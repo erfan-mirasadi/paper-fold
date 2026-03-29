@@ -1,65 +1,113 @@
-import Image from "next/image";
+"use client";
+
+import { useRef, useEffect, useState } from "react";
+import * as THREE from "three";
+import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
+import html2canvas from "html2canvas";
+import { PaperUI } from "./_components/PaperUI";
+import { Paper3D } from "./_components/Paper3D";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hiddenUiRef = useRef<HTMLDivElement>(null);
+
+  // We use a ref object so we can mutate it inside GSAP and read it securely in R3F's useFrame
+  const progressRef = useRef({ value: 0 });
+  const [uiTexture, setUiTexture] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    if (hiddenUiRef.current) {
+      setTimeout(() => {
+        html2canvas(hiddenUiRef.current!, {
+          backgroundColor: null,
+          scale: 2,
+          useCORS: true,
+          logging: true,
+        }).then((canvas) => {
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.anisotropy = 16;
+          texture.minFilter = THREE.LinearFilter;
+          texture.generateMipmaps = false;
+          texture.needsUpdate = true;
+          setUiTexture(texture);
+        }).catch(err => console.error("html2canvas capture error:", err));
+      }, 1000); // Give fonts/styles a moment to load and render natively
+    }
+  }, []);
+
+  useGSAP(
+    () => {
+      // Sync WebGL shader purely with GSAP scroll!
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          pin: "#pinWrap", // Pin the environment
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1, // Smooth scrubbing
+          onUpdate: (self) => {
+            progressRef.current.value = self.progress;
+          },
+        },
+      });
+    },
+    { scope: containerRef },
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    // 300vh allows the user to actually physically scroll down the page to trigger GSAP
+    <div
+      ref={containerRef}
+      className="relative w-full bg-[#18181A]"
+      style={{ height: "300vh" }}
+    >
+      {/* 
+        This is the container we PIN. Both the 3D scene and the HTML UI are placed 
+        inside this, ensuring they perfectly mirror each other dynamically and never disconnect 
+        while scrolling.
+      */}
+      <div
+        id="pinWrap"
+        className="relative w-full h-screen overflow-hidden flex justify-center items-center"
+      >
+        {/* 
+          The Native HTML Overlay Layer is rendered centrally but sitting at a lower z-index.
+          The Canvas wrapper has a solid background and a higher z-index, completely hiding this UI from human eyes,
+          but preserving it flawlessly in the physical viewport for html2canvas to capture!
+        */}
+        <div
+          className="absolute w-full h-full flex items-center justify-center overflow-hidden z-10"
+        >
+          <div ref={hiddenUiRef}>
+            <PaperUI />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* 
+          The 3D layer automatically maps to the container dimensions. 
+          Given a solid bg color to physically hide the native UI behind it!
+        */}
+        <div className="absolute w-full h-full flex justify-center items-center pointer-events-none z-20 py-12 bg-[#18181A]">
+          <Canvas shadows camera={{ position: [0, 0, 8.5], fov: 45 }}>
+            <ambientLight intensity={0.6} color="#ffffff" />
+            <directionalLight
+              position={[10, 20, 15]}
+              intensity={1.5}
+              castShadow
+              shadow-bias={-0.0001}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <Environment preset="city" />
+            <Paper3D progressRef={progressRef} uiTexture={uiTexture} />
+          </Canvas>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
