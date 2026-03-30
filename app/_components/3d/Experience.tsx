@@ -1,23 +1,19 @@
 "use client";
-
-import { Environment, OrbitControls } from "@react-three/drei";
+import { Environment, OrbitControls, ScrollControls } from "@react-three/drei";
 import React from "react";
 import { SinglePaper } from "./SinglePaper";
 
-interface ExperienceProps {
-  isFolded: boolean;
-}
-
-export const Experience: React.FC<ExperienceProps> = ({ isFolded }) => {
+export const Experience: React.FC = () => {
   return (
     <>
-      <group rotation-x={-Math.PI / 4}>
-        <SinglePaper isFolded={isFolded} />
-      </group>
+      <ScrollControls pages={4} damping={0.3}>
+        <group rotation-x={-Math.PI / 4}>
+          <SinglePaper />
+        </group>
+      </ScrollControls>
 
       <OrbitControls enableZoom={false} enablePan={false} />
 
-      {/* Lighting */}
       <Environment preset="studio" />
       <directionalLight
         position={[2, 5, 2]}

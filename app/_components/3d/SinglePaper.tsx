@@ -1,7 +1,13 @@
 "use client";
 
-import { RenderTexture, useTexture } from "@react-three/drei";
-import { PaperContent } from "./PaperContent";
+import {
+  OrthographicCamera,
+  RenderTexture,
+  useScroll,
+  useTexture,
+} from "@react-three/drei";
+import { FOLD_Y_POSITIONS, PaperContent } from "./PaperContent";
+import { getFoldAnglesForScroll } from "./foldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import React, { useMemo, useRef } from "react";
@@ -22,18 +28,24 @@ import { degToRad } from "three/src/math/MathUtils.js";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
-// Controls the strength of the curves
-const insideCurveStrength = 0.18;
+
+// Controls the strength of the ambient paper curve
+const insideCurveStrength = 0.28;
 const outsideCurveStrength = 0.05;
 
 export const PAGE_WIDTH = 1.28;
 export const PAGE_HEIGHT = 1.71;
 export const PAGE_DEPTH = 0.003;
-// INCREASED segments for higher resolution paper and sharper folds!
-const PAGE_SEGMENTS = 50;
+
+// INCREASED segments to 80 for sharper, cleaner folds without using hacky single-hinges
+const PAGE_SEGMENTS = 30;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
-// Base geometry setup (Segments applied to Y axis)
+// Fractional bone position per crease line.
+export const foldBonePositions: readonly number[] = FOLD_Y_POSITIONS.map((y) =>
+  Math.min(Math.max(Math.abs(y) / SEGMENT_HEIGHT, 0), PAGE_SEGMENTS),
+);
+
 const pageGeometry = new BoxGeometry(
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -42,7 +54,7 @@ const pageGeometry = new BoxGeometry(
   PAGE_SEGMENTS,
 );
 
-// Translate so the TOP of the paper is at Y=0
+// Translate so the TOP edge of the paper is at Y = 0
 pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
 
 const position = pageGeometry.attributes.position;
@@ -50,12 +62,9 @@ const vertex = new Vector3();
 const skinIndexes: number[] = [];
 const skinWeights: number[] = [];
 
-// Apply skinning weights vertically
 for (let i = 0; i < position.count; i++) {
   vertex.fromBufferAttribute(position, i);
-  const y = vertex.y;
-
-  const distFromTop = -y;
+  const distFromTop = -vertex.y;
   let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
   skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
   const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
@@ -73,18 +82,13 @@ pageGeometry.setAttribute(
   new Float32BufferAttribute(skinWeights, 4),
 );
 
-// Exact colors from your source code
 const whiteColor = new Color("white");
 
-interface SinglePaperProps {
-  isFolded: boolean;
-}
-
-export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded }) => {
+export const SinglePaper: React.FC = () => {
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
+  const scroll = useScroll();
 
-  // Load the normal map
   const creaseNormalMap = useTexture("/crease-normal.png");
 
   const manualSkinnedMesh = useMemo(() => {
@@ -92,24 +96,18 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded }) => {
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
       const bone = new Bone();
       bones.push(bone);
-      if (i === 0) {
-        bone.position.y = 0;
-      } else {
-        bone.position.y = -SEGMENT_HEIGHT;
-      }
-      if (i > 0) {
-        bones[i - 1].add(bone);
-      }
+      bone.position.y = i === 0 ? 0 : -SEGMENT_HEIGHT;
+      if (i > 0) bones[i - 1].add(bone);
     }
     const skeleton = new Skeleton(bones);
 
     const materials = [
-      new MeshStandardMaterial({ color: whiteColor }), // side
-      new MeshStandardMaterial({ color: "#111" }), // side
-      new MeshStandardMaterial({ color: whiteColor }), // top
-      new MeshStandardMaterial({ color: whiteColor }), // bottom
-      new MeshStandardMaterial({ color: whiteColor, roughness: 0.1 }), // front
-      new MeshStandardMaterial({ color: whiteColor, roughness: 0.1 }), // back
+      new MeshStandardMaterial({ color: whiteColor }), // side L
+      new MeshStandardMaterial({ color: "#111" }), // side R
+      new MeshStandardMaterial({ color: whiteColor }), // top cap
+      new MeshStandardMaterial({ color: whiteColor }), // bottom cap
+      new MeshStandardMaterial({ color: whiteColor, roughness: 0.1 }), // front face
+      new MeshStandardMaterial({ color: whiteColor, roughness: 0.1 }), // back face
     ];
 
     const mesh = new SkinnedMesh(pageGeometry, materials);
@@ -118,45 +116,49 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded }) => {
     mesh.frustumCulled = false;
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
-
     return mesh;
   }, []);
 
   useFrame((_, delta) => {
-    if (!skinnedMeshRef.current || !group.current) {
-      return;
-    }
+    if (!skinnedMeshRef.current || !group.current) return;
 
     const bones = skinnedMeshRef.current.skeleton.bones;
+    const offset = scroll.offset; // [0, 1]
     const baseRotation = degToRad(10);
 
-    const middleBoneIndex = Math.floor(PAGE_SEGMENTS / 2);
+    // Get the dynamic angles from our state machine
+    const targetFoldAngles = getFoldAnglesForScroll(offset);
+    const foldContributions = new Float32Array(bones.length);
+
+    targetFoldAngles.forEach((totalAngle, foldIdx) => {
+      const rawBonePos = foldBonePositions[foldIdx];
+      const lowerBone = Math.floor(rawBonePos);
+      const upperBone = Math.min(lowerBone + 1, bones.length - 1);
+      const blendToUpper = rawBonePos - lowerBone;
+
+      // Perfectly blends the fold angle across the fractional coordinate
+      // Ensures the 3D hinge matches the texture exactly!
+      foldContributions[lowerBone] += totalAngle * (1 - blendToUpper);
+      foldContributions[upperBone] += totalAngle * blendToUpper;
+    });
 
     for (let i = 0; i < bones.length; i++) {
       const target = i === 0 ? group.current : bones[i];
 
-      const normalizedI = (i / PAGE_SEGMENTS) * 30;
+      // Ambient paper curve
+      const normalizedI = (i / PAGE_SEGMENTS) * 30; // Map back to original curve math
       const insideCurveIntensity =
         normalizedI < 8 ? Math.sin(normalizedI * 0.2 + 0.25) : 0;
       const outsideCurveIntensity =
         normalizedI >= 8 ? Math.cos(normalizedI * 0.3 + 0.09) : 0;
 
-      let rotationAngle =
+      const curveAngle =
         insideCurveStrength * insideCurveIntensity * baseRotation -
         outsideCurveStrength * outsideCurveIntensity * baseRotation;
 
-      if (i === middleBoneIndex || i === middleBoneIndex + 1) {
-        const foldAngle = isFolded ? (Math.PI - 0.02) / 2 : 0;
-        rotationAngle += foldAngle;
-      }
+      const targetAngle = curveAngle + foldContributions[i];
 
-      easing.dampAngle(
-        target.rotation,
-        "x",
-        rotationAngle,
-        easingFactor,
-        delta,
-      );
+      easing.dampAngle(target.rotation, "x", targetAngle, easingFactor, delta);
     }
   });
 
@@ -167,11 +169,32 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded }) => {
           attach="material-4"
           roughness={0.55}
           color={whiteColor}
-          normalMap={creaseNormalMap}
           normalScale={new Vector2(0.8, 0.8)}
         >
           <RenderTexture attach="map" width={1200} height={1700}>
             <PaperContent />
+          </RenderTexture>
+
+          <RenderTexture attach="normalMap" width={1200} height={1700}>
+            <color attach="background" args={["#8080ff"]} />
+            <OrthographicCamera
+              makeDefault
+              left={0}
+              right={PAGE_WIDTH}
+              top={0}
+              bottom={-PAGE_HEIGHT}
+              position={[0, 0, 5]}
+            />
+            {FOLD_Y_POSITIONS.map((y, i) => (
+              <mesh key={i} position={[PAGE_WIDTH / 2, y, i * 0.01]}>
+                <planeGeometry args={[PAGE_WIDTH, 0.2]} />
+                <meshBasicMaterial
+                  map={creaseNormalMap}
+                  transparent={true}
+                  depthTest={false}
+                />
+              </mesh>
+            ))}
           </RenderTexture>
         </meshStandardMaterial>
       </primitive>

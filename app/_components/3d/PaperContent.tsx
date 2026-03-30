@@ -6,18 +6,62 @@ import {
   useTexture,
   QuadraticBezierLine,
 } from "@react-three/drei";
-import React from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
 
-// ---- Dimensions ----
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71;
 const PW = PAGE_WIDTH;
 const PADDING = 0.05; // Less padding to occupy more paper space
 const CONTENT_W = PW - PADDING * 2;
 
-// ---- Colors Matching Target Reference Exactly ----
-const BG_COLOR = "#fefbf2"; // Warm paper background
+// ==========================================
+// FOLD Y POSITIONS
+
+// Eagerly-evaluated export consumed by SinglePaper
+export const FOLD_Y_POSITIONS: readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+] = (() => {
+  const s1Top = -0.16;
+  const s1Pad = 0.025;
+  const gap = 0.02;
+  const smallBoxH = 0.07;
+  const anaAyetH = 0.095;
+  const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + gap + anaAyetH;
+
+  const s2Top = s1Top - s1H - 0.035;
+  const s2Pad = 0.035;
+  const bigBoxH = 0.095;
+  const groupGap = 0.025;
+  const groupPad = 0.02;
+  const s2Gap = 0.02;
+  const smallBoxH2 = 0.075;
+  const groupH = groupPad * 2 + (smallBoxH2 * 2 + s2Gap);
+
+  const v6Y = s2Top - s2Pad;
+  const g1Y = v6Y - bigBoxH - groupGap;
+  const g2Y = g1Y - groupH - groupGap;
+  const g3Y = g2Y - groupH - groupGap;
+
+  return [
+    v6Y - bigBoxH - groupGap / 2, // Fold 1: Below 6
+    g1Y - groupPad - smallBoxH2 - s2Gap / 2, // Fold 2: Below 8,7 (Middle of G1)
+    g1Y - groupH - groupGap / 2, // Fold 3: Below 9,10 (Below G1)
+    g2Y - groupPad - smallBoxH2 - s2Gap / 2, // Fold 4: Between 11,12 and 13,14 (Middle of G2)
+    g2Y - groupH - groupGap / 2, // Fold 5: Above 15,16 (Below G2)
+    g3Y - groupPad - smallBoxH2 - s2Gap / 2, // Fold 6: Between 16,15 and 18,17 (Middle of G3)
+    g3Y - groupH - groupGap / 2, // Fold 7: Above 19 (Below G3)
+  ] as const;
+})();
+
+//Colors
+const BG_COLOR = "#fefbf2";
 
 // Section 1 (Rich Golden/Yellows)
 const S1_OUTER_BG = "#fbe09e";
@@ -41,11 +85,8 @@ const WHITE_VERSE_BG = "#ffffff";
 const TEXT_DARK = "#1a1a1a"; // Completely dark text
 const CIRCLE_BORDER = "#8e8e8e";
 
-// ==========================================
-// 1. DATA STRUCTURE
-// ==========================================
 const SURAH_DATA = {
-  bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", // Perfectly balanced tatweel
+  bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
   section1: {
     label: "Beş ayetlik Ana Böl.",
     gridVerses: [
@@ -102,10 +143,6 @@ const SURAH_DATA = {
   },
 };
 
-// ==========================================
-// 2. HELPER COMPONENTS (Flawless flat Geometry)
-// ==========================================
-
 const RoundedShapeComponent = ({
   w,
   h,
@@ -115,7 +152,7 @@ const RoundedShapeComponent = ({
   h: number;
   radius: number;
 }) => {
-  const shape = React.useMemo(() => {
+  const shape = useMemo(() => {
     const s = new THREE.Shape();
     const r = Math.min(radius, w / 2, h / 2);
     s.moveTo(r, 0);
@@ -315,7 +352,7 @@ const VerseBox = ({
 
 // ==========================================
 // 3. MAIN COMPONENT
-// ==========================================
+
 interface PaperContentProps {
   imageUrl?: string;
 }

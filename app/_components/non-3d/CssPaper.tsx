@@ -3,7 +3,6 @@ import { useState } from "react";
 import FoldableSection from "./FoldableSection";
 
 export default function CssPaper() {
-  // Step 0: Folded | Step 1: Middle Open | Step 2: Fully Open
   const [step, setStep] = useState<number>(0);
 
   const handlePaperClick = () => {
