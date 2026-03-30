@@ -1,9 +1,34 @@
 "use client";
+
 import { Environment, OrbitControls, ScrollControls } from "@react-three/drei";
-import React from "react";
+import { useFrame } from "@react-three/fiber";
+import { easing } from "maath";
+import React, { useEffect, useRef } from "react";
 import { SinglePaper } from "./SinglePaper";
 
-export const Experience: React.FC = () => {
+interface ExperienceProps {
+  isDarkMode: boolean;
+}
+
+export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
+  const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
+  const isDragging = useRef(false);
+
+  useEffect(() => {
+    document.body.style.cursor = "grab";
+    return () => {
+      document.body.style.cursor = "auto";
+    };
+  }, []);
+
+  useFrame((state, delta) => {
+    if (!controlsRef.current || isDragging.current) return;
+
+    easing.damp3(state.camera.position, [0, 1, 1.7], 0.4, delta);
+    easing.damp3(controlsRef.current.target, [0, 0, 0], 0.4, delta);
+    controlsRef.current.update();
+  });
+
   return (
     <>
       <ScrollControls pages={4} damping={0.3}>
@@ -12,12 +37,24 @@ export const Experience: React.FC = () => {
         </group>
       </ScrollControls>
 
-      <OrbitControls enableZoom={false} enablePan={false} />
-
-      <Environment preset="studio" />
+      <OrbitControls
+        ref={controlsRef}
+        enableZoom={false}
+        enablePan={false}
+        makeDefault
+        onStart={() => {
+          isDragging.current = true;
+          document.body.style.cursor = "grabbing";
+        }}
+        onEnd={() => {
+          isDragging.current = false;
+          document.body.style.cursor = "grab";
+        }}
+      />
+      <Environment preset={isDarkMode ? "studio" : "apartment"} />
       <directionalLight
         position={[2, 5, 2]}
-        intensity={2.5}
+        intensity={isDarkMode ? 1.5 : 2.5}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -26,7 +63,7 @@ export const Experience: React.FC = () => {
 
       <mesh position-y={-1.5} rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[100, 100]} />
-        <shadowMaterial transparent opacity={0.2} />
+        <shadowMaterial transparent opacity={isDarkMode ? 0.4 : 0.15} />
       </mesh>
     </>
   );
