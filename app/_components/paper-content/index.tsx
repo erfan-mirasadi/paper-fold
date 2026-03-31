@@ -1,8 +1,7 @@
 "use client";
 
 import { OrthographicCamera, Text, useTexture } from "@react-three/drei";
-import React from "react";
-import { BG_COLOR, TEXT_DARK } from "./SharedUI";
+import { BG_COLOR, TEXT_DARK, TEXT_SIZES } from "./SharedUI";
 import { QuranicBorder } from "./QuranicBorder";
 import { SectionOne, SectionTwo } from "./SurahSections";
 
@@ -13,7 +12,7 @@ const PADDING = 0.05;
 const CONTENT_W = PW - PADDING * 2;
 
 // Layout Math Engine
-const s1Top = -0.16;
+const s1Top = -0.21;
 const s1Pad = 0.025;
 const gap = 0.02;
 const smallBoxH = 0.07;
@@ -87,21 +86,21 @@ const SURAH_DATA = {
   section1: {
     label: "Beş ayetlik Ana Böl.",
     gridVerses: [
-      { number: 2, text: "خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ" },
+      { number: 2, text: "خَلَقَ الْإِنْسَانَ مِنْ عَلَقٍ" },
       { number: 1, text: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ" },
       { number: 4, text: "الَّذِي عَلَّمَ بِالْقَلَمِ" },
       { number: 3, text: "اقْرَأْ وَرَبُّكَ الْأَكْرَمُ" },
     ],
-    anaAyet: { number: 5, text: "عَلَّمَ الْإِنسَانَ مَا لَمْ يَعْلَمْ" },
+    anaAyet: { number: 5, text: "عَلَّمَ الْإِنْسَانَ مَا لَمْ يَعْلَمْ" },
   },
   section2: {
     topLabel: "Beş ayetlik 1. Açıklama Böl.",
-    introVerse: { number: 6, text: "كَلَّا إِنَّ الْإِنسَانَ لَيَطْغَىٰ" },
+    introVerse: { number: 6, text: "كَلَّا إِنَّ الْإِنْسَانَ لَيَطْغَىٰ" },
     colorGroups: [
       {
         verses: [
           { number: 8, text: "إِنَّ إِلَىٰ رَبِّكَ الرُّجْعَىٰ" },
-          { number: 7, text: "أَن رَّآهُ اسْتَغْنَىٰ" },
+          { number: 7, text: "أَنْ رَآهُ اسْتَغْنَىٰ" },
           { number: 10, text: "عَبْدًا إِذَا صَلَّىٰ" },
           { number: 9, text: "أَرَأَيْتَ الَّذِي يَنْهَىٰ" },
         ],
@@ -109,9 +108,9 @@ const SURAH_DATA = {
       {
         verses: [
           { number: 12, text: "أَوْ أَمَرَ بِالتَّقْوَىٰ" },
-          { number: 11, text: "أَرَأَيْتَ إِن كَانَ عَلَى الْهُدَىٰ" },
-          { number: 14, text: "أَلَمْ يَعْلَم بِأَنَّ اللَّهَ يَرَىٰ" },
-          { number: 13, text: "أَرَأَيْتَ إِن كَذَّبَ وَتَوَلَّىٰ" },
+          { number: 11, text: "أَرَأَيْتَ إِنْ كَانَ عَلَى الْهُدَىٰ" },
+          { number: 14, text: "أَلَمْ يَعْلَمْ بِأَنَّ اللَّهَ يَرَىٰ" },
+          { number: 13, text: "أَرَأَيْتَ إِنْ كَذَّبَ وَتَوَلَّىٰ" },
         ],
       },
       {
@@ -119,7 +118,7 @@ const SURAH_DATA = {
           { number: 16, text: "نَاصِيَةٍ كَاذِبَةٍ خَاطِئَةٍ" },
           {
             number: 15,
-            text: "كَلَّا لَئِن لَّمْ يَنتَهِ لَنَسْفَعًا بِالنَّاصِيَةِ",
+            text: "كَلَّا لَئِنْ لَمْ يَنْتَهِ لَنَسْفَعًا بِالنَّاصِيَةِ",
           },
           { number: 18, text: "سَنَدْعُ الزَّبَانِيَةَ" },
           { number: 17, text: "فَلْيَدْعُ نَادِيَهُ" },
@@ -128,7 +127,7 @@ const SURAH_DATA = {
     ],
     outroVerse: {
       number: 19,
-      text: "كَلَّا لَا تُطِعْهُ وَاسْجُدْ وَاقْتَرِب",
+      text: "كَلَّا لَا تُطِعْهُ وَاسْجُدْ وَاقْتَرِبْ",
     },
     bottomLabel: "Beş ayetlik 2. Açıklama Böl.",
   },
@@ -184,13 +183,15 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
       </group>
 
       <Text
-        position={[PW / 2, -0.07, 0.001]}
-        fontSize={0.052}
+        position={[PW / 2, -0.12, 0.001]}
+        fontSize={TEXT_SIZES.BISMILLAH}
         color={TEXT_DARK}
         anchorX="center"
         anchorY="middle"
         textAlign="center"
         material-depthTest={false}
+        font="/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf"
+        direction="rtl"
       >
         {SURAH_DATA.bismillah}
       </Text>

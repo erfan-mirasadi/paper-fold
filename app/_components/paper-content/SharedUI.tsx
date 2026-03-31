@@ -3,6 +3,7 @@ import { Text } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
 
+const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
 export const BG_COLOR = "#fefbf2";
 export const S1_OUTER_BG = "#fbe09e";
 export const S1_OUTER_BORDER = "#ddb364";
@@ -18,10 +19,20 @@ export const MAROON_THEME = "#8f4265";
 export const MAROON_VERSE_BG = "#ebd2dc";
 export const GREEN_THEME = "#92a265";
 export const GREEN_VERSE_BG = "#eaf2db";
+export const BLUE_THEME = "#638f9c";
 
 export const WHITE_VERSE_BG = "#ffffff";
 export const TEXT_DARK = "#1a1a1a";
 export const CIRCLE_BORDER = "#8e8e8e";
+
+export const TEXT_SIZES = {
+  BISMILLAH: 0.065,
+  TOP_LABEL: 0.018,
+  ANA_AYET_TAB: 0.016,
+  VERSE_NUMBER: 0.024,
+  VERSE_TEXT_SMALL: 0.035,
+  VERSE_TEXT_BIG: 0.052,
+};
 
 interface RoundedShapeProps {
   w: number;
@@ -114,13 +125,14 @@ export function TopLabel({ x, y, z = 0, text }: TopLabelProps) {
       <UiRect x={0} y={0} z={0.001} w={w} h={h} radius={0.01} color="#ffffff" />
       <Text
         position={[w / 2, -h / 2, 0.002]}
-        fontSize={0.016}
+        fontSize={TEXT_SIZES.TOP_LABEL}
         color="#4a423a"
         anchorX="center"
         anchorY="middle"
         fontStyle="italic"
         fontWeight="bold"
         material-depthTest={false}
+        font={QURAN_FONT}
       >
         {text}
       </Text>
@@ -158,12 +170,13 @@ export function AnaAyetTab({ x, y, z }: AnaAyetTabProps) {
       />
       <Text
         position={[0.045, -0.0225, 0.002]}
-        fontSize={0.014}
+        fontSize={TEXT_SIZES.ANA_AYET_TAB}
         color="#432c10"
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
         material-depthTest={false}
+        font={QURAN_FONT}
       >
         Ana Ayet
       </Text>
@@ -182,6 +195,8 @@ interface VerseBoxProps {
   bg: string;
   border: string;
   circleBorderCol?: string;
+  circleBg?: string;
+  circleTextCol?: string;
   isPill?: boolean;
 }
 
@@ -196,15 +211,19 @@ export const VerseBox = ({
   bg,
   border,
   circleBorderCol,
+  circleBg,
+  circleTextCol,
   isPill = true,
 }: VerseBoxProps) => {
   const bw = 0.003;
   const rad = isPill ? h / 2 : 0.015;
   const cr = isPill ? h / 2 : 0.026;
   const cx = isPill ? cr : 0.07;
-  const textSpaceStart = cx + cr;
-  const textX = textSpaceStart + (w - textSpaceStart) / 2;
-  const textMaxW = w - textSpaceStart - 0.04;
+
+  const textX = w / 2;
+
+  const safeMargin = cx + cr + 0.01;
+  const textMaxW = w - safeMargin * 2;
 
   return (
     <group position={[x, y, z]}>
@@ -219,10 +238,11 @@ export const VerseBox = ({
         shadow
       />
       <UiRect x={0} y={0} z={0.001} w={w} h={h} radius={rad} color={bg} />
+
       <group position={[cx, -h / 2, 0.002]}>
         <mesh>
           <circleGeometry args={[cr - 0.002, 48]} />
-          <meshBasicMaterial color="#ffffff" depthTest={false} />
+          <meshBasicMaterial color={circleBg || "#ffffff"} depthTest={false} />
         </mesh>
         <mesh position={[0, 0, -0.001]}>
           <circleGeometry args={[cr, 48]} />
@@ -233,8 +253,8 @@ export const VerseBox = ({
         </mesh>
         <Text
           position={[0, 0, 0.001]}
-          fontSize={0.024}
-          color={TEXT_DARK}
+          fontSize={TEXT_SIZES.VERSE_NUMBER}
+          color={circleTextCol || TEXT_DARK}
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"
@@ -243,15 +263,20 @@ export const VerseBox = ({
           {String(number)}
         </Text>
       </group>
+
       <Text
         position={[textX, -h / 2, 0.002]}
-        fontSize={isPill ? 0.034 : 0.046}
+        fontSize={
+          isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
+        }
         color={TEXT_DARK}
         anchorX="center"
         anchorY="middle"
         maxWidth={textMaxW}
         textAlign="center"
         material-depthTest={false}
+        font={QURAN_FONT}
+        direction="rtl"
       >
         {verse}
       </Text>

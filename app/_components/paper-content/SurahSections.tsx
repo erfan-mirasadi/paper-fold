@@ -16,6 +16,7 @@ import {
   WHITE_VERSE_BG,
   MAROON_THEME,
   GREEN_THEME,
+  BLUE_THEME,
 } from "./SharedUI";
 export interface Verse {
   number: number;
@@ -294,8 +295,10 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         verse={data.introVerse.text}
         number={data.introVerse.number}
         bg={WHITE_VERSE_BG}
-        border={MAROON_THEME}
-        circleBorderCol={MAROON_THEME}
+        border={BLUE_THEME}
+        circleBorderCol={BLUE_THEME}
+        circleBg={BLUE_THEME}
+        circleTextCol="#ffffff"
         isPill={false}
       />
 
@@ -359,8 +362,10 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         verse={data.outroVerse.text}
         number={data.outroVerse.number}
         bg={WHITE_VERSE_BG}
-        border={MAROON_THEME}
-        circleBorderCol={GREEN_THEME}
+        border={BLUE_THEME}
+        circleBorderCol={BLUE_THEME}
+        circleBg={BLUE_THEME}
+        circleTextCol="#ffffff"
         isPill={false}
       />
     </group>

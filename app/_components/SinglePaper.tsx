@@ -28,17 +28,19 @@ import { degToRad } from "three/src/math/MathUtils.js";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
+//paper curve
+const AMBIENT_CURVE_MULTIPLIER = 0.3;
 
 // Controls the strength of the ambient paper curve
-const insideCurveStrength = 0.28;
-const outsideCurveStrength = 0.05;
+const insideCurveStrength = 0.28 * AMBIENT_CURVE_MULTIPLIER;
+const outsideCurveStrength = 0.05 * AMBIENT_CURVE_MULTIPLIER;
 
 export const PAGE_WIDTH = 1.28;
 export const PAGE_HEIGHT = 1.71;
 export const PAGE_DEPTH = 0.003;
 
-// Set to 30 segments based on your code
-const PAGE_SEGMENTS = 30;
+// سگمنت بالا برای دقت میلی‌متری لولاها
+const PAGE_SEGMENTS = 120;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
 // Fractional bone position per crease line.
