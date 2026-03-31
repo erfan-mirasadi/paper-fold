@@ -1,8 +1,8 @@
 "use client";
 
 import { Environment, OrbitControls, ScrollControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { easing } from "maath";
+// import { useFrame } from "@react-three/fiber";
+// import { easing } from "maath";
 import { useEffect, useRef } from "react";
 import { SinglePaper } from "./SinglePaper";
 
@@ -21,13 +21,14 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
     };
   }, []);
 
-  useFrame((state, delta) => {
-    if (!controlsRef.current || isDragging.current) return;
+  // this code is for auto camera magnetism
+  // useFrame((state, delta) => {
+  //   if (!controlsRef.current || isDragging.current) return;
 
-    easing.damp3(state.camera.position, [0, 1, 1.7], 0.4, delta);
-    easing.damp3(controlsRef.current.target, [0, 0, 0], 0.4, delta);
-    controlsRef.current.update();
-  });
+  //   easing.damp3(state.camera.position, [0, 1, 1.7], 0.4, delta);
+  //   easing.damp3(controlsRef.current.target, [0, 0, 0], 0.4, delta);
+  //   controlsRef.current.update();
+  // });
 
   return (
     <>
