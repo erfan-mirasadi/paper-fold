@@ -31,7 +31,7 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
 
   return (
     <>
-      <ScrollControls pages={4} damping={0.3}>
+      <ScrollControls pages={1.5} damping={0.2}>
         <group rotation-x={-Math.PI / 4}>
           <SinglePaper />
         </group>

@@ -82,11 +82,22 @@ export const getFoldAnglesForScroll = (offset: number): number[] => {
   const toIndex = Math.min(fromIndex + 1, maxStageIndex);
   const localT = fromIndex === maxStageIndex ? 0 : rawStage - fromIndex;
 
+  // Faster reaction: reduced deadzone from 10% to 5%
+  let easedT = 0;
+  if (localT > 0.05 && localT < 0.95) {
+    // Animate between 5% and 95% of the local scroll stage
+    const normalized = (localT - 0.05) / 0.9;
+    // Smoothstep formula
+    easedT = normalized * normalized * (3 - 2 * normalized);
+  } else if (localT >= 0.95) {
+    easedT = 1;
+  }
+
   return FOLD_STORY_STEPS[fromIndex].folds.map((fromFold, foldIndex) => {
     const toFold = FOLD_STORY_STEPS[toIndex].folds[foldIndex];
     const fromAngle = foldStateToAngle(fromFold);
     const toAngle = foldStateToAngle(toFold);
 
-    return MathUtils.lerp(fromAngle, toAngle, localT);
+    return MathUtils.lerp(fromAngle, toAngle, easedT);
   });
 };

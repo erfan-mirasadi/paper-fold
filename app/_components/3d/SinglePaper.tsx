@@ -7,10 +7,10 @@ import {
   useTexture,
 } from "@react-three/drei";
 import { FOLD_Y_POSITIONS, PaperContent } from "./PaperContent";
-import { getFoldAnglesForScroll } from "./foldStory";
+import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./foldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   Bone,
   BoxGeometry,
@@ -37,7 +37,7 @@ export const PAGE_WIDTH = 1.28;
 export const PAGE_HEIGHT = 1.71;
 export const PAGE_DEPTH = 0.003;
 
-// INCREASED segments to 80 for sharper, cleaner folds without using hacky single-hinges
+// Set to 30 segments based on your code
 const PAGE_SEGMENTS = 30;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
@@ -91,6 +91,18 @@ export const SinglePaper: React.FC = () => {
 
   const creaseNormalMap = useTexture("/crease-normal.png");
 
+  // ---- Audio Setup ----
+  const foldSound = useRef<HTMLAudioElement | null>(null);
+  const lastActiveStage = useRef<number>(0);
+
+  useEffect(() => {
+    // Load the sound effect from the public folder
+    foldSound.current = new Audio("/paper-fold.mp3");
+    if (foldSound.current) {
+      foldSound.current.volume = 1;
+    }
+  }, []);
+
   const manualSkinnedMesh = useMemo(() => {
     const bones: Bone[] = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
@@ -125,6 +137,20 @@ export const SinglePaper: React.FC = () => {
     const bones = skinnedMeshRef.current.skeleton.bones;
     const offset = scroll.offset; // [0, 1]
     const baseRotation = degToRad(10);
+
+    // --- Audio Playback Logic ---
+    const maxStageIndex = FOLD_STORY_STEPS.length - 1;
+    const currentStage = Math.round(offset * maxStageIndex);
+
+    if (currentStage !== lastActiveStage.current) {
+      lastActiveStage.current = currentStage;
+      if (foldSound.current) {
+        foldSound.current.currentTime = 0;
+        foldSound.current.play().catch(() => {
+          // Ignore auto-play restrictions silently
+        });
+      }
+    }
 
     // Get the dynamic angles from our state machine
     const targetFoldAngles = getFoldAnglesForScroll(offset);
