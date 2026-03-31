@@ -166,7 +166,7 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
         position={[0, 0, 5]}
       />
 
-      <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} />
+      {/* <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} /> */}
 
       <group position={[PW / 2, -1.0, -0.05]}>
         {radiusList.map((rad, i) => (
