@@ -1,6 +1,6 @@
 "use client";
 import { Line } from "@react-three/drei";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
 import { BLUE_THEME, MAROON_THEME, GREEN_THEME } from "./SharedUI";
 
@@ -25,7 +25,7 @@ interface SideArrowsProps {
 
 // Custom configuration constants for easy tweaking
 // ===============================================
-const LINE_GAP = 0.017; // Controls the gap between the parallel spine lines (user set)
+const LINE_GAP = 0.04; // Controls the gap between the parallel spine lines (user set)
 const ARROW_INWARD_OFFSET = 0.01; // Controls inward penetration for most arrows (user set)
 const ARROW_DEEP_OFFSET = 0.009; // Controls the 12-14 penetration exception (user set)
 

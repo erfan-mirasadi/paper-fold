@@ -17,7 +17,7 @@ import {
   GREEN_THEME,
   BLUE_THEME,
 } from "./SharedUI";
-import { SideArrows } from "./SideArrows";
+import { SideCurves } from "./SideCurves";
 
 export interface Verse {
   number: number;
@@ -81,6 +81,9 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
   const { s1Top, s1Pad, gap, smallBoxH, anaAyetH, s1H, innerW, innerHalfW } =
     layout;
 
+  // Pure math for centering
+  const baseX = startX + s1Pad;
+
   return (
     <group>
       <UiRect
@@ -102,12 +105,11 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
         radius={0.017}
         color={S1_OUTER_BG}
       />
-      <TopLabel x={PW / 2} y={s1Top} z={0.004} text={data.label} />
 
       {data.gridVerses.map((v: Verse, i: number) => {
         const isRightCol = i % 2 !== 0;
         const isBottomRow = i >= 2;
-        const xPos = startX + s1Pad + (isRightCol ? innerHalfW + gap : 0);
+        const xPos = baseX + (isRightCol ? innerHalfW + gap : 0);
         const yPos = s1Top - s1Pad - (isBottomRow ? smallBoxH + gap : 0);
         return (
           <VerseBox
@@ -129,7 +131,7 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
 
       <group>
         <VerseBox
-          x={startX + s1Pad}
+          x={baseX}
           y={s1Top - s1Pad - (smallBoxH * 2 + gap) - gap}
           z={0.002}
           w={innerW}
@@ -142,13 +144,14 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
           isPill={false}
         />
         <AnaAyetTab
-          x={startX - 0.04}
+          x={baseX - 0.04 - s1Pad}
           y={
             s1Top - s1Pad - (smallBoxH * 2 + gap) - gap - anaAyetH / 2 + 0.0225
           }
           z={0.005}
         />
       </group>
+      <TopLabel x={PW / 2} y={s1Top} z={0.004} text={data.label} />
     </group>
   );
 }
@@ -170,7 +173,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
     smallBoxH2,
     groupH,
     s2H,
-    innerW,
     groupInnerHalfW,
     v6Y,
     g1Y,
@@ -180,24 +182,54 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
     sectionW,
   } = layout;
 
+  const s2_innerW = sectionW - s2Pad * 2;
+  const baseX = startX + s2Pad;
+
+  // ==========================================
+  // Middle group settings (11 to 14) that will be shrunk
+  const g2Shrink = 0.01; // Shrink amount from both sides
+  const g2_baseX = baseX + g2Shrink;
+  const g2_innerW = s2_innerW - g2Shrink * 2;
+  const g2_groupInnerHalfW = (g2_innerW - groupPad * 2 - s2Gap) / 2;
+
+  // ==========================================
+  // Container box settings (Super Groups) for verses 6-10 and 15-19
+  const sgPad = 0.015; // Safe margin around boxes
+  const sg_X = baseX - sgPad;
+  const sg_W = s2_innerW + sgPad * 2;
+
+  // Upper container box (6 to 10)
+  const sg1_Y = v6Y + sgPad;
+  const sg1_bottom = g1Y - groupH - sgPad;
+  const sg1_H = sg1_Y - sg1_bottom;
+
+  // Lower container box (15 to 19)
+  const sg2_Y = g3Y + sgPad;
+  const sg2_bottom = v19Y - bigBoxH - sgPad;
+  const sg2_H = sg2_Y - sg2_bottom;
+
+  // Soft colors for container boxes
+  const SG_BG = "#C9B5A5"; // Soft cream
+  const SG_BORDER = "#AD7B2A"; // Brownish cream for border
+  const bw = 0.003;
+
   const renderGroupVerses = (
     verses: Verse[],
     gY: number,
     bgColor: string | undefined,
     borderCol: string,
-  ) =>
-    verses.map((v, i) => (
+    isGroup2: boolean = false,
+  ) => {
+    const currentBaseX = isGroup2 ? g2_baseX : baseX;
+    const currentHalfW = isGroup2 ? g2_groupInnerHalfW : groupInnerHalfW;
+
+    return verses.map((v, i) => (
       <VerseBox
         key={v.number}
-        x={
-          startX +
-          s2Pad +
-          groupPad +
-          (i % 2 !== 0 ? groupInnerHalfW + s2Gap : 0)
-        }
+        x={currentBaseX + groupPad + (i % 2 !== 0 ? currentHalfW + s2Gap : 0)}
         y={gY - groupPad - (i >= 2 ? smallBoxH2 + s2Gap : 0)}
         z={0.003}
-        w={groupInnerHalfW}
+        w={currentHalfW}
         h={smallBoxH2}
         verse={v.text}
         number={v.number}
@@ -207,9 +239,11 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         isPill={true}
       />
     ));
+  };
 
   return (
     <group>
+      {/* Section 2 main background */}
       <UiRect
         x={startX}
         y={s2Top}
@@ -229,14 +263,55 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         radius={0.017}
         color={S2_OUTER_BG}
       />
-      <TopLabel x={PW / 2} y={s2Top} z={0.004} text={data.topLabel} />
-      <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
 
-      <VerseBox
-        x={startX + s2Pad}
-        y={v6Y}
+      {/* ================= Upper container box (6-10) ================= */}
+      <UiRect
+        x={sg_X - bw}
+        y={sg1_Y + bw}
+        z={0.0015}
+        w={sg_W + bw * 2}
+        h={sg1_H + bw * 2}
+        radius={0.025}
+        color={SG_BORDER}
+        shadow
+      />
+      <UiRect
+        x={sg_X}
+        y={sg1_Y}
         z={0.002}
-        w={innerW}
+        w={sg_W}
+        h={sg1_H}
+        radius={0.022}
+        color={SG_BG}
+      />
+
+      {/* ================= Lower container box (15-19) ================= */}
+      <UiRect
+        x={sg_X - bw}
+        y={sg2_Y + bw}
+        z={0.0015}
+        w={sg_W + bw * 2}
+        h={sg2_H + bw * 2}
+        radius={0.025}
+        color={SG_BORDER}
+        shadow
+      />
+      <UiRect
+        x={sg_X}
+        y={sg2_Y}
+        z={0.002}
+        w={sg_W}
+        h={sg2_H}
+        radius={0.022}
+        color={SG_BG}
+      />
+
+      {/* Verse 6 */}
+      <VerseBox
+        x={baseX}
+        y={v6Y}
+        z={0.003}
+        w={s2_innerW}
         h={bigBoxH}
         verse={data.introVerse.text}
         number={data.introVerse.number}
@@ -248,11 +323,12 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         isPill={false}
       />
 
+      {/* Upper maroon group */}
       <UiRect
-        x={startX + s2Pad}
+        x={baseX}
         y={g1Y}
-        z={0.002}
-        w={innerW}
+        z={0.0025}
+        w={s2_innerW}
         h={groupH}
         radius={0.015}
         color={MAROON_THEME}
@@ -263,13 +339,15 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         g1Y,
         data.colorGroups[0].verseBg,
         MAROON_THEME,
+        false,
       )}
 
+      {/* Middle green group (shrunk) */}
       <UiRect
-        x={startX + s2Pad}
+        x={g2_baseX}
         y={g2Y}
-        z={0.002}
-        w={innerW}
+        z={0.0025}
+        w={g2_innerW}
         h={groupH}
         radius={0.015}
         color={GREEN_THEME}
@@ -280,13 +358,15 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         g2Y,
         data.colorGroups[1].verseBg,
         GREEN_THEME,
+        true,
       )}
 
+      {/* Lower maroon group */}
       <UiRect
-        x={startX + s2Pad}
+        x={baseX}
         y={g3Y}
-        z={0.002}
-        w={innerW}
+        z={0.0025}
+        w={s2_innerW}
         h={groupH}
         radius={0.015}
         color={MAROON_THEME}
@@ -297,13 +377,15 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         g3Y,
         data.colorGroups[2].verseBg,
         MAROON_THEME,
+        false,
       )}
 
+      {/* Verse 19 */}
       <VerseBox
-        x={startX + s2Pad}
+        x={baseX}
         y={v19Y}
-        z={0.002}
-        w={innerW}
+        z={0.003}
+        w={s2_innerW}
         h={bigBoxH}
         verse={data.outroVerse.text}
         number={data.outroVerse.number}
@@ -314,7 +396,11 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         circleTextCol="#ffffff"
         isPill={false}
       />
-      <SideArrows layout={layout} startX={startX} />
+
+      {/* Connecting lines */}
+      <SideCurves layout={layout} startX={startX} />
+      <TopLabel x={PW / 2} y={s2Top} z={0.004} text={data.topLabel} />
+      <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
     </group>
   );
 }

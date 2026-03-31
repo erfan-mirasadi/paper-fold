@@ -30,8 +30,8 @@ export const TEXT_SIZES = {
   TOP_LABEL: 0.018,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,
-  VERSE_TEXT_SMALL: 0.035,
-  VERSE_TEXT_BIG: 0.052,
+  VERSE_TEXT_SMALL: 0.042,
+  VERSE_TEXT_BIG: 0.059,
 };
 
 interface RoundedShapeProps {
