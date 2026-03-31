@@ -12,8 +12,8 @@ export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#efbe6c";
 export const S1_ANA_BORDER = "#b48238";
 
-export const S2_OUTER_BG = "#fdfaf6";
-export const S2_OUTER_BORDER = "#eadecf";
+export const S2_OUTER_BG = "#F0E5C0";
+export const S2_OUTER_BORDER = "#E3B678";
 
 export const MAROON_THEME = "#8f4265";
 export const MAROON_VERSE_BG = "#ebd2dc";

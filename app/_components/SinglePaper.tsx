@@ -35,7 +35,7 @@ const AMBIENT_CURVE_MULTIPLIER = 0.3;
 const insideCurveStrength = 0.28 * AMBIENT_CURVE_MULTIPLIER;
 const outsideCurveStrength = 0.05 * AMBIENT_CURVE_MULTIPLIER;
 
-export const PAGE_WIDTH = 1.28;
+export const PAGE_WIDTH = 1.4;
 export const PAGE_HEIGHT = 1.71;
 export const PAGE_DEPTH = 0.003;
 

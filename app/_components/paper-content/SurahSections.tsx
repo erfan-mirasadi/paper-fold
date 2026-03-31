@@ -1,5 +1,4 @@
 "use client";
-import { QuadraticBezierLine } from "@react-three/drei";
 import {
   TopLabel,
   UiRect,
@@ -18,6 +17,8 @@ import {
   GREEN_THEME,
   BLUE_THEME,
 } from "./SharedUI";
+import { SideArrows } from "./SideArrows";
+
 export interface Verse {
   number: number;
   text: string;
@@ -207,10 +208,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
       />
     ));
 
-  const startX_L = startX + s2Pad - 0.005;
-  const startX_R = startX + sectionW - s2Pad + 0.005;
-  const g2CenterY = g2Y - groupH / 2;
-
   return (
     <group>
       <UiRect
@@ -234,57 +231,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
       />
       <TopLabel x={PW / 2} y={s2Top} z={0.004} text={data.topLabel} />
       <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
-
-      {/* <group position={[0, 0, 0.02]}>
-        <QuadraticBezierLine
-          start={[startX_L, g1Y, 0]}
-          end={[startX_L, g3Y - groupH, 0]}
-          mid={[startX_L - 0.15, g2CenterY, 0]}
-          color="#a0d1cc"
-          lineWidth={4}
-          material-depthTest={false}
-        />
-        <QuadraticBezierLine
-          start={[startX_L, g2Y, 0]}
-          end={[startX_L, g2Y - groupH, 0]}
-          mid={[startX_L - 0.1, g2CenterY, 0]}
-          color="#badfae"
-          lineWidth={4}
-          material-depthTest={false}
-        />
-        <QuadraticBezierLine
-          start={[startX_L, g1Y - groupH, 0]}
-          end={[startX_L, g3Y, 0]}
-          mid={[startX_L - 0.05, g2CenterY, 0]}
-          color="#dfb8c2"
-          lineWidth={4}
-          material-depthTest={false}
-        />
-        <QuadraticBezierLine
-          start={[startX_R, g1Y, 0]}
-          end={[startX_R, g3Y - groupH, 0]}
-          mid={[startX_R + 0.15, g2CenterY, 0]}
-          color="#a0d1cc"
-          lineWidth={4}
-          material-depthTest={false}
-        />
-        <QuadraticBezierLine
-          start={[startX_R, g2Y, 0]}
-          end={[startX_R, g2Y - groupH, 0]}
-          mid={[startX_R + 0.1, g2CenterY, 0]}
-          color="#badfae"
-          lineWidth={4}
-          material-depthTest={false}
-        />
-        <QuadraticBezierLine
-          start={[startX_R, g1Y - groupH, 0]}
-          end={[startX_R, g3Y, 0]}
-          mid={[startX_R + 0.05, g2CenterY, 0]}
-          color="#dfb8c2"
-          lineWidth={4}
-          material-depthTest={false}
-        />
-      </group> */}
 
       <VerseBox
         x={startX + s2Pad}
@@ -368,6 +314,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         circleTextCol="#ffffff"
         isPill={false}
       />
+      <SideArrows layout={layout} startX={startX} />
     </group>
   );
 }

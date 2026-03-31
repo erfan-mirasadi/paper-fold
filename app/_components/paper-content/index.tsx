@@ -5,7 +5,7 @@ import { BG_COLOR, TEXT_DARK, TEXT_SIZES } from "./SharedUI";
 import { QuranicBorder } from "./QuranicBorder";
 import { SectionOne, SectionTwo } from "./SurahSections";
 
-const PAGE_WIDTH = 1.28;
+const PAGE_WIDTH = 1.4;
 const PAGE_HEIGHT = 1.71;
 const PW = PAGE_WIDTH;
 const PADDING = 0.05;
@@ -167,20 +167,6 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
       />
 
       <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} />
-
-      {/* <group position={[PW / 2, -1.0, -0.05]}>
-        {radiusList.map((rad, i) => (
-          <mesh key={i}>
-            <ringGeometry args={[rad, rad + 0.0015, 64]} />
-            <meshBasicMaterial
-              color="#e8e1cc"
-              transparent
-              opacity={0.5}
-              depthTest={false}
-            />
-          </mesh>
-        ))}
-      </group> */}
 
       <Text
         position={[PW / 2, -0.12, 0.001]}
