@@ -152,7 +152,7 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
     return <ImageContent url={imageUrl} />;
   }
 
-  const radiusList = [0.4, 0.55, 0.7, 0.85, 1.0, 1.15];
+  // const radiusList = [0.4, 0.55, 0.7, 0.85, 1.0, 1.15];
 
   return (
     <>
@@ -166,9 +166,9 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
         position={[0, 0, 5]}
       />
 
-      {/* <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} /> */}
+      <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} />
 
-      <group position={[PW / 2, -1.0, -0.05]}>
+      {/* <group position={[PW / 2, -1.0, -0.05]}>
         {radiusList.map((rad, i) => (
           <mesh key={i}>
             <ringGeometry args={[rad, rad + 0.0015, 64]} />
@@ -180,7 +180,7 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
             />
           </mesh>
         ))}
-      </group>
+      </group> */}
 
       <Text
         position={[PW / 2, -0.12, 0.001]}

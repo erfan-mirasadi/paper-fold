@@ -235,7 +235,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
       <TopLabel x={PW / 2} y={s2Top} z={0.004} text={data.topLabel} />
       <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
 
-      <group position={[0, 0, 0.02]}>
+      {/* <group position={[0, 0, 0.02]}>
         <QuadraticBezierLine
           start={[startX_L, g1Y, 0]}
           end={[startX_L, g3Y - groupH, 0]}
@@ -284,7 +284,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
           lineWidth={4}
           material-depthTest={false}
         />
-      </group>
+      </group> */}
 
       <VerseBox
         x={startX + s2Pad}
