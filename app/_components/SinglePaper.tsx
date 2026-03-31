@@ -6,11 +6,11 @@ import {
   useScroll,
   useTexture,
 } from "@react-three/drei";
-import { FOLD_Y_POSITIONS, PaperContent } from "./PaperContent";
+import { FOLD_Y_POSITIONS, PaperContent } from "./paper-content/index";
 import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./foldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
-import React, { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Bone,
   BoxGeometry,

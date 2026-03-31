@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
 
 const Experience = dynamic(
-  () => import("./_components/3d/Experience").then((mod) => mod.Experience),
+  () => import("./_components/Experience").then((mod) => mod.Experience),
   { ssr: false },
 );
 

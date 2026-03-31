@@ -3,7 +3,7 @@
 import { Environment, OrbitControls, ScrollControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { SinglePaper } from "./SinglePaper";
 
 interface ExperienceProps {
