@@ -39,7 +39,7 @@ export const PAGE_WIDTH = 1.6;
 export const PAGE_HEIGHT = 1.71;
 export const PAGE_DEPTH = 0.003;
 
-// سگمنت بالا برای دقت میلی‌متری لولاها
+// segment for millimeter precision of hinges
 const PAGE_SEGMENTS = 120;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 

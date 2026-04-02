@@ -29,11 +29,11 @@ const CURVE_GAP = 0.05; // Controls how far outward the curve bows (user set)
 const CURVE_INWARD_OFFSET = 0.0001; // Controls inward penetration for most curves (user set)
 const CURVE_DEEP_OFFSET = 0.02; // Controls the 12-14 penetration exception (user set)
 
-// تنظیمات سایه (دست خودت که باهاش بازی کنی)
-const SHADOW_OFFSET_X = 0.009; // شیفت سایه به راست
-const SHADOW_OFFSET_Y = -0.006; // شیفت سایه به پایین
-const SHADOW_OPACITY = 0.25; // غلظت سایه (بین 0 تا 1)
-const SHADOW_WIDTH = 4.5; // ضخامت سایه (یه نمه از خط اصلی کلفت‌تره که نرم دیده بشه)
+// shadow settings (you can play with it)
+const SHADOW_OFFSET_X = 0.009; // the offset of the shadow to the right
+const SHADOW_OFFSET_Y = -0.006; // the offset of the shadow to the bottom
+const SHADOW_OPACITY = 0.25; // the opacity of the shadow (between 0 and 1)
+const SHADOW_WIDTH = 4.5; // the thickness of the shadow
 
 // Function to generate a smooth Cubic Bezier curve
 // =========================================================================
