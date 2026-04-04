@@ -1,4 +1,22 @@
-export const TAFSIR_DATA = [
+export type TafsirDirection = "left" | "right";
+
+export interface TafsirEntry {
+  id: number;
+  scrollStart: number;
+  scrollEnd: number;
+  targetId?: string;
+  anchorOffsetX: number;
+  anchorOffsetY: number;
+  title: string;
+  translation: string;
+  explanation: string;
+  direction: TafsirDirection;
+  lineWidth: number;
+  verticalOffset: number;
+  boneIndex: number;
+}
+
+export const TAFSIR_DATA: TafsirEntry[] = [
   {
     id: 3,
     scrollStart: 0.3,
@@ -11,7 +29,7 @@ export const TAFSIR_DATA = [
     translation: "Read, and your Lord is the most Generous.",
     explanation:
       "This verse emphasizes Allah's boundless generosity in granting knowledge.",
-    direction: "right" as const,
+    direction: "right",
     lineWidth: 460,
     verticalOffset: -88,
   },
@@ -26,7 +44,7 @@ export const TAFSIR_DATA = [
     title: "The Rebellion",
     translation: "Nay! Man does indeed transgress.",
     explanation: "A highlight on human arrogance when feeling self-sufficient.",
-    direction: "right" as const,
+    direction: "right",
     lineWidth: 780,
     verticalOffset: -88,
   },
