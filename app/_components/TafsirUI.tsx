@@ -217,7 +217,7 @@ export const TafsirUI = ({ isDarkMode }: { isDarkMode: boolean }) => {
                     marginBottom: 12,
                   }}
                 >
-                  "{activeTafsir.translation}"
+                  &quot;{activeTafsir.translation}&quot;
                 </p>
                 <p
                   style={{
