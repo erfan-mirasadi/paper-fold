@@ -1,17 +1,19 @@
 "use client";
 
 import { OrthographicCamera, Text, useTexture } from "@react-three/drei";
-import { BG_COLOR, TEXT_DARK, TEXT_SIZES } from "./SharedUI";
+import { TEXT_DARK, TEXT_SIZES } from "./SharedUI";
 // import { QuranicBorder } from "./QuranicBorder";
 import { SectionOne, SectionTwo } from "./SurahSections";
+import { Boarder } from "./Boarder";
 
 const PAGE_WIDTH = 1.6;
 const PAGE_HEIGHT = 1.71;
 const PW = PAGE_WIDTH;
-const PADDING = 0.14;
-const CONTENT_W = PW - PADDING * 2;
+const PADDING = 0.04;
+const CONTENT_W = PW - PADDING * 8;
+const START_X = (PW - CONTENT_W) / 2;
 
-// Layout Math Engine
+// Layout Math Engine (preserved as absolute)
 const s1Top = -0.21;
 const s1Pad = 0.025;
 const gap = 0.02;
@@ -118,7 +120,7 @@ const SURAH_DATA = {
           { number: 16, text: "نَاصِيَةٍ كَاذِبَةٍ خَاطِئَةٍ" },
           {
             number: 15,
-            text: "كَلَّا لَئِنْ لَمْ يَنْتَهِ لَنَسْفَعًا بِالنَّاصِيَةِ",
+            text: "كَلَّا لئِنْ لَمْ يَنْتَهِ لَنَسْفَعًا بِالنَّاصِيَةِ",
           },
           { number: 18, text: "سَنَدْعُ الزَّبَانِيَةَ" },
           { number: 17, text: "فَلْيَدْعُ نَادِيَهُ" },
@@ -152,11 +154,18 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
     return <ImageContent url={imageUrl} />;
   }
 
-  // const radiusList = [0.4, 0.55, 0.7, 0.85, 1.0, 1.15];
+  // New Rich Color Constants
+  const BG_COLOR = "#EBEBDF"; // Richer, slightly cool pale beige-grey (Canvas)
 
   return (
     <>
-      <color attach="background" args={[BG_COLOR]} />
+      {/* 1. Large background mesh to cover outside areas in richer color */}
+      <mesh position={[PW / 2, -PAGE_HEIGHT / 2, -0.05]}>
+        <planeGeometry args={[PW * 1.5, PAGE_HEIGHT * 1.5]} />
+        <meshBasicMaterial color={BG_COLOR} />
+      </mesh>
+      <color attach="background" args={[BG_COLOR]} />{" "}
+      {/* Make outside background richer */}
       <OrthographicCamera
         makeDefault
         left={0}
@@ -165,11 +174,11 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
         bottom={-PAGE_HEIGHT}
         position={[0, 0, 5]}
       />
-
+      <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} />
       {/* <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} /> */}
-
+      {/* All content layers go at z >= 0.02 to sit on top of fill */}
       <Text
-        position={[PW / 2, -0.12, 0.001]}
+        position={[PW / 2, -0.12, 0.02]}
         fontSize={TEXT_SIZES.BISMILLAH}
         color={TEXT_DARK}
         anchorX="center"
@@ -181,17 +190,17 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
       >
         {SURAH_DATA.bismillah}
       </Text>
-
+      {/* Existing layout math and components, placed on z=0.02 */}
       <SectionOne
         data={SURAH_DATA.section1}
         layout={layoutMath}
-        startX={PADDING}
+        startX={START_X}
         PW={PW}
       />
       <SectionTwo
         data={SURAH_DATA.section2}
         layout={layoutMath}
-        startX={PADDING}
+        startX={START_X}
         PW={PW}
       />
     </>
