@@ -405,7 +405,13 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
 
       {/* Connecting lines */}
       <SideCurves layout={layout} startX={startX} />
-      <TopLabel x={PW / 2} y={s2Top} z={0.004} text={data.topLabel} />
+      <TopLabel
+        x={PW / 2}
+        y={s2Top}
+        z={0.004}
+        text={data.topLabel}
+        animateOnScroll={true}
+      />
       <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
     </group>
   );

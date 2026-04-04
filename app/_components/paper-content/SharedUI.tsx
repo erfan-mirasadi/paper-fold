@@ -1,7 +1,8 @@
 "use client";
-import { Text } from "@react-three/drei";
-import { useMemo } from "react";
+import { Text, useScroll } from "@react-three/drei";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
 export const BG_COLOR = "#fefbf2";
@@ -105,34 +106,104 @@ interface TopLabelProps {
   y: number;
   z?: number;
   text: string;
+  animateOnScroll?: boolean;
 }
 
-export function TopLabel({ x, y, z = 0, text }: TopLabelProps) {
+export function TopLabel({
+  x,
+  y,
+  z = 0,
+  text,
+  animateOnScroll = false,
+}: TopLabelProps) {
   const w = 0.38;
   const h = 0.038;
+  const radius = h / 2; // Capsule shape
+
+  const groupRef = useRef<THREE.Group>(null);
+  const scroll = useScroll();
+
+  useFrame(() => {
+    if (animateOnScroll && scroll && groupRef.current) {
+      // Calculate opacity based on scroll. Let's make it appear near the end (e.g. > 0.8)
+      let targetOpacity = 0;
+      if (scroll.offset > 0.8) {
+        targetOpacity = Math.min((scroll.offset - 0.8) / 0.15, 1);
+      }
+
+      groupRef.current.traverse((child: THREE.Object3D) => {
+        const node = child as THREE.Object3D & {
+          isMesh?: boolean;
+          text?: string;
+          material?: THREE.Material & {
+            color?: THREE.Color;
+            fillOpacity?: number;
+            opacity?: number;
+            transparent?: boolean;
+          };
+        };
+
+        if (node.isMesh || node.text !== undefined) {
+          const mat = node.material;
+          node.visible = targetOpacity > 0;
+
+          if (mat && targetOpacity > 0) {
+            // The shadow mesh inside UiRect uses black color (#000000)
+            const isBlackShadow =
+              mat.color &&
+              mat.color.getHexString &&
+              mat.color.getHexString() === "000000";
+
+            if (node.text !== undefined || mat.fillOpacity !== undefined) {
+              mat.fillOpacity = targetOpacity;
+              mat.opacity = targetOpacity;
+            } else {
+              // Vital: To explicitly prevent Z-fighting and "shininess",
+              // we only enable transparency on the solid meshes if they're actively fading < 1!
+              if (!isBlackShadow) {
+                mat.transparent = targetOpacity < 1;
+                mat.opacity = targetOpacity;
+              } else {
+                mat.transparent = true;
+                mat.opacity = targetOpacity * 0.12;
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+
   return (
-    <group position={[x - w / 2, y + h / 2, z]}>
+    <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
       <UiRect
         x={-0.002}
         y={0.002}
         z={0}
         w={w + 0.004}
         h={h + 0.004}
-        radius={0.012}
+        radius={radius + 0.002}
         color="#cdc6bf"
         shadow
       />
-      <UiRect x={0} y={0} z={0.001} w={w} h={h} radius={0.01} color="#ffffff" />
+      <UiRect
+        x={0}
+        y={0}
+        z={0.001}
+        w={w}
+        h={h}
+        radius={radius}
+        color="#ffffff"
+      />
       <Text
         position={[w / 2, -h / 2, 0.002]}
         fontSize={TEXT_SIZES.TOP_LABEL}
         color="#4a423a"
         anchorX="center"
         anchorY="middle"
-        fontStyle="italic"
+        fontStyle="normal"
         fontWeight="bold"
         material-depthTest={false}
-        font={QURAN_FONT}
       >
         {text}
       </Text>
