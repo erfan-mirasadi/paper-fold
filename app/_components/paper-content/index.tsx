@@ -35,7 +35,7 @@ const g2Y = g1Y - groupH - groupGap;
 const g3Y = g2Y - groupH - groupGap;
 const v19Y = g3Y - groupH - groupGap;
 
-const layoutMath = {
+export const layoutMath = {
   sectionW: CONTENT_W,
   innerW: CONTENT_W - s1Pad * 2,
   innerHalfW: (CONTENT_W - s1Pad * 2 - gap) / 2,

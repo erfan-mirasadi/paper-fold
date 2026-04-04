@@ -1,48 +1,88 @@
 "use client";
 
-import { Environment, OrbitControls, ScrollControls } from "@react-three/drei";
-// import { useFrame } from "@react-three/fiber";
-// import { easing } from "maath";
-import { useEffect, useRef } from "react";
+import { Environment, useScroll, OrbitControls } from "@react-three/drei";
+import { PerspectiveCamera } from "@theatre/r3f";
+import { useFrame } from "@react-three/fiber";
+import { useRef, useEffect, useState } from "react";
 import { SinglePaper } from "./SinglePaper";
+import { mainSheet } from "./TheatreManager";
 
 interface ExperienceProps {
   isDarkMode: boolean;
 }
 
 export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
+  const scroll = useScroll();
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
+  const [controlsEnabled, setControlsEnabled] = useState(false);
 
   useEffect(() => {
-    document.body.style.cursor = "grab";
-    return () => {
+    if (controlsEnabled) {
+      document.body.style.cursor = "grab";
+    } else {
       document.body.style.cursor = "auto";
-    };
-  }, []);
+    }
+  }, [controlsEnabled]);
 
-  // this code is for auto camera magnetism
-  // useFrame((state, delta) => {
-  //   if (!controlsRef.current || isDragging.current) return;
+  useFrame(() => {
+    if (mainSheet && scroll) {
+      const INTRO_SCROLL_RATIO = 0.3;
+      const THEATRE_ANIMATION_LENGTH = 5;
 
-  //   easing.damp3(state.camera.position, [0, 1, 1.7], 0.4, delta);
-  //   easing.damp3(controlsRef.current.target, [0, 0, 0], 0.4, delta);
-  //   controlsRef.current.update();
-  // });
+      const isAtEnd = scroll.offset > INTRO_SCROLL_RATIO;
+      if (controlsEnabled !== isAtEnd) {
+        setControlsEnabled(isAtEnd);
+      }
+
+      if (!isAtEnd) {
+        const normalizedTime =
+          (scroll.offset / INTRO_SCROLL_RATIO) * THEATRE_ANIMATION_LENGTH;
+        mainSheet.sequence.position = normalizedTime;
+
+        // Lock controls to prevent dragging mid-scroll
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
+      } else {
+        mainSheet.sequence.position = THEATRE_ANIMATION_LENGTH;
+
+        // Enable orbit controls when animation is done
+        if (controlsRef.current) {
+          controlsRef.current.enabled = true;
+          // Slowly damp back to original look at center as a smooth transition
+          controlsRef.current.target.set(0, 0, 0);
+          controlsRef.current.update();
+        }
+      }
+    }
+  });
 
   return (
     <>
-      <ScrollControls pages={1.5} damping={0.2}>
-        <group rotation-x={-Math.PI / 4}>
-          <SinglePaper />
-        </group>
-      </ScrollControls>
+      <PerspectiveCamera
+        theatreKey="Camera"
+        makeDefault
+        position={[0, 1, 1.7]}
+        fov={45}
+      />
+
+      <group rotation-x={-Math.PI / 4}>
+        <SinglePaper />
+      </group>
 
       <OrbitControls
         ref={controlsRef}
+        enabled={controlsEnabled}
         enableZoom={false}
         enablePan={false}
-        makeDefault
+        makeDefault={controlsEnabled}
+        // Limit Azimuth angle (left-right rotation) to between -45 and 45 degrees
+        minAzimuthAngle={-Math.PI / 4}
+        maxAzimuthAngle={Math.PI / 4}
+        // Limit Polar angle (up-down) around its resting position (approx 60 degrees)
+        minPolarAngle={Math.PI / 6} // ~30 degrees upward
+        maxPolarAngle={Math.PI * 0.45} // ~80 degrees downward, stopping before it sees the back
         onStart={() => {
           isDragging.current = true;
           document.body.style.cursor = "grabbing";
@@ -52,7 +92,9 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
           document.body.style.cursor = "grab";
         }}
       />
+
       <Environment preset={isDarkMode ? "studio" : "apartment"} />
+
       <directionalLight
         position={[2, 5, 2]}
         intensity={isDarkMode ? 1.5 : 2.5}

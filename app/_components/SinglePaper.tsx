@@ -7,7 +7,7 @@ import {
   useTexture,
 } from "@react-three/drei";
 import { FOLD_Y_POSITIONS, PaperContent } from "./paper-content/index";
-import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./foldStory";
+import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { useEffect, useMemo, useRef } from "react";
@@ -25,6 +25,7 @@ import {
   Vector2,
 } from "three";
 import { degToRad } from "three/src/math/MathUtils.js";
+import { Tafsir3DTracker } from "./Tafsir3DTracker";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
@@ -70,7 +71,6 @@ for (let i = 0; i < position.count; i++) {
   let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
   skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
   const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
-
   skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
   skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
 }
@@ -137,25 +137,30 @@ export const SinglePaper: React.FC = () => {
     if (!skinnedMeshRef.current || !group.current) return;
 
     const bones = skinnedMeshRef.current.skeleton.bones;
-    const offset = scroll.offset; // [0, 1]
     const baseRotation = degToRad(10);
 
-    // --- Audio Playback Logic ---
+    //Paper unfolds only after intro
+    const INTRO_SCROLL_RATIO = 0.3;
+    let paperProgress = 0;
+
+    if (scroll.offset > INTRO_SCROLL_RATIO) {
+      paperProgress =
+        (scroll.offset - INTRO_SCROLL_RATIO) / (1 - INTRO_SCROLL_RATIO);
+    }
+
     const maxStageIndex = FOLD_STORY_STEPS.length - 1;
-    const currentStage = Math.round(offset * maxStageIndex);
+    const currentStage = Math.round(paperProgress * maxStageIndex);
 
     if (currentStage !== lastActiveStage.current) {
       lastActiveStage.current = currentStage;
-      if (foldSound.current) {
+      if (foldSound.current && paperProgress > 0) {
         foldSound.current.currentTime = 0;
-        foldSound.current.play().catch(() => {
-          // Ignore auto-play restrictions silently
-        });
+        foldSound.current.play().catch(() => {});
       }
     }
 
     // Get the dynamic angles from our state machine
-    const targetFoldAngles = getFoldAnglesForScroll(offset);
+    const targetFoldAngles = getFoldAnglesForScroll(paperProgress);
     const foldContributions = new Float32Array(bones.length);
 
     targetFoldAngles.forEach((totalAngle, foldIdx) => {
@@ -164,8 +169,6 @@ export const SinglePaper: React.FC = () => {
       const upperBone = Math.min(lowerBone + 1, bones.length - 1);
       const blendToUpper = rawBonePos - lowerBone;
 
-      // Perfectly blends the fold angle across the fractional coordinate
-      // Ensures the 3D hinge matches the texture exactly!
       foldContributions[lowerBone] += totalAngle * (1 - blendToUpper);
       foldContributions[upperBone] += totalAngle * blendToUpper;
     });
@@ -174,7 +177,7 @@ export const SinglePaper: React.FC = () => {
       const target = i === 0 ? group.current : bones[i];
 
       // Ambient paper curve
-      const normalizedI = (i / PAGE_SEGMENTS) * 30; // Map back to original curve math
+      const normalizedI = (i / PAGE_SEGMENTS) * 30;
       const insideCurveIntensity =
         normalizedI < 8 ? Math.sin(normalizedI * 0.2 + 0.25) : 0;
       const outsideCurveIntensity =
@@ -192,6 +195,8 @@ export const SinglePaper: React.FC = () => {
 
   return (
     <group ref={group} position={[0, PAGE_HEIGHT / 2, 0]}>
+      <Tafsir3DTracker skeleton={manualSkinnedMesh.skeleton} />
+
       <primitive object={manualSkinnedMesh} ref={skinnedMeshRef}>
         <meshStandardMaterial
           attach="material-4"

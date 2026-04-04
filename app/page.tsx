@@ -1,8 +1,11 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
+import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
+import TheatreManager from "./_components/TheatreManager";
+import { TafsirUI, TafsirScrollTracker } from "./_components/TafsirUI";
 
 const Experience = dynamic(
   () => import("./_components/Experience").then((mod) => mod.Experience),
@@ -25,7 +28,6 @@ export default function Home() {
         transition: "background-color 0.5s ease",
       }}
     >
-      {/* Premium Theme Toggle Button */}
       <button
         onClick={() => setIsDarkMode(!isDarkMode)}
         style={{
@@ -38,9 +40,6 @@ export default function Home() {
           border: "none",
           backgroundColor: btnBg,
           color: btnColor,
-          fontFamily: "sans-serif",
-          fontSize: "14px",
-          fontWeight: "bold",
           cursor: "pointer",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           transition: "all 0.3s ease",
@@ -58,20 +57,21 @@ export default function Home() {
           </div>
         }
       >
-        <div
-          style={{
-            width: "100vw",
-            height: "100vh",
-            overflow: "auto",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
+        <div style={{ width: "100vw", height: "100vh" }}>
           <Canvas shadows camera={{ position: [0, 1, 1.7], fov: 45 }}>
             <color attach="background" args={[bgColor]} />
-            <Experience isDarkMode={isDarkMode} />
+            <TheatreManager>
+              <ScrollControls pages={3} damping={0.2}>
+                <Experience isDarkMode={isDarkMode} />
+                <TafsirScrollTracker />
+              </ScrollControls>
+            </TheatreManager>
           </Canvas>
         </div>
       </Suspense>
+
+      {/* TafsirUI is now a plain HTML overlay, rendered OUTSIDE the Canvas */}
+      <TafsirUI isDarkMode={isDarkMode} />
     </main>
   );
 }
