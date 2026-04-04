@@ -215,14 +215,15 @@ export const VerseBox = ({
   circleTextCol,
   isPill = true,
 }: VerseBoxProps) => {
-  const bw = 0.003;
-  const rad = isPill ? h / 2 : 0.015;
-  const cr = isPill ? h / 2 : 0.026;
-  const cx = isPill ? cr : 0.07;
-
+  const bw = 0.0035;
+  const rad = isPill ? h / 2 : 0.05;
+  const cr = Math.min(h * 0.46, 0.035);
+  const SMALL_PILL_OFFSET = 0.002; // nudge small-box circles inward (to the right)
+  // position the circle: for pills keep inside but nudge small boxes to the right
+  const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
   const textX = w / 2;
 
-  const safeMargin = cx + cr + 0.01;
+  const safeMargin = cx + cr + 0.015; // ensure text doesn't overlap the circle
   const textMaxW = w - safeMargin * 2;
 
   return (

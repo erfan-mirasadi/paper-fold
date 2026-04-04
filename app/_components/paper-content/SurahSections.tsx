@@ -124,6 +124,8 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
             bg={S1_INNER_BG}
             border={S1_INNER_BORDER}
             circleBorderCol={S1_OUTER_BORDER}
+            circleBg={S1_OUTER_BORDER}
+            circleTextCol="#ffffff"
             isPill={true}
           />
         );
@@ -141,6 +143,8 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
           bg={S1_ANA_BG}
           border={S1_ANA_BORDER}
           circleBorderCol={S1_ANA_BORDER}
+          circleBg={S1_ANA_BORDER}
+          circleTextCol="#ffffff"
           isPill={false}
         />
         <AnaAyetTab
@@ -236,6 +240,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         bg={bgColor || WHITE_VERSE_BG}
         border={WHITE_VERSE_BG}
         circleBorderCol={borderCol}
+        circleBg={borderCol}
+        circleTextCol="#ffffff"
         isPill={true}
       />
     ));
