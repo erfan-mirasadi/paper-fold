@@ -29,22 +29,22 @@ interface SideCurvesProps {
 // OUTER curves — one per bracket pair, bow increases outward per nesting level
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const CURVE_GAP = 0.1; // step between each nesting level
-const CURVE_INWARD_OFFSET = 0.0001; // how far the tip penetrates inward (standard)
-const CURVE_DEEP_OFFSET_OUTER = 0.0; // deeper penetration for the 12-14 pair (outer)
+const CURVE_INWARD_OFFSET = 0.0085; // how far the tip penetrates inward (standard)
+const CURVE_DEEP_OFFSET_OUTER = 0.01; // deeper penetration for the 12-14 pair (outer)
 const CURVE_DEEP_OFFSET_INNER = 0.0185; // deeper penetration for the 12-14 pair (inner)
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INNER curves — identical bow for every pair, tweak these two values
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const INNER_CURVE_GAP = 0.095; // how far inward the inner curve bows
-const INNER_CURVE_INWARD_OFFSET = 0.009; // tip penetration for inner curves
+const INNER_CURVE_INWARD_OFFSET = 0.008; // tip penetration for inner curves
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MASTER CORNER CONTROLS (Unified caps matching)
 // Just tweak these TWO variables to sync all corners!
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const CORNER_ROUNDNESS = 0.001; // 1. How rounded/curved the cap is (Y-axis bend)
-const CORNER_DEPTH = 0.03; // 2. How far the cap pushes inward/outward (X-axis depth)
+const CORNER_ROUNDNESS = 0.003; // 1. How rounded/curved the cap is (Y-axis bend)
+const CORNER_DEPTH = 0.01; // 2. How far the cap pushes inward/outward (X-axis depth)
 
 // Function to generate a smooth Cubic Bezier curve
 // =========================================================================
@@ -176,12 +176,12 @@ const CurvePair = ({
         depthTest={false}
         renderOrder={999}
       />
-      <mesh renderOrder={998}>
+      <mesh renderOrder={1}>
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
-          color={color}
+          color={"#ffffff"}
           transparent
-          opacity={0.5}
+          opacity={0.03}
           depthTest={false}
         />
       </mesh>
@@ -237,9 +237,9 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
   const y19 = v19Y - bigBoxH;
 
   const y8 = g1Y - groupPad;
-  const y18 = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2;
+  const y18 = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2 - 0.01;
 
-  const y10 = g1Y - groupPad - smallBoxH2 - s2Gap;
+  const y10 = g1Y - groupPad - smallBoxH2 - s2Gap - 0.01;
   const y16 = g3Y - groupPad - smallBoxH2;
 
   const y12 = g2Y - groupPad;

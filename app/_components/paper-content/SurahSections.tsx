@@ -219,9 +219,17 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
   const sg2_bottom = v19Y - bigBoxH - sgPadBottom;
   const sg2_H = sg2_Y - sg2_bottom;
 
-  // Soft colors for container boxes
-  const SG_BG = "#C9B5A5"; // Soft cream
-  const SG_BORDER = "#AD7B2A"; // Brownish cream for border
+  // Container box colors (updated per request)
+  const SG_BG = "#845775"; // Section background (6-10, 15-19)
+  const SG_BORDER = "#F4ECD8"; // Brownish cream for border
+  // Background for capsule boxes in ranges 7-10 and 15-18
+  const CAPSULE_BG_7_10_15_18 = "#E4D3DE";
+  // Background for capsule boxes specifically for verses 12-14
+  // (new variable requested)
+  const CAPSULE_BG_12_14 = "#E0E6D0";
+  // Background for verse 6 and 19 capsules: 50% lighter than section background
+  // (keeps these endpoint capsules visually lighter than the section)
+  const CAPSULE_BG_6_19 = "#F8F1E6";
   const bw = 0.003;
 
   const renderGroupVerses = (
@@ -230,28 +238,38 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
     bgColor: string | undefined,
     borderCol: string,
     isGroup2: boolean = false,
+    extraRowGap: number = 0,
   ) => {
     const currentBaseX = isGroup2 ? g2_baseX : baseX;
     const currentHalfW = isGroup2 ? g2_groupInnerHalfW : groupInnerHalfW;
 
-    return verses.map((v, i) => (
-      <VerseBox
-        key={v.number}
-        x={currentBaseX + groupPad + (i % 2 !== 0 ? currentHalfW + s2Gap : 0)}
-        y={gY - groupPad - (i >= 2 ? smallBoxH2 + s2Gap : 0)}
-        z={0.003}
-        w={currentHalfW}
-        h={smallBoxH2}
-        verse={v.text}
-        number={v.number}
-        bg={bgColor || WHITE_VERSE_BG}
-        border={WHITE_VERSE_BG}
-        circleBorderCol={borderCol}
-        circleBg={borderCol}
-        circleTextCol="#ffffff"
-        isPill={true}
-      />
-    ));
+    return verses.map((v, i) => {
+      const rowOffset = i >= 2 ? smallBoxH2 + s2Gap + extraRowGap : 0;
+      // If this verse is 11-14, use the special capsule color (include 11 per request)
+      const finalBg =
+        v.number >= 11 && v.number <= 14
+          ? CAPSULE_BG_12_14
+          : bgColor || WHITE_VERSE_BG;
+      return (
+        <VerseBox
+          key={v.number}
+          x={currentBaseX + groupPad + (i % 2 !== 0 ? currentHalfW + s2Gap : 0)}
+          y={gY - groupPad - rowOffset}
+          z={0.003}
+          w={currentHalfW}
+          h={smallBoxH2}
+          verse={v.text}
+          number={v.number}
+          bg={finalBg}
+          border={borderCol}
+          borderWidth={0.009}
+          circleBorderCol={borderCol}
+          circleBg={borderCol}
+          circleTextCol="#ffffff"
+          isPill={true}
+        />
+      );
+    });
   };
 
   return (
@@ -265,7 +283,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={s2H}
         radius={0.02}
         color={S2_OUTER_BORDER}
-        shadow
       />
       <UiRect
         x={startX + 0.003}
@@ -286,7 +303,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={sg1_H + bw * 2}
         radius={0.025}
         color={SG_BORDER}
-        shadow
       />
       <UiRect
         x={sg_X}
@@ -307,7 +323,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={sg2_H + bw * 2}
         radius={0.025}
         color={SG_BORDER}
-        shadow
       />
       <UiRect
         x={sg_X}
@@ -328,7 +343,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={bigBoxH}
         verse={data.introVerse.text}
         number={data.introVerse.number}
-        bg={WHITE_VERSE_BG}
+        bg={CAPSULE_BG_6_19}
         border={BLUE_THEME}
         circleBorderCol={BLUE_THEME}
         circleBg={BLUE_THEME}
@@ -336,7 +351,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         isPill={false}
       />
 
-      {/* Upper maroon group */}
+      {/* Upper group background (applied #845775) */}
       <UiRect
         x={baseX}
         y={g1Y}
@@ -344,15 +359,15 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         w={s2_innerW}
         h={groupH}
         radius={0.015}
-        color={MAROON_THEME}
-        shadow
+        color={"#845775"}
       />
       {renderGroupVerses(
         data.colorGroups[0].verses,
         g1Y,
-        data.colorGroups[0].verseBg,
+        CAPSULE_BG_7_10_15_18,
         MAROON_THEME,
         false,
+        0.01,
       )}
 
       {/* Middle green group (shrunk) */}
@@ -372,9 +387,10 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         data.colorGroups[1].verseBg,
         GREEN_THEME,
         true,
+        0,
       )}
 
-      {/* Lower maroon group */}
+      {/* Lower group background (applied #845775) */}
       <UiRect
         x={baseX}
         y={g3Y}
@@ -382,15 +398,15 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         w={s2_innerW}
         h={groupH}
         radius={0.015}
-        color={MAROON_THEME}
-        shadow
+        color={"#845775"}
       />
       {renderGroupVerses(
         data.colorGroups[2].verses,
         g3Y,
-        data.colorGroups[2].verseBg,
+        CAPSULE_BG_7_10_15_18,
         MAROON_THEME,
         false,
+        0.01,
       )}
 
       {/* Verse 19 */}
@@ -402,7 +418,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={bigBoxH}
         verse={data.outroVerse.text}
         number={data.outroVerse.number}
-        bg={WHITE_VERSE_BG}
+        bg={CAPSULE_BG_6_19}
         border={BLUE_THEME}
         circleBorderCol={BLUE_THEME}
         circleBg={BLUE_THEME}
@@ -419,12 +435,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         text={data.topLabel}
         animateOnScroll={true}
       />
-      <TopLabel
-        x={PW / 2}
-        y={s2Top - s2H}
-        z={0.004}
-        text={data.bottomLabel}
-      />
+      <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
     </group>
   );
 }

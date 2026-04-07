@@ -6,7 +6,7 @@ import { TEXT_DARK, TEXT_SIZES } from "./SharedUI";
 import { SectionOne, SectionTwo } from "./SurahSections";
 import { Boarder } from "./Boarder";
 
-export const PAGE_WIDTH = 1.63;
+export const PAGE_WIDTH = 1.54;
 export const PAGE_HEIGHT = 1.74;
 export const PW = PAGE_WIDTH;
 export const PADDING = 0.28;

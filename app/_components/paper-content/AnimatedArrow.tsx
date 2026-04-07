@@ -140,7 +140,7 @@ export const AnimatedArrow = ({
         <shapeGeometry args={[arrowShape]} />
         <meshBasicMaterial
           ref={headMaterialRef}
-          color="#ffffff"
+          color={color}
           transparent
           depthTest={false}
         />

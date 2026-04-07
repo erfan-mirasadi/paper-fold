@@ -5,20 +5,20 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
 const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
-export const BG_COLOR = "#fefbf2";
-export const S1_OUTER_BG = "#fbe09e";
-export const S1_OUTER_BORDER = "#ddb364";
+export const BG_COLOR = "#FDF8E4";
+export const S1_OUTER_BG = "#F8E3B6";
+export const S1_OUTER_BORDER = "#A3822E";
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#efbe6c";
 export const S1_ANA_BORDER = "#b48238";
 
-export const S2_OUTER_BG = "#F0E5C0";
-export const S2_OUTER_BORDER = "#E3B678";
+export const S2_OUTER_BG = "#F0E2CC";
+export const S2_OUTER_BORDER = "#DBC180";
 
-export const MAROON_THEME = "#8f4265";
+export const MAROON_THEME = "#7D3D62";
 export const MAROON_VERSE_BG = "#ebd2dc";
-export const GREEN_THEME = "#92a265";
+export const GREEN_THEME = "#879A63";
 export const GREEN_VERSE_BG = "#eaf2db";
 export const BLUE_THEME = "#638f9c";
 
@@ -27,12 +27,12 @@ export const TEXT_DARK = "#1a1a1a";
 export const CIRCLE_BORDER = "#8e8e8e";
 
 export const TEXT_SIZES = {
-  BISMILLAH: 0.057,
+  BISMILLAH: 0.054,
   TOP_LABEL: 0.018,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,
-  VERSE_TEXT_SMALL: 0.036,
-  VERSE_TEXT_BIG: 0.053,
+  VERSE_TEXT_SMALL: 0.032,
+  VERSE_TEXT_BIG: 0.051,
 };
 
 interface RoundedShapeProps {
@@ -269,6 +269,7 @@ interface VerseBoxProps {
   circleBg?: string;
   circleTextCol?: string;
   isPill?: boolean;
+  borderWidth?: number;
 }
 
 export const VerseBox = ({
@@ -285,13 +286,14 @@ export const VerseBox = ({
   circleBg,
   circleTextCol,
   isPill = true,
+  borderWidth,
 }: VerseBoxProps) => {
   // Reduce horizontal padding so text can occupy more space inside the pill
   const shrinkX = 0.001; // amount to shrink from left and right sides (reduced)
   const finalX = x + shrinkX;
   const finalW = w - shrinkX * 2;
 
-  const bw = 0.0055; // slightly thinner border
+  const bw = borderWidth ?? 0.0055; // default border width (can be overridden via prop)
   const rad = isPill ? h / 2 : 0.05;
   const cr = Math.min(h * 0.46, 0.035);
   const SMALL_PILL_OFFSET = 0.002; // nudge small-box circles inward (to the right)
@@ -304,7 +306,12 @@ export const VerseBox = ({
   const textMaxW = finalW - safeMargin * 2;
 
   // Center the text within the available area to the right of the circle
-  const textX = safeMargin + textMaxW / 1.9;
+  const textX = safeMargin + textMaxW / 2;
+
+  // Small verses (inside pills) should be nudged slightly to the left
+  // while larger verse text remains centered.
+  const SMALL_TEXT_SHIFT = -0.02;
+  const versePosX = isPill ? textX - SMALL_TEXT_SHIFT : textX;
 
   return (
     <group position={[finalX, y, z]}>
@@ -346,7 +353,7 @@ export const VerseBox = ({
       </group>
 
       <Text
-        position={[textX, -h / 2, 0.002]}
+        position={[versePosX, -h / 2, 0.002]}
         fontSize={
           isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
         }
