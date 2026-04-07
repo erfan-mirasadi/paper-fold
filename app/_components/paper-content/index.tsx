@@ -6,16 +6,16 @@ import { TEXT_DARK, TEXT_SIZES } from "./SharedUI";
 import { SectionOne, SectionTwo } from "./SurahSections";
 import { Boarder } from "./Boarder";
 
-const PAGE_WIDTH = 1.6;
+const PAGE_WIDTH = 1.7;
 const PAGE_HEIGHT = 1.71;
 const PW = PAGE_WIDTH;
-const PADDING = 0.04;
-const CONTENT_W = PW - PADDING * 8;
+const PADDING = 0.01;
+const CONTENT_W = PW - PADDING * 45; // Reduced width significantly as requested
 const START_X = (PW - CONTENT_W) / 2;
 
 // Layout Math Engine (preserved as absolute)
 const s1Top = -0.21;
-const s1Pad = 0.025;
+const s1Pad = 0.045;
 const gap = 0.02;
 const smallBoxH = 0.07;
 const anaAyetH = 0.095;
@@ -29,12 +29,14 @@ const groupPad = 0.02;
 const s2Gap = 0.02;
 const smallBoxH2 = 0.075;
 const groupH = groupPad * 2 + (smallBoxH2 * 2 + s2Gap);
-const s2H = s2Pad * 2 + bigBoxH * 2 + groupGap * 4 + groupH * 3;
+const middleExtraGap = 0.02;
+const s2H =
+  s2Pad * 2 + bigBoxH * 2 + groupGap * 4 + groupH * 3 + middleExtraGap * 2;
 
 const v6Y = s2Top - s2Pad;
 const g1Y = v6Y - bigBoxH - groupGap;
-const g2Y = g1Y - groupH - groupGap;
-const g3Y = g2Y - groupH - groupGap;
+const g2Y = g1Y - groupH - (groupGap + middleExtraGap);
+const g3Y = g2Y - groupH - (groupGap + middleExtraGap);
 const v19Y = g3Y - groupH - groupGap;
 
 export const layoutMath = {
@@ -76,9 +78,9 @@ export const FOLD_Y_POSITIONS: readonly [
 ] = [
   v6Y - bigBoxH - groupGap / 2,
   g1Y - groupPad - smallBoxH2 - s2Gap / 2,
-  g1Y - groupH - groupGap / 2,
+  g1Y - groupH - (groupGap + middleExtraGap) / 2,
   g2Y - groupPad - smallBoxH2 - s2Gap / 2,
-  g2Y - groupH - groupGap / 2,
+  g2Y - groupH - (groupGap + middleExtraGap) / 2,
   g3Y - groupPad - smallBoxH2 - s2Gap / 2,
   g3Y - groupH - groupGap / 2,
 ] as const;

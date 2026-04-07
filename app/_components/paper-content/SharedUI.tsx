@@ -116,7 +116,7 @@ export function TopLabel({
   text,
   animateOnScroll = false,
 }: TopLabelProps) {
-  const w = 0.38;
+  const w = 0.33;
   const h = 0.038;
   const radius = h / 2; // Capsule shape
 
@@ -294,7 +294,7 @@ export const VerseBox = ({
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
   const textX = w / 2;
 
-  const safeMargin = cx + cr + 0.015; // ensure text doesn't overlap the circle
+  const safeMargin = cx + cr + 0.01; // ensure text doesn't overlap the circle
   const textMaxW = w - safeMargin * 2;
 
   return (

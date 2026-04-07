@@ -131,7 +131,7 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
         );
       })}
 
-      <group>
+      <group position={[-0.015, 0, 0]}>
         <VerseBox
           x={baseX}
           y={s1Top - s1Pad - (smallBoxH * 2 + gap) - gap}
