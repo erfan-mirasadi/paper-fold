@@ -27,7 +27,7 @@ export const TEXT_DARK = "#1a1a1a";
 export const CIRCLE_BORDER = "#8e8e8e";
 
 export const TEXT_SIZES = {
-  BISMILLAH: 0.065,
+  BISMILLAH: 0.057,
   TOP_LABEL: 0.018,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,
@@ -286,30 +286,34 @@ export const VerseBox = ({
   circleTextCol,
   isPill = true,
 }: VerseBoxProps) => {
-  const bw = 0.0035;
+  const shrinkX = 0.007; // amount to shrink from left and right sides
+  const finalX = x + shrinkX;
+  const finalW = w - shrinkX * 2;
+
+  const bw = 0.007;
   const rad = isPill ? h / 2 : 0.05;
   const cr = Math.min(h * 0.46, 0.035);
   const SMALL_PILL_OFFSET = 0.002; // nudge small-box circles inward (to the right)
   // position the circle: for pills keep inside but nudge small boxes to the right
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
-  const textX = w / 2;
+  const textX = finalW / 2;
 
   const safeMargin = cx + cr + 0.01; // ensure text doesn't overlap the circle
-  const textMaxW = w - safeMargin * 2;
+  const textMaxW = finalW - safeMargin * 2;
 
   return (
-    <group position={[x, y, z]}>
+    <group position={[finalX, y, z]}>
       <UiRect
         x={-bw}
         y={bw}
         z={0}
-        w={w + bw * 2}
+        w={finalW + bw * 2}
         h={h + bw * 2}
         radius={rad + bw}
         color={border}
         shadow
       />
-      <UiRect x={0} y={0} z={0.001} w={w} h={h} radius={rad} color={bg} />
+      <UiRect x={0} y={0} z={0.001} w={finalW} h={h} radius={rad} color={bg} />
 
       <group position={[cx, -h / 2, 0.002]}>
         <mesh>

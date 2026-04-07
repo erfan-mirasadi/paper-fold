@@ -6,7 +6,12 @@ import {
   useScroll,
   useTexture,
 } from "@react-three/drei";
-import { FOLD_Y_POSITIONS, PaperContent } from "./paper-content/index";
+import {
+  FOLD_Y_POSITIONS,
+  PaperContent,
+  PAGE_WIDTH,
+  PAGE_HEIGHT,
+} from "./paper-content/index";
 import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
@@ -36,8 +41,6 @@ const AMBIENT_CURVE_MULTIPLIER = 0.3;
 const insideCurveStrength = 0.28 * AMBIENT_CURVE_MULTIPLIER;
 const outsideCurveStrength = 0.05 * AMBIENT_CURVE_MULTIPLIER;
 
-export const PAGE_WIDTH = 1.6;
-export const PAGE_HEIGHT = 1.71;
 export const PAGE_DEPTH = 0.003;
 
 // segment for millimeter precision of hinges

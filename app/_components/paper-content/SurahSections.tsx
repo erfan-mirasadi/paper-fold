@@ -62,6 +62,8 @@ export interface LayoutConfig {
   smallBoxH2: number;
   groupH: number;
   s2H: number;
+  s2PadTop: number;
+  s2PadBottom: number;
   v6Y: number;
   g1Y: number;
   g2Y: number;
@@ -131,7 +133,9 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
         );
       })}
 
-      <group position={[-0.015, 0, 0]}>
+      {/* Ana Ayet box and tab number 5 */}
+
+      <group position={[0.0, -0.01, 0]}>
         <VerseBox
           x={baseX}
           y={s1Top - s1Pad - (smallBoxH * 2 + gap) - gap}
@@ -148,10 +152,8 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
           isPill={false}
         />
         <AnaAyetTab
-          x={baseX - 0.04 - s1Pad}
-          y={
-            s1Top - s1Pad - (smallBoxH * 2 + gap) - gap - anaAyetH / 2 + 0.0225
-          }
+          x={baseX - 0.07 - s1Pad}
+          y={s1Top - s1Pad - (smallBoxH * 2 + gap) - gap - anaAyetH / 2 + 0.046}
           z={0.005}
         />
       </group>
@@ -170,7 +172,9 @@ interface SectionTwoProps {
 export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
   const {
     s2Top,
-    s2Pad,
+    s2Pad, // Top padding basically
+    s2PadTop,
+    s2PadBottom,
     bigBoxH,
     groupPad,
     s2Gap,
@@ -186,8 +190,9 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
     sectionW,
   } = layout;
 
-  const s2_innerW = sectionW - s2Pad * 2;
-  const baseX = startX + s2Pad;
+  const realS2PadLeftRight = 0.035; // We only want extra padding on top, left right stays normal
+  const s2_innerW = sectionW - realS2PadLeftRight * 2;
+  const baseX = startX + realS2PadLeftRight;
 
   // ==========================================
   // Middle group settings (11 to 14) that will be shrunk
@@ -199,17 +204,19 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
   // ==========================================
   // Container box settings (Super Groups) for verses 6-10 and 15-19
   const sgPad = 0.015; // Safe margin around boxes
+  const sgPadTop = 0.022; // Extra space at the top of the upper container box
+  const sgPadBottom = sgPadTop; // Mirror the extra spacing for the lower container bottom
   const sg_X = baseX - sgPad;
   const sg_W = s2_innerW + sgPad * 2;
 
   // Upper container box (6 to 10)
-  const sg1_Y = v6Y + sgPad;
+  const sg1_Y = v6Y + sgPadTop;
   const sg1_bottom = g1Y - groupH - sgPad;
   const sg1_H = sg1_Y - sg1_bottom;
 
   // Lower container box (15 to 19)
   const sg2_Y = g3Y + sgPad;
-  const sg2_bottom = v19Y - bigBoxH - sgPad;
+  const sg2_bottom = v19Y - bigBoxH - sgPadBottom;
   const sg2_H = sg2_Y - sg2_bottom;
 
   // Soft colors for container boxes
@@ -412,7 +419,12 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         text={data.topLabel}
         animateOnScroll={true}
       />
-      <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
+      <TopLabel
+        x={PW / 2}
+        y={s2Top - s2H}
+        z={0.004}
+        text={data.bottomLabel}
+      />
     </group>
   );
 }
