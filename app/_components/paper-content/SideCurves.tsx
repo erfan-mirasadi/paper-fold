@@ -31,13 +31,13 @@ interface SideCurvesProps {
 const CURVE_GAP = 0.1; // step between each nesting level
 const CURVE_INWARD_OFFSET = 0.0001; // how far the tip penetrates inward (standard)
 const CURVE_DEEP_OFFSET_OUTER = 0.0; // deeper penetration for the 12-14 pair (outer)
-const CURVE_DEEP_OFFSET_INNER = 0.021; // deeper penetration for the 12-14 pair (inner)
+const CURVE_DEEP_OFFSET_INNER = 0.0185; // deeper penetration for the 12-14 pair (inner)
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INNER curves — identical bow for every pair, tweak these two values
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const INNER_CURVE_GAP = 0.095; // how far inward the inner curve bows
-const INNER_CURVE_INWARD_OFFSET = 0.01; // tip penetration for inner curves
+const INNER_CURVE_INWARD_OFFSET = 0.009; // tip penetration for inner curves
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MASTER CORNER CONTROLS (Unified caps matching)

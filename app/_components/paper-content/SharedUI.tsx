@@ -286,20 +286,25 @@ export const VerseBox = ({
   circleTextCol,
   isPill = true,
 }: VerseBoxProps) => {
-  const shrinkX = 0.007; // amount to shrink from left and right sides
+  // Reduce horizontal padding so text can occupy more space inside the pill
+  const shrinkX = 0.001; // amount to shrink from left and right sides (reduced)
   const finalX = x + shrinkX;
   const finalW = w - shrinkX * 2;
 
-  const bw = 0.007;
+  const bw = 0.0055; // slightly thinner border
   const rad = isPill ? h / 2 : 0.05;
   const cr = Math.min(h * 0.46, 0.035);
   const SMALL_PILL_OFFSET = 0.002; // nudge small-box circles inward (to the right)
   // position the circle: for pills keep inside but nudge small boxes to the right
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
-  const textX = finalW / 2;
 
-  const safeMargin = cx + cr + 0.01; // ensure text doesn't overlap the circle
+  // Reduce the extra safety margin so the text can use more width,
+  // but keep enough space to avoid overlapping the circle.
+  const safeMargin = 0.0;
   const textMaxW = finalW - safeMargin * 2;
+
+  // Center the text within the available area to the right of the circle
+  const textX = safeMargin + textMaxW / 1.9;
 
   return (
     <group position={[finalX, y, z]}>
