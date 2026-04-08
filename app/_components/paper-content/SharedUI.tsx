@@ -33,7 +33,7 @@ export const CIRCLE_BORDER = "#8e8e8e";
 
 export const TEXT_SIZES = {
   BISMILLAH: 0.054,
-  TOP_LABEL: 0.018,
+  TOP_LABEL: 0.023,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,
   VERSE_TEXT_SMALL: 0.032,
@@ -128,8 +128,8 @@ export function TopLabel({
   text,
   animateOnScroll = false,
 }: TopLabelProps) {
-  const w = 0.33;
-  const h = 0.038;
+  const w = 0.4;
+  const h = 0.046;
   const radius = h / 2; // Capsule shape
 
   const groupRef = useRef<THREE.Group>(null);
@@ -338,12 +338,26 @@ export const VerseBox = ({
         shadow
         renderOrder={10}
       />
-      <UiRect x={0} y={0} z={0.001} w={finalW} h={h} radius={rad} color={bg} renderOrder={11} />
+      <UiRect
+        x={0}
+        y={0}
+        z={0.001}
+        w={finalW}
+        h={h}
+        radius={rad}
+        color={bg}
+        renderOrder={11}
+      />
 
       <group position={[cx, -h / 2, 0.002]}>
         <mesh renderOrder={12}>
           <circleGeometry args={[cr - 0.002, 48]} />
-          <meshBasicMaterial color={circleBg || "#ffffff"} depthTest={false} transparent opacity={0.999} />
+          <meshBasicMaterial
+            color={circleBg || "#ffffff"}
+            depthTest={false}
+            transparent
+            opacity={0.999}
+          />
         </mesh>
         <mesh position={[0, 0, -0.001]} renderOrder={12}>
           <circleGeometry args={[cr, 48]} />

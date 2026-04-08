@@ -95,9 +95,13 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
 
       <Environment preset={isDarkMode ? "studio" : "apartment"} />
 
+      {/* Added ambient light to softly illuminate the base without causing specular washouts */}
+      <ambientLight intensity={isDarkMode ? 0.6 : 0.8} />
+
+      {/* Tweaked directional light to provide shadow depth without blasting the paper texture */}
       <directionalLight
         position={[2, 5, 2]}
-        intensity={isDarkMode ? 1.5 : 2.5}
+        intensity={isDarkMode ? 1.0 : 1.5}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
