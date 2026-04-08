@@ -31,7 +31,7 @@ interface SideCurvesProps {
 const CURVE_GAP = 0.1; // step between each nesting level
 const CURVE_INWARD_OFFSET = 0.0085; // how far the tip penetrates inward (standard)
 const CURVE_DEEP_OFFSET_OUTER = 0.01; // deeper penetration for the 12-14 pair (outer)
-const CURVE_DEEP_OFFSET_INNER = 0.0185; // deeper penetration for the 12-14 pair (inner)
+const CURVE_DEEP_OFFSET_INNER = 0.03; // deeper penetration for the 12-14 pair (inner)
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INNER curves — identical bow for every pair, tweak these two values
@@ -44,7 +44,7 @@ const INNER_CURVE_INWARD_OFFSET = 0.008; // tip penetration for inner curves
 // Just tweak these TWO variables to sync all corners!
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const CORNER_ROUNDNESS = 0.003; // 1. How rounded/curved the cap is (Y-axis bend)
-const CORNER_DEPTH = 0.01; // 2. How far the cap pushes inward/outward (X-axis depth)
+const CORNER_DEPTH = 0.03; // 2. How far the cap pushes inward/outward (X-axis depth)
 
 // Function to generate a smooth Cubic Bezier curve
 // =========================================================================
@@ -179,9 +179,9 @@ const CurvePair = ({
       <mesh renderOrder={1}>
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
-          color={"#ffffff"}
+          color={color}
           transparent
-          opacity={0.03}
+          opacity={0.5}
           depthTest={false}
         />
       </mesh>

@@ -7,7 +7,7 @@ import { SectionOne, SectionTwo } from "./SurahSections";
 import { Boarder } from "./Boarder";
 
 export const PAGE_WIDTH = 1.54;
-export const PAGE_HEIGHT = 1.74;
+export const PAGE_HEIGHT = 1.76;
 export const PW = PAGE_WIDTH;
 export const PADDING = 0.28;
 
@@ -37,7 +37,7 @@ const groupPad = 0.02;
 const s2Gap = 0.02;
 const smallBoxH2 = 0.075;
 const groupH = groupPad * 2 + (smallBoxH2 * 2 + s2Gap);
-const middleExtraGap = 0.02;
+const middleExtraGap = 0.04;
 const s2H =
   s2PadTop +
   s2PadBottom +
