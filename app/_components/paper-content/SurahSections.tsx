@@ -16,6 +16,11 @@ import {
   MAROON_THEME,
   GREEN_THEME,
   BLUE_THEME,
+  SG_BG,
+  SG_BORDER,
+  CAPSULE_BG_7_10_15_18,
+  CAPSULE_BG_12_14,
+  CAPSULE_BG_6_19,
 } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 
@@ -219,17 +224,6 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
   const sg2_bottom = v19Y - bigBoxH - sgPadBottom;
   const sg2_H = sg2_Y - sg2_bottom;
 
-  // Container box colors (updated per request)
-  const SG_BG = "#845775"; // Section background (6-10, 15-19)
-  const SG_BORDER = "#F4ECD8"; // Brownish cream for border
-  // Background for capsule boxes in ranges 7-10 and 15-18
-  const CAPSULE_BG_7_10_15_18 = "#E4D3DE";
-  // Background for capsule boxes specifically for verses 12-14
-  // (new variable requested)
-  const CAPSULE_BG_12_14 = "#E0E6D0";
-  // Background for verse 6 and 19 capsules: 50% lighter than section background
-  // (keeps these endpoint capsules visually lighter than the section)
-  const CAPSULE_BG_6_19 = "#F8F1E6";
   const bw = 0.003;
 
   const renderGroupVerses = (

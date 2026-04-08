@@ -14,8 +14,10 @@ export const AnimatedArrow = ({
   innerYBot,
   color,
   delay = 0,
-  speed = 0.3, // overall speed of the animation
-  arrowSize = 0.015,
+  speed = 0.0005, // Speed of the animation
+  arrowSize = 0.008, // Base size of the core dot
+  floatIntensity = 0.008, // Amplitude of the floating/wobbling effect
+  glowSize = 4, // Multiplier for the glow plane size relative to arrowSize
 }: {
   outerTipX: number;
   innerTipX: number;
@@ -29,10 +31,12 @@ export const AnimatedArrow = ({
   delay?: number;
   speed?: number;
   arrowSize?: number;
+  floatIntensity?: number;
+  glowSize?: number;
 }) => {
   const groupRef = useRef<THREE.Group>(null);
-  const headMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
-  const trailMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
+  const coreMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
+  const glowMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
 
   const centerCurve = useMemo(
     () =>
@@ -70,22 +74,31 @@ export const AnimatedArrow = ({
     ],
   );
 
-  // A simple glowing arrow shape
-  const arrowShape = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(0, arrowSize); // tip
-    shape.lineTo(-arrowSize * 0.8, -arrowSize); // bottom left
-    shape.lineTo(0, -arrowSize * 0.5); // inner indent
-    shape.lineTo(arrowSize * 0.8, -arrowSize); // bottom right
-    shape.lineTo(0, arrowSize); // back to tip
-    return shape;
-  }, [arrowSize]);
+  // The WebGL Trick: Creating a soft radial gradient texture using an offscreen 2D canvas
+  const glowTexture = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      // Core is solid white, fading out softly to transparent
+      gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+      gradient.addColorStop(0.2, "rgba(255, 255, 255, 0.8)");
+      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
 
   useFrame((state) => {
     if (
       !groupRef.current ||
-      !headMaterialRef.current ||
-      !trailMaterialRef.current
+      !coreMaterialRef.current ||
+      !glowMaterialRef.current
     )
       return;
 
@@ -97,11 +110,23 @@ export const AnimatedArrow = ({
     const position = centerCurve.getPoint(t);
     const tangent = centerCurve.getTangent(t);
 
+    // Floating/wobbling effect logic
+    // Calculate the normal vector (orthogonal to the tangent) for natural hovering
+    const floatFrequency = 3.0; // How fast it wobbles (kept static, but can be a prop too)
+    const floatOffset =
+      Math.sin(state.clock.elapsedTime * floatFrequency + delay) *
+      floatIntensity;
+
+    const normal = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize();
+    position.add(normal.multiplyScalar(floatOffset));
+
+    // Add a slight local Z offset to appear slightly in front of the curve lines
+    position.z = 0.0003;
+
     groupRef.current.position.copy(position);
 
     // Calculate rotation to face the direction of the curve
     const angle = Math.atan2(tangent.y, tangent.x);
-    // Since our custom shape is drawn pointing UP (+Y), we subtract PI/2 to align with X-axis if needed
     groupRef.current.rotation.z = angle - Math.PI / 2;
 
     // Smooth fade in and out at the edges of the curve
@@ -113,36 +138,39 @@ export const AnimatedArrow = ({
       opacity = (1 - t) / fadeEdges;
     }
 
-    headMaterialRef.current.opacity = opacity;
-    trailMaterialRef.current.opacity = opacity * 0.4;
+    // Apply opacity (fade the glow slightly more than the core)
+    coreMaterialRef.current.opacity = opacity;
+    glowMaterialRef.current.opacity = opacity * 0.8;
 
     // Add a pulsing effect to the scale
-    const pulse = 1 + Math.sin(time * 15) * 0.15;
+    const pulse = 1 + Math.sin(state.clock.elapsedTime * 5 + delay) * 0.15;
     groupRef.current.scale.set(pulse, pulse, 1);
   });
 
   return (
     <group ref={groupRef} renderOrder={1002}>
-      {/* Glow / Trail underneath */}
+      {/* Soft Glow Layer */}
       <mesh renderOrder={1001}>
-        <shapeGeometry args={[arrowShape]} />
+        {/* Glow size is dynamically controlled by arrowSize * glowSize */}
+        <planeGeometry args={[arrowSize * glowSize, arrowSize * glowSize]} />
         <meshBasicMaterial
-          ref={trailMaterialRef}
-          color={color}
+          ref={glowMaterialRef}
+          map={glowTexture}
+          color={color} // Taking color from props
           transparent
           blending={THREE.AdditiveBlending}
-          depthTest={false}
+          depthWrite={false}
         />
       </mesh>
 
-      {/* Core Arrow Head */}
-      <mesh renderOrder={1002} scale={[0.8, 0.8, 1]}>
-        <shapeGeometry args={[arrowShape]} />
+      {/* Core Solid Ball */}
+      <mesh renderOrder={1002}>
+        <circleGeometry args={[arrowSize * 0.6, 32]} />
         <meshBasicMaterial
-          ref={headMaterialRef}
-          color={color}
+          ref={coreMaterialRef}
+          color={color} // Taking color from props
           transparent
-          depthTest={false}
+          depthWrite={false}
         />
       </mesh>
     </group>

@@ -21,6 +21,11 @@ export const MAROON_VERSE_BG = "#ebd2dc";
 export const GREEN_THEME = "#879A63";
 export const GREEN_VERSE_BG = "#eaf2db";
 export const BLUE_THEME = "#638f9c";
+export const SG_BG = "#845775";
+export const SG_BORDER = "#F4ECD8";
+export const CAPSULE_BG_7_10_15_18 = "#E4D3DE";
+export const CAPSULE_BG_12_14 = "#E0E6D0";
+export const CAPSULE_BG_6_19 = "#F8F1E6";
 
 export const WHITE_VERSE_BG = "#ffffff";
 export const TEXT_DARK = "#1a1a1a";
@@ -69,6 +74,7 @@ interface UiRectProps {
   color: string;
   shadow?: boolean;
   depthTest?: boolean;
+  renderOrder?: number;
 }
 
 export const UiRect = ({
@@ -81,22 +87,28 @@ export const UiRect = ({
   color,
   shadow = false,
   depthTest = false,
+  renderOrder,
 }: UiRectProps) => (
   <group position={[x, y, z]}>
     {shadow && (
-      <mesh position={[0.008, -0.008, -0.001]}>
+      <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         <meshBasicMaterial
           color="#000000"
           transparent
-          opacity={0.12}
+          opacity={renderOrder != null ? 0.12 : 0.12}
           depthTest={depthTest}
         />
       </mesh>
     )}
-    <mesh>
+    <mesh renderOrder={renderOrder}>
       <RoundedShapeComponent w={w} h={h} radius={radius} />
-      <meshBasicMaterial color={color} depthTest={depthTest} />
+      <meshBasicMaterial
+        color={color}
+        depthTest={depthTest}
+        transparent={renderOrder != null}
+        opacity={renderOrder != null ? 0.999 : 1}
+      />
     </mesh>
   </group>
 );
@@ -324,19 +336,22 @@ export const VerseBox = ({
         radius={rad + bw}
         color={border}
         shadow
+        renderOrder={10}
       />
-      <UiRect x={0} y={0} z={0.001} w={finalW} h={h} radius={rad} color={bg} />
+      <UiRect x={0} y={0} z={0.001} w={finalW} h={h} radius={rad} color={bg} renderOrder={11} />
 
       <group position={[cx, -h / 2, 0.002]}>
-        <mesh>
+        <mesh renderOrder={12}>
           <circleGeometry args={[cr - 0.002, 48]} />
-          <meshBasicMaterial color={circleBg || "#ffffff"} depthTest={false} />
+          <meshBasicMaterial color={circleBg || "#ffffff"} depthTest={false} transparent opacity={0.999} />
         </mesh>
-        <mesh position={[0, 0, -0.001]}>
+        <mesh position={[0, 0, -0.001]} renderOrder={12}>
           <circleGeometry args={[cr, 48]} />
           <meshBasicMaterial
             color={circleBorderCol || CIRCLE_BORDER}
             depthTest={false}
+            transparent
+            opacity={0.999}
           />
         </mesh>
         <Text
@@ -347,6 +362,7 @@ export const VerseBox = ({
           anchorY="middle"
           fontWeight="bold"
           material-depthTest={false}
+          renderOrder={13}
         >
           {String(number)}
         </Text>
@@ -365,6 +381,7 @@ export const VerseBox = ({
         material-depthTest={false}
         font={QURAN_FONT}
         direction="rtl"
+        renderOrder={13}
       >
         {verse}
       </Text>

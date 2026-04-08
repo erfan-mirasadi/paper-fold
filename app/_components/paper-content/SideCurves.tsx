@@ -2,7 +2,14 @@
 import { Line } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
-import { BLUE_THEME, MAROON_THEME, GREEN_THEME } from "./SharedUI";
+import {
+  BLUE_THEME,
+  MAROON_THEME,
+  GREEN_THEME,
+  CAPSULE_BG_7_10_15_18,
+  CAPSULE_BG_12_14,
+  CAPSULE_BG_6_19,
+} from "./SharedUI";
 import { AnimatedArrow } from "./AnimatedArrow";
 
 export interface LayoutConfig {
@@ -25,7 +32,6 @@ interface SideCurvesProps {
   startX: number;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // OUTER curves — one per bracket pair, bow increases outward per nesting level
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const CURVE_GAP = 0.1; // step between each nesting level
@@ -33,21 +39,15 @@ const CURVE_INWARD_OFFSET = 0.0085; // how far the tip penetrates inward (standa
 const CURVE_DEEP_OFFSET_OUTER = 0.01; // deeper penetration for the 12-14 pair (outer)
 const CURVE_DEEP_OFFSET_INNER = 0.03; // deeper penetration for the 12-14 pair (inner)
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INNER curves — identical bow for every pair, tweak these two values
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const INNER_CURVE_GAP = 0.095; // how far inward the inner curve bows
 const INNER_CURVE_INWARD_OFFSET = 0.008; // tip penetration for inner curves
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MASTER CORNER CONTROLS (Unified caps matching)
-// Just tweak these TWO variables to sync all corners!
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const CORNER_ROUNDNESS = 0.003; // 1. How rounded/curved the cap is (Y-axis bend)
-const CORNER_DEPTH = 0.03; // 2. How far the cap pushes inward/outward (X-axis depth)
-
-// Function to generate a smooth Cubic Bezier curve
-// =========================================================================
+// Kept these to avoid breaking your custom fields, though the new exact-path method
+// naturally creates perfect flush connections without needing manual bezier depths!
+//
 const getSmoothCurvePoints = (
   tipX: number,
   controlX: number,
@@ -76,7 +76,8 @@ const CurvePair = ({
   innerControlX,
   innerTipX,
   color,
-  isRight, // boolean to handle left/right symmetry automatically
+  fillColor,
+  isRight,
 }: {
   outerYTop: number;
   outerYBot: number;
@@ -87,6 +88,7 @@ const CurvePair = ({
   innerControlX: number;
   innerTipX: number;
   color: string;
+  fillColor?: string;
   isRight: boolean;
 }) => {
   const outerPoints = useMemo(
@@ -102,87 +104,58 @@ const CurvePair = ({
   const fillShape = useMemo(() => {
     const s = new THREE.Shape();
 
-    // Direction multiplier to handle left vs right symmetries seamlessly
-    const dir = isRight ? 1 : -1;
+    // The Ultimate Fix: Instead of trying to mathematically match a low-res Shape bezier
+    // with a high-res Line, we just construct the Shape using the EXACT same points
+    // generated for the Lines! This guarantees zero bleeding.
+    if (outerPoints.length > 0 && innerPoints.length > 0) {
+      // 1. Start at top outer point
+      s.moveTo(outerPoints[0].x, outerPoints[0].y);
 
-    // Unified control points using just the 2 master variables
-    // Top Cap
-    const topCp1X = innerTipX + CORNER_DEPTH * dir;
-    const topCp1Y = innerYTop + CORNER_ROUNDNESS;
-    const topCp2X = outerTipX + CORNER_DEPTH * dir;
-    const topCp2Y = outerYTop;
+      // 2. Trace the exact high-res points of the outer curve
+      for (let i = 1; i < outerPoints.length; i++) {
+        s.lineTo(outerPoints[i].x, outerPoints[i].y);
+      }
 
-    // Bottom Cap
-    const botCp1X = outerTipX + CORNER_DEPTH * dir;
-    const botCp1Y = outerYBot;
-    const botCp2X = innerTipX + CORNER_DEPTH * dir;
-    const botCp2Y = innerYBot - CORNER_ROUNDNESS;
+      // 3. Clean straight flush cap at the bottom (snaps perfectly to the UI box)
+      const lastInner = innerPoints[innerPoints.length - 1];
+      s.lineTo(lastInner.x, lastInner.y);
 
-    // 1. Start at top outer point
-    s.moveTo(outerTipX, outerYTop);
+      // 4. Trace the exact high-res points of the inner curve backwards!
+      for (let i = innerPoints.length - 2; i >= 0; i--) {
+        s.lineTo(innerPoints[i].x, innerPoints[i].y);
+      }
 
-    // 2. Draw outer curve down to outer bottom
-    s.bezierCurveTo(
-      outerControlX,
-      outerYTop,
-      outerControlX,
-      outerYBot,
-      outerTipX,
-      outerYBot,
-    );
-
-    // 3. Draw Bottom Cap (Hug the box with unified logic)
-    s.bezierCurveTo(botCp1X, botCp1Y, botCp2X, botCp2Y, innerTipX, innerYBot);
-
-    // 4. Draw inner curve back up to inner top
-    s.bezierCurveTo(
-      innerControlX,
-      innerYBot,
-      innerControlX,
-      innerYTop,
-      innerTipX,
-      innerYTop,
-    );
-
-    // 5. Draw Top Cap (Hug the box with unified logic)
-    s.bezierCurveTo(topCp1X, topCp1Y, topCp2X, topCp2Y, outerTipX, outerYTop);
+      // 5. Clean straight flush cap at the top (closes the shape)
+      s.lineTo(outerPoints[0].x, outerPoints[0].y);
+    }
 
     return s;
-  }, [
-    outerTipX,
-    outerYTop,
-    outerControlX,
-    outerYBot,
-    innerTipX,
-    innerYBot,
-    innerControlX,
-    innerYTop,
-    isRight,
-  ]);
+  }, [outerPoints, innerPoints]);
 
   return (
-    <group>
-      <Line
-        points={outerPoints}
-        color={color}
-        lineWidth={3.5}
-        depthTest={false}
-        renderOrder={999}
-      />
-      <Line
-        points={innerPoints}
-        color={color}
-        lineWidth={3.5}
-        depthTest={false}
-        renderOrder={999}
-      />
-      <mesh renderOrder={1}>
+    <group position={[0, 0, 0.0012]}>
+      <group position={[0, 0, 0.0012]} renderOrder={5}>
+        <Line
+          points={outerPoints}
+          color={color}
+          lineWidth={3.5}
+          renderOrder={5}
+        />
+        <Line
+          points={innerPoints}
+          color={color}
+          lineWidth={3.5}
+          renderOrder={5}
+        />
+      </group>
+      <mesh renderOrder={4}>
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
-          color={color}
+          color={fillColor ?? color}
           transparent
-          opacity={0.5}
+          opacity={0.999}
           depthTest={false}
+          depthWrite={false}
         />
       </mesh>
 
@@ -197,8 +170,11 @@ const CurvePair = ({
         outerYBot={outerYBot}
         innerYBot={innerYBot}
         color={color}
-        delay={isRight ? 0.2 : 0} // Slight delay offset for left vs right
-        speed={0.15}
+        delay={isRight ? 0.2 : 0}
+        speed={0.05}
+        arrowSize={0.008}
+        floatIntensity={0.0005}
+        glowSize={4}
       />
       <AnimatedArrow
         outerTipX={outerTipX}
@@ -210,8 +186,11 @@ const CurvePair = ({
         outerYBot={outerYBot}
         innerYBot={innerYBot}
         color={color}
-        delay={isRight ? 0.7 : 0.5} // Two arrows looping on the same curve
-        speed={0.15}
+        delay={isRight ? 0.7 : 0.5}
+        speed={0.05}
+        arrowSize={0.008}
+        floatIntensity={0.0009}
+        glowSize={4}
       />
     </group>
   );
@@ -232,7 +211,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
     s2Gap,
   } = layout;
 
-  // ── TOP edges (existing outer curves) ──────────────────────────────────
+  // ── TOP edges (existing outer curves)
   const y6 = v6Y;
   const y19 = v19Y - bigBoxH;
 
@@ -300,7 +279,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
   const innerTipX_12_14_R = startX_R - CURVE_DEEP_OFFSET_INNER;
 
   return (
-    <group position={[0, 0, 0.08]} renderOrder={999}>
+    <group position={[0, 0, 0.0025]} renderOrder={5}>
       {/* ================= LEFT CURVES ================= */}
       <CurvePair
         outerYTop={y6}
@@ -312,6 +291,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl1_L}
         innerTipX={innerTipX_L}
         color={BLUE_THEME}
+        fillColor={CAPSULE_BG_6_19}
         isRight={false}
       />
       <CurvePair
@@ -324,6 +304,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl2_L}
         innerTipX={innerTipX_L}
         color={MAROON_THEME}
+        fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
       />
       <CurvePair
@@ -336,6 +317,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl3_L}
         innerTipX={innerTipX_L}
         color={MAROON_THEME}
+        fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
       />
       <CurvePair
@@ -348,6 +330,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl4_L}
         innerTipX={innerTipX_12_14_L}
         color={GREEN_THEME}
+        fillColor={CAPSULE_BG_12_14}
         isRight={false}
       />
 
@@ -362,6 +345,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl1_R}
         innerTipX={innerTipX_R}
         color={BLUE_THEME}
+        fillColor={CAPSULE_BG_6_19}
         isRight={true}
       />
       <CurvePair
@@ -374,6 +358,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl2_R}
         innerTipX={innerTipX_R}
         color={MAROON_THEME}
+        fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
       />
       <CurvePair
@@ -386,6 +371,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl3_R}
         innerTipX={innerTipX_R}
         color={MAROON_THEME}
+        fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
       />
       <CurvePair
@@ -398,6 +384,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         innerControlX={innerControl4_R}
         innerTipX={innerTipX_12_14_R}
         color={GREEN_THEME}
+        fillColor={CAPSULE_BG_12_14}
         isRight={true}
       />
     </group>
