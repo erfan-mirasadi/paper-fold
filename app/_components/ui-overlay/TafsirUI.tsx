@@ -4,7 +4,7 @@ import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TAFSIR_DATA } from "./TafsirData";
+import { TAFSIR_DATA } from "./tafsir-data";
 
 let _activeId: number | null = null;
 let _anchorPos = { x: -9999, y: -9999 };

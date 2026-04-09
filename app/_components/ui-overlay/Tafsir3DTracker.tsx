@@ -3,7 +3,7 @@
 import { useFrame, useThree, createPortal } from "@react-three/fiber";
 import { useRef, useSyncExternalStore } from "react";
 import { Object3D, Vector3, Skeleton } from "three";
-import { TAFSIR_DATA } from "./TafsirData";
+import { TAFSIR_DATA } from "./tafsir-data";
 import { subscribe, getActiveId, setAnchorPosition } from "./TafsirUI";
 
 export const Tafsir3DTracker = ({ skeleton }: { skeleton: Skeleton }) => {

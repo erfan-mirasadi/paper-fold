@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+
 import { a, useSpring } from "@react-spring/three";
 import {
   VerseBox,
@@ -61,7 +61,7 @@ export function PopUpManager({ isFolded }: PopUpManagerProps) {
             circleBg={S1_OUTER_BORDER}
             circleTextCol="#ffffff"
             isPill={true}
-            shadow={true}
+            shadow={false}
           />
         </a.group>
       </group>
@@ -82,7 +82,7 @@ export function PopUpManager({ isFolded }: PopUpManagerProps) {
             circleBg={S1_OUTER_BORDER}
             circleTextCol="#ffffff"
             isPill={true}
-            shadow={true}
+            shadow={false}
           />
         </a.group>
       </group>
