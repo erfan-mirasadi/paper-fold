@@ -18,9 +18,9 @@ import { Boarder } from "./Boarder";
 // ============================================================================
 
 export const PAGE_WIDTH = 1.54;
-export const PAGE_HEIGHT = 1.76;
+export const PAGE_HEIGHT = 1.74;
 export const PW = PAGE_WIDTH;
-export const PADDING = 0.28;
+export const PADDING = 0.29;
 
 export const CONTENT_W = PW - PADDING * 2;
 export const START_X = PADDING;
@@ -47,12 +47,12 @@ const s2PadTop = 0.035 + s2TopExtra;
 const s2PadBottom = 0.06;
 const bigBoxH = 0.095;
 const groupGap = 0.025;
-const groupPad = 0.02;
-const groupPadBottom = 0.025; // Reduced from 0.038 to shrink the border from bottom
+const groupPad = 0.012; // Reduced from 0.02 to shift content up
+const groupPadBottom = 0.025; // Increased from 0.02 to keep groupH constant while shifting content up
 const s2Gap = 0.02;
 const smallBoxH2 = 0.075;
 const groupH = groupPad + groupPadBottom + (smallBoxH2 * 2 + s2Gap);
-const middleExtraGap = 0.033; // Increased to move G1 up and G3 down relative to middle
+const middleExtraGap = 0.033;
 
 // Full calculation of Section 2 total Height
 const s2H =

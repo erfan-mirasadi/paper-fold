@@ -367,10 +367,10 @@ export function SectionTwo({
       {/* --------------------- TOP HOLLOW BORDER CONNECTOR --------------------- */}
       <UiRect
         x={box_X - bw}
-        y={tBox_Y + bw}
+        y={tBox_Y + bw * 2}
         z={0.0015}
         w={box_W + bw * 2}
-        h={tBox_H + bw * 2}
+        h={tBox_H + bw * 3}
         radius={0.025}
         color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
@@ -470,7 +470,7 @@ export function SectionTwo({
         data.colorGroups[1].verseBg,
         GREEN_THEME,
         true,
-        extraRowGap,
+        0,
       )}
 
       {/* --------------------- CONTENT GROUP 3 (LOWER) --------------------- */}
