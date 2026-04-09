@@ -74,6 +74,8 @@ export interface LayoutConfig {
   g2Y: number;
   g3Y: number;
   v19Y: number;
+  baseG1Y: number;
+  baseG3Y: number;
   groupInnerHalfW: number;
 }
 
@@ -217,6 +219,8 @@ export function SectionTwo({
     g3Y,
     v19Y,
     sectionW,
+    baseG1Y,
+    baseG3Y,
   } = layout;
 
   const realS2PadLeftRight = 0.035; // We only want extra padding on top, left right stays normal
@@ -240,11 +244,11 @@ export function SectionTwo({
 
   // Upper container box (6 to 10)
   const sg1_Y = v6Y + sgPadTop;
-  const sg1_bottom = g1Y - groupH - sgPad;
+  const sg1_bottom = (baseG1Y || g1Y) - groupH - sgPad;
   const sg1_H = sg1_Y - sg1_bottom;
 
   // Lower container box (15 to 19)
-  const sg2_Y = g3Y + sgPad;
+  const sg2_Y = (baseG3Y || g3Y) + sgPad;
   const sg2_bottom = v19Y - bigBoxH - sgPadBottom;
   const sg2_H = sg2_Y - sg2_bottom;
 

@@ -35,7 +35,7 @@ import { Tafsir3DTracker } from "./Tafsir3DTracker";
 // Controls the speed of the easing
 const easingFactor = 0.5;
 //paper curve
-const AMBIENT_CURVE_MULTIPLIER = 0.3;
+const AMBIENT_CURVE_MULTIPLIER = 0.07;
 
 // Controls the strength of the ambient paper curve
 const insideCurveStrength = 0.28 * AMBIENT_CURVE_MULTIPLIER;
@@ -130,8 +130,8 @@ export const SinglePaper: React.FC = () => {
     ];
 
     const mesh = new SkinnedMesh(pageGeometry, materials);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
     mesh.frustumCulled = false;
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);

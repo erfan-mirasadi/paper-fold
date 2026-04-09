@@ -45,10 +45,19 @@ const s2H =
   middleExtraGap * 2;
 
 const v6Y = s2Top - s2PadTop;
-const g1Y = v6Y - bigBoxH - groupGap;
-const g2Y = g1Y - groupH - (groupGap + middleExtraGap);
-const g3Y = g2Y - groupH - (groupGap + middleExtraGap);
-const v19Y = g3Y - groupH - groupGap;
+
+// برای اینکه جابجایی یه بخش، بقیه بخش‌ها رو خراب نکنه، اول موقعیت‌های پایه (زنجیره‌ای) رو حساب میکنیم
+const baseG1Y = v6Y - bigBoxH - groupGap;
+const baseG2Y = baseG1Y - groupH - (groupGap + middleExtraGap);
+const baseG3Y = baseG2Y - groupH - (groupGap + middleExtraGap);
+const baseV19Y = baseG3Y - groupH - groupGap;
+
+// حالا هر تغییری میخوای بدی رو اینجا مستقل بده.
+// الان g2Y فقط روی همون ۴ آیه وسط تاثیر میذاره و بقیه جابجا نمیشن
+const g1Y = baseG1Y + 0.01;
+const g2Y = baseG2Y + 0.01;
+const g3Y = baseG3Y + 0.01;
+const v19Y = baseV19Y;
 
 export const layoutMath = {
   sectionW: CONTENT_W,
@@ -76,6 +85,8 @@ export const layoutMath = {
   g2Y,
   g3Y,
   v19Y,
+  baseG1Y,
+  baseG3Y,
   groupInnerW: CONTENT_W - 0.035 * 2 - groupPad * 2,
   groupInnerHalfW: (CONTENT_W - 0.035 * 2 - groupPad * 2 - s2Gap) / 2,
 };

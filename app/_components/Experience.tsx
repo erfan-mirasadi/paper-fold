@@ -1,6 +1,11 @@
 "use client";
 
-import { Environment, useScroll, OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import {
+  Environment,
+  // useScroll,
+  OrbitControls,
+  PerspectiveCamera,
+} from "@react-three/drei";
 // import { PerspectiveCamera } from "@theatre/r3f";
 import { useFrame } from "@react-three/fiber";
 import { useRef, useEffect, useState } from "react";
@@ -12,7 +17,7 @@ interface ExperienceProps {
 }
 
 export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
-  const scroll = useScroll();
+  // const scroll = useScroll();
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const [controlsEnabled, setControlsEnabled] = useState(true);
@@ -70,7 +75,7 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
       <PerspectiveCamera
         // theatreKey="Camera"
         makeDefault
-        position={[0, 1, 1.7]}
+        position={[0, 1.4, 1.6]}
         fov={45}
       />
 
@@ -101,24 +106,11 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
       />
 
       <Environment preset={isDarkMode ? "studio" : "apartment"} />
-
-      {/* Added ambient light to softly illuminate the base without causing specular washouts */}
       <ambientLight intensity={isDarkMode ? 0.6 : 0.8} />
-
-      {/* Tweaked directional light to provide shadow depth without blasting the paper texture */}
       <directionalLight
         position={[2, 5, 2]}
         intensity={isDarkMode ? 1.0 : 1.5}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-bias={-0.0001}
       />
-
-      <mesh position-y={-1.5} rotation-x={-Math.PI / 2} receiveShadow>
-        <planeGeometry args={[100, 100]} />
-        <shadowMaterial transparent opacity={isDarkMode ? 0.4 : 0.15} />
-      </mesh>
     </>
   );
 };
