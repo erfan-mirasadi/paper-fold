@@ -1,4 +1,5 @@
 "use client";
+
 import {
   TopLabel,
   UiRect,
@@ -16,14 +17,22 @@ import {
   MAROON_THEME,
   GREEN_THEME,
   BLUE_THEME,
-  SG_BG,
-  SG_BORDER,
+  HOLLOW_BORDER_COLOR,
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
+  BUMP_MAX,
+  BUMP_MID,
+  BUMP_LOWER,
+  BUMP_DEEP,
+  WHITE_BASE,
 } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 
+// ============================================================================
+// DATA INTERFACES
+// Setup structure of the content mapped dynamically down from `index.tsx`.
+// ============================================================================
 export interface Verse {
   number: number;
   text: string;
@@ -48,6 +57,10 @@ export interface SectionTwoData {
   bottomLabel: string;
 }
 
+// ============================================================================
+// LAYOUT CONFIG INTERFACE
+// Mapped safely representing absolutely placed items across Section layout.
+// ============================================================================
 export interface LayoutConfig {
   sectionW: number;
   innerW: number;
@@ -60,6 +73,8 @@ export interface LayoutConfig {
   s1H: number;
   s2Top: number;
   s2Pad: number;
+  s2PadTop: number;
+  s2PadBottom: number;
   bigBoxH: number;
   groupGap: number;
   groupPad: number;
@@ -67,8 +82,6 @@ export interface LayoutConfig {
   smallBoxH2: number;
   groupH: number;
   s2H: number;
-  s2PadTop: number;
-  s2PadBottom: number;
   v6Y: number;
   g1Y: number;
   g2Y: number;
@@ -77,14 +90,25 @@ export interface LayoutConfig {
   baseG1Y: number;
   baseG3Y: number;
   groupInnerHalfW: number;
+  s2PadLeftRight: number;
+  g2Shrink: number;
+  sgPad: number;
+  sgBorderWidth: number;
+  boxExtOffset: number;
+  extraRowGap: number;
 }
 
+// ============================================================================
+// SECTION 1 (UPPER WRAPPER)
+// Responsible for Top content visualization with Main Grid arrays and single AnaAyet tag
+// ============================================================================
 interface SectionOneProps {
   data: SectionOneData;
   layout: LayoutConfig;
   startX: number;
   PW: number;
   isBumpMap?: boolean;
+  isFolded?: boolean;
 }
 
 export function SectionOne({
@@ -93,14 +117,14 @@ export function SectionOne({
   startX,
   PW,
   isBumpMap = false,
+  isFolded = false,
 }: SectionOneProps) {
-  const { s1Top, s1Pad, gap, smallBoxH, anaAyetH, s1H, innerW, innerHalfW } =
-    layout;
-
+  const { s1Top, s1Pad, gap, smallBoxH, anaAyetH, s1H, innerW, innerHalfW } = layout;
   const baseX = startX + s1Pad;
 
   return (
     <group>
+      {/* Outer wrapper panel borders */}
       <UiRect
         x={startX}
         y={s1Top}
@@ -111,7 +135,7 @@ export function SectionOne({
         color={S1_OUTER_BORDER}
         shadow
         isBumpMap={isBumpMap}
-        bumpColor="#ffffff"
+        bumpColor={BUMP_MAX}
       />
       <UiRect
         x={startX + 0.003}
@@ -122,14 +146,18 @@ export function SectionOne({
         radius={0.017}
         color={S1_OUTER_BG}
         isBumpMap={isBumpMap}
-        bumpColor="#222222"
+        bumpColor={BUMP_DEEP}
       />
 
+      {/* Renders main verse 2 x 2 grid inside Section One limits */}
       {data.gridVerses.map((v: Verse, i: number) => {
+        if (isFolded && (v.number === 1 || v.number === 2)) return null;
+
         const isRightCol = i % 2 !== 0;
         const isBottomRow = i >= 2;
         const xPos = baseX + (isRightCol ? innerHalfW + gap : 0);
         const yPos = s1Top - s1Pad - (isBottomRow ? smallBoxH + gap : 0);
+
         return (
           <VerseBox
             key={v.number}
@@ -144,13 +172,14 @@ export function SectionOne({
             border={S1_INNER_BORDER}
             circleBorderCol={S1_OUTER_BORDER}
             circleBg={S1_OUTER_BORDER}
-            circleTextCol="#ffffff"
+            circleTextCol={WHITE_BASE}
             isPill={true}
             isBumpMap={isBumpMap}
           />
         );
       })}
 
+      {/* Main Focus Highlight (AnaAyet) Bottom Panel Row */}
       <group position={[0.0, -0.01, 0]}>
         <VerseBox
           x={baseX}
@@ -164,7 +193,7 @@ export function SectionOne({
           border={S1_ANA_BORDER}
           circleBorderCol={S1_ANA_BORDER}
           circleBg={S1_ANA_BORDER}
-          circleTextCol="#ffffff"
+          circleTextCol={WHITE_BASE}
           isPill={false}
           isBumpMap={isBumpMap}
         />
@@ -175,17 +204,24 @@ export function SectionOne({
           isBumpMap={isBumpMap}
         />
       </group>
+      
+      {/* Absolute Section Title Label Pinning Target */}
       <TopLabel
         x={PW / 2}
         y={s1Top}
         z={0.004}
         text={data.label}
         isBumpMap={isBumpMap}
+        noBorder={true}
       />
     </group>
   );
 }
 
+// ============================================================================
+// SECTION 2 (LOWER WRAPPER)
+// Manages large verse grids grouped into connected 3 main containers.
+// ============================================================================
 interface SectionTwoProps {
   data: SectionTwoData;
   layout: LayoutConfig;
@@ -203,9 +239,6 @@ export function SectionTwo({
 }: SectionTwoProps) {
   const {
     s2Top,
-    s2Pad,
-    s2PadTop,
-    s2PadBottom,
     bigBoxH,
     groupPad,
     s2Gap,
@@ -221,57 +254,59 @@ export function SectionTwo({
     sectionW,
     baseG1Y,
     baseG3Y,
+    s2PadLeftRight,
+    g2Shrink,
+    sgPad,
+    sgBorderWidth: bw,
+    boxExtOffset,
+    extraRowGap,
   } = layout;
 
-  const realS2PadLeftRight = 0.035; // We only want extra padding on top, left right stays normal
-  const s2_innerW = sectionW - realS2PadLeftRight * 2;
-  const baseX = startX + realS2PadLeftRight;
+  // --- Dynamic Container Scaling Configurations ---
+  // Calculates inner working area widths ignoring vertical top/bottom safe lines.
+  const s2_innerW = sectionW - s2PadLeftRight * 2;
+  const baseX = startX + s2PadLeftRight;
 
-  // ==========================================
-  // Middle group settings (11 to 14) that will be shrunk
-  const g2Shrink = 0.01; // Shrink amount from both sides
+  // Defines a specialized shrunken constraint explicitly for Group 2 Middle Block indenting
   const g2_baseX = baseX + g2Shrink;
   const g2_innerW = s2_innerW - g2Shrink * 2;
   const g2_groupInnerHalfW = (g2_innerW - groupPad * 2 - s2Gap) / 2;
 
-  // ==========================================
-  // Container box settings (Super Groups) for verses 6-10 and 15-19
-  const sgPad = 0.015; // Safe margin around boxes
-  const sgPadTop = 0.022; // Extra space at the top of the upper container box
-  const sgPadBottom = sgPadTop; // Mirror the extra spacing for the lower container bottom
-  const sg_X = baseX - sgPad;
-  const sg_W = s2_innerW + sgPad * 2;
+  // Calculates bounding offsets extending safe lines mapping Hollow Border wraps
+  const box_X = baseX - sgPad;
+  const box_W = s2_innerW + sgPad * 2;
 
-  // Upper container box (6 to 10)
-  const sg1_Y = v6Y + sgPadTop;
-  const sg1_bottom = (baseG1Y || g1Y) - groupH - sgPad;
-  const sg1_H = sg1_Y - sg1_bottom;
+  // Top Hollow Wrapper constraints bridging top content into the main Group clusters
+  const tBox_Y = s2Top; 
+  const tBox_bottom = (baseG1Y || g1Y) - groupH - boxExtOffset;
+  const tBox_H = tBox_Y - tBox_bottom;
 
-  // Lower container box (15 to 19)
-  const sg2_Y = (baseG3Y || g3Y) + sgPad;
-  const sg2_bottom = v19Y - bigBoxH - sgPadBottom;
-  const sg2_H = sg2_Y - sg2_bottom;
+  // Bottom Hollow Wrapper bridging final clusters out towards completion texts
+  const bBox_Y = (baseG3Y || g3Y) + boxExtOffset;
+  const bBox_bottom = s2Top - s2H; 
+  const bBox_H = bBox_Y - bBox_bottom;
 
-  const bw = 0.003;
-
+  // Helper handling individual Verse Arrays placed inside unified thematic groupings 
   const renderGroupVerses = (
     verses: Verse[],
     gY: number,
     bgColor: string | undefined,
     borderCol: string,
     isGroup2: boolean = false,
-    extraRowGap: number = 0,
+    extraYOffset: number = 0,
   ) => {
+    // Map directly to dynamically shifted indent widths based on parent group 
     const currentBaseX = isGroup2 ? g2_baseX : baseX;
     const currentHalfW = isGroup2 ? g2_groupInnerHalfW : groupInnerHalfW;
 
     return verses.map((v, i) => {
-      const rowOffset = i >= 2 ? smallBoxH2 + s2Gap + extraRowGap : 0;
-      // If this verse is 11-14, use the special capsule color (include 11 per request)
-      const finalBg =
-        v.number >= 11 && v.number <= 14
-          ? CAPSULE_BG_12_14
-          : bgColor || WHITE_VERSE_BG;
+      const rowOffset = i >= 2 ? smallBoxH2 + s2Gap + extraYOffset : 0;
+      
+      // Override explicitly targeted internal highlighted sequences 
+      const finalBg = (v.number >= 11 && v.number <= 14) 
+        ? CAPSULE_BG_12_14 
+        : bgColor || WHITE_VERSE_BG;
+
       return (
         <VerseBox
           key={v.number}
@@ -287,7 +322,7 @@ export function SectionTwo({
           borderWidth={0.009}
           circleBorderCol={borderCol}
           circleBg={borderCol}
-          circleTextCol="#ffffff"
+          circleTextCol={WHITE_BASE}
           isPill={true}
           isBumpMap={isBumpMap}
         />
@@ -297,7 +332,7 @@ export function SectionTwo({
 
   return (
     <group>
-      {/* Section 2 main background */}
+      {/* --------------------- SECTION BASE WRAPS --------------------- */}
       <UiRect
         x={startX}
         y={s2Top}
@@ -307,7 +342,7 @@ export function SectionTwo({
         radius={0.02}
         color={S2_OUTER_BORDER}
         isBumpMap={isBumpMap}
-        bumpColor="#ffffff"
+        bumpColor={BUMP_MAX}
       />
       <UiRect
         x={startX + 0.003}
@@ -318,58 +353,58 @@ export function SectionTwo({
         radius={0.017}
         color={S2_OUTER_BG}
         isBumpMap={isBumpMap}
-        bumpColor="#222222"
+        bumpColor={BUMP_DEEP}
       />
 
-      {/* ================= Upper container box (6-10) ================= */}
+      {/* --------------------- TOP HOLLOW BORDER CONNECTOR --------------------- */}
       <UiRect
-        x={sg_X - bw}
-        y={sg1_Y + bw}
+        x={box_X - bw}
+        y={tBox_Y + bw}
         z={0.0015}
-        w={sg_W + bw * 2}
-        h={sg1_H + bw * 2}
+        w={box_W + bw * 2}
+        h={tBox_H + bw * 2}
         radius={0.025}
-        color={SG_BORDER}
+        color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
-        bumpColor="#ffffff"
+        bumpColor={BUMP_MAX}
       />
       <UiRect
-        x={sg_X}
-        y={sg1_Y}
+        x={box_X}
+        y={tBox_Y}
         z={0.002}
-        w={sg_W}
-        h={sg1_H}
+        w={box_W}
+        h={tBox_H}
         radius={0.022}
-        color={SG_BG}
+        color={S2_OUTER_BG}
         isBumpMap={isBumpMap}
-        bumpColor="#333333"
+        bumpColor={BUMP_LOWER}
       />
 
-      {/* ================= Lower container box (15-19) ================= */}
+      {/* --------------------- BOTTOM HOLLOW BORDER CONNECTOR --------------------- */}
       <UiRect
-        x={sg_X - bw}
-        y={sg2_Y + bw}
+        x={box_X - bw}
+        y={bBox_Y + bw}
         z={0.0015}
-        w={sg_W + bw * 2}
-        h={sg2_H + bw * 2}
+        w={box_W + bw * 2}
+        h={bBox_H + bw * 3}
         radius={0.025}
-        color={SG_BORDER}
+        color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
-        bumpColor="#ffffff"
+        bumpColor={BUMP_MAX}
       />
       <UiRect
-        x={sg_X}
-        y={sg2_Y}
+        x={box_X}
+        y={bBox_Y}
         z={0.002}
-        w={sg_W}
-        h={sg2_H}
+        w={box_W}
+        h={bBox_H}
         radius={0.022}
-        color={SG_BG}
+        color={S2_OUTER_BG}
         isBumpMap={isBumpMap}
-        bumpColor="#333333"
+        bumpColor={BUMP_LOWER}
       />
 
-      {/* Verse 6 */}
+      {/* --------------------- INTRO THEMATIC VERSE --------------------- */}
       <VerseBox
         x={baseX}
         y={v6Y}
@@ -382,12 +417,12 @@ export function SectionTwo({
         border={BLUE_THEME}
         circleBorderCol={BLUE_THEME}
         circleBg={BLUE_THEME}
-        circleTextCol="#ffffff"
+        circleTextCol={WHITE_BASE}
         isPill={false}
         isBumpMap={isBumpMap}
       />
 
-      {/* Upper group background (applied #845775) */}
+      {/* --------------------- CONTENT GROUP 1 (UPPER) --------------------- */}
       <UiRect
         x={baseX}
         y={g1Y}
@@ -395,9 +430,9 @@ export function SectionTwo({
         w={s2_innerW}
         h={groupH}
         radius={0.015}
-        color={"#845775"}
+        color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
-        bumpColor="#444444"
+        bumpColor={BUMP_MID}
       />
       {renderGroupVerses(
         data.colorGroups[0].verses,
@@ -405,10 +440,10 @@ export function SectionTwo({
         CAPSULE_BG_7_10_15_18,
         MAROON_THEME,
         false,
-        0.01,
+        extraRowGap,
       )}
 
-      {/* Middle green group (shrunk) */}
+      {/* --------------------- CONTENT GROUP 2 (MIDDLE SHRUNKEN) --------------------- */}
       <UiRect
         x={g2_baseX}
         y={g2Y}
@@ -419,7 +454,7 @@ export function SectionTwo({
         color={GREEN_THEME}
         shadow
         isBumpMap={isBumpMap}
-        bumpColor="#444444"
+        bumpColor={BUMP_MID}
       />
       {renderGroupVerses(
         data.colorGroups[1].verses,
@@ -430,7 +465,7 @@ export function SectionTwo({
         0,
       )}
 
-      {/* Lower group background (applied #845775) */}
+      {/* --------------------- CONTENT GROUP 3 (LOWER) --------------------- */}
       <UiRect
         x={baseX}
         y={g3Y}
@@ -438,9 +473,9 @@ export function SectionTwo({
         w={s2_innerW}
         h={groupH}
         radius={0.015}
-        color={"#845775"}
+        color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
-        bumpColor="#444444"
+        bumpColor={BUMP_MID}
       />
       {renderGroupVerses(
         data.colorGroups[2].verses,
@@ -448,10 +483,10 @@ export function SectionTwo({
         CAPSULE_BG_7_10_15_18,
         MAROON_THEME,
         false,
-        0.01,
+        extraRowGap,
       )}
 
-      {/* Verse 19 */}
+      {/* --------------------- OUTRO THEMATIC VERSE --------------------- */}
       <VerseBox
         x={baseX}
         y={v19Y}
@@ -464,13 +499,14 @@ export function SectionTwo({
         border={BLUE_THEME}
         circleBorderCol={BLUE_THEME}
         circleBg={BLUE_THEME}
-        circleTextCol="#ffffff"
+        circleTextCol={WHITE_BASE}
         isPill={false}
         isBumpMap={isBumpMap}
       />
 
-      {/* SideCurves are purely visual lines, they don't need bump mapped generally, but you can pass it if you want them embossed */}
+      {/* Extra Structural Elements (Curve decorations and pinning labels) */}
       <SideCurves layout={layout} startX={startX} />
+      
       <TopLabel
         x={PW / 2}
         y={s2Top}
@@ -478,13 +514,17 @@ export function SectionTwo({
         text={data.topLabel}
         animateOnScroll={true}
         isBumpMap={isBumpMap}
+        partialBorder={true}
       />
+      
       <TopLabel
         x={PW / 2}
         y={s2Top - s2H}
         z={0.004}
         text={data.bottomLabel}
         isBumpMap={isBumpMap}
+        partialBorder={true}
+        bottomBorder={true}
       />
     </group>
   );

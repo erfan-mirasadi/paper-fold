@@ -1,11 +1,50 @@
 "use client";
+
 import { Text, useScroll } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
-const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
+// ============================================================================
+// GLOBAL THEME & CONSTANTS 
+// Location: app/_components/paper-content/SharedUI.tsx
+// Purpose: Centralized repository for all shared UI elements, colors, and styling rules.
+// ============================================================================
+
+export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
+
+// ----------------------------------------------------------------------------
+// 1. BASE COLORS
+// ----------------------------------------------------------------------------
+export const WHITE_BASE = "#ffffff";
+export const SHADOW_BLACK = "#000000";
+export const TEXT_DARK = "#1a1a1a";
+export const TEXT_LABEL = "#4a423a";
+
+// ----------------------------------------------------------------------------
+// 2. BUMP MAP (EXTRUSION) COLORS
+// These colors define the 3D depth of elements when generated as a heightmap.
+// White = Highest Extrusion, Black = Lowest (Base flat surface)
+// ----------------------------------------------------------------------------
+export const BUMP_MAX = "#ffffff";
+export const BUMP_HIGH = "#e3e3e3";
+export const BUMP_MID_HIGH = "#555555";
+export const BUMP_MID = "#444444";
+export const BUMP_LOWER = "#333333";
+export const BUMP_DEEP = "#222222";
+export const BUMP_BASE = "#000000";
+
+// ----------------------------------------------------------------------------
+// 3. CANVAS & LAYOUT THEME COLORS
+// ----------------------------------------------------------------------------
 export const BG_COLOR = "#FDF8E4";
+export const PAGE_BG_COLOR = "#EBEBDF";
+export const HOLLOW_BORDER_COLOR = "#845775"; // Used for Section 2 wrapping borders
+export const CIRCLE_BORDER = "#8e8e8e";
+
+// ----------------------------------------------------------------------------
+// 4. SECTION 1 COLORS
+// ----------------------------------------------------------------------------
 export const S1_OUTER_BG = "#F8E3B6";
 export const S1_OUTER_BORDER = "#A3822E";
 export const S1_INNER_BG = "#fbf1d5";
@@ -13,9 +52,15 @@ export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#efbe6c";
 export const S1_ANA_BORDER = "#b48238";
 
+export const TAB_BG = "#e5ba71";
+export const TAB_BORDER = "#96601b";
+export const TAB_TEXT = "#432c10";
+
+// ----------------------------------------------------------------------------
+// 5. SECTION 2 COLORS
+// ----------------------------------------------------------------------------
 export const S2_OUTER_BG = "#F0E2CC";
 export const S2_OUTER_BORDER = "#DBC180";
-
 export const MAROON_THEME = "#7D3D62";
 export const MAROON_VERSE_BG = "#ebd2dc";
 export const GREEN_THEME = "#879A63";
@@ -23,14 +68,18 @@ export const GREEN_VERSE_BG = "#eaf2db";
 export const BLUE_THEME = "#638f9c";
 export const SG_BG = "#845775";
 export const SG_BORDER = "#F4ECD8";
+
+// ----------------------------------------------------------------------------
+// 6. CAPSULE (VERSE BOX) COLORS
+// ----------------------------------------------------------------------------
 export const CAPSULE_BG_7_10_15_18 = "#E4D3DE";
 export const CAPSULE_BG_12_14 = "#E0E6D0";
 export const CAPSULE_BG_6_19 = "#F8F1E6";
-
 export const WHITE_VERSE_BG = "#ffffff";
-export const TEXT_DARK = "#1a1a1a";
-export const CIRCLE_BORDER = "#8e8e8e";
 
+// ----------------------------------------------------------------------------
+// 7. GLOBAL TEXT SIZES
+// ----------------------------------------------------------------------------
 export const TEXT_SIZES = {
   BISMILLAH: 0.054,
   TOP_LABEL: 0.023,
@@ -40,27 +89,64 @@ export const TEXT_SIZES = {
   VERSE_TEXT_BIG: 0.051,
 };
 
+// ============================================================================
+// SHARED COMPONENTS
+// ============================================================================
+
 interface RoundedShapeProps {
   w: number;
   h: number;
   radius: number;
+  topOnly?: boolean;
+  bottomOnly?: boolean;
 }
 
-export function RoundedShapeComponent({ w, h, radius }: RoundedShapeProps) {
+/**
+ * RoundedShapeComponent
+ * Generates custom rounded corner shapes geometrically for ThreeJS geometry.
+ */
+export function RoundedShapeComponent({
+  w,
+  h,
+  radius,
+  topOnly = false,
+  bottomOnly = false,
+}: RoundedShapeProps) {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
     const r = Math.min(radius, w / 2, h / 2);
-    s.moveTo(r, 0);
-    s.lineTo(w - r, 0);
-    s.quadraticCurveTo(w, 0, w, -r);
-    s.lineTo(w, -(h - r));
-    s.quadraticCurveTo(w, -h, w - r, -h);
-    s.lineTo(r, -h);
-    s.quadraticCurveTo(0, -h, 0, -(h - r));
-    s.lineTo(0, -r);
-    s.quadraticCurveTo(0, 0, r, 0);
+
+    if (topOnly) {
+      const visibleH = h / 2;
+      s.moveTo(r, 0);
+      s.lineTo(w - r, 0);
+      s.quadraticCurveTo(w, 0, w, -r);
+      s.lineTo(w, -visibleH);
+      s.lineTo(0, -visibleH);
+      s.lineTo(0, -r);
+      s.quadraticCurveTo(0, 0, r, 0);
+    } else if (bottomOnly) {
+      const startY = -h / 2;
+      s.moveTo(0, startY);
+      s.lineTo(w, startY);
+      s.lineTo(w, -(h - r));
+      s.quadraticCurveTo(w, -h, w - r, -h);
+      s.lineTo(r, -h);
+      s.quadraticCurveTo(0, -h, 0, -(h - r));
+      s.lineTo(0, startY);
+    } else {
+      s.moveTo(r, 0);
+      s.lineTo(w - r, 0);
+      s.quadraticCurveTo(w, 0, w, -r);
+      s.lineTo(w, -(h - r));
+      s.quadraticCurveTo(w, -h, w - r, -h);
+      s.lineTo(r, -h);
+      s.quadraticCurveTo(0, -h, 0, -(h - r));
+      s.lineTo(0, -r);
+      s.quadraticCurveTo(0, 0, r, 0);
+    }
     return s;
-  }, [w, h, radius]);
+  }, [w, h, radius, topOnly, bottomOnly]);
   return <shapeGeometry args={[shape]} />;
 }
 
@@ -75,10 +161,16 @@ interface UiRectProps {
   shadow?: boolean;
   depthTest?: boolean;
   renderOrder?: number;
-  isBumpMap?: boolean; // Added for Bump Map support
-  bumpColor?: string; // Specific greyscale color when in bump map mode
+  isBumpMap?: boolean;
+  bumpColor?: string;
+  topOnly?: boolean;
+  bottomOnly?: boolean;
 }
 
+/**
+ * UiRect
+ * A universal rectangular layout block capable of generating shadows and managing 3D depth.
+ */
 export const UiRect = ({
   x,
   y,
@@ -91,26 +183,41 @@ export const UiRect = ({
   depthTest = false,
   renderOrder,
   isBumpMap = false,
-  bumpColor = "#ffffff", // Default to max extrusion (white) if not specified
+  bumpColor = BUMP_MAX, // Default to highest bump
+  topOnly = false,
+  bottomOnly = false,
 }: UiRectProps) => {
   const finalColor = isBumpMap ? bumpColor : color;
 
   return (
     <group position={[x, y, z]}>
-      {/* Shadows are disabled completely in Bump Map mode because they aren't physical geometry */}
+      {/* Shadow Layer */}
       {shadow && !isBumpMap && (
         <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
-          <RoundedShapeComponent w={w} h={h} radius={radius} />
+          <RoundedShapeComponent
+            w={w}
+            h={h}
+            radius={radius}
+            topOnly={topOnly}
+            bottomOnly={bottomOnly}
+          />
           <meshBasicMaterial
-            color="#000000"
+            color={SHADOW_BLACK}
             transparent
             opacity={renderOrder != null ? 0.32 : 0.12}
             depthTest={depthTest}
           />
         </mesh>
       )}
+      {/* Main Box Layer */}
       <mesh renderOrder={renderOrder}>
-        <RoundedShapeComponent w={w} h={h} radius={radius} />
+        <RoundedShapeComponent
+          w={w}
+          h={h}
+          radius={radius}
+          topOnly={topOnly}
+          bottomOnly={bottomOnly}
+        />
         <meshBasicMaterial
           color={finalColor}
           depthTest={depthTest}
@@ -129,8 +236,16 @@ interface TopLabelProps {
   text: string;
   animateOnScroll?: boolean;
   isBumpMap?: boolean;
+  partialBorder?: boolean;
+  borderColor?: string;
+  bottomBorder?: boolean;
+  noBorder?: boolean;
 }
 
+/**
+ * TopLabel
+ * Top curved tags that label sections.
+ */
 export function TopLabel({
   x,
   y,
@@ -138,6 +253,10 @@ export function TopLabel({
   text,
   animateOnScroll = false,
   isBumpMap = false,
+  partialBorder = false,
+  borderColor = HOLLOW_BORDER_COLOR, 
+  bottomBorder = false,
+  noBorder = false,
 }: TopLabelProps) {
   const w = 0.4;
   const h = 0.046;
@@ -147,8 +266,7 @@ export function TopLabel({
   const scroll = useScroll();
 
   useFrame(() => {
-    // Disable opacity animations entirely when rendering the bump map
-    // We want the geometry to be constantly present for accurate 3D displacement
+    // Scroll animation logic completely disabled for BumpMap to preserve structure
     if (animateOnScroll && scroll && groupRef.current && !isBumpMap) {
       let targetOpacity = 0;
       if (scroll.offset > 0.8) {
@@ -195,20 +313,26 @@ export function TopLabel({
     }
   });
 
+  const borderThickness = 0.004;
+
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
-      <UiRect
-        x={-0.002}
-        y={0.002}
-        z={0}
-        w={w + 0.004}
-        h={h + 0.004}
-        radius={radius + 0.002}
-        color="#cdc6bf"
-        shadow
-        isBumpMap={isBumpMap}
-        bumpColor="#ffffff" // Extrude the border
-      />
+      {!noBorder && (
+        <UiRect
+          x={-borderThickness}
+          y={borderThickness}
+          z={0}
+          w={w + borderThickness * 2}
+          h={h + borderThickness * 2}
+          radius={radius + borderThickness}
+          color={borderColor}
+          shadow={!partialBorder}
+          isBumpMap={isBumpMap}
+          bumpColor={BUMP_MAX}
+          topOnly={partialBorder && !bottomBorder}
+          bottomOnly={partialBorder && bottomBorder}
+        />
+      )}
       <UiRect
         x={0}
         y={0}
@@ -216,14 +340,15 @@ export function TopLabel({
         w={w}
         h={h}
         radius={radius}
-        color="#ffffff"
+        color={WHITE_BASE}
         isBumpMap={isBumpMap}
-        bumpColor="#333333" // Indent the background slightly relative to border
+        bumpColor={BUMP_LOWER}
+        topOnly={false}
       />
       <Text
         position={[w / 2, -h / 2, 0.002]}
         fontSize={TEXT_SIZES.TOP_LABEL}
-        color={isBumpMap ? "#ffffff" : "#4a423a"} // White text means the text itself is extruded
+        color={isBumpMap ? BUMP_MAX : TEXT_LABEL}
         anchorX="center"
         anchorY="middle"
         fontStyle="normal"
@@ -243,6 +368,10 @@ interface AnaAyetTabProps {
   isBumpMap?: boolean;
 }
 
+/**
+ * AnaAyetTab
+ * Custom tab marking the focal point verse for Section 1.
+ */
 export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
   return (
     <group position={[x, y, z]}>
@@ -253,10 +382,10 @@ export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
         w={0.09}
         h={0.045}
         radius={0.008}
-        color="#96601b"
+        color={TAB_BORDER}
         shadow
         isBumpMap={isBumpMap}
-        bumpColor="#ffffff" // Border extrusion
+        bumpColor={BUMP_MAX} 
       />
       <UiRect
         x={0.003}
@@ -265,14 +394,14 @@ export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
         w={0.084}
         h={0.039}
         radius={0.006}
-        color="#e5ba71"
+        color={TAB_BG}
         isBumpMap={isBumpMap}
-        bumpColor="#555555" // Mid-level extrusion for bg
+        bumpColor={BUMP_MID_HIGH}
       />
       <Text
         position={[0.045, -0.0225, 0.002]}
         fontSize={TEXT_SIZES.ANA_AYET_TAB}
-        color={isBumpMap ? "#ffffff" : "#432c10"}
+        color={isBumpMap ? BUMP_MAX : TAB_TEXT}
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
@@ -303,6 +432,10 @@ interface VerseBoxProps {
   isBumpMap?: boolean;
 }
 
+/**
+ * VerseBox
+ * Modular box renderer holding Verse Text, Numbers and managing all inner layouts.
+ */
 export const VerseBox = ({
   x,
   y,
@@ -320,34 +453,26 @@ export const VerseBox = ({
   borderWidth,
   isBumpMap = false,
 }: VerseBoxProps) => {
-  // Reduce horizontal padding so text can occupy more space inside the pill
-  const shrinkX = 0.001; // amount to shrink from left and right sides (reduced)
+  const shrinkX = 0.001; 
   const finalX = x + shrinkX;
   const finalW = w - shrinkX * 2;
 
-  const bw = borderWidth ?? 0.0055; // default border width (can be overridden via prop)
+  const bw = borderWidth ?? 0.0055; 
   const rad = isPill ? h / 2 : 0.05;
   const cr = Math.min(h * 0.46, 0.035);
-  const SMALL_PILL_OFFSET = 0.002; // nudge small-box circles inward (to the right)
-  // position the circle: for pills keep inside but nudge small boxes to the right
+  const SMALL_PILL_OFFSET = 0.002; 
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
-  // Reduce the extra safety margin so the text can use more width,
-  // but keep enough space to avoid overlapping the circle.
   const safeMargin = 0.0;
   const textMaxW = finalW - safeMargin * 2;
-
-  // Center the text within the available area to the right of the circle
   const textX = safeMargin + textMaxW / 2;
 
-  // Small verses (inside pills) should be nudged slightly to the left
-  // while larger verse text remains centered.
   const SMALL_TEXT_SHIFT = -0.02;
   const versePosX = isPill ? textX - SMALL_TEXT_SHIFT : textX;
 
   return (
     <group position={[finalX, y, z]}>
-      {/* Outer Border (Max Extrusion) */}
+      {/* Outer Border Component Base Level */}
       <UiRect
         x={-bw}
         y={bw}
@@ -359,9 +484,9 @@ export const VerseBox = ({
         shadow
         renderOrder={10}
         isBumpMap={isBumpMap}
-        bumpColor="#ffffff"
+        bumpColor={BUMP_MAX}
       />
-      {/* Inner Background (Mid Extrusion) */}
+      {/* Inner Highlight Layer */}
       <UiRect
         x={0}
         y={0}
@@ -372,34 +497,35 @@ export const VerseBox = ({
         color={bg}
         renderOrder={11}
         isBumpMap={isBumpMap}
-        bumpColor="#333333"
+        bumpColor={BUMP_LOWER}
       />
 
       <group position={[cx, -h / 2, 0.002]}>
-        {/* Circle Inner BG */}
+        {/* Circle Background */}
         <mesh renderOrder={12}>
           <circleGeometry args={[cr - 0.002, 48]} />
           <meshBasicMaterial
-            color={isBumpMap ? "#222222" : circleBg || "#ffffff"}
+            color={isBumpMap ? BUMP_DEEP : circleBg || WHITE_BASE}
             depthTest={false}
             transparent={!isBumpMap}
             opacity={0.999}
           />
         </mesh>
-        {/* Circle Border */}
+        {/* Circle Border Line */}
         <mesh position={[0, 0, -0.001]} renderOrder={12}>
           <circleGeometry args={[cr, 48]} />
           <meshBasicMaterial
-            color={isBumpMap ? "#ffffff" : circleBorderCol || CIRCLE_BORDER}
+            color={isBumpMap ? BUMP_MAX : circleBorderCol || CIRCLE_BORDER}
             depthTest={false}
             transparent={!isBumpMap}
             opacity={0.999}
           />
         </mesh>
+        {/* Number Text Layer */}
         <Text
           position={[0, 0, 0.001]}
           fontSize={TEXT_SIZES.VERSE_NUMBER}
-          color={isBumpMap ? "#ffffff" : circleTextCol || TEXT_DARK}
+          color={isBumpMap ? BUMP_MAX : circleTextCol || TEXT_DARK}
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"
@@ -410,12 +536,11 @@ export const VerseBox = ({
         </Text>
       </group>
 
+      {/* Main Verse Content Layer */}
       <Text
         position={[versePosX, -h / 2, 0.002]}
-        fontSize={
-          isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
-        }
-        color={isBumpMap ? "#ffffff" : TEXT_DARK} // Text pushes out
+        fontSize={isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG}
+        color={isBumpMap ? BUMP_MAX : TEXT_DARK} 
         anchorX="center"
         anchorY="middle"
         maxWidth={textMaxW}

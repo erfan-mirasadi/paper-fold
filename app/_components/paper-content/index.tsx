@@ -1,23 +1,36 @@
 "use client";
 
 import { OrthographicCamera, Text, useTexture } from "@react-three/drei";
-import { TEXT_DARK, TEXT_SIZES } from "./SharedUI";
-// import { QuranicBorder } from "./QuranicBorder";
+import { 
+  TEXT_DARK, 
+  TEXT_SIZES, 
+  PAGE_BG_COLOR, 
+  BUMP_BASE, 
+  BUMP_MAX 
+} from "./SharedUI";
 import { SectionOne, SectionTwo } from "./SurahSections";
 import { Boarder } from "./Boarder";
+
+// ============================================================================
+// GLOBAL PAGE DIMENSIONS
+// Location: app/_components/paper-content/index.tsx
+// Purpose: Dictates layout variables, engine math, and orchestrates page rendering.
+// ============================================================================
 
 export const PAGE_WIDTH = 1.54;
 export const PAGE_HEIGHT = 1.76;
 export const PW = PAGE_WIDTH;
 export const PADDING = 0.28;
 
-// Simplify layout logic:
-// Content width is the page width minus padding on both left and right
 export const CONTENT_W = PW - PADDING * 2;
 export const START_X = PADDING;
 
-// Layout Math Engine (Unchanged)
-const s2TopExtra = 0.025;
+// ============================================================================
+// LAYOUT MATH ENGINE
+// Refined definitions to ensure structured and perfectly nested bounds.
+// ============================================================================
+
+// --- Section 1 (Top Block) Dimensions ---
 const s1Top = -0.17;
 const s1Pad = 0.045;
 const gap = 0.02;
@@ -25,8 +38,11 @@ const smallBoxH = 0.07;
 const anaAyetH = 0.095;
 const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + gap + anaAyetH;
 
+// --- Section 2 (Main Lower Blocks) Dimensions ---
 const gapBetweenS1andS2 = 0.035;
+const s2TopExtra = 0.025;
 const s2Top = s1Top - s1H - gapBetweenS1andS2;
+
 const s2PadTop = 0.035 + s2TopExtra;
 const s2PadBottom = 0.06;
 const bigBoxH = 0.095;
@@ -36,6 +52,8 @@ const s2Gap = 0.02;
 const smallBoxH2 = 0.075;
 const groupH = groupPad * 2 + (smallBoxH2 * 2 + s2Gap);
 const middleExtraGap = 0.04;
+
+// Full calculation of Section 2 total Height
 const s2H =
   s2PadTop +
   s2PadBottom +
@@ -44,22 +62,27 @@ const s2H =
   groupH * 3 +
   middleExtraGap * 2;
 
+// --- Specific Element Y-Placement Positions ---
 const v6Y = s2Top - s2PadTop;
 
-// برای اینکه جابجایی یه بخش، بقیه بخش‌ها رو خراب نکنه، اول موقعیت‌های پایه (زنجیره‌ای) رو حساب میکنیم
+// Calculate Base Starting constraints for core groups
 const baseG1Y = v6Y - bigBoxH - groupGap;
 const baseG2Y = baseG1Y - groupH - (groupGap + middleExtraGap);
 const baseG3Y = baseG2Y - groupH - (groupGap + middleExtraGap);
 const baseV19Y = baseG3Y - groupH - groupGap;
 
-// حالا هر تغییری میخوای بدی رو اینجا مستقل بده.
-// الان g2Y فقط روی همون ۴ آیه وسط تاثیر میذاره و بقیه جابجا نمیشن
+// Adding standard inner padding (0.01) to cleanly isolate elements visually 
 const g1Y = baseG1Y + 0.01;
 const g2Y = baseG2Y + 0.01;
 const g3Y = baseG3Y + 0.01;
 const v19Y = baseV19Y;
 
+// ============================================================================
+// EXPORTED CONFIGURATIONS
+// Provides absolute bounds scaling info downstream mapping components
+// ============================================================================
 export const layoutMath = {
+  // S1 Variables
   sectionW: CONTENT_W,
   innerW: CONTENT_W - s1Pad * 2,
   innerHalfW: (CONTENT_W - s1Pad * 2 - gap) / 2,
@@ -69,6 +92,8 @@ export const layoutMath = {
   smallBoxH,
   anaAyetH,
   s1H,
+  
+  // S2 Variables
   s2Top,
   s2Pad: s2PadTop,
   s2PadTop,
@@ -80,6 +105,8 @@ export const layoutMath = {
   smallBoxH2,
   groupH,
   s2H,
+  
+  // Placements Variables
   v6Y,
   g1Y,
   g2Y,
@@ -87,10 +114,21 @@ export const layoutMath = {
   v19Y,
   baseG1Y,
   baseG3Y,
-  groupInnerW: CONTENT_W - 0.035 * 2 - groupPad * 2,
-  groupInnerHalfW: (CONTENT_W - 0.035 * 2 - groupPad * 2 - s2Gap) / 2,
+
+  // Inner Box Calculations
+  groupInnerW: CONTENT_W - 0.07 - groupPad * 2,
+  groupInnerHalfW: (CONTENT_W - 0.07 - groupPad * 2 - s2Gap) / 2,
+
+  // Advanced Refinements (Internal Layout Offsets explicitly moved up here)
+  s2PadLeftRight: 0.035,
+  g2Shrink: 0.01,
+  sgPad: 0.03,
+  sgBorderWidth: 0.006,
+  boxExtOffset: 0.02,
+  extraRowGap: 0.01,
 };
 
+// Fold positioning points based on geometry offsets
 export const FOLD_Y_POSITIONS: readonly [
   number,
   number,
@@ -109,6 +147,9 @@ export const FOLD_Y_POSITIONS: readonly [
   g3Y - groupH - groupGap / 2,
 ] as const;
 
+// ============================================================================
+// CONTENT DOMAIN DATA (SURAH TEXTS)
+// ============================================================================
 const SURAH_DATA = {
   bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
   section1: {
@@ -161,9 +202,13 @@ const SURAH_DATA = {
   },
 };
 
+// ============================================================================
+// MAIN WRAPPER COMPONENT
+// ============================================================================
 interface PaperContentProps {
   imageUrl?: string;
-  isBumpMap?: boolean; // Added support for Bump Map at the top level
+  isBumpMap?: boolean;
+  isFolded?: boolean;
 }
 
 const ImageContent: React.FC<{ url: string }> = ({ url }) => {
@@ -179,21 +224,23 @@ const ImageContent: React.FC<{ url: string }> = ({ url }) => {
 export function PaperContent({
   imageUrl,
   isBumpMap = false,
+  isFolded = false,
 }: PaperContentProps) {
   if (imageUrl) {
     return <ImageContent url={imageUrl} />;
   }
 
-  // If rendering for Bump Map, the canvas base must be pitch black
-  const BG_COLOR = isBumpMap ? "#000000" : "#EBEBDF";
+  // Ensures deep black cutoff out-of-bounds for rendering bump passes vs Standard Color Canvas BG
+  const activeBg = isBumpMap ? BUMP_BASE : PAGE_BG_COLOR;
 
   return (
     <>
       <mesh position={[PW / 2, -PAGE_HEIGHT / 2, -0.05]}>
         <planeGeometry args={[PW * 1.5, PAGE_HEIGHT * 1.5]} />
-        <meshBasicMaterial color={BG_COLOR} />
+        <meshBasicMaterial color={activeBg} />
       </mesh>
-      <color attach="background" args={[BG_COLOR]} />{" "}
+      <color attach="background" args={[activeBg]} />
+      
       {/* Make outside background richer */}
       <OrthographicCamera
         makeDefault
@@ -204,10 +251,12 @@ export function PaperContent({
         position={[0, 0, 5]}
       />
       <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} isBumpMap={isBumpMap} />
+      
+      {/* Bismillah Header Title */}
       <Text
         position={[PW / 2, -0.085, 0.02]}
         fontSize={TEXT_SIZES.BISMILLAH}
-        color={isBumpMap ? "#ffffff" : TEXT_DARK} // Text pushes out in bump map
+        color={isBumpMap ? BUMP_MAX : TEXT_DARK} 
         anchorX="center"
         anchorY="middle"
         textAlign="center"
@@ -217,12 +266,15 @@ export function PaperContent({
       >
         {SURAH_DATA.bismillah}
       </Text>
+      
+      {/* Main Blocks rendering passed layout constraints safely */}
       <SectionOne
         data={SURAH_DATA.section1}
         layout={layoutMath}
         startX={START_X}
         PW={PW}
         isBumpMap={isBumpMap}
+        isFolded={isFolded}
       />
       <SectionTwo
         data={SURAH_DATA.section2}

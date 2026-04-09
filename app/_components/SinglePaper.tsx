@@ -30,7 +30,7 @@ import {
   Vector2,
 } from "three";
 import { degToRad } from "three/src/math/MathUtils.js";
-import { Tafsir3DTracker } from "./Tafsir3DTracker";
+import { Tafsir3DTracker } from "./ui-overlay/Tafsir3DTracker";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
@@ -90,7 +90,11 @@ pageGeometry.setAttribute(
 // Changed to a slight off-white for better lighting interaction without washing out
 const paperBaseColor = new Color("#f2f0e6");
 
-export const SinglePaper: React.FC = () => {
+interface SinglePaperProps {
+  isFolded?: boolean;
+}
+
+export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded = false }) => {
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const scroll = useScroll();
@@ -216,7 +220,7 @@ export const SinglePaper: React.FC = () => {
         >
           {/* 1. The main color content map */}
           <RenderTexture attach="map" width={1200} height={1700}>
-            <PaperContent />
+            <PaperContent isFolded={isFolded} />
           </RenderTexture>
 
           {/* 2. The new Bump Map for the embossed UI elements! */}

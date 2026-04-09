@@ -5,7 +5,10 @@ import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
 import TheatreManager from "./_components/TheatreManager";
-import { TafsirUI, TafsirScrollTracker } from "./_components/TafsirUI";
+import {
+  TafsirUI,
+  TafsirScrollTracker,
+} from "./_components/ui-overlay/TafsirUI";
 
 const Experience = dynamic(
   () => import("./_components/Experience").then((mod) => mod.Experience),
@@ -14,6 +17,8 @@ const Experience = dynamic(
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isFolded, setIsFolded] = useState(false);
+
   const bgColor = isDarkMode ? "#121212" : "#f4f1ea";
   const btnBg = isDarkMode ? "#ffffff" : "#121212";
   const btnColor = isDarkMode ? "#121212" : "#ffffff";
@@ -28,25 +33,49 @@ export default function Home() {
         transition: "background-color 0.5s ease",
       }}
     >
-      <button
-        onClick={() => setIsDarkMode(!isDarkMode)}
+      <div
         style={{
           position: "absolute",
           top: "24px",
           right: "24px",
           zIndex: 50,
-          padding: "10px 20px",
-          borderRadius: "30px",
-          border: "none",
-          backgroundColor: btnBg,
-          color: btnColor,
-          cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          transition: "all 0.3s ease",
+          display: "flex",
+          gap: "12px",
         }}
       >
-        {isDarkMode ? "☀️ Light" : "🌙 Dark"}
-      </button>
+        <button
+          onClick={() => setIsFolded(!isFolded)}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "30px",
+            border: "none",
+            backgroundColor: isFolded ? "#ff6b6b" : "#ffcc66",
+            color: "#111",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            transition: "all 0.3s ease",
+            fontWeight: "bold",
+          }}
+        >
+          {isFolded ? "open" : "close"}
+        </button>
+
+        <button
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "30px",
+            border: "none",
+            backgroundColor: btnBg,
+            color: btnColor,
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            transition: "all 0.3s ease",
+          }}
+        >
+          {isDarkMode ? "☀️ Light" : "🌙 Dark"}
+        </button>
+      </div>
 
       <Suspense
         fallback={
@@ -62,7 +91,11 @@ export default function Home() {
             <color attach="background" args={[bgColor]} />
             <TheatreManager>
               <ScrollControls pages={2} damping={0.2}>
-                <Experience isDarkMode={isDarkMode} />
+                <Experience
+                  isDarkMode={isDarkMode}
+                  isFolded={isFolded}
+                  onTogglePopUp={() => setIsFolded(!isFolded)}
+                />
                 <TafsirScrollTracker />
               </ScrollControls>
             </TheatreManager>
