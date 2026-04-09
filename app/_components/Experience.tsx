@@ -14,13 +14,13 @@ import { PopUpManager } from "./pop-up-verses/PopUpManager";
 interface ExperienceProps {
   isDarkMode: boolean;
   isFolded: boolean;
-  onTogglePopUp: () => void;
+  onTogglePopUp?: () => void;
 }
 
-export const Experience: React.FC<ExperienceProps> = ({
+export function Experience({
   isDarkMode,
   isFolded,
-}) => {
+}: ExperienceProps) {
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const [controlsEnabled, setControlsEnabled] = useState(true);
@@ -76,4 +76,4 @@ export const Experience: React.FC<ExperienceProps> = ({
       />
     </>
   );
-};
+}

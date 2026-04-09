@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
 // ============================================================================
-// GLOBAL THEME & CONSTANTS 
+// GLOBAL THEME & CONSTANTS
 // Location: app/_components/paper-content/SharedUI.tsx
 // Purpose: Centralized repository for all shared UI elements, colors, and styling rules.
 // ============================================================================
@@ -254,7 +254,7 @@ export function TopLabel({
   animateOnScroll = false,
   isBumpMap = false,
   partialBorder = false,
-  borderColor = HOLLOW_BORDER_COLOR, 
+  borderColor = HOLLOW_BORDER_COLOR,
   bottomBorder = false,
   noBorder = false,
 }: TopLabelProps) {
@@ -385,7 +385,7 @@ export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
         color={TAB_BORDER}
         shadow
         isBumpMap={isBumpMap}
-        bumpColor={BUMP_MAX} 
+        bumpColor={BUMP_MAX}
       />
       <UiRect
         x={0.003}
@@ -429,6 +429,7 @@ interface VerseBoxProps {
   circleTextCol?: string;
   isPill?: boolean;
   borderWidth?: number;
+  shadow?: boolean;
   isBumpMap?: boolean;
 }
 
@@ -451,16 +452,17 @@ export const VerseBox = ({
   circleTextCol,
   isPill = true,
   borderWidth,
+  shadow = true,
   isBumpMap = false,
 }: VerseBoxProps) => {
-  const shrinkX = 0.001; 
+  const shrinkX = 0.001;
   const finalX = x + shrinkX;
   const finalW = w - shrinkX * 2;
 
-  const bw = borderWidth ?? 0.0055; 
+  const bw = borderWidth ?? 0.0055;
   const rad = isPill ? h / 2 : 0.05;
   const cr = Math.min(h * 0.46, 0.035);
-  const SMALL_PILL_OFFSET = 0.002; 
+  const SMALL_PILL_OFFSET = 0.002;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
   const safeMargin = 0.0;
@@ -481,7 +483,7 @@ export const VerseBox = ({
         h={h + bw * 2}
         radius={rad + bw}
         color={border}
-        shadow
+        shadow={shadow}
         renderOrder={10}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MAX}
@@ -539,8 +541,10 @@ export const VerseBox = ({
       {/* Main Verse Content Layer */}
       <Text
         position={[versePosX, -h / 2, 0.002]}
-        fontSize={isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG}
-        color={isBumpMap ? BUMP_MAX : TEXT_DARK} 
+        fontSize={
+          isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
+        }
+        color={isBumpMap ? BUMP_MAX : TEXT_DARK}
         anchorX="center"
         anchorY="middle"
         maxWidth={textMaxW}

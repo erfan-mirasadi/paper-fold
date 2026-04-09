@@ -19,7 +19,7 @@ interface PopUpManagerProps {
   isFolded: boolean;
 }
 
-export const PopUpManager: React.FC<PopUpManagerProps> = ({ isFolded }) => {
+export function PopUpManager({ isFolded }: PopUpManagerProps) {
   const { s1Top, s1Pad, gap, smallBoxH, innerHalfW } = layoutMath;
   const baseX = START_X + s1Pad;
 
@@ -88,4 +88,4 @@ export const PopUpManager: React.FC<PopUpManagerProps> = ({ isFolded }) => {
       </group>
     </group>
   );
-};
+}
