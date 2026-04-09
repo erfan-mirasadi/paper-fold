@@ -172,9 +172,9 @@ const CurvePair = ({
         color={color}
         delay={isRight ? 0.2 : 0}
         speed={0.05}
-        arrowSize={0.008}
+        arrowSize={0.005}
         floatIntensity={0.0005}
-        glowSize={4}
+        glowSize={2}
       />
       <AnimatedArrow
         outerTipX={outerTipX}
@@ -187,10 +187,10 @@ const CurvePair = ({
         innerYBot={innerYBot}
         color={color}
         delay={isRight ? 0.7 : 0.5}
-        speed={0.05}
-        arrowSize={0.008}
+        speed={0.06}
+        arrowSize={0.004}
         floatIntensity={0.0009}
-        glowSize={4}
+        glowSize={2}
       />
     </group>
   );

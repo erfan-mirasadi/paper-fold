@@ -87,7 +87,8 @@ pageGeometry.setAttribute(
   new Float32BufferAttribute(skinWeights, 4),
 );
 
-const whiteColor = new Color("white");
+// Changed to a slight off-white for better lighting interaction without washing out
+const paperBaseColor = new Color("#f2f0e6");
 
 export const SinglePaper: React.FC = () => {
   const group = useRef<Group>(null);
@@ -119,12 +120,13 @@ export const SinglePaper: React.FC = () => {
     const skeleton = new Skeleton(bones);
 
     const materials = [
-      new MeshStandardMaterial({ color: whiteColor }), // side L
+      new MeshStandardMaterial({ color: paperBaseColor }), // side L
       new MeshStandardMaterial({ color: "#111" }), // side R
-      new MeshStandardMaterial({ color: whiteColor }), // top cap
-      new MeshStandardMaterial({ color: whiteColor }), // bottom cap
-      new MeshStandardMaterial({ color: whiteColor, roughness: 0.1 }), // front face
-      new MeshStandardMaterial({ color: whiteColor, roughness: 0.1 }), // back face
+      new MeshStandardMaterial({ color: paperBaseColor }), // top cap
+      new MeshStandardMaterial({ color: paperBaseColor }), // bottom cap
+      // Initial materials, the front face will be overridden by the primitive material
+      new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }), // front face
+      new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }), // back face
     ];
 
     const mesh = new SkinnedMesh(pageGeometry, materials);
@@ -203,14 +205,24 @@ export const SinglePaper: React.FC = () => {
       <primitive object={manualSkinnedMesh} ref={skinnedMeshRef}>
         <meshStandardMaterial
           attach="material-4"
-          roughness={0.55}
-          color={whiteColor}
-          normalScale={new Vector2(0.8, 0.8)}
+          roughness={0.8}
+          metalness={0.05} // Just a tiny bit of density to help the bumps catch light
+          color={paperBaseColor}
+          bumpScale={0.015} // This controls how high the elements pop out (adjust if needed)
+          normalScale={new Vector2(0.8, 0.8)} // Keeps your creases intact
+          envMapIntensity={0.5} // Balanced to show off the bumps without blowing out colors
         >
+          {/* 1. The main color content map */}
           <RenderTexture attach="map" width={1200} height={1700}>
             <PaperContent />
           </RenderTexture>
 
+          {/* 2. The new Bump Map for the embossed UI elements! */}
+          <RenderTexture attach="bumpMap" width={1200} height={1700}>
+            <PaperContent isBumpMap={true} />
+          </RenderTexture>
+
+          {/* 3. The existing Normal Map for the folded creases */}
           <RenderTexture attach="normalMap" width={1200} height={1700}>
             <color attach="background" args={["#8080ff"]} />
             <OrthographicCamera

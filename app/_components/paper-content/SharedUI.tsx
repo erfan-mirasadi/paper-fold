@@ -75,6 +75,8 @@ interface UiRectProps {
   shadow?: boolean;
   depthTest?: boolean;
   renderOrder?: number;
+  isBumpMap?: boolean; // Added for Bump Map support
+  bumpColor?: string; // Specific greyscale color when in bump map mode
 }
 
 export const UiRect = ({
@@ -88,30 +90,37 @@ export const UiRect = ({
   shadow = false,
   depthTest = false,
   renderOrder,
-}: UiRectProps) => (
-  <group position={[x, y, z]}>
-    {shadow && (
-      <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
+  isBumpMap = false,
+  bumpColor = "#ffffff", // Default to max extrusion (white) if not specified
+}: UiRectProps) => {
+  const finalColor = isBumpMap ? bumpColor : color;
+
+  return (
+    <group position={[x, y, z]}>
+      {/* Shadows are disabled completely in Bump Map mode because they aren't physical geometry */}
+      {shadow && !isBumpMap && (
+        <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
+          <RoundedShapeComponent w={w} h={h} radius={radius} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={renderOrder != null ? 0.32 : 0.12}
+            depthTest={depthTest}
+          />
+        </mesh>
+      )}
+      <mesh renderOrder={renderOrder}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         <meshBasicMaterial
-          color="#000000"
-          transparent
-          opacity={renderOrder != null ? 0.12 : 0.12}
+          color={finalColor}
           depthTest={depthTest}
+          transparent={renderOrder != null && !isBumpMap}
+          opacity={renderOrder != null && !isBumpMap ? 0.999 : 1}
         />
       </mesh>
-    )}
-    <mesh renderOrder={renderOrder}>
-      <RoundedShapeComponent w={w} h={h} radius={radius} />
-      <meshBasicMaterial
-        color={color}
-        depthTest={depthTest}
-        transparent={renderOrder != null}
-        opacity={renderOrder != null ? 0.999 : 1}
-      />
-    </mesh>
-  </group>
-);
+    </group>
+  );
+};
 
 interface TopLabelProps {
   x: number;
@@ -119,6 +128,7 @@ interface TopLabelProps {
   z?: number;
   text: string;
   animateOnScroll?: boolean;
+  isBumpMap?: boolean;
 }
 
 export function TopLabel({
@@ -127,17 +137,19 @@ export function TopLabel({
   z = 0,
   text,
   animateOnScroll = false,
+  isBumpMap = false,
 }: TopLabelProps) {
   const w = 0.4;
   const h = 0.046;
-  const radius = h / 2; // Capsule shape
+  const radius = h / 2;
 
   const groupRef = useRef<THREE.Group>(null);
   const scroll = useScroll();
 
   useFrame(() => {
-    if (animateOnScroll && scroll && groupRef.current) {
-      // Calculate opacity based on scroll. Let's make it appear near the end (e.g. > 0.8)
+    // Disable opacity animations entirely when rendering the bump map
+    // We want the geometry to be constantly present for accurate 3D displacement
+    if (animateOnScroll && scroll && groupRef.current && !isBumpMap) {
       let targetOpacity = 0;
       if (scroll.offset > 0.8) {
         targetOpacity = Math.min((scroll.offset - 0.8) / 0.15, 1);
@@ -160,7 +172,6 @@ export function TopLabel({
           node.visible = targetOpacity > 0;
 
           if (mat && targetOpacity > 0) {
-            // The shadow mesh inside UiRect uses black color (#000000)
             const isBlackShadow =
               mat.color &&
               mat.color.getHexString &&
@@ -170,8 +181,6 @@ export function TopLabel({
               mat.fillOpacity = targetOpacity;
               mat.opacity = targetOpacity;
             } else {
-              // Vital: To explicitly prevent Z-fighting and "shininess",
-              // we only enable transparency on the solid meshes if they're actively fading < 1!
               if (!isBlackShadow) {
                 mat.transparent = targetOpacity < 1;
                 mat.opacity = targetOpacity;
@@ -197,6 +206,8 @@ export function TopLabel({
         radius={radius + 0.002}
         color="#cdc6bf"
         shadow
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff" // Extrude the border
       />
       <UiRect
         x={0}
@@ -206,11 +217,13 @@ export function TopLabel({
         h={h}
         radius={radius}
         color="#ffffff"
+        isBumpMap={isBumpMap}
+        bumpColor="#333333" // Indent the background slightly relative to border
       />
       <Text
         position={[w / 2, -h / 2, 0.002]}
         fontSize={TEXT_SIZES.TOP_LABEL}
-        color="#4a423a"
+        color={isBumpMap ? "#ffffff" : "#4a423a"} // White text means the text itself is extruded
         anchorX="center"
         anchorY="middle"
         fontStyle="normal"
@@ -227,9 +240,10 @@ interface AnaAyetTabProps {
   x: number;
   y: number;
   z: number;
+  isBumpMap?: boolean;
 }
 
-export function AnaAyetTab({ x, y, z }: AnaAyetTabProps) {
+export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
   return (
     <group position={[x, y, z]}>
       <UiRect
@@ -241,6 +255,8 @@ export function AnaAyetTab({ x, y, z }: AnaAyetTabProps) {
         radius={0.008}
         color="#96601b"
         shadow
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff" // Border extrusion
       />
       <UiRect
         x={0.003}
@@ -250,11 +266,13 @@ export function AnaAyetTab({ x, y, z }: AnaAyetTabProps) {
         h={0.039}
         radius={0.006}
         color="#e5ba71"
+        isBumpMap={isBumpMap}
+        bumpColor="#555555" // Mid-level extrusion for bg
       />
       <Text
         position={[0.045, -0.0225, 0.002]}
         fontSize={TEXT_SIZES.ANA_AYET_TAB}
-        color="#432c10"
+        color={isBumpMap ? "#ffffff" : "#432c10"}
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
@@ -282,6 +300,7 @@ interface VerseBoxProps {
   circleTextCol?: string;
   isPill?: boolean;
   borderWidth?: number;
+  isBumpMap?: boolean;
 }
 
 export const VerseBox = ({
@@ -299,6 +318,7 @@ export const VerseBox = ({
   circleTextCol,
   isPill = true,
   borderWidth,
+  isBumpMap = false,
 }: VerseBoxProps) => {
   // Reduce horizontal padding so text can occupy more space inside the pill
   const shrinkX = 0.001; // amount to shrink from left and right sides (reduced)
@@ -327,6 +347,7 @@ export const VerseBox = ({
 
   return (
     <group position={[finalX, y, z]}>
+      {/* Outer Border (Max Extrusion) */}
       <UiRect
         x={-bw}
         y={bw}
@@ -337,7 +358,10 @@ export const VerseBox = ({
         color={border}
         shadow
         renderOrder={10}
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff"
       />
+      {/* Inner Background (Mid Extrusion) */}
       <UiRect
         x={0}
         y={0}
@@ -347,31 +371,35 @@ export const VerseBox = ({
         radius={rad}
         color={bg}
         renderOrder={11}
+        isBumpMap={isBumpMap}
+        bumpColor="#333333"
       />
 
       <group position={[cx, -h / 2, 0.002]}>
+        {/* Circle Inner BG */}
         <mesh renderOrder={12}>
           <circleGeometry args={[cr - 0.002, 48]} />
           <meshBasicMaterial
-            color={circleBg || "#ffffff"}
+            color={isBumpMap ? "#222222" : circleBg || "#ffffff"}
             depthTest={false}
-            transparent
+            transparent={!isBumpMap}
             opacity={0.999}
           />
         </mesh>
+        {/* Circle Border */}
         <mesh position={[0, 0, -0.001]} renderOrder={12}>
           <circleGeometry args={[cr, 48]} />
           <meshBasicMaterial
-            color={circleBorderCol || CIRCLE_BORDER}
+            color={isBumpMap ? "#ffffff" : circleBorderCol || CIRCLE_BORDER}
             depthTest={false}
-            transparent
+            transparent={!isBumpMap}
             opacity={0.999}
           />
         </mesh>
         <Text
           position={[0, 0, 0.001]}
           fontSize={TEXT_SIZES.VERSE_NUMBER}
-          color={circleTextCol || TEXT_DARK}
+          color={isBumpMap ? "#ffffff" : circleTextCol || TEXT_DARK}
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"
@@ -387,7 +415,7 @@ export const VerseBox = ({
         fontSize={
           isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
         }
-        color={TEXT_DARK}
+        color={isBumpMap ? "#ffffff" : TEXT_DARK} // Text pushes out
         anchorX="center"
         anchorY="middle"
         maxWidth={textMaxW}

@@ -14,13 +14,11 @@ export const PADDING = 0.28;
 // Simplify layout logic:
 // Content width is the page width minus padding on both left and right
 export const CONTENT_W = PW - PADDING * 2;
-
-// START_X is simply the left PADDING. (Mathematically same as before, just clearer)
 export const START_X = PADDING;
 
-// Layout Math Engine
-const s2TopExtra = 0.025; // extra space for S2 top padding
-const s1Top = -0.17; // Push S1 higher up so everything fits
+// Layout Math Engine (Unchanged)
+const s2TopExtra = 0.025;
+const s1Top = -0.17;
 const s1Pad = 0.045;
 const gap = 0.02;
 const smallBoxH = 0.07;
@@ -28,8 +26,8 @@ const anaAyetH = 0.095;
 const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + gap + anaAyetH;
 
 const gapBetweenS1andS2 = 0.035;
-const s2Top = s1Top - s1H - gapBetweenS1andS2; // the actual top position of S2
-const s2PadTop = 0.035 + s2TopExtra; // Increased top padding inside S2
+const s2Top = s1Top - s1H - gapBetweenS1andS2;
+const s2PadTop = 0.035 + s2TopExtra;
 const s2PadBottom = 0.06;
 const bigBoxH = 0.095;
 const groupGap = 0.025;
@@ -63,7 +61,7 @@ export const layoutMath = {
   anaAyetH,
   s1H,
   s2Top,
-  s2Pad: s2PadTop, // Export top padding as s2Pad for layout logic compatibility
+  s2Pad: s2PadTop,
   s2PadTop,
   s2PadBottom,
   bigBoxH,
@@ -154,6 +152,7 @@ const SURAH_DATA = {
 
 interface PaperContentProps {
   imageUrl?: string;
+  isBumpMap?: boolean; // Added support for Bump Map at the top level
 }
 
 const ImageContent: React.FC<{ url: string }> = ({ url }) => {
@@ -166,17 +165,19 @@ const ImageContent: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
-export function PaperContent({ imageUrl }: PaperContentProps) {
+export function PaperContent({
+  imageUrl,
+  isBumpMap = false,
+}: PaperContentProps) {
   if (imageUrl) {
     return <ImageContent url={imageUrl} />;
   }
 
-  // New Rich Color Constants
-  const BG_COLOR = "#EBEBDF"; // Richer, slightly cool pale beige-grey (Canvas)
+  // If rendering for Bump Map, the canvas base must be pitch black
+  const BG_COLOR = isBumpMap ? "#000000" : "#EBEBDF";
 
   return (
     <>
-      {/* 1. Large background mesh to cover outside areas in richer color */}
       <mesh position={[PW / 2, -PAGE_HEIGHT / 2, -0.05]}>
         <planeGeometry args={[PW * 1.5, PAGE_HEIGHT * 1.5]} />
         <meshBasicMaterial color={BG_COLOR} />
@@ -191,13 +192,11 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
         bottom={-PAGE_HEIGHT}
         position={[0, 0, 5]}
       />
-      <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} />
-      {/* <QuranicBorder PW={PAGE_WIDTH} PAGE_HEIGHT={PAGE_HEIGHT} /> */}
-      {/* All content layers go at z >= 0.02 to sit on top of fill */}
+      <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} isBumpMap={isBumpMap} />
       <Text
         position={[PW / 2, -0.085, 0.02]}
         fontSize={TEXT_SIZES.BISMILLAH}
-        color={TEXT_DARK}
+        color={isBumpMap ? "#ffffff" : TEXT_DARK} // Text pushes out in bump map
         anchorX="center"
         anchorY="middle"
         textAlign="center"
@@ -207,18 +206,19 @@ export function PaperContent({ imageUrl }: PaperContentProps) {
       >
         {SURAH_DATA.bismillah}
       </Text>
-      {/* Existing layout math and components, placed on z=0.02 */}
       <SectionOne
         data={SURAH_DATA.section1}
         layout={layoutMath}
         startX={START_X}
         PW={PW}
+        isBumpMap={isBumpMap}
       />
       <SectionTwo
         data={SURAH_DATA.section2}
         layout={layoutMath}
         startX={START_X}
         PW={PW}
+        isBumpMap={isBumpMap}
       />
     </>
   );

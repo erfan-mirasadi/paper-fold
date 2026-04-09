@@ -82,13 +82,19 @@ interface SectionOneProps {
   layout: LayoutConfig;
   startX: number;
   PW: number;
+  isBumpMap?: boolean;
 }
 
-export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
+export function SectionOne({
+  data,
+  layout,
+  startX,
+  PW,
+  isBumpMap = false,
+}: SectionOneProps) {
   const { s1Top, s1Pad, gap, smallBoxH, anaAyetH, s1H, innerW, innerHalfW } =
     layout;
 
-  // Pure math for centering
   const baseX = startX + s1Pad;
 
   return (
@@ -102,6 +108,8 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
         radius={0.02}
         color={S1_OUTER_BORDER}
         shadow
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff"
       />
       <UiRect
         x={startX + 0.003}
@@ -111,6 +119,8 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
         h={s1H - 0.006}
         radius={0.017}
         color={S1_OUTER_BG}
+        isBumpMap={isBumpMap}
+        bumpColor="#222222"
       />
 
       {data.gridVerses.map((v: Verse, i: number) => {
@@ -134,11 +144,10 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
             circleBg={S1_OUTER_BORDER}
             circleTextCol="#ffffff"
             isPill={true}
+            isBumpMap={isBumpMap}
           />
         );
       })}
-
-      {/* Ana Ayet box and tab number 5 */}
 
       <group position={[0.0, -0.01, 0]}>
         <VerseBox
@@ -155,14 +164,22 @@ export function SectionOne({ data, layout, startX, PW }: SectionOneProps) {
           circleBg={S1_ANA_BORDER}
           circleTextCol="#ffffff"
           isPill={false}
+          isBumpMap={isBumpMap}
         />
         <AnaAyetTab
           x={baseX - 0.07 - s1Pad}
           y={s1Top - s1Pad - (smallBoxH * 2 + gap) - gap - anaAyetH / 2 + 0.046}
           z={0.005}
+          isBumpMap={isBumpMap}
         />
       </group>
-      <TopLabel x={PW / 2} y={s1Top} z={0.004} text={data.label} />
+      <TopLabel
+        x={PW / 2}
+        y={s1Top}
+        z={0.004}
+        text={data.label}
+        isBumpMap={isBumpMap}
+      />
     </group>
   );
 }
@@ -172,12 +189,19 @@ interface SectionTwoProps {
   layout: LayoutConfig;
   startX: number;
   PW: number;
+  isBumpMap?: boolean;
 }
 
-export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
+export function SectionTwo({
+  data,
+  layout,
+  startX,
+  PW,
+  isBumpMap = false,
+}: SectionTwoProps) {
   const {
     s2Top,
-    s2Pad, // Top padding basically
+    s2Pad,
     s2PadTop,
     s2PadBottom,
     bigBoxH,
@@ -261,6 +285,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
           circleBg={borderCol}
           circleTextCol="#ffffff"
           isPill={true}
+          isBumpMap={isBumpMap}
         />
       );
     });
@@ -277,6 +302,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={s2H}
         radius={0.02}
         color={S2_OUTER_BORDER}
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff"
       />
       <UiRect
         x={startX + 0.003}
@@ -286,6 +313,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={s2H - 0.006}
         radius={0.017}
         color={S2_OUTER_BG}
+        isBumpMap={isBumpMap}
+        bumpColor="#222222"
       />
 
       {/* ================= Upper container box (6-10) ================= */}
@@ -297,6 +326,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={sg1_H + bw * 2}
         radius={0.025}
         color={SG_BORDER}
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff"
       />
       <UiRect
         x={sg_X}
@@ -306,6 +337,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={sg1_H}
         radius={0.022}
         color={SG_BG}
+        isBumpMap={isBumpMap}
+        bumpColor="#333333"
       />
 
       {/* ================= Lower container box (15-19) ================= */}
@@ -317,6 +350,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={sg2_H + bw * 2}
         radius={0.025}
         color={SG_BORDER}
+        isBumpMap={isBumpMap}
+        bumpColor="#ffffff"
       />
       <UiRect
         x={sg_X}
@@ -326,6 +361,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={sg2_H}
         radius={0.022}
         color={SG_BG}
+        isBumpMap={isBumpMap}
+        bumpColor="#333333"
       />
 
       {/* Verse 6 */}
@@ -343,6 +380,7 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         circleBg={BLUE_THEME}
         circleTextCol="#ffffff"
         isPill={false}
+        isBumpMap={isBumpMap}
       />
 
       {/* Upper group background (applied #845775) */}
@@ -354,6 +392,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={groupH}
         radius={0.015}
         color={"#845775"}
+        isBumpMap={isBumpMap}
+        bumpColor="#444444"
       />
       {renderGroupVerses(
         data.colorGroups[0].verses,
@@ -374,6 +414,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         radius={0.015}
         color={GREEN_THEME}
         shadow
+        isBumpMap={isBumpMap}
+        bumpColor="#444444"
       />
       {renderGroupVerses(
         data.colorGroups[1].verses,
@@ -393,6 +435,8 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         h={groupH}
         radius={0.015}
         color={"#845775"}
+        isBumpMap={isBumpMap}
+        bumpColor="#444444"
       />
       {renderGroupVerses(
         data.colorGroups[2].verses,
@@ -418,9 +462,10 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         circleBg={BLUE_THEME}
         circleTextCol="#ffffff"
         isPill={false}
+        isBumpMap={isBumpMap}
       />
 
-      {/* Connecting lines */}
+      {/* SideCurves are purely visual lines, they don't need bump mapped generally, but you can pass it if you want them embossed */}
       <SideCurves layout={layout} startX={startX} />
       <TopLabel
         x={PW / 2}
@@ -428,8 +473,15 @@ export function SectionTwo({ data, layout, startX, PW }: SectionTwoProps) {
         z={0.004}
         text={data.topLabel}
         animateOnScroll={true}
+        isBumpMap={isBumpMap}
       />
-      <TopLabel x={PW / 2} y={s2Top - s2H} z={0.004} text={data.bottomLabel} />
+      <TopLabel
+        x={PW / 2}
+        y={s2Top - s2H}
+        z={0.004}
+        text={data.bottomLabel}
+        isBumpMap={isBumpMap}
+      />
     </group>
   );
 }
