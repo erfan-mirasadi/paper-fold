@@ -269,8 +269,8 @@ export function TopLabel({
     // Scroll animation logic completely disabled for BumpMap to preserve structure
     if (animateOnScroll && scroll && groupRef.current && !isBumpMap) {
       let targetOpacity = 0;
-      if (scroll.offset > 0.8) {
-        targetOpacity = Math.min((scroll.offset - 0.8) / 0.15, 1);
+      if (scroll.offset > 0.4) {
+        targetOpacity = Math.min((scroll.offset - 0.4) / 0.15, 1);
       }
 
       groupRef.current.traverse((child: THREE.Object3D) => {

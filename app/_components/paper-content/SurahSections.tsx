@@ -119,7 +119,8 @@ export function SectionOne({
   isBumpMap = false,
   isFolded = false,
 }: SectionOneProps) {
-  const { s1Top, s1Pad, gap, smallBoxH, anaAyetH, s1H, innerW, innerHalfW } = layout;
+  const { s1Top, s1Pad, gap, smallBoxH, anaAyetH, s1H, innerW, innerHalfW } =
+    layout;
   const baseX = startX + s1Pad;
 
   return (
@@ -204,7 +205,7 @@ export function SectionOne({
           isBumpMap={isBumpMap}
         />
       </group>
-      
+
       {/* Absolute Section Title Label Pinning Target */}
       <TopLabel
         x={PW / 2}
@@ -277,16 +278,22 @@ export function SectionTwo({
   const box_W = s2_innerW + sgPad * 2;
 
   // Top Hollow Wrapper constraints bridging top content into the main Group clusters
-  const tBox_Y = s2Top; 
+  // Mirrored shifting for Section 2 (Top moves down, Bottom moves up)
+  const S2_MIRROR_SHIFT = 0.015;
+  const shiftedTop = s2Top - S2_MIRROR_SHIFT;
+  const shiftedBot = s2Top - s2H + S2_MIRROR_SHIFT;
+  const shiftedH = s2H - 2 * S2_MIRROR_SHIFT;
+
+  const tBox_Y = shiftedTop;
   const tBox_bottom = (baseG1Y || g1Y) - groupH - boxExtOffset;
   const tBox_H = tBox_Y - tBox_bottom;
 
   // Bottom Hollow Wrapper bridging final clusters out towards completion texts
   const bBox_Y = (baseG3Y || g3Y) + boxExtOffset;
-  const bBox_bottom = s2Top - s2H; 
+  const bBox_bottom = shiftedBot;
   const bBox_H = bBox_Y - bBox_bottom;
 
-  // Helper handling individual Verse Arrays placed inside unified thematic groupings 
+  // Helper handling individual Verse Arrays placed inside unified thematic groupings
   const renderGroupVerses = (
     verses: Verse[],
     gY: number,
@@ -295,17 +302,18 @@ export function SectionTwo({
     isGroup2: boolean = false,
     extraYOffset: number = 0,
   ) => {
-    // Map directly to dynamically shifted indent widths based on parent group 
+    // Map directly to dynamically shifted indent widths based on parent group
     const currentBaseX = isGroup2 ? g2_baseX : baseX;
     const currentHalfW = isGroup2 ? g2_groupInnerHalfW : groupInnerHalfW;
 
     return verses.map((v, i) => {
       const rowOffset = i >= 2 ? smallBoxH2 + s2Gap + extraYOffset : 0;
-      
-      // Override explicitly targeted internal highlighted sequences 
-      const finalBg = (v.number >= 11 && v.number <= 14) 
-        ? CAPSULE_BG_12_14 
-        : bgColor || WHITE_VERSE_BG;
+
+      // Override explicitly targeted internal highlighted sequences
+      const finalBg =
+        v.number >= 11 && v.number <= 14
+          ? CAPSULE_BG_12_14
+          : bgColor || WHITE_VERSE_BG;
 
       return (
         <VerseBox
@@ -335,10 +343,10 @@ export function SectionTwo({
       {/* --------------------- SECTION BASE WRAPS --------------------- */}
       <UiRect
         x={startX}
-        y={s2Top}
+        y={shiftedTop}
         z={0}
         w={sectionW}
-        h={s2H}
+        h={shiftedH}
         radius={0.02}
         color={S2_OUTER_BORDER}
         isBumpMap={isBumpMap}
@@ -346,10 +354,10 @@ export function SectionTwo({
       />
       <UiRect
         x={startX + 0.003}
-        y={s2Top - 0.003}
+        y={shiftedTop - 0.003}
         z={0.001}
         w={sectionW - 0.006}
-        h={s2H - 0.006}
+        h={shiftedH - 0.006}
         radius={0.017}
         color={S2_OUTER_BG}
         isBumpMap={isBumpMap}
@@ -462,7 +470,7 @@ export function SectionTwo({
         data.colorGroups[1].verseBg,
         GREEN_THEME,
         true,
-        0,
+        extraRowGap,
       )}
 
       {/* --------------------- CONTENT GROUP 3 (LOWER) --------------------- */}
@@ -506,22 +514,23 @@ export function SectionTwo({
 
       {/* Extra Structural Elements (Curve decorations and pinning labels) */}
       <SideCurves layout={layout} startX={startX} />
-      
+
       <TopLabel
         x={PW / 2}
-        y={s2Top}
+        y={shiftedTop}
         z={0.004}
         text={data.topLabel}
         animateOnScroll={true}
         isBumpMap={isBumpMap}
         partialBorder={true}
       />
-      
+
       <TopLabel
         x={PW / 2}
-        y={s2Top - s2H}
+        y={shiftedBot}
         z={0.004}
         text={data.bottomLabel}
+        animateOnScroll={true}
         isBumpMap={isBumpMap}
         partialBorder={true}
         bottomBorder={true}

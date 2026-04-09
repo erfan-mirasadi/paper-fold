@@ -1,12 +1,12 @@
 "use client";
 
 import { OrthographicCamera, Text, useTexture } from "@react-three/drei";
-import { 
-  TEXT_DARK, 
-  TEXT_SIZES, 
-  PAGE_BG_COLOR, 
-  BUMP_BASE, 
-  BUMP_MAX 
+import {
+  TEXT_DARK,
+  TEXT_SIZES,
+  PAGE_BG_COLOR,
+  BUMP_BASE,
+  BUMP_MAX,
 } from "./SharedUI";
 import { SectionOne, SectionTwo } from "./SurahSections";
 import { Boarder } from "./Boarder";
@@ -31,7 +31,7 @@ export const START_X = PADDING;
 // ============================================================================
 
 // --- Section 1 (Top Block) Dimensions ---
-const s1Top = -0.17;
+const s1Top = -0.17; // Shift everything up from -0.17
 const s1Pad = 0.045;
 const gap = 0.02;
 const smallBoxH = 0.07;
@@ -48,10 +48,11 @@ const s2PadBottom = 0.06;
 const bigBoxH = 0.095;
 const groupGap = 0.025;
 const groupPad = 0.02;
+const groupPadBottom = 0.025; // Reduced from 0.038 to shrink the border from bottom
 const s2Gap = 0.02;
 const smallBoxH2 = 0.075;
-const groupH = groupPad * 2 + (smallBoxH2 * 2 + s2Gap);
-const middleExtraGap = 0.04;
+const groupH = groupPad + groupPadBottom + (smallBoxH2 * 2 + s2Gap);
+const middleExtraGap = 0.033; // Increased to move G1 up and G3 down relative to middle
 
 // Full calculation of Section 2 total Height
 const s2H =
@@ -71,10 +72,10 @@ const baseG2Y = baseG1Y - groupH - (groupGap + middleExtraGap);
 const baseG3Y = baseG2Y - groupH - (groupGap + middleExtraGap);
 const baseV19Y = baseG3Y - groupH - groupGap;
 
-// Adding standard inner padding (0.01) to cleanly isolate elements visually 
-const g1Y = baseG1Y + 0.01;
-const g2Y = baseG2Y + 0.01;
-const g3Y = baseG3Y + 0.01;
+// Removed the + 0.01 offset to ensure perfect symmetry across all groups
+const g1Y = baseG1Y;
+const g2Y = baseG2Y;
+const g3Y = baseG3Y;
 const v19Y = baseV19Y;
 
 // ============================================================================
@@ -92,7 +93,7 @@ export const layoutMath = {
   smallBoxH,
   anaAyetH,
   s1H,
-  
+
   // S2 Variables
   s2Top,
   s2Pad: s2PadTop,
@@ -105,7 +106,7 @@ export const layoutMath = {
   smallBoxH2,
   groupH,
   s2H,
-  
+
   // Placements Variables
   v6Y,
   g1Y,
@@ -240,7 +241,7 @@ export function PaperContent({
         <meshBasicMaterial color={activeBg} />
       </mesh>
       <color attach="background" args={[activeBg]} />
-      
+
       {/* Make outside background richer */}
       <OrthographicCamera
         makeDefault
@@ -251,12 +252,12 @@ export function PaperContent({
         position={[0, 0, 5]}
       />
       <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} isBumpMap={isBumpMap} />
-      
+
       {/* Bismillah Header Title */}
       <Text
         position={[PW / 2, -0.085, 0.02]}
         fontSize={TEXT_SIZES.BISMILLAH}
-        color={isBumpMap ? BUMP_MAX : TEXT_DARK} 
+        color={isBumpMap ? BUMP_MAX : TEXT_DARK}
         anchorX="center"
         anchorY="middle"
         textAlign="center"
@@ -266,7 +267,7 @@ export function PaperContent({
       >
         {SURAH_DATA.bismillah}
       </Text>
-      
+
       {/* Main Blocks rendering passed layout constraints safely */}
       <SectionOne
         data={SURAH_DATA.section1}

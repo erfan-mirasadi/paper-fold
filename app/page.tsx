@@ -9,7 +9,6 @@ import {
   TafsirUI,
   TafsirScrollTracker,
 } from "./_components/ui-overlay/TafsirUI";
-
 const Experience = dynamic(
   () => import("./_components/Experience").then((mod) => mod.Experience),
   { ssr: false },
@@ -102,8 +101,6 @@ export default function Home() {
           </Canvas>
         </div>
       </Suspense>
-
-      {/* TafsirUI is now a plain HTML overlay, rendered OUTSIDE the Canvas */}
       <TafsirUI isDarkMode={isDarkMode} />
     </main>
   );
