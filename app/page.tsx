@@ -61,7 +61,7 @@ export default function Home() {
           <Canvas shadows camera={{ position: [0, 1, 1.7], fov: 45 }}>
             <color attach="background" args={[bgColor]} />
             <TheatreManager>
-              <ScrollControls pages={3} damping={0.2}>
+              <ScrollControls pages={2} damping={0.2}>
                 <Experience isDarkMode={isDarkMode} />
                 <TafsirScrollTracker />
               </ScrollControls>

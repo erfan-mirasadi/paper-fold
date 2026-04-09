@@ -1,7 +1,7 @@
 "use client";
 
-import { Environment, useScroll, OrbitControls } from "@react-three/drei";
-import { PerspectiveCamera } from "@theatre/r3f";
+import { Environment, useScroll, OrbitControls, PerspectiveCamera } from "@react-three/drei";
+// import { PerspectiveCamera } from "@theatre/r3f";
 import { useFrame } from "@react-three/fiber";
 import { useRef, useEffect, useState } from "react";
 import { SinglePaper } from "./SinglePaper";
@@ -15,7 +15,7 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
   const scroll = useScroll();
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
-  const [controlsEnabled, setControlsEnabled] = useState(false);
+  const [controlsEnabled, setControlsEnabled] = useState(true);
 
   useEffect(() => {
     if (controlsEnabled) {
@@ -26,6 +26,12 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
   }, [controlsEnabled]);
 
   useFrame(() => {
+    // Force Theatre sequence to the end of the intro
+    if (mainSheet) {
+      mainSheet.sequence.position = 5;
+    }
+
+    /*
     if (mainSheet && scroll) {
       const INTRO_SCROLL_RATIO = 0.3;
       const THEATRE_ANIMATION_LENGTH = 5;
@@ -56,12 +62,13 @@ export const Experience: React.FC<ExperienceProps> = ({ isDarkMode }) => {
         }
       }
     }
+    */
   });
 
   return (
     <>
       <PerspectiveCamera
-        theatreKey="Camera"
+        // theatreKey="Camera"
         makeDefault
         position={[0, 1, 1.7]}
         fov={45}

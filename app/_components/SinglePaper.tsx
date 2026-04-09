@@ -144,14 +144,16 @@ export const SinglePaper: React.FC = () => {
     const bones = skinnedMeshRef.current.skeleton.bones;
     const baseRotation = degToRad(10);
 
-    //Paper unfolds only after intro
-    const INTRO_SCROLL_RATIO = 0.3;
-    let paperProgress = 0;
+    //Paper unfolds from the start (intro removed)
+    // const INTRO_SCROLL_RATIO = 0.3;
+    let paperProgress = scroll.offset;
 
+    /*
     if (scroll.offset > INTRO_SCROLL_RATIO) {
       paperProgress =
         (scroll.offset - INTRO_SCROLL_RATIO) / (1 - INTRO_SCROLL_RATIO);
     }
+    */
 
     const maxStageIndex = FOLD_STORY_STEPS.length - 1;
     const currentStage = Math.round(paperProgress * maxStageIndex);
