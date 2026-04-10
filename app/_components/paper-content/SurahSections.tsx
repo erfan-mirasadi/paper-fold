@@ -28,6 +28,8 @@ import {
   WHITE_BASE,
 } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
+import { ORIGINAL_TEXTURE_TIMING } from "../pop-up-verses/useFoldAnimation";
+import { useEffect, useState } from "react";
 
 // ============================================================================
 // DATA INTERFACES
@@ -123,6 +125,18 @@ export function SectionOne({
     layout;
   const baseX = startX + s1Pad;
 
+  const [delayedIsFolded, setDelayedIsFolded] = useState(isFolded);
+
+  useEffect(() => {
+    const delay = isFolded
+      ? ORIGINAL_TEXTURE_TIMING.hideDelay
+      : ORIGINAL_TEXTURE_TIMING.showDelay;
+    const timeout = setTimeout(() => {
+      setDelayedIsFolded(isFolded);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [isFolded]);
+
   return (
     <group>
       {/* Outer wrapper panel borders */}
@@ -152,7 +166,7 @@ export function SectionOne({
 
       {/* Renders main verse 2 x 2 grid inside Section One limits */}
       {data.gridVerses.map((v: Verse, i: number) => {
-        if (isFolded && (v.number === 1 || v.number === 2)) return null;
+        if (delayedIsFolded && (v.number === 1 || v.number === 2)) return null;
 
         const isRightCol = i % 2 !== 0;
         const isBottomRow = i >= 2;
