@@ -559,3 +559,105 @@ export const VerseBox = ({
     </group>
   );
 };
+
+/**
+ * DirectionalCross
+ * A cross with arrows at each end, used for visual guidance between verses 11-14.
+ */
+export function DirectionalCross({
+  x,
+  y,
+  z = 0.005,
+  size = 0.06,
+  color = MAROON_THEME,
+  isBumpMap = false,
+}: {
+  x: number;
+  y: number;
+  z?: number;
+  size?: number;
+  color?: string;
+  isBumpMap?: boolean;
+}) {
+  const thickness = 0.006;
+  const arrowSize = 0.029;
+  const finalColor = isBumpMap ? BUMP_MAX : color;
+
+  const arrowShape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0); // Tip
+    s.lineTo(arrowSize / 1.6, -arrowSize);
+    s.lineTo(-arrowSize / 1.6, -arrowSize);
+    s.lineTo(0, 0);
+    return s;
+  }, [arrowSize]);
+
+  return (
+    <group position={[x, y, z]}>
+      {/* Horizontal Line */}
+      <UiRect
+        x={-size / 2}
+        y={thickness / 2}
+        z={0}
+        w={size}
+        h={thickness}
+        color={finalColor}
+        isBumpMap={isBumpMap}
+        radius={thickness / 2}
+        renderOrder={20}
+        depthTest={false}
+      />
+      {/* Vertical Line */}
+      <UiRect
+        x={-thickness / 2}
+        y={size / 2}
+        z={0.001}
+        w={thickness}
+        h={size}
+        color={finalColor}
+        isBumpMap={isBumpMap}
+        radius={thickness / 2}
+        renderOrder={20}
+        depthTest={false}
+      />
+
+      {/* Arrow Heads */}
+      {/* Top */}
+      <mesh
+        position={[0, size / 2 + arrowSize * 0.8, 0.002]}
+        rotation={[0, 0, 0]}
+        renderOrder={20}
+      >
+        <shapeGeometry args={[arrowShape]} />
+        <meshBasicMaterial color={finalColor} depthTest={false} />
+      </mesh>
+      {/* Bottom */}
+      <mesh
+        position={[0, -size / 2 - arrowSize * 0.8, 0.002]}
+        rotation={[0, 0, Math.PI]}
+        renderOrder={20}
+      >
+        <shapeGeometry args={[arrowShape]} />
+        <meshBasicMaterial color={finalColor} depthTest={false} />
+      </mesh>
+      {/* Right */}
+      <mesh
+        position={[size / 2 + arrowSize * 0.8, 0, 0.002]}
+        rotation={[0, 0, -Math.PI / 2]}
+        renderOrder={20}
+      >
+        <shapeGeometry args={[arrowShape]} />
+        <meshBasicMaterial color={finalColor} depthTest={false} />
+      </mesh>
+      {/* Left */}
+      <mesh
+        position={[-size / 2 - arrowSize * 0.8, 0, 0.002]}
+        rotation={[0, 0, Math.PI / 2]}
+        renderOrder={20}
+      >
+        <shapeGeometry args={[arrowShape]} />
+        <meshBasicMaterial color={finalColor} depthTest={false} />
+      </mesh>
+    </group>
+  );
+}

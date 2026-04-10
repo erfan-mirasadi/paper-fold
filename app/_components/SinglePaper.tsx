@@ -11,6 +11,7 @@ import {
   PaperContent,
   PAGE_WIDTH,
   PAGE_HEIGHT,
+  layoutMath,
 } from "./paper-content/index";
 import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
@@ -94,7 +95,9 @@ interface SinglePaperProps {
   isFolded?: boolean;
 }
 
-export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded = false }) => {
+export const SinglePaper: React.FC<SinglePaperProps> = ({
+  isFolded = false,
+}) => {
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const scroll = useScroll();
@@ -249,6 +252,49 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({ isFolded = false }) =>
                 />
               </mesh>
             ))}
+
+            {/* Vertical crease line between verses 7 to 18 */}
+            <mesh
+              position={[
+                PAGE_WIDTH / 2,
+                (layoutMath.g1Y + (layoutMath.g3Y - layoutMath.groupH)) / 2,
+                0.62,
+              ]}
+              rotation={[0, 0, Math.PI / 2]}
+            >
+              <planeGeometry
+                args={[
+                  layoutMath.g1Y - (layoutMath.g3Y - layoutMath.groupH),
+                  0.25,
+                ]}
+              />
+              <meshBasicMaterial
+                map={creaseNormalMap}
+                transparent={true}
+                depthTest={false}
+              />
+            </mesh>
+
+            {/* Vertical crease line between verses 1 to 4 (Section 1) */}
+            <mesh
+              position={[
+                PAGE_WIDTH / 2,
+                layoutMath.s1Top -
+                  layoutMath.s1Pad -
+                  (layoutMath.smallBoxH + layoutMath.gap / 2),
+                0.62,
+              ]}
+              rotation={[0, 0, Math.PI / 2]}
+            >
+              <planeGeometry
+                args={[layoutMath.smallBoxH * 2 + layoutMath.gap, 0.25]}
+              />
+              <meshBasicMaterial
+                map={creaseNormalMap}
+                transparent={true}
+                depthTest={false}
+              />
+            </mesh>
           </RenderTexture>
         </meshStandardMaterial>
       </primitive>
