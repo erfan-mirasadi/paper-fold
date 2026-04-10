@@ -58,6 +58,30 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
     ],
   },
   {
+    id: "custom-step-1",
+    folds: [
+      { direction: -1, angleFactor: 0 }, // 1) below 6
+      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
+      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
+      { direction: 1, angleFactor: -1 }, // 4) between 11/12 and 13/14
+      { direction: -1, angleFactor: 0 }, // 5) above 15/16
+      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
+      { direction: -1, angleFactor: 0 }, // 7) above 19
+    ],
+  },
+  {
+    id: "custom-step-2",
+    folds: [
+      { direction: -1, angleFactor: 0 }, // 1) below 6
+      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
+      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
+      { direction: -1, angleFactor: 1 }, // 4) between 11/12 and 13/14
+      { direction: -1, angleFactor: -1 }, // 5) above 15/16
+      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
+      { direction: -1, angleFactor: 0 }, // 7) above 19
+    ],
+  },
+  {
     id: "end",
     folds: [
       { direction: -1, angleFactor: 0 }, // 1) below 6
