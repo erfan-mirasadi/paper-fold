@@ -17,10 +17,7 @@ interface ExperienceProps {
   onTogglePopUp?: () => void;
 }
 
-export function Experience({
-  isDarkMode,
-  isFolded,
-}: ExperienceProps) {
+export function Experience({ isDarkMode, isFolded }: ExperienceProps) {
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const [controlsEnabled, setControlsEnabled] = useState(true);
@@ -41,7 +38,7 @@ export function Experience({
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 1.4, 1.6]} fov={45} />
+      <PerspectiveCamera makeDefault position={[0, 1.6, 1.5]} fov={45} />
 
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />

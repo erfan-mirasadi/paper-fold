@@ -1,44 +1,48 @@
 import { useState } from "react";
 import { useSpring } from "@react-spring/three";
 
-// ============================================================================
-// TIMING & ANIMATION CONSTANTS (Adjust these values to tweak the effect!)
-// ============================================================================
+// TIMING & ANIMATION CONSTANTS
 export const POPUP_TIMING = {
-  // 1) Position & Appearance Values
-  dipDepth: -0.03, // How deep into the paper it goes when hidden (Z-axis offset)
-  restDepth: 0.001, // The normal position when flat on the paper surface
+  dipDepth: 0.001,
+  restDepth: 0.002,
 
-  // 2) Spring Physics Configs
-  springMass: 2,
-  springTension: 140,
-  springFriction: 30,
+  springMass: 1.9,
+  springTension: 110,
+  springFriction: 22,
 
-  // 3) APPEARING (Going from hidden inside paper -> Popping up)
-  appearDelayZAndOpacity: 0, // It starts rising & fading in immediately
-  appearDelayFold: 450, // It waits a bit before it starts folding upward
+  appearDelayZAndOpacity: 0,
+  appearDelayFold: 150,
+  appearDelayShadow: 150,
 
-  // 4) DISAPPEARING (Folding flat -> Hiding inside paper)
-  hideDelayFold: 0, // Starts folding down flat immediately
-  hideDelayZAndOpacity: 500, // Waits for the fold to finish, then sinks & fades out
+  hideDelayFold: 0,
+  hideDelayZAndOpacity: 350,
+  hideDelayShadow: 0,
 };
 
 export const ORIGINAL_TEXTURE_TIMING = {
-  hideDelay: 250, // Delay before original static text disappears when pop-up opens
-  showDelay: 500, // Delay before original static text reappears when pop-up closes
+  hideDelay: 150,
+  showDelay: 350,
 };
 
-// ============================================================================
-// ANIMATION HOOK
-// Handles the spring physics, rotation values, and visibility unmounting.
-// ============================================================================
+// SHADOW CONFIGURATION
+export const SHADOW_CONFIG = {
+  baseOffsetX: 0.0,
+  baseOffsetY: -0.004,
+  foldOffsetX: 0,
+  foldOffsetY: -0.03,
+
+  shrinkX: 0.65,
+  shrinkY: 0.2,
+
+  opacityFlat: 0.6,
+  opacityFolded: 0.05,
+};
 
 export function useFoldAnimation(isFolded: boolean) {
   const [isVisible, setIsVisible] = useState(isFolded);
   const [animationComplete, setAnimationComplete] = useState(!isFolded);
   const [prevIsFolded, setPrevIsFolded] = useState(isFolded);
 
-  // Sync state explicitly to avoid React cascading render warnings
   if (isFolded !== prevIsFolded) {
     setPrevIsFolded(isFolded);
     if (isFolded) {
@@ -47,33 +51,36 @@ export function useFoldAnimation(isFolded: boolean) {
     }
   }
 
-  // Spring for Rotation & Shadow (Folding Action)
-  const { rotLeft, rotRight, shadowVal } = useSpring({
+  const springConfig = {
+    mass: POPUP_TIMING.springMass,
+    tension: POPUP_TIMING.springTension,
+    friction: POPUP_TIMING.springFriction,
+  };
+
+  const { rotLeft, rotRight, foldProgress } = useSpring({
     rotLeft: isFolded ? Math.PI / 2.05 : 0,
     rotRight: isFolded ? -Math.PI / 2.05 : 0,
-    shadowVal: isFolded ? 1 : 0,
-    config: {
-      mass: POPUP_TIMING.springMass,
-      tension: POPUP_TIMING.springTension,
-      friction: POPUP_TIMING.springFriction,
-    },
+    foldProgress: isFolded ? 1 : 0,
+    config: springConfig,
     delay: isFolded ? POPUP_TIMING.appearDelayFold : POPUP_TIMING.hideDelayFold,
   });
 
-  // Spring for Position & Opacity (Sinking into paper & Fading)
+  const { shadowGlobalOpacity } = useSpring({
+    shadowGlobalOpacity: isFolded ? 1 : 0,
+    config: springConfig,
+    delay: isFolded
+      ? POPUP_TIMING.appearDelayShadow
+      : POPUP_TIMING.hideDelayShadow,
+  });
+
   const { zOffset, opacity } = useSpring({
     zOffset: isFolded ? POPUP_TIMING.restDepth : POPUP_TIMING.dipDepth,
     opacity: isFolded ? 1 : 0,
-    config: {
-      mass: POPUP_TIMING.springMass,
-      tension: POPUP_TIMING.springTension,
-      friction: POPUP_TIMING.springFriction,
-    },
+    config: springConfig,
     delay: isFolded
       ? POPUP_TIMING.appearDelayZAndOpacity
       : POPUP_TIMING.hideDelayZAndOpacity,
     onRest: (result) => {
-      // Unmount safely ONLY after all closing animations finish
       if (result.finished && !isFolded) {
         setAnimationComplete(true);
         setIsVisible(false);
@@ -86,7 +93,8 @@ export function useFoldAnimation(isFolded: boolean) {
     animationComplete,
     rotLeft,
     rotRight,
-    shadowVal,
+    foldProgress,
+    shadowGlobalOpacity,
     zOffset,
     opacity,
   };

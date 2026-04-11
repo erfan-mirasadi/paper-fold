@@ -30,17 +30,10 @@ import {
   Vector3,
   Vector2,
 } from "three";
-import { degToRad } from "three/src/math/MathUtils.js";
 import { Tafsir3DTracker } from "./ui-overlay/Tafsir3DTracker";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
-//paper curve
-const AMBIENT_CURVE_MULTIPLIER = 0.07;
-
-// Controls the strength of the ambient paper curve
-const insideCurveStrength = 0.28 * AMBIENT_CURVE_MULTIPLIER;
-const outsideCurveStrength = 0.05 * AMBIENT_CURVE_MULTIPLIER;
 
 export const PAGE_DEPTH = 0.003;
 
@@ -149,11 +142,10 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     if (!skinnedMeshRef.current || !group.current) return;
 
     const bones = skinnedMeshRef.current.skeleton.bones;
-    const baseRotation = degToRad(10);
 
     //Paper unfolds from the start (intro removed)
     // const INTRO_SCROLL_RATIO = 0.3;
-    let paperProgress = scroll.offset;
+    const paperProgress = scroll.offset;
 
     /*
     if (scroll.offset > INTRO_SCROLL_RATIO) {
@@ -190,18 +182,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     for (let i = 0; i < bones.length; i++) {
       const target = i === 0 ? group.current : bones[i];
 
-      // Ambient paper curve
-      const normalizedI = (i / PAGE_SEGMENTS) * 30;
-      const insideCurveIntensity =
-        normalizedI < 8 ? Math.sin(normalizedI * 0.2 + 0.25) : 0;
-      const outsideCurveIntensity =
-        normalizedI >= 8 ? Math.cos(normalizedI * 0.3 + 0.09) : 0;
-
-      const curveAngle =
-        insideCurveStrength * insideCurveIntensity * baseRotation -
-        outsideCurveStrength * outsideCurveIntensity * baseRotation;
-
-      const targetAngle = curveAngle + foldContributions[i];
+      const targetAngle = foldContributions[i];
 
       easing.dampAngle(target.rotation, "x", targetAngle, easingFactor, delta);
     }

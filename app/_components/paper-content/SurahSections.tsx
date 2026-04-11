@@ -31,10 +31,8 @@ import { SideCurves } from "./SideCurves";
 import { ORIGINAL_TEXTURE_TIMING } from "../pop-up-verses/useFoldAnimation";
 import { useEffect, useState } from "react";
 
-// ============================================================================
-// DATA INTERFACES
 // Setup structure of the content mapped dynamically down from `index.tsx`.
-// ============================================================================
+
 export interface Verse {
   number: number;
   text: string;
@@ -59,10 +57,7 @@ export interface SectionTwoData {
   bottomLabel: string;
 }
 
-// ============================================================================
-// LAYOUT CONFIG INTERFACE
-// Mapped safely representing absolutely placed items across Section layout.
-// ============================================================================
+// Mapped safely representing absolutely placed items across Section layout
 export interface LayoutConfig {
   sectionW: number;
   innerW: number;
@@ -100,10 +95,9 @@ export interface LayoutConfig {
   extraRowGap: number;
 }
 
-// ============================================================================
 // SECTION 1 (UPPER WRAPPER)
 // Responsible for Top content visualization with Main Grid arrays and single AnaAyet tag
-// ============================================================================
+
 interface SectionOneProps {
   data: SectionOneData;
   layout: LayoutConfig;
@@ -166,7 +160,7 @@ export function SectionOne({
 
       {/* Renders main verse 2 x 2 grid inside Section One limits */}
       {data.gridVerses.map((v: Verse, i: number) => {
-        if (delayedIsFolded && (v.number === 1 || v.number === 2)) return null;
+        if (delayedIsFolded) return null;
 
         const isRightCol = i % 2 !== 0;
         const isBottomRow = i >= 2;
@@ -232,8 +226,6 @@ export function SectionOne({
     </group>
   );
 }
-
-// ============================================================================
 // SECTION 2 (LOWER WRAPPER)
 // Manages large verse grids grouped into connected 3 main containers.
 // ============================================================================
@@ -243,6 +235,7 @@ interface SectionTwoProps {
   startX: number;
   PW: number;
   isBumpMap?: boolean;
+  isFolded?: boolean;
 }
 
 export function SectionTwo({
@@ -251,6 +244,7 @@ export function SectionTwo({
   startX,
   PW,
   isBumpMap = false,
+  isFolded = false,
 }: SectionTwoProps) {
   const {
     s2Top,
@@ -307,6 +301,18 @@ export function SectionTwo({
   const bBox_bottom = shiftedBot;
   const bBox_H = bBox_Y - bBox_bottom;
 
+  const [delayedIsFolded, setDelayedIsFolded] = useState(isFolded);
+
+  useEffect(() => {
+    const delay = isFolded
+      ? ORIGINAL_TEXTURE_TIMING.hideDelay
+      : ORIGINAL_TEXTURE_TIMING.showDelay;
+    const timeout = setTimeout(() => {
+      setDelayedIsFolded(isFolded);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [isFolded]);
+
   // Helper handling individual Verse Arrays placed inside unified thematic groupings
   const renderGroupVerses = (
     verses: Verse[],
@@ -316,6 +322,8 @@ export function SectionTwo({
     isGroup2: boolean = false,
     extraYOffset: number = 0,
   ) => {
+    if (delayedIsFolded) return null;
+
     // Map directly to dynamically shifted indent widths based on parent group
     const currentBaseX = isGroup2 ? g2_baseX : baseX;
     const currentHalfW = isGroup2 ? g2_groupInnerHalfW : groupInnerHalfW;

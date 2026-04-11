@@ -1,33 +1,23 @@
 "use client";
 import * as THREE from "three";
-import { a, SpringValue } from "@react-spring/three";
+import { useMemo } from "react";
+import { a, SpringValue, to } from "@react-spring/three";
 import { RenderTexture, OrthographicCamera } from "@react-three/drei";
 import { VerseBox, RoundedShapeComponent } from "../paper-content/SharedUI";
-
-// ============================================================================
-// 3D BRICK & FBO COMPONENT
-// Represents a single physical pop-up capsule. Completely isolated.
-// ============================================================================
+import { SHADOW_CONFIG } from "./useFoldAnimation";
 
 interface PopUpVerseCardProps {
   hingeX: number;
-  rowY: number;
+  y: number;
+  w: number;
+  h: number;
   zBaseOffset: number;
   direction: "left" | "right";
   rotValue: SpringValue<number>;
-  shadowVal: SpringValue<number>;
+  foldProgress: SpringValue<number>;
+  shadowGlobalOpacity: SpringValue<number>;
   zOffset: SpringValue<number>;
   opacity: SpringValue<number>;
-  innerHalfW: number;
-  smallBoxH: number;
-  boxRadius: number;
-  outerW: number;
-  outerH: number;
-  outerLeft: number;
-  outerTop: number;
-  bw: number;
-  shape: THREE.Shape;
-  extrudeSettings: any;
   backfaceColor: string;
   verse: string;
   number: number;
@@ -40,23 +30,16 @@ interface PopUpVerseCardProps {
 
 export function PopUpVerseCard({
   hingeX,
-  rowY,
+  y,
+  w,
+  h,
   zBaseOffset,
   direction,
   rotValue,
-  shadowVal,
+  foldProgress,
+  shadowGlobalOpacity,
   zOffset,
   opacity,
-  innerHalfW,
-  smallBoxH,
-  boxRadius,
-  outerW,
-  outerH,
-  outerLeft,
-  outerTop,
-  bw,
-  shape,
-  extrudeSettings,
   verse,
   number,
   bg,
@@ -65,45 +48,92 @@ export function PopUpVerseCard({
   circleBg,
   circleTextCol,
 }: PopUpVerseCardProps) {
-  const shadowXOffset =
-    direction === "left"
-      ? shadowVal.to((v) => -innerHalfW + 0.008 + v * 0.015)
-      : shadowVal.to((v) => 0.008 + v * 0.015);
-
-  const brickGroupXOffset =
-    direction === "left" ? -innerHalfW + outerLeft : outerLeft;
-
+  const bw = 0.0055;
   const shrinkX = 0.001;
+  const outerW = w - shrinkX * 2 + bw * 2;
+  const outerH = h + bw * 2;
+  const outerRadius = h / 2 + bw;
+  const outerLeft = shrinkX - bw;
+  const outerTop = bw;
+  const boxRadius = h / 2;
   const alignX = bw - shrinkX;
   const alignY = -bw;
 
+  const shape = useMemo(() => {
+    const s = new THREE.Shape();
+    const r = outerRadius;
+    s.moveTo(r, 0);
+    s.lineTo(outerW - r, 0);
+    s.quadraticCurveTo(outerW, 0, outerW, -r);
+    s.lineTo(outerW, -(outerH - r));
+    s.quadraticCurveTo(outerW, -outerH, outerW - r, -outerH);
+    s.lineTo(r, -outerH);
+    s.quadraticCurveTo(0, -outerH, 0, -(outerH - r));
+    s.lineTo(0, -r);
+    s.quadraticCurveTo(0, 0, r, 0);
+    return s;
+  }, [outerW, outerH, outerRadius]);
+
+  const extrudeSettings = useMemo(
+    () => ({ depth: 0.008, bevelEnabled: false }),
+    [],
+  );
+
+  const shadowScaleX = foldProgress.to((v) => 1 - v * SHADOW_CONFIG.shrinkX);
+  const shadowScaleY = foldProgress.to((v) => 1 - v * SHADOW_CONFIG.shrinkY);
+
+  const shadowXOffset = to([foldProgress, shadowScaleX], (v, scaleX) => {
+    if (direction === "left") {
+      const shiftCorrection = (1 - scaleX) * w;
+      return (
+        -w +
+        shiftCorrection +
+        SHADOW_CONFIG.baseOffsetX +
+        v * SHADOW_CONFIG.foldOffsetX
+      );
+    } else {
+      return SHADOW_CONFIG.baseOffsetX + v * SHADOW_CONFIG.foldOffsetX;
+    }
+  });
+
+  const shadowYOffset = foldProgress.to(
+    (v) => SHADOW_CONFIG.baseOffsetY + v * SHADOW_CONFIG.foldOffsetY,
+  );
+
+  const finalShadowOpacity = to(
+    [shadowGlobalOpacity, foldProgress, opacity],
+    (globalOp, foldP, mainOp) => {
+      const dynamicOpacity =
+        SHADOW_CONFIG.opacityFlat -
+        foldP * (SHADOW_CONFIG.opacityFlat - SHADOW_CONFIG.opacityFolded);
+      return globalOp * dynamicOpacity * mainOp;
+    },
+  );
+
+  const brickGroupXOffset = direction === "left" ? -w + outerLeft : outerLeft;
   const paperBaseColor = "#f2f0e6";
 
   return (
-    <group position={[hingeX, rowY, zBaseOffset]}>
-      {/* Dynamic Floor Shadow */}
+    <a.group
+      position={[hingeX, y, zBaseOffset]}
+      visible={opacity.to((o) => o > 0.01)}
+    >
       <a.mesh
         position-x={shadowXOffset}
-        position-y={shadowVal.to((v) => -0.008 - v * 0.03)}
+        position-y={shadowYOffset}
         position-z={-0.001}
-        scale={shadowVal.to((v) => 1 + v * 0.03)}
+        scale-x={shadowScaleX}
+        scale-y={shadowScaleY}
       >
-        <RoundedShapeComponent
-          w={innerHalfW}
-          h={smallBoxH}
-          radius={boxRadius}
-        />
+        <RoundedShapeComponent w={w} h={h} radius={boxRadius} />
         <a.meshBasicMaterial
           color="#000000"
           transparent
-          opacity={opacity.to(
-            (o) => o * (0.32 - (direction === "left" ? 0.27 : 0.24)),
-          )}
+          opacity={finalShadowOpacity}
           depthTest={false}
         />
       </a.mesh>
 
-      {/* The rotating 3D Hinge Group */}
       <a.group rotation-y={rotValue} position-z={zOffset}>
         <group position={[brickGroupXOffset, outerTop, 0]}>
           <mesh position={[0, 0, -0.008]} renderOrder={100}>
@@ -145,14 +175,13 @@ export function PopUpVerseCard({
                   bottom={-outerH}
                   position={[0, 0, 10]}
                 />
-
                 <group position={[alignX, alignY, 0]}>
                   <VerseBox
                     x={0}
                     y={0}
                     z={0}
-                    w={innerHalfW}
-                    h={smallBoxH}
+                    w={w}
+                    h={h}
                     verse={verse}
                     number={number}
                     bg={bg}
@@ -169,6 +198,6 @@ export function PopUpVerseCard({
           </mesh>
         </group>
       </a.group>
-    </group>
+    </a.group>
   );
 }

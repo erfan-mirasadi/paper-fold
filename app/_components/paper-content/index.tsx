@@ -151,7 +151,7 @@ export const FOLD_Y_POSITIONS: readonly [
 // ============================================================================
 // CONTENT DOMAIN DATA (SURAH TEXTS)
 // ============================================================================
-const SURAH_DATA = {
+export const SURAH_DATA = {
   bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
   section1: {
     label: "Beş ayetlik Ana Böl.",
@@ -283,6 +283,7 @@ export function PaperContent({
         startX={START_X}
         PW={PW}
         isBumpMap={isBumpMap}
+        isFolded={isFolded}
       />
     </>
   );
