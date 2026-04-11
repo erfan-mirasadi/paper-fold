@@ -26,7 +26,6 @@ import {
   BUMP_LOWER,
   BUMP_DEEP,
   WHITE_BASE,
-  DirectionalCross,
 } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { ORIGINAL_TEXTURE_TIMING } from "../pop-up-verses/useFoldAnimation";
@@ -487,16 +486,6 @@ export function SectionTwo({
         true,
         0,
       )}
-
-      {/* Indicator Cross for Directionality between Verses 11-14 */}
-      <DirectionalCross
-        x={g2_baseX + groupPad + g2_groupInnerHalfW + s2Gap / 2}
-        y={g2Y - groupPad - smallBoxH2 - s2Gap / 2}
-        z={0.1}
-        size={0.06}
-        color="#3B2F2F"
-        isBumpMap={isBumpMap}
-      />
 
       {/* --------------------- CONTENT GROUP 3 (LOWER) --------------------- */}
       <UiRect
