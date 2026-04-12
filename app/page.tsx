@@ -6,9 +6,10 @@ import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
 import TheatreManager from "./_components/TheatreManager";
 import {
-  TafsirUI,
+  // TafsirUI,
   TafsirScrollTracker,
 } from "./_components/ui-overlay/TafsirUI";
+import { PopUpUI } from "./_components/pop-up-verses/ui/PopUpUI";
 const Experience = dynamic(
   () => import("./_components/Experience").then((mod) => mod.Experience),
   { ssr: false },
@@ -16,7 +17,6 @@ const Experience = dynamic(
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isFolded, setIsFolded] = useState(false);
 
   const bgColor = isDarkMode ? "#121212" : "#f4f1ea";
   const btnBg = isDarkMode ? "#ffffff" : "#121212";
@@ -42,23 +42,7 @@ export default function Home() {
           gap: "12px",
         }}
       >
-        <button
-          onClick={() => setIsFolded(!isFolded)}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "30px",
-            border: "none",
-            backgroundColor: isFolded ? "#ff6b6b" : "#ffcc66",
-            color: "#111",
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            transition: "all 0.3s ease",
-            fontWeight: "bold",
-          }}
-        >
-          {isFolded ? "open" : "close"}
-        </button>
-
+        {/* Fold toggle removed */}
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
           style={{
@@ -90,18 +74,15 @@ export default function Home() {
             <color attach="background" args={[bgColor]} />
             <TheatreManager>
               <ScrollControls pages={2} damping={0.2}>
-                <Experience
-                  isDarkMode={isDarkMode}
-                  isFolded={isFolded}
-                  onTogglePopUp={() => setIsFolded(!isFolded)}
-                />
+                <Experience isDarkMode={isDarkMode} />
                 <TafsirScrollTracker />
               </ScrollControls>
             </TheatreManager>
           </Canvas>
         </div>
       </Suspense>
-      <TafsirUI isDarkMode={isDarkMode} />
+      {/* <TafsirUI isDarkMode={isDarkMode} /> */}
+      <PopUpUI isDarkMode={isDarkMode} />
     </main>
   );
 }

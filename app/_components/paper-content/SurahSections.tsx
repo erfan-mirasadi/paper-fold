@@ -29,7 +29,8 @@ import {
 } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { ORIGINAL_TEXTURE_TIMING } from "../pop-up-verses/useFoldAnimation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { usePopUpState } from "../pop-up-verses/ui/PopUpState";
 
 // Setup structure of the content mapped dynamically down from `index.tsx`.
 
@@ -95,6 +96,41 @@ export interface LayoutConfig {
   extraRowGap: number;
 }
 
+export function useDelayedPopUpGroups() {
+  const { groups } = usePopUpState();
+  const [delayedIsOpen, setDelayedIsOpen] = useState<Record<string, boolean>>(
+    () => {
+      const init: Record<string, boolean> = {};
+      groups.forEach((g) => (init[g.id] = g.isOpen));
+      return init;
+    },
+  );
+
+  useEffect(() => {
+    const timeouts = groups.map((g) => {
+      const delay = g.isOpen
+        ? ORIGINAL_TEXTURE_TIMING.hideDelay
+        : ORIGINAL_TEXTURE_TIMING.showDelay;
+      return setTimeout(() => {
+        setDelayedIsOpen((prev) => {
+          if (prev[g.id] === g.isOpen) return prev;
+          return { ...prev, [g.id]: g.isOpen };
+        });
+      }, delay);
+    });
+
+    return () => timeouts.forEach((t) => clearTimeout(t));
+  }, [groups]);
+
+  const isVerseHidden = (verseId: number) => {
+    const group = groups.find((g) => g.verseIds.includes(verseId));
+    if (!group) return false;
+    return delayedIsOpen[group.id] ?? group.isOpen;
+  };
+
+  return { isVerseHidden };
+}
+
 // SECTION 1 (UPPER WRAPPER)
 // Responsible for Top content visualization with Main Grid arrays and single AnaAyet tag
 
@@ -119,17 +155,7 @@ export function SectionOne({
     layout;
   const baseX = startX + s1Pad;
 
-  const [delayedIsFolded, setDelayedIsFolded] = useState(isFolded);
-
-  useEffect(() => {
-    const delay = isFolded
-      ? ORIGINAL_TEXTURE_TIMING.hideDelay
-      : ORIGINAL_TEXTURE_TIMING.showDelay;
-    const timeout = setTimeout(() => {
-      setDelayedIsFolded(isFolded);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [isFolded]);
+  const { isVerseHidden } = useDelayedPopUpGroups();
 
   return (
     <group>
@@ -160,7 +186,7 @@ export function SectionOne({
 
       {/* Renders main verse 2 x 2 grid inside Section One limits */}
       {data.gridVerses.map((v: Verse, i: number) => {
-        if (delayedIsFolded) return null;
+        if (isVerseHidden(v.number)) return null;
 
         const isRightCol = i % 2 !== 0;
         const isBottomRow = i >= 2;
@@ -301,17 +327,7 @@ export function SectionTwo({
   const bBox_bottom = shiftedBot;
   const bBox_H = bBox_Y - bBox_bottom;
 
-  const [delayedIsFolded, setDelayedIsFolded] = useState(isFolded);
-
-  useEffect(() => {
-    const delay = isFolded
-      ? ORIGINAL_TEXTURE_TIMING.hideDelay
-      : ORIGINAL_TEXTURE_TIMING.showDelay;
-    const timeout = setTimeout(() => {
-      setDelayedIsFolded(isFolded);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [isFolded]);
+  const { isVerseHidden } = useDelayedPopUpGroups();
 
   // Helper handling individual Verse Arrays placed inside unified thematic groupings
   const renderGroupVerses = (
@@ -322,13 +338,14 @@ export function SectionTwo({
     isGroup2: boolean = false,
     extraYOffset: number = 0,
   ) => {
-    if (delayedIsFolded) return null;
-
     // Map directly to dynamically shifted indent widths based on parent group
     const currentBaseX = isGroup2 ? g2_baseX : baseX;
     const currentHalfW = isGroup2 ? g2_groupInnerHalfW : groupInnerHalfW;
 
     return verses.map((v, i) => {
+      // If this specific verse is hidden, don't render its texture
+      if (isVerseHidden(v.number)) return null;
+
       const rowOffset = i >= 2 ? smallBoxH2 + s2Gap + extraYOffset : 0;
 
       // Override explicitly targeted internal highlighted sequences

@@ -1,7 +1,11 @@
 "use client";
 import * as THREE from "three";
+import { useScroll } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
+import { usePopUpState, setScrollThresholdReached } from "./ui/PopUpState";
+import { PopUp3DTracker } from "./ui/PopUp3DTracker";
 import {
   S1_INNER_BG,
   S1_INNER_BORDER,
@@ -64,14 +68,25 @@ export function PopUpManager({ isFolded }: PopUpManagerProps) {
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
 
-  const {
-    rotLeft,
-    rotRight,
-    foldProgress,
-    shadowGlobalOpacity,
-    zOffset,
-    opacity,
-  } = useFoldAnimation(isFolded);
+  const { groups } = usePopUpState();
+
+  const scroll = useScroll();
+  useFrame(() => {
+    if (scroll) {
+      // 0.9 is near the end of the 2-page scroll
+      setScrollThresholdReached(scroll.offset >= 0.9);
+    }
+  });
+
+  const VISIBILITY_THRESHOLDS: Record<string, number> = {
+    g_1_2: 0,
+    g_3_4: 0,
+    g_7_8: 0.15,
+    g_9_10: 0.35,
+    g_11_12_13_14: 0.55,
+    g_15_16: 0.75,
+    g_17_18: 0.85,
+  };
 
   const versesConfig: VerseConfig[] = [];
 
@@ -209,30 +224,98 @@ export function PopUpManager({ isFolded }: PopUpManagerProps) {
 
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
-      {versesConfig.map((config) => (
-        <PopUpVerseCard
-          key={`popup-${config.id}`}
-          direction={config.direction}
-          hingeX={config.hingeX}
-          y={config.y}
-          w={config.w}
-          h={config.h}
-          zBaseOffset={zBaseOffset}
-          rotValue={config.direction === "left" ? rotLeft : rotRight}
-          foldProgress={foldProgress}
-          shadowGlobalOpacity={shadowGlobalOpacity}
-          zOffset={zOffset}
-          opacity={opacity}
-          backfaceColor={backfaceColor}
-          verse={config.verse}
-          number={config.number}
-          bg={config.bg}
-          border={config.border}
-          circleBorderCol={config.circleBorderCol}
-          circleBg={config.circleBg}
-          circleTextCol={config.circleTextCol}
-        />
-      ))}
+      {versesConfig.map((config) => {
+        const group = groups.find((g) => g.verseIds.includes(config.id));
+        const isOpen = group?.isOpen ?? false;
+        return (
+          <PopUpCardWrapper
+            key={`popup-${config.id}`}
+            config={config}
+            isOpen={isOpen}
+            zBaseOffset={zBaseOffset}
+            backfaceColor={backfaceColor}
+          />
+        );
+      })}
+
+      {/* Render 3D Trackers for each group at the correct positions */}
+      {groups.map((g) => {
+        const versesInGroup = versesConfig.filter((c) =>
+          g.verseIds.includes(c.id),
+        );
+        if (!versesInGroup.length) return null;
+
+        // The verse box renders downwards from its 'y' coordinate.
+        // We find the center vertically.
+        const centerY = versesInGroup[0].y - versesInGroup[0].h / 2;
+
+        // Position the button on the far left edge of the book (-PAGE_WIDTH / 2 - padding)
+        const btnX = -PAGE_WIDTH / 2 - 0.05;
+
+        // Determine specific scroll threshold mapping. Default 0 if missing.
+        const threshold = VISIBILITY_THRESHOLDS[g.id] ?? 0;
+
+        return (
+          <PopUp3DTracker
+            key={`tracker-${g.id}`}
+            id={g.id}
+            worldPosition={[btnX, centerY, zBaseOffset]}
+            scrollThreshold={threshold}
+          />
+        );
+      })}
+
+      {/* Global button anchor at top center of the paper */}
+      <PopUp3DTracker
+        id="global"
+        worldPosition={[0, s1Top + 0.25, zBaseOffset]}
+        scrollThreshold={0.88}
+      />
     </group>
+  );
+}
+
+function PopUpCardWrapper({
+  config,
+  isOpen,
+  zBaseOffset,
+  backfaceColor,
+}: {
+  config: VerseConfig;
+  isOpen: boolean;
+  zBaseOffset: number;
+  backfaceColor: string;
+}) {
+  const {
+    rotLeft,
+    rotRight,
+    foldProgress,
+    shadowGlobalOpacity,
+    zOffset,
+    opacity,
+  } = useFoldAnimation(isOpen);
+
+  return (
+    <PopUpVerseCard
+      direction={config.direction}
+      hingeX={config.hingeX}
+      y={config.y}
+      w={config.w}
+      h={config.h}
+      zBaseOffset={zBaseOffset}
+      rotValue={config.direction === "left" ? rotLeft : rotRight}
+      foldProgress={foldProgress}
+      shadowGlobalOpacity={shadowGlobalOpacity}
+      zOffset={zOffset}
+      opacity={opacity}
+      backfaceColor={backfaceColor}
+      verse={config.verse}
+      number={config.number}
+      bg={config.bg}
+      border={config.border}
+      circleBorderCol={config.circleBorderCol}
+      circleBg={config.circleBg}
+      circleTextCol={config.circleTextCol}
+    />
   );
 }

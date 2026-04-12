@@ -13,11 +13,10 @@ import { PopUpManager } from "./pop-up-verses/PopUpManager";
 
 interface ExperienceProps {
   isDarkMode: boolean;
-  isFolded: boolean;
-  onTogglePopUp?: () => void;
+  isFolded?: boolean;
 }
 
-export function Experience({ isDarkMode, isFolded }: ExperienceProps) {
+export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const [controlsEnabled, setControlsEnabled] = useState(true);
@@ -38,7 +37,7 @@ export function Experience({ isDarkMode, isFolded }: ExperienceProps) {
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 1.6, 1.5]} fov={45} />
+      <PerspectiveCamera makeDefault position={[0, 1.6, 1.7]} fov={45} />
 
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />
