@@ -6,16 +6,22 @@ type PopUpGroup = {
   id: string;
   verseIds: number[];
   isOpen: boolean;
+  hasEverOpened: boolean;
 };
 
 let _groups: PopUpGroup[] = [
-  { id: "g_1_2", verseIds: [1, 2], isOpen: true },
-  { id: "g_3_4", verseIds: [3, 4], isOpen: false },
-  { id: "g_7_8", verseIds: [7, 8], isOpen: false },
-  { id: "g_9_10", verseIds: [9, 10], isOpen: false },
-  { id: "g_11_12_13_14", verseIds: [11, 12, 13, 14], isOpen: false },
-  { id: "g_15_16", verseIds: [15, 16], isOpen: false },
-  { id: "g_17_18", verseIds: [17, 18], isOpen: false },
+  { id: "g_1_2", verseIds: [1, 2], isOpen: false, hasEverOpened: false },
+  { id: "g_3_4", verseIds: [3, 4], isOpen: false, hasEverOpened: false },
+  { id: "g_7_8", verseIds: [7, 8], isOpen: false, hasEverOpened: false },
+  { id: "g_9_10", verseIds: [9, 10], isOpen: false, hasEverOpened: false },
+  {
+    id: "g_11_12_13_14",
+    verseIds: [11, 12, 13, 14],
+    isOpen: false,
+    hasEverOpened: false,
+  },
+  { id: "g_15_16", verseIds: [15, 16], isOpen: false, hasEverOpened: false },
+  { id: "g_17_18", verseIds: [17, 18], isOpen: false, hasEverOpened: false },
 ];
 
 let _allOpen = false;
@@ -57,7 +63,11 @@ export function toggleGroup(id: string) {
     if (g.id === id) {
       const newState = !g.isOpen;
       if (!newState) anyClosed = true;
-      return { ...g, isOpen: newState };
+      return {
+        ...g,
+        isOpen: newState,
+        hasEverOpened: g.hasEverOpened || newState,
+      };
     }
     if (!g.isOpen) anyClosed = true;
     return g;
@@ -68,7 +78,11 @@ export function toggleGroup(id: string) {
 
 export function toggleAll() {
   _allOpen = !_allOpen;
-  _groups = _groups.map((g) => ({ ...g, isOpen: _allOpen }));
+  _groups = _groups.map((g) => ({
+    ...g,
+    isOpen: _allOpen,
+    hasEverOpened: g.hasEverOpened || _allOpen,
+  }));
   emit();
 }
 

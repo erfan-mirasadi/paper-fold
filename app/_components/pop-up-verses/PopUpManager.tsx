@@ -1,5 +1,4 @@
 "use client";
-import * as THREE from "three";
 import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useFoldAnimation } from "./useFoldAnimation";
@@ -24,11 +23,6 @@ import {
 import { PAGE_DEPTH } from "../SinglePaper";
 import { SURAH_DATA } from "../paper-content/index";
 
-interface PopUpManagerProps {
-  isFolded: boolean;
-  skeleton?: THREE.Skeleton | null;
-}
-
 interface VerseConfig {
   id: number;
   verse: string;
@@ -45,7 +39,7 @@ interface VerseConfig {
   circleTextCol: string;
 }
 
-export function PopUpManager({ isFolded }: PopUpManagerProps) {
+export function PopUpManager() {
   const {
     sectionW,
     s1Top,
@@ -227,6 +221,11 @@ export function PopUpManager({ isFolded }: PopUpManagerProps) {
       {versesConfig.map((config) => {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
+        const hasEverOpened = group?.hasEverOpened ?? false;
+        if (!hasEverOpened && !isOpen) {
+          return null;
+        }
+
         return (
           <PopUpCardWrapper
             key={`popup-${config.id}`}

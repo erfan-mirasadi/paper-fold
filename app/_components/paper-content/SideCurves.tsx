@@ -1,6 +1,6 @@
 "use client";
 import { Line } from "@react-three/drei";
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
 import {
   BLUE_THEME,
@@ -11,6 +11,8 @@ import {
   CAPSULE_BG_6_19,
 } from "./SharedUI";
 import { AnimatedArrow } from "./AnimatedArrow";
+import { usePopUpState } from "../pop-up-verses/ui/PopUpState";
+import { useFrame } from "@react-three/fiber";
 
 export interface LayoutConfig {
   s2Pad: number;
@@ -78,6 +80,7 @@ const CurvePair = ({
   color,
   fillColor,
   isRight,
+  shouldHide = false,
 }: {
   outerYTop: number;
   outerYBot: number;
@@ -90,6 +93,7 @@ const CurvePair = ({
   color: string;
   fillColor?: string;
   isRight: boolean;
+  shouldHide?: boolean;
 }) => {
   const outerPoints = useMemo(
     () => getSmoothCurvePoints(outerTipX, outerControlX, outerYTop, outerYBot),
@@ -132,25 +136,83 @@ const CurvePair = ({
     return s;
   }, [outerPoints, innerPoints]);
 
+  const groupRef = useRef<THREE.Group>(null);
+  const fillMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lineRef1 = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lineRef2 = useRef<any>(null);
+
+  const globalOpacityRef = useRef(1);
+  const isAnimating = useRef(false);
+
+  // Trigger animation loop only when shouldHide changes
+  useEffect(() => {
+    isAnimating.current = true;
+    // If it's going to be visible, turn on the mesh immediately before fading in
+    if (!shouldHide && groupRef.current) {
+      groupRef.current.visible = true;
+    }
+  }, [shouldHide]);
+
+  useFrame((state, delta) => {
+    // Optimization: Skip calculation entirely if not animating
+    if (!isAnimating.current) return;
+
+    const targetOp = shouldHide ? 0 : 1;
+    globalOpacityRef.current = THREE.MathUtils.damp(
+      globalOpacityRef.current,
+      targetOp,
+      4,
+      delta,
+    );
+    const go = globalOpacityRef.current;
+
+    // Apply Opacity
+    if (fillMaterialRef.current) {
+      fillMaterialRef.current.opacity = 0.999 * go;
+    }
+    if (lineRef1.current?.material) {
+      lineRef1.current.material.opacity = go;
+    }
+    if (lineRef2.current?.material) {
+      lineRef2.current.material.opacity = go;
+    }
+
+    // Optimization: Turn off visibility when fully transparent to save GPU fill-rate
+    // Stop animation loop when target is reached
+    if (Math.abs(go - targetOp) < 0.01) {
+      isAnimating.current = false; // Stop useFrame math
+      if (shouldHide && groupRef.current) {
+        groupRef.current.visible = false; // Stop rendering!
+      }
+    }
+  });
+
   return (
-    <group position={[0, 0, 0.0012]}>
+    <group ref={groupRef} position={[0, 0, 0.0012]}>
       <group position={[0, 0, 0.0012]} renderOrder={5}>
         <Line
+          ref={lineRef1}
           points={outerPoints}
           color={color}
           lineWidth={3.5}
+          transparent={true}
           renderOrder={5}
         />
         <Line
+          ref={lineRef2}
           points={innerPoints}
           color={color}
           lineWidth={3.5}
+          transparent={true}
           renderOrder={5}
         />
       </group>
       <mesh renderOrder={4}>
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
+          ref={fillMaterialRef}
           color={fillColor ?? color}
           transparent
           opacity={0.999}
@@ -175,6 +237,7 @@ const CurvePair = ({
         arrowSize={0.005}
         floatIntensity={0.0005}
         glowSize={2}
+        shouldHide={shouldHide}
       />
       <AnimatedArrow
         outerTipX={outerTipX}
@@ -191,12 +254,17 @@ const CurvePair = ({
         arrowSize={0.004}
         floatIntensity={0.0009}
         glowSize={2}
+        shouldHide={shouldHide}
       />
     </group>
   );
 };
 
 export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
+  const { groups } = usePopUpState();
+  const shouldHide = groups.some(
+    (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
+  );
   const {
     s2Pad,
     sectionW,
@@ -293,6 +361,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={BLUE_THEME}
         fillColor={CAPSULE_BG_6_19}
         isRight={false}
+        shouldHide={shouldHide}
       />
       <CurvePair
         outerYTop={y8}
@@ -306,6 +375,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={MAROON_THEME}
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
+        shouldHide={shouldHide}
       />
       <CurvePair
         outerYTop={y10}
@@ -319,6 +389,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={MAROON_THEME}
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
+        shouldHide={shouldHide}
       />
       <CurvePair
         outerYTop={y12}
@@ -332,6 +403,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={GREEN_THEME}
         fillColor={CAPSULE_BG_12_14}
         isRight={false}
+        shouldHide={shouldHide}
       />
 
       {/* ================= RIGHT CURVES ================= */}
@@ -347,6 +419,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={BLUE_THEME}
         fillColor={CAPSULE_BG_6_19}
         isRight={true}
+        shouldHide={shouldHide}
       />
       <CurvePair
         outerYTop={y8}
@@ -360,6 +433,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={MAROON_THEME}
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
+        shouldHide={shouldHide}
       />
       <CurvePair
         outerYTop={y10}
@@ -373,6 +447,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={MAROON_THEME}
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
+        shouldHide={shouldHide}
       />
       <CurvePair
         outerYTop={y12}
@@ -386,6 +461,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         color={GREEN_THEME}
         fillColor={CAPSULE_BG_12_14}
         isRight={true}
+        shouldHide={shouldHide}
       />
     </group>
   );

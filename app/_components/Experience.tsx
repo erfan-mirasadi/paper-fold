@@ -41,7 +41,7 @@ export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
 
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />
-        <PopUpManager isFolded={isFolded} />
+        <PopUpManager />
       </group>
 
       <OrbitControls

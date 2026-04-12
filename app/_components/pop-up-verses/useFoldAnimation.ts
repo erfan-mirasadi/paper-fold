@@ -61,12 +61,20 @@ export function useFoldAnimation(isFolded: boolean) {
     rotLeft: isFolded ? Math.PI / 2.05 : 0,
     rotRight: isFolded ? -Math.PI / 2.05 : 0,
     foldProgress: isFolded ? 1 : 0,
+    from: {
+      rotLeft: 0,
+      rotRight: 0,
+      foldProgress: 0,
+    },
     config: springConfig,
     delay: isFolded ? POPUP_TIMING.appearDelayFold : POPUP_TIMING.hideDelayFold,
   });
 
   const { shadowGlobalOpacity } = useSpring({
     shadowGlobalOpacity: isFolded ? 1 : 0,
+    from: {
+      shadowGlobalOpacity: 0,
+    },
     config: springConfig,
     delay: isFolded
       ? POPUP_TIMING.appearDelayShadow
@@ -76,6 +84,10 @@ export function useFoldAnimation(isFolded: boolean) {
   const { zOffset, opacity } = useSpring({
     zOffset: isFolded ? POPUP_TIMING.restDepth : POPUP_TIMING.dipDepth,
     opacity: isFolded ? 1 : 0,
+    from: {
+      zOffset: POPUP_TIMING.dipDepth,
+      opacity: 0,
+    },
     config: springConfig,
     delay: isFolded
       ? POPUP_TIMING.appearDelayZAndOpacity

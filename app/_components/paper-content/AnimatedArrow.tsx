@@ -1,7 +1,77 @@
 "use client";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+
+type ArrowTextures = {
+  glowTexture: THREE.CanvasTexture;
+  flareTexture: THREE.CanvasTexture;
+  shadowTexture: THREE.CanvasTexture;
+};
+
+function createArrowTextures(): ArrowTextures {
+  // 1. Soft Radial Glow Canvas
+  const gCanvas = document.createElement("canvas");
+  gCanvas.width = 128;
+  gCanvas.height = 128;
+  const gCtx = gCanvas.getContext("2d");
+  if (gCtx) {
+    const gradient = gCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+    gradient.addColorStop(0.2, "rgba(255, 255, 255, 0.8)");
+    gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+    gCtx.fillStyle = gradient;
+    gCtx.fillRect(0, 0, 128, 128);
+  }
+  const glowTexture = new THREE.CanvasTexture(gCanvas);
+  glowTexture.needsUpdate = true;
+
+  // 2. Star Flare Canvas
+  const fCanvas = document.createElement("canvas");
+  fCanvas.width = 128;
+  fCanvas.height = 128;
+  const fCtx = fCanvas.getContext("2d");
+  if (fCtx) {
+    const gradH = fCtx.createLinearGradient(0, 64, 128, 64);
+    gradH.addColorStop(0, "rgba(255,255,255,0)");
+    gradH.addColorStop(0.48, "rgba(255,255,255,0.95)");
+    gradH.addColorStop(0.5, "rgba(255,255,255,1)");
+    gradH.addColorStop(0.52, "rgba(255,255,255,0.95)");
+    gradH.addColorStop(1, "rgba(255,255,255,0)");
+    fCtx.fillStyle = gradH;
+    fCtx.fillRect(0, 62, 128, 4);
+
+    const gradV = fCtx.createLinearGradient(64, 0, 64, 128);
+    gradV.addColorStop(0, "rgba(255,255,255,0)");
+    gradV.addColorStop(0.48, "rgba(255,255,255,0.95)");
+    gradV.addColorStop(0.5, "rgba(255,255,255,1)");
+    gradV.addColorStop(0.52, "rgba(255,255,255,0.95)");
+    gradV.addColorStop(1, "rgba(255,255,255,0)");
+    fCtx.fillStyle = gradV;
+    fCtx.fillRect(62, 0, 4, 128);
+  }
+  const flareTexture = new THREE.CanvasTexture(fCanvas);
+  flareTexture.needsUpdate = true;
+
+  // 3. Shadow/Dark Halo Canvas
+  const sCanvas = document.createElement("canvas");
+  sCanvas.width = 128;
+  sCanvas.height = 128;
+  const sCtx = sCanvas.getContext("2d");
+  if (sCtx) {
+    const gradient = sCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, "rgba(0, 0, 0, 1)");
+    gradient.addColorStop(0.4, "rgba(0, 0, 0, 0.6)");
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    sCtx.fillStyle = gradient;
+    sCtx.fillRect(0, 0, 128, 128);
+  }
+  const shadowTexture = new THREE.CanvasTexture(sCanvas);
+  shadowTexture.needsUpdate = true;
+
+  return { glowTexture, flareTexture, shadowTexture };
+}
 
 export const AnimatedArrow = ({
   outerTipX,
@@ -18,6 +88,7 @@ export const AnimatedArrow = ({
   arrowSize = 0.008, // Base size of the core star dot
   floatIntensity = 0.008, // Amplitude of the floating/wobbling effect
   glowSize = 4, // Multiplier for the glow plane size relative to arrowSize
+  shouldHide = false, // Hides the arrow according to popup state
 }: {
   outerTipX: number;
   innerTipX: number;
@@ -33,6 +104,7 @@ export const AnimatedArrow = ({
   arrowSize?: number;
   floatIntensity?: number;
   glowSize?: number;
+  shouldHide?: boolean;
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const innerGroupRef = useRef<THREE.Group>(null); // New group to handle the subtle spin of all components
@@ -44,6 +116,11 @@ export const AnimatedArrow = ({
   const flareMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
   const shadowMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
   const darkHaloMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
+
+  const globalOpacityRef = useRef(1);
+  const curvePositionRef = useRef(new THREE.Vector3());
+  const curveTangentRef = useRef(new THREE.Vector3());
+  const curveNormalRef = useRef(new THREE.Vector3());
 
   // --- INTERNAL VISUAL TUNING ---
   // Adjust these values to fine-tune the look without changing props
@@ -88,74 +165,18 @@ export const AnimatedArrow = ({
     ],
   );
 
-  // The WebGL Trick: Creating advanced multi-layered textures for a powerful star-like glow
+  // Reuse one set of textures for all arrows instead of generating per instance.
   const { glowTexture, flareTexture, shadowTexture } = useMemo(() => {
-    // 1. Soft Radial Glow Canvas
-    const gCanvas = document.createElement("canvas");
-    gCanvas.width = 128;
-    gCanvas.height = 128;
-    const gCtx = gCanvas.getContext("2d");
-    if (gCtx) {
-      const gradient = gCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
-      gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
-      gradient.addColorStop(0.2, "rgba(255, 255, 255, 0.8)");
-      gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
-      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-      gCtx.fillStyle = gradient;
-      gCtx.fillRect(0, 0, 128, 128);
-    }
-    const gTex = new THREE.CanvasTexture(gCanvas);
-    gTex.needsUpdate = true;
-
-    // 2. Star Flare Canvas
-    const fCanvas = document.createElement("canvas");
-    fCanvas.width = 128;
-    fCanvas.height = 128;
-    const fCtx = fCanvas.getContext("2d");
-    if (fCtx) {
-      // Horizontal Streak
-      const gradH = fCtx.createLinearGradient(0, 64, 128, 64);
-      gradH.addColorStop(0, "rgba(255,255,255,0)");
-      gradH.addColorStop(0.48, "rgba(255,255,255,0.95)");
-      gradH.addColorStop(0.5, "rgba(255,255,255,1)");
-      gradH.addColorStop(0.52, "rgba(255,255,255,0.95)");
-      gradH.addColorStop(1, "rgba(255,255,255,0)");
-      fCtx.fillStyle = gradH;
-      fCtx.fillRect(0, 62, 128, 4);
-
-      // Vertical Streak
-      const gradV = fCtx.createLinearGradient(64, 0, 64, 128);
-      gradV.addColorStop(0, "rgba(255,255,255,0)");
-      gradV.addColorStop(0.48, "rgba(255,255,255,0.95)");
-      gradV.addColorStop(0.5, "rgba(255,255,255,1)");
-      gradV.addColorStop(0.52, "rgba(255,255,255,0.95)");
-      gradV.addColorStop(1, "rgba(255,255,255,0)");
-      fCtx.fillStyle = gradV;
-      fCtx.fillRect(62, 0, 4, 128);
-    }
-    const fTex = new THREE.CanvasTexture(fCanvas);
-    fTex.needsUpdate = true;
-
-    // 3. Shadow/Dark Halo Canvas (Inverse Radial for contrast)
-    const sCanvas = document.createElement("canvas");
-    sCanvas.width = 128;
-    sCanvas.height = 128;
-    const sCtx = sCanvas.getContext("2d");
-    if (sCtx) {
-      const gradient = sCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
-      gradient.addColorStop(0, "rgba(0, 0, 0, 1)");
-      gradient.addColorStop(0.4, "rgba(0, 0, 0, 0.6)");
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-      sCtx.fillStyle = gradient;
-      sCtx.fillRect(0, 0, 128, 128);
-    }
-    const sTex = new THREE.CanvasTexture(sCanvas);
-    sTex.needsUpdate = true;
-
-    return { glowTexture: gTex, flareTexture: fTex, shadowTexture: sTex };
+    return createArrowTextures();
   }, []);
 
-  useFrame((state) => {
+  useEffect(() => {
+    if (!shouldHide && groupRef.current) {
+      groupRef.current.visible = true;
+    }
+  }, [shouldHide]);
+
+  useFrame((state, delta) => {
     if (
       !groupRef.current ||
       !innerGroupRef.current ||
@@ -169,30 +190,50 @@ export const AnimatedArrow = ({
     )
       return;
 
+    const targetOp = shouldHide ? 0 : 1;
+    globalOpacityRef.current = THREE.MathUtils.damp(
+      globalOpacityRef.current,
+      targetOp,
+      4,
+      delta,
+    );
+    const go = globalOpacityRef.current;
+
+    if (shouldHide && go < 0.01) {
+      if (groupRef.current.visible) {
+        groupRef.current.visible = false;
+      }
+      return;
+    }
+
+    if (!groupRef.current.visible) {
+      groupRef.current.visible = true;
+    }
+
     const time = state.clock.elapsedTime * speed + delay;
     const t = time - Math.floor(time);
 
-    const position = centerCurve.getPoint(t);
-    const tangent = centerCurve.getTangent(t);
+    const curvePosition = curvePositionRef.current;
+    const curveTangent = curveTangentRef.current;
+    const curveNormal = curveNormalRef.current;
+
+    centerCurve.getPoint(t, curvePosition);
+    centerCurve.getTangent(t, curveTangent);
 
     const floatFrequency = 3.0;
     const floatOffset =
       Math.sin(state.clock.elapsedTime * floatFrequency + delay) *
       floatIntensity;
 
-    const normal = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize();
-    position.add(normal.multiplyScalar(floatOffset));
+    curveNormal.set(-curveTangent.y, curveTangent.x, 0).normalize();
+    curvePosition.addScaledVector(curveNormal, floatOffset);
+    curvePosition.z = 0.0005;
 
-    position.z = 0.0005; // Slightly higher to ensure visibility over curves
-    groupRef.current.position.copy(position);
+    groupRef.current.position.copy(curvePosition);
+    groupRef.current.rotation.z =
+      Math.atan2(curveTangent.y, curveTangent.x) - Math.PI / 2;
 
-    const angle = Math.atan2(tangent.y, tangent.x);
-    groupRef.current.rotation.z = angle - Math.PI / 2;
-
-    const subtleSpinSpeed = 0.3;
-    innerGroupRef.current.rotation.z =
-      state.clock.elapsedTime * subtleSpinSpeed + delay;
-
+    innerGroupRef.current.rotation.z = state.clock.elapsedTime * 0.3 + delay;
     flareRef.current.rotation.z -= 0.02;
 
     let opacity = 1;
@@ -203,12 +244,12 @@ export const AnimatedArrow = ({
       opacity = (1 - t) / fadeEdges;
     }
 
-    coreMaterialRef.current.opacity = opacity * GLOW_STRENGTH;
-    glowMaterialRef.current.opacity = opacity * GLOW_STRENGTH;
-    outerGlowMaterialRef.current.opacity = opacity * 0.9 * GLOW_STRENGTH;
-    flareMaterialRef.current.opacity = opacity * GLOW_STRENGTH;
-    shadowMaterialRef.current.opacity = opacity * SHADOW_OPACITY; // Uses the internal constant
-    darkHaloMaterialRef.current.opacity = opacity * CONTRAST_BOOST; // Uses the internal constant
+    coreMaterialRef.current.opacity = opacity * GLOW_STRENGTH * go;
+    glowMaterialRef.current.opacity = opacity * GLOW_STRENGTH * go;
+    outerGlowMaterialRef.current.opacity = opacity * 0.9 * GLOW_STRENGTH * go;
+    flareMaterialRef.current.opacity = opacity * GLOW_STRENGTH * go;
+    shadowMaterialRef.current.opacity = opacity * SHADOW_OPACITY * go;
+    darkHaloMaterialRef.current.opacity = opacity * CONTRAST_BOOST * go;
   });
 
   return (

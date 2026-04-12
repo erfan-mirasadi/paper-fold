@@ -14,7 +14,6 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
         zIndex: 999998,
       }}
     >
-      {/* GLOBAL TOGGLE BUTTON AT TOP CENTER OF PAPER (Managed by 3D Tracker) */}
       <div
         id="popup-anchor-global"
         style={{
@@ -23,7 +22,7 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           left: 0,
           width: 0,
           height: 0,
-          display: "none",
+          visibility: "hidden",
           opacity: 0,
           transition: "opacity 0.4s ease-out",
           willChange: "transform, opacity",
@@ -69,7 +68,7 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
               left: 0,
               width: 0,
               height: 0,
-              display: "none",
+              visibility: "hidden",
               opacity: 0,
               transition: "opacity 0.4s ease-out",
               willChange: "transform, opacity",

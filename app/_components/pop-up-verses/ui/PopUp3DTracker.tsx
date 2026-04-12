@@ -2,13 +2,13 @@
 
 import { useFrame, useThree } from "@react-three/fiber";
 import { useScroll } from "@react-three/drei";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Object3D, Vector3 } from "three";
 
 interface PopUp3DTrackerProps {
-  id: string; // The group id
-  worldPosition: [number, number, number]; // Give it the 3D position where you want the button to appear in world coordinates
-  scrollThreshold: number; // When should this button start becoming visible?
+  id: string;
+  worldPosition: [number, number, number];
+  scrollThreshold: number;
 }
 
 const _vector = new Vector3();
@@ -19,11 +19,18 @@ export function PopUp3DTracker({
   scrollThreshold,
 }: PopUp3DTrackerProps) {
   const objRef = useRef<Object3D>(null);
+  const domElRef = useRef<HTMLElement | null>(null);
+
   const { size, camera } = useThree();
   const scroll = useScroll();
 
+  // Find and cache the element once when component mounts
+  useEffect(() => {
+    domElRef.current = document.getElementById(`popup-anchor-${id}`);
+  }, [id]);
+
   useFrame(() => {
-    if (!objRef.current) return;
+    if (!objRef.current || !domElRef.current) return;
 
     // Instead of creating a new vector every frame (bad for memory/GC), we reuse one
     objRef.current.getWorldPosition(_vector);
@@ -44,24 +51,18 @@ export function PopUp3DTracker({
     // Calculate Scroll Visibility
     const isScrollVisible = scroll ? scroll.offset >= scrollThreshold : true;
     const visible = isOnScreen;
+    const el = domElRef.current;
 
-    // Directly manipulate the DOM element for this anchor to avoid React re-renders!
-    const el = document.getElementById(`popup-anchor-${id}`);
-    if (el) {
-      if (!visible) {
-        el.style.display = "none";
-      } else {
-        el.style.display = "block";
-        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        el.style.opacity = isScrollVisible ? "1" : "0";
-        el.style.pointerEvents = isScrollVisible ? "auto" : "none";
-      }
+    if (!visible) {
+      el.style.visibility = "hidden";
+      el.style.pointerEvents = "none";
+    } else {
+      el.style.visibility = "visible";
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      el.style.opacity = isScrollVisible ? "1" : "0";
+      el.style.pointerEvents = isScrollVisible ? "auto" : "none";
     }
   });
 
-  return (
-    <group ref={objRef} position={worldPosition}>
-      {/* Invisible anchor */}
-    </group>
-  );
+  return <group ref={objRef} position={worldPosition}></group>;
 }

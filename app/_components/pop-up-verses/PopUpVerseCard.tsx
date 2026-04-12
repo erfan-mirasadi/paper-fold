@@ -165,7 +165,7 @@ export function PopUpVerseCard({
               metalness={0.05}
               envMapIntensity={0.5}
             >
-              <RenderTexture attach="map" width={2048} height={1024} frames={2}>
+              <RenderTexture attach="map" width={512} height={256} frames={2}>
                 <OrthographicCamera
                   makeDefault
                   manual
