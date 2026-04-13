@@ -84,6 +84,13 @@ pageGeometry.setAttribute(
 // Changed to a slight off-white for better lighting interaction without washing out
 const paperBaseColor = new Color("#f2f0e6");
 
+// Static materials that never change — allocated once outside the component
+// to avoid re-allocation on every mount and reduce memory pressure.
+const staticSideL = new MeshStandardMaterial({ color: paperBaseColor }); // side L
+const staticSideR = new MeshStandardMaterial({ color: "#111" }); // side R
+const staticTopCap = new MeshStandardMaterial({ color: paperBaseColor }); // top cap
+const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // bottom cap
+
 interface SinglePaperProps {
   isFolded?: boolean;
 }
@@ -100,6 +107,8 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
   // ---- Audio Setup ----
   const foldSound = useRef<HTMLAudioElement | null>(null);
   const lastActiveStage = useRef<number>(0);
+  // Browsers block audio until the user has interacted with the page.
+  const hasInteracted = useRef(false);
 
   useEffect(() => {
     // Load the sound effect from the public folder
@@ -107,6 +116,17 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     if (foldSound.current) {
       foldSound.current.volume = 1;
     }
+
+    // Mark interaction on first user gesture so autoplay is allowed.
+    const onInteract = () => {
+      hasInteracted.current = true;
+    };
+    window.addEventListener("pointerdown", onInteract, { once: true });
+    window.addEventListener("keydown", onInteract, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", onInteract);
+      window.removeEventListener("keydown", onInteract);
+    };
   }, []);
 
   const manualSkinnedMesh = useMemo(() => {
@@ -120,11 +140,11 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     const skeleton = new Skeleton(bones);
 
     const materials = [
-      new MeshStandardMaterial({ color: paperBaseColor }), // side L
-      new MeshStandardMaterial({ color: "#111" }), // side R
-      new MeshStandardMaterial({ color: paperBaseColor }), // top cap
-      new MeshStandardMaterial({ color: paperBaseColor }), // bottom cap
-      // Initial materials, the front face will be overridden by the primitive material
+      staticSideL, // side L   — shared static instance
+      staticSideR, // side R   — shared static instance
+      staticTopCap, // top cap  — shared static instance
+      staticBottomCap, // bottom cap — shared static instance
+      // Front and back faces are dynamic (overridden via JSX material-4)
       new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }), // front face
       new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }), // back face
     ];
@@ -159,7 +179,8 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
 
     if (currentStage !== lastActiveStage.current) {
       lastActiveStage.current = currentStage;
-      if (foldSound.current && paperProgress > 0) {
+      // Guard against browser autoplay policy — only play after first user interaction.
+      if (foldSound.current && paperProgress > 0 && hasInteracted.current) {
         foldSound.current.currentTime = 0;
         foldSound.current.play().catch(() => {});
       }

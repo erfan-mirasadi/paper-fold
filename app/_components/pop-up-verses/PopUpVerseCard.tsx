@@ -113,6 +113,37 @@ export function PopUpVerseCard({
   const brickGroupXOffset = direction === "left" ? -w + outerLeft : outerLeft;
   const paperBaseColor = "#f2f0e6";
 
+  const materialsProps = useMemo(() => {
+    return {
+      shadow: {
+        color: "#000000",
+        transparent: true,
+        depthTest: false,
+      },
+      front: {
+        color: paperBaseColor,
+        transparent: true,
+        depthTest: true,
+        depthWrite: true,
+        roughness: 0.8,
+        metalness: 0.05,
+        envMapIntensity: 0.5,
+      },
+      back: {
+        color: paperBaseColor,
+        transparent: true,
+        depthTest: true,
+        depthWrite: true,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
+        roughness: 0.8,
+        metalness: 0.05,
+        envMapIntensity: 0.5,
+      },
+    };
+  }, []);
+
   return (
     <a.group
       position={[hingeX, y, zBaseOffset]}
@@ -127,10 +158,8 @@ export function PopUpVerseCard({
       >
         <RoundedShapeComponent w={w} h={h} radius={boxRadius} />
         <a.meshBasicMaterial
-          color="#000000"
-          transparent
+          {...materialsProps.shadow}
           opacity={finalShadowOpacity}
-          depthTest={false}
         />
       </a.mesh>
 
@@ -139,31 +168,16 @@ export function PopUpVerseCard({
           <mesh position={[0, 0, -0.008]} renderOrder={100}>
             <extrudeGeometry args={[shape, extrudeSettings]} />
             <a.meshStandardMaterial
-              color={paperBaseColor}
-              transparent={true}
+              {...materialsProps.front}
               opacity={opacity}
-              depthTest={true}
-              depthWrite={true}
-              roughness={0.8}
-              metalness={0.05}
-              envMapIntensity={0.5}
             />
           </mesh>
 
           <mesh position={[outerW / 2, -outerH / 2, 0.002]} renderOrder={101}>
             <planeGeometry args={[outerW, outerH]} />
             <a.meshStandardMaterial
-              color={paperBaseColor}
-              transparent={true}
+              {...materialsProps.back}
               opacity={opacity}
-              depthTest={true}
-              depthWrite={true}
-              polygonOffset={true}
-              polygonOffsetFactor={-1}
-              polygonOffsetUnits={-1}
-              roughness={0.8}
-              metalness={0.05}
-              envMapIntensity={0.5}
             >
               <RenderTexture attach="map" width={512} height={256} frames={2}>
                 <OrthographicCamera

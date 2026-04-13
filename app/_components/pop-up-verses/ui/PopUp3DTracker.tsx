@@ -20,6 +20,7 @@ export function PopUp3DTracker({
 }: PopUp3DTrackerProps) {
   const objRef = useRef<Object3D>(null);
   const domElRef = useRef<HTMLElement | null>(null);
+  const lastState = useRef({ x: -9999, y: -9999, visible: false, op: "-1" });
 
   const { size, camera } = useThree();
   const scroll = useScroll();
@@ -52,15 +53,31 @@ export function PopUp3DTracker({
     const isScrollVisible = scroll ? scroll.offset >= scrollThreshold : true;
     const visible = isOnScreen;
     const el = domElRef.current;
+    
+    const op = isScrollVisible ? "1" : "0";
 
-    if (!visible) {
-      el.style.visibility = "hidden";
-      el.style.pointerEvents = "none";
-    } else {
-      el.style.visibility = "visible";
-      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      el.style.opacity = isScrollVisible ? "1" : "0";
-      el.style.pointerEvents = isScrollVisible ? "auto" : "none";
+    const xDiff = Math.abs(x - lastState.current.x);
+    const yDiff = Math.abs(y - lastState.current.y);
+
+    if (
+      visible !== lastState.current.visible ||
+      op !== lastState.current.op ||
+      (visible && (xDiff > 0.1 || yDiff > 0.1))
+    ) {
+      lastState.current.visible = visible;
+      lastState.current.op = op;
+      lastState.current.x = x;
+      lastState.current.y = y;
+
+      if (!visible) {
+        el.style.visibility = "hidden";
+        el.style.pointerEvents = "none";
+      } else {
+        el.style.visibility = "visible";
+        el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+        el.style.opacity = op;
+        el.style.pointerEvents = isScrollVisible ? "auto" : "none";
+      }
     }
   });
 

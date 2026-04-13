@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSpring } from "@react-spring/three";
 
 // TIMING & ANIMATION CONSTANTS
@@ -39,17 +38,6 @@ export const SHADOW_CONFIG = {
 };
 
 export function useFoldAnimation(isFolded: boolean) {
-  const [isVisible, setIsVisible] = useState(isFolded);
-  const [animationComplete, setAnimationComplete] = useState(!isFolded);
-  const [prevIsFolded, setPrevIsFolded] = useState(isFolded);
-
-  if (isFolded !== prevIsFolded) {
-    setPrevIsFolded(isFolded);
-    if (isFolded) {
-      setIsVisible(true);
-      setAnimationComplete(false);
-    }
-  }
 
   const springConfig = {
     mass: POPUP_TIMING.springMass,
@@ -92,17 +80,9 @@ export function useFoldAnimation(isFolded: boolean) {
     delay: isFolded
       ? POPUP_TIMING.appearDelayZAndOpacity
       : POPUP_TIMING.hideDelayZAndOpacity,
-    onRest: (result) => {
-      if (result.finished && !isFolded) {
-        setAnimationComplete(true);
-        setIsVisible(false);
-      }
-    },
   });
 
   return {
-    isVisible,
-    animationComplete,
     rotLeft,
     rotRight,
     foldProgress,

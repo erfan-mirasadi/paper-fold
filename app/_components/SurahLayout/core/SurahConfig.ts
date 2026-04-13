@@ -487,3 +487,16 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
 // Module-level singleton — computed once at boot since all inputs are static constants.
 // All components import `SURAH_TRANSFORMS` directly; no prop-drilling of math needed.
 export const SURAH_TRANSFORMS = buildSurahTransforms(START_X);
+
+export function getPopUpTrackerPosition(
+  verses: { y: number; h: number }[],
+  isGlobal = false,
+  s1Top = 0
+): [number, number] {
+  if (isGlobal) {
+    return [0, s1Top + 0.25];
+  }
+  const centerY = verses[0].y - verses[0].h / 2;
+  const btnX = -PAGE_WIDTH / 2 - 0.05;
+  return [btnX, centerY];
+}

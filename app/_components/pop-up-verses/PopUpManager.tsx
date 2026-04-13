@@ -20,6 +20,7 @@ import {
   PAGE_HEIGHT,
   START_X,
   SURAH_DATA,
+  getPopUpTrackerPosition,
 } from "../SurahLayout/core/SurahConfig";
 import { PAGE_DEPTH } from "../SinglePaper";
 
@@ -39,7 +40,8 @@ interface VerseConfig {
   circleTextCol: string;
 }
 
-export function PopUpManager() {
+const VERSES_CONFIG: VerseConfig[] = (() => {
+  const configs: VerseConfig[] = [];
   const {
     sectionW,
     s1Top,
@@ -59,31 +61,6 @@ export function PopUpManager() {
     extraRowGap,
   } = layoutMath;
 
-  const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
-  const backfaceColor = "#e8e4d8";
-
-  const { groups } = usePopUpState();
-
-  const scroll = useScroll();
-  useFrame(() => {
-    if (scroll) {
-      // 0.9 is near the end of the 2-page scroll
-      setScrollThresholdReached(scroll.offset >= 0.9);
-    }
-  });
-
-  const VISIBILITY_THRESHOLDS: Record<string, number> = {
-    g_1_2: 0,
-    g_3_4: 0,
-    g_7_8: 0.15,
-    g_9_10: 0.35,
-    g_11_12_13_14: 0.55,
-    g_15_16: 0.75,
-    g_17_18: 0.85,
-  };
-
-  const versesConfig: VerseConfig[] = [];
-
   //  Section 1 (Verses 1 to 4)
   const s1BaseX = START_X + s1Pad;
   SURAH_DATA.section1.gridVerses.forEach((v, i) => {
@@ -99,7 +76,7 @@ export function PopUpManager() {
     const direction = isRightCol ? "right" : "left";
     const hingeX = isRightCol ? worldX : worldX + w;
 
-    versesConfig.push({
+    configs.push({
       id: v.number,
       verse: v.text,
       number: v.number,
@@ -133,7 +110,7 @@ export function PopUpManager() {
     const direction = isRightCol ? "right" : "left";
     const hingeX = isRightCol ? worldX : worldX + w;
 
-    versesConfig.push({
+    configs.push({
       id: v.number,
       verse: v.text,
       number: v.number,
@@ -168,7 +145,7 @@ export function PopUpManager() {
     const direction = isRightCol ? "right" : "left";
     const hingeX = isRightCol ? worldX : worldX + w;
 
-    versesConfig.push({
+    configs.push({
       id: v.number,
       verse: v.text,
       number: v.number,
@@ -199,7 +176,7 @@ export function PopUpManager() {
     const direction = isRightCol ? "right" : "left";
     const hingeX = isRightCol ? worldX : worldX + w;
 
-    versesConfig.push({
+    configs.push({
       id: v.number,
       verse: v.text,
       number: v.number,
@@ -216,9 +193,38 @@ export function PopUpManager() {
     });
   });
 
+  return configs;
+})();
+
+export function PopUpManager() {
+  const { s1Top } = layoutMath;
+
+  const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
+  const backfaceColor = "#e8e4d8";
+
+  const { groups } = usePopUpState();
+
+  const scroll = useScroll();
+  useFrame(() => {
+    if (scroll) {
+      // 0.9 is near the end of the 2-page scroll
+      setScrollThresholdReached(scroll.offset >= 0.9);
+    }
+  });
+
+  const VISIBILITY_THRESHOLDS: Record<string, number> = {
+    g_1_2: 0,
+    g_3_4: 0,
+    g_7_8: 0.15,
+    g_9_10: 0.35,
+    g_11_12_13_14: 0.55,
+    g_15_16: 0.75,
+    g_17_18: 0.85,
+  };
+
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
-      {versesConfig.map((config) => {
+      {VERSES_CONFIG.map((config) => {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
         const hasEverOpened = group?.hasEverOpened ?? false;
@@ -239,17 +245,12 @@ export function PopUpManager() {
 
       {/* Render 3D Trackers for each group at the correct positions */}
       {groups.map((g) => {
-        const versesInGroup = versesConfig.filter((c) =>
+        const versesInGroup = VERSES_CONFIG.filter((c) =>
           g.verseIds.includes(c.id),
         );
         if (!versesInGroup.length) return null;
 
-        // The verse box renders downwards from its 'y' coordinate.
-        // We find the center vertically.
-        const centerY = versesInGroup[0].y - versesInGroup[0].h / 2;
-
-        // Position the button on the far left edge of the book (-PAGE_WIDTH / 2 - padding)
-        const btnX = -PAGE_WIDTH / 2 - 0.05;
+        const [btnX, centerY] = getPopUpTrackerPosition(versesInGroup);
 
         // Determine specific scroll threshold mapping. Default 0 if missing.
         const threshold = VISIBILITY_THRESHOLDS[g.id] ?? 0;
@@ -267,7 +268,7 @@ export function PopUpManager() {
       {/* Global button anchor at top center of the paper */}
       <PopUp3DTracker
         id="global"
-        worldPosition={[0, s1Top + 0.25, zBaseOffset]}
+        worldPosition={[...getPopUpTrackerPosition([], true, s1Top), zBaseOffset]}
         scrollThreshold={0.88}
       />
     </group>

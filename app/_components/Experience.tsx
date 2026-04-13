@@ -5,10 +5,8 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { SinglePaper } from "./SinglePaper";
-import { mainSheet } from "./TheatreManager";
 import { PopUpManager } from "./pop-up-verses/PopUpManager";
 
 interface ExperienceProps {
@@ -19,21 +17,23 @@ interface ExperienceProps {
 export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
-  const [controlsEnabled, setControlsEnabled] = useState(true);
 
   useEffect(() => {
-    if (controlsEnabled) {
-      document.body.style.cursor = "grab";
-    } else {
+    // Set the default cursor once on mount.
+    document.body.style.cursor = "grab";
+    return () => {
       document.body.style.cursor = "auto";
-    }
-  }, [controlsEnabled]);
+    };
+  }, []);
 
-  useFrame(() => {
-    if (mainSheet) {
-      mainSheet.sequence.position = 5;
-    }
-  });
+  // Theatre.js initial position — runs ONCE at mount, not 60× per second.
+  // Keeping this in useFrame was locking Theatre from playing any animations
+  // and adding unnecessary per-frame overhead.
+  // useEffect(() => {
+  //   if (mainSheet) {
+  //     mainSheet.sequence.position = 5;
+  //   }
+  // }, []);
 
   return (
     <>
@@ -46,10 +46,10 @@ export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
 
       <OrbitControls
         ref={controlsRef}
-        enabled={controlsEnabled}
+        enabled={true}
         enableZoom={false}
         enablePan={false}
-        makeDefault={controlsEnabled}
+        makeDefault={true}
         minAzimuthAngle={-Math.PI / 4}
         maxAzimuthAngle={Math.PI / 4}
         minPolarAngle={Math.PI / 6}
