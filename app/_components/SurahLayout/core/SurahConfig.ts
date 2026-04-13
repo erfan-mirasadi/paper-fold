@@ -491,7 +491,7 @@ export const SURAH_TRANSFORMS = buildSurahTransforms(START_X);
 export function getPopUpTrackerPosition(
   verses: { y: number; h: number }[],
   isGlobal = false,
-  s1Top = 0
+  s1Top = 0,
 ): [number, number] {
   if (isGlobal) {
     return [0, s1Top + 0.25];

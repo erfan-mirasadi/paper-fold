@@ -1,6 +1,4 @@
 "use client";
-
-// ============================================================================
 // HOLLOW CONNECTOR
 // Location: SurahLayout/components/HollowConnector.tsx
 // Purpose: Renders the decorative framed border boxes that visually "connect"
@@ -12,7 +10,7 @@
 import { UiRect } from "./SharedUI";
 import {
   HOLLOW_BORDER_COLOR,
-  S2_OUTER_BG,
+  HOLLOW_CONNECTOR_INNER_BG_1_3,
   BUMP_MAX,
   BUMP_LOWER,
 } from "../core/theme";
@@ -29,23 +27,31 @@ interface HollowConnectorProps {
 }
 
 export function HollowConnector({
+  position,
   boxX,
   boxW,
   yTop,
-  yBottom: _yBottom,
   height,
   borderWidth: bw,
   isBumpMap = false,
 }: HollowConnectorProps) {
+  // Bias the outer border so the "extra" framing appears on the
+  // connector's primary side: top connectors push the frame upward,
+  // bottom connectors bias it downward.
+  const outerX = boxX - bw;
+  const outerW = boxW + bw * 2;
+  const outerH = height + bw * 3;
+  const outerY = position === "top" ? yTop + bw * 2 : yTop + bw;
+
   return (
     <>
       {/* Outer border layer — slightly larger to create a framed effect */}
       <UiRect
-        x={boxX - bw}
-        y={yTop + bw * 2}
+        x={outerX}
+        y={outerY}
         z={0.0015}
-        w={boxW + bw * 2}
-        h={height + bw * 3}
+        w={outerW}
+        h={outerH}
         radius={0.025}
         color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
@@ -59,7 +65,7 @@ export function HollowConnector({
         w={boxW}
         h={height}
         radius={0.022}
-        color={S2_OUTER_BG}
+        color={HOLLOW_CONNECTOR_INNER_BG_1_3}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_LOWER}
       />

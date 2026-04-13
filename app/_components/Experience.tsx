@@ -10,11 +10,10 @@ import { SinglePaper } from "./SinglePaper";
 import { PopUpManager } from "./pop-up-verses/PopUpManager";
 
 interface ExperienceProps {
-  isDarkMode: boolean;
   isFolded?: boolean;
 }
 
-export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
+export function Experience({ isFolded = false }: ExperienceProps) {
   const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
 
@@ -54,12 +53,9 @@ export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
         }}
       />
 
-      <Environment preset={isDarkMode ? "studio" : "apartment"} />
-      <ambientLight intensity={isDarkMode ? 0.6 : 0.8} />
-      <directionalLight
-        position={[2, 5, 2]}
-        intensity={isDarkMode ? 1.0 : 1.5}
-      />
+      <Environment preset="apartment" />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[2, 5, 2]} intensity={1.5} />
     </>
   );
 }

@@ -20,8 +20,8 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const bgColor = isDarkMode ? "#000000" : "#F2F2ED";
-  const btnBg = isDarkMode ? "#ffffff" : "#121212";
-  const btnColor = isDarkMode ? "#121212" : "#ffffff";
+  const btnBg = isDarkMode ? "#F2F2ED" : "#121212";
+  const btnColor = isDarkMode ? "#121212" : "#F2F2ED";
 
   return (
     <main
@@ -76,7 +76,7 @@ export default function Home() {
             <BackgroundParticlesDesktop isDarkMode={isDarkMode} />
             <TheatreManager>
               <ScrollControls pages={2} damping={0.2}>
-                <Experience isDarkMode={isDarkMode} />
+                <Experience />
                 <TafsirScrollTracker />
               </ScrollControls>
             </TheatreManager>

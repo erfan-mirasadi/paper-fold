@@ -22,6 +22,8 @@ import {
   WHITE_BASE,
   BUMP_MAX,
   BUMP_DEEP,
+  S1_TOP_LABEL_BG,
+  S1_TOP_LABEL_BORDER,
 } from "../core/theme";
 import type { SectionOneData, S1Transforms } from "../core/SurahConfig";
 
@@ -168,7 +170,8 @@ export function SectionOne({
         z={0.004}
         text={data.label}
         isBumpMap={isBumpMap}
-        noBorder={true}
+        bgColor={S1_TOP_LABEL_BG}
+        borderColor={S1_TOP_LABEL_BORDER}
       />
     </group>
   );

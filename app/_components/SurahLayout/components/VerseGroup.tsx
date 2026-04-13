@@ -40,7 +40,7 @@ export function VerseGroup({
   return (
     <group>
       {/* Group bounding box — color/shadow driven by isCenter flag */}
-      <UiRect
+      {/* <UiRect
         x={gt.frameX}
         y={gt.frameY}
         z={0.0025}
@@ -51,7 +51,7 @@ export function VerseGroup({
         shadow={gt.isCenter}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MID}
-      />
+      /> */}
 
       {/* 2×2 verse grid — position comes from the engine, no math here */}
       {group.verses.map((v) => {

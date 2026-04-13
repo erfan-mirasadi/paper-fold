@@ -24,6 +24,8 @@ import {
   WHITE_BASE,
   BUMP_MAX,
   BUMP_DEEP,
+  S2_TOP_LABEL_BG,
+  S2_TOP_LABEL_BORDER,
 } from "../core/theme";
 import type {
   SectionTwoData,
@@ -201,6 +203,8 @@ export function SectionTwo({
         animateOnScroll={true}
         isBumpMap={isBumpMap}
         partialBorder={true}
+        bgColor={S2_TOP_LABEL_BG}
+        borderColor={S2_TOP_LABEL_BORDER}
       />
       <TopLabel
         x={PW / 2}
@@ -211,6 +215,8 @@ export function SectionTwo({
         isBumpMap={isBumpMap}
         partialBorder={true}
         bottomBorder={true}
+        bgColor={S2_TOP_LABEL_BG}
+        borderColor={S2_TOP_LABEL_BORDER}
       />
     </group>
   );

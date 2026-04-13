@@ -193,6 +193,7 @@ interface TopLabelProps {
   borderColor?: string;
   bottomBorder?: boolean;
   noBorder?: boolean;
+  bgColor?: string;
 }
 
 /**
@@ -211,6 +212,7 @@ export function TopLabel({
   borderColor = HOLLOW_BORDER_COLOR,
   bottomBorder = false,
   noBorder = false,
+  bgColor = WHITE_BASE,
 }: TopLabelProps) {
   const w = 0.4;
   const h = 0.046;
@@ -294,7 +296,7 @@ export function TopLabel({
         w={w}
         h={h}
         radius={radius}
-        color={WHITE_BASE}
+        color={bgColor}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_LOWER}
         topOnly={false}

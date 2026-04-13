@@ -29,13 +29,18 @@ import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../core/SurahConfig";
 
 // ── Curve shape constants ─────────────────────────────────────────────────────
-const CURVE_GAP = 0.1;               // Bow step between nesting levels (outer)
-const CURVE_INWARD_OFFSET = 0.0085;  // How far the bracket tip pokes inward
+const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
+const CURVE_INWARD_OFFSET = 0.0085; // How far the bracket tip pokes inward
 const CURVE_DEEP_OFFSET_OUTER = 0.01; // Deeper tip for the center (12–14) bracket
 const CURVE_DEEP_OFFSET_INNER = 0.03; // Deeper inner tip for center bracket
 
-const INNER_CURVE_GAP = 0.095;          // Bow step for inner curves
+const INNER_CURVE_GAP = 0.095; // Bow step for inner curves
 const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
+
+// ── Line width constants ────────────────────────────────────────────────────
+// Edit these two values to adjust the thickness of the side-curve outlines.
+export const CURVE_OUTER_LINE_WIDTH = 1;
+export const CURVE_INNER_LINE_WIDTH = 2;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -188,7 +193,7 @@ const CurvePair = ({
           ref={lineRef1}
           points={outerPoints}
           color={activeColor}
-          lineWidth={3.5}
+          lineWidth={CURVE_OUTER_LINE_WIDTH}
           transparent={true}
           renderOrder={5}
         />
@@ -196,7 +201,7 @@ const CurvePair = ({
           ref={lineRef2}
           points={innerPoints}
           color={activeColor}
-          lineWidth={3.5}
+          lineWidth={CURVE_INNER_LINE_WIDTH}
           transparent={true}
           renderOrder={5}
         />
@@ -255,7 +260,11 @@ const CurvePair = ({
 // ─────────────────────────────────────────────────────────────────────────────
 // SideCurves — orchestrates all 4 bracket pairs on left and right sides
 // ─────────────────────────────────────────────────────────────────────────────
-export const SideCurves = ({ layout, startX, isBumpMap = false }: SideCurvesProps) => {
+export const SideCurves = ({
+  layout,
+  startX,
+  isBumpMap = false,
+}: SideCurvesProps) => {
   const { groups } = usePopUpState();
   // Hide curves whenever any inner group (not 1–2 or 3–4) is open
   const shouldHide = groups.some(

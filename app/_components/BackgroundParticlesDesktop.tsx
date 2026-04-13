@@ -17,11 +17,11 @@ const pseudoRandom = (seed: number): number => {
 // Top-level tweakable distance constants — change these to move particles farther away
 export const Z_SETTINGS = {
   // positive value: particles' base shift away along -Z axis (increase to go further away)
-  BASE_Z_OFFSET: 4,
+  BASE_Z_OFFSET: 3,
   // multiplies the existing CONFIG.DEPTH to increase spread in Z
-  DEPTH_MULTIPLIER: 0.1,
+  DEPTH_MULTIPLIER: 0.06,
   // amplitude of the Z twinkle / oscillation
-  TWINKLE_AMPLITUDE: 0.3,
+  TWINKLE_AMPLITUDE: 0.12,
   // moves the entire particle system forward/backward as one group
   GROUP_Z_OFFSET: 0,
 };
@@ -38,12 +38,12 @@ const CONFIG = {
   OPACITY_DARK: 0.7,
   SIZE: 0.032,
   SPREAD_FACTOR: 3.5,
-  DEPTH: 26,
-  FLOAT_SPEED: 0.02,
-  FLOAT_AMPLITUDE: 0.002,
-  HOVER_SMOOTHNESS: 0.015,
-  HOVER_RADIUS: 3.8,
-  HOVER_STRENGTH: 0.5,
+  DEPTH: 228,
+  FLOAT_SPEED: 0.015,
+  FLOAT_AMPLITUDE: 0.001,
+  HOVER_SMOOTHNESS: 0.08,
+  HOVER_RADIUS: 3.6,
+  HOVER_STRENGTH: 0.55,
 };
 
 export default function BackgroundParticlesDesktop({
