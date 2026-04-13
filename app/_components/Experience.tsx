@@ -19,21 +19,11 @@ export function Experience({ isDarkMode, isFolded = false }: ExperienceProps) {
   const isDragging = useRef(false);
 
   useEffect(() => {
-    // Set the default cursor once on mount.
     document.body.style.cursor = "grab";
     return () => {
       document.body.style.cursor = "auto";
     };
   }, []);
-
-  // Theatre.js initial position — runs ONCE at mount, not 60× per second.
-  // Keeping this in useFrame was locking Theatre from playing any animations
-  // and adding unnecessary per-frame overhead.
-  // useEffect(() => {
-  //   if (mainSheet) {
-  //     mainSheet.sequence.position = 5;
-  //   }
-  // }, []);
 
   return (
     <>

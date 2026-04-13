@@ -20,6 +20,8 @@ import {
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
+  BUMP_MID,
+  BUMP_LOWER,
 } from "../core/theme";
 import { AnimatedArrow } from "./AnimatedArrow";
 import { usePopUpState } from "../../pop-up-verses/ui/PopUpState";
@@ -40,6 +42,7 @@ const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
 interface SideCurvesProps {
   layout: LayoutConfig;
   startX: number;
+  isBumpMap?: boolean;
 }
 
 /**
@@ -79,6 +82,7 @@ const CurvePair = ({
   fillColor,
   isRight,
   shouldHide = false,
+  isBumpMap = false,
 }: {
   outerYTop: number;
   outerYBot: number;
@@ -92,6 +96,7 @@ const CurvePair = ({
   fillColor?: string;
   isRight: boolean;
   shouldHide?: boolean;
+  isBumpMap?: boolean;
 }) => {
   const outerPoints = useMemo(
     () => getSmoothCurvePoints(outerTipX, outerControlX, outerYTop, outerYBot),
@@ -173,13 +178,16 @@ const CurvePair = ({
     }
   });
 
+  const activeColor = isBumpMap ? BUMP_MID : color;
+  const activeFillColor = isBumpMap ? BUMP_LOWER : (fillColor ?? color);
+
   return (
     <group ref={groupRef} position={[0, 0, 0.0012]}>
       <group position={[0, 0, 0.0012]} renderOrder={5}>
         <Line
           ref={lineRef1}
           points={outerPoints}
-          color={color}
+          color={activeColor}
           lineWidth={3.5}
           transparent={true}
           renderOrder={5}
@@ -187,7 +195,7 @@ const CurvePair = ({
         <Line
           ref={lineRef2}
           points={innerPoints}
-          color={color}
+          color={activeColor}
           lineWidth={3.5}
           transparent={true}
           renderOrder={5}
@@ -197,7 +205,7 @@ const CurvePair = ({
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
           ref={fillMaterialRef}
-          color={fillColor ?? color}
+          color={activeFillColor}
           transparent
           opacity={0.999}
           depthTest={false}
@@ -247,7 +255,7 @@ const CurvePair = ({
 // ─────────────────────────────────────────────────────────────────────────────
 // SideCurves — orchestrates all 4 bracket pairs on left and right sides
 // ─────────────────────────────────────────────────────────────────────────────
-export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
+export const SideCurves = ({ layout, startX, isBumpMap = false }: SideCurvesProps) => {
   const { groups } = usePopUpState();
   // Hide curves whenever any inner group (not 1–2 or 3–4) is open
   const shouldHide = groups.some(
@@ -355,6 +363,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_6_19}
         isRight={false}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       {/* Bracket 2 (maroon): verse 7–8 ↔ verse 17–18 */}
@@ -371,6 +380,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       {/* Bracket 3 (maroon): verse 9–10 ↔ verse 15–16 */}
@@ -387,6 +397,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       {/* Bracket 4 (innermost, green): verse 11–12 ↔ verse 13–14 */}
@@ -403,6 +414,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_12_14}
         isRight={false}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       {/* ════════════ RIGHT SIDE ════════════ */}
@@ -420,6 +432,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_6_19}
         isRight={true}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       <CurvePair
@@ -435,6 +448,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       <CurvePair
@@ -450,6 +464,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
 
       <CurvePair

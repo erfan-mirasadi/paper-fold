@@ -20,20 +20,34 @@ import { useEffect, useMemo, useRef } from "react";
 import {
   Bone,
   BoxGeometry,
+  ClampToEdgeWrapping,
   Color,
   Float32BufferAttribute,
   Group,
+  LinearFilter,
   MeshStandardMaterial,
   Skeleton,
   SkinnedMesh,
   Uint16BufferAttribute,
   Vector3,
   Vector2,
+  NoColorSpace,
+  RepeatWrapping,
 } from "three";
 import { Tafsir3DTracker } from "./ui-overlay/Tafsir3DTracker";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
+
+// I made this smaller since you cropped the image to a thin line.
+// Tweak this to make the crease thicker or thinner vertically.
+const CREASE_BAND_HEIGHT = 0.05;
+
+const CREASE_NORMAL_OPACITY = 1;
+
+// Opacity for the base paper normal-map rendered into the normalMap RT.
+// Lower values reduce the strength of the overall normal effect.
+const PAPER_NORMAL_OPACITY = 0.75;
 
 export const PAGE_DEPTH = 0.003;
 
@@ -102,7 +116,38 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const scroll = useScroll();
 
-  const creaseNormalMap = useTexture("/crease-normal.png");
+  const creaseNormalMap = useTexture("/crease-normal.png", (texture) => {
+    texture.colorSpace = NoColorSpace;
+
+    // CHANGED: Use RepeatWrapping on the X-axis so it tiles instead of stretching
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = ClampToEdgeWrapping;
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
+    texture.generateMipmaps = false;
+
+    // CHANGED: Repeat the texture 5 times along the line.
+    // Adjust this '5' up or down until it looks perfectly proportional!
+    texture.repeat.set(5, 1);
+
+    texture.needsUpdate = true;
+  });
+
+  const paperTextureNormal = useTexture(
+    "/Paper-Texture-7_normal.png",
+    (texture) => {
+      // Normal maps MUST use NoColorSpace (linear representation) otherwise they appear inverted/messed up
+      texture.colorSpace = NoColorSpace;
+
+      // Enable repeating to prevent edge clamping
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = RepeatWrapping;
+
+      // Set repeat to [1, 1] to fit the page exactly
+      texture.repeat.set(1, 1);
+      texture.needsUpdate = true;
+    },
+  );
 
   // ---- Audio Setup ----
   const foldSound = useRef<HTMLAudioElement | null>(null);
@@ -163,17 +208,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
 
     const bones = skinnedMeshRef.current.skeleton.bones;
 
-    //Paper unfolds from the start (intro removed)
-    // const INTRO_SCROLL_RATIO = 0.3;
     const paperProgress = scroll.offset;
-
-    /*
-    if (scroll.offset > INTRO_SCROLL_RATIO) {
-      paperProgress =
-        (scroll.offset - INTRO_SCROLL_RATIO) / (1 - INTRO_SCROLL_RATIO);
-    }
-    */
-
     const maxStageIndex = FOLD_STORY_STEPS.length - 1;
     const currentStage = Math.round(paperProgress * maxStageIndex);
 
@@ -220,10 +255,10 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
           metalness={0.05} // Just a tiny bit of density to help the bumps catch light
           color={paperBaseColor}
           bumpScale={0.015} // This controls how high the elements pop out (adjust if needed)
-          normalScale={new Vector2(0.8, 0.8)} // Keeps your creases intact
+          normalScale={new Vector2(0.8, 0.8)}
           envMapIntensity={0.5} // Balanced to show off the bumps without blowing out colors
         >
-          {/* 1. The main color content map */}
+          {/* The main color content map (Offsets removed to fix layout drop) */}
           <RenderTexture attach="map" width={1200} height={1700}>
             <PaperContent isFolded={isFolded} />
           </RenderTexture>
@@ -236,6 +271,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
           {/* 3. The existing Normal Map for the folded creases */}
           <RenderTexture attach="normalMap" width={1200} height={1700}>
             <color attach="background" args={["#8080ff"]} />
+
             <OrthographicCamera
               makeDefault
               left={0}
@@ -244,13 +280,37 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
               bottom={-PAGE_HEIGHT}
               position={[0, 0, 5]}
             />
+
+            {/* The base paper normal texture covering the entire page */}
+            {/* Render order 0 so it stays in the background */}
+            <mesh
+              position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, -1]}
+              renderOrder={0}
+            >
+              <planeGeometry args={[PAGE_WIDTH, PAGE_HEIGHT]} />
+              <meshBasicMaterial
+                map={paperTextureNormal}
+                transparent={true}
+                opacity={PAPER_NORMAL_OPACITY}
+                depthTest={false}
+                toneMapped={false}
+              />
+            </mesh>
+
+            {/* Render order 10 so creases render ON TOP of the base paper texture */}
             {FOLD_Y_POSITIONS.map((y, i) => (
-              <mesh key={i} position={[PAGE_WIDTH / 2, y, i * 0.01]}>
-                <planeGeometry args={[PAGE_WIDTH, 0.2]} />
+              <mesh
+                key={i}
+                position={[PAGE_WIDTH / 2, y, i * 0.01]}
+                renderOrder={10}
+              >
+                <planeGeometry args={[PAGE_WIDTH, CREASE_BAND_HEIGHT]} />
                 <meshBasicMaterial
                   map={creaseNormalMap}
                   transparent={true}
+                  opacity={CREASE_NORMAL_OPACITY}
                   depthTest={false}
+                  toneMapped={false}
                 />
               </mesh>
             ))}
@@ -263,17 +323,21 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
                 0.62,
               ]}
               rotation={[0, 0, Math.PI / 2]}
+              renderOrder={10}
             >
+              {/* CHANGED: Made the thickness match the new CREASE_BAND_HEIGHT instead of 0.25 */}
               <planeGeometry
                 args={[
                   layoutMath.g1Y - (layoutMath.g3Y - layoutMath.groupH),
-                  0.25,
+                  CREASE_BAND_HEIGHT,
                 ]}
               />
               <meshBasicMaterial
                 map={creaseNormalMap}
                 transparent={true}
+                opacity={CREASE_NORMAL_OPACITY}
                 depthTest={false}
+                toneMapped={false}
               />
             </mesh>
 
@@ -287,14 +351,21 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
                 0.62,
               ]}
               rotation={[0, 0, Math.PI / 2]}
+              renderOrder={10}
             >
+              {/* CHANGED: Made the thickness match the new CREASE_BAND_HEIGHT instead of 0.25 */}
               <planeGeometry
-                args={[layoutMath.smallBoxH * 2 + layoutMath.gap, 0.25]}
+                args={[
+                  layoutMath.smallBoxH * 2 + layoutMath.gap,
+                  CREASE_BAND_HEIGHT,
+                ]}
               />
               <meshBasicMaterial
                 map={creaseNormalMap}
                 transparent={true}
+                opacity={CREASE_NORMAL_OPACITY}
                 depthTest={false}
+                toneMapped={false}
               />
             </mesh>
           </RenderTexture>

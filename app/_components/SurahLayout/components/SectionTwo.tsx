@@ -190,7 +190,7 @@ export function SectionTwo({
       />
 
       {/* ─── SIDE CURVES (still read raw layout math) ────────────────────── */}
-      <SideCurves layout={layout} startX={startX} />
+      <SideCurves layout={layout} startX={startX} isBumpMap={isBumpMap} />
 
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
       <TopLabel
