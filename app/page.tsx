@@ -10,6 +10,7 @@ import {
   TafsirScrollTracker,
 } from "./_components/ui-overlay/TafsirUI";
 import { PopUpUI } from "./_components/pop-up-verses/ui/PopUpUI";
+import BackgroundParticlesDesktop from "./_components/BackgroundParticlesDesktop";
 const Experience = dynamic(
   () => import("./_components/Experience").then((mod) => mod.Experience),
   { ssr: false },
@@ -18,7 +19,7 @@ const Experience = dynamic(
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const bgColor = isDarkMode ? "#121212" : "#f4f1ea";
+  const bgColor = isDarkMode ? "#000000" : "#F2F2ED";
   const btnBg = isDarkMode ? "#ffffff" : "#121212";
   const btnColor = isDarkMode ? "#121212" : "#ffffff";
 
@@ -56,7 +57,7 @@ export default function Home() {
             transition: "all 0.3s ease",
           }}
         >
-          {isDarkMode ? "☀️ Light" : "🌙 Dark"}
+          {isDarkMode ? "☀️" : "🌙"}
         </button>
       </div>
 
@@ -72,6 +73,7 @@ export default function Home() {
         <div style={{ width: "100vw", height: "100vh" }}>
           <Canvas shadows camera={{ position: [0, 1, 1.7], fov: 45 }}>
             <color attach="background" args={[bgColor]} />
+            <BackgroundParticlesDesktop isDarkMode={isDarkMode} />
             <TheatreManager>
               <ScrollControls pages={2} damping={0.2}>
                 <Experience isDarkMode={isDarkMode} />
