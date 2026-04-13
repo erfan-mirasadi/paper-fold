@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { useMemo } from "react";
 import { a, SpringValue, to } from "@react-spring/three";
 import { RenderTexture, OrthographicCamera } from "@react-three/drei";
-import { VerseBox, RoundedShapeComponent } from "../paper-content/SharedUI";
+import { VerseBox, RoundedShapeComponent } from "../SurahLayout/components/SharedUI";
 import { SHADOW_CONFIG } from "./useFoldAnimation";
 
 interface PopUpVerseCardProps {

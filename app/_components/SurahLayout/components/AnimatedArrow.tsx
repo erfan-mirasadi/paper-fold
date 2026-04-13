@@ -1,4 +1,13 @@
 "use client";
+
+// ============================================================================
+// ANIMATED ARROW
+// Location: SurahLayout/components/AnimatedArrow.tsx
+// Purpose: A glowing particle dot that travels along the center path of a
+//          SideCurve bracket. Communicates chiastic structure to the reader.
+//          Fully self-contained; receives curve math as props from SideCurves.
+// ============================================================================
+
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -10,7 +19,7 @@ type ArrowTextures = {
 };
 
 function createArrowTextures(): ArrowTextures {
-  // 1. Soft Radial Glow Canvas
+  // 1. Soft radial glow canvas
   const gCanvas = document.createElement("canvas");
   gCanvas.width = 128;
   gCanvas.height = 128;
@@ -27,7 +36,7 @@ function createArrowTextures(): ArrowTextures {
   const glowTexture = new THREE.CanvasTexture(gCanvas);
   glowTexture.needsUpdate = true;
 
-  // 2. Star Flare Canvas
+  // 2. Star flare cross canvas
   const fCanvas = document.createElement("canvas");
   fCanvas.width = 128;
   fCanvas.height = 128;
@@ -54,7 +63,7 @@ function createArrowTextures(): ArrowTextures {
   const flareTexture = new THREE.CanvasTexture(fCanvas);
   flareTexture.needsUpdate = true;
 
-  // 3. Shadow/Dark Halo Canvas
+  // 3. Dark shadow / halo canvas
   const sCanvas = document.createElement("canvas");
   sCanvas.width = 128;
   sCanvas.height = 128;
@@ -73,6 +82,13 @@ function createArrowTextures(): ArrowTextures {
   return { glowTexture, flareTexture, shadowTexture };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MODULE-LEVEL TEXTURE SINGLETON
+// Textures are created ONCE when the module loads and shared across ALL
+// AnimatedArrow instances. Prevents N×3 WebGL texture allocations in memory.
+// ─────────────────────────────────────────────────────────────────────────────
+const SHARED_ARROW_TEXTURES = createArrowTextures();
+
 export const AnimatedArrow = ({
   outerTipX,
   innerTipX,
@@ -84,11 +100,11 @@ export const AnimatedArrow = ({
   innerYBot,
   color,
   delay = 0,
-  speed = 0.0005, // Speed of the animation along the path
-  arrowSize = 0.008, // Base size of the core star dot
-  floatIntensity = 0.008, // Amplitude of the floating/wobbling effect
-  glowSize = 4, // Multiplier for the glow plane size relative to arrowSize
-  shouldHide = false, // Hides the arrow according to popup state
+  speed = 0.0005,       // Speed of travel along the path
+  arrowSize = 0.008,    // Base size of the core dot
+  floatIntensity = 0.008, // Amplitude of the perpendicular float wobble
+  glowSize = 4,         // Glow plane size multiplier relative to arrowSize
+  shouldHide = false,   // Synced to popup open state
 }: {
   outerTipX: number;
   innerTipX: number;
@@ -107,7 +123,7 @@ export const AnimatedArrow = ({
   shouldHide?: boolean;
 }) => {
   const groupRef = useRef<THREE.Group>(null);
-  const innerGroupRef = useRef<THREE.Group>(null); // New group to handle the subtle spin of all components
+  const innerGroupRef = useRef<THREE.Group>(null);
   const flareRef = useRef<THREE.Mesh>(null);
 
   const coreMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -122,13 +138,12 @@ export const AnimatedArrow = ({
   const curveTangentRef = useRef(new THREE.Vector3());
   const curveNormalRef = useRef(new THREE.Vector3());
 
-  // --- INTERNAL VISUAL TUNING ---
-  // Adjust these values to fine-tune the look without changing props
-  const SHADOW_OPACITY = 0.1; // Scale of 0 to 1 for the drop shadow
-  const CONTRAST_BOOST = 0.65; // Scale of 0 to 1 for the dark halo that makes the glow pop
-  const GLOW_STRENGTH = 1.0; // Multiplier for the main light layers
-  // ------------------------------
+  // Visual tuning constants
+  const SHADOW_OPACITY = 0.1;
+  const CONTRAST_BOOST = 0.65;
+  const GLOW_STRENGTH = 1.0;
 
+  // Center path is the average of outer and inner curves
   const centerCurve = useMemo(
     () =>
       new THREE.CubicBezierCurve3(
@@ -165,10 +180,8 @@ export const AnimatedArrow = ({
     ],
   );
 
-  // Reuse one set of textures for all arrows instead of generating per instance.
-  const { glowTexture, flareTexture, shadowTexture } = useMemo(() => {
-    return createArrowTextures();
-  }, []);
+  // Reference the module-level singleton — no per-instance allocation
+  const { glowTexture, flareTexture, shadowTexture } = SHARED_ARROW_TEXTURES;
 
   useEffect(() => {
     if (!shouldHide && groupRef.current) {
@@ -200,15 +213,10 @@ export const AnimatedArrow = ({
     const go = globalOpacityRef.current;
 
     if (shouldHide && go < 0.01) {
-      if (groupRef.current.visible) {
-        groupRef.current.visible = false;
-      }
+      if (groupRef.current.visible) groupRef.current.visible = false;
       return;
     }
-
-    if (!groupRef.current.visible) {
-      groupRef.current.visible = true;
-    }
+    if (!groupRef.current.visible) groupRef.current.visible = true;
 
     const time = state.clock.elapsedTime * speed + delay;
     const t = time - Math.floor(time);
@@ -236,6 +244,7 @@ export const AnimatedArrow = ({
     innerGroupRef.current.rotation.z = state.clock.elapsedTime * 0.3 + delay;
     flareRef.current.rotation.z -= 0.02;
 
+    // Edge fade-in/out to prevent popping at loop boundary
     let opacity = 1;
     const fadeEdges = 0.15;
     if (t < fadeEdges) {
@@ -255,7 +264,7 @@ export const AnimatedArrow = ({
   return (
     <group ref={groupRef} renderOrder={1002}>
       <group ref={innerGroupRef}>
-        {/* Drop Shadow - Offset slightly to create depth */}
+        {/* Drop shadow offset for perceived depth */}
         <mesh position={[0.003, -0.003, -0.0002]} renderOrder={998}>
           <planeGeometry args={[arrowSize * 6, arrowSize * 6]} />
           <meshBasicMaterial
@@ -266,7 +275,7 @@ export const AnimatedArrow = ({
           />
         </mesh>
 
-        {/* Dark Contrast Halo - Sits exactly behind the glow to make it pop */}
+        {/* Dark contrast halo — sits behind glow to make it pop */}
         <mesh renderOrder={999}>
           <planeGeometry args={[arrowSize * 8, arrowSize * 8]} />
           <meshBasicMaterial
@@ -277,7 +286,7 @@ export const AnimatedArrow = ({
           />
         </mesh>
 
-        {/* Ambient Outer Glow */}
+        {/* Ambient outer glow ring */}
         <mesh renderOrder={1000}>
           <planeGeometry
             args={[arrowSize * glowSize * 2.5, arrowSize * glowSize * 2.5]}
@@ -292,7 +301,7 @@ export const AnimatedArrow = ({
           />
         </mesh>
 
-        {/* Main Intense Glow */}
+        {/* Main intense inner glow */}
         <mesh renderOrder={1001}>
           <planeGeometry
             args={[arrowSize * glowSize * 1.5, arrowSize * glowSize * 1.5]}
@@ -307,7 +316,7 @@ export const AnimatedArrow = ({
           />
         </mesh>
 
-        {/* Star Flare Layer */}
+        {/* Star flare cross layer */}
         <mesh ref={flareRef} renderOrder={1002}>
           <planeGeometry
             args={[arrowSize * glowSize * 3.5, arrowSize * glowSize * 3.5]}
@@ -322,12 +331,12 @@ export const AnimatedArrow = ({
           />
         </mesh>
 
-        {/* Core Solid Ball - Hotter & Brighter */}
+        {/* Core solid white dot — hottest, brightest point */}
         <mesh renderOrder={1003}>
           <circleGeometry args={[arrowSize * 0.5, 32]} />
           <meshBasicMaterial
             ref={coreMaterialRef}
-            color="#FFFFFF" // White core for maximum "heat"
+            color="#FFFFFF"
             transparent
             depthWrite={false}
           />

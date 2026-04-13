@@ -13,15 +13,15 @@ import {
   CAPSULE_BG_12_14,
   MAROON_THEME,
   GREEN_THEME,
-} from "../paper-content/SharedUI";
+} from "../SurahLayout/core/theme";
 import {
   layoutMath,
   PAGE_WIDTH,
   PAGE_HEIGHT,
   START_X,
-} from "../paper-content/index";
+  SURAH_DATA,
+} from "../SurahLayout/core/SurahConfig";
 import { PAGE_DEPTH } from "../SinglePaper";
-import { SURAH_DATA } from "../paper-content/index";
 
 interface VerseConfig {
   id: number;

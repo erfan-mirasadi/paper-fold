@@ -1,4 +1,15 @@
 "use client";
+
+// ============================================================================
+// SIDE CURVES
+// Location: SurahLayout/components/SideCurves.tsx
+// Purpose: Renders the chiastic (ring-structure) bracket curves on both sides
+//          of Section 2. Each CurvePair brackets two semantically-mirrored
+//          verse groups. Coordinates are derived 100% from the passed `layout`
+//          prop — no hardcoded positions. If verse positions shift (e.g., taller
+//          boxes, added groups), the curves follow automatically.
+// ============================================================================
+
 import { Line } from "@react-three/drei";
 import { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
@@ -9,54 +20,40 @@ import {
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
-} from "./SharedUI";
+} from "../core/theme";
 import { AnimatedArrow } from "./AnimatedArrow";
-import { usePopUpState } from "../pop-up-verses/ui/PopUpState";
+import { usePopUpState } from "../../pop-up-verses/ui/PopUpState";
 import { useFrame } from "@react-three/fiber";
+import type { LayoutConfig } from "../core/SurahConfig";
 
-export interface LayoutConfig {
-  s2Pad: number;
-  sectionW: number;
-  v6Y: number;
-  g1Y: number;
-  g2Y: number;
-  g3Y: number;
-  v19Y: number;
-  bigBoxH: number;
-  groupPad: number;
-  smallBoxH2: number;
-  s2Gap: number;
-  groupH: number;
-}
+// ── Curve shape constants ─────────────────────────────────────────────────────
+const CURVE_GAP = 0.1;               // Bow step between nesting levels (outer)
+const CURVE_INWARD_OFFSET = 0.0085;  // How far the bracket tip pokes inward
+const CURVE_DEEP_OFFSET_OUTER = 0.01; // Deeper tip for the center (12–14) bracket
+const CURVE_DEEP_OFFSET_INNER = 0.03; // Deeper inner tip for center bracket
+
+const INNER_CURVE_GAP = 0.095;          // Bow step for inner curves
+const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface SideCurvesProps {
   layout: LayoutConfig;
   startX: number;
 }
 
-// OUTER curves — one per bracket pair, bow increases outward per nesting level
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const CURVE_GAP = 0.1; // step between each nesting level
-const CURVE_INWARD_OFFSET = 0.0085; // how far the tip penetrates inward (standard)
-const CURVE_DEEP_OFFSET_OUTER = 0.01; // deeper penetration for the 12-14 pair (outer)
-const CURVE_DEEP_OFFSET_INNER = 0.03; // deeper penetration for the 12-14 pair (inner)
-
-// INNER curves — identical bow for every pair, tweak these two values
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const INNER_CURVE_GAP = 0.095; // how far inward the inner curve bows
-const INNER_CURVE_INWARD_OFFSET = 0.008; // tip penetration for inner curves
-
-// MASTER CORNER CONTROLS (Unified caps matching)
-// Kept these to avoid breaking your custom fields, though the new exact-path method
-// naturally creates perfect flush connections without needing manual bezier depths!
-//
+/**
+ * getSmoothCurvePoints
+ * Builds high-resolution cubic bezier points for a single curve arm.
+ * Using the exact same sample points for both the Line and the fill Shape
+ * guarantees zero visual bleeding between the two.
+ */
 const getSmoothCurvePoints = (
   tipX: number,
   controlX: number,
   yTop: number,
   yBot: number,
 ) => {
-  // A Cubic Bezier Curve uses two control points to create a smooth C-shape
   const curve = new THREE.CubicBezierCurve3(
     new THREE.Vector3(tipX, yTop, 0),
     new THREE.Vector3(controlX, yTop, 0),
@@ -66,8 +63,9 @@ const getSmoothCurvePoints = (
   return curve.getPoints(50);
 };
 
-// CurvePair component representing the smooth lines and their fill
-// ===========================================
+// ─────────────────────────────────────────────────────────────────────────────
+// CurvePair — renders one nested bracket (outer line + inner line + fill mesh)
+// ─────────────────────────────────────────────────────────────────────────────
 const CurvePair = ({
   outerYTop,
   outerYBot,
@@ -105,31 +103,21 @@ const CurvePair = ({
     [innerTipX, innerControlX, innerYTop, innerYBot],
   );
 
+  // Build the fill shape from the exact same sample points as the lines.
+  // This prevents any sub-pixel gap or bleed between outline and fill.
   const fillShape = useMemo(() => {
     const s = new THREE.Shape();
 
-    // The Ultimate Fix: Instead of trying to mathematically match a low-res Shape bezier
-    // with a high-res Line, we just construct the Shape using the EXACT same points
-    // generated for the Lines! This guarantees zero bleeding.
     if (outerPoints.length > 0 && innerPoints.length > 0) {
-      // 1. Start at top outer point
       s.moveTo(outerPoints[0].x, outerPoints[0].y);
-
-      // 2. Trace the exact high-res points of the outer curve
       for (let i = 1; i < outerPoints.length; i++) {
         s.lineTo(outerPoints[i].x, outerPoints[i].y);
       }
-
-      // 3. Clean straight flush cap at the bottom (snaps perfectly to the UI box)
       const lastInner = innerPoints[innerPoints.length - 1];
       s.lineTo(lastInner.x, lastInner.y);
-
-      // 4. Trace the exact high-res points of the inner curve backwards!
       for (let i = innerPoints.length - 2; i >= 0; i--) {
         s.lineTo(innerPoints[i].x, innerPoints[i].y);
       }
-
-      // 5. Clean straight flush cap at the top (closes the shape)
       s.lineTo(outerPoints[0].x, outerPoints[0].y);
     }
 
@@ -146,17 +134,15 @@ const CurvePair = ({
   const globalOpacityRef = useRef(1);
   const isAnimating = useRef(false);
 
-  // Trigger animation loop only when shouldHide changes
   useEffect(() => {
     isAnimating.current = true;
-    // If it's going to be visible, turn on the mesh immediately before fading in
+    // Make visible immediately before fading in
     if (!shouldHide && groupRef.current) {
       groupRef.current.visible = true;
     }
   }, [shouldHide]);
 
-  useFrame((state, delta) => {
-    // Optimization: Skip calculation entirely if not animating
+  useFrame((_, delta) => {
     if (!isAnimating.current) return;
 
     const targetOp = shouldHide ? 0 : 1;
@@ -168,7 +154,6 @@ const CurvePair = ({
     );
     const go = globalOpacityRef.current;
 
-    // Apply Opacity
     if (fillMaterialRef.current) {
       fillMaterialRef.current.opacity = 0.999 * go;
     }
@@ -179,12 +164,11 @@ const CurvePair = ({
       lineRef2.current.material.opacity = go;
     }
 
-    // Optimization: Turn off visibility when fully transparent to save GPU fill-rate
-    // Stop animation loop when target is reached
+    // Stop the animation loop when close enough to target; hide when fully invisible
     if (Math.abs(go - targetOp) < 0.01) {
-      isAnimating.current = false; // Stop useFrame math
+      isAnimating.current = false;
       if (shouldHide && groupRef.current) {
-        groupRef.current.visible = false; // Stop rendering!
+        groupRef.current.visible = false;
       }
     }
   });
@@ -221,7 +205,7 @@ const CurvePair = ({
         />
       </mesh>
 
-      {/* Adding Animated Arrows on the Center curves */}
+      {/* Two staggered animated arrows per bracket for a layered look */}
       <AnimatedArrow
         outerTipX={outerTipX}
         innerTipX={innerTipX}
@@ -260,11 +244,16 @@ const CurvePair = ({
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SideCurves — orchestrates all 4 bracket pairs on left and right sides
+// ─────────────────────────────────────────────────────────────────────────────
 export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
   const { groups } = usePopUpState();
+  // Hide curves whenever any inner group (not 1–2 or 3–4) is open
   const shouldHide = groups.some(
     (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
   );
+
   const {
     s2Pad,
     sectionW,
@@ -279,45 +268,47 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
     s2Gap,
   } = layout;
 
-  // ── TOP edges (existing outer curves)
+  // ── Derive Y edges from the layout object (no hardcoded numbers) ──────────
+
+  // Outer bracket (blue): spans verse 6 top → verse 19 bottom
   const y6 = v6Y;
   const y19 = v19Y - bigBoxH;
 
+  // Second bracket (maroon): spans verse 7/8 top → verse 17/18 bottom
   const y8 = g1Y - groupPad;
   const y18 = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2 - 0.01;
 
+  // Third bracket (maroon): spans verse 9/10 top → verse 15/16 bottom
   const y10 = g1Y - groupPad - smallBoxH2 - s2Gap - 0.01;
   const y16 = g3Y - groupPad - smallBoxH2;
 
+  // Inner bracket (green): spans verse 11/12 top → verse 13/14 bottom
   const y12 = g2Y - groupPad;
   const y14 = g2Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2;
 
-  // ── BOTTOM edges for each upper section / TOP edges for each lower section ──
+  // ── Bottom edges (inner faces of each bracket) ────────────────────────────
   const y6_bot = v6Y - bigBoxH;
   const y19_top = v19Y;
-
   const y8_bot = y8 - smallBoxH2;
   const y18_top = y18 + smallBoxH2;
-
   const y10_bot = y10 - smallBoxH2;
   const y16_top = y16 + smallBoxH2;
-
   const y12_bot = y12 - smallBoxH2;
   const y14_top = y14 + smallBoxH2;
 
-  // Base bounding box reference edges
+  // ── Reference edges (flush with the section box sides) ───────────────────
   const startX_L = startX + s2Pad - 0.005;
   const startX_R = startX + sectionW - s2Pad + 0.005;
 
-  // Destination edges
+  // Standard bracket tips
   const tipX_L = startX_L + CURVE_INWARD_OFFSET;
   const tipX_R = startX_R - CURVE_INWARD_OFFSET;
 
-  // Deep penetration destination exception for 12-14 boxes
+  // Deep-penetration tips for center (12–14) bracket
   const tipX_12_14_L = startX_L + CURVE_DEEP_OFFSET_OUTER;
   const tipX_12_14_R = startX_R - CURVE_DEEP_OFFSET_OUTER;
 
-  // ── Outer control points ──
+  // ── Outer control points (bow increases outward per nesting level) ────────
   const control4_L = startX_L - CURVE_GAP * 1;
   const control3_L = startX_L - CURVE_GAP * 2;
   const control2_L = startX_L - CURVE_GAP * 3;
@@ -328,7 +319,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
   const control2_R = startX_R + CURVE_GAP * 3;
   const control1_R = startX_R + CURVE_GAP * 4;
 
-  // ── Inner control points ──
+  // ── Inner control points ──────────────────────────────────────────────────
   const innerControl4_L = startX_L - INNER_CURVE_GAP * 1;
   const innerControl3_L = startX_L - INNER_CURVE_GAP * 2;
   const innerControl2_L = startX_L - INNER_CURVE_GAP * 3;
@@ -339,7 +330,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
   const innerControl2_R = startX_R + INNER_CURVE_GAP * 3;
   const innerControl1_R = startX_R + INNER_CURVE_GAP * 4;
 
-  // ── Inner tip X ──
+  // ── Inner tips ────────────────────────────────────────────────────────────
   const innerTipX_L = startX_L + INNER_CURVE_INWARD_OFFSET;
   const innerTipX_R = startX_R - INNER_CURVE_INWARD_OFFSET;
 
@@ -348,7 +339,9 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
 
   return (
     <group position={[0, 0, 0.0025]} renderOrder={5}>
-      {/* ================= LEFT CURVES ================= */}
+      {/* ════════════ LEFT SIDE ════════════ */}
+
+      {/* Bracket 1 (outermost, blue): verse 6 ↔ verse 19 */}
       <CurvePair
         outerYTop={y6}
         outerYBot={y19}
@@ -363,6 +356,8 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         isRight={false}
         shouldHide={shouldHide}
       />
+
+      {/* Bracket 2 (maroon): verse 7–8 ↔ verse 17–18 */}
       <CurvePair
         outerYTop={y8}
         outerYBot={y18}
@@ -377,6 +372,8 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         isRight={false}
         shouldHide={shouldHide}
       />
+
+      {/* Bracket 3 (maroon): verse 9–10 ↔ verse 15–16 */}
       <CurvePair
         outerYTop={y10}
         outerYBot={y16}
@@ -391,6 +388,8 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         isRight={false}
         shouldHide={shouldHide}
       />
+
+      {/* Bracket 4 (innermost, green): verse 11–12 ↔ verse 13–14 */}
       <CurvePair
         outerYTop={y12}
         outerYBot={y14}
@@ -406,7 +405,8 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         shouldHide={shouldHide}
       />
 
-      {/* ================= RIGHT CURVES ================= */}
+      {/* ════════════ RIGHT SIDE ════════════ */}
+
       <CurvePair
         outerYTop={y6}
         outerYBot={y19}
@@ -421,6 +421,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         isRight={true}
         shouldHide={shouldHide}
       />
+
       <CurvePair
         outerYTop={y8}
         outerYBot={y18}
@@ -435,6 +436,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         isRight={true}
         shouldHide={shouldHide}
       />
+
       <CurvePair
         outerYTop={y10}
         outerYBot={y16}
@@ -449,6 +451,7 @@ export const SideCurves = ({ layout, startX }: SideCurvesProps) => {
         isRight={true}
         shouldHide={shouldHide}
       />
+
       <CurvePair
         outerYTop={y12}
         outerYBot={y14}

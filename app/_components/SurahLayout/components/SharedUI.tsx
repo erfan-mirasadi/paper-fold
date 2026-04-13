@@ -1,96 +1,39 @@
 "use client";
 
+// ============================================================================
+// SHARED UI PRIMITIVES
+// Location: SurahLayout/components/SharedUI.tsx
+// Purpose: Universal Three.js layout building blocks used across all Surah
+//          sections AND the popup verse system. Keeps primitives decoupled from
+//          any specific surah data or layout config.
+//          Colors are imported from theme.ts; no hex strings are hardcoded here.
+// ============================================================================
+
 import { Text, useScroll } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
+import {
+  WHITE_BASE,
+  SHADOW_BLACK,
+  TEXT_DARK,
+  TEXT_LABEL,
+  BUMP_MAX,
+  BUMP_MID_HIGH,
+  BUMP_LOWER,
+  HOLLOW_BORDER_COLOR,
+  CIRCLE_BORDER,
+  TAB_BG,
+  TAB_BORDER,
+  TAB_TEXT,
+  QURAN_FONT,
+  TEXT_SIZES,
+} from "../core/theme";
+
+export * from "../core/theme";
 
 // ============================================================================
-// GLOBAL THEME & CONSTANTS
-// Location: app/_components/paper-content/SharedUI.tsx
-// Purpose: Centralized repository for all shared UI elements, colors, and styling rules.
-// ============================================================================
-
-export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
-
-// ----------------------------------------------------------------------------
-// 1. BASE COLORS
-// ----------------------------------------------------------------------------
-export const WHITE_BASE = "#ffffff";
-export const SHADOW_BLACK = "#000000";
-export const TEXT_DARK = "#1a1a1a";
-export const TEXT_LABEL = "#4a423a";
-
-// ----------------------------------------------------------------------------
-// 2. BUMP MAP (EXTRUSION) COLORS
-// These colors define the 3D depth of elements when generated as a heightmap.
-// White = Highest Extrusion, Black = Lowest (Base flat surface)
-// ----------------------------------------------------------------------------
-export const BUMP_MAX = "#ffffff";
-export const BUMP_HIGH = "#e3e3e3";
-export const BUMP_MID_HIGH = "#555555";
-export const BUMP_MID = "#444444";
-export const BUMP_LOWER = "#333333";
-export const BUMP_DEEP = "#222222";
-export const BUMP_BASE = "#000000";
-
-// ----------------------------------------------------------------------------
-// 3. CANVAS & LAYOUT THEME COLORS
-// ----------------------------------------------------------------------------
-export const BG_COLOR = "#FDF8E4";
-export const PAGE_BG_COLOR = "#EBEBDF";
-export const HOLLOW_BORDER_COLOR = "#845775"; // Used for Section 2 wrapping borders
-export const CIRCLE_BORDER = "#8e8e8e";
-
-// ----------------------------------------------------------------------------
-// 4. SECTION 1 COLORS
-// ----------------------------------------------------------------------------
-export const S1_OUTER_BG = "#F8E3B6";
-export const S1_OUTER_BORDER = "#A3822E";
-export const S1_INNER_BG = "#fbf1d5";
-export const S1_INNER_BORDER = "#e2caae";
-export const S1_ANA_BG = "#efbe6c";
-export const S1_ANA_BORDER = "#b48238";
-
-export const TAB_BG = "#e5ba71";
-export const TAB_BORDER = "#96601b";
-export const TAB_TEXT = "#432c10";
-
-// ----------------------------------------------------------------------------
-// 5. SECTION 2 COLORS
-// ----------------------------------------------------------------------------
-export const S2_OUTER_BG = "#F0E2CC";
-export const S2_OUTER_BORDER = "#DBC180";
-export const MAROON_THEME = "#7D3D62";
-export const MAROON_VERSE_BG = "#ebd2dc";
-export const GREEN_THEME = "#879A63";
-export const GREEN_VERSE_BG = "#eaf2db";
-export const BLUE_THEME = "#638f9c";
-export const SG_BG = "#845775";
-export const SG_BORDER = "#F4ECD8";
-
-// ----------------------------------------------------------------------------
-// 6. CAPSULE (VERSE BOX) COLORS
-// ----------------------------------------------------------------------------
-export const CAPSULE_BG_7_10_15_18 = "#E4D3DE";
-export const CAPSULE_BG_12_14 = "#E0E6D0";
-export const CAPSULE_BG_6_19 = "#F8F1E6";
-export const WHITE_VERSE_BG = "#ffffff";
-
-// ----------------------------------------------------------------------------
-// 7. GLOBAL TEXT SIZES
-// ----------------------------------------------------------------------------
-export const TEXT_SIZES = {
-  BISMILLAH: 0.054,
-  TOP_LABEL: 0.023,
-  ANA_AYET_TAB: 0.016,
-  VERSE_NUMBER: 0.024,
-  VERSE_TEXT_SMALL: 0.032,
-  VERSE_TEXT_BIG: 0.051,
-};
-
-// ============================================================================
-// SHARED COMPONENTS
+// ROUNDED SHAPE GEOMETRY
 // ============================================================================
 
 interface RoundedShapeProps {
@@ -103,7 +46,8 @@ interface RoundedShapeProps {
 
 /**
  * RoundedShapeComponent
- * Generates custom rounded corner shapes geometrically for ThreeJS geometry.
+ * Generates a custom rounded-corner Three.js Shape geometry.
+ * Supports full rounding, top-only, and bottom-only corner modes.
  */
 export function RoundedShapeComponent({
   w,
@@ -150,6 +94,10 @@ export function RoundedShapeComponent({
   return <shapeGeometry args={[shape]} />;
 }
 
+// ============================================================================
+// UI RECT
+// ============================================================================
+
 interface UiRectProps {
   x: number;
   y: number;
@@ -169,7 +117,8 @@ interface UiRectProps {
 
 /**
  * UiRect
- * A universal rectangular layout block capable of generating shadows and managing 3D depth.
+ * A universal rectangular layout block. Supports shadows, bump maps, and
+ * partial rounding (top-only / bottom-only) for connector panels.
  */
 export const UiRect = ({
   x,
@@ -183,7 +132,7 @@ export const UiRect = ({
   depthTest = false,
   renderOrder,
   isBumpMap = false,
-  bumpColor = BUMP_MAX, // Default to highest bump
+  bumpColor = BUMP_MAX,
   topOnly = false,
   bottomOnly = false,
 }: UiRectProps) => {
@@ -191,7 +140,7 @@ export const UiRect = ({
 
   return (
     <group position={[x, y, z]}>
-      {/* Shadow Layer */}
+      {/* Drop shadow layer — skipped in bump map passes */}
       {shadow && !isBumpMap && (
         <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
           <RoundedShapeComponent
@@ -209,7 +158,7 @@ export const UiRect = ({
           />
         </mesh>
       )}
-      {/* Main Box Layer */}
+      {/* Main box layer */}
       <mesh renderOrder={renderOrder}>
         <RoundedShapeComponent
           w={w}
@@ -229,6 +178,10 @@ export const UiRect = ({
   );
 };
 
+// ============================================================================
+// TOP LABEL
+// ============================================================================
+
 interface TopLabelProps {
   x: number;
   y: number;
@@ -244,7 +197,8 @@ interface TopLabelProps {
 
 /**
  * TopLabel
- * Top curved tags that label sections.
+ * Pill-shaped label tag pinned to the top or bottom edge of a section.
+ * Supports scroll-driven fade-in animation.
  */
 export function TopLabel({
   x,
@@ -266,7 +220,7 @@ export function TopLabel({
   const scroll = useScroll();
 
   useFrame(() => {
-    // Scroll animation logic completely disabled for BumpMap to preserve structure
+    // Scroll animation is completely disabled for bump map passes
     if (animateOnScroll && scroll && groupRef.current && !isBumpMap) {
       let targetOpacity = 0;
       if (scroll.offset > 0.4) {
@@ -361,6 +315,10 @@ export function TopLabel({
   );
 }
 
+// ============================================================================
+// ANA AYET TAB
+// ============================================================================
+
 interface AnaAyetTabProps {
   x: number;
   y: number;
@@ -370,7 +328,7 @@ interface AnaAyetTabProps {
 
 /**
  * AnaAyetTab
- * Custom tab marking the focal point verse for Section 1.
+ * Decorative side tab marking the focal-point verse in Section 1.
  */
 export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
   return (
@@ -414,6 +372,10 @@ export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
   );
 }
 
+// ============================================================================
+// VERSE BOX
+// ============================================================================
+
 interface VerseBoxProps {
   x: number;
   y: number;
@@ -435,7 +397,8 @@ interface VerseBoxProps {
 
 /**
  * VerseBox
- * Modular box renderer holding Verse Text, Numbers and managing all inner layouts.
+ * Modular verse card renderer. Displays Arabic text, verse number circle,
+ * and themed border/background. Used in sections AND the popup card system.
  */
 export const VerseBox = ({
   x,
@@ -474,7 +437,7 @@ export const VerseBox = ({
 
   return (
     <group position={[finalX, y, z]}>
-      {/* Outer Border Component Base Level */}
+      {/* Outer border */}
       <UiRect
         x={-bw}
         y={bw}
@@ -488,7 +451,7 @@ export const VerseBox = ({
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MAX}
       />
-      {/* Inner Highlight Layer */}
+      {/* Inner fill */}
       <UiRect
         x={0}
         y={0}
@@ -502,18 +465,17 @@ export const VerseBox = ({
         bumpColor={BUMP_LOWER}
       />
 
+      {/* Verse number circle */}
       <group position={[cx, -h / 2, 0.002]}>
-        {/* Circle Background */}
         <mesh renderOrder={12}>
           <circleGeometry args={[cr - 0.002, 48]} />
           <meshBasicMaterial
-            color={isBumpMap ? BUMP_DEEP : circleBg || WHITE_BASE}
+            color={isBumpMap ? "#222222" : circleBg || WHITE_BASE}
             depthTest={false}
             transparent={!isBumpMap}
             opacity={0.999}
           />
         </mesh>
-        {/* Circle Border Line */}
         <mesh position={[0, 0, -0.001]} renderOrder={12}>
           <circleGeometry args={[cr, 48]} />
           <meshBasicMaterial
@@ -523,7 +485,6 @@ export const VerseBox = ({
             opacity={0.999}
           />
         </mesh>
-        {/* Number Text Layer */}
         <Text
           position={[0, 0, 0.001]}
           fontSize={TEXT_SIZES.VERSE_NUMBER}
@@ -538,7 +499,7 @@ export const VerseBox = ({
         </Text>
       </group>
 
-      {/* Main Verse Content Layer */}
+      {/* Arabic verse text */}
       <Text
         position={[versePosX, -h / 2, 0.002]}
         fontSize={

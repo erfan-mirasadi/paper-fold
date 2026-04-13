@@ -8,11 +8,11 @@ import {
 } from "@react-three/drei";
 import {
   FOLD_Y_POSITIONS,
-  PaperContent,
+  SurahLayout as PaperContent,
   PAGE_WIDTH,
   PAGE_HEIGHT,
   layoutMath,
-} from "./paper-content/index";
+} from "./SurahLayout/index";
 import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
