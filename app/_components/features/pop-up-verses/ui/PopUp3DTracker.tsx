@@ -53,7 +53,7 @@ export function PopUp3DTracker({
     const isScrollVisible = scroll ? scroll.offset >= scrollThreshold : true;
     const visible = isOnScreen;
     const el = domElRef.current;
-    
+
     const op = isScrollVisible ? "1" : "0";
 
     const xDiff = Math.abs(x - lastState.current.x);

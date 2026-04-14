@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { useMemo } from "react";
 import { a, SpringValue, to } from "@react-spring/three";
 import { RenderTexture, OrthographicCamera } from "@react-three/drei";
-import { VerseBox, RoundedShapeComponent } from "../SurahLayout/components/SharedUI";
+import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "./useFoldAnimation";
 
 interface PopUpVerseCardProps {
@@ -175,10 +175,7 @@ export function PopUpVerseCard({
 
           <mesh position={[outerW / 2, -outerH / 2, 0.002]} renderOrder={101}>
             <planeGeometry args={[outerW, outerH]} />
-            <a.meshStandardMaterial
-              {...materialsProps.back}
-              opacity={opacity}
-            >
+            <a.meshStandardMaterial {...materialsProps.back} opacity={opacity}>
               <RenderTexture attach="map" width={512} height={256} frames={2}>
                 <OrthographicCamera
                   makeDefault

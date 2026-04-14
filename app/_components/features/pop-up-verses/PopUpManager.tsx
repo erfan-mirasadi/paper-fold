@@ -13,7 +13,7 @@ import {
   CAPSULE_BG_12_14,
   MAROON_THEME,
   GREEN_THEME,
-} from "../SurahLayout/core/theme";
+} from "../../data/theme";
 import {
   layoutMath,
   PAGE_WIDTH,
@@ -21,8 +21,8 @@ import {
   START_X,
   SURAH_DATA,
   getPopUpTrackerPosition,
-} from "../SurahLayout/core/SurahConfig";
-import { PAGE_DEPTH } from "../SinglePaper";
+} from "../../data/SurahConfig";
+import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 
 interface VerseConfig {
   id: number;
@@ -268,7 +268,10 @@ export function PopUpManager() {
       {/* Global button anchor at top center of the paper */}
       <PopUp3DTracker
         id="global"
-        worldPosition={[...getPopUpTrackerPosition([], true, s1Top), zBaseOffset]}
+        worldPosition={[
+          ...getPopUpTrackerPosition([], true, s1Top),
+          zBaseOffset,
+        ]}
         scrollThreshold={0.88}
       />
     </group>

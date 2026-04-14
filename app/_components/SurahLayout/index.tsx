@@ -10,9 +10,9 @@
 // ============================================================================
 
 import { OrthographicCamera, Text, useTexture } from "@react-three/drei";
-import { Boarder } from "./components/Boarder";
-import { SectionOne } from "./components/SectionOne";
-import { SectionTwo } from "./components/SectionTwo";
+import { Boarder } from "./Boarder";
+import { SectionOne } from "./SectionOne";
+import { SectionTwo } from "./SectionTwo";
 import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -21,7 +21,7 @@ import {
   layoutMath,
   SURAH_DATA,
   SURAH_TRANSFORMS,
-} from "./core/SurahConfig";
+} from "../data/SurahConfig";
 import {
   TEXT_DARK,
   TEXT_SIZES,
@@ -29,10 +29,10 @@ import {
   BUMP_BASE,
   BUMP_MAX,
   QURAN_FONT,
-} from "./core/theme";
+} from "../data/theme";
 
 export { PAGE_WIDTH, PAGE_HEIGHT, PW, layoutMath };
-export { FOLD_Y_POSITIONS } from "./core/SurahConfig";
+export { FOLD_Y_POSITIONS } from "../data/SurahConfig";
 export { SurahLayout, SurahLayout as PaperContent };
 
 // ----------------------------------------------------------------------------

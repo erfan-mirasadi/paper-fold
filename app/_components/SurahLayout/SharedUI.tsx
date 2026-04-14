@@ -28,9 +28,9 @@ import {
   TAB_TEXT,
   QURAN_FONT,
   TEXT_SIZES,
-} from "../core/theme";
+} from "../data/theme";
 
-export * from "../core/theme";
+export * from "../data/theme";
 
 // ============================================================================
 // ROUNDED SHAPE GEOMETRY

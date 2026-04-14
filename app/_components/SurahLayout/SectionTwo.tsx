@@ -12,8 +12,8 @@
 import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
-import { usePopUpState } from "../../pop-up-verses/ui/PopUpState";
-import { ORIGINAL_TEXTURE_TIMING } from "../../pop-up-verses/useFoldAnimation";
+import { usePopUpState } from "../features/pop-up-verses/ui/PopUpState";
+import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
 import {
@@ -26,12 +26,12 @@ import {
   BUMP_DEEP,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
-} from "../core/theme";
+} from "../data/theme";
 import type {
   SectionTwoData,
   LayoutConfig,
   S2Transforms,
-} from "../core/SurahConfig";
+} from "../data/SurahConfig";
 
 interface SectionTwoProps {
   data: SectionTwoData;

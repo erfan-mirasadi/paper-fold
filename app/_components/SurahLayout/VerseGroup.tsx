@@ -18,8 +18,8 @@ import {
   GREEN_THEME,
   HOLLOW_BORDER_COLOR,
   BUMP_MID,
-} from "../core/theme";
-import type { ColorGroup, GroupTransforms } from "../core/SurahConfig";
+} from "../data/theme";
+import type { ColorGroup, GroupTransforms } from "../data/SurahConfig";
 
 interface VerseGroupProps {
   group: ColorGroup;

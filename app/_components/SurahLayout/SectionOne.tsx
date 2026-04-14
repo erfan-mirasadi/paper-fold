@@ -2,7 +2,7 @@
 
 // ============================================================================
 // SECTION ONE
-// Location: SurahLayout/components/SectionOne.tsx
+// Location: SurahLayout/SectionOne.tsx
 // Purpose: Renders the upper Surah block. Receives pre-computed S1Transforms
 //          from the LayoutEngine — does ZERO positional math in JSX.
 //          All x/y/w/h values come straight from the engine output.
@@ -10,8 +10,8 @@
 
 import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
-import { usePopUpState } from "../../pop-up-verses/ui/PopUpState";
-import { ORIGINAL_TEXTURE_TIMING } from "../../pop-up-verses/useFoldAnimation";
+import { usePopUpState } from "../features/pop-up-verses/ui/PopUpState";
+import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
 import {
   S1_OUTER_BORDER,
   S1_OUTER_BG,
@@ -24,8 +24,8 @@ import {
   BUMP_DEEP,
   S1_TOP_LABEL_BG,
   S1_TOP_LABEL_BORDER,
-} from "../core/theme";
-import type { SectionOneData, S1Transforms } from "../core/SurahConfig";
+} from "../data/theme";
+import type { SectionOneData, S1Transforms } from "../data/SurahConfig";
 
 interface SectionOneProps {
   data: SectionOneData;

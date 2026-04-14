@@ -12,7 +12,7 @@ import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
   layoutMath,
-} from "./SurahLayout/index";
+} from "../SurahLayout/index";
 import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
@@ -34,7 +34,7 @@ import {
   NoColorSpace,
   RepeatWrapping,
 } from "three";
-import { Tafsir3DTracker } from "./ui-overlay/Tafsir3DTracker";
+import { Tafsir3DTracker } from "../features/tafsir/Tafsir3DTracker";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;

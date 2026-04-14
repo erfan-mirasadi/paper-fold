@@ -7,7 +7,7 @@ import {
 } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import { SinglePaper } from "./SinglePaper";
-import { PopUpManager } from "./pop-up-verses/PopUpManager";
+import { PopUpManager } from "../features/pop-up-verses/PopUpManager";
 
 interface ExperienceProps {
   isFolded?: boolean;

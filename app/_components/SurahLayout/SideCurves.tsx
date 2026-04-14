@@ -22,11 +22,11 @@ import {
   CAPSULE_BG_6_19,
   BUMP_MID,
   BUMP_LOWER,
-} from "../core/theme";
+} from "../data/theme";
 import { AnimatedArrow } from "./AnimatedArrow";
-import { usePopUpState } from "../../pop-up-verses/ui/PopUpState";
+import { usePopUpState } from "../features/pop-up-verses/ui/PopUpState";
 import { useFrame } from "@react-three/fiber";
-import type { LayoutConfig } from "../core/SurahConfig";
+import type { LayoutConfig } from "../data/SurahConfig";
 
 // ── Curve shape constants ─────────────────────────────────────────────────────
 const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)

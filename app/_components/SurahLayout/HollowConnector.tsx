@@ -13,7 +13,7 @@ import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
   BUMP_MAX,
   BUMP_LOWER,
-} from "../core/theme";
+} from "../data/theme";
 
 interface HollowConnectorProps {
   position: "top" | "bottom";

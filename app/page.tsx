@@ -7,11 +7,12 @@ import { Suspense, useState } from "react";
 // import {
 //   TafsirScrollTracker,
 // } from "./_components/ui-overlay/TafsirUI";
-import { PopUpUI } from "./_components/pop-up-verses/ui/PopUpUI";
-import BackgroundParticlesDesktop from "./_components/BackgroundParticlesDesktop";
-import Effects from "./_components/Effects";
+import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
+import BackgroundParticlesDesktop from "./_components/3d-scene/BackgroundParticlesDesktop";
+import Effects from "./_components/3d-scene/Effects";
 const Experience = dynamic(
-  () => import("./_components/Experience").then((mod) => mod.Experience),
+  () =>
+    import("./_components/3d-scene/Experience").then((mod) => mod.Experience),
   { ssr: false },
 );
 
