@@ -8,6 +8,7 @@ import { Suspense, useState } from "react";
 //   TafsirScrollTracker,
 // } from "./_components/ui-overlay/TafsirUI";
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
+import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
 import BackgroundParticlesDesktop from "./_components/3d-scene/BackgroundParticlesDesktop";
 import Effects from "./_components/3d-scene/Effects";
 const Experience = dynamic(
@@ -84,6 +85,7 @@ export default function Home() {
         </div>
       </Suspense>
       {/* <TafsirUI isDarkMode={isDarkMode} /> */}
+      <CameraResetOverlay />
       <PopUpUI isDarkMode={isDarkMode} />
     </main>
   );

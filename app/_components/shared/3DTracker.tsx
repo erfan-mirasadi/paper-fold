@@ -5,26 +5,17 @@ import { useRef, useEffect } from "react";
 import { Object3D, Vector3 } from "three";
 
 export interface Shared3DTrackerProps {
-  /** The 3D position [x,y,z] of the tracker. Default is [0,0,0] */
   position?: [number, number, number];
-  /** The DOM element ID to attach to this 3D point. Will auto-apply transform and basic visibility. */
   domElementId?: string;
-  /** Optional function to run on every frame update */
   onFrameUpdate?: (
     x: number,
     y: number,
     isOnScreen: boolean,
-    el: HTMLElement | null
+    el: HTMLElement | null,
   ) => void;
-  /** Children to render at this 3D point (e.g. debugging meshes) */
   children?: React.ReactNode;
 }
 
-/**
- * A unified 3D to 2D tracker used for UI overlays.
- * It tracks its position in the 3D scene and maps it to screen coordinates,
- * either applying it directly to a DOM element or passing it back via `onFrameUpdate`.
- */
 export function Shared3DTracker({
   position = [0, 0, 0],
   domElementId,
@@ -47,7 +38,7 @@ export function Shared3DTracker({
 
   useFrame(() => {
     if (!objRef.current) return;
-    
+
     // If no outputs are specified, we don't need to calculate projection
     if (!domElementId && !onFrameUpdate) return;
 
