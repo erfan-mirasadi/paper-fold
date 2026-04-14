@@ -9,6 +9,7 @@ import { Suspense, useState } from "react";
 // } from "./_components/ui-overlay/TafsirUI";
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
+import { VerseNeonTracker, VerseNeonHTMLOverlay } from "./_components/features/camera-zoom/VerseNeonOverlay";
 import BackgroundParticlesDesktop from "./_components/3d-scene/BackgroundParticlesDesktop";
 import Effects from "./_components/3d-scene/Effects";
 const Experience = dynamic(
@@ -81,12 +82,14 @@ export default function Home() {
               <Experience />
               {/* <TafsirScrollTracker /> */}
             </ScrollControls>
+            <VerseNeonTracker />
           </Canvas>
         </div>
       </Suspense>
       {/* <TafsirUI isDarkMode={isDarkMode} /> */}
       <CameraResetOverlay />
       <PopUpUI isDarkMode={isDarkMode} />
+      <VerseNeonHTMLOverlay />
     </main>
   );
 }
