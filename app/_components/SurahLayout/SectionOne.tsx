@@ -10,7 +10,7 @@
 
 import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
-import { usePopUpState } from "../features/pop-up-verses/ui/PopUpState";
+import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
 import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
 import {
   S1_OUTER_BORDER,
@@ -40,7 +40,7 @@ interface SectionOneProps {
 // Delays verse-hidden state to sync with popup animation timing.
 // ----------------------------------------------------------------------------
 function useDelayedPopUpGroups() {
-  const { groups } = usePopUpState();
+  const groups = usePopUpStore((state) => state.popUpGroups);
   const [delayedIsOpen, setDelayedIsOpen] = useState<Record<string, boolean>>(
     () => {
       const init: Record<string, boolean> = {};

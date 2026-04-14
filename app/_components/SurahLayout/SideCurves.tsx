@@ -24,7 +24,7 @@ import {
   BUMP_LOWER,
 } from "../data/theme";
 import { AnimatedArrow } from "./AnimatedArrow";
-import { usePopUpState } from "../features/pop-up-verses/ui/PopUpState";
+import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
 import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../data/SurahConfig";
 
@@ -265,7 +265,7 @@ export const SideCurves = ({
   startX,
   isBumpMap = false,
 }: SideCurvesProps) => {
-  const { groups } = usePopUpState();
+  const groups = usePopUpStore((state) => state.popUpGroups);
   // Hide curves whenever any inner group (not 1–2 or 3–4) is open
   const shouldHide = groups.some(
     (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",

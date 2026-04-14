@@ -1,9 +1,12 @@
 "use client";
 
-import { usePopUpState, toggleGroup, toggleAll } from "./PopUpState";
+import { usePopUpStore } from "./usePopUpStore";
 
 export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
-  const { groups, allOpen } = usePopUpState();
+  const groups = usePopUpStore((state) => state.popUpGroups);
+  const allOpen = usePopUpStore((state) => state.popUpAllOpen);
+  const toggleAll = usePopUpStore((state) => state.toggleAllPopUps);
+  const toggleGroup = usePopUpStore((state) => state.togglePopUpGroup);
 
   return (
     <div

@@ -12,7 +12,7 @@
 import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
-import { usePopUpState } from "../features/pop-up-verses/ui/PopUpState";
+import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
 import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
@@ -47,7 +47,7 @@ interface SectionTwoProps {
 // HOOK: useDelayedPopUpGroups
 // ----------------------------------------------------------------------------
 function useDelayedPopUpGroups() {
-  const { groups } = usePopUpState();
+  const groups = usePopUpStore((state) => state.popUpGroups);
   const [delayedIsOpen, setDelayedIsOpen] = useState<Record<string, boolean>>(
     () => {
       const init: Record<string, boolean> = {};

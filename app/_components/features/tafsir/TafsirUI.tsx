@@ -2,43 +2,16 @@
 
 import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef, useSyncExternalStore } from "react";
+import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TAFSIR_DATA } from "./tafsir-data";
-
-let _activeId: number | null = null;
-let _anchorPos = { x: -9999, y: -9999 };
-const _listeners = new Set<() => void>();
-
-export function subscribe(cb: () => void) {
-  _listeners.add(cb);
-  return () => _listeners.delete(cb);
-}
-
-export function getActiveId() {
-  return _activeId;
-}
-
-export function setActiveId(id: number | null) {
-  if (id === _activeId) return;
-  _activeId = id;
-  _listeners.forEach((cb) => cb());
-}
-
-export function getAnchorPosition() {
-  return _anchorPos;
-}
-
-export function setAnchorPosition(x: number, y: number) {
-  if (Math.abs(_anchorPos.x - x) < 0.5 && Math.abs(_anchorPos.y - y) < 0.5)
-    return;
-  _anchorPos = { x, y };
-  _listeners.forEach((cb) => cb());
-}
+import { useTafsirStore } from "./useTafsirStore";
 
 export function TafsirScrollTracker() {
   const scroll = useScroll();
   const prevRef = useRef<number | null>(null);
+  const setTafsirActiveId = useTafsirStore((state) => state.setTafsirActiveId);
+
   useFrame(() => {
     if (!scroll) return;
     const active = TAFSIR_DATA.find(
@@ -47,19 +20,16 @@ export function TafsirScrollTracker() {
     const newId = active?.id ?? null;
     if (newId !== prevRef.current) {
       prevRef.current = newId;
-      setActiveId(newId);
+      setTafsirActiveId(newId);
     }
   });
   return null;
 }
 
 export const TafsirUI = ({ isDarkMode }: { isDarkMode: boolean }) => {
-  const activeId = useSyncExternalStore(subscribe, getActiveId, getActiveId);
-  const anchorPos = useSyncExternalStore(
-    subscribe,
-    getAnchorPosition,
-    getAnchorPosition,
-  );
+  const activeId = useTafsirStore((state) => state.tafsirActiveId);
+  const anchorPos = useTafsirStore((state) => state.tafsirAnchorPos);
+  
   const activeTafsir = TAFSIR_DATA.find((t) => t.id === activeId);
 
   return (

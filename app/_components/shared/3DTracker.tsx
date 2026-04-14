@@ -1,0 +1,105 @@
+"use client";
+
+import { useFrame, useThree } from "@react-three/fiber";
+import { useRef, useEffect } from "react";
+import { Object3D, Vector3 } from "three";
+
+export interface Shared3DTrackerProps {
+  /** The 3D position [x,y,z] of the tracker. Default is [0,0,0] */
+  position?: [number, number, number];
+  /** The DOM element ID to attach to this 3D point. Will auto-apply transform and basic visibility. */
+  domElementId?: string;
+  /** Optional function to run on every frame update */
+  onFrameUpdate?: (
+    x: number,
+    y: number,
+    isOnScreen: boolean,
+    el: HTMLElement | null
+  ) => void;
+  /** Children to render at this 3D point (e.g. debugging meshes) */
+  children?: React.ReactNode;
+}
+
+/**
+ * A unified 3D to 2D tracker used for UI overlays.
+ * It tracks its position in the 3D scene and maps it to screen coordinates,
+ * either applying it directly to a DOM element or passing it back via `onFrameUpdate`.
+ */
+export function Shared3DTracker({
+  position = [0, 0, 0],
+  domElementId,
+  onFrameUpdate,
+  children,
+}: Shared3DTrackerProps) {
+  const objRef = useRef<Object3D>(null);
+  const domElRef = useRef<HTMLElement | null>(null);
+  const lastState = useRef({ x: -9999, y: -9999, visible: false });
+  // Allocate vector once per mount to prevent GC spikes
+  const vectorRef = useRef(new Vector3());
+
+  const { size, camera } = useThree();
+
+  useEffect(() => {
+    if (domElementId) {
+      domElRef.current = document.getElementById(domElementId);
+    }
+  }, [domElementId]);
+
+  useFrame(() => {
+    if (!objRef.current) return;
+    
+    // If no outputs are specified, we don't need to calculate projection
+    if (!domElementId && !onFrameUpdate) return;
+
+    const _vector = vectorRef.current;
+    objRef.current.getWorldPosition(_vector);
+    _vector.project(camera);
+
+    const x = (_vector.x * 0.5 + 0.5) * size.width;
+    const y = (_vector.y * -0.5 + 0.5) * size.height;
+
+    // Visibility heuristic: within frustum and roughly on screen bounds
+    const isOnScreen =
+      _vector.z < 1 &&
+      _vector.x > -1.2 &&
+      _vector.x < 1.2 &&
+      _vector.y > -1.2 &&
+      _vector.y < 1.2;
+
+    const xDiff = Math.abs(x - lastState.current.x);
+    const yDiff = Math.abs(y - lastState.current.y);
+
+    const hasPositionChanged = xDiff > 0.1 || yDiff > 0.1;
+    const hasVisibilityChanged = isOnScreen !== lastState.current.visible;
+
+    const el = domElRef.current;
+
+    // Optimization: Only update DOM styles if something meaningfully changed
+    if (hasVisibilityChanged || (isOnScreen && hasPositionChanged)) {
+      lastState.current.visible = isOnScreen;
+      lastState.current.x = x;
+      lastState.current.y = y;
+
+      if (el) {
+        if (!isOnScreen) {
+          el.style.visibility = "hidden";
+        } else {
+          el.style.visibility = "visible";
+          el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+        }
+      }
+    }
+
+    // Pass latest values to optional callback on every frame
+    // This allows parents to add dynamic interpolations (like opacity on scroll)
+    if (onFrameUpdate) {
+      onFrameUpdate(x, y, isOnScreen, el);
+    }
+  });
+
+  return (
+    <group ref={objRef} position={position}>
+      {children}
+    </group>
+  );
+}

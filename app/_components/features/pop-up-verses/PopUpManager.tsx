@@ -3,7 +3,7 @@ import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
-import { usePopUpState, setScrollThresholdReached } from "./ui/PopUpState";
+import { usePopUpStore } from "./ui/usePopUpStore";
 import { PopUp3DTracker } from "./ui/PopUp3DTracker";
 import {
   S1_INNER_BG,
@@ -202,7 +202,8 @@ export function PopUpManager() {
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
 
-  const { groups } = usePopUpState();
+  const groups = usePopUpStore((state) => state.popUpGroups);
+  const setScrollThresholdReached = usePopUpStore((state) => state.setPopUpScrollThresholdReached);
 
   const scroll = useScroll();
   useFrame(() => {
