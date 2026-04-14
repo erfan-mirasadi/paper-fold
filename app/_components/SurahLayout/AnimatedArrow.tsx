@@ -84,10 +84,11 @@ function createArrowTextures(): ArrowTextures {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MODULE-LEVEL TEXTURE SINGLETON
-// Textures are created ONCE when the module loads and shared across ALL
-// AnimatedArrow instances. Prevents N×3 WebGL texture allocations in memory.
+// Textures are created lazily on the client and shared across ALL
+// AnimatedArrow instances. Creating them at module load previously
+// attempted to access `document` during server-side import and crashed.
 // ─────────────────────────────────────────────────────────────────────────────
-const SHARED_ARROW_TEXTURES = createArrowTextures();
+let SHARED_ARROW_TEXTURES: ArrowTextures | null = null;
 
 export const AnimatedArrow = ({
   outerTipX,
@@ -180,8 +181,14 @@ export const AnimatedArrow = ({
     ],
   );
 
-  // Reference the module-level singleton — no per-instance allocation
-  const { glowTexture, flareTexture, shadowTexture } = SHARED_ARROW_TEXTURES;
+  // Reference the module-level singleton — created lazily on first client render
+  const textures = useMemo<ArrowTextures>(() => {
+    if (!SHARED_ARROW_TEXTURES) {
+      SHARED_ARROW_TEXTURES = createArrowTextures();
+    }
+    return SHARED_ARROW_TEXTURES!;
+  }, []);
+  const { glowTexture, flareTexture, shadowTexture } = textures;
 
   useEffect(() => {
     if (!shouldHide && groupRef.current) {
