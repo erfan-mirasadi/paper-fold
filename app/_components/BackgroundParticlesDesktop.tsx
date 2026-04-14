@@ -34,9 +34,10 @@ export const Y_SETTINGS = {
 const CONFIG = {
   COUNT: 380,
   COLOR: "#d4af37",
-  OPACITY_LIGHT: 0.55,
+  OPACITY_LIGHT: 0.82,
   OPACITY_DARK: 0.7,
   SIZE: 0.032,
+  SIZE_LIGHT: 0.045,
   SPREAD_FACTOR: 3.5,
   DEPTH: 228,
   FLOAT_SPEED: 0.015,
@@ -148,7 +149,7 @@ export default function BackgroundParticlesDesktop({
 
     positionsAttr.needsUpdate = true;
   });
-  const particleColor = isDarkMode ? CONFIG.COLOR : "#8B4513";
+  const particleColor = isDarkMode ? CONFIG.COLOR : "#1a1a1a";
 
   return (
     <points
@@ -163,7 +164,7 @@ export default function BackgroundParticlesDesktop({
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={CONFIG.SIZE}
+        size={isDarkMode ? CONFIG.SIZE : CONFIG.SIZE_LIGHT}
         color={particleColor}
         transparent
         opacity={isDarkMode ? CONFIG.OPACITY_DARK : CONFIG.OPACITY_LIGHT}
