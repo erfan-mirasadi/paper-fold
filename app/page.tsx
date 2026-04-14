@@ -4,13 +4,12 @@ import { Canvas } from "@react-three/fiber";
 import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
-import TheatreManager from "./_components/TheatreManager";
-import {
-  // TafsirUI,
-  TafsirScrollTracker,
-} from "./_components/ui-overlay/TafsirUI";
+// import {
+//   TafsirScrollTracker,
+// } from "./_components/ui-overlay/TafsirUI";
 import { PopUpUI } from "./_components/pop-up-verses/ui/PopUpUI";
 import BackgroundParticlesDesktop from "./_components/BackgroundParticlesDesktop";
+import Effects from "./_components/Effects";
 const Experience = dynamic(
   () => import("./_components/Experience").then((mod) => mod.Experience),
   { ssr: false },
@@ -18,11 +17,10 @@ const Experience = dynamic(
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const [glitchKey, setGlitchKey] = useState(0);
   const bgColor = isDarkMode ? "#000000" : "#F2F2ED";
   const btnBg = isDarkMode ? "#F2F2ED" : "#121212";
   const btnColor = isDarkMode ? "#121212" : "#F2F2ED";
-
   return (
     <main
       style={{
@@ -43,9 +41,11 @@ export default function Home() {
           gap: "12px",
         }}
       >
-        {/* Fold toggle removed */}
         <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
+          onClick={() => {
+            setIsDarkMode(!isDarkMode);
+            setGlitchKey((prev) => prev + 1); // trigger the subtle 3D glitch
+          }}
           style={{
             padding: "10px 20px",
             borderRadius: "30px",
@@ -74,12 +74,11 @@ export default function Home() {
           <Canvas shadows camera={{ position: [0, 1, 1.7], fov: 45 }}>
             <color attach="background" args={[bgColor]} />
             <BackgroundParticlesDesktop isDarkMode={isDarkMode} />
-            <TheatreManager>
-              <ScrollControls pages={2} damping={0.2}>
-                <Experience />
-                <TafsirScrollTracker />
-              </ScrollControls>
-            </TheatreManager>
+            <Effects glitchTrigger={glitchKey} />
+            <ScrollControls pages={2} damping={0.2}>
+              <Experience />
+              {/* <TafsirScrollTracker /> */}
+            </ScrollControls>
           </Canvas>
         </div>
       </Suspense>
