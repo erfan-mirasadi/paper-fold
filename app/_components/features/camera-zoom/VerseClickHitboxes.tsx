@@ -25,10 +25,8 @@ import { useCameraStore } from "./useCameraStore";
 // Reusable vector to avoid allocations on every click
 const _worldPos = new Vector3();
 
-// Build a flat list of every clickable verse with its world-space box.
 interface VerseHitbox {
   id: number;
-  /** Center X in paper-local space (parent group is already offset by PAGE_HEIGHT/2 on Y) */
   cx: number;
   cy: number;
   cz: number;
@@ -40,7 +38,6 @@ function buildHitboxes(): VerseHitbox[] {
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;
 
-  // ── Section 1 grid verses (1-4) ───────────────────────────────────────
   const s1 = SURAH_TRANSFORMS.s1;
   SURAH_DATA.section1.gridVerses.forEach((v) => {
     const vt = s1.verses[v.number];
@@ -55,7 +52,6 @@ function buildHitboxes(): VerseHitbox[] {
     });
   });
 
-  // ── Section 1 AnaAyet (verse 5) ───────────────────────────────────────
   const anaAyet = s1.anaAyet;
   hitboxes.push({
     id: SURAH_DATA.section1.anaAyet.number,
@@ -66,7 +62,6 @@ function buildHitboxes(): VerseHitbox[] {
     h: anaAyet.h,
   });
 
-  // ── Section 2 intro verse (6) ─────────────────────────────────────────
   const s2 = SURAH_TRANSFORMS.s2;
   const intro = s2.introVerse;
   hitboxes.push({
@@ -78,7 +73,6 @@ function buildHitboxes(): VerseHitbox[] {
     h: intro.h,
   });
 
-  // ── Section 2 group verses (7-18) ─────────────────────────────────────
   SURAH_DATA.section2.colorGroups.forEach((group, gIdx) => {
     const gTransform = s2.groups[gIdx];
     group.verses.forEach((v) => {
@@ -95,7 +89,6 @@ function buildHitboxes(): VerseHitbox[] {
     });
   });
 
-  // ── Section 2 outro verse (19) ────────────────────────────────────────
   const outro = s2.outroVerse;
   hitboxes.push({
     id: SURAH_DATA.section2.outroVerse.number,
@@ -113,13 +106,15 @@ const HITBOXES = buildHitboxes();
 
 export function VerseClickHitboxes() {
   const focusOnVerse = useCameraStore((s) => s.focusOnVerse);
-  const phase = useCameraStore((s) => s.phase);
+  // Removed the reactive phase subscription here!
+  // It was causing a massive re-render of ALL meshes on click, killing performance.
 
   const handleClick = (hb: VerseHitbox, e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
 
     if (e.delta > 2) return;
 
+    // Use getState() to check phase without causing re-renders
     if (useCameraStore.getState().phase !== "idle") return;
 
     _worldPos.set(0, 0, 0);
@@ -132,8 +127,6 @@ export function VerseClickHitboxes() {
     });
   };
 
-  const isIdle = phase === "idle";
-
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
       {HITBOXES.map((hb) => (
@@ -141,11 +134,16 @@ export function VerseClickHitboxes() {
           key={`hitbox-${hb.id}`}
           position={[hb.cx, hb.cy, hb.cz]}
           onClick={(e) => handleClick(hb, e)}
-          onPointerOver={() => {
-            if (isIdle) document.body.style.cursor = "pointer";
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            if (useCameraStore.getState().phase === "idle") {
+              document.body.style.cursor = "pointer";
+            }
           }}
           onPointerOut={() => {
-            if (isIdle) document.body.style.cursor = "grab";
+            if (useCameraStore.getState().phase === "idle") {
+              document.body.style.cursor = "grab";
+            }
           }}
         >
           <planeGeometry args={[hb.w, hb.h]} />
