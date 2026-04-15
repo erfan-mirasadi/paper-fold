@@ -111,7 +111,7 @@ export function PopUpVerseCard({
   );
 
   const brickGroupXOffset = direction === "left" ? -w + outerLeft : outerLeft;
-  const paperBaseColor = "#f2f0e6";
+  const paperBaseColor = "#E4DFCA";
 
   const materialsProps = useMemo(() => {
     return {

@@ -3,7 +3,7 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import {
   EffectComposer,
-  Noise,
+  // Noise,
   Vignette,
   ToneMapping,
   BrightnessContrast,
@@ -24,7 +24,7 @@ const Effects: React.FC<EffectsProps> = ({
   glitchTrigger = 0,
   brightness = -0.09,
   contrast = 0.2,
-  noiseOpacity = 0.15,
+  // noiseOpacity = 0.05,
   vignetteDarkness = 0.4,
 }) => {
   const [manualActive, setManualActive] = useState(false);
@@ -43,7 +43,7 @@ const Effects: React.FC<EffectsProps> = ({
     <EffectComposer multisampling={5} enableNormalPass={false}>
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <BrightnessContrast brightness={brightness} contrast={contrast} />
-      <Noise opacity={noiseOpacity} />
+      {/* <Noise opacity={noiseOpacity} /> */}
       <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} />
 
       {/* 

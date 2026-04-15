@@ -12,6 +12,8 @@ import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraRes
 import { VerseNeonTracker, VerseNeonHTMLOverlay } from "./_components/features/camera-zoom/VerseNeonOverlay";
 import BackgroundParticlesDesktop from "./_components/3d-scene/BackgroundParticlesDesktop";
 import Effects from "./_components/3d-scene/Effects";
+import { ScrollManager } from "./_components/3d-scene/ScrollManager";
+import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
 const Experience = dynamic(
   () =>
     import("./_components/3d-scene/Experience").then((mod) => mod.Experience),
@@ -79,6 +81,7 @@ export default function Home() {
             <BackgroundParticlesDesktop isDarkMode={isDarkMode} />
             <Effects glitchTrigger={glitchKey} />
             <ScrollControls pages={2} damping={0.2}>
+              <ScrollManager />
               <Experience />
               {/* <TafsirScrollTracker /> */}
             </ScrollControls>
@@ -90,6 +93,7 @@ export default function Home() {
       <CameraResetOverlay />
       <PopUpUI isDarkMode={isDarkMode} />
       <VerseNeonHTMLOverlay />
+      <NavigationOverlay isDarkMode={isDarkMode} />
     </main>
   );
 }

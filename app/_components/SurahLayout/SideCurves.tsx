@@ -1,15 +1,5 @@
 "use client";
 
-// ============================================================================
-// SIDE CURVES
-// Location: SurahLayout/components/SideCurves.tsx
-// Purpose: Renders the chiastic (ring-structure) bracket curves on both sides
-//          of Section 2. Each CurvePair brackets two semantically-mirrored
-//          verse groups. Coordinates are derived 100% from the passed `layout`
-//          prop — no hardcoded positions. If verse positions shift (e.g., taller
-//          boxes, added groups), the curves follow automatically.
-// ============================================================================
-
 import { Line } from "@react-three/drei";
 import { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
@@ -39,8 +29,8 @@ const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
 
 // ── Line width constants ────────────────────────────────────────────────────
 // Edit these two values to adjust the thickness of the side-curve outlines.
-export const CURVE_OUTER_LINE_WIDTH = 1;
-export const CURVE_INNER_LINE_WIDTH = 2;
+export const CURVE_OUTER_LINE_WIDTH = 4;
+export const CURVE_INNER_LINE_WIDTH = 4;
 
 // ─────────────────────────────────────────────────────────────────────────────
 

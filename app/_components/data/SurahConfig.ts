@@ -62,7 +62,7 @@ export interface SectionTwoData {
 
 // --- Page Dimensions ---
 export const PAGE_WIDTH = 1.54;
-export const PAGE_HEIGHT = 1.74;
+export const PAGE_HEIGHT = 1.76;
 export const PW = PAGE_WIDTH;
 export const PADDING = 0.29;
 export const CONTENT_W = PW - PADDING * 2;
@@ -73,7 +73,7 @@ const s1Top = -0.17;
 const s1Pad = 0.045;
 const gap = 0.02;
 const smallBoxH = 0.07;
-const anaAyetH = 0.095;
+const anaAyetH = 0.11;
 const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + gap + anaAyetH;
 
 // --- Section 2 (Main Lower Block) ---
@@ -83,7 +83,7 @@ const s2Top = s1Top - s1H - gapBetweenS1andS2;
 
 const s2PadTop = 0.035 + s2TopExtra;
 const s2PadBottom = 0.06;
-const bigBoxH = 0.095;
+const bigBoxH = 0.11;
 const groupGap = 0.025;
 const groupPad = 0.012;
 const groupPadBottom = 0.025;
@@ -177,7 +177,9 @@ export const FOLD_Y_POSITIONS: readonly [
   number,
   number,
   number,
+  number,
 ] = [
+  s2Top + gapBetweenS1andS2 / 2, // New fold: between 5 and 6
   v6Y - bigBoxH - groupGap / 2,
   g1Y - groupPad - smallBoxH2 - s2Gap / 2,
   g1Y - groupH - (groupGap + middleExtraGap) / 2,

@@ -17,13 +17,28 @@ export interface FoldStoryStep {
     FoldState,
     FoldState,
     FoldState,
+    FoldState,
   ];
 }
 
 export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   {
+    id: "pre-start",
+    folds: [
+      { direction: 1, angleFactor: 1 }, // 0) between 5 and 6 (New)
+      { direction: -1, angleFactor: 0 }, // 1) below 6
+      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
+      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
+      { direction: +1, angleFactor: -1 }, // 4) between 11/12 and 13/14
+      { direction: -1, angleFactor: 0 }, // 5) above 15/16
+      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
+      { direction: -1, angleFactor: -1 }, // 7) above 19
+    ],
+  },
+  {
     id: "start",
     folds: [
+      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
       { direction: -1, angleFactor: 0 }, // 1) below 6
       { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
       { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
@@ -36,6 +51,7 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   {
     id: "outer-open",
     folds: [
+      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
       { direction: -1, angleFactor: 0 }, // 1) below 6
       { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
       { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
@@ -48,6 +64,7 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   {
     id: "inner-open",
     folds: [
+      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
       { direction: -1, angleFactor: 0 }, // 1) below 6
       { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
       { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
@@ -60,6 +77,7 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   // {
   //   id: "custom-step-1",
   //   folds: [
+  //{ direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
   //     { direction: -1, angleFactor: 0 }, // 1) below 6
   //     { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
   //     { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
@@ -72,6 +90,7 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   // {
   //   id: "custom-step-2",
   //   folds: [
+  //{ direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
   //     { direction: -1, angleFactor: 0 }, // 1) below 6
   //     { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
   //     { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
@@ -84,6 +103,7 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   {
     id: "end",
     folds: [
+      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
       { direction: -1, angleFactor: 0 }, // 1) below 6
       { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
       { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
@@ -124,4 +144,10 @@ export const getFoldAnglesForScroll = (offset: number): number[] => {
 
     return MathUtils.lerp(fromAngle, toAngle, easedT);
   });
+};
+
+export const getOffsetForId = (id: string): number => {
+  const index = FOLD_STORY_STEPS.findIndex((step) => step.id === id);
+  if (index === -1) return 0;
+  return index / (FOLD_STORY_STEPS.length - 1);
 };

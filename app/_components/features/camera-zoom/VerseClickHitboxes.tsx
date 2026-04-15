@@ -12,7 +12,7 @@
 // ============================================================================
 
 import { ThreeEvent } from "@react-three/fiber";
-import { Vector3 } from "three";
+import { MeshBasicMaterial, PlaneGeometry, Vector3 } from "three";
 import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -22,8 +22,10 @@ import {
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import { useCameraStore } from "./useCameraStore";
 
-// Reusable vector to avoid allocations on every click
+// Reusable objects to avoid allocations on every click/render
 const _worldPos = new Vector3();
+const hitBoxMaterial = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+const hitBoxGeom = new PlaneGeometry(1, 1);
 
 interface VerseHitbox {
   id: number;
@@ -104,51 +106,52 @@ function buildHitboxes(): VerseHitbox[] {
 
 const HITBOXES = buildHitboxes();
 
-export function VerseClickHitboxes() {
-  const focusOnVerse = useCameraStore((s) => s.focusOnVerse);
-  // Removed the reactive phase subscription here!
-  // It was causing a massive re-render of ALL meshes on click, killing performance.
+const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+  e.stopPropagation();
+  if (useCameraStore.getState().phase === "idle") {
+    document.body.style.cursor = "pointer";
+  }
+};
 
-  const handleClick = (hb: VerseHitbox, e: ThreeEvent<MouseEvent>) => {
-    e.stopPropagation();
+const handlePointerOut = () => {
+  if (useCameraStore.getState().phase === "idle") {
+    document.body.style.cursor = "grab";
+  }
+};
 
-    if (e.delta > 2) return;
+const handleClick = (e: ThreeEvent<MouseEvent>) => {
+  e.stopPropagation();
+  if (e.delta > 2) return;
+  if (useCameraStore.getState().phase !== "idle") return;
 
-    // Use getState() to check phase without causing re-renders
-    if (useCameraStore.getState().phase !== "idle") return;
+  _worldPos.set(0, 0, 0);
+  const worldPos = e.object.getWorldPosition(_worldPos);
 
-    _worldPos.set(0, 0, 0);
-    const worldPos = e.object.getWorldPosition(_worldPos);
-
-    focusOnVerse(hb.id, {
+  const id = e.object.userData.id;
+  if (typeof id === "number") {
+    useCameraStore.getState().focusOnVerse(id, {
       x: worldPos.x,
       y: worldPos.y,
       z: worldPos.z,
     });
-  };
+  }
+};
 
+export function VerseClickHitboxes() {
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
       {HITBOXES.map((hb) => (
         <mesh
           key={`hitbox-${hb.id}`}
           position={[hb.cx, hb.cy, hb.cz]}
-          onClick={(e) => handleClick(hb, e)}
-          onPointerOver={(e) => {
-            e.stopPropagation();
-            if (useCameraStore.getState().phase === "idle") {
-              document.body.style.cursor = "pointer";
-            }
-          }}
-          onPointerOut={() => {
-            if (useCameraStore.getState().phase === "idle") {
-              document.body.style.cursor = "grab";
-            }
-          }}
-        >
-          <planeGeometry args={[hb.w, hb.h]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        </mesh>
+          scale={[hb.w, hb.h, 1]}
+          userData={{ id: hb.id }}
+          onClick={handleClick}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+          geometry={hitBoxGeom}
+          material={hitBoxMaterial}
+        />
       ))}
     </group>
   );

@@ -4,7 +4,7 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { useRef, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { PopUpManager } from "../features/pop-up-verses/PopUpManager";
@@ -17,11 +17,6 @@ interface ExperienceProps {
 }
 
 export function Experience({ isFolded = false }: ExperienceProps) {
-  const controlsRef = useRef<React.ElementRef<typeof OrbitControls>>(null);
-
-  const phase = useCameraStore((s) => s.phase);
-  const controlsEnabled = phase === "idle" || phase === "zoomed";
-
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
     const { phase: p, resetCamera } = useCameraStore.getState();
@@ -53,27 +48,35 @@ export function Experience({ isFolded = false }: ExperienceProps) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      <OrbitControls
-        ref={controlsRef}
-        enabled={controlsEnabled}
-        enableZoom={false}
-        enablePan={false}
-        makeDefault={true}
-        minAzimuthAngle={-Math.PI / 4}
-        maxAzimuthAngle={Math.PI / 4}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI * 0.45}
-        onStart={() => {
-          document.body.style.cursor = "grabbing";
-        }}
-        onEnd={() => {
-          document.body.style.cursor = "grab";
-        }}
-      />
+      <DynamicControls />
 
       <Environment preset="apartment" />
       <ambientLight intensity={0.8} />
       <directionalLight position={[2, 5, 2]} intensity={1.5} />
     </>
+  );
+}
+
+function DynamicControls() {
+  const phase = useCameraStore((s) => s.phase);
+  const controlsEnabled = phase === "idle" || phase === "zoomed";
+
+  return (
+    <OrbitControls
+      enabled={controlsEnabled}
+      enableZoom={false}
+      enablePan={false}
+      makeDefault={true}
+      minAzimuthAngle={-Math.PI / 4}
+      maxAzimuthAngle={Math.PI / 4}
+      minPolarAngle={Math.PI / 6}
+      maxPolarAngle={Math.PI * 0.45}
+      onStart={() => {
+        document.body.style.cursor = "grabbing";
+      }}
+      onEnd={() => {
+        document.body.style.cursor = "grab";
+      }}
+    />
   );
 }

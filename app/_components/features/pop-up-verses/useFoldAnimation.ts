@@ -5,22 +5,22 @@ export const POPUP_TIMING = {
   dipDepth: 0.001,
   restDepth: 0.002,
 
-  springMass: 1.9,
-  springTension: 110,
+  springMass: 2.7,
+  springTension: 80,
   springFriction: 22,
 
   appearDelayZAndOpacity: 0,
-  appearDelayFold: 150,
-  appearDelayShadow: 150,
+  appearDelayFold: 295,
+  appearDelayShadow: 295,
 
   hideDelayFold: 0,
-  hideDelayZAndOpacity: 350,
+  hideDelayZAndOpacity: 690,
   hideDelayShadow: 0,
 };
 
 export const ORIGINAL_TEXTURE_TIMING = {
-  hideDelay: 150,
-  showDelay: 350,
+  hideDelay: 295,
+  showDelay: 640,
 };
 
 // SHADOW CONFIGURATION
@@ -38,7 +38,6 @@ export const SHADOW_CONFIG = {
 };
 
 export function useFoldAnimation(isFolded: boolean) {
-
   const springConfig = {
     mass: POPUP_TIMING.springMass,
     tension: POPUP_TIMING.springTension,
@@ -46,8 +45,8 @@ export function useFoldAnimation(isFolded: boolean) {
   };
 
   const { rotLeft, rotRight, foldProgress } = useSpring({
-    rotLeft: isFolded ? Math.PI / 2.05 : 0,
-    rotRight: isFolded ? -Math.PI / 2.05 : 0,
+    rotLeft: isFolded ? Math.PI / 3 : 0,
+    rotRight: isFolded ? -Math.PI / 3 : 0,
     foldProgress: isFolded ? 1 : 0,
     from: {
       rotLeft: 0,
