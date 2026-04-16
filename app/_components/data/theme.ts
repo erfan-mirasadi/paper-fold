@@ -71,8 +71,8 @@ export const S2_TOP_LABEL_BORDER = "#72665F";
 // ----------------------------------------------------------------------------
 // 6. CAPSULE (VERSE BOX) BACKGROUND COLORS
 // ----------------------------------------------------------------------------
-export const CAPSULE_BG_7_10_15_18 = "#EED1C9";
-export const CAPSULE_BG_12_14 = "#E0E6D0";
+export const CAPSULE_BG_7_10_15_18 = "#E0E6D0";
+export const CAPSULE_BG_12_14 = "#EED1C9";
 export const CAPSULE_BG_6_19 = "#EFE9DC";
 export const WHITE_VERSE_BG = "#ffffff";
 
