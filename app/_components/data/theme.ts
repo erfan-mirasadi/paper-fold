@@ -26,7 +26,7 @@ export const CIRCLE_BORDER = "#8e8e8e";
 // 4. SECTION 1 — UPPER BLOCK PALETTE
 // ----------------------------------------------------------------------------
 export const S1_OUTER_BG = "#A0948D";
-export const S1_OUTER_BORDER = "#8B7C74";
+export const S1_OUTER_BORDER = "#C4963B";
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#C4963B";
