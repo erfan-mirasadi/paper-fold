@@ -12,8 +12,8 @@
 import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
-import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
-import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
+import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
+import { useRef } from "react";
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
 import {
@@ -44,43 +44,6 @@ interface SectionTwoProps {
 }
 
 // ----------------------------------------------------------------------------
-// HOOK: useDelayedPopUpGroups
-// ----------------------------------------------------------------------------
-function useDelayedPopUpGroups() {
-  const groups = usePopUpStore((state) => state.popUpGroups);
-  const [delayedIsOpen, setDelayedIsOpen] = useState<Record<string, boolean>>(
-    () => {
-      const init: Record<string, boolean> = {};
-      groups.forEach((g) => (init[g.id] = g.isOpen));
-      return init;
-    },
-  );
-
-  useEffect(() => {
-    const timeouts = groups.map((g) => {
-      const delay = g.isOpen
-        ? ORIGINAL_TEXTURE_TIMING.hideDelay
-        : ORIGINAL_TEXTURE_TIMING.showDelay;
-      return setTimeout(() => {
-        setDelayedIsOpen((prev) => {
-          if (prev[g.id] === g.isOpen) return prev;
-          return { ...prev, [g.id]: g.isOpen };
-        });
-      }, delay);
-    });
-    return () => timeouts.forEach((t) => clearTimeout(t));
-  }, [groups]);
-
-  const isVerseHidden = (verseId: number) => {
-    const group = groups.find((g) => g.verseIds.includes(verseId));
-    if (!group) return false;
-    return delayedIsOpen[group.id] ?? group.isOpen;
-  };
-
-  return { isVerseHidden };
-}
-
-// ----------------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------------
 export function SectionTwo({
@@ -91,7 +54,7 @@ export function SectionTwo({
   PW,
   isBumpMap = false,
 }: SectionTwoProps) {
-  const { isVerseHidden } = useDelayedPopUpGroups();
+  const isVerseHidden = useDelayedVerseVisibility();
   const t = transforms;
 
   return (
@@ -145,22 +108,24 @@ export function SectionTwo({
       />
 
       {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
-      <VerseBox
-        x={t.introVerse.x}
-        y={t.introVerse.y}
-        z={t.introVerse.z}
-        w={t.introVerse.w}
-        h={t.introVerse.h}
-        verse={data.introVerse.text}
-        number={data.introVerse.number}
-        bg={CAPSULE_BG_6_19}
-        border={BLUE_THEME}
-        circleBorderCol={BLUE_THEME}
-        circleBg={BLUE_THEME}
-        circleTextCol={WHITE_BASE}
-        isPill={false}
-        isBumpMap={isBumpMap}
-      />
+      {!isVerseHidden(data.introVerse.number) && (
+        <VerseBox
+          x={t.introVerse.x}
+          y={t.introVerse.y}
+          z={t.introVerse.z}
+          w={t.introVerse.w}
+          h={t.introVerse.h}
+          verse={data.introVerse.text}
+          number={data.introVerse.number}
+          bg={CAPSULE_BG_6_19}
+          border={BLUE_THEME}
+          circleBorderCol={BLUE_THEME}
+          circleBg={BLUE_THEME}
+          circleTextCol={WHITE_BASE}
+          isPill={false}
+          isBumpMap={isBumpMap}
+        />
+      )}
 
       {/* ─── VERSE GROUPS — mapped from pre-computed group transforms ─────── */}
       {data.colorGroups.map((group, index) => (
@@ -169,27 +134,29 @@ export function SectionTwo({
           group={group}
           groupTransform={t.groups[index]}
           isBumpMap={isBumpMap}
-          isVerseHidden={isVerseHidden}
+          isVerseHidden={(id) => isVerseHidden(id)}
         />
       ))}
 
       {/* ─── OUTRO VERSE (verse 19) ──────────────────────────────────────── */}
-      <VerseBox
-        x={t.outroVerse.x}
-        y={t.outroVerse.y}
-        z={t.outroVerse.z}
-        w={t.outroVerse.w}
-        h={t.outroVerse.h}
-        verse={data.outroVerse.text}
-        number={data.outroVerse.number}
-        bg={CAPSULE_BG_6_19}
-        border={BLUE_THEME}
-        circleBorderCol={BLUE_THEME}
-        circleBg={BLUE_THEME}
-        circleTextCol={WHITE_BASE}
-        isPill={false}
-        isBumpMap={isBumpMap}
-      />
+      {!isVerseHidden(data.outroVerse.number) && (
+        <VerseBox
+          x={t.outroVerse.x}
+          y={t.outroVerse.y}
+          z={t.outroVerse.z}
+          w={t.outroVerse.w}
+          h={t.outroVerse.h}
+          verse={data.outroVerse.text}
+          number={data.outroVerse.number}
+          bg={CAPSULE_BG_6_19}
+          border={BLUE_THEME}
+          circleBorderCol={BLUE_THEME}
+          circleBg={BLUE_THEME}
+          circleTextCol={WHITE_BASE}
+          isPill={false}
+          isBumpMap={isBumpMap}
+        />
+      )}
 
       {/* ─── SIDE CURVES (still read raw layout math) ────────────────────── */}
       <SideCurves layout={layout} startX={startX} isBumpMap={isBumpMap} />

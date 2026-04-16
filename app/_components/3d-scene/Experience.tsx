@@ -12,6 +12,8 @@ import { CameraManager } from "./CameraManager";
 import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
 import { useCameraStore } from "../features/camera-zoom/useCameraStore";
 
+import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
+
 interface ExperienceProps {
   isFolded?: boolean;
 }
@@ -19,6 +21,9 @@ interface ExperienceProps {
 export function Experience({ isFolded = false }: ExperienceProps) {
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
+    // Dismiss elevated verse on background click
+    useElevatedStore.getState().dismiss();
+    // Also handle camera reset if it's ever re-enabled
     const { phase: p, resetCamera } = useCameraStore.getState();
     if (p === "zoomed") {
       resetCamera();
@@ -40,6 +45,7 @@ export function Experience({ isFolded = false }: ExperienceProps) {
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />
         <PopUpManager />
+
         <VerseClickHitboxes />
       </group>
 

@@ -113,6 +113,7 @@ interface UiRectProps {
   bumpColor?: string;
   topOnly?: boolean;
   bottomOnly?: boolean;
+  opacity?: number;
 }
 
 /**
@@ -135,6 +136,7 @@ export const UiRect = ({
   bumpColor = BUMP_MAX,
   topOnly = false,
   bottomOnly = false,
+  opacity,
 }: UiRectProps) => {
   const finalColor = isBumpMap ? bumpColor : color;
 
@@ -170,8 +172,10 @@ export const UiRect = ({
         <meshBasicMaterial
           color={finalColor}
           depthTest={depthTest}
-          transparent={renderOrder != null && !isBumpMap}
-          opacity={renderOrder != null && !isBumpMap ? 0.999 : 1}
+          transparent={
+            opacity !== undefined || (renderOrder != null && !isBumpMap)
+          }
+          opacity={opacity ?? (renderOrder != null && !isBumpMap ? 0.999 : 1)}
         />
       </mesh>
     </group>
@@ -395,6 +399,8 @@ interface VerseBoxProps {
   borderWidth?: number;
   shadow?: boolean;
   isBumpMap?: boolean;
+  bgOpacity?: number;
+  textColor?: string;
 }
 
 /**
@@ -419,6 +425,8 @@ export const VerseBox = ({
   borderWidth,
   shadow = true,
   isBumpMap = false,
+  bgOpacity = 1,
+  textColor,
 }: VerseBoxProps) => {
   const shrinkX = 0.001;
   const finalX = x + shrinkX;
@@ -465,6 +473,7 @@ export const VerseBox = ({
         renderOrder={11}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_LOWER}
+        opacity={bgOpacity}
       />
 
       {/* Verse number circle */}
@@ -507,7 +516,7 @@ export const VerseBox = ({
         fontSize={
           isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
         }
-        color={isBumpMap ? BUMP_MAX : TEXT_DARK}
+        color={isBumpMap ? BUMP_MAX : textColor || TEXT_DARK}
         anchorX="center"
         anchorY="middle"
         maxWidth={textMaxW}

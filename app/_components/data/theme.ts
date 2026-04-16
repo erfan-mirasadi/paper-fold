@@ -30,7 +30,13 @@ export const S1_OUTER_BORDER = "#8B7C74";
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#C4963B";
-export const S1_ANA_BORDER = "#5A451B";
+export const S1_ANA_BORDER = "#000000";
+
+// Verse 5 Specifics
+export const S1_VERSE_5_NUMBER_BG = "#000000";
+export const S1_VERSE_5_NUMBER_BORDER = "#8B7C74";
+export const S1_VERSE_5_NUMBER_TEXT = "#fbf1d5";
+export const S1_VERSE_5_TEXT = "#C4963B";
 
 export const TAB_BG = "#e5ba71";
 export const TAB_BORDER = "#96601b";

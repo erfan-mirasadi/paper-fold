@@ -7,11 +7,8 @@
 //          from the LayoutEngine — does ZERO positional math in JSX.
 //          All x/y/w/h values come straight from the engine output.
 // ============================================================================
-
-import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
-import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
-import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
+import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
 import {
   S1_OUTER_BORDER,
   S1_OUTER_BG,
@@ -36,44 +33,6 @@ interface SectionOneProps {
 }
 
 // ----------------------------------------------------------------------------
-// HOOK: useDelayedPopUpGroups
-// Delays verse-hidden state to sync with popup animation timing.
-// ----------------------------------------------------------------------------
-function useDelayedPopUpGroups() {
-  const groups = usePopUpStore((state) => state.popUpGroups);
-  const [delayedIsOpen, setDelayedIsOpen] = useState<Record<string, boolean>>(
-    () => {
-      const init: Record<string, boolean> = {};
-      groups.forEach((g) => (init[g.id] = g.isOpen));
-      return init;
-    },
-  );
-
-  useEffect(() => {
-    const timeouts = groups.map((g) => {
-      const delay = g.isOpen
-        ? ORIGINAL_TEXTURE_TIMING.hideDelay
-        : ORIGINAL_TEXTURE_TIMING.showDelay;
-      return setTimeout(() => {
-        setDelayedIsOpen((prev) => {
-          if (prev[g.id] === g.isOpen) return prev;
-          return { ...prev, [g.id]: g.isOpen };
-        });
-      }, delay);
-    });
-    return () => timeouts.forEach((t) => clearTimeout(t));
-  }, [groups]);
-
-  const isVerseHidden = (verseId: number) => {
-    const group = groups.find((g) => g.verseIds.includes(verseId));
-    if (!group) return false;
-    return delayedIsOpen[group.id] ?? group.isOpen;
-  };
-
-  return { isVerseHidden };
-}
-
-// ----------------------------------------------------------------------------
 // COMPONENT
 // ----------------------------------------------------------------------------
 export function SectionOne({
@@ -82,7 +41,7 @@ export function SectionOne({
   PW,
   isBumpMap = false,
 }: SectionOneProps) {
-  const { isVerseHidden } = useDelayedPopUpGroups();
+  const isVerseHidden = useDelayedVerseVisibility();
   const t = transforms;
 
   return (
@@ -140,22 +99,25 @@ export function SectionOne({
       })}
 
       {/* AnaAyet — y offset absorbed by LayoutEngine, no wrapper group needed */}
-      <VerseBox
-        x={t.anaAyet.x}
-        y={t.anaAyet.y}
-        z={t.anaAyet.z}
-        w={t.anaAyet.w}
-        h={t.anaAyet.h}
-        verse={data.anaAyet.text}
-        number={data.anaAyet.number}
-        bg={S1_ANA_BG}
-        border={S1_ANA_BORDER}
-        circleBorderCol={S1_ANA_BORDER}
-        circleBg={S1_ANA_BORDER}
-        circleTextCol={WHITE_BASE}
-        isPill={false}
-        isBumpMap={isBumpMap}
-      />
+      {/* Hidden to allow MetallicVerseFive (PopUpManager) to render in its place */}
+      {data.anaAyet.number !== 5 && !isVerseHidden(data.anaAyet.number) && (
+        <VerseBox
+          x={t.anaAyet.x}
+          y={t.anaAyet.y}
+          z={t.anaAyet.z}
+          w={t.anaAyet.w}
+          h={t.anaAyet.h}
+          verse={data.anaAyet.text}
+          number={data.anaAyet.number}
+          bg={S1_ANA_BG}
+          border={S1_ANA_BORDER}
+          circleBorderCol={S1_ANA_BORDER}
+          circleBg={S1_ANA_BORDER}
+          circleTextCol={WHITE_BASE}
+          isPill={false}
+          isBumpMap={isBumpMap}
+        />
+      )}
       <AnaAyetTab
         x={t.anaAyetTabX}
         y={t.anaAyetTabY}

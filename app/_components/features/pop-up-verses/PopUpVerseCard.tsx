@@ -18,6 +18,12 @@ interface PopUpVerseCardProps {
   shadowGlobalOpacity: SpringValue<number>;
   zOffset: SpringValue<number>;
   opacity: SpringValue<number>;
+  liftZ: SpringValue<number>;
+  tiltX: SpringValue<number>;
+  scale: SpringValue<number>;
+  elevateShadowOpacity: SpringValue<number>;
+  elevateOpacity: SpringValue<number>;
+  isPill?: boolean;
   backfaceColor: string;
   verse: string;
   number: number;
@@ -40,6 +46,12 @@ export function PopUpVerseCard({
   shadowGlobalOpacity,
   zOffset,
   opacity,
+  liftZ,
+  tiltX,
+  scale,
+  elevateShadowOpacity,
+  elevateOpacity,
+  isPill = true,
   verse,
   number,
   bg,
@@ -101,12 +113,12 @@ export function PopUpVerseCard({
   );
 
   const finalShadowOpacity = to(
-    [shadowGlobalOpacity, foldProgress, opacity],
-    (globalOp, foldP, mainOp) => {
+    [shadowGlobalOpacity, foldProgress, opacity, elevateShadowOpacity],
+    (globalOp, foldP, mainOp, elShadowOp) => {
       const dynamicOpacity =
         SHADOW_CONFIG.opacityFlat -
         foldP * (SHADOW_CONFIG.opacityFlat - SHADOW_CONFIG.opacityFolded);
-      return globalOp * dynamicOpacity * mainOp;
+      return Math.max(globalOp * dynamicOpacity * mainOp, elShadowOp);
     },
   );
 
@@ -146,8 +158,12 @@ export function PopUpVerseCard({
 
   return (
     <a.group
-      position={[hingeX, y, zBaseOffset]}
-      visible={opacity.to((o) => o > 0.01)}
+      position-x={hingeX}
+      position-y={y}
+      position-z={to([zBaseOffset, zOffset, liftZ], (b, z, l) => b + z + l)}
+      visible={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2) > 0.01)}
+      scale={scale}
+      rotation-x={tiltX}
     >
       <a.mesh
         position-x={shadowXOffset}
@@ -169,13 +185,13 @@ export function PopUpVerseCard({
             <extrudeGeometry args={[shape, extrudeSettings]} />
             <a.meshStandardMaterial
               {...materialsProps.front}
-              opacity={opacity}
+              opacity={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2))}
             />
           </mesh>
 
           <mesh position={[outerW / 2, -outerH / 2, 0.002]} renderOrder={101}>
             <planeGeometry args={[outerW, outerH]} />
-            <a.meshStandardMaterial {...materialsProps.back} opacity={opacity}>
+            <a.meshStandardMaterial {...materialsProps.back} opacity={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2))}>
               <RenderTexture attach="map" width={512} height={256} frames={2}>
                 <OrthographicCamera
                   makeDefault
@@ -200,7 +216,7 @@ export function PopUpVerseCard({
                     circleBorderCol={circleBorderCol}
                     circleBg={circleBg}
                     circleTextCol={circleTextCol}
-                    isPill={true}
+                    isPill={isPill}
                     shadow={false}
                   />
                 </group>

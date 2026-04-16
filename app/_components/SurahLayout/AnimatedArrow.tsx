@@ -82,14 +82,6 @@ function createArrowTextures(): ArrowTextures {
   return { glowTexture, flareTexture, shadowTexture };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MODULE-LEVEL TEXTURE SINGLETON
-// Textures are created lazily on the client and shared across ALL
-// AnimatedArrow instances. Creating them at module load previously
-// attempted to access `document` during server-side import and crashed.
-// ─────────────────────────────────────────────────────────────────────────────
-let SHARED_ARROW_TEXTURES: ArrowTextures | null = null;
-
 export const AnimatedArrow = ({
   outerTipX,
   innerTipX,
@@ -101,11 +93,11 @@ export const AnimatedArrow = ({
   innerYBot,
   color,
   delay = 0,
-  speed = 0.0005,       // Speed of travel along the path
-  arrowSize = 0.008,    // Base size of the core dot
+  speed = 0.0005, // Speed of travel along the path
+  arrowSize = 0.008, // Base size of the core dot
   floatIntensity = 0.008, // Amplitude of the perpendicular float wobble
-  glowSize = 4,         // Glow plane size multiplier relative to arrowSize
-  shouldHide = false,   // Synced to popup open state
+  glowSize = 4, // Glow plane size multiplier relative to arrowSize
+  shouldHide = false, // Synced to popup open state
 }: {
   outerTipX: number;
   innerTipX: number;
@@ -181,13 +173,7 @@ export const AnimatedArrow = ({
     ],
   );
 
-  // Reference the module-level singleton — created lazily on first client render
-  const textures = useMemo<ArrowTextures>(() => {
-    if (!SHARED_ARROW_TEXTURES) {
-      SHARED_ARROW_TEXTURES = createArrowTextures();
-    }
-    return SHARED_ARROW_TEXTURES!;
-  }, []);
+  const textures = useMemo<ArrowTextures>(() => createArrowTextures(), []);
   const { glowTexture, flareTexture, shadowTexture } = textures;
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { memo, useEffect, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   EffectComposer,
   // Noise,
@@ -8,9 +9,12 @@ import {
   ToneMapping,
   BrightnessContrast,
   Glitch,
+  DepthOfField,
 } from "@react-three/postprocessing";
 import { ToneMappingMode, GlitchMode } from "postprocessing";
 import { Vector2 } from "three";
+import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
+import { ELEVATE_CAMERA } from "../features/elevated-verses/useElevateAnimation";
 
 type EffectsProps = {
   glitchTrigger?: number; // Pass a counter from outside to trigger glitch
@@ -29,15 +33,26 @@ const Effects: React.FC<EffectsProps> = ({
 }) => {
   const [manualActive, setManualActive] = useState(false);
   const lastTriggerRef = useRef(0);
+  const activeUntilRef = useRef(0);
+  const activeRef = useRef(false);
+  const isElevated = useElevatedStore((s) => s.phase === "elevated");
+  const dofFocusDistance = isElevated ? 0.15 + ELEVATE_CAMERA.focusOffset : 0;
+  const dofBokehScale = isElevated ? ELEVATE_CAMERA.bokehScale : 0;
 
   useEffect(() => {
     if (!glitchTrigger) return;
     if (lastTriggerRef.current === glitchTrigger) return;
     lastTriggerRef.current = glitchTrigger;
-    setManualActive(true);
-    const t = setTimeout(() => setManualActive(false), 300);
-    return () => clearTimeout(t);
+    activeUntilRef.current = performance.now() + 300;
   }, [glitchTrigger]);
+
+  useFrame(() => {
+    const shouldBeActive = performance.now() < activeUntilRef.current;
+    if (shouldBeActive !== activeRef.current) {
+      activeRef.current = shouldBeActive;
+      setManualActive(shouldBeActive);
+    }
+  });
 
   return (
     <EffectComposer multisampling={5} enableNormalPass={false}>
@@ -46,10 +61,11 @@ const Effects: React.FC<EffectsProps> = ({
       {/* <Noise opacity={noiseOpacity} /> */}
       <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} />
 
-      {/* 
-        - active={manualActive} is the clean way to toggle without TS conditional render errors.
-        - dtSize and columns make the glitch blocks themselves much finer/thinner (riiz tar)! 
-      */}
+      <DepthOfField
+        focusDistance={dofFocusDistance}
+        focalLength={15}
+        bokehScale={dofBokehScale}
+      />
       <Glitch
         active={manualActive}
         mode={GlitchMode.CONSTANT_WILD}

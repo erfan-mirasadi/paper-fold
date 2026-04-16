@@ -4,7 +4,11 @@ import { useFrame } from "@react-three/fiber";
 import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
+import { useState } from "react";
+import { useElevatedStore } from "../elevated-verses/useElevatedStore";
+import { useElevateAnimation } from "../elevated-verses/useElevateAnimation";
 import { PopUp3DTracker } from "./ui/PopUp3DTracker";
+import { VerseFiveMetallic } from "./VerseFiveMetallic";
 import {
   S1_INNER_BG,
   S1_INNER_BORDER,
@@ -13,6 +17,9 @@ import {
   CAPSULE_BG_12_14,
   MAROON_THEME,
   GREEN_THEME,
+  BLUE_THEME,
+  CAPSULE_BG_6_19,
+  WHITE_BASE,
 } from "../../data/theme";
 import {
   layoutMath,
@@ -21,6 +28,7 @@ import {
   START_X,
   SURAH_DATA,
   getPopUpTrackerPosition,
+  SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 
@@ -38,6 +46,7 @@ interface VerseConfig {
   circleBorderCol: string;
   circleBg: string;
   circleTextCol: string;
+  isPill?: boolean;
 }
 
 const VERSES_CONFIG: VerseConfig[] = (() => {
@@ -91,6 +100,24 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
       circleBg: S1_OUTER_BORDER,
       circleTextCol: "#ffffff",
     });
+  });
+
+  const introT = SURAH_TRANSFORMS.s2.introVerse;
+  configs.push({
+    id: SURAH_DATA.section2.introVerse.number,
+    verse: SURAH_DATA.section2.introVerse.text,
+    number: SURAH_DATA.section2.introVerse.number,
+    y: introT.y,
+    w: introT.w,
+    h: introT.h,
+    hingeX: introT.x - PAGE_WIDTH / 2,
+    direction: "right",
+    bg: CAPSULE_BG_6_19,
+    border: BLUE_THEME,
+    circleBorderCol: BLUE_THEME,
+    circleBg: BLUE_THEME,
+    circleTextCol: WHITE_BASE,
+    isPill: false,
   });
 
   // 2. Section 2 Bases
@@ -193,6 +220,24 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
     });
   });
 
+  const outroT = SURAH_TRANSFORMS.s2.outroVerse;
+  configs.push({
+    id: SURAH_DATA.section2.outroVerse.number,
+    verse: SURAH_DATA.section2.outroVerse.text,
+    number: SURAH_DATA.section2.outroVerse.number,
+    y: outroT.y,
+    w: outroT.w,
+    h: outroT.h,
+    hingeX: outroT.x - PAGE_WIDTH / 2,
+    direction: "right",
+    bg: CAPSULE_BG_6_19,
+    border: BLUE_THEME,
+    circleBorderCol: BLUE_THEME,
+    circleBg: BLUE_THEME,
+    circleTextCol: WHITE_BASE,
+    isPill: false,
+  });
+
   return configs;
 })();
 
@@ -203,6 +248,7 @@ export function PopUpManager() {
   const backfaceColor = "#e8e4d8";
 
   const groups = usePopUpStore((state) => state.popUpGroups);
+  const activeVerseId = useElevatedStore((state) => state.activeVerseId);
   const setScrollThresholdReached = usePopUpStore((state) => state.setPopUpScrollThresholdReached);
 
   const scroll = useScroll();
@@ -229,15 +275,15 @@ export function PopUpManager() {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
         const hasEverOpened = group?.hasEverOpened ?? false;
-        if (!hasEverOpened && !isOpen) {
-          return null;
-        }
+        const isElevated = activeVerseId === config.id;
 
         return (
           <PopUpCardWrapper
             key={`popup-${config.id}`}
             config={config}
             isOpen={isOpen}
+            hasEverOpened={hasEverOpened}
+            isElevated={isElevated}
             zBaseOffset={zBaseOffset}
             backfaceColor={backfaceColor}
           />
@@ -275,6 +321,9 @@ export function PopUpManager() {
         ]}
         scrollThreshold={0.88}
       />
+
+      {/* Static Metallic Verse 5 (stuck to paper) */}
+      <VerseFiveMetallic />
     </group>
   );
 }
@@ -282,14 +331,23 @@ export function PopUpManager() {
 function PopUpCardWrapper({
   config,
   isOpen,
+  hasEverOpened,
+  isElevated,
   zBaseOffset,
   backfaceColor,
 }: {
   config: VerseConfig;
   isOpen: boolean;
+  hasEverOpened: boolean;
+  isElevated: boolean;
   zBaseOffset: number;
   backfaceColor: string;
 }) {
+  const [hasEverBeenElevated, setHasEverBeenElevated] = useState(isElevated);
+  if (isElevated && !hasEverBeenElevated) {
+    setHasEverBeenElevated(true);
+  }
+
   const {
     rotLeft,
     rotRight,
@@ -298,6 +356,16 @@ function PopUpCardWrapper({
     zOffset,
     opacity,
   } = useFoldAnimation(isOpen);
+
+  const { 
+    liftZ, 
+    tiltX, 
+    scale, 
+    shadowOpacity: elevateShadowOpacity, 
+    opacity: elevateOpacity 
+  } = useElevateAnimation(isElevated);
+
+  if (!hasEverOpened && !isOpen && !hasEverBeenElevated) return null;
 
   return (
     <PopUpVerseCard
@@ -312,6 +380,12 @@ function PopUpCardWrapper({
       shadowGlobalOpacity={shadowGlobalOpacity}
       zOffset={zOffset}
       opacity={opacity}
+      liftZ={liftZ}
+      tiltX={tiltX}
+      scale={scale}
+      elevateShadowOpacity={elevateShadowOpacity}
+      elevateOpacity={elevateOpacity}
+      isPill={config.isPill !== false}
       backfaceColor={backfaceColor}
       verse={config.verse}
       number={config.number}

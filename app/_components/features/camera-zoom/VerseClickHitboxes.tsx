@@ -1,18 +1,7 @@
 "use client";
 
-// ============================================================================
-// VERSE CLICK HITBOXES
-// ============================================================================
-// Renders invisible planes over each verse capsule on the paper surface.
-// When clicked, they write the verse's 3D world position into the camera
-// store, triggering the CameraManager to zoom in.
-//
-// These meshes sit at the same Z as the paper front-face, are fully
-// transparent, but have `pointer-events` so R3F's raycaster picks them up.
-// ============================================================================
-
 import { ThreeEvent } from "@react-three/fiber";
-import { MeshBasicMaterial, PlaneGeometry, Vector3 } from "three";
+import { MeshBasicMaterial, PlaneGeometry } from "three";
 import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -20,11 +9,14 @@ import {
   SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
-import { useCameraStore } from "./useCameraStore";
+import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 
 // Reusable objects to avoid allocations on every click/render
-const _worldPos = new Vector3();
-const hitBoxMaterial = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+const hitBoxMaterial = new MeshBasicMaterial({
+  transparent: true,
+  opacity: 0,
+  depthWrite: false,
+});
 const hitBoxGeom = new PlaneGeometry(1, 1);
 
 interface VerseHitbox {
@@ -108,32 +100,20 @@ const HITBOXES = buildHitboxes();
 
 const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
   e.stopPropagation();
-  if (useCameraStore.getState().phase === "idle") {
-    document.body.style.cursor = "pointer";
-  }
+  document.body.style.cursor = "pointer";
 };
 
 const handlePointerOut = () => {
-  if (useCameraStore.getState().phase === "idle") {
-    document.body.style.cursor = "grab";
-  }
+  document.body.style.cursor = "grab";
 };
 
 const handleClick = (e: ThreeEvent<MouseEvent>) => {
   e.stopPropagation();
   if (e.delta > 2) return;
-  if (useCameraStore.getState().phase !== "idle") return;
-
-  _worldPos.set(0, 0, 0);
-  const worldPos = e.object.getWorldPosition(_worldPos);
 
   const id = e.object.userData.id;
   if (typeof id === "number") {
-    useCameraStore.getState().focusOnVerse(id, {
-      x: worldPos.x,
-      y: worldPos.y,
-      z: worldPos.z,
-    });
+    useElevatedStore.getState().elevateVerse(id);
   }
 };
 

@@ -8,7 +8,7 @@
 //          Does ZERO positional math — positions come directly from the engine.
 // ============================================================================
 
-import { VerseBox, UiRect } from "./SharedUI";
+import { VerseBox } from "./SharedUI";
 import {
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
@@ -16,8 +16,6 @@ import {
   WHITE_BASE,
   MAROON_THEME,
   GREEN_THEME,
-  HOLLOW_BORDER_COLOR,
-  BUMP_MID,
 } from "../data/theme";
 import type { ColorGroup, GroupTransforms } from "../data/SurahConfig";
 
