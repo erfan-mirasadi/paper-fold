@@ -248,8 +248,10 @@ export function PopUpManager() {
   const backfaceColor = "#e8e4d8";
 
   const groups = usePopUpStore((state) => state.popUpGroups);
-  const activeVerseId = useElevatedStore((state) => state.activeVerseId);
-  const setScrollThresholdReached = usePopUpStore((state) => state.setPopUpScrollThresholdReached);
+  const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
+  const setScrollThresholdReached = usePopUpStore(
+    (state) => state.setPopUpScrollThresholdReached,
+  );
 
   const scroll = useScroll();
   useFrame(() => {
@@ -275,7 +277,7 @@ export function PopUpManager() {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
         const hasEverOpened = group?.hasEverOpened ?? false;
-        const isElevated = activeVerseId === config.id;
+        const isElevated = activeVerseIds.includes(config.id);
 
         return (
           <PopUpCardWrapper
@@ -357,12 +359,12 @@ function PopUpCardWrapper({
     opacity,
   } = useFoldAnimation(isOpen);
 
-  const { 
-    liftZ, 
-    tiltX, 
-    scale, 
-    shadowOpacity: elevateShadowOpacity, 
-    opacity: elevateOpacity 
+  const {
+    liftZ,
+    tiltX,
+    scale,
+    shadowOpacity: elevateShadowOpacity,
+    opacity: elevateOpacity,
   } = useElevateAnimation(isElevated);
 
   if (!hasEverOpened && !isOpen && !hasEverBeenElevated) return null;

@@ -9,6 +9,7 @@
 // ============================================================================
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
+import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import {
   S1_OUTER_BORDER,
   S1_OUTER_BG,
@@ -42,6 +43,10 @@ export function SectionOne({
   isBumpMap = false,
 }: SectionOneProps) {
   const isVerseHidden = useDelayedVerseVisibility();
+  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
+  const hideSectionSurface = activeSectionIds.includes("s1");
+  const hideSectionLabel = activeSectionIds.includes("s1");
+  const sectionSurfaceOpacity = hideSectionSurface ? 0 : undefined;
   const t = transforms;
 
   return (
@@ -55,9 +60,10 @@ export function SectionOne({
         h={t.frameH}
         radius={0.02}
         color={S1_OUTER_BORDER}
-        shadow
+        shadow={!hideSectionSurface}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MAX}
+        opacity={sectionSurfaceOpacity}
       />
       {/* Outer wrapper — fill layer */}
       <UiRect
@@ -70,6 +76,7 @@ export function SectionOne({
         color={S1_OUTER_BG}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_DEEP}
+        opacity={sectionSurfaceOpacity}
       />
 
       {/* 2×2 verse grid — positions come from the engine, no math here */}
@@ -126,15 +133,17 @@ export function SectionOne({
       />
 
       {/* Section title label pinned to the top edge */}
-      <TopLabel
-        x={PW / 2}
-        y={t.labelPinY}
-        z={0.004}
-        text={data.label}
-        isBumpMap={isBumpMap}
-        bgColor={S1_TOP_LABEL_BG}
-        borderColor={S1_TOP_LABEL_BORDER}
-      />
+      {!hideSectionLabel && (
+        <TopLabel
+          x={PW / 2}
+          y={t.labelPinY}
+          z={0.004}
+          text={data.label}
+          isBumpMap={isBumpMap}
+          bgColor={S1_TOP_LABEL_BG}
+          borderColor={S1_TOP_LABEL_BORDER}
+        />
+      )}
     </group>
   );
 }

@@ -24,6 +24,7 @@ interface HollowConnectorProps {
   height: number;
   borderWidth: number;
   isBumpMap?: boolean;
+  opacity?: number;
 }
 
 export function HollowConnector({
@@ -34,6 +35,7 @@ export function HollowConnector({
   height,
   borderWidth: bw,
   isBumpMap = false,
+  opacity,
 }: HollowConnectorProps) {
   // Bias the outer border so the "extra" framing appears on the
   // connector's primary side: top connectors push the frame upward,
@@ -56,6 +58,7 @@ export function HollowConnector({
         color={HOLLOW_BORDER_COLOR}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MAX}
+        opacity={opacity}
       />
       {/* Inner fill layer — matches Section 2 background to create hollow look */}
       <UiRect
@@ -68,6 +71,7 @@ export function HollowConnector({
         color={HOLLOW_CONNECTOR_INNER_BG_1_3}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_LOWER}
+        opacity={opacity}
       />
     </>
   );

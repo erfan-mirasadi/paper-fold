@@ -15,6 +15,7 @@ import {
 } from "../data/theme";
 import { AnimatedArrow } from "./AnimatedArrow";
 import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
+import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../data/SurahConfig";
 
@@ -256,10 +257,20 @@ export const SideCurves = ({
   isBumpMap = false,
 }: SideCurvesProps) => {
   const groups = usePopUpStore((state) => state.popUpGroups);
-  // Hide curves whenever any inner group (not 1–2 or 3–4) is open
-  const shouldHide = groups.some(
+  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
+
+  // Hide curves whenever any inner popup group (not 1–2 or 3–4) is open.
+  const hideFromPopUps = groups.some(
     (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
   );
+
+  // Also hide curves during section-level elevation for Section 2 hollow blocks.
+  const hideFromSectionElevate =
+    activeSectionIds.includes("s2_top") ||
+    activeSectionIds.includes("s2_center") ||
+    activeSectionIds.includes("s2_bottom");
+
+  const shouldHide = hideFromPopUps || hideFromSectionElevate;
 
   const {
     s2Pad,
@@ -479,6 +490,7 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_12_14}
         isRight={true}
         shouldHide={shouldHide}
+        isBumpMap={isBumpMap}
       />
     </group>
   );

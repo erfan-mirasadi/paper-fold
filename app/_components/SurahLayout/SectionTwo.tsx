@@ -9,11 +9,10 @@
 //          layout math (that component has its own coordinate derivation).
 // ============================================================================
 
-import { useEffect, useState } from "react";
 import { TopLabel, UiRect, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
-import { useRef } from "react";
+import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
 import {
@@ -55,6 +54,13 @@ export function SectionTwo({
   isBumpMap = false,
 }: SectionTwoProps) {
   const isVerseHidden = useDelayedVerseVisibility();
+  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
+  const hideTopConnector = activeSectionIds.includes("s2_top");
+  const hideBottomConnector = activeSectionIds.includes("s2_bottom");
+  const hideTopLabel = activeSectionIds.includes("s2_top");
+  const hideBottomLabel = activeSectionIds.includes("s2_bottom");
+  const topConnectorOpacity = hideTopConnector ? 0 : undefined;
+  const bottomConnectorOpacity = hideBottomConnector ? 0 : undefined;
   const t = transforms;
 
   return (
@@ -93,6 +99,7 @@ export function SectionTwo({
         height={t.topConnectorH}
         borderWidth={t.borderWidth}
         isBumpMap={isBumpMap}
+        opacity={topConnectorOpacity}
       />
 
       {/* ─── BOTTOM HOLLOW CONNECTOR ─────────────────────────────────────── */}
@@ -105,6 +112,7 @@ export function SectionTwo({
         height={t.bottomConnectorH}
         borderWidth={t.borderWidth}
         isBumpMap={isBumpMap}
+        opacity={bottomConnectorOpacity}
       />
 
       {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
@@ -162,29 +170,33 @@ export function SectionTwo({
       <SideCurves layout={layout} startX={startX} isBumpMap={isBumpMap} />
 
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
-      <TopLabel
-        x={PW / 2}
-        y={t.topLabelPinY}
-        z={0.004}
-        text={data.topLabel}
-        animateOnScroll={true}
-        isBumpMap={isBumpMap}
-        partialBorder={true}
-        bgColor={S2_TOP_LABEL_BG}
-        borderColor={S2_TOP_LABEL_BORDER}
-      />
-      <TopLabel
-        x={PW / 2}
-        y={t.bottomLabelPinY}
-        z={0.004}
-        text={data.bottomLabel}
-        animateOnScroll={true}
-        isBumpMap={isBumpMap}
-        partialBorder={true}
-        bottomBorder={true}
-        bgColor={S2_TOP_LABEL_BG}
-        borderColor={S2_TOP_LABEL_BORDER}
-      />
+      {!hideTopLabel && (
+        <TopLabel
+          x={PW / 2}
+          y={t.topLabelPinY}
+          z={0.004}
+          text={data.topLabel}
+          animateOnScroll={true}
+          isBumpMap={isBumpMap}
+          partialBorder={true}
+          bgColor={S2_TOP_LABEL_BG}
+          borderColor={S2_TOP_LABEL_BORDER}
+        />
+      )}
+      {!hideBottomLabel && (
+        <TopLabel
+          x={PW / 2}
+          y={t.bottomLabelPinY}
+          z={0.004}
+          text={data.bottomLabel}
+          animateOnScroll={true}
+          isBumpMap={isBumpMap}
+          partialBorder={true}
+          bottomBorder={true}
+          bgColor={S2_TOP_LABEL_BG}
+          borderColor={S2_TOP_LABEL_BORDER}
+        />
+      )}
     </group>
   );
 }

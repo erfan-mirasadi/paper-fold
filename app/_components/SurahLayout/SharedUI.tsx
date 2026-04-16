@@ -198,6 +198,7 @@ interface TopLabelProps {
   bottomBorder?: boolean;
   noBorder?: boolean;
   bgColor?: string;
+  renderOrder?: number;
 }
 
 /**
@@ -217,6 +218,7 @@ export function TopLabel({
   bottomBorder = false,
   noBorder = false,
   bgColor = WHITE_BASE,
+  renderOrder,
 }: TopLabelProps) {
   const w = 0.4;
   const h = 0.046;
@@ -291,6 +293,7 @@ export function TopLabel({
           bumpColor={BUMP_MAX}
           topOnly={partialBorder && !bottomBorder}
           bottomOnly={partialBorder && bottomBorder}
+          renderOrder={renderOrder}
         />
       )}
       <UiRect
@@ -304,6 +307,7 @@ export function TopLabel({
         isBumpMap={isBumpMap}
         bumpColor={BUMP_LOWER}
         topOnly={false}
+        renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
       <Text
         position={[w / 2, -h / 2, 0.002]}
@@ -314,6 +318,7 @@ export function TopLabel({
         fontStyle="normal"
         fontWeight="bold"
         material-depthTest={false}
+        renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
       >
         {text}
       </Text>

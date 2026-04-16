@@ -30,7 +30,7 @@ const BW = 0.0055; // Border width to match VerseBox
 const SHADOW_SCALE = 1.02; // Shadow slightly larger than object
 
 export function VerseFiveMetallic() {
-  const isElevated = useElevatedStore((s) => s.activeVerseId === 5);
+  const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
   const { liftZ, tiltX, scale, shadowOpacity } =
     useElevateAnimation(isElevated);
 
@@ -116,8 +116,8 @@ export function VerseFiveMetallic() {
           <meshStandardMaterial
             transparent
             opacity={1}
-            metalness={0.4}
-            roughness={0.3}
+            metalness={0.1}
+            roughness={0.8}
           >
             <RenderTexture
               attach="map"

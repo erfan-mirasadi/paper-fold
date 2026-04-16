@@ -13,6 +13,8 @@ import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
 import { useCameraStore } from "../features/camera-zoom/useCameraStore";
 
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
+import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSectionSurfaces";
+import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -44,6 +46,8 @@ export function Experience({ isFolded = false }: ExperienceProps) {
 
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />
+        <ElevatedSectionSurfaces />
+        <ElevatedSectionLabels />
         <PopUpManager />
 
         <VerseClickHitboxes />

@@ -6,7 +6,7 @@ import { ELEVATE_TEXTURE_TIMING } from "../features/elevated-verses/useElevateAn
 
 export function useDelayedVerseVisibility() {
   const groups = usePopUpStore((state) => state.popUpGroups);
-  const activeVerseId = useElevatedStore((state) => state.activeVerseId);
+  const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
 
   // Pop-up delayed state
   const [delayedGroupIsOpen, setDelayedGroupIsOpen] = useState<
@@ -20,7 +20,7 @@ export function useDelayedVerseVisibility() {
   // Elevated delayed state
   const [delayedElevatedState, setDelayedElevatedState] = useState<
     Record<number, boolean>
-  >(activeVerseId !== null ? { [activeVerseId]: true } : {});
+  >(() => Object.fromEntries(activeVerseIds.map((id) => [id, true])));
 
   // Refs for tracking timeouts so we can cancel specific ones without wiping others
   const groupTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
@@ -30,7 +30,7 @@ export function useDelayedVerseVisibility() {
   const prevGroupsOpenRef = useRef<Record<string, boolean>>(
     Object.fromEntries(groups.map((g) => [g.id, g.isOpen])),
   );
-  const prevActiveRef = useRef<number | null>(activeVerseId);
+  const prevActiveSetRef = useRef<Set<number>>(new Set(activeVerseIds));
 
   // Sync Pop-ups
   useEffect(() => {
@@ -59,38 +59,37 @@ export function useDelayedVerseVisibility() {
 
   // Sync Elevated
   useEffect(() => {
-    const currentActive = activeVerseId;
-    const prevActive = prevActiveRef.current;
+    const currentSet = new Set(activeVerseIds);
+    const prevSet = prevActiveSetRef.current;
 
-    // 1. Handle newly active verse (hide it)
-    if (currentActive !== null && currentActive !== prevActive) {
-      if (elevatedTimeoutsRef.current[currentActive]) {
-        clearTimeout(elevatedTimeoutsRef.current[currentActive]);
+    // Newly elevated verses should hide immediately (or with configured delay).
+    currentSet.forEach((id) => {
+      if (prevSet.has(id)) return;
+
+      if (elevatedTimeoutsRef.current[id]) {
+        clearTimeout(elevatedTimeoutsRef.current[id]);
       }
 
-      elevatedTimeoutsRef.current[currentActive] = setTimeout(() => {
-        setDelayedElevatedState((prev) => ({ ...prev, [currentActive]: true }));
+      elevatedTimeoutsRef.current[id] = setTimeout(() => {
+        setDelayedElevatedState((prev) => ({ ...prev, [id]: true }));
       }, ELEVATE_TEXTURE_TIMING.hideDelay);
-    }
+    });
 
-    // 2. Handle previously active verse (show it)
-    if (prevActive !== null && prevActive !== currentActive) {
-      if (elevatedTimeoutsRef.current[prevActive]) {
-        clearTimeout(elevatedTimeoutsRef.current[prevActive]);
+    // Verses leaving elevated mode should reappear with the release delay.
+    prevSet.forEach((id) => {
+      if (currentSet.has(id)) return;
+
+      if (elevatedTimeoutsRef.current[id]) {
+        clearTimeout(elevatedTimeoutsRef.current[id]);
       }
 
-      const targetVerseToDismiss = prevActive; // bind for timeout closure
-
-      elevatedTimeoutsRef.current[targetVerseToDismiss] = setTimeout(() => {
-        setDelayedElevatedState((prev) => ({
-          ...prev,
-          [targetVerseToDismiss]: false,
-        }));
+      elevatedTimeoutsRef.current[id] = setTimeout(() => {
+        setDelayedElevatedState((prev) => ({ ...prev, [id]: false }));
       }, ELEVATE_TEXTURE_TIMING.showDelay);
-    }
+    });
 
-    prevActiveRef.current = currentActive;
-  }, [activeVerseId]);
+    prevActiveSetRef.current = currentSet;
+  }, [activeVerseIds]);
 
   // Global unmount cleanup
   useEffect(() => {
