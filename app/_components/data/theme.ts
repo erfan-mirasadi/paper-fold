@@ -73,7 +73,7 @@ export const S2_TOP_LABEL_BORDER = "#72665F";
 // ----------------------------------------------------------------------------
 export const CAPSULE_BG_7_10_15_18 = "#E0E6D0";
 export const CAPSULE_BG_12_14 = "#EED1C9";
-export const CAPSULE_BG_6_19 = "#EFE9DC";
+export const CAPSULE_BG_6_19 = "#CEE0E9";
 export const WHITE_VERSE_BG = "#ffffff";
 
 // ----------------------------------------------------------------------------
