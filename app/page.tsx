@@ -83,7 +83,7 @@ export default function Home() {
             <color attach="background" args={[bgColor]} />
             <BackgroundParticlesDesktop isDarkMode={isDarkMode} />
             <Effects glitchTrigger={glitchKey} />
-            <ScrollControls pages={2} damping={0.2}>
+            <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />
               <Experience />
               {/* <TafsirScrollTracker /> */}

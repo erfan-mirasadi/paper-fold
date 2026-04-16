@@ -11,6 +11,7 @@ export function NavigationOverlay({
   isDarkMode = false,
 }: NavigationOverlayProps) {
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
+  const currentOffset = useFoldStore((s) => s.currentOffset);
 
   // Design Tokens
   const accentColor = "#D4AF37"; // Gold/Brass accent for a premium feel
@@ -73,6 +74,15 @@ export function NavigationOverlay({
     visible: { x: 0, opacity: 1 },
   } as const;
 
+  const nextStageId: "end" | "pre-start" =
+    currentOffset < 0.5 ? "end" : "pre-start";
+  const activeIcon = nextStageId === "end" ? iconUnfold : iconFold;
+  const buttonLabel = nextStageId === "end" ? "Aç" : "Kapat";
+
+  const handleSmartTransition = () => {
+    triggerTransition(nextStageId);
+  };
+
   return (
     <motion.div
       variants={containerVariants}
@@ -89,21 +99,9 @@ export function NavigationOverlay({
       }}
     >
       <NavButton
-        onClick={() => triggerTransition("end")}
-        icon={iconUnfold}
-        // label="Fully Unfold"
-        isDarkMode={isDarkMode}
-        accentColor={accentColor}
-        textColor={textColor}
-        glassBg={glassBg}
-        glassBorder={glassBorder}
-        variants={itemVariants}
-      />
-
-      <NavButton
-        onClick={() => triggerTransition("pre-start")}
-        icon={iconFold}
-        // label="Fold Together"
+        onClick={handleSmartTransition}
+        icon={activeIcon}
+        label={buttonLabel}
         isDarkMode={isDarkMode}
         accentColor={accentColor}
         textColor={textColor}
@@ -156,7 +154,7 @@ function NavButton({
         borderRadius: "14px",
         display: "flex",
         alignItems: "center",
-        // gap: "12px",
+        gap: "10px",
         fontSize: "13px",
         fontWeight: 500,
         letterSpacing: "0.02em",
