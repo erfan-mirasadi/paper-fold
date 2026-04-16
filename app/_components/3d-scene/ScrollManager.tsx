@@ -4,6 +4,10 @@ import { useScroll } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { create } from "zustand";
 import { FOLD_STORY_STEPS, getOffsetForId } from "./FoldStory";
+import {
+  ELEVATED_SCROLL_UNLOCK_THRESHOLD,
+  useElevatedStore,
+} from "../features/elevated-verses/useElevatedStore";
 
 const STEP_SCROLL_DURATION_MS = 620;
 const STEP_PAUSE_MS = 250;
@@ -50,6 +54,9 @@ export function ScrollManager() {
   const targetStageId = useFoldStore((s) => s.targetStageId);
   const transitionToken = useFoldStore((s) => s.transitionToken);
   const setCurrentOffset = useFoldStore((s) => s.setCurrentOffset);
+  const elevatedUnlockedRef = useRef(
+    useElevatedStore.getState().isEnabledByScroll,
+  );
   const activeRunIdRef = useRef(0);
   const frameIdRef = useRef<number | null>(null);
   const timeoutIdRef = useRef<number | null>(null);
@@ -77,6 +84,12 @@ export function ScrollManager() {
       const maxScroll = el.scrollHeight - el.clientHeight;
       const offset = maxScroll <= 0 ? 0 : clamp01(el.scrollTop / maxScroll);
       setCurrentOffset(offset);
+
+      const isUnlocked = offset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD;
+      if (isUnlocked !== elevatedUnlockedRef.current) {
+        elevatedUnlockedRef.current = isUnlocked;
+        useElevatedStore.getState().setEnabledByScroll(isUnlocked);
+      }
     };
 
     syncCurrentOffset();

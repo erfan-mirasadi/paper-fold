@@ -12,7 +12,11 @@
 import { TopLabel, UiRect, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
-import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
+import { useDelayedHidden } from "../shared/useDelayedHidden";
+import {
+  ELEVATED_RETURN_SYNC_MS,
+  useElevatedStore,
+} from "../features/elevated-verses/useElevatedStore";
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
 import {
@@ -55,12 +59,20 @@ export function SectionTwo({
 }: SectionTwoProps) {
   const isVerseHidden = useDelayedVerseVisibility();
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const hideTopConnector = activeSectionIds.includes("s2_top");
-  const hideBottomConnector = activeSectionIds.includes("s2_bottom");
-  const hideTopLabel = activeSectionIds.includes("s2_top");
-  const hideBottomLabel = activeSectionIds.includes("s2_bottom");
-  const topConnectorOpacity = hideTopConnector ? 0 : undefined;
-  const bottomConnectorOpacity = hideBottomConnector ? 0 : undefined;
+  const hideTopConnectorNow = activeSectionIds.includes("s2_top");
+  const hideBottomConnectorNow = activeSectionIds.includes("s2_bottom");
+
+  const hideTopConnector = useDelayedHidden(
+    hideTopConnectorNow,
+    ELEVATED_RETURN_SYNC_MS,
+  );
+  const hideBottomConnector = useDelayedHidden(
+    hideBottomConnectorNow,
+    ELEVATED_RETURN_SYNC_MS,
+  );
+
+  const hideTopLabel = hideTopConnector;
+  const hideBottomLabel = hideBottomConnector;
   const t = transforms;
 
   return (
@@ -90,30 +102,32 @@ export function SectionTwo({
       />
 
       {/* ─── TOP HOLLOW CONNECTOR ────────────────────────────────────────── */}
-      <HollowConnector
-        position="top"
-        boxX={t.connectorX}
-        boxW={t.connectorW}
-        yTop={t.topConnectorY}
-        yBottom={t.topConnectorY - t.topConnectorH}
-        height={t.topConnectorH}
-        borderWidth={t.borderWidth}
-        isBumpMap={isBumpMap}
-        opacity={topConnectorOpacity}
-      />
+      {!hideTopConnector && (
+        <HollowConnector
+          position="top"
+          boxX={t.connectorX}
+          boxW={t.connectorW}
+          yTop={t.topConnectorY}
+          yBottom={t.topConnectorY - t.topConnectorH}
+          height={t.topConnectorH}
+          borderWidth={t.borderWidth}
+          isBumpMap={isBumpMap}
+        />
+      )}
 
       {/* ─── BOTTOM HOLLOW CONNECTOR ─────────────────────────────────────── */}
-      <HollowConnector
-        position="bottom"
-        boxX={t.connectorX}
-        boxW={t.connectorW}
-        yTop={t.bottomConnectorY}
-        yBottom={t.bottomConnectorY - t.bottomConnectorH}
-        height={t.bottomConnectorH}
-        borderWidth={t.borderWidth}
-        isBumpMap={isBumpMap}
-        opacity={bottomConnectorOpacity}
-      />
+      {!hideBottomConnector && (
+        <HollowConnector
+          position="bottom"
+          boxX={t.connectorX}
+          boxW={t.connectorW}
+          yTop={t.bottomConnectorY}
+          yBottom={t.bottomConnectorY - t.bottomConnectorH}
+          height={t.bottomConnectorH}
+          borderWidth={t.borderWidth}
+          isBumpMap={isBumpMap}
+        />
+      )}
 
       {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
       {!isVerseHidden(data.introVerse.number) && (

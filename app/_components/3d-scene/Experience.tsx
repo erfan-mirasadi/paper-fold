@@ -21,6 +21,8 @@ interface ExperienceProps {
 }
 
 export function Experience({ isFolded = false }: ExperienceProps) {
+  const isElevatedUnlocked = useElevatedStore((s) => s.isEnabledByScroll);
+
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
     // Dismiss elevated verse on background click
@@ -46,11 +48,11 @@ export function Experience({ isFolded = false }: ExperienceProps) {
 
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />
-        <ElevatedSectionSurfaces />
-        <ElevatedSectionLabels />
+        {isElevatedUnlocked && <ElevatedSectionSurfaces />}
+        {isElevatedUnlocked && <ElevatedSectionLabels />}
         <PopUpManager />
 
-        <VerseClickHitboxes />
+        {isElevatedUnlocked && <VerseClickHitboxes />}
       </group>
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>

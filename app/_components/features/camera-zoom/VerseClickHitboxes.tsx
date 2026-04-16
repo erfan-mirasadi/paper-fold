@@ -241,7 +241,15 @@ function buildHitboxes(): VerseHitbox[] {
 
 const HITBOXES = buildHitboxes();
 
+const canUseElevatedInteraction = () =>
+  useElevatedStore.getState().isEnabledByScroll;
+
 const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+  if (!canUseElevatedInteraction()) {
+    document.body.style.cursor = "grab";
+    return;
+  }
+
   e.stopPropagation();
   document.body.style.cursor = "pointer";
 };
@@ -251,6 +259,8 @@ const handlePointerOut = () => {
 };
 
 const handleClick = (e: ThreeEvent<MouseEvent>) => {
+  if (!canUseElevatedInteraction()) return;
+
   e.stopPropagation();
   if (e.delta > 2) return;
 

@@ -11,6 +11,12 @@ import { create } from "zustand";
 export type ElevatedPhase = "idle" | "elevated";
 export type ElevatedSectionId = "s1" | "s2_top" | "s2_bottom" | "s2_center";
 
+/** Elevated interactions unlock only after user scroll reaches this offset. */
+export const ELEVATED_SCROLL_UNLOCK_THRESHOLD = 0.9;
+
+/** Delay used to sync base section reappearance with elevated return animation. */
+export const ELEVATED_RETURN_SYNC_MS = 480;
+
 const SECTION_VERSE_IDS: Record<ElevatedSectionId, number[]> = {
   s1: [1, 2, 3, 4, 5],
   s2_top: [6, 7, 8, 9, 10],
@@ -80,6 +86,12 @@ interface ElevatedStoreState {
   /** Current lifecycle phase. */
   phase: ElevatedPhase;
 
+  /** Whether elevated interaction is currently unlocked by scroll position. */
+  isEnabledByScroll: boolean;
+
+  /** Updates elevated availability based on current scroll threshold. */
+  setEnabledByScroll: (enabled: boolean) => void;
+
   /** Toggle a single verse in/out of the elevated set. */
   elevateVerse: (verseId: number) => void;
 
@@ -97,8 +109,30 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   activeSectionIds: [],
   hasEverElevated: false,
   phase: "idle",
+  isEnabledByScroll: false,
+
+  setEnabledByScroll: (enabled) => {
+    const { isEnabledByScroll } = get();
+    if (isEnabledByScroll === enabled) return;
+
+    if (!enabled) {
+      set({
+        isEnabledByScroll: false,
+        activeVerseId: null,
+        activeVerseIds: [],
+        activeSectionId: null,
+        activeSectionIds: [],
+        phase: "idle",
+      });
+      return;
+    }
+
+    set({ isEnabledByScroll: true });
+  },
 
   elevateVerse: (verseId) => {
+    if (!get().isEnabledByScroll) return;
+
     const { activeVerseIds, hasEverElevated, activeSectionId } = get();
     const hasVerse = activeVerseIds.includes(verseId);
     const nextIds = normalizeVerseIds(
@@ -124,6 +158,8 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   },
 
   elevateVerses: (verseIds, sectionId) => {
+    if (!get().isEnabledByScroll) return;
+
     const normalized = normalizeVerseIds(verseIds);
     if (normalized.length === 0) {
       set({

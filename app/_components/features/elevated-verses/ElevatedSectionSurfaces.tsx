@@ -15,18 +15,21 @@ import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
 } from "../../data/theme";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
-import { useElevatedStore } from "./useElevatedStore";
+import { ELEVATED_RETURN_SYNC_MS, useElevatedStore } from "./useElevatedStore";
 
 type SectionSpring = {
   liftZ: SpringValue<number>;
   opacity: SpringValue<number>;
   shadowOpacity: SpringValue<number>;
+  shadowVisibility: SpringValue<number>;
 };
 
 const SECTION_SURFACE = {
   liftHeight: 0.095,
   liftDelayMs: 120,
-  shadowOpacity: 0.24,
+  opacityShowDelayMs: 0,
+  opacityHideDelayMs: ELEVATED_RETURN_SYNC_MS,
+  shadowOpacity: 0.26,
   spring: {
     mass: 2.2,
     tension: 85,
@@ -34,22 +37,47 @@ const SECTION_SURFACE = {
   },
 };
 
+const VERSE_MIMIC_SHADOW = {
+  offsetX: 0,
+  offsetY: -0.004,
+  insetZ: -0.001,
+  scale: 1.05,
+  opacityFlat: 0.6,
+};
+
 function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
-  const { liftZ, opacity } = useSpring({
+  const { liftZ } = useSpring({
     liftZ: isActive ? SECTION_SURFACE.liftHeight : 0,
-    opacity: isActive ? 1 : 0,
-    from: { liftZ: 0, opacity: 0 },
+    from: { liftZ: 0 },
     delay: isActive ? SECTION_SURFACE.liftDelayMs : 0,
+    config: SECTION_SURFACE.spring,
+  });
+
+  const { opacity } = useSpring({
+    opacity: isActive ? 1 : 0,
+    from: { opacity: 0 },
+    delay: isActive
+      ? SECTION_SURFACE.opacityShowDelayMs
+      : SECTION_SURFACE.opacityHideDelayMs,
+    immediate: isActive,
     config: SECTION_SURFACE.spring,
   });
 
   const { shadowOpacity } = useSpring({
     shadowOpacity: isActive ? SECTION_SURFACE.shadowOpacity : 0,
     from: { shadowOpacity: 0 },
+    delay: 0,
     config: SECTION_SURFACE.spring,
   });
 
-  return { liftZ, opacity, shadowOpacity };
+  const { shadowVisibility } = useSpring({
+    shadowVisibility: isActive ? 1 : 0,
+    from: { shadowVisibility: 0 },
+    delay: 0,
+    config: SECTION_SURFACE.spring,
+  });
+
+  return { liftZ, opacity, shadowOpacity, shadowVisibility };
 }
 
 interface ElevatedLayerProps {
@@ -77,7 +105,7 @@ function ElevatedLayer({
   zOffset = 0,
   shadow = false,
   shadowStrength = 1,
-  shadowInsetZ = -0.00018,
+  shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
 }: ElevatedLayerProps) {
   const baseZ = PAGE_DEPTH / 2 + 0.001 + zOffset;
 
@@ -87,18 +115,39 @@ function ElevatedLayer({
       position-z={to(spring.liftZ, (lift) => baseZ + lift)}
     >
       {shadow && (
-        <mesh position={[0.008, -0.008, shadowInsetZ]}>
+        <a.mesh
+          position={[VERSE_MIMIC_SHADOW.offsetX, VERSE_MIMIC_SHADOW.offsetY, 0]}
+          position-z={to(spring.liftZ, (lift) => shadowInsetZ - lift)}
+          scale-x={to(
+            spring.liftZ,
+            (lift) =>
+              1 +
+              (lift / SECTION_SURFACE.liftHeight) *
+                (VERSE_MIMIC_SHADOW.scale - 1),
+          )}
+          scale-y={to(
+            spring.liftZ,
+            (lift) =>
+              1 +
+              (lift / SECTION_SURFACE.liftHeight) *
+                (VERSE_MIMIC_SHADOW.scale - 1),
+          )}
+        >
           <RoundedShapeComponent w={w} h={h} radius={radius} />
           <a.meshBasicMaterial
             color="#000000"
             transparent
             depthWrite={false}
+            depthTest={false}
+            toneMapped={false}
             opacity={to(
-              [spring.shadowOpacity, spring.opacity],
-              (shadowOp, op) => shadowOp * op * shadowStrength,
+              [spring.shadowOpacity, spring.shadowVisibility],
+              (shadowOp, vis) =>
+                Math.max(vis * VERSE_MIMIC_SHADOW.opacityFlat, shadowOp) *
+                shadowStrength,
             )}
           />
-        </mesh>
+        </a.mesh>
       )}
 
       <mesh>
@@ -219,6 +268,8 @@ export function ElevatedSectionSurfaces() {
         radius={topConnector.outer.radius}
         color={HOLLOW_BORDER_COLOR}
         spring={s2TopSpring}
+        shadow
+        shadowStrength={0.62}
       />
       <ElevatedLayer
         x={topConnector.middle.x}
@@ -254,6 +305,8 @@ export function ElevatedSectionSurfaces() {
         radius={bottomConnector.outer.radius}
         color={HOLLOW_BORDER_COLOR}
         spring={s2BottomSpring}
+        shadow
+        shadowStrength={0.62}
       />
       <ElevatedLayer
         x={bottomConnector.middle.x}

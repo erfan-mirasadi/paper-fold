@@ -9,7 +9,11 @@
 // ============================================================================
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
-import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
+import { useDelayedHidden } from "../shared/useDelayedHidden";
+import {
+  ELEVATED_RETURN_SYNC_MS,
+  useElevatedStore,
+} from "../features/elevated-verses/useElevatedStore";
 import {
   S1_OUTER_BORDER,
   S1_OUTER_BG,
@@ -44,40 +48,46 @@ export function SectionOne({
 }: SectionOneProps) {
   const isVerseHidden = useDelayedVerseVisibility();
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const hideSectionSurface = activeSectionIds.includes("s1");
-  const hideSectionLabel = activeSectionIds.includes("s1");
-  const sectionSurfaceOpacity = hideSectionSurface ? 0 : undefined;
+  const hideSectionSurfaceNow = activeSectionIds.includes("s1");
+  const hideSectionSurface = useDelayedHidden(
+    hideSectionSurfaceNow,
+    ELEVATED_RETURN_SYNC_MS,
+  );
+
+  const hideSectionLabel = hideSectionSurface;
   const t = transforms;
 
   return (
     <group>
       {/* Outer wrapper — border layer */}
-      <UiRect
-        x={t.frameX}
-        y={t.frameY}
-        z={0}
-        w={t.frameW}
-        h={t.frameH}
-        radius={0.02}
-        color={S1_OUTER_BORDER}
-        shadow={!hideSectionSurface}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MAX}
-        opacity={sectionSurfaceOpacity}
-      />
-      {/* Outer wrapper — fill layer */}
-      <UiRect
-        x={t.frameX + 0.003}
-        y={t.frameY - 0.003}
-        z={0.001}
-        w={t.frameW - 0.006}
-        h={t.frameH - 0.006}
-        radius={0.017}
-        color={S1_OUTER_BG}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_DEEP}
-        opacity={sectionSurfaceOpacity}
-      />
+      {!hideSectionSurface && (
+        <>
+          <UiRect
+            x={t.frameX}
+            y={t.frameY}
+            z={0}
+            w={t.frameW}
+            h={t.frameH}
+            radius={0.02}
+            color={S1_OUTER_BORDER}
+            shadow
+            isBumpMap={isBumpMap}
+            bumpColor={BUMP_MAX}
+          />
+          {/* Outer wrapper — fill layer */}
+          <UiRect
+            x={t.frameX + 0.003}
+            y={t.frameY - 0.003}
+            z={0.001}
+            w={t.frameW - 0.006}
+            h={t.frameH - 0.006}
+            radius={0.017}
+            color={S1_OUTER_BG}
+            isBumpMap={isBumpMap}
+            bumpColor={BUMP_DEEP}
+          />
+        </>
+      )}
 
       {/* 2×2 verse grid — positions come from the engine, no math here */}
       {data.gridVerses.map((v) => {
@@ -125,12 +135,14 @@ export function SectionOne({
           isBumpMap={isBumpMap}
         />
       )}
-      <AnaAyetTab
-        x={t.anaAyetTabX}
-        y={t.anaAyetTabY}
-        z={0.005}
-        isBumpMap={isBumpMap}
-      />
+      {!hideSectionSurface && (
+        <AnaAyetTab
+          x={t.anaAyetTabX}
+          y={t.anaAyetTabY}
+          z={0.005}
+          isBumpMap={isBumpMap}
+        />
+      )}
 
       {/* Section title label pinned to the top edge */}
       {!hideSectionLabel && (

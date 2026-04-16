@@ -16,7 +16,11 @@ import {
   S2_TOP_LABEL_BORDER,
 } from "../../data/theme";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
-import { useElevatedStore, type ElevatedSectionId } from "./useElevatedStore";
+import {
+  ELEVATED_RETURN_SYNC_MS,
+  useElevatedStore,
+  type ElevatedSectionId,
+} from "./useElevatedStore";
 
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
@@ -35,8 +39,6 @@ type AnimatedLabelProps = {
   renderOrder?: number;
 };
 
-const LABEL_RETURN_ANIMATION_MS = 480;
-
 function AnimatedElevatedLabel({
   sectionId,
   y,
@@ -49,8 +51,8 @@ function AnimatedElevatedLabel({
   liftHeight,
   tension = 88,
   friction = 23,
-  zBaseOffset = 0.003,
-  labelZ = 0.004,
+  zBaseOffset = 0.002,
+  labelZ = 0.00035,
   renderOrder,
 }: AnimatedLabelProps) {
   const activeSectionIds = useElevatedStore((s) => s.activeSectionIds);
@@ -62,7 +64,7 @@ function AnimatedElevatedLabel({
       () => {
         setIsMounted(isActive);
       },
-      isActive ? 0 : LABEL_RETURN_ANIMATION_MS,
+      isActive ? 0 : ELEVATED_RETURN_SYNC_MS,
     );
 
     return () => {
@@ -133,8 +135,8 @@ export function ElevatedSectionLabels() {
         liftHeight={0.092}
         tension={90}
         friction={23}
-        zBaseOffset={0.012}
-        labelZ={0.008}
+        zBaseOffset={0.0022}
+        labelZ={0.00035}
         renderOrder={240}
       />
 
@@ -150,8 +152,8 @@ export function ElevatedSectionLabels() {
         liftHeight={0.096}
         tension={84}
         friction={22}
-        zBaseOffset={0.014}
-        labelZ={0.008}
+        zBaseOffset={0.0022}
+        labelZ={0.00035}
         renderOrder={240}
       />
     </>
