@@ -27,11 +27,19 @@ export const ORIGINAL_TEXTURE_TIMING = {
 export const SHADOW_CONFIG = {
   baseOffsetX: 0.0,
   baseOffsetY: -0.004,
+  baseInsetZ: -0.001,
+  surfaceLiftZBias: 0.0006,
+  directionBiasX: 0.004,
+  leftAnchorCompensation: 0.3,
   foldOffsetX: 0,
   foldOffsetY: -0.03,
+  surfaceScaleDampen: 0.6,
 
   shrinkX: 0.65,
   shrinkY: 0.2,
+  elevateScaleX: 1.14,
+  elevateScaleY: 1.1,
+  elevateOpacityFalloff: 1.7,
 
   opacityFlat: 0.6,
   opacityFolded: 0.05,

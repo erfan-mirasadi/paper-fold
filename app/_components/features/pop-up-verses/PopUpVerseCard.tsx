@@ -5,6 +5,7 @@ import { a, SpringValue, to } from "@react-spring/three";
 import { RenderTexture, OrthographicCamera } from "@react-three/drei";
 import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "./useFoldAnimation";
+import { ELEVATE_TIMING } from "../elevated-verses/useElevateAnimation";
 
 interface PopUpVerseCardProps {
   hingeX: number;
@@ -19,6 +20,7 @@ interface PopUpVerseCardProps {
   zOffset: SpringValue<number>;
   opacity: SpringValue<number>;
   liftZ: SpringValue<number>;
+  surfaceLiftZ: SpringValue<number>;
   tiltX: SpringValue<number>;
   scale: SpringValue<number>;
   elevateShadowOpacity: SpringValue<number>;
@@ -47,6 +49,7 @@ export function PopUpVerseCard({
   zOffset,
   opacity,
   liftZ,
+  surfaceLiftZ,
   tiltX,
   scale,
   elevateShadowOpacity,
@@ -60,6 +63,16 @@ export function PopUpVerseCard({
   circleBg,
   circleTextCol,
 }: PopUpVerseCardProps) {
+  const normalizeLiftProgress = (lift: number) => {
+    const ratio = lift / ELEVATE_TIMING.liftHeight;
+    return Math.max(0, Math.min(1, ratio));
+  };
+
+  const normalizeSurfaceLiftProgress = (surfaceLift: number) => {
+    const ratio = surfaceLift / 0.095;
+    return Math.max(0, Math.min(1, ratio));
+  };
+
   const bw = 0.0055;
   const shrinkX = 0.001;
   const outerW = w - shrinkX * 2 + bw * 2;
@@ -91,34 +104,73 @@ export function PopUpVerseCard({
     [],
   );
 
-  const shadowScaleX = foldProgress.to((v) => 1 - v * SHADOW_CONFIG.shrinkX);
-  const shadowScaleY = foldProgress.to((v) => 1 - v * SHADOW_CONFIG.shrinkY);
+  const shadowScaleX = to(
+    [foldProgress, liftZ, surfaceLiftZ],
+    (foldP, lift, surfaceLift) => {
+      const foldScale = 1 - foldP * SHADOW_CONFIG.shrinkX;
+      const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+      const surfaceDampen =
+        1 - surfaceProgress * SHADOW_CONFIG.surfaceScaleDampen;
+      const liftScaleBoost =
+        normalizeLiftProgress(lift) * (SHADOW_CONFIG.elevateScaleX - 1);
+      const liftScale = 1 + liftScaleBoost * surfaceDampen;
+      return foldScale * liftScale;
+    },
+  );
 
-  const shadowXOffset = to([foldProgress, shadowScaleX], (v, scaleX) => {
-    if (direction === "left") {
-      const shiftCorrection = (1 - scaleX) * w;
-      return (
-        -w +
-        shiftCorrection +
+  const shadowScaleY = to(
+    [foldProgress, liftZ, surfaceLiftZ],
+    (foldP, lift, surfaceLift) => {
+      const foldScale = 1 - foldP * SHADOW_CONFIG.shrinkY;
+      const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+      const surfaceDampen =
+        1 - surfaceProgress * SHADOW_CONFIG.surfaceScaleDampen;
+      const liftScaleBoost =
+        normalizeLiftProgress(lift) * (SHADOW_CONFIG.elevateScaleY - 1);
+      const liftScale = 1 + liftScaleBoost * surfaceDampen;
+      return foldScale * liftScale;
+    },
+  );
+
+  const shadowXOffset = to(
+    [foldProgress, shadowScaleX, surfaceLiftZ],
+    (v, scaleX, surfaceLift) => {
+      const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+      const baseRightBias =
         SHADOW_CONFIG.baseOffsetX +
-        v * SHADOW_CONFIG.foldOffsetX
-      );
-    } else {
-      return SHADOW_CONFIG.baseOffsetX + v * SHADOW_CONFIG.foldOffsetX;
-    }
-  });
+        SHADOW_CONFIG.directionBiasX * surfaceProgress +
+        v * SHADOW_CONFIG.foldOffsetX;
+
+      if (direction === "left") {
+        const leftAnchorCompensation =
+          1 - surfaceProgress * (1 - SHADOW_CONFIG.leftAnchorCompensation);
+        const shiftCorrection = (1 - scaleX) * w * leftAnchorCompensation;
+        return -w + shiftCorrection + baseRightBias;
+      }
+
+      return baseRightBias;
+    },
+  );
 
   const shadowYOffset = foldProgress.to(
     (v) => SHADOW_CONFIG.baseOffsetY + v * SHADOW_CONFIG.foldOffsetY,
   );
 
   const finalShadowOpacity = to(
-    [shadowGlobalOpacity, foldProgress, opacity, elevateShadowOpacity],
-    (globalOp, foldP, mainOp, elShadowOp) => {
+    [shadowGlobalOpacity, foldProgress, opacity, elevateShadowOpacity, liftZ],
+    (globalOp, foldP, mainOp, elShadowOp, lift) => {
       const dynamicOpacity =
         SHADOW_CONFIG.opacityFlat -
         foldP * (SHADOW_CONFIG.opacityFlat - SHADOW_CONFIG.opacityFolded);
-      return Math.max(globalOp * dynamicOpacity * mainOp, elShadowOp);
+      const foldShadowOpacity = globalOp * dynamicOpacity * mainOp;
+      const elevateShadowLiftOpacity =
+        elShadowOp *
+        Math.pow(
+          normalizeLiftProgress(lift),
+          SHADOW_CONFIG.elevateOpacityFalloff,
+        );
+
+      return Math.max(foldShadowOpacity, elevateShadowLiftOpacity);
     },
   );
 
@@ -131,6 +183,8 @@ export function PopUpVerseCard({
         color: "#000000",
         transparent: true,
         depthTest: false,
+        depthWrite: false,
+        toneMapped: false,
       },
       front: {
         color: paperBaseColor,
@@ -161,14 +215,20 @@ export function PopUpVerseCard({
       position-x={hingeX}
       position-y={y}
       position-z={to([zBaseOffset, zOffset, liftZ], (b, z, l) => b + z + l)}
-      visible={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2) > 0.01)}
-      scale={scale}
-      rotation-x={tiltX}
+      visible={to(
+        [opacity, elevateOpacity],
+        (o1, o2) => Math.max(o1, o2) > 0.01,
+      )}
     >
       <a.mesh
         position-x={shadowXOffset}
         position-y={shadowYOffset}
-        position-z={-0.001}
+        renderOrder={90}
+        position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
+          const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+          const surfaceZBias = SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
+          return SHADOW_CONFIG.baseInsetZ - lift + surfaceLift + surfaceZBias;
+        })}
         scale-x={shadowScaleX}
         scale-y={shadowScaleY}
       >
@@ -179,51 +239,60 @@ export function PopUpVerseCard({
         />
       </a.mesh>
 
-      <a.group rotation-y={rotValue} position-z={zOffset}>
-        <group position={[brickGroupXOffset, outerTop, 0]}>
-          <mesh position={[0, 0, -0.008]} renderOrder={100}>
-            <extrudeGeometry args={[shape, extrudeSettings]} />
-            <a.meshStandardMaterial
-              {...materialsProps.front}
-              opacity={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2))}
-            />
-          </mesh>
+      <a.group rotation-x={tiltX} scale={scale}>
+        <a.group rotation-y={rotValue} position-z={zOffset}>
+          <group position={[brickGroupXOffset, outerTop, 0]}>
+            <mesh position={[0, 0, -0.008]} renderOrder={100}>
+              <extrudeGeometry args={[shape, extrudeSettings]} />
+              <a.meshStandardMaterial
+                {...materialsProps.front}
+                opacity={to([opacity, elevateOpacity], (o1, o2) =>
+                  Math.max(o1, o2),
+                )}
+              />
+            </mesh>
 
-          <mesh position={[outerW / 2, -outerH / 2, 0.002]} renderOrder={101}>
-            <planeGeometry args={[outerW, outerH]} />
-            <a.meshStandardMaterial {...materialsProps.back} opacity={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2))}>
-              <RenderTexture attach="map" width={512} height={256} frames={2}>
-                <OrthographicCamera
-                  makeDefault
-                  manual
-                  left={0}
-                  right={outerW}
-                  top={0}
-                  bottom={-outerH}
-                  position={[0, 0, 10]}
-                />
-                <group position={[alignX, alignY, 0]}>
-                  <VerseBox
-                    x={0}
-                    y={0}
-                    z={0}
-                    w={w}
-                    h={h}
-                    verse={verse}
-                    number={number}
-                    bg={bg}
-                    border={border}
-                    circleBorderCol={circleBorderCol}
-                    circleBg={circleBg}
-                    circleTextCol={circleTextCol}
-                    isPill={isPill}
-                    shadow={false}
+            <mesh position={[outerW / 2, -outerH / 2, 0.002]} renderOrder={101}>
+              <planeGeometry args={[outerW, outerH]} />
+              <a.meshStandardMaterial
+                {...materialsProps.back}
+                opacity={to([opacity, elevateOpacity], (o1, o2) =>
+                  Math.max(o1, o2),
+                )}
+              >
+                <RenderTexture attach="map" width={512} height={256} frames={2}>
+                  <OrthographicCamera
+                    makeDefault
+                    manual
+                    left={0}
+                    right={outerW}
+                    top={0}
+                    bottom={-outerH}
+                    position={[0, 0, 10]}
                   />
-                </group>
-              </RenderTexture>
-            </a.meshStandardMaterial>
-          </mesh>
-        </group>
+                  <group position={[alignX, alignY, 0]}>
+                    <VerseBox
+                      x={0}
+                      y={0}
+                      z={0}
+                      w={w}
+                      h={h}
+                      verse={verse}
+                      number={number}
+                      bg={bg}
+                      border={border}
+                      circleBorderCol={circleBorderCol}
+                      circleBg={circleBg}
+                      circleTextCol={circleTextCol}
+                      isPill={isPill}
+                      shadow={false}
+                    />
+                  </group>
+                </RenderTexture>
+              </a.meshStandardMaterial>
+            </mesh>
+          </group>
+        </a.group>
       </a.group>
     </a.group>
   );

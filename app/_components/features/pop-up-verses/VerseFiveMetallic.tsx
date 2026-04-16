@@ -19,20 +19,69 @@ import {
 } from "../../data/theme";
 import { SHADOW_CONFIG } from "./useFoldAnimation";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
-import { useElevateAnimation } from "../elevated-verses/useElevateAnimation";
-import { a } from "@react-spring/three";
+import {
+  ELEVATE_TIMING,
+  useElevateAnimation,
+} from "../elevated-verses/useElevateAnimation";
+import { a, to, useSpring } from "@react-spring/three";
 
 // --- ADJUSTABLE PARAMETERS ---
 const EXTRUDE_DEPTH = 0.01; // How thick the 3D object is
 const Z_OFFSET = 0.01; // Distance from the paper surface
-const SHADOW_OPACITY = 0.45; // Shadow intensity
 const BW = 0.0055; // Border width to match VerseBox
-const SHADOW_SCALE = 1.02; // Shadow slightly larger than object
+
+const METALLIC_SHADOW = {
+  opacityRest: 0.24,
+  opacityLifted: 0.5,
+  scaleRest: 1.02,
+  scaleLifted: 1.14,
+  fadePower: 1.7,
+  surfaceScaleDampen: 0.6,
+};
+
+const SECTION_SURFACE_SHADOW_MOTION = {
+  liftHeight: 0.095,
+  liftDelayMs: 120,
+  spring: {
+    mass: 2.2,
+    tension: 85,
+    friction: 22,
+  },
+} as const;
+
+function normalizeLiftProgress(lift: number) {
+  const ratio = lift / ELEVATE_TIMING.liftHeight;
+  return Math.max(0, Math.min(1, ratio));
+}
+
+function normalizeSurfaceLiftProgress(surfaceLift: number) {
+  const ratio = surfaceLift / 0.095;
+  return Math.max(0, Math.min(1, ratio));
+}
 
 export function VerseFiveMetallic() {
   const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
-  const { liftZ, tiltX, scale, shadowOpacity } =
-    useElevateAnimation(isElevated);
+  const isSectionSurfaceRaised = useElevatedStore((s) =>
+    s.activeSectionIds.includes("s1"),
+  );
+
+  const {
+    liftZ,
+    tiltX,
+    scale,
+    shadowOpacity: elevateShadowOpacity,
+  } = useElevateAnimation(isElevated);
+
+  const { surfaceLiftZ } = useSpring({
+    surfaceLiftZ: isSectionSurfaceRaised
+      ? SECTION_SURFACE_SHADOW_MOTION.liftHeight
+      : 0,
+    from: { surfaceLiftZ: 0 },
+    delay: isSectionSurfaceRaised
+      ? SECTION_SURFACE_SHADOW_MOTION.liftDelayMs
+      : 0,
+    config: SECTION_SURFACE_SHADOW_MOTION.spring,
+  });
 
   const t = SURAH_TRANSFORMS.s1.anaAyet;
   const data = SURAH_DATA.section1.anaAyet;
@@ -46,6 +95,52 @@ export function VerseFiveMetallic() {
   const outerRadius = radius + BW / 2; // Adjusted to look natural
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
+
+  const shadowScale = to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
+    const liftProgress = normalizeLiftProgress(lift);
+    const surfaceDampen =
+      1 -
+      normalizeSurfaceLiftProgress(surfaceLift) *
+        METALLIC_SHADOW.surfaceScaleDampen;
+    const scaledLiftProgress = liftProgress * surfaceDampen;
+
+    return (
+      METALLIC_SHADOW.scaleRest +
+      (METALLIC_SHADOW.scaleLifted - METALLIC_SHADOW.scaleRest) *
+        scaledLiftProgress
+    );
+  });
+
+  const finalShadowOpacity = to(
+    [elevateShadowOpacity, liftZ],
+    (elevateOpacity, lift) => {
+      const liftProgress = normalizeLiftProgress(lift);
+      const blend = Math.pow(liftProgress, METALLIC_SHADOW.fadePower);
+      const liftedTarget = Math.max(
+        elevateOpacity,
+        METALLIC_SHADOW.opacityLifted,
+      );
+
+      return (
+        METALLIC_SHADOW.opacityRest +
+        (liftedTarget - METALLIC_SHADOW.opacityRest) * blend
+      );
+    },
+  );
+
+  const shadowX = to([shadowScale, surfaceLiftZ], (scaleValue, surfaceLift) => {
+    const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+    return (
+      SHADOW_CONFIG.baseOffsetX +
+      SHADOW_CONFIG.directionBiasX * surfaceProgress -
+      (outerW * (scaleValue - 1)) / 2
+    );
+  });
+
+  const shadowY = to(
+    shadowScale,
+    (scaleValue) => SHADOW_CONFIG.baseOffsetY + (outerH * (scaleValue - 1)) / 2,
+  );
 
   const shape = useMemo(() => {
     const s = new THREE.Shape();
@@ -72,25 +167,29 @@ export function VerseFiveMetallic() {
 
   return (
     <group position={[t.x - PAGE_WIDTH / 2 - BW, t.y + BW, zBasePosition]}>
-      {/* Static Shadow - Larger and slightly above paper to avoid flicker */}
-      {/* Also adds the dynamic elevate shadow opacity on top of static opacity */}
-      <group
-        position={[
-          SHADOW_CONFIG.baseOffsetX - (outerW * (SHADOW_SCALE - 1)) / 2,
-          SHADOW_CONFIG.baseOffsetY + (outerH * (SHADOW_SCALE - 1)) / 2,
-          -Z_OFFSET + 0.001,
-        ]}
-        scale={[SHADOW_SCALE, SHADOW_SCALE, 1]}
+      <a.group
+        position-x={shadowX}
+        position-y={shadowY}
+        position-z={to(surfaceLiftZ, (surfaceLift) => {
+          const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+          const surfaceZBias = SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
+          return -Z_OFFSET + 0.001 + surfaceLift + surfaceZBias;
+        })}
+        scale-x={shadowScale}
+        scale-y={shadowScale}
       >
-        <mesh>
+        <mesh renderOrder={90}>
           <RoundedShapeComponent w={outerW} h={outerH} radius={outerRadius} />
           <a.meshBasicMaterial
             color="#000000"
             transparent
-            opacity={shadowOpacity.to((o) => Math.max(o, SHADOW_OPACITY))}
+            depthTest={false}
+            depthWrite={false}
+            toneMapped={false}
+            opacity={finalShadowOpacity}
           />
         </mesh>
-      </group>
+      </a.group>
 
       {/* Animated 3D Body + Content */}
       <a.group
@@ -100,7 +199,7 @@ export function VerseFiveMetallic() {
         scale-y={scale}
       >
         {/* Metallic Body */}
-        <mesh position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]} renderOrder={100}>
           <extrudeGeometry args={[shape, extrudeSettings]} />
           <meshStandardMaterial
             color={S1_ANA_BG}
@@ -111,7 +210,10 @@ export function VerseFiveMetallic() {
         </mesh>
 
         {/* Content Overlay - Shifted to accommodate border and circle */}
-        <mesh position={[outerW / 2, -outerH / 2, EXTRUDE_DEPTH + 0.001]}>
+        <mesh
+          position={[outerW / 2, -outerH / 2, EXTRUDE_DEPTH + 0.001]}
+          renderOrder={101}
+        >
           <planeGeometry args={[outerW, outerH]} />
           <meshStandardMaterial
             transparent

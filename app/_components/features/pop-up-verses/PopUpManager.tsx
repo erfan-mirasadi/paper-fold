@@ -5,6 +5,7 @@ import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
 import { useState } from "react";
+import { useSpring } from "@react-spring/three";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 import { useElevateAnimation } from "../elevated-verses/useElevateAnimation";
 import { PopUp3DTracker } from "./ui/PopUp3DTracker";
@@ -47,6 +48,27 @@ interface VerseConfig {
   circleBg: string;
   circleTextCol: string;
   isPill?: boolean;
+}
+
+type ShadowSurfaceSectionId = "s1" | "s2_top" | "s2_bottom";
+
+const SECTION_SURFACE_SHADOW_MOTION = {
+  liftHeight: 0.095,
+  liftDelayMs: 120,
+  spring: {
+    mass: 2.2,
+    tension: 85,
+    friction: 22,
+  },
+} as const;
+
+function getShadowSurfaceSectionId(
+  verseId: number,
+): ShadowSurfaceSectionId | null {
+  if (verseId >= 1 && verseId <= 5) return "s1";
+  if (verseId >= 6 && verseId <= 10) return "s2_top";
+  if (verseId >= 15 && verseId <= 19) return "s2_bottom";
+  return null;
 }
 
 const VERSES_CONFIG: VerseConfig[] = (() => {
@@ -249,6 +271,7 @@ export function PopUpManager() {
 
   const groups = usePopUpStore((state) => state.popUpGroups);
   const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
+  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const setScrollThresholdReached = usePopUpStore(
     (state) => state.setPopUpScrollThresholdReached,
   );
@@ -278,6 +301,10 @@ export function PopUpManager() {
         const isOpen = group?.isOpen ?? false;
         const hasEverOpened = group?.hasEverOpened ?? false;
         const isElevated = activeVerseIds.includes(config.id);
+        const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id);
+        const isSectionSurfaceRaised =
+          shadowSurfaceSectionId !== null &&
+          activeSectionIds.includes(shadowSurfaceSectionId);
 
         return (
           <PopUpCardWrapper
@@ -286,6 +313,7 @@ export function PopUpManager() {
             isOpen={isOpen}
             hasEverOpened={hasEverOpened}
             isElevated={isElevated}
+            isSectionSurfaceRaised={isSectionSurfaceRaised}
             zBaseOffset={zBaseOffset}
             backfaceColor={backfaceColor}
           />
@@ -335,6 +363,7 @@ function PopUpCardWrapper({
   isOpen,
   hasEverOpened,
   isElevated,
+  isSectionSurfaceRaised,
   zBaseOffset,
   backfaceColor,
 }: {
@@ -342,6 +371,7 @@ function PopUpCardWrapper({
   isOpen: boolean;
   hasEverOpened: boolean;
   isElevated: boolean;
+  isSectionSurfaceRaised: boolean;
   zBaseOffset: number;
   backfaceColor: string;
 }) {
@@ -367,6 +397,17 @@ function PopUpCardWrapper({
     opacity: elevateOpacity,
   } = useElevateAnimation(isElevated);
 
+  const { surfaceLiftZ } = useSpring({
+    surfaceLiftZ: isSectionSurfaceRaised
+      ? SECTION_SURFACE_SHADOW_MOTION.liftHeight
+      : 0,
+    from: { surfaceLiftZ: 0 },
+    delay: isSectionSurfaceRaised
+      ? SECTION_SURFACE_SHADOW_MOTION.liftDelayMs
+      : 0,
+    config: SECTION_SURFACE_SHADOW_MOTION.spring,
+  });
+
   if (!hasEverOpened && !isOpen && !hasEverBeenElevated) return null;
 
   return (
@@ -383,6 +424,7 @@ function PopUpCardWrapper({
       zOffset={zOffset}
       opacity={opacity}
       liftZ={liftZ}
+      surfaceLiftZ={surfaceLiftZ}
       tiltX={tiltX}
       scale={scale}
       elevateShadowOpacity={elevateShadowOpacity}
