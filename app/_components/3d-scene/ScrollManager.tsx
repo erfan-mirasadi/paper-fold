@@ -9,8 +9,8 @@ import {
   useElevatedStore,
 } from "../features/elevated-verses/useElevatedStore";
 
-const STEP_SCROLL_DURATION_MS = 620;
-const STEP_PAUSE_MS = 250;
+const STEP_SCROLL_DURATION_MS = 820;
+const STEP_PAUSE_MS = 450;
 const SCROLL_SNAP_EPSILON_PX = 0.5;
 
 const easeInOutCubic = (t: number): number => {
