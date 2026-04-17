@@ -9,8 +9,8 @@ interface GrainOverlayProps {
 }
 
 export default function GrainOverlay({
-  opacity = 0.3,
-  speed = "0.9s",
+  opacity = 0.2,
+  speed = "1.3s",
   smooth = false,
 }: GrainOverlayProps) {
   return (

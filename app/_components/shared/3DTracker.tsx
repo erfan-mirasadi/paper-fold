@@ -63,7 +63,11 @@ export function Shared3DTracker({
     const hasPositionChanged = xDiff > 0.1 || yDiff > 0.1;
     const hasVisibilityChanged = isOnScreen !== lastState.current.visible;
 
-    const el = domElRef.current;
+    let el = domElRef.current;
+    if (!el && domElementId) {
+      el = document.getElementById(domElementId);
+      domElRef.current = el;
+    }
 
     // Optimization: Only update DOM styles if something meaningfully changed
     if (hasVisibilityChanged || (isOnScreen && hasPositionChanged)) {

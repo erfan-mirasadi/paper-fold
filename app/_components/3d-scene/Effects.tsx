@@ -9,11 +9,11 @@ import {
   ToneMapping,
   BrightnessContrast,
   Glitch,
-  DepthOfField,
+  // DepthOfField,
 } from "@react-three/postprocessing";
 import { ToneMappingMode, GlitchMode } from "postprocessing";
 import { Vector2 } from "three";
-import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
+// import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 // import { ELEVATE_CAMERA } from "../features/elevated-verses/useElevateAnimation";
 
 type EffectsProps = {

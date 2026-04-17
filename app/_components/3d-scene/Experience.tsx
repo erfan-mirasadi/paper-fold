@@ -15,6 +15,8 @@ import { useCameraStore } from "../features/camera-zoom/useCameraStore";
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
+import { CameraViewController } from "../features/camera-views/CameraViewController";
+import { useCameraViewStore } from "../features/camera-views/useCameraViewStore";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -45,6 +47,7 @@ export function Experience({ isFolded = false }: ExperienceProps) {
     <>
       <PerspectiveCamera makeDefault position={[0, 1.6, 1.7]} fov={45} />
       <CameraManager />
+      <CameraViewController />
 
       <group rotation-x={-Math.PI / 4}>
         <SinglePaper isFolded={isFolded} />
@@ -72,6 +75,8 @@ export function Experience({ isFolded = false }: ExperienceProps) {
 function DynamicControls() {
   const phase = useCameraStore((s) => s.phase);
   const controlsEnabled = phase === "idle" || phase === "zoomed";
+  const setUserInteracting = useCameraViewStore((s) => s.setUserInteracting);
+  const clearRequest = useCameraViewStore((s) => s.clearRequest);
 
   return (
     <OrbitControls
@@ -84,9 +89,12 @@ function DynamicControls() {
       minPolarAngle={Math.PI / 6}
       maxPolarAngle={Math.PI * 0.45}
       onStart={() => {
+        setUserInteracting(true);
+        clearRequest();
         document.body.style.cursor = "grabbing";
       }}
       onEnd={() => {
+        setUserInteracting(false);
         document.body.style.cursor = "grab";
       }}
     />

@@ -17,6 +17,7 @@ import BackgroundParticlesDesktop from "./_components/3d-scene/BackgroundParticl
 import Effects from "./_components/3d-scene/Effects";
 import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
+import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
 const Experience = dynamic(
   () =>
     import("./_components/3d-scene/Experience").then((mod) => mod.Experience),
@@ -97,6 +98,7 @@ export default function Home() {
       <PopUpUI isDarkMode={isDarkMode} />
       <VerseNeonHTMLOverlay />
       <NavigationOverlay isDarkMode={isDarkMode} />
+      <CameraViewPresetOverlay />
     </main>
   );
 }
