@@ -50,15 +50,15 @@ export const ELEVATE_TEXTURE_TIMING = {
 // ============================================================================
 export const ELEVATE_CAMERA = {
   /** How close the camera moves to the elevated verse. */
-  zoomDistance: 0.65,
+  zoomDistance: 0.15,
   /** Camera lerp speed per frame (0-1). */
-  lerpSpeed: 0.04,
+  lerpSpeed: 0.004,
   /** Y offset above the verse center for the camera look-at. */
-  lookAtYOffset: 0.05,
+  lookAtYOffset: 0.5,
   /** DOF blur intensity when focused (0 = no blur). */
-  bokehScale: 8.0,
+  bokehScale: 10.0,
   /** DOF focus distance — auto-calculated from camera-to-verse distance. */
-  focusOffset: 0.0,
+  focusOffset: 4.0,
 };
 
 // ============================================================================

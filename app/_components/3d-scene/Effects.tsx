@@ -14,7 +14,7 @@ import {
 import { ToneMappingMode, GlitchMode } from "postprocessing";
 import { Vector2 } from "three";
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
-import { ELEVATE_CAMERA } from "../features/elevated-verses/useElevateAnimation";
+// import { ELEVATE_CAMERA } from "../features/elevated-verses/useElevateAnimation";
 
 type EffectsProps = {
   glitchTrigger?: number; // Pass a counter from outside to trigger glitch
@@ -35,9 +35,9 @@ const Effects: React.FC<EffectsProps> = ({
   const lastTriggerRef = useRef(0);
   const activeUntilRef = useRef(0);
   const activeRef = useRef(false);
-  const isElevated = useElevatedStore((s) => s.phase === "elevated");
-  const dofFocusDistance = isElevated ? 0.15 + ELEVATE_CAMERA.focusOffset : 0;
-  const dofBokehScale = isElevated ? ELEVATE_CAMERA.bokehScale : 0;
+  // const isElevated = useElevatedStore((s) => s.phase === "elevated");
+  // const dofFocusDistance = isElevated ? 0.15 + ELEVATE_CAMERA.focusOffset : 0;
+  // const dofBokehScale = isElevated ? ELEVATE_CAMERA.bokehScale : 0;
 
   useEffect(() => {
     if (!glitchTrigger) return;
@@ -61,11 +61,11 @@ const Effects: React.FC<EffectsProps> = ({
       {/* <Noise opacity={noiseOpacity} /> */}
       <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} />
 
-      <DepthOfField
+      {/* <DepthOfField
         focusDistance={dofFocusDistance}
         focalLength={15}
         bokehScale={dofBokehScale}
-      />
+      /> */}
       <Glitch
         active={manualActive}
         mode={GlitchMode.CONSTANT_WILD}

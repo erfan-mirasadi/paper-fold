@@ -24,6 +24,7 @@ const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
 const CURVE_INWARD_OFFSET = 0.0085; // How far the bracket tip pokes inward
 const CURVE_DEEP_OFFSET_OUTER = 0.01; // Deeper tip for the center (12–14) bracket
 const CURVE_DEEP_OFFSET_INNER = 0.03; // Deeper inner tip for center bracket
+const DEFAULT_VERSE_BORDER_WIDTH = 0.0055; // Matches VerseBox default border width
 
 const INNER_CURVE_GAP = 0.095; // Bow step for inner curves
 const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
@@ -38,6 +39,8 @@ export const CURVE_INNER_LINE_WIDTH = 4;
 interface SideCurvesProps {
   layout: LayoutConfig;
   startX: number;
+
+  borderWidth?: number;
   isBumpMap?: boolean;
 }
 
@@ -254,6 +257,7 @@ const CurvePair = ({
 export const SideCurves = ({
   layout,
   startX,
+  borderWidth = DEFAULT_VERSE_BORDER_WIDTH,
   isBumpMap = false,
 }: SideCurvesProps) => {
   const groups = usePopUpStore((state) => state.popUpGroups);
@@ -288,9 +292,11 @@ export const SideCurves = ({
 
   // ── Derive Y edges from the layout object (no hardcoded numbers) ──────────
 
-  // Outer bracket (blue): spans verse 6 top → verse 19 bottom
-  const y6 = v6Y;
-  const y19 = v19Y - bigBoxH;
+  // Outer bracket (blue): spans verse 6 top → verse 19 bottom.
+  // Apply only the delta from the VerseBox default border so we don't over-shift.
+  const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
+  const y6 = v6Y + borderDelta;
+  const y19 = v19Y - bigBoxH - borderDelta;
 
   // Second bracket (maroon): spans verse 7/8 top → verse 17/18 bottom
   const y8 = g1Y - groupPad;

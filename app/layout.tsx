@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import GrainOverlay from "./_components/ui-overlay/GrainOverlay";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.className} h-full antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        <GrainOverlay />
+        {children}
+      </body>
     </html>
   );
 }

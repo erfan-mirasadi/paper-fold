@@ -74,6 +74,7 @@ export function SectionTwo({
   const hideTopLabel = hideTopConnector;
   const hideBottomLabel = hideBottomConnector;
   const t = transforms;
+  const edgeVerseBorderWidth = t.borderWidth;
 
   return (
     <group>
@@ -145,6 +146,7 @@ export function SectionTwo({
           circleBg={BLUE_THEME}
           circleTextCol={WHITE_BASE}
           isPill={false}
+          borderWidth={edgeVerseBorderWidth}
           isBumpMap={isBumpMap}
         />
       )}
@@ -176,12 +178,18 @@ export function SectionTwo({
           circleBg={BLUE_THEME}
           circleTextCol={WHITE_BASE}
           isPill={false}
+          borderWidth={edgeVerseBorderWidth}
           isBumpMap={isBumpMap}
         />
       )}
 
       {/* ─── SIDE CURVES (still read raw layout math) ────────────────────── */}
-      <SideCurves layout={layout} startX={startX} isBumpMap={isBumpMap} />
+      <SideCurves
+        layout={layout}
+        startX={startX}
+        isBumpMap={isBumpMap}
+        borderWidth={edgeVerseBorderWidth}
+      />
 
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
       {!hideTopLabel && (

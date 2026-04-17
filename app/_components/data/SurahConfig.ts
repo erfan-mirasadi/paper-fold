@@ -157,6 +157,7 @@ export const layoutMath = {
   // Spacing & decoration offsets
   s2PadLeftRight: 0.035,
   g2Shrink: 0.01,
+  s1BorderWidth: 0.011,
   sgPad: 0.03,
   sgBorderWidth: 0.006,
   boxExtOffset: 0.02,
@@ -300,6 +301,7 @@ export interface S1Transforms {
   anaAyet: ElementTransform;
   anaAyetTabX: number;
   anaAyetTabY: number;
+  borderWidth: number;
   labelPinY: number;
 }
 
@@ -448,6 +450,7 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
       },
       anaAyetTabX: s1BaseX - 0.07 - lm.s1Pad,
       anaAyetTabY: anaAyetY - lm.anaAyetH / 2 + 0.046,
+      borderWidth: lm.s1BorderWidth,
       labelPinY: lm.s1Top,
     },
     s2: {

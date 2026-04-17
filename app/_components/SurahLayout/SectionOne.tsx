@@ -21,6 +21,8 @@ import {
   S1_INNER_BORDER,
   S1_ANA_BG,
   S1_ANA_BORDER,
+  S1_VERSE_NUMBER_BG,
+  S1_VERSE_NUMBER_BORDER,
   WHITE_BASE,
   BUMP_MAX,
   BUMP_DEEP,
@@ -76,11 +78,11 @@ export function SectionOne({
           />
           {/* Outer wrapper — fill layer */}
           <UiRect
-            x={t.frameX + 0.003}
-            y={t.frameY - 0.003}
+            x={t.frameX + t.borderWidth}
+            y={t.frameY - t.borderWidth}
             z={0.001}
-            w={t.frameW - 0.006}
-            h={t.frameH - 0.006}
+            w={t.frameW - t.borderWidth * 2}
+            h={t.frameH - t.borderWidth * 2}
             radius={0.017}
             color={S1_OUTER_BG}
             isBumpMap={isBumpMap}
@@ -106,8 +108,8 @@ export function SectionOne({
             number={v.number}
             bg={S1_INNER_BG}
             border={S1_INNER_BORDER}
-            circleBorderCol={S1_OUTER_BORDER}
-            circleBg={S1_OUTER_BORDER}
+            circleBorderCol={S1_VERSE_NUMBER_BORDER}
+            circleBg={S1_VERSE_NUMBER_BG}
             circleTextCol={WHITE_BASE}
             isPill={true}
             isBumpMap={isBumpMap}

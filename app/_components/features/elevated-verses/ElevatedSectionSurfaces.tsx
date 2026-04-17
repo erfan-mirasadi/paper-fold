@@ -247,10 +247,10 @@ export function ElevatedSectionSurfaces() {
         spring={s1Spring}
       />
       <ElevatedLayer
-        x={s1.frameX + 0.003}
-        y={s1.frameY - 0.003}
-        w={s1.frameW - 0.006}
-        h={s1.frameH - 0.006}
+        x={s1.frameX + s1.borderWidth}
+        y={s1.frameY - s1.borderWidth}
+        w={s1.frameW - s1.borderWidth * 2}
+        h={s1.frameH - s1.borderWidth * 2}
         radius={0.017}
         color={S1_OUTER_BG}
         spring={s1Spring}

@@ -14,6 +14,8 @@ import {
   S1_INNER_BG,
   S1_INNER_BORDER,
   S1_OUTER_BORDER,
+  S1_VERSE_NUMBER_BG,
+  S1_VERSE_NUMBER_BORDER,
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   MAROON_THEME,
@@ -118,8 +120,8 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
       direction,
       bg: S1_INNER_BG,
       border: S1_INNER_BORDER,
-      circleBorderCol: S1_OUTER_BORDER,
-      circleBg: S1_OUTER_BORDER,
+      circleBorderCol: S1_VERSE_NUMBER_BORDER,
+      circleBg: S1_VERSE_NUMBER_BG,
       circleTextCol: "#ffffff",
     });
   });
