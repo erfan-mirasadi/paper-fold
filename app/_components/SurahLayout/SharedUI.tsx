@@ -23,9 +23,9 @@ import {
   BUMP_LOWER,
   HOLLOW_BORDER_COLOR,
   CIRCLE_BORDER,
-  TAB_BG,
-  TAB_BORDER,
-  TAB_TEXT,
+  S1_ANA_LABEL_BG,
+  S1_ANA_LABEL_BORDER,
+  S1_ANA_LABEL_TEXT,
   QURAN_FONT,
   TEXT_SIZES,
 } from "../data/theme";
@@ -331,8 +331,13 @@ export function TopLabel({
 // ============================================================================
 
 interface AnaAyetTabProps {
+  /** Horizontal center of the label. */
   x: number;
+  /** Border line Y that the label is pinned to. */
   y: number;
+  w: number;
+  h: number;
+  borderWidth: number;
   z: number;
   isBumpMap?: boolean;
 }
@@ -341,41 +346,51 @@ interface AnaAyetTabProps {
  * AnaAyetTab
  * Decorative side tab marking the focal-point verse in Section 1.
  */
-export function AnaAyetTab({ x, y, z, isBumpMap = false }: AnaAyetTabProps) {
+export function AnaAyetTab({
+  x,
+  y,
+  w,
+  h,
+  borderWidth,
+  z,
+  isBumpMap = false,
+}: AnaAyetTabProps) {
+  const radius = h / 2;
+
   return (
-    <group position={[x, y, z]}>
+    <group position={[x - w / 2, y + h / 2, z]}>
       <UiRect
-        x={0}
-        y={0}
+        x={-borderWidth}
+        y={borderWidth}
         z={0}
-        w={0.09}
-        h={0.045}
-        radius={0.008}
-        color={TAB_BORDER}
+        w={w + borderWidth * 2}
+        h={h + borderWidth * 2}
+        radius={radius + borderWidth}
+        color={S1_ANA_LABEL_BORDER}
         shadow
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MAX}
       />
       <UiRect
-        x={0.003}
-        y={-0.003}
+        x={0}
+        y={0}
         z={0.001}
-        w={0.084}
-        h={0.039}
-        radius={0.006}
-        color={TAB_BG}
+        w={w}
+        h={h}
+        radius={radius}
+        color={S1_ANA_LABEL_BG}
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MID_HIGH}
       />
+
       <Text
-        position={[0.045, -0.0225, 0.002]}
-        fontSize={TEXT_SIZES.ANA_AYET_TAB}
-        color={isBumpMap ? BUMP_MAX : TAB_TEXT}
+        position={[w / 2, -h / 2, 0.002]}
+        fontSize={TEXT_SIZES.TOP_LABEL}
+        color={isBumpMap ? BUMP_MAX : S1_ANA_LABEL_TEXT}
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
         material-depthTest={false}
-        font={QURAN_FONT}
       >
         Ana Ayet
       </Text>

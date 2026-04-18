@@ -1,7 +1,7 @@
 "use client";
 import * as THREE from "three";
 import { useMemo } from "react";
-import { RenderTexture, OrthographicCamera } from "@react-three/drei";
+import { RenderTexture, OrthographicCamera, Text } from "@react-three/drei";
 import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
   SURAH_TRANSFORMS,
@@ -12,10 +12,14 @@ import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
   S1_ANA_BG,
   S1_ANA_BORDER,
+  S1_ANA_LABEL_BG,
+  S1_ANA_LABEL_BORDER,
+  S1_ANA_LABEL_TEXT,
   S1_VERSE_5_NUMBER_BG,
   S1_VERSE_5_NUMBER_BORDER,
   S1_VERSE_5_NUMBER_TEXT,
   S1_VERSE_5_TEXT,
+  TEXT_SIZES,
 } from "../../data/theme";
 import { SHADOW_CONFIG } from "./useFoldAnimation";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
@@ -29,6 +33,9 @@ import { a, to, useSpring } from "@react-spring/three";
 const EXTRUDE_DEPTH = 0.01; // How thick the 3D object is
 const Z_OFFSET = 0.01; // Distance from the paper surface
 const BW = 0.0055; // Border width to match VerseBox
+const ANA_LABEL_DEPTH = 0.0035;
+const ANA_LABEL_Z_OFFSET = 0.0025;
+const ANA_LABEL_PIN_OVERLAP = 0.0015;
 
 const METALLIC_SHADOW = {
   opacityRest: 0.24,
@@ -93,6 +100,15 @@ export function VerseFiveMetallic() {
   const outerW = w + BW * 2;
   const outerH = h + BW * 2;
   const outerRadius = radius + BW / 2; // Adjusted to look natural
+
+  const labelW = SURAH_TRANSFORMS.s1.anaAyetTabW;
+  const labelH = SURAH_TRANSFORMS.s1.anaAyetTabH;
+  const labelBorderW = SURAH_TRANSFORMS.s1.anaAyetTabBorderWidth;
+  const labelDrop = SURAH_TRANSFORMS.s1.anaAyetLabelDrop;
+  const labelRadius = labelH / 2;
+  const labelOuterW = labelW + labelBorderW * 2;
+  const labelOuterH = labelH + labelBorderW * 2;
+  const labelOuterRadius = labelRadius + labelBorderW;
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
 
@@ -160,8 +176,50 @@ export function VerseFiveMetallic() {
     return s;
   }, [outerW, outerH, outerRadius]);
 
+  const labelOuterShape = useMemo(() => {
+    const s = new THREE.Shape();
+    const r = labelOuterRadius;
+
+    s.moveTo(r, 0);
+    s.lineTo(labelOuterW - r, 0);
+    s.quadraticCurveTo(labelOuterW, 0, labelOuterW, -r);
+    s.lineTo(labelOuterW, -(labelOuterH - r));
+    s.quadraticCurveTo(
+      labelOuterW,
+      -labelOuterH,
+      labelOuterW - r,
+      -labelOuterH,
+    );
+    s.lineTo(r, -labelOuterH);
+    s.quadraticCurveTo(0, -labelOuterH, 0, -(labelOuterH - r));
+    s.lineTo(0, -r);
+    s.quadraticCurveTo(0, 0, r, 0);
+    return s;
+  }, [labelOuterW, labelOuterH, labelOuterRadius]);
+
+  const labelInnerShape = useMemo(() => {
+    const s = new THREE.Shape();
+    const r = labelRadius;
+
+    s.moveTo(r, 0);
+    s.lineTo(labelW - r, 0);
+    s.quadraticCurveTo(labelW, 0, labelW, -r);
+    s.lineTo(labelW, -(labelH - r));
+    s.quadraticCurveTo(labelW, -labelH, labelW - r, -labelH);
+    s.lineTo(r, -labelH);
+    s.quadraticCurveTo(0, -labelH, 0, -(labelH - r));
+    s.lineTo(0, -r);
+    s.quadraticCurveTo(0, 0, r, 0);
+    return s;
+  }, [labelW, labelH, labelRadius]);
+
   const extrudeSettings = useMemo(
     () => ({ depth: EXTRUDE_DEPTH, bevelEnabled: false }),
+    [],
+  );
+
+  const labelExtrudeSettings = useMemo(
+    () => ({ depth: ANA_LABEL_DEPTH, bevelEnabled: false }),
     [],
   );
 
@@ -259,6 +317,45 @@ export function VerseFiveMetallic() {
             </RenderTexture>
           </meshStandardMaterial>
         </mesh>
+
+        {/* 3D Ana Ayet label mounted on verse 5 top border. */}
+        <group
+          position={[
+            outerW / 2 - labelOuterW / 2,
+            labelOuterH - ANA_LABEL_PIN_OVERLAP - labelDrop,
+            EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
+          ]}
+        >
+          <mesh renderOrder={102}>
+            <extrudeGeometry args={[labelOuterShape, labelExtrudeSettings]} />
+            <meshBasicMaterial color={S1_ANA_LABEL_BORDER} toneMapped={false} />
+          </mesh>
+
+          <mesh
+            position={[labelBorderW, -labelBorderW, 0.001]}
+            renderOrder={103}
+          >
+            <extrudeGeometry args={[labelInnerShape, labelExtrudeSettings]} />
+            <meshBasicMaterial color={S1_ANA_LABEL_BG} toneMapped={false} />
+          </mesh>
+
+          <Text
+            position={[
+              labelOuterW / 2,
+              -labelOuterH / 2,
+              ANA_LABEL_DEPTH + 0.002,
+            ]}
+            fontSize={TEXT_SIZES.TOP_LABEL}
+            color={S1_ANA_LABEL_TEXT}
+            anchorX="center"
+            anchorY="middle"
+            fontWeight="bold"
+            material-depthTest={false}
+            renderOrder={104}
+          >
+            Ana Ayet
+          </Text>
+        </group>
       </a.group>
     </group>
   );

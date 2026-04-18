@@ -137,10 +137,13 @@ export function SectionOne({
           isBumpMap={isBumpMap}
         />
       )}
-      {!hideSectionSurface && (
+      {!hideSectionSurface && data.anaAyet.number !== 5 && (
         <AnaAyetTab
           x={t.anaAyetTabX}
           y={t.anaAyetTabY}
+          w={t.anaAyetTabW}
+          h={t.anaAyetTabH}
+          borderWidth={t.anaAyetTabBorderWidth}
           z={0.005}
           isBumpMap={isBumpMap}
         />

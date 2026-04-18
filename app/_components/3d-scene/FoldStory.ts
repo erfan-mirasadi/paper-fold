@@ -25,7 +25,7 @@ export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
   {
     id: "pre-start",
     folds: [
-      { direction: 1, angleFactor: 1 }, // 0) between 5 and 6 (New)
+      { direction: 1, angleFactor: 0.93 }, // 0) between 5 and 6 (New)
       { direction: -1, angleFactor: 0 }, // 1) below 6
       { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
       { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2

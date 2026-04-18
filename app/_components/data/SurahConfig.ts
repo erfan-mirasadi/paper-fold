@@ -72,9 +72,10 @@ export const START_X = PADDING;
 const s1Top = -0.08;
 const s1Pad = 0.045;
 const gap = 0.02;
+const s1AnaGap = 0.05;
 const smallBoxH = 0.07;
 const anaAyetH = 0.11;
-const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + gap + anaAyetH;
+const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + s1AnaGap + anaAyetH;
 
 // --- Section 2 (Main Lower Block) ---
 const gapBetweenS1andS2 = 0.09;
@@ -124,6 +125,7 @@ export const layoutMath = {
   s1Top,
   s1Pad,
   gap,
+  s1AnaGap,
   smallBoxH,
   anaAyetH,
   s1H,
@@ -158,6 +160,11 @@ export const layoutMath = {
   s2PadLeftRight: 0.035,
   g2Shrink: 0.01,
   s1BorderWidth: 0.011,
+  anaAyetTabW: 0.2,
+  anaAyetTabH: 0.032,
+  anaAyetTabBorderWidth: 0.0035,
+  // Positive values move only the Ana Ayet label downward.
+  anaAyetLabelDrop: 0.012,
   sgPad: 0.03,
   sgBorderWidth: 0.006,
   boxExtOffset: 0.02,
@@ -301,6 +308,10 @@ export interface S1Transforms {
   anaAyet: ElementTransform;
   anaAyetTabX: number;
   anaAyetTabY: number;
+  anaAyetTabW: number;
+  anaAyetTabH: number;
+  anaAyetTabBorderWidth: number;
+  anaAyetLabelDrop: number;
   borderWidth: number;
   labelPinY: number;
 }
@@ -350,7 +361,7 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
     lm.s1Top -
     lm.s1Pad -
     (lm.smallBoxH * 2 + lm.gap) -
-    lm.gap +
+    lm.s1AnaGap +
     ANA_AYET_Y_OFFSET;
 
   const s1Verses: Record<number, ElementTransform> = {};
@@ -448,8 +459,13 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
         w: lm.innerW,
         h: lm.anaAyetH,
       },
-      anaAyetTabX: s1BaseX - 0.07 - lm.s1Pad,
-      anaAyetTabY: anaAyetY - lm.anaAyetH / 2 + 0.046,
+      // Tab is now rendered as a label and pinned to verse 5's top border.
+      anaAyetTabX: s1BaseX + lm.innerW / 2,
+      anaAyetTabY: anaAyetY,
+      anaAyetTabW: lm.anaAyetTabW,
+      anaAyetTabH: lm.anaAyetTabH,
+      anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
+      anaAyetLabelDrop: lm.anaAyetLabelDrop,
       borderWidth: lm.s1BorderWidth,
       labelPinY: lm.s1Top,
     },
