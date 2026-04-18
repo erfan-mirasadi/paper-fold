@@ -44,32 +44,6 @@ function PaperViewIcon({ preset }: { preset: CameraViewPreset }) {
     return (
       <svg viewBox="0 0 28 18" width="24" height="16" aria-hidden="true">
         <path
-          d="M4 13.5 15.5 8.2 24 11.3 12.5 16.5Z"
-          fill="currentColor"
-          opacity="0.2"
-        />
-        <path
-          d="M4 13.5V6.8L15.5 1.5V8.2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M4 13.5 15.5 8.2 24 11.3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  if (preset === "right") {
-    return (
-      <svg viewBox="0 0 28 18" width="24" height="16" aria-hidden="true">
-        <path
           d="M24 13.5 12.5 8.2 4 11.3 15.5 16.5Z"
           fill="currentColor"
           opacity="0.2"
@@ -83,6 +57,32 @@ function PaperViewIcon({ preset }: { preset: CameraViewPreset }) {
         />
         <path
           d="M24 13.5 12.5 8.2 4 11.3"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (preset === "right") {
+    return (
+      <svg viewBox="0 0 28 18" width="24" height="16" aria-hidden="true">
+        <path
+          d="M4 13.5 15.5 8.2 24 11.3 12.5 16.5Z"
+          fill="currentColor"
+          opacity="0.2"
+        />
+        <path
+          d="M4 13.5V6.8L15.5 1.5V8.2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M4 13.5 15.5 8.2 24 11.3"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.2"

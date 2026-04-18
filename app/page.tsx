@@ -16,6 +16,7 @@ import {
 import Effects from "./_components/3d-scene/Effects";
 import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
+import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
 import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
 const Experience = dynamic(
@@ -28,8 +29,12 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [glitchKey, setGlitchKey] = useState(0);
   const bgColor = isDarkMode ? "#000000" : "#F2F2ED";
-  const btnBg = isDarkMode ? "#F2F2ED" : "#121212";
-  const btnColor = isDarkMode ? "#121212" : "#F2F2ED";
+
+  const handleThemeToggle = () => {
+    setIsDarkMode((prev) => !prev);
+    setGlitchKey((prev) => prev + 1);
+  };
+
   return (
     <main
       style={{
@@ -40,36 +45,6 @@ export default function Home() {
         transition: "background-color 0.5s ease",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          top: "24px",
-          right: "24px",
-          zIndex: 50,
-          display: "flex",
-          gap: "12px",
-        }}
-      >
-        <button
-          onClick={() => {
-            setIsDarkMode(!isDarkMode);
-            setGlitchKey((prev) => prev + 1); // trigger the subtle 3D glitch
-          }}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "30px",
-            border: "none",
-            backgroundColor: btnBg,
-            color: btnColor,
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            transition: "all 0.3s ease",
-          }}
-        >
-          {isDarkMode ? "☀️" : "🌙"}
-        </button>
-      </div>
-
       <Suspense
         fallback={
           <div
@@ -102,6 +77,10 @@ export default function Home() {
       <PopUpUI isDarkMode={isDarkMode} />
       <VerseNeonHTMLOverlay />
       <NavigationOverlay isDarkMode={isDarkMode} />
+      <ThemeToggleOverlay
+        isDarkMode={isDarkMode}
+        onToggle={handleThemeToggle}
+      />
       <CameraViewPresetOverlay />
     </main>
   );
