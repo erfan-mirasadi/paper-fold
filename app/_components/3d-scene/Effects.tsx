@@ -28,7 +28,7 @@ type EffectsProps = {
 const Effects: React.FC<EffectsProps> = ({
   glitchTrigger = 0,
   brightness = -0.09,
-  contrast = 0.2,
+  contrast = 0.23,
   // noiseOpacity = 0.05,
   vignetteDarkness = 0.4,
 }) => {
@@ -59,21 +59,14 @@ const Effects: React.FC<EffectsProps> = ({
     <EffectComposer multisampling={5} enableNormalPass={false}>
       {/* High threshold keeps glow isolated to explicit HDR-style neon elements */}
       <Bloom
-        intensity={1.85}
+        intensity={2.85}
         luminanceThreshold={1.5}
-        luminanceSmoothing={0.02}
+        luminanceSmoothing={0}
         mipmapBlur
       />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <BrightnessContrast brightness={brightness} contrast={contrast} />
-      {/* <Noise opacity={noiseOpacity} /> */}
       <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} />
-
-      {/* <DepthOfField
-        focusDistance={dofFocusDistance}
-        focalLength={15}
-        bokehScale={dofBokehScale}
-      /> */}
       <Glitch
         active={manualActive}
         mode={GlitchMode.CONSTANT_WILD}

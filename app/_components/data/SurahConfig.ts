@@ -78,8 +78,8 @@ const anaAyetH = 0.11;
 const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + s1AnaGap + anaAyetH;
 
 // --- Section 2 (Main Lower Block) ---
-const gapBetweenS1andS2 = 0.09;
-const s2TopExtra = 0.025;
+const gapBetweenS1andS2 = 0.07;
+const s2TopExtra = 0.019;
 const s2Top = s1Top - s1H - gapBetweenS1andS2;
 
 const s2PadTop = 0.035 + s2TopExtra;
@@ -159,12 +159,12 @@ export const layoutMath = {
   // Spacing & decoration offsets
   s2PadLeftRight: 0.035,
   g2Shrink: 0.01,
-  s1BorderWidth: 0.011,
+  s1BorderWidth: 0,
   anaAyetTabW: 0.2,
   anaAyetTabH: 0.032,
   anaAyetTabBorderWidth: 0.0035,
   // Positive values move only the Ana Ayet label downward.
-  anaAyetLabelDrop: 0.012,
+  anaAyetLabelDrop: 0.009,
   sgPad: 0.03,
   sgBorderWidth: 0.006,
   boxExtOffset: 0.02,
