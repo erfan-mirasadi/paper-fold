@@ -201,7 +201,6 @@ export function SectionOne({
           y={t.anaAyetTabY}
           w={t.anaAyetTabW}
           h={t.anaAyetTabH}
-          borderWidth={t.anaAyetTabBorderWidth}
           z={0.005}
           isBumpMap={isBumpMap}
         />

@@ -8,9 +8,9 @@ interface BoarderProps {
 }
 
 export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
-  const ORIGINAL_CARD_PAD_X = 0.028;
-  const ORIGINAL_CARD_PAD_TOP = 0.029;
-  const ORIGINAL_CARD_PAD_BOTTOM = 0.029;
+  const ORIGINAL_CARD_PAD_X = 0.02;
+  const ORIGINAL_CARD_PAD_TOP = 0.02;
+  const ORIGINAL_CARD_PAD_BOTTOM = 0.02;
 
   const FRAME_PAD = 0.02; // White border thickness
   const HALO_PAD = 0.001; // Subtle gap creating the shadow/glow halo

@@ -45,7 +45,7 @@ const PAPER_NORMAL_OPACITY = 0.75;
 
 export const PAGE_DEPTH = 0.003;
 
-const PAGE_SEGMENTS = 120;
+const PAGE_SEGMENTS = 80;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
 export const foldBonePositions: readonly number[] = FOLD_Y_POSITIONS.map((y) =>

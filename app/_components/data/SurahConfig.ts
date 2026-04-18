@@ -69,16 +69,16 @@ export const CONTENT_W = PW - PADDING * 2;
 export const START_X = PADDING;
 
 // --- Section 1 (Top Block) ---
-const s1Top = -0.08;
+const s1Top = -0.06;
 const s1Pad = 0.045;
 const gap = 0.02;
 const s1AnaGap = 0.05;
 const smallBoxH = 0.07;
-const anaAyetH = 0.11;
+const anaAyetH = 0.132;
 const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + s1AnaGap + anaAyetH;
 
 // --- Section 2 (Main Lower Block) ---
-const gapBetweenS1andS2 = 0.07;
+const gapBetweenS1andS2 = 0.09;
 const s2TopExtra = 0.019;
 const s2Top = s1Top - s1H - gapBetweenS1andS2;
 

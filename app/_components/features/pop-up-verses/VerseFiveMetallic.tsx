@@ -13,7 +13,6 @@ import {
   S1_ANA_BG,
   S1_ANA_BORDER,
   S1_ANA_LABEL_BG,
-  S1_ANA_LABEL_BORDER,
   S1_ANA_LABEL_TEXT,
   S1_VERSE_5_NUMBER_BG,
   S1_VERSE_5_NUMBER_BORDER,
@@ -103,12 +102,8 @@ export function VerseFiveMetallic() {
 
   const labelW = SURAH_TRANSFORMS.s1.anaAyetTabW;
   const labelH = SURAH_TRANSFORMS.s1.anaAyetTabH;
-  const labelBorderW = SURAH_TRANSFORMS.s1.anaAyetTabBorderWidth;
   const labelDrop = SURAH_TRANSFORMS.s1.anaAyetLabelDrop;
   const labelRadius = labelH / 2;
-  const labelOuterW = labelW + labelBorderW * 2;
-  const labelOuterH = labelH + labelBorderW * 2;
-  const labelOuterRadius = labelRadius + labelBorderW;
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
 
@@ -175,27 +170,6 @@ export function VerseFiveMetallic() {
     s.quadraticCurveTo(0, 0, r, 0);
     return s;
   }, [outerW, outerH, outerRadius]);
-
-  const labelOuterShape = useMemo(() => {
-    const s = new THREE.Shape();
-    const r = labelOuterRadius;
-
-    s.moveTo(r, 0);
-    s.lineTo(labelOuterW - r, 0);
-    s.quadraticCurveTo(labelOuterW, 0, labelOuterW, -r);
-    s.lineTo(labelOuterW, -(labelOuterH - r));
-    s.quadraticCurveTo(
-      labelOuterW,
-      -labelOuterH,
-      labelOuterW - r,
-      -labelOuterH,
-    );
-    s.lineTo(r, -labelOuterH);
-    s.quadraticCurveTo(0, -labelOuterH, 0, -(labelOuterH - r));
-    s.lineTo(0, -r);
-    s.quadraticCurveTo(0, 0, r, 0);
-    return s;
-  }, [labelOuterW, labelOuterH, labelOuterRadius]);
 
   const labelInnerShape = useMemo(() => {
     const s = new THREE.Shape();
@@ -317,41 +291,36 @@ export function VerseFiveMetallic() {
             </RenderTexture>
           </meshStandardMaterial>
         </mesh>
+      </a.group>
 
-        {/* 3D Ana Ayet label mounted on verse 5 top border. */}
+      {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
+      <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
         <group
           position={[
-            outerW / 2 - labelOuterW / 2,
-            labelOuterH - ANA_LABEL_PIN_OVERLAP - labelDrop,
+            outerW / 2 - labelW / 2,
+            labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
             EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
           ]}
         >
-          <mesh renderOrder={102}>
-            <extrudeGeometry args={[labelOuterShape, labelExtrudeSettings]} />
-            <meshBasicMaterial color={S1_ANA_LABEL_BORDER} toneMapped={false} />
-          </mesh>
-
-          <mesh
-            position={[labelBorderW, -labelBorderW, 0.001]}
-            renderOrder={103}
-          >
+          <mesh renderOrder={110}>
             <extrudeGeometry args={[labelInnerShape, labelExtrudeSettings]} />
-            <meshBasicMaterial color={S1_ANA_LABEL_BG} toneMapped={false} />
+            <meshBasicMaterial
+              color={S1_ANA_LABEL_BG}
+              toneMapped={false}
+              side={THREE.DoubleSide}
+            />
           </mesh>
 
           <Text
-            position={[
-              labelOuterW / 2,
-              -labelOuterH / 2,
-              ANA_LABEL_DEPTH + 0.002,
-            ]}
+            position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}
             fontSize={TEXT_SIZES.TOP_LABEL}
             color={S1_ANA_LABEL_TEXT}
             anchorX="center"
             anchorY="middle"
             fontWeight="bold"
             material-depthTest={false}
-            renderOrder={104}
+            material-depthWrite={false}
+            renderOrder={111}
           >
             Ana Ayet
           </Text>

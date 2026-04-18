@@ -1,10 +1,5 @@
 "use client";
 
-// Purpose: Universal Three.js layout building blocks used across all Surah
-//          sections AND the popup verse system. Keeps primitives decoupled from
-//          any specific surah data or layout config.
-//          Colors are imported from theme.ts; no hex strings are hardcoded here.
-
 import { Text, useScroll } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -20,7 +15,6 @@ import {
   HOLLOW_BORDER_COLOR,
   CIRCLE_BORDER,
   S1_ANA_LABEL_BG,
-  S1_ANA_LABEL_BORDER,
   S1_ANA_LABEL_TEXT,
   QURAN_FONT,
   TEXT_SIZES,
@@ -192,6 +186,8 @@ interface TopLabelProps {
   z?: number;
   text: string;
   animateOnScroll?: boolean;
+  scrollStart?: number;
+  scrollRange?: number;
   isBumpMap?: boolean;
   partialBorder?: boolean;
   borderColor?: string;
@@ -207,6 +203,8 @@ export function TopLabel({
   z = 0,
   text,
   animateOnScroll = false,
+  scrollStart = 0.4,
+  scrollRange = 0.15,
   isBumpMap = false,
   partialBorder = false,
   borderColor = HOLLOW_BORDER_COLOR,
@@ -226,8 +224,11 @@ export function TopLabel({
     // Scroll animation is completely disabled for bump map passes
     if (animateOnScroll && scroll && groupRef.current && !isBumpMap) {
       let targetOpacity = 0;
-      if (scroll.offset > 0.4) {
-        targetOpacity = Math.min((scroll.offset - 0.4) / 0.15, 1);
+      if (scroll.offset > scrollStart) {
+        targetOpacity = Math.min(
+          (scroll.offset - scrollStart) / scrollRange,
+          1,
+        );
       }
 
       groupRef.current.traverse((child: THREE.Object3D) => {
@@ -327,7 +328,6 @@ interface AnaAyetTabProps {
   y: number;
   w: number;
   h: number;
-  borderWidth: number;
   z: number;
   isBumpMap?: boolean;
 }
@@ -336,7 +336,6 @@ export function AnaAyetTab({
   y,
   w,
   h,
-  borderWidth,
   z,
   isBumpMap = false,
 }: AnaAyetTabProps) {
@@ -344,18 +343,6 @@ export function AnaAyetTab({
 
   return (
     <group position={[x - w / 2, y + h / 2, z]}>
-      <UiRect
-        x={-borderWidth}
-        y={borderWidth}
-        z={0}
-        w={w + borderWidth * 2}
-        h={h + borderWidth * 2}
-        radius={radius + borderWidth}
-        color={S1_ANA_LABEL_BORDER}
-        shadow
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MAX}
-      />
       <UiRect
         x={0}
         y={0}
