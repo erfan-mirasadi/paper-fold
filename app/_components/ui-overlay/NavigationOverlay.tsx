@@ -12,10 +12,11 @@ export function NavigationOverlay({
 }: NavigationOverlayProps) {
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
   const currentOffset = useFoldStore((s) => s.currentOffset);
+  const isTransitioning = useFoldStore((s) => s.isTransitioning);
 
   // Keep label/icon color fixed while the glass surface adapts to theme.
-  const accentColor = "#0F1218";
-  const textColor = "#0F1218";
+  const accentColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
+  const textColor = accentColor;
   const glassBackground = isDarkMode
     ? "radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%)"
     : "radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%)";
@@ -109,6 +110,7 @@ export function NavigationOverlay({
   const buttonLabel = nextStageId === "end" ? "Aç" : "Kapat";
 
   const handleSmartTransition = () => {
+    if (isTransitioning) return;
     triggerTransition(nextStageId);
   };
 
@@ -132,6 +134,7 @@ export function NavigationOverlay({
         icon={activeIcon}
         label={buttonLabel}
         isDarkMode={isDarkMode}
+        isPending={isTransitioning}
         accentColor={accentColor}
         textColor={textColor}
         glassBg={glassBackground}
@@ -151,6 +154,7 @@ interface NavButtonProps {
   icon: React.ReactNode;
   label?: string;
   isDarkMode: boolean;
+  isPending: boolean;
   accentColor: string;
   textColor: string;
   glassBg: string;
@@ -166,6 +170,7 @@ function NavButton({
   icon,
   label,
   isDarkMode,
+  isPending,
   accentColor,
   textColor,
   glassBg,
@@ -176,16 +181,28 @@ function NavButton({
   glassHoverShadow,
   variants,
 }: NavButtonProps) {
+  const handleClick = () => {
+    if (isPending) return;
+    onClick();
+  };
+
   return (
     <motion.button
+      type="button"
       variants={variants}
-      whileHover={{
-        background: glassHoverBg,
-        borderColor: glassHoverBorderColor,
-        boxShadow: glassHoverShadow,
-      }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
+      whileHover={
+        isPending
+          ? undefined
+          : {
+              background: glassHoverBg,
+              borderColor: glassHoverBorderColor,
+              boxShadow: glassHoverShadow,
+            }
+      }
+      whileTap={isPending ? undefined : { scale: 0.98 }}
+      onClick={handleClick}
+      disabled={isPending}
+      aria-busy={isPending}
       style={{
         position: "relative",
         background: glassBg,
@@ -193,7 +210,7 @@ function NavButton({
         backdropFilter: "blur(18px) saturate(130%)",
         WebkitBackdropFilter: "blur(18px) saturate(130%)",
         color: textColor,
-        cursor: "pointer",
+        cursor: isPending ? "wait" : "pointer",
         height: "52px",
         minWidth: "72px",
         padding: "4px 8px",
@@ -213,21 +230,84 @@ function NavButton({
           "border-color 150ms ease, box-shadow 150ms ease, background 150ms ease",
       }}
     >
-      {/* Animated Background Polish */}
+      {/* Reflective activity sweep for pending state */}
       <motion.div
-        variants={{ hover: { x: "100%" }, tap: { x: "100%" } }}
-        initial={{ x: "-100%" }}
-        transition={{ duration: 0.6, ease: "circOut" }}
+        initial={false}
+        animate={
+          isPending
+            ? {
+                x: ["-175%", "175%"],
+                rotate: [-16, -16],
+                opacity: [0, 0.72, 0],
+              }
+            : { x: "-210%", rotate: -16, opacity: 0 }
+        }
+        transition={
+          isPending
+            ? { duration: 0.95, ease: "easeInOut", repeat: Infinity }
+            : { duration: 0.2, ease: "easeOut" }
+        }
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
+          top: "-42%",
+          left: "-78%",
+          width: "92%",
+          height: "190%",
           background: isDarkMode
-            ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)"
-            : "linear-gradient(90deg, transparent, rgba(0,0,0,0.02), transparent)",
-          zIndex: 0,
+            ? "linear-gradient(110deg, rgba(255,255,255,0), rgba(236,245,255,0.48), rgba(255,255,255,0))"
+            : "linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,0.84), rgba(255,255,255,0))",
+          filter: "blur(0.35px)",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
+
+      <motion.div
+        initial={false}
+        animate={
+          isPending
+            ? {
+                x: ["-185%", "185%"],
+                rotate: [-16, -16],
+                opacity: [0, 0.96, 0],
+              }
+            : { x: "-220%", rotate: -16, opacity: 0 }
+        }
+        transition={
+          isPending
+            ? { duration: 0.95, ease: "easeInOut", repeat: Infinity }
+            : { duration: 0.2, ease: "easeOut" }
+        }
+        style={{
+          position: "absolute",
+          top: "-46%",
+          left: "-80%",
+          width: "34%",
+          height: "198%",
+          background: isDarkMode
+            ? "linear-gradient(110deg, rgba(255,255,255,0), rgba(249,252,255,0.9), rgba(255,255,255,0))"
+            : "linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,1), rgba(255,255,255,0))",
+          filter: "blur(0.2px)",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
+
+      <motion.div
+        initial={false}
+        animate={isPending ? { opacity: [0.04, 0.15, 0.04] } : { opacity: 0 }}
+        transition={
+          isPending
+            ? { duration: 0.95, ease: "easeInOut", repeat: Infinity }
+            : { duration: 0.2, ease: "easeOut" }
+        }
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: isDarkMode
+            ? "linear-gradient(180deg, rgba(233,244,255,0.22) 0%, rgba(233,244,255,0) 64%)"
+            : "linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 64%)",
+          zIndex: 1,
           pointerEvents: "none",
         }}
       />
@@ -237,33 +317,27 @@ function NavButton({
           display: "flex",
           color: accentColor,
           filter: isDarkMode
-            ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.2))"
+            ? "drop-shadow(0 0 8px rgba(226, 239, 255, 0.28))"
             : "none",
-          zIndex: 1,
+          zIndex: 2,
           pointerEvents: "none",
         }}
       >
         {icon}
       </span>
 
-      {label && <span style={{ zIndex: 1 }}>{label}</span>}
-
-      <motion.div
-        variants={{
-          hover: { width: "100%", left: 0 },
-          tap: { width: "100%", left: 0 },
-        }}
-        initial={{ width: "0%", left: "0%" }}
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: "50%",
-          height: "2px",
-          background: accentColor,
-          zIndex: 1,
-          transition: "width 200ms ease, left 200ms ease",
-        }}
-      />
+      {label && (
+        <span
+          style={{
+            zIndex: 2,
+            textShadow: isDarkMode
+              ? "0 1px 10px rgba(199, 220, 255, 0.28)"
+              : "none",
+          }}
+        >
+          {label}
+        </span>
+      )}
     </motion.button>
   );
 }

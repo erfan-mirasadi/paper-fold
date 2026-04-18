@@ -23,6 +23,7 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 interface FoldStoreState {
   targetStageId: string | null;
   transitionToken: number;
+  isTransitioning: boolean;
   currentOffset: number;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
@@ -32,15 +33,17 @@ interface FoldStoreState {
 export const useFoldStore = create<FoldStoreState>((set) => ({
   targetStageId: null,
   transitionToken: 0,
+  isTransitioning: false,
   currentOffset: 0,
 
   triggerTransition: (id) =>
     set((state) => ({
       targetStageId: id,
       transitionToken: state.transitionToken + 1,
+      isTransitioning: true,
     })),
   setCurrentOffset: (offset) => set({ currentOffset: clamp01(offset) }),
-  resetTransition: () => set({ targetStageId: null }),
+  resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
 }));
 
 export function ScrollManager() {
@@ -105,6 +108,7 @@ export function ScrollManager() {
     );
 
     if (targetIndex === -1) {
+      useFoldStore.setState({ isTransitioning: false, targetStageId: null });
       return;
     }
 
@@ -166,7 +170,10 @@ export function ScrollManager() {
     const runStepByStepScroll = async () => {
       const el = scroll.el;
       const maxScroll = el.scrollHeight - el.clientHeight;
-      if (maxScroll <= 0 || maxStageIndex <= 0) return;
+      if (maxScroll <= 0 || maxStageIndex <= 0) {
+        useFoldStore.setState({ isTransitioning: false, targetStageId: null });
+        return;
+      }
 
       const currentOffset = clamp01(el.scrollTop / maxScroll);
       const currentStage = currentOffset * maxStageIndex;
@@ -219,6 +226,10 @@ export function ScrollManager() {
 
       el.scrollTo({ top: targetOffset * maxScroll, behavior: "auto" });
       setCurrentOffset(targetOffset);
+
+      if (activeRunIdRef.current === thisRunId) {
+        useFoldStore.setState({ isTransitioning: false, targetStageId: null });
+      }
     };
 
     void runStepByStepScroll();
@@ -234,6 +245,7 @@ export function ScrollManager() {
   useEffect(
     () => () => {
       clearPendingWork();
+      useFoldStore.setState({ isTransitioning: false, targetStageId: null });
     },
     [],
   );
