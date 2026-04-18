@@ -114,6 +114,10 @@ interface UiRectProps {
   topOnly?: boolean;
   bottomOnly?: boolean;
   opacity?: number;
+  transparent?: boolean;
+  emissive?: string;
+  emissiveIntensity?: number;
+  toneMapped?: boolean;
 }
 
 /**
@@ -137,8 +141,18 @@ export const UiRect = ({
   topOnly = false,
   bottomOnly = false,
   opacity,
+  transparent,
+  emissive,
+  emissiveIntensity,
+  toneMapped,
 }: UiRectProps) => {
   const finalColor = isBumpMap ? bumpColor : color;
+  const resolvedTransparent =
+    transparent ??
+    (opacity !== undefined || (renderOrder != null && !isBumpMap));
+  const resolvedOpacity =
+    opacity ?? (renderOrder != null && !isBumpMap ? 0.999 : 1);
+  const useEmissiveMaterial = Boolean(emissive) && !isBumpMap;
 
   return (
     <group position={[x, y, z]}>
@@ -169,14 +183,27 @@ export const UiRect = ({
           topOnly={topOnly}
           bottomOnly={bottomOnly}
         />
-        <meshBasicMaterial
-          color={finalColor}
-          depthTest={depthTest}
-          transparent={
-            opacity !== undefined || (renderOrder != null && !isBumpMap)
-          }
-          opacity={opacity ?? (renderOrder != null && !isBumpMap ? 0.999 : 1)}
-        />
+        {useEmissiveMaterial ? (
+          <meshStandardMaterial
+            color={finalColor}
+            depthTest={depthTest}
+            transparent={resolvedTransparent}
+            opacity={resolvedOpacity}
+            emissive={emissive || "#000000"}
+            emissiveIntensity={emissiveIntensity ?? 1}
+            roughness={0.55}
+            metalness={0.15}
+            toneMapped={toneMapped ?? false}
+          />
+        ) : (
+          <meshBasicMaterial
+            color={finalColor}
+            depthTest={depthTest}
+            transparent={resolvedTransparent}
+            opacity={resolvedOpacity}
+            toneMapped={toneMapped}
+          />
+        )}
       </mesh>
     </group>
   );

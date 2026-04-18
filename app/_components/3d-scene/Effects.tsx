@@ -4,6 +4,7 @@ import React, { memo, useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   EffectComposer,
+  Bloom,
   // Noise,
   Vignette,
   ToneMapping,
@@ -56,6 +57,13 @@ const Effects: React.FC<EffectsProps> = ({
 
   return (
     <EffectComposer multisampling={5} enableNormalPass={false}>
+      {/* High threshold keeps glow isolated to explicit HDR-style neon elements */}
+      <Bloom
+        intensity={1.85}
+        luminanceThreshold={1.5}
+        luminanceSmoothing={0.02}
+        mipmapBlur
+      />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <BrightnessContrast brightness={brightness} contrast={contrast} />
       {/* <Noise opacity={noiseOpacity} /> */}

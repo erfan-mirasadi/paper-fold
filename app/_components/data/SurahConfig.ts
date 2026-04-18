@@ -173,6 +173,22 @@ export const layoutMath = {
 
 export type LayoutConfig = typeof layoutMath;
 
+// Section 1 neon border tuning.
+// Sizes live here so glow spread can be adjusted without touching JSX.
+export const S1_NEON_CONFIG = {
+  haloPad: 0.014,
+  haloZ: -0.001,
+  haloOpacity: 0.36,
+  haloEmissiveIntensity: 4.2,
+  outerHaloPad: 0.026,
+  outerHaloOpacity: 0.16,
+  outerHaloEmissiveIntensity: 2.4,
+  topLabelGapWidth: 0.4,
+  topLabelGapPadding: 0.01,
+  topLabelGapHeight: 0.058,
+  topLabelGapYOffset: 0.022,
+} as const;
+
 // ----------------------------------------------------------------------------
 // EXPORTED FOLD POSITIONS
 // Used by animation engine to know where page fold-lines sit.

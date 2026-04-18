@@ -43,6 +43,7 @@ export const S1_VERSE_5_TEXT = "#000000";
 export const S1_ANA_LABEL_BG = "#000000";
 export const S1_ANA_LABEL_BORDER = "#72665F";
 export const S1_ANA_LABEL_TEXT = "#e5ba71";
+export const S1_NEON_GOLD = "#FFD700";
 // ----------------------------------------------------------------------------
 // TOP LABEL — Section-specific background & border (Section 1)
 // ----------------------------------------------------------------------------
