@@ -1,12 +1,4 @@
 "use client";
-
-// ============================================================================
-// SECTION ONE
-// Location: SurahLayout/SectionOne.tsx
-// Purpose: Renders the upper Surah block. Receives pre-computed S1Transforms
-//          from the LayoutEngine — does ZERO positional math in JSX.
-//          All x/y/w/h values come straight from the engine output.
-// ============================================================================
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
 import { useDelayedHidden } from "../shared/useDelayedHidden";
@@ -44,9 +36,6 @@ interface SectionOneProps {
   isFolded?: boolean;
 }
 
-// ----------------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------------
 export function SectionOne({
   data,
   transforms,

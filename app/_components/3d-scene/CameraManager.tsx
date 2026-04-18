@@ -32,11 +32,9 @@ type OrbitSyncControls = {
   scale?: number;
 };
 
-// ---------------------------------------------------------
 // ZERO-GC MODULE-LEVEL OPTIMIZATION
 // Moving all object allocations outside the component body
 // prevents overhead & re-allocation, minimizing garbage collection spikes.
-// ---------------------------------------------------------
 const _lookAt = new Vector3();
 const _desiredPos = new Vector3();
 const _desiredOffset = new Vector3();
@@ -160,9 +158,7 @@ export function CameraManager() {
 
     _prevPhase = phase;
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE: ZOOMING IN
-    // ═══════════════════════════════════════════════════════════════
     if (phase === "zooming_in" && cameraTarget) {
       const distToTarget = camera.position.distanceTo(_desiredPos);
 
@@ -188,9 +184,7 @@ export function CameraManager() {
       return;
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE: ZOOMED (Flat Edge Panning)
-    // ═══════════════════════════════════════════════════════════════
     if (phase === "zoomed" && cameraTarget) {
       if (!controls?.target) return;
 
@@ -233,9 +227,7 @@ export function CameraManager() {
       return;
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE: ZOOMING OUT
-    // ═══════════════════════════════════════════════════════════════
     if (phase === "zooming_out" && _hasPreZoomPos) {
       _returnFrames++;
 

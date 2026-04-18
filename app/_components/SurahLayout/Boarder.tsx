@@ -1,13 +1,4 @@
 "use client";
-
-// ============================================================================
-// BOARDER (PAGE FRAME)
-// Location: SurahLayout/components/Boarder.tsx
-// Purpose: Renders the decorative page border — three nested layers creating
-//          a halo → white frame → warm inner fill effect. Used once by the
-//          main SurahLayout entry point.
-// ============================================================================
-
 import { UiRect } from "./SharedUI";
 
 interface BoarderProps {
@@ -21,12 +12,12 @@ export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
   const ORIGINAL_CARD_PAD_TOP = 0.029;
   const ORIGINAL_CARD_PAD_BOTTOM = 0.029;
 
-  const FRAME_PAD = 0.02;   // White border thickness
-  const HALO_PAD = 0.001;   // Subtle gap creating the shadow/glow halo
+  const FRAME_PAD = 0.02; // White border thickness
+  const HALO_PAD = 0.001; // Subtle gap creating the shadow/glow halo
 
   const INNER_CARD_COLOR = "#EBEBDF"; // Warm off-white inner fill
-  const FRAME_COLOR = "#ffffff";      // Pure white frame
-  const HALO_COLOR = "#ADADAD";       // Soft grey halo shadow
+  const FRAME_COLOR = "#ffffff"; // Pure white frame
+  const HALO_COLOR = "#ADADAD"; // Soft grey halo shadow
 
   // Inner fill dimensions (inside the white frame)
   const INNER_FILL_W = PW - ORIGINAL_CARD_PAD_X * 2;

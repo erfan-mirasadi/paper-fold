@@ -15,8 +15,6 @@ export const Tafsir3DTracker = ({ skeleton }: { skeleton: Skeleton }) => {
   const targetBone = skeleton.bones[activeData.boneIndex];
   if (!targetBone) return null;
 
-  // We portal a single invisible anchor to the currently active bone
-  // Using our shared tracker to calculate projection and pass to state
   return createPortal(
     <Shared3DTracker
       position={[activeData.anchorOffsetX, activeData.anchorOffsetY, 0.01]}

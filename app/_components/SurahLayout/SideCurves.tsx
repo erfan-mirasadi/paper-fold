@@ -19,7 +19,6 @@ import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../data/SurahConfig";
 
-// ── Curve shape constants ─────────────────────────────────────────────────────
 const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
 const CURVE_INWARD_OFFSET = 0.0085; // How far the bracket tip pokes inward
 const CURVE_DEEP_OFFSET_OUTER = 0.01; // Deeper tip for the center (12–14) bracket
@@ -29,12 +28,10 @@ const DEFAULT_VERSE_BORDER_WIDTH = 0.0055; // Matches VerseBox default border wi
 const INNER_CURVE_GAP = 0.095; // Bow step for inner curves
 const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
 
-// ── Line width constants ────────────────────────────────────────────────────
+// ── Line width constants
 // Edit these two values to adjust the thickness of the side-curve outlines.
 export const CURVE_OUTER_LINE_WIDTH = 4;
 export const CURVE_INNER_LINE_WIDTH = 4;
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface SideCurvesProps {
   layout: LayoutConfig;
@@ -43,13 +40,6 @@ interface SideCurvesProps {
   borderWidth?: number;
   isBumpMap?: boolean;
 }
-
-/**
- * getSmoothCurvePoints
- * Builds high-resolution cubic bezier points for a single curve arm.
- * Using the exact same sample points for both the Line and the fill Shape
- * guarantees zero visual bleeding between the two.
- */
 const getSmoothCurvePoints = (
   tipX: number,
   controlX: number,
@@ -64,10 +54,7 @@ const getSmoothCurvePoints = (
   );
   return curve.getPoints(50);
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
 // CurvePair — renders one nested bracket (outer line + inner line + fill mesh)
-// ─────────────────────────────────────────────────────────────────────────────
 const CurvePair = ({
   outerYTop,
   outerYBot,
@@ -251,9 +238,6 @@ const CurvePair = ({
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SideCurves — orchestrates all 4 bracket pairs on left and right sides
-// ─────────────────────────────────────────────────────────────────────────────
 export const SideCurves = ({
   layout,
   startX,

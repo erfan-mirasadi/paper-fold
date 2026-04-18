@@ -14,7 +14,6 @@ import {
   type ElevatedSectionId,
 } from "../elevated-verses/useElevatedStore";
 
-// Reusable objects to avoid allocations on every click/render
 const hitBoxMaterial = new MeshBasicMaterial({
   transparent: true,
   opacity: 0,

@@ -1,13 +1,5 @@
 "use client";
 
-// ============================================================================
-// ANIMATED ARROW
-// Location: SurahLayout/components/AnimatedArrow.tsx
-// Purpose: A glowing particle dot that travels along the center path of a
-//          SideCurve bracket. Communicates chiastic structure to the reader.
-//          Fully self-contained; receives curve math as props from SideCurves.
-// ============================================================================
-
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";

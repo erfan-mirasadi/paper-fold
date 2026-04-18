@@ -13,7 +13,6 @@ import { VerseFiveMetallic } from "./VerseFiveMetallic";
 import {
   S1_INNER_BG,
   S1_INNER_BORDER,
-  S1_OUTER_BORDER,
   S1_VERSE_NUMBER_BG,
   S1_VERSE_NUMBER_BORDER,
   CAPSULE_BG_7_10_15_18,

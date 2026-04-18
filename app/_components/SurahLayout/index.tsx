@@ -1,15 +1,5 @@
 "use client";
-
-// ============================================================================
-// SURAH LAYOUT — MAIN ENTRY POINT
-// Location: SurahLayout/index.tsx
-// Purpose: Assembles the full Surah paper texture. Imports pre-computed
-//          transforms from the LayoutEngine (module-level singleton) and
-//          passes them down to SectionOne / SectionTwo.
-//          Components receive ready-made positions — they do zero math.
-// ============================================================================
-
-import { OrthographicCamera, Text, useTexture } from "@react-three/drei";
+import { OrthographicCamera, useTexture } from "@react-three/drei";
 import { Boarder } from "./Boarder";
 import { SectionOne } from "./SectionOne";
 import { SectionTwo } from "./SectionTwo";
@@ -35,10 +25,6 @@ export { PAGE_WIDTH, PAGE_HEIGHT, PW, layoutMath };
 export { FOLD_Y_POSITIONS } from "../data/SurahConfig";
 export { SurahLayout, SurahLayout as PaperContent };
 
-// ----------------------------------------------------------------------------
-// INNER COMPONENT: ImageContent
-// Renders a flat mapped texture (used for pre-baked frames).
-// ----------------------------------------------------------------------------
 const ImageContent: React.FC<{ url: string }> = ({ url }) => {
   const texture = useTexture(url);
   return (
@@ -49,9 +35,6 @@ const ImageContent: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
-// ----------------------------------------------------------------------------
-// MAIN COMPONENT: SurahLayout
-// ----------------------------------------------------------------------------
 interface SurahLayoutProps {
   imageUrl?: string;
   isBumpMap?: boolean;

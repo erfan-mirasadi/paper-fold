@@ -1,19 +1,9 @@
 import { create } from "zustand";
-
-// -------------------------------------------------------------------
-// ELEVATED VERSE STORE
-// -------------------------------------------------------------------
-// Multi-select elevation:
-// - user can keep multiple verses elevated
-// - sections are considered active when all verses of that section are selected
-// -------------------------------------------------------------------
-
 export type ElevatedPhase = "idle" | "elevated";
 export type ElevatedSectionId = "s1" | "s2_top" | "s2_bottom" | "s2_center";
 
 /** Elevated interactions unlock only after user scroll reaches this offset. */
 export const ELEVATED_SCROLL_UNLOCK_THRESHOLD = 0.9;
-
 /** Delay used to sync base section reappearance with elevated return animation. */
 export const ELEVATED_RETURN_SYNC_MS = 480;
 
@@ -68,37 +58,16 @@ function pickActiveSectionId(
 }
 
 interface ElevatedStoreState {
-  /** Primary elevated verse id (first from sorted set), or null when idle. */
   activeVerseId: number | null;
-
-  /** All currently elevated verse ids (single or grouped). */
   activeVerseIds: number[];
-
-  /** Backward-compatible active section id (single preferred section). */
   activeSectionId: ElevatedSectionId | null;
-
-  /** All section ids that are currently fully elevated. */
   activeSectionIds: ElevatedSectionId[];
-
-  /** Whether any verse has ever been elevated (for lazy mount). */
   hasEverElevated: boolean;
-
-  /** Current lifecycle phase. */
   phase: ElevatedPhase;
-
-  /** Whether elevated interaction is currently unlocked by scroll position. */
   isEnabledByScroll: boolean;
-
-  /** Updates elevated availability based on current scroll threshold. */
   setEnabledByScroll: (enabled: boolean) => void;
-
-  /** Toggle a single verse in/out of the elevated set. */
   elevateVerse: (verseId: number) => void;
-
-  /** Toggle a section/set of verses in/out of the elevated set. */
   elevateVerses: (verseIds: number[], sectionId?: ElevatedSectionId) => void;
-
-  /** Dismiss all elevated verses. */
   dismiss: () => void;
 }
 

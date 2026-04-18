@@ -1,14 +1,4 @@
 "use client";
-
-// ============================================================================
-// SECTION TWO
-// Location: SurahLayout/components/SectionTwo.tsx
-// Purpose: Renders the lower Surah block. Receives pre-computed S2Transforms
-//          from the LayoutEngine — does ZERO positional math in JSX.
-//          Still receives `layout` + `startX` because SideCurves consumes raw
-//          layout math (that component has its own coordinate derivation).
-// ============================================================================
-
 import { TopLabel, UiRect, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
@@ -46,9 +36,6 @@ interface SectionTwoProps {
   isFolded?: boolean;
 }
 
-// ----------------------------------------------------------------------------
-// COMPONENT
-// ----------------------------------------------------------------------------
 export function SectionTwo({
   data,
   transforms,

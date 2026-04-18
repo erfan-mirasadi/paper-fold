@@ -1,13 +1,9 @@
 "use client";
 
-// ============================================================================
-// SHARED UI PRIMITIVES
-// Location: SurahLayout/components/SharedUI.tsx
 // Purpose: Universal Three.js layout building blocks used across all Surah
 //          sections AND the popup verse system. Keeps primitives decoupled from
 //          any specific surah data or layout config.
 //          Colors are imported from theme.ts; no hex strings are hardcoded here.
-// ============================================================================
 
 import { Text, useScroll } from "@react-three/drei";
 import { useMemo, useRef } from "react";
@@ -29,13 +25,9 @@ import {
   QURAN_FONT,
   TEXT_SIZES,
 } from "../data/theme";
-
 export * from "../data/theme";
 
-// ============================================================================
 // ROUNDED SHAPE GEOMETRY
-// ============================================================================
-
 interface RoundedShapeProps {
   w: number;
   h: number;
@@ -43,12 +35,6 @@ interface RoundedShapeProps {
   topOnly?: boolean;
   bottomOnly?: boolean;
 }
-
-/**
- * RoundedShapeComponent
- * Generates a custom rounded-corner Three.js Shape geometry.
- * Supports full rounding, top-only, and bottom-only corner modes.
- */
 export function RoundedShapeComponent({
   w,
   h,
@@ -94,10 +80,6 @@ export function RoundedShapeComponent({
   return <shapeGeometry args={[shape]} />;
 }
 
-// ============================================================================
-// UI RECT
-// ============================================================================
-
 interface UiRectProps {
   x: number;
   y: number;
@@ -119,12 +101,6 @@ interface UiRectProps {
   emissiveIntensity?: number;
   toneMapped?: boolean;
 }
-
-/**
- * UiRect
- * A universal rectangular layout block. Supports shadows, bump maps, and
- * partial rounding (top-only / bottom-only) for connector panels.
- */
 export const UiRect = ({
   x,
   y,
@@ -209,10 +185,7 @@ export const UiRect = ({
   );
 };
 
-// ============================================================================
 // TOP LABEL
-// ============================================================================
-
 interface TopLabelProps {
   x: number;
   y: number;
@@ -228,11 +201,6 @@ interface TopLabelProps {
   renderOrder?: number;
 }
 
-/**
- * TopLabel
- * Pill-shaped label tag pinned to the top or bottom edge of a section.
- * Supports scroll-driven fade-in animation.
- */
 export function TopLabel({
   x,
   y,
@@ -353,14 +321,9 @@ export function TopLabel({
   );
 }
 
-// ============================================================================
 // ANA AYET TAB
-// ============================================================================
-
 interface AnaAyetTabProps {
-  /** Horizontal center of the label. */
   x: number;
-  /** Border line Y that the label is pinned to. */
   y: number;
   w: number;
   h: number;
@@ -368,11 +331,6 @@ interface AnaAyetTabProps {
   z: number;
   isBumpMap?: boolean;
 }
-
-/**
- * AnaAyetTab
- * Decorative side tab marking the focal-point verse in Section 1.
- */
 export function AnaAyetTab({
   x,
   y,
@@ -424,11 +382,7 @@ export function AnaAyetTab({
     </group>
   );
 }
-
-// ============================================================================
 // VERSE BOX
-// ============================================================================
-
 interface VerseBoxProps {
   x: number;
   y: number;
@@ -449,12 +403,6 @@ interface VerseBoxProps {
   bgOpacity?: number;
   textColor?: string;
 }
-
-/**
- * VerseBox
- * Modular verse card renderer. Displays Arabic text, verse number circle,
- * and themed border/background. Used in sections AND the popup card system.
- */
 export const VerseBox = ({
   x,
   y,

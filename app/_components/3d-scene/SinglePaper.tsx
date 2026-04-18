@@ -1,5 +1,4 @@
 "use client";
-
 import {
   OrthographicCamera,
   RenderTexture,
@@ -25,6 +24,7 @@ import {
   Float32BufferAttribute,
   Group,
   LinearFilter,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   Skeleton,
   SkinnedMesh,
@@ -34,29 +34,20 @@ import {
   NoColorSpace,
   RepeatWrapping,
 } from "three";
-import { Tafsir3DTracker } from "../features/tafsir/Tafsir3DTracker";
 import { BismillahFloatingText3D } from "../features/bismillah/BismillahFloatingText3D";
+import { PAGE_BG_COLOR } from "../data/theme";
 
-// Controls the speed of the easing
 const easingFactor = 0.5;
-
-// I made this smaller since you cropped the image to a thin line.
-// Tweak this to make the crease thicker or thinner vertically.
 const CREASE_BAND_HEIGHT = 0.05;
-
 const CREASE_NORMAL_OPACITY = 1;
 
-// Opacity for the base paper normal-map rendered into the normalMap RT.
-// Lower values reduce the strength of the overall normal effect.
 const PAPER_NORMAL_OPACITY = 0.75;
 
 export const PAGE_DEPTH = 0.003;
 
-// segment for millimeter precision of hinges
 const PAGE_SEGMENTS = 120;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
-// Fractional bone position per crease line.
 export const foldBonePositions: readonly number[] = FOLD_Y_POSITIONS.map((y) =>
   Math.min(Math.max(Math.abs(y) / SEGMENT_HEIGHT, 0), PAGE_SEGMENTS),
 );
@@ -69,7 +60,6 @@ const pageGeometry = new BoxGeometry(
   PAGE_SEGMENTS,
 );
 
-// Translate so the TOP edge of the paper is at Y = 0
 pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
 
 const position = pageGeometry.attributes.position;
@@ -98,11 +88,14 @@ pageGeometry.setAttribute(
 
 // Changed to a slight off-white for better lighting interaction without washing out
 const paperBaseColor = new Color("#f2f0e6");
-
-// Static materials that never change — allocated once outside the component
-// to avoid re-allocation on every mount and reduce memory pressure.
+const paperBackColor = new Color(PAGE_BG_COLOR);
 const staticSideL = new MeshStandardMaterial({ color: paperBaseColor }); // side L
-const staticSideR = new MeshStandardMaterial({ color: "#111" }); // side R
+const staticSideR = new MeshStandardMaterial({
+  color: "#111",
+  roughness: 1,
+  metalness: 0,
+  toneMapped: false,
+}); // side R
 const staticTopCap = new MeshStandardMaterial({ color: paperBaseColor }); // top cap
 const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // bottom cap
 
@@ -116,54 +109,36 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const scroll = useScroll();
-
   const creaseNormalMap = useTexture("/crease-normal.png", (texture) => {
     texture.colorSpace = NoColorSpace;
-
-    // CHANGED: Use RepeatWrapping on the X-axis so it tiles instead of stretching
     texture.wrapS = RepeatWrapping;
     texture.wrapT = ClampToEdgeWrapping;
     texture.minFilter = LinearFilter;
     texture.magFilter = LinearFilter;
     texture.generateMipmaps = false;
-
-    // CHANGED: Repeat the texture 5 times along the line.
-    // Adjust this '5' up or down until it looks perfectly proportional!
     texture.repeat.set(5, 1);
-
     texture.needsUpdate = true;
   });
-
   const paperTextureNormal = useTexture(
     "/Paper-Texture-7_normal.png",
     (texture) => {
-      // Normal maps MUST use NoColorSpace (linear representation) otherwise they appear inverted/messed up
       texture.colorSpace = NoColorSpace;
-
-      // Enable repeating to prevent edge clamping
       texture.wrapS = RepeatWrapping;
       texture.wrapT = RepeatWrapping;
-
-      // Set repeat to [1, 1] to fit the page exactly
       texture.repeat.set(1, 1);
       texture.needsUpdate = true;
     },
   );
 
-  // ---- Audio Setup ----
+  // Audio Setup
   const foldSound = useRef<HTMLAudioElement | null>(null);
   const lastActiveStage = useRef<number>(0);
-  // Browsers block audio until the user has interacted with the page.
   const hasInteracted = useRef(false);
-
   useEffect(() => {
-    // Load the sound effect from the public folder
     foldSound.current = new Audio("/paper-fold.mp3");
     if (foldSound.current) {
       foldSound.current.volume = 1;
     }
-
-    // Mark interaction on first user gesture so autoplay is allowed.
     const onInteract = () => {
       hasInteracted.current = true;
     };
@@ -174,7 +149,6 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
       window.removeEventListener("keydown", onInteract);
     };
   }, []);
-
   const manualSkinnedMesh = useMemo(() => {
     const bones: Bone[] = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
@@ -186,13 +160,12 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     const skeleton = new Skeleton(bones);
 
     const materials = [
-      staticSideL, // side L   — shared static instance
-      staticSideR, // side R   — shared static instance
-      staticTopCap, // top cap  — shared static instance
-      staticBottomCap, // bottom cap — shared static instance
-      // Front and back faces are dynamic (overridden via JSX material-4)
+      staticSideL,
+      staticSideR,
+      staticTopCap,
+      staticBottomCap,
       new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }), // front face
-      new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }), // back face
+      new MeshBasicMaterial({ color: paperBackColor }), // back face (flat/unlit, no bloom highlights)
     ];
 
     const mesh = new SkinnedMesh(pageGeometry, materials);
@@ -206,9 +179,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
 
   useFrame((_, delta) => {
     if (!skinnedMeshRef.current || !group.current) return;
-
     const bones = skinnedMeshRef.current.skeleton.bones;
-
     const paperProgress = scroll.offset;
     const maxStageIndex = FOLD_STORY_STEPS.length - 1;
     const currentStage = Math.round(paperProgress * maxStageIndex);
@@ -247,7 +218,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
 
   return (
     <group ref={group} position={[0, PAGE_HEIGHT / 2, 0]}>
-      <Tafsir3DTracker skeleton={manualSkinnedMesh.skeleton} />
+      {/* <Tafsir3DTracker skeleton={manualSkinnedMesh.skeleton} /> */}
 
       <primitive object={manualSkinnedMesh} ref={skinnedMeshRef}>
         <meshStandardMaterial
@@ -264,12 +235,12 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
             <PaperContent isFolded={isFolded} />
           </RenderTexture>
 
-          {/* 2. The new Bump Map for the embossed UI elements! */}
+          {/* The new Bump Map for the embossed UI elements */}
           <RenderTexture attach="bumpMap" width={1200} height={1700}>
             <PaperContent isBumpMap={true} />
           </RenderTexture>
 
-          {/* 3. The existing Normal Map for the folded creases */}
+          {/* The existing Normal Map for the folded creases */}
           <RenderTexture attach="normalMap" width={1200} height={1700}>
             <color attach="background" args={["#8080ff"]} />
 
@@ -283,7 +254,6 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
             />
 
             {/* The base paper normal texture covering the entire page */}
-            {/* Render order 0 so it stays in the background */}
             <mesh
               position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, -1]}
               renderOrder={0}
@@ -373,7 +343,6 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
         </meshStandardMaterial>
       </primitive>
 
-      {/* Floating metallic Bismillah kept above the paper surface. */}
       <BismillahFloatingText3D surfaceZ={PAGE_DEPTH / 2} />
     </group>
   );

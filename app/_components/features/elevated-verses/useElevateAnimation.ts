@@ -1,28 +1,18 @@
 import { useSpring } from "@react-spring/three";
 
-// ============================================================================
-// ELEVATE ANIMATION — CONFIGURABLE CONSTANTS
-// ============================================================================
-// Tweak these to control how the verse "peels" off the paper.
-// ============================================================================
-
 export const ELEVATE_TIMING = {
   /** How high the verse lifts off the paper surface. */
   liftHeight: 0.14,
-
   /** Subtle tilt on X axis when elevated (radians). Simulates paper peel. */
   tiltX: 0.08,
-
   /** Spring mass — higher = heavier, more momentum. */
   springMass: 2.7,
   /** Spring tension — higher = snappier. */
   springTension: 80,
   /** Spring friction — higher = more damping. */
   springFriction: 22,
-
   /** Scale factor when elevated (subtle zoom). */
   liftScale: 1.015,
-
   appearDelayZAndOpacity: 0,
   hideDelayZAndOpacity: 690,
 };
@@ -45,9 +35,7 @@ export const ELEVATE_TEXTURE_TIMING = {
   showDelay: 640,
 };
 
-// ============================================================================
-// CAMERA FOCUS SETTINGS  (used by ElevateCameraController)
-// ============================================================================
+// CAMERA FOCUS SETTINGS
 export const ELEVATE_CAMERA = {
   /** How close the camera moves to the elevated verse. */
   zoomDistance: 0.15,
@@ -60,10 +48,6 @@ export const ELEVATE_CAMERA = {
   /** DOF focus distance — auto-calculated from camera-to-verse distance. */
   focusOffset: 4.0,
 };
-
-// ============================================================================
-// HOOK
-// ============================================================================
 
 export function useElevateAnimation(isElevated: boolean) {
   const springConfig = {

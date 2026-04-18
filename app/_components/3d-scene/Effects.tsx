@@ -5,20 +5,16 @@ import { useFrame } from "@react-three/fiber";
 import {
   EffectComposer,
   Bloom,
-  // Noise,
   Vignette,
   ToneMapping,
   BrightnessContrast,
   Glitch,
-  // DepthOfField,
 } from "@react-three/postprocessing";
 import { ToneMappingMode, GlitchMode } from "postprocessing";
 import { Vector2 } from "three";
-// import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
-// import { ELEVATE_CAMERA } from "../features/elevated-verses/useElevateAnimation";
 
 type EffectsProps = {
-  glitchTrigger?: number; // Pass a counter from outside to trigger glitch
+  glitchTrigger?: number;
   brightness?: number;
   contrast?: number;
   noiseOpacity?: number;
@@ -29,16 +25,12 @@ const Effects: React.FC<EffectsProps> = ({
   glitchTrigger = 0,
   brightness = -0.09,
   contrast = 0.23,
-  // noiseOpacity = 0.05,
   vignetteDarkness = 0.4,
 }) => {
   const [manualActive, setManualActive] = useState(false);
   const lastTriggerRef = useRef(0);
   const activeUntilRef = useRef(0);
   const activeRef = useRef(false);
-  // const isElevated = useElevatedStore((s) => s.phase === "elevated");
-  // const dofFocusDistance = isElevated ? 0.15 + ELEVATE_CAMERA.focusOffset : 0;
-  // const dofBokehScale = isElevated ? ELEVATE_CAMERA.bokehScale : 0;
 
   useEffect(() => {
     if (!glitchTrigger) return;
@@ -57,7 +49,6 @@ const Effects: React.FC<EffectsProps> = ({
 
   return (
     <EffectComposer multisampling={5} enableNormalPass={false}>
-      {/* High threshold keeps glow isolated to explicit HDR-style neon elements */}
       <Bloom
         intensity={2.85}
         luminanceThreshold={1.5}

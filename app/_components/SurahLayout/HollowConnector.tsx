@@ -1,12 +1,4 @@
 "use client";
-// HOLLOW CONNECTOR
-// Location: SurahLayout/components/HollowConnector.tsx
-// Purpose: Renders the decorative framed border boxes that visually "connect"
-//          the intro/outro verses to the main VerseGroup cluster rows inside
-//          Section 2. Top connector bridges down, bottom bridges up.
-//          All positional math is derived from the passed `layout` prop.
-// ============================================================================
-
 import { UiRect } from "./SharedUI";
 import {
   HOLLOW_BORDER_COLOR,

@@ -1,12 +1,7 @@
 "use client";
-
-// ============================================================================
-// VERSE GROUP
-// Location: SurahLayout/components/VerseGroup.tsx
 // Purpose: Renders a single thematic 2×2 verse cluster inside Section 2.
 //          Receives a pre-computed GroupTransforms object from the LayoutEngine.
 //          Does ZERO positional math — positions come directly from the engine.
-// ============================================================================
 
 import { VerseBox } from "./SharedUI";
 import {

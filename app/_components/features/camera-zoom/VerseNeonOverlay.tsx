@@ -14,9 +14,6 @@ import {
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import { Shared3DTracker } from "../../shared/3DTracker";
 
-// ============================================================================
-// CONFIGURABLE CONSTANTS FOR NEON ANIMATION
-// ============================================================================
 export const NEON_CONFIG = {
   // Appearance
   lineColor: "#00ffff", // Bright neon blue/cyan outline
@@ -31,9 +28,6 @@ export const NEON_CONFIG = {
   fadeDelay: 50, // Percentage point where fade-out begins
 };
 
-// ============================================================================
-// GEOMETRY CONSTANTS (Must match VerseBox in SharedUI.tsx)
-// ============================================================================
 const OVERLAY_ELEMENT_ID = "verse-neon-overlay";
 const GLOW_PATH_ID = "verse-neon-path-glow";
 const CORE_PATH_ID = "verse-neon-path-core";
@@ -197,9 +191,6 @@ const NEON_SHAPES_BY_ID = new Map<number, VerseNeonShape>(
   NEON_SHAPES.map((shape) => [shape.id, shape]),
 );
 
-// ============================================================================
-// 1. NEON 3D TRACKER (Inside <Canvas>)
-// ============================================================================
 export function VerseNeonTracker() {
   const activeVerseId = useCameraStore((s) => s.activeVerseId);
   const phase = useCameraStore((s) => s.phase);
@@ -355,9 +346,6 @@ export function VerseNeonTracker() {
   );
 }
 
-// ============================================================================
-// 2. NEON 2D HTML OVERLAY (Outside <Canvas>, like in page.tsx)
-// ============================================================================
 export function VerseNeonHTMLOverlay() {
   const activeVerseId = useCameraStore((s) => s.activeVerseId);
   const phase = useCameraStore((s) => s.phase);
@@ -389,11 +377,6 @@ export function VerseNeonHTMLOverlay() {
         style={{ overflow: "visible" }}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* PERFORMANCE OPTIMIZATION 3: 
-          Removed the heavy <filter> and <feGaussianBlur> tags.
-          Applying SVG filters to an actively animating path causes severe GPU bottlenecking.
-          Using CSS filter: drop-shadow achieves the same visual glow with native hardware acceleration. 
-        */}
         <path
           id={GLOW_PATH_ID}
           d=""

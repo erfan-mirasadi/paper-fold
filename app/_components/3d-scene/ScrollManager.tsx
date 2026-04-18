@@ -24,7 +24,6 @@ interface FoldStoreState {
   targetStageId: string | null;
   transitionToken: number;
   currentOffset: number;
-  /** Set a stage ID to animate to. Will be reset to null after transition starts. */
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   resetTransition: () => void;
@@ -44,11 +43,6 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   resetTransition: () => set({ targetStageId: null }),
 }));
 
-/**
- * ScrollManager sits inside ScrollControls.
- * It listens to the useFoldStore and programmatically scrolls the container
- * when a targetStageId is set.
- */
 export function ScrollManager() {
   const scroll = useScroll();
   const targetStageId = useFoldStore((s) => s.targetStageId);

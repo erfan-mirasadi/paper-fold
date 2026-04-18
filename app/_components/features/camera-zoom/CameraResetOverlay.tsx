@@ -1,13 +1,5 @@
 "use client";
 
-// ============================================================================
-// CAMERA RESET OVERLAY
-// ============================================================================
-// Visible close button + click-anywhere backdrop when zoomed.
-// The 3D background mesh handles "click to reset" in the scene — this
-// component provides the DOM-level close button.
-// ============================================================================
-
 import { useCameraStore } from "./useCameraStore";
 
 export function CameraResetOverlay() {

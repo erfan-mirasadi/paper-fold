@@ -6,7 +6,6 @@ import * as THREE from "three";
 import { PAGE_WIDTH, SURAH_DATA } from "../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../data/theme";
 
-// Keep the text clearly outside the paper, sitting above the top edge.
 const TOP_EDGE_OFFSET = 0.03;
 const FRONT_CLEARANCE = 0.016;
 const EXTRUSION_LAYERS = 8;

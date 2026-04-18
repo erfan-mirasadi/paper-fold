@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Object3D, Vector3 } from "three";
 
 export interface Shared3DTrackerProps {
@@ -23,18 +23,11 @@ export function Shared3DTracker({
   children,
 }: Shared3DTrackerProps) {
   const objRef = useRef<Object3D>(null);
-  const domElRef = useRef<HTMLElement | null>(null);
   const lastState = useRef({ x: -9999, y: -9999, visible: false });
   // Allocate vector once per mount to prevent GC spikes
   const vectorRef = useRef(new Vector3());
 
   const { size, camera } = useThree();
-
-  useEffect(() => {
-    if (domElementId) {
-      domElRef.current = document.getElementById(domElementId);
-    }
-  }, [domElementId]);
 
   useFrame(() => {
     if (!objRef.current) return;
@@ -63,11 +56,9 @@ export function Shared3DTracker({
     const hasPositionChanged = xDiff > 0.1 || yDiff > 0.1;
     const hasVisibilityChanged = isOnScreen !== lastState.current.visible;
 
-    let el = domElRef.current;
-    if (!el && domElementId) {
-      el = document.getElementById(domElementId);
-      domElRef.current = el;
-    }
+    const el = domElementId
+      ? (document.getElementById(domElementId) as HTMLElement | null)
+      : null;
 
     // Optimization: Only update DOM styles if something meaningfully changed
     if (hasVisibilityChanged || (isOnScreen && hasPositionChanged)) {

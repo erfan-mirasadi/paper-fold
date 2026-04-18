@@ -1,4 +1,3 @@
-// components/GrainOverlay.tsx
 "use client";
 
 // Defining Props interface for custom settings
@@ -14,7 +13,6 @@ export default function GrainOverlay({
   smooth = false,
 }: GrainOverlayProps) {
   return (
-    // Applied dynamic opacity via inline style
     <div
       className="grain pointer-events-none fixed inset-0 z-50 overflow-hidden mix-blend-multiply"
       style={{ opacity: opacity }}
@@ -42,8 +40,7 @@ export default function GrainOverlay({
           animation: film-scratch-anim ${speed} ${smooth ? "linear" : "steps(1)"} infinite;
         }
       `}</style>
-
-      {/* Oversized container to prevent edge clipping during translation */}
+      
       <div className="grain-overflow absolute -inset-[200%] h-[400%] w-[400%]"></div>
     </div>
   );
