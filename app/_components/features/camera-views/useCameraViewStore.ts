@@ -1,21 +1,21 @@
 import { create } from "zustand";
+import {
+  CAMERA_CONFIG,
+  type CameraViewPreset as CameraViewPresetType,
+} from "../../data/cameraConfig";
 
-export type CameraViewPreset = "left" | "default" | "right";
+export type CameraViewPreset = CameraViewPresetType;
 
 // Left/right are offsets from the initial camera azimuth at app start.
 // Keep center on 0 so the default button returns to exact initial state.
-export const CAMERA_VIEW_AZIMUTH_OFFSETS: Record<CameraViewPreset, number> = {
-  left: -0.56,
-  default: 0,
-  right: 0.56,
-};
+export const CAMERA_VIEW_AZIMUTH_OFFSETS: Readonly<
+  Record<CameraViewPreset, number>
+> = CAMERA_CONFIG.viewPresetOffsets.azimuth;
 
 // Optional per-preset vertical tweaks (radians) relative to initial polar angle.
-export const CAMERA_VIEW_POLAR_OFFSETS: Record<CameraViewPreset, number> = {
-  left: 0,
-  default: 0,
-  right: 0,
-};
+export const CAMERA_VIEW_POLAR_OFFSETS: Readonly<
+  Record<CameraViewPreset, number>
+> = CAMERA_CONFIG.viewPresetOffsets.polar;
 
 interface CameraViewState {
   requestedView: CameraViewPreset | null;

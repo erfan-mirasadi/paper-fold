@@ -13,11 +13,11 @@ import {
   VerseNeonTracker,
   VerseNeonHTMLOverlay,
 } from "./_components/features/camera-zoom/VerseNeonOverlay";
-import BackgroundParticlesDesktop from "./_components/3d-scene/BackgroundParticlesDesktop";
 import Effects from "./_components/3d-scene/Effects";
 import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
+import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
 const Experience = dynamic(
   () =>
     import("./_components/3d-scene/Experience").then((mod) => mod.Experience),
@@ -80,9 +80,13 @@ export default function Home() {
         }
       >
         <div style={{ width: "100vw", height: "100vh" }}>
-          <Canvas shadows camera={{ position: [0, 1, 1.7], fov: 45 }}>
+          <Canvas
+            camera={{
+              position: CAMERA_CONFIG.initialCamera.position,
+              fov: CAMERA_CONFIG.initialCamera.fov,
+            }}
+          >
             <color attach="background" args={[bgColor]} />
-            <BackgroundParticlesDesktop isDarkMode={isDarkMode} />
             <Effects glitchTrigger={glitchKey} />
             <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />

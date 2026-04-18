@@ -23,12 +23,12 @@ import {
   SURAH_TRANSFORMS,
 } from "../data/SurahConfig";
 import {
-  TEXT_DARK,
-  TEXT_SIZES,
+  // TEXT_DARK,
+  // TEXT_SIZES,
   PAGE_BG_COLOR,
   BUMP_BASE,
-  BUMP_MAX,
-  QURAN_FONT,
+  // BUMP_MAX,
+  // QURAN_FONT,
 } from "../data/theme";
 
 export { PAGE_WIDTH, PAGE_HEIGHT, PW, layoutMath };
@@ -76,7 +76,6 @@ function SurahLayout({
         <planeGeometry args={[PW * 1.5, PAGE_HEIGHT * 1.5]} />
         <meshBasicMaterial color={activeBg} />
       </mesh>
-      <color attach="background" args={[activeBg]} />
 
       {/* Orthographic camera framing the page exactly */}
       <OrthographicCamera
@@ -92,7 +91,7 @@ function SurahLayout({
       <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} isBumpMap={isBumpMap} />
 
       {/* Bismillah header */}
-      <Text
+      {/* <Text
         position={[PW / 2, -0.085, 0.02]}
         fontSize={TEXT_SIZES.BISMILLAH}
         color={isBumpMap ? BUMP_MAX : TEXT_DARK}
@@ -104,7 +103,7 @@ function SurahLayout({
         direction="rtl"
       >
         {SURAH_DATA.bismillah}
-      </Text>
+      </Text> */}
 
       {/* Upper section — receives pre-computed S1Transforms, does zero math */}
       <SectionOne

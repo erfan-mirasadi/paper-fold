@@ -31,7 +31,7 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           willChange: "transform, opacity",
         }}
       >
-        <button
+        {/* <button
           onClick={toggleAll}
           style={{
             position: "absolute",
@@ -57,7 +57,7 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
           }}
         >
           {allOpen ? "⊟" : "⊞"}
-        </button>
+        </button> */}
       </div>
 
       {groups.map((group) => {

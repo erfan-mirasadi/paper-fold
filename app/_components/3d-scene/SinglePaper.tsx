@@ -35,6 +35,7 @@ import {
   RepeatWrapping,
 } from "three";
 import { Tafsir3DTracker } from "../features/tafsir/Tafsir3DTracker";
+import { BismillahFloatingText3D } from "../features/bismillah/BismillahFloatingText3D";
 
 // Controls the speed of the easing
 const easingFactor = 0.5;
@@ -371,6 +372,9 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
           </RenderTexture>
         </meshStandardMaterial>
       </primitive>
+
+      {/* Floating metallic Bismillah kept above the paper surface. */}
+      <BismillahFloatingText3D surfaceZ={PAGE_DEPTH / 2} />
     </group>
   );
 };

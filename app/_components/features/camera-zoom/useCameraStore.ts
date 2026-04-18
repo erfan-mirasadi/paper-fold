@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { CAMERA_CONFIG } from "../../data/cameraConfig";
 
 // -------------------------------------------------------------------
 // CAMERA ZOOM STORE
@@ -16,13 +17,13 @@ import { create } from "zustand";
 // -------------------------------------------------------------------
 
 /** How close the camera zooms in (lower = closer). */
-export const ZOOM_DISTANCE = 0.6;
+export const ZOOM_DISTANCE = CAMERA_CONFIG.zoom.distance;
 
 /** Lerp/slerp speed for zoom-in (0-1 per frame). */
-export const CAMERA_LERP_SPEED = 0.04;
+export const CAMERA_LERP_SPEED = CAMERA_CONFIG.zoom.lerpIn;
 
 /** Lerp/slerp speed for zoom-out. */
-export const CAMERA_RESET_LERP_SPEED = 0.035;
+export const CAMERA_RESET_LERP_SPEED = CAMERA_CONFIG.zoom.lerpOut;
 
 // -------------------------------------------------------------------
 // TYPES
@@ -69,9 +70,7 @@ export const useCameraStore = create<CameraStoreState>((set) => ({
 
   setZoomed: () => set({ phase: "zoomed" }),
 
-  resetCamera: () =>
-    set({ activeVerseId: null, phase: "zooming_out" }),
+  resetCamera: () => set({ activeVerseId: null, phase: "zooming_out" }),
 
-  finishReturn: () =>
-    set({ phase: "idle", cameraTarget: null }),
+  finishReturn: () => set({ phase: "idle", cameraTarget: null }),
 }));

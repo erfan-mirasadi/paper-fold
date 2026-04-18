@@ -17,6 +17,7 @@ import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSec
 import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
 import { CameraViewController } from "../features/camera-views/CameraViewController";
 import { useCameraViewStore } from "../features/camera-views/useCameraViewStore";
+import { CAMERA_CONFIG } from "../data/cameraConfig";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -45,7 +46,11 @@ export function Experience({ isFolded = false }: ExperienceProps) {
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 1.6, 1.7]} fov={45} />
+      <PerspectiveCamera
+        makeDefault
+        position={CAMERA_CONFIG.initialCamera.position}
+        fov={CAMERA_CONFIG.initialCamera.fov}
+      />
       <CameraManager />
       <CameraViewController />
 
@@ -84,10 +89,10 @@ function DynamicControls() {
       enableZoom={false}
       enablePan={false}
       makeDefault={true}
-      minAzimuthAngle={-Math.PI / 4}
-      maxAzimuthAngle={Math.PI / 4}
-      minPolarAngle={Math.PI / 6}
-      maxPolarAngle={Math.PI * 0.45}
+      minAzimuthAngle={CAMERA_CONFIG.orbitControls.minAzimuthAngle}
+      maxAzimuthAngle={CAMERA_CONFIG.orbitControls.maxAzimuthAngle}
+      minPolarAngle={CAMERA_CONFIG.orbitControls.minPolarAngle}
+      maxPolarAngle={CAMERA_CONFIG.orbitControls.maxPolarAngle}
       onStart={() => {
         setUserInteracting(true);
         clearRequest();
