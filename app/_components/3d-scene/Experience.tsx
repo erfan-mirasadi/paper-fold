@@ -4,7 +4,7 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { PopUpManager } from "../features/pop-up-verses/PopUpManager";
@@ -16,7 +16,6 @@ import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
 import { CameraViewController } from "../features/camera-views/CameraViewController";
-import { useCameraViewStore } from "../features/camera-views/useCameraViewStore";
 import { CAMERA_CONFIG } from "../data/cameraConfig";
 
 interface ExperienceProps {
@@ -35,13 +34,6 @@ export function Experience({ isFolded = false }: ExperienceProps) {
     if (p === "zoomed") {
       resetCamera();
     }
-  }, []);
-
-  useEffect(() => {
-    document.body.style.cursor = "grab";
-    return () => {
-      document.body.style.cursor = "auto";
-    };
   }, []);
 
   return (
@@ -80,12 +72,11 @@ export function Experience({ isFolded = false }: ExperienceProps) {
 function DynamicControls() {
   const phase = useCameraStore((s) => s.phase);
   const controlsEnabled = phase === "idle" || phase === "zoomed";
-  const setUserInteracting = useCameraViewStore((s) => s.setUserInteracting);
-  const clearRequest = useCameraViewStore((s) => s.clearRequest);
 
   return (
     <OrbitControls
       enabled={controlsEnabled}
+      enableRotate={false}
       enableZoom={false}
       enablePan={false}
       makeDefault={true}
@@ -93,15 +84,6 @@ function DynamicControls() {
       maxAzimuthAngle={CAMERA_CONFIG.orbitControls.maxAzimuthAngle}
       minPolarAngle={CAMERA_CONFIG.orbitControls.minPolarAngle}
       maxPolarAngle={CAMERA_CONFIG.orbitControls.maxPolarAngle}
-      onStart={() => {
-        setUserInteracting(true);
-        clearRequest();
-        document.body.style.cursor = "grabbing";
-      }}
-      onEnd={() => {
-        setUserInteracting(false);
-        document.body.style.cursor = "grab";
-      }}
     />
   );
 }

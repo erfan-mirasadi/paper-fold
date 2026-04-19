@@ -20,17 +20,13 @@ export const CAMERA_VIEW_POLAR_OFFSETS: Readonly<
 interface CameraViewState {
   requestedView: CameraViewPreset | null;
   selectedView: CameraViewPreset;
-  isUserInteracting: boolean;
   requestView: (view: CameraViewPreset) => void;
   clearRequest: () => void;
-  setUserInteracting: (value: boolean) => void;
 }
 
 export const useCameraViewStore = create<CameraViewState>((set) => ({
   requestedView: null,
   selectedView: "default",
-  isUserInteracting: false,
   requestView: (view) => set({ requestedView: view, selectedView: view }),
   clearRequest: () => set({ requestedView: null }),
-  setUserInteracting: (value) => set({ isUserInteracting: value }),
 }));

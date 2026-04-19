@@ -109,13 +109,6 @@ export function CameraViewController() {
       _hasInitialOrbit = true;
     }
 
-    if (cameraViewStore.isUserInteracting) {
-      if (cameraViewStore.requestedView !== null) {
-        cameraViewStore.clearRequest();
-      }
-      return;
-    }
-
     const requestedView = cameraViewStore.requestedView;
     if (!requestedView) return;
 

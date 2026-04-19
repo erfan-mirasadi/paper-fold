@@ -10,11 +10,18 @@ const BASE_CAMERA = {
     maxPolarAngle: Math.PI * 0.45,
   },
   viewPresetOffsets: {
-    leftAzimuth: -0.56,
-    rightAzimuth: 0.56,
-    leftPolar: 0,
-    defaultPolar: 0,
-    rightPolar: 0,
+    left: {
+      rotateY: -0.58,
+      rotateX: 0.2,
+    },
+    default: {
+      rotateY: 0,
+      rotateX: 0,
+    },
+    right: {
+      rotateY: 0.58,
+      rotateX: 0.2,
+    },
   },
   zoom: {
     distance: 0.6,
@@ -60,17 +67,20 @@ export const CAMERA_CONFIG = {
   },
   viewPresetOffsets: {
     azimuth: {
-      left: BASE_CAMERA.viewPresetOffsets.leftAzimuth * CAMERA_TUNING.yawScale,
-      default: 0,
+      left: BASE_CAMERA.viewPresetOffsets.left.rotateY * CAMERA_TUNING.yawScale,
+      default:
+        BASE_CAMERA.viewPresetOffsets.default.rotateY * CAMERA_TUNING.yawScale,
       right:
-        BASE_CAMERA.viewPresetOffsets.rightAzimuth * CAMERA_TUNING.yawScale,
+        BASE_CAMERA.viewPresetOffsets.right.rotateY * CAMERA_TUNING.yawScale,
     },
     polar: {
-      left: BASE_CAMERA.viewPresetOffsets.leftPolar * CAMERA_TUNING.pitchScale,
+      left:
+        BASE_CAMERA.viewPresetOffsets.left.rotateX * CAMERA_TUNING.pitchScale,
       default:
-        BASE_CAMERA.viewPresetOffsets.defaultPolar * CAMERA_TUNING.pitchScale,
+        BASE_CAMERA.viewPresetOffsets.default.rotateX *
+        CAMERA_TUNING.pitchScale,
       right:
-        BASE_CAMERA.viewPresetOffsets.rightPolar * CAMERA_TUNING.pitchScale,
+        BASE_CAMERA.viewPresetOffsets.right.rotateX * CAMERA_TUNING.pitchScale,
     },
   },
   zoom: {
