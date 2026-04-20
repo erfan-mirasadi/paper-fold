@@ -57,7 +57,7 @@ const Effects: React.FC<EffectsProps> = ({
       />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <BrightnessContrast brightness={brightness} contrast={contrast} />
-      <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} />
+      {/* <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} /> */}
       <Glitch
         active={manualActive}
         mode={GlitchMode.CONSTANT_WILD}

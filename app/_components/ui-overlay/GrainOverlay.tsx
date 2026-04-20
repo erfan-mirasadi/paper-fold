@@ -8,7 +8,7 @@ interface GrainOverlayProps {
 }
 
 export default function GrainOverlay({
-  opacity = 0.2,
+  opacity = 0.05,
   speed = "1.3s",
   smooth = false,
 }: GrainOverlayProps) {
@@ -40,7 +40,7 @@ export default function GrainOverlay({
           animation: film-scratch-anim ${speed} ${smooth ? "linear" : "steps(1)"} infinite;
         }
       `}</style>
-      
+
       <div className="grain-overflow absolute -inset-[200%] h-[400%] w-[400%]"></div>
     </div>
   );

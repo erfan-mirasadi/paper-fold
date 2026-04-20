@@ -28,7 +28,7 @@ const Experience = dynamic(
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [glitchKey, setGlitchKey] = useState(0);
-  const bgColor = isDarkMode ? "#000000" : "#F2F2ED";
+  const bgColor = isDarkMode ? "#000000" : "#Ffffff";
 
   const handleThemeToggle = () => {
     setIsDarkMode((prev) => !prev);
