@@ -17,105 +17,75 @@ const VIEW_ITEMS: ViewItem[] = [
   { id: "right", label: "Sag" },
 ];
 
-function CameraIcon() {
+// Global scale knob for the whole preset overlay (buttons + icons + labels).
+const CAMERA_PRESET_SCALE = 1.2;
+const PAPER_BORDER_STROKE = 1.05;
+
+function QuranTextMarks() {
   return (
-    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-      <path
-        d="M7.8 7.2h4.1l1.1-1.5h3.3l1.1 1.5h1.6a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.2a2 2 0 0 1 2-2h2.8Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx="12"
-        cy="12.8"
-        r="3.2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
+    <g
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M0.2 0.6h7.2" strokeWidth="0.62" />
+      <path d="M0 2.1h7.4" strokeWidth="0.6" />
+      <path d="M0.4 3.6h6.6" strokeWidth="0.58" />
+    </g>
+  );
+}
+
+function PaperIcon({
+  angle = 0,
+  mirror = false,
+}: {
+  angle?: number;
+  mirror?: boolean;
+}) {
+  return (
+    <svg viewBox="0 0 28 20" width="18" height="14" aria-hidden="true">
+      <g transform={mirror ? "translate(28 0) scale(-1 1)" : undefined}>
+        <g transform={`translate(14 10) rotate(${angle}) translate(-14 -10)`}>
+          {/* rotate around center */}
+          <rect
+            x="9"
+            y="1.5"
+            width="10"
+            height="16"
+            rx="1.35"
+            fill="currentColor"
+            opacity="0.14"
+          />
+          <rect
+            x="9"
+            y="1.5"
+            width="10"
+            height="16"
+            rx="1.35"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={PAPER_BORDER_STROKE}
+          />
+          <g transform="translate(11 7)" opacity="0.78">
+            <QuranTextMarks />
+          </g>
+        </g>
+      </g>
     </svg>
   );
 }
 
 function PaperViewIcon({ preset }: { preset: CameraViewPreset }) {
   if (preset === "left") {
-    return (
-      <svg viewBox="0 0 28 18" width="24" height="16" aria-hidden="true">
-        <path
-          d="M24 13.5 12.5 8.2 4 11.3 15.5 16.5Z"
-          fill="currentColor"
-          opacity="0.2"
-        />
-        <path
-          d="M24 13.5V6.8L12.5 1.5V8.2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M24 13.5 12.5 8.2 4 11.3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
+    return <PaperIcon angle={-8} />;
   }
 
   if (preset === "right") {
-    return (
-      <svg viewBox="0 0 28 18" width="24" height="16" aria-hidden="true">
-        <path
-          d="M4 13.5 15.5 8.2 24 11.3 12.5 16.5Z"
-          fill="currentColor"
-          opacity="0.2"
-        />
-        <path
-          d="M4 13.5V6.8L15.5 1.5V8.2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M4 13.5 15.5 8.2 24 11.3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
+    return <PaperIcon angle={8} />;
   }
 
-  return (
-    <svg viewBox="0 0 28 18" width="24" height="16" aria-hidden="true">
-      <rect
-        x="4.2"
-        y="2.2"
-        width="19.6"
-        height="13.6"
-        rx="1.8"
-        fill="currentColor"
-        opacity="0.18"
-      />
-      <rect
-        x="4.2"
-        y="2.2"
-        width="19.6"
-        height="13.6"
-        rx="1.8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.2"
-      />
-      <path d="M8.2 6.2h11.6" stroke="currentColor" strokeWidth="1.1" />
-    </svg>
-  );
+  return <PaperIcon angle={0} />;
 }
 
 export function CameraViewPresetOverlay() {
@@ -132,15 +102,9 @@ export function CameraViewPresetOverlay() {
         role="group"
         aria-label="Kamera gorunum secimi"
       >
-        <div className="camera-header">
-          <span className="camera-header-icon" aria-hidden="true">
-            <CameraIcon />
-          </span>
-          <span className="camera-header-title">Kamera</span>
-        </div>
-
         {VIEW_ITEMS.map((item) => {
           const isActive = selectedView === item.id;
+          const isCenter = item.id === "default";
 
           return (
             <button
@@ -150,7 +114,7 @@ export function CameraViewPresetOverlay() {
               aria-pressed={isActive}
               aria-label={`Kamera gorunum: ${item.label}`}
               onClick={() => requestView(item.id)}
-              className={`camera-preset-btn ${isActive ? "is-active" : ""}`}
+              className={`camera-preset-btn ${isActive ? "is-active" : ""} ${isCenter ? "is-center" : ""}`}
             >
               <span className="camera-preset-icon" aria-hidden="true">
                 <PaperViewIcon preset={item.id} />
@@ -164,21 +128,23 @@ export function CameraViewPresetOverlay() {
       <style jsx>{`
         .camera-presets-root {
           position: fixed;
-          left: 16px;
-          bottom: 16px;
+          left: 10px;
+          bottom: 10px;
           z-index: 999993;
           pointer-events: none;
           user-select: none;
+          transform: scale(${CAMERA_PRESET_SCALE});
+          transform-origin: left bottom;
         }
 
         .camera-presets-shell {
           pointer-events: auto;
           display: grid;
-          grid-template-columns: repeat(3, minmax(84px, 1fr));
-          gap: 6px;
-          padding: 8px;
-          border-radius: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.34);
+          grid-template-columns: repeat(3, minmax(66px, 1fr));
+          gap: 4px;
+          padding: 5px;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.32);
           background:
             radial-gradient(
               160% 140% at 9% -90%,
@@ -192,56 +158,27 @@ export function CameraViewPresetOverlay() {
               rgba(226, 230, 236, 0.32) 100%
             );
           box-shadow:
-            0 12px 30px rgba(19, 22, 29, 0.16),
-            0 2px 0 rgba(255, 255, 255, 0.54) inset,
+            0 8px 18px rgba(19, 22, 29, 0.14),
+            0 1px 0 rgba(255, 255, 255, 0.54) inset,
             0 -1px 0 rgba(255, 255, 255, 0.24) inset;
-          backdrop-filter: blur(18px) saturate(130%);
-          -webkit-backdrop-filter: blur(18px) saturate(130%);
-        }
-
-        .camera-header {
-          grid-column: 1 / -1;
-          min-height: 24px;
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          padding: 0 4px 2px;
-          color: rgba(15, 18, 24, 0.84);
-        }
-
-        .camera-header-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 20px;
-          height: 20px;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.44);
-          border: 1px solid rgba(255, 255, 255, 0.52);
-        }
-
-        .camera-header-title {
-          font-family:
-            "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
-          font-size: 12px;
-          font-weight: 600;
-          letter-spacing: 0.01em;
+          backdrop-filter: blur(14px) saturate(124%);
+          -webkit-backdrop-filter: blur(14px) saturate(124%);
         }
 
         .camera-preset-btn {
           position: relative;
           border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 12px;
+          border-radius: 9px;
           background: rgba(255, 255, 255, 0.2);
           color: rgba(26, 30, 37, 0.84);
-          height: 52px;
-          padding: 0 8px;
+          height: 42px;
+          padding: 0 4px;
           cursor: pointer;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 3px;
+          gap: 2px;
           font-family:
             "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
           letter-spacing: 0.01em;
@@ -270,7 +207,7 @@ export function CameraViewPresetOverlay() {
             rgba(236, 240, 246, 0.84) 100%
           );
           box-shadow:
-            0 6px 14px rgba(35, 42, 55, 0.14),
+            0 4px 10px rgba(35, 42, 55, 0.13),
             0 1px 0 rgba(255, 255, 255, 0.72) inset;
         }
 
@@ -279,11 +216,15 @@ export function CameraViewPresetOverlay() {
           align-items: center;
           justify-content: center;
           line-height: 1;
-          opacity: 0.9;
+          opacity: 0.93;
+        }
+
+        .camera-preset-btn.is-center .camera-preset-icon {
+          transform: translateY(1px);
         }
 
         .camera-preset-label {
-          font-size: 11px;
+          font-size: 9px;
           font-weight: 600;
           line-height: 1;
           white-space: nowrap;
@@ -291,29 +232,30 @@ export function CameraViewPresetOverlay() {
 
         @media (max-width: 760px) {
           .camera-presets-root {
-            left: 10px;
-            bottom: 10px;
+            left: 8px;
+            bottom: 8px;
+            transform: scale(${CAMERA_PRESET_SCALE * 0.93});
           }
 
           .camera-presets-shell {
-            grid-template-columns: repeat(3, minmax(72px, 1fr));
-            padding: 5px;
-            gap: 5px;
-            border-radius: 14px;
+            grid-template-columns: repeat(3, minmax(56px, 1fr));
+            padding: 4px;
+            gap: 4px;
+            border-radius: 11px;
           }
 
           .camera-preset-btn {
-            height: 46px;
-            padding: 0 6px;
-            border-radius: 10px;
+            height: 35px;
+            padding: 0 3px;
+            border-radius: 8px;
           }
 
           .camera-preset-icon {
-            transform: scale(0.92);
+            transform: scale(0.88);
           }
 
           .camera-preset-label {
-            font-size: 10px;
+            font-size: 8.5px;
           }
         }
       `}</style>

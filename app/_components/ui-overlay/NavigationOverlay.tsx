@@ -38,8 +38,8 @@ export function NavigationOverlay({
 
   const iconUnfold = (
     <svg
-      width="24"
-      height="16"
+      width="22"
+      height="14"
       viewBox="0 0 28 18"
       fill="none"
       stroke="currentColor"
@@ -63,8 +63,8 @@ export function NavigationOverlay({
 
   const iconFold = (
     <svg
-      width="24"
-      height="16"
+      width="22"
+      height="14"
       viewBox="0 0 28 18"
       fill="none"
       stroke="currentColor"
@@ -121,11 +121,11 @@ export function NavigationOverlay({
       animate="visible"
       style={{
         position: "fixed",
-        top: "16px", // Positioned below the camera reset button
-        left: "24px",
+        top: "14px", // Positioned below the camera reset button
+        left: "18px",
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
+        gap: "10px",
         zIndex: 100,
       }}
     >
@@ -211,16 +211,16 @@ function NavButton({
         WebkitBackdropFilter: "blur(18px) saturate(130%)",
         color: textColor,
         cursor: isPending ? "wait" : "pointer",
-        height: "52px",
-        minWidth: "72px",
-        padding: "4px 8px",
-        borderRadius: "12px",
+        height: "46px",
+        minWidth: "66px",
+        padding: "3px 7px",
+        borderRadius: "11px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "3px",
-        fontSize: "11px",
+        gap: "2px",
+        fontSize: "10.5px",
         fontWeight: 600,
         letterSpacing: "0.01em",
         boxShadow: glassShadow,
