@@ -1,12 +1,23 @@
 "use client";
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
+import { useTexture } from "@react-three/drei";
+import { useEffect, useMemo } from "react";
 import { RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
   SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
+import {
+  Color,
+  ClampToEdgeWrapping,
+  LinearFilter,
+  NoColorSpace,
+  type Texture,
+  Vector2,
+} from "three";
+
 import {
   S1_OUTER_BG,
   S1_OUTER_BORDER,
@@ -16,6 +27,42 @@ import {
 } from "../../data/theme";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import { ELEVATED_RETURN_SYNC_MS, useElevatedStore } from "./useElevatedStore";
+
+const SURFACE_NORMAL_SCALE = new Vector2(0.8, 0.8);
+// 1 = no change, lower values make elevated section surfaces darker.
+const ELEVATED_SURFACE_DARKNESS = 0.7;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function buildSectionNormalMap(
+  source: Texture,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): Texture {
+  // Lock each elevated surface to the same page-space UV range as the base paper.
+  const xStart = clamp(x, 0, PAGE_WIDTH);
+  const xEnd = clamp(x + w, 0, PAGE_WIDTH);
+  const yTop = clamp(y, -PAGE_HEIGHT, 0);
+  const yBottom = clamp(y - h, -PAGE_HEIGHT, 0);
+
+  const mappedW = Math.max(xEnd - xStart, 0.0001);
+  const mappedH = Math.max(yTop - yBottom, 0.0001);
+
+  const texture = source.clone();
+  texture.wrapS = ClampToEdgeWrapping;
+  texture.wrapT = ClampToEdgeWrapping;
+  texture.repeat.set(mappedW / PAGE_WIDTH, mappedH / PAGE_HEIGHT);
+  texture.offset.set(
+    xStart / PAGE_WIDTH,
+    (yBottom + PAGE_HEIGHT) / PAGE_HEIGHT,
+  );
+  texture.needsUpdate = true;
+  return texture;
+}
 
 type SectionSpring = {
   liftZ: SpringValue<number>;
@@ -87,6 +134,7 @@ interface ElevatedLayerProps {
   h: number;
   radius: number;
   color: string;
+  paperNormalTexture: Texture;
   spring: SectionSpring;
   zOffset?: number;
   shadow?: boolean;
@@ -101,6 +149,7 @@ function ElevatedLayer({
   h,
   radius,
   color,
+  paperNormalTexture,
   spring,
   zOffset = 0,
   shadow = false,
@@ -108,6 +157,20 @@ function ElevatedLayer({
   shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
 }: ElevatedLayerProps) {
   const baseZ = PAGE_DEPTH / 2 + 0.001 + zOffset;
+  const shadedColor = useMemo(
+    () => new Color(color).multiplyScalar(ELEVATED_SURFACE_DARKNESS).getStyle(),
+    [color],
+  );
+  const sectionNormalMap = useMemo(
+    () => buildSectionNormalMap(paperNormalTexture, x, y, w, h),
+    [paperNormalTexture, x, y, w, h],
+  );
+
+  useEffect(() => {
+    return () => {
+      sectionNormalMap.dispose();
+    };
+  }, [sectionNormalMap]);
 
   return (
     <a.group
@@ -150,23 +213,37 @@ function ElevatedLayer({
         </a.mesh>
       )}
 
-      <mesh>
+      <a.mesh material-opacity={spring.opacity}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
-        <a.meshStandardMaterial
-          color={color}
+        <meshStandardMaterial
+          color={shadedColor}
           transparent
-          opacity={spring.opacity}
-          roughness={0.82}
-          metalness={0.06}
-          envMapIntensity={0.5}
-          depthWrite
+          opacity={1}
+          roughness={0.8}
+          metalness={0.02}
+          envMapIntensity={0.2}
+          normalMap={sectionNormalMap}
+          normalScale={SURFACE_NORMAL_SCALE}
         />
-      </mesh>
+      </a.mesh>
     </a.group>
   );
 }
 
 export function ElevatedSectionSurfaces() {
+  const paperTextureNormal = useTexture(
+    "/Paper-Texture-7_normal.png",
+    (texture) => {
+      texture.colorSpace = NoColorSpace;
+      texture.wrapS = ClampToEdgeWrapping;
+      texture.wrapT = ClampToEdgeWrapping;
+      texture.minFilter = LinearFilter;
+      texture.magFilter = LinearFilter;
+      texture.generateMipmaps = false;
+      texture.needsUpdate = true;
+    },
+  );
+
   const activeSectionIds = useElevatedStore((s) => s.activeSectionIds);
   const s1Spring = useSectionSurfaceSpring(activeSectionIds.includes("s1"));
   const s2TopSpring = useSectionSurfaceSpring(
@@ -244,6 +321,7 @@ export function ElevatedSectionSurfaces() {
         h={s1.frameH}
         radius={0.02}
         color={S1_OUTER_BORDER}
+        paperNormalTexture={paperTextureNormal}
         spring={s1Spring}
       />
       <ElevatedLayer
@@ -253,6 +331,7 @@ export function ElevatedSectionSurfaces() {
         h={s1.frameH - s1.borderWidth * 2}
         radius={0.017}
         color={S1_OUTER_BG}
+        paperNormalTexture={paperTextureNormal}
         spring={s1Spring}
         zOffset={0.001}
         shadow
@@ -267,6 +346,7 @@ export function ElevatedSectionSurfaces() {
         h={topConnector.outer.h}
         radius={topConnector.outer.radius}
         color={HOLLOW_BORDER_COLOR}
+        paperNormalTexture={paperTextureNormal}
         spring={s2TopSpring}
         shadow
         shadowStrength={0.62}
@@ -278,6 +358,7 @@ export function ElevatedSectionSurfaces() {
         h={topConnector.middle.h}
         radius={topConnector.middle.radius}
         color={HOLLOW_BORDER_INNER}
+        paperNormalTexture={paperTextureNormal}
         spring={s2TopSpring}
         zOffset={0.0006}
         shadow
@@ -290,6 +371,7 @@ export function ElevatedSectionSurfaces() {
         h={topConnector.fill.h}
         radius={topConnector.fill.radius}
         color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+        paperNormalTexture={paperTextureNormal}
         spring={s2TopSpring}
         zOffset={0.0012}
         shadow
@@ -304,6 +386,7 @@ export function ElevatedSectionSurfaces() {
         h={bottomConnector.outer.h}
         radius={bottomConnector.outer.radius}
         color={HOLLOW_BORDER_COLOR}
+        paperNormalTexture={paperTextureNormal}
         spring={s2BottomSpring}
         shadow
         shadowStrength={0.62}
@@ -315,6 +398,7 @@ export function ElevatedSectionSurfaces() {
         h={bottomConnector.middle.h}
         radius={bottomConnector.middle.radius}
         color={HOLLOW_BORDER_INNER}
+        paperNormalTexture={paperTextureNormal}
         spring={s2BottomSpring}
         zOffset={0.0006}
         shadow
@@ -327,6 +411,7 @@ export function ElevatedSectionSurfaces() {
         h={bottomConnector.fill.h}
         radius={bottomConnector.fill.radius}
         color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+        paperNormalTexture={paperTextureNormal}
         spring={s2BottomSpring}
         zOffset={0.0012}
         shadow

@@ -171,6 +171,9 @@ export const CAPSULE_BORDER_WIDTH = 0.0039;
 // Controls the thickness of the border ring around verse numbers.
 export const CIRCLE_BORDER_WIDTH = 0.0035;
 
+// Single source of truth for all three section label widths.
+export const TOP_LABEL_WIDTH = 0.47;
+
 // Section 1 neon border tuning.
 // Sizes live here so glow spread can be adjusted without touching JSX.
 export const S1_NEON_CONFIG = {
@@ -181,7 +184,7 @@ export const S1_NEON_CONFIG = {
   outerHaloPad: 0.026,
   outerHaloOpacity: 0.16,
   outerHaloEmissiveIntensity: 2.4,
-  topLabelGapWidth: 0.4,
+  topLabelGapWidth: TOP_LABEL_WIDTH,
   topLabelGapPadding: 0.01,
   topLabelGapHeight: 0.058,
   topLabelGapYOffset: 0.022,

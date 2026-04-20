@@ -1,7 +1,12 @@
 "use client";
 import * as THREE from "three";
 import { useMemo } from "react";
-import { RenderTexture, OrthographicCamera, Text } from "@react-three/drei";
+import {
+  RenderTexture,
+  OrthographicCamera,
+  Text,
+  useGLTF,
+} from "@react-three/drei";
 import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
   SURAH_TRANSFORMS,
@@ -37,6 +42,12 @@ const ANA_LABEL_DEPTH = 0.0035;
 const ANA_LABEL_Z_OFFSET = 0.0025;
 const ANA_LABEL_PIN_OVERLAP = 0.0015;
 
+// Pattern pair controls (requested simple tuning only)
+const PATTERN_PAIR_SCALE = 0.001;
+const PATTERN_PAIR_GAP = 0.59;
+const PATTERN_PAIR_OFFSET_X = 0.015;
+const PATTERN_PAIR_OFFSET_Y = 0.01;
+
 const METALLIC_SHADOW = {
   opacityRest: 0.24,
   opacityLifted: 0.5,
@@ -67,6 +78,7 @@ function normalizeSurfaceLiftProgress(surfaceLift: number) {
 }
 
 export function VerseFiveMetallic() {
+  const patternGltf = useGLTF("/pattern.glb");
   const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
   const isSectionSurfaceRaised = useElevatedStore((s) =>
     s.activeSectionIds.includes("s1"),
@@ -198,6 +210,26 @@ export function VerseFiveMetallic() {
     [],
   );
 
+  const patternScene = useMemo(() => {
+    const cloned = patternGltf.scene.clone(true);
+
+    cloned.traverse((obj) => {
+      if (!(obj instanceof THREE.Mesh)) return;
+
+      obj.material = new THREE.MeshBasicMaterial({
+        color: "#8B7C74",
+        toneMapped: false,
+      });
+    });
+
+    return cloned;
+  }, [patternGltf.scene]);
+
+  const patternCenterX = outerW / 2 + PATTERN_PAIR_OFFSET_X;
+  const patternCenterY = -outerH / 2 + PATTERN_PAIR_OFFSET_Y;
+  const leftPatternX = patternCenterX - PATTERN_PAIR_GAP / 2;
+  const rightPatternX = patternCenterX + PATTERN_PAIR_GAP / 2;
+
   return (
     <group position={[t.x - PAGE_WIDTH / 2 - BW, t.y + BW, zBasePosition]}>
       <a.group
@@ -292,6 +324,20 @@ export function VerseFiveMetallic() {
             </RenderTexture>
           </meshStandardMaterial>
         </mesh>
+
+        <primitive
+          object={patternScene}
+          position={[leftPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
+          scale={[PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE]}
+          renderOrder={105}
+        />
+
+        <primitive
+          object={patternScene.clone(true)}
+          position={[rightPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
+          scale={[-PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE]}
+          renderOrder={105}
+        />
       </a.group>
 
       {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}

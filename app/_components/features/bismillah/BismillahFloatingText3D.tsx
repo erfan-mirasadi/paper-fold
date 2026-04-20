@@ -5,8 +5,10 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { PAGE_WIDTH, SURAH_DATA } from "../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../data/theme";
+import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 
 const TOP_EDGE_OFFSET = 0.01;
+const MANUAL_DOWN_SHIFT = -0.0008;
 const FRONT_CLEARANCE = 0.016;
 const EXTRUSION_LAYERS = 8;
 const EXTRUSION_STEP = 0.00085;
@@ -20,21 +22,31 @@ export function BismillahFloatingText3D({
   surfaceZ,
   isDarkMode = false,
 }: BismillahFloatingText3DProps) {
+  const isElevatedPhase = useElevatedStore((s) => s.phase === "elevated");
+
   const layers = isDarkMode ? 4 : EXTRUSION_LAYERS;
   const step = isDarkMode ? 0.0006 : EXTRUSION_STEP;
+  const baseRenderOrder = isElevatedPhase ? 70 : 270;
+  const frontRenderOrder = isElevatedPhase ? 89 : 290;
 
   const bismillahColor = isDarkMode ? "#F2F2ED" : "#000000";
 
   const depthColors = useMemo(() => {
     const color = new THREE.Color(bismillahColor);
 
-    return Array.from({ length: layers }, (_, i) => {
+    return Array.from({ length: layers }, () => {
       return color.clone().getStyle();
     });
   }, [bismillahColor, layers]);
 
   return (
-    <group position={[0, TOP_EDGE_OFFSET, surfaceZ + FRONT_CLEARANCE]}>
+    <group
+      position={[
+        0,
+        TOP_EDGE_OFFSET + MANUAL_DOWN_SHIFT,
+        surfaceZ + FRONT_CLEARANCE,
+      ]}
+    >
       {depthColors.map((color, i) => {
         const z = -(layers - i) * step;
 
@@ -50,7 +62,7 @@ export function BismillahFloatingText3D({
             textAlign="center"
             direction="rtl"
             maxWidth={PAGE_WIDTH * 0.9}
-            renderOrder={270 + i}
+            renderOrder={baseRenderOrder + i}
           >
             {SURAH_DATA.bismillah}
             <meshStandardMaterial
@@ -73,7 +85,7 @@ export function BismillahFloatingText3D({
         textAlign="center"
         direction="rtl"
         maxWidth={PAGE_WIDTH * 0.9}
-        renderOrder={290}
+        renderOrder={frontRenderOrder}
       >
         {SURAH_DATA.bismillah}
         <meshPhysicalMaterial

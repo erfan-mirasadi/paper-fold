@@ -20,7 +20,11 @@ import {
   TEXT_SIZES,
 } from "../data/theme";
 export * from "../data/theme";
-import { CAPSULE_BORDER_WIDTH, CIRCLE_BORDER_WIDTH } from "../data/SurahConfig";
+import {
+  CAPSULE_BORDER_WIDTH,
+  CIRCLE_BORDER_WIDTH,
+  TOP_LABEL_WIDTH,
+} from "../data/SurahConfig";
 
 // ROUNDED SHAPE GEOMETRY
 interface RoundedShapeProps {
@@ -186,6 +190,7 @@ interface TopLabelProps {
   y: number;
   z?: number;
   text: string;
+  labelWidth?: number;
   animateOnScroll?: boolean;
   scrollStart?: number;
   scrollRange?: number;
@@ -203,6 +208,7 @@ export function TopLabel({
   y,
   z = 0,
   text,
+  labelWidth = TOP_LABEL_WIDTH,
   animateOnScroll = false,
   scrollStart = 0.4,
   scrollRange = 0.15,
@@ -214,7 +220,7 @@ export function TopLabel({
   bgColor = WHITE_BASE,
   renderOrder,
 }: TopLabelProps) {
-  const w = 0.4;
+  const w = labelWidth;
   const h = 0.046;
   const radius = h / 2;
 
