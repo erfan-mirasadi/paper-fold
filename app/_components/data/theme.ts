@@ -32,7 +32,6 @@ export const S1_VERSE_NUMBER_BORDER = "#8B7C74";
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#C4963B";
-export const S1_ANA_BORDER = "#CFA95E"; // esmesh baiad avaz she hamon backgrounde capsole 5
 
 // Verse 5 Specifics
 export const S1_VERSE_5_NUMBER_BG = "#000000";
@@ -47,8 +46,8 @@ export const S1_NEON_GOLD = "#FFD700";
 // ----------------------------------------------------------------------------
 // TOP LABEL — Section-specific background & border (Section 1)
 // ----------------------------------------------------------------------------
-export const S1_TOP_LABEL_BG = "#F7E9C8";
-export const S1_TOP_LABEL_BORDER = "#fbf1d5";
+export const S1_TOP_LABEL_BG = "#EFE9DC";
+export const S1_TOP_LABEL_BORDER = "#EFE9DC";
 
 // ----------------------------------------------------------------------------
 // 5. SECTION 2 — LOWER BLOCK PALETTE
@@ -62,7 +61,7 @@ export const MAROON_THEME = "#7c8cb0";
 export const MAROON_VERSE_BG = "#ebd2dc";
 export const GREEN_THEME = "#5E7367";
 export const GREEN_VERSE_BG = "#eaf2db";
-export const BLUE_THEME = "#A17B30";
+export const BLUE_THEME = "#C4963B";
 export const SG_BG = "#845775";
 export const SG_BORDER = "#F4ECD8";
 // ----------------------------------------------------------------------------
@@ -76,8 +75,9 @@ export const S2_TOP_LABEL_BORDER = "#72665F";
 // ----------------------------------------------------------------------------
 export const CAPSULE_BG_7_10_15_18 = "#CEE0E9";
 export const CAPSULE_BG_12_14 = "#eaf2db";
-export const CAPSULE_BG_6_19 = "#D9BC81";
+export const CAPSULE_BG_6_19 = "#E5CFA4";
 export const WHITE_VERSE_BG = "#ffffff";
+export const S1_ANA_BORDER = "#DBBD80"; // esmesh baiad avaz she hamon backgrounde capsole 5
 // CEE0E9
 // ----------------------------------------------------------------------------
 // 7. GLOBAL FONT PATH
