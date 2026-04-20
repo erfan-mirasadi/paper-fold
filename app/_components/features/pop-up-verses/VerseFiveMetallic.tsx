@@ -7,11 +7,12 @@ import {
   SURAH_TRANSFORMS,
   SURAH_DATA,
   PAGE_WIDTH,
+  CAPSULE_BORDER_WIDTH,
 } from "../../data/SurahConfig";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
   S1_ANA_BG,
-  S1_ANA_BORDER,
+  CAPSULE_BG_5,
   S1_ANA_LABEL_BG,
   S1_ANA_LABEL_TEXT,
   S1_VERSE_5_NUMBER_BG,
@@ -31,7 +32,7 @@ import { a, to, useSpring } from "@react-spring/three";
 // --- ADJUSTABLE PARAMETERS ---
 const EXTRUDE_DEPTH = 0.01; // How thick the 3D object is
 const Z_OFFSET = 0.01; // Distance from the paper surface
-const BW = 0.0055; // Border width to match VerseBox
+const BW = CAPSULE_BORDER_WIDTH; // Using global thickness
 const ANA_LABEL_DEPTH = 0.0035;
 const ANA_LABEL_Z_OFFSET = 0.0025;
 const ANA_LABEL_PIN_OVERLAP = 0.0015;
@@ -279,7 +280,7 @@ export function VerseFiveMetallic() {
                   number={data.number}
                   bg={S1_ANA_BG}
                   bgOpacity={0}
-                  border={S1_ANA_BORDER}
+                  border={CAPSULE_BG_5}
                   circleBorderCol={S1_VERSE_5_NUMBER_BORDER}
                   circleBg={S1_VERSE_5_NUMBER_BG}
                   circleTextCol={S1_VERSE_5_NUMBER_TEXT}

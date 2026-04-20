@@ -1,15 +1,3 @@
-// ============================================================================
-// SURAH CONFIG — SINGLE SOURCE OF TRUTH
-// Location: SurahLayout/core/SurahConfig.ts
-// Purpose: All layout math, content data, and shape-behavior flags live here.
-//          The UI reads this file and renders itself accordingly.
-//          To change visual structure, edit the flags here — NOT the components.
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// SECTION: TYPE DEFINITIONS
-// ----------------------------------------------------------------------------
-
 export interface Verse {
   number: number;
   text: string;
@@ -164,7 +152,7 @@ export const layoutMath = {
   anaAyetTabH: 0.032,
   anaAyetTabBorderWidth: 0.0035,
   // Positive values move only the Ana Ayet label downward.
-  anaAyetLabelDrop: 0.009,
+  anaAyetLabelDrop: 0.015, // Increased to move the label further down independently!
   sgPad: 0.04,
   sgBorderWidth: 0.006,
   boxExtOffset: 0.02,
@@ -172,6 +160,16 @@ export const layoutMath = {
 } satisfies Record<string, number>;
 
 export type LayoutConfig = typeof layoutMath;
+
+// ----------------------------------------------------------------------------
+// CAPSULE BORDER WIDTH
+// Controls the border thickness around all verse capsules (pill + non-pill).
+// Adjust this one value to change borders globally across the whole page.
+// ----------------------------------------------------------------------------
+export const CAPSULE_BORDER_WIDTH = 0.0039;
+
+// Controls the thickness of the border ring around verse numbers.
+export const CIRCLE_BORDER_WIDTH = 0.0035;
 
 // Section 1 neon border tuning.
 // Sizes live here so glow spread can be adjusted without touching JSX.

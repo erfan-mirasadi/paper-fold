@@ -20,6 +20,7 @@ import {
   TEXT_SIZES,
 } from "../data/theme";
 export * from "../data/theme";
+import { CAPSULE_BORDER_WIDTH, CIRCLE_BORDER_WIDTH } from "../data/SurahConfig";
 
 // ROUNDED SHAPE GEOMETRY
 interface RoundedShapeProps {
@@ -414,7 +415,8 @@ export const VerseBox = ({
   const finalX = x + shrinkX;
   const finalW = w - shrinkX * 2;
 
-  const bw = borderWidth ?? 0.0055;
+  // Single border width for ALL capsules — tunable from SurahConfig.ts
+  const bw = borderWidth ?? CAPSULE_BORDER_WIDTH;
   const rad = isPill ? h / 2 : 0.05;
   const cr = Math.min(h * 0.46, 0.035);
   const SMALL_PILL_OFFSET = 0.002;
@@ -461,9 +463,9 @@ export const VerseBox = ({
       {/* Verse number circle */}
       <group position={[cx, -h / 2, 0.002]}>
         <mesh renderOrder={12}>
-          <circleGeometry args={[cr - 0.002, 48]} />
+          <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
           <meshBasicMaterial
-            color={isBumpMap ? "#222222" : circleBg || WHITE_BASE}
+            color={isBumpMap ? "#222222" : (circleBg ?? bg)}
             depthTest={false}
             transparent={!isBumpMap}
             opacity={0.999}
@@ -472,7 +474,11 @@ export const VerseBox = ({
         <mesh position={[0, 0, -0.001]} renderOrder={12}>
           <circleGeometry args={[cr, 48]} />
           <meshBasicMaterial
-            color={isBumpMap ? BUMP_MAX : circleBorderCol || CIRCLE_BORDER}
+            color={
+              isBumpMap
+                ? BUMP_MAX
+                : (circleBorderCol ?? border ?? CIRCLE_BORDER)
+            }
             depthTest={false}
             transparent={!isBumpMap}
             opacity={0.999}
@@ -481,7 +487,9 @@ export const VerseBox = ({
         <Text
           position={[0, 0, 0.001]}
           fontSize={TEXT_SIZES.VERSE_NUMBER}
-          color={isBumpMap ? BUMP_MAX : circleTextCol || TEXT_DARK}
+          color={
+            isBumpMap ? BUMP_MAX : (circleTextCol ?? circleBorderCol ?? border)
+          }
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"

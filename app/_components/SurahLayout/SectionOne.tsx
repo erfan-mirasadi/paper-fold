@@ -12,10 +12,10 @@ import {
   S1_INNER_BG,
   S1_INNER_BORDER,
   S1_ANA_BG,
-  S1_ANA_BORDER,
+  CAPSULE_BG_5,
   S1_VERSE_NUMBER_BG,
   S1_VERSE_NUMBER_BORDER,
-  WHITE_BASE,
+  S1_VERSE_NUMBER_TEXT,
   BUMP_MAX,
   BUMP_DEEP,
   S1_TOP_LABEL_BG,
@@ -168,7 +168,7 @@ export function SectionOne({
             border={S1_INNER_BORDER}
             circleBorderCol={S1_VERSE_NUMBER_BORDER}
             circleBg={S1_VERSE_NUMBER_BG}
-            circleTextCol={WHITE_BASE}
+            circleTextCol={S1_VERSE_NUMBER_TEXT}
             isPill={true}
             isBumpMap={isBumpMap}
           />
@@ -187,10 +187,10 @@ export function SectionOne({
           verse={data.anaAyet.text}
           number={data.anaAyet.number}
           bg={S1_ANA_BG}
-          border={S1_ANA_BORDER}
-          circleBorderCol={S1_ANA_BORDER}
-          circleBg={S1_ANA_BORDER}
-          circleTextCol={WHITE_BASE}
+          border={CAPSULE_BG_5}
+          circleBorderCol={CAPSULE_BG_5}
+          circleBg={S1_ANA_BG}
+          circleTextCol={CAPSULE_BG_5}
           isPill={false}
           isBumpMap={isBumpMap}
         />

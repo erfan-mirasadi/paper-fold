@@ -14,7 +14,6 @@ import {
   S2_OUTER_BG,
   BLUE_THEME,
   CAPSULE_BG_6_19,
-  WHITE_BASE,
   BUMP_MAX,
   BUMP_DEEP,
   S2_TOP_LABEL_BG,
@@ -130,8 +129,8 @@ export function SectionTwo({
           bg={CAPSULE_BG_6_19}
           border={BLUE_THEME}
           circleBorderCol={BLUE_THEME}
-          circleBg={BLUE_THEME}
-          circleTextCol={WHITE_BASE}
+          circleBg={CAPSULE_BG_6_19}
+          circleTextCol={BLUE_THEME}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
           isBumpMap={isBumpMap}
@@ -162,8 +161,8 @@ export function SectionTwo({
           bg={CAPSULE_BG_6_19}
           border={BLUE_THEME}
           circleBorderCol={BLUE_THEME}
-          circleBg={BLUE_THEME}
-          circleTextCol={WHITE_BASE}
+          circleBg={CAPSULE_BG_6_19}
+          circleTextCol={BLUE_THEME}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
           isBumpMap={isBumpMap}

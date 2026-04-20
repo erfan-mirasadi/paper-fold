@@ -20,8 +20,8 @@ import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../data/SurahConfig";
 
 const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
-const CURVE_INWARD_OFFSET = 0.0085; // How far the bracket tip pokes inward
-const CURVE_DEEP_OFFSET_OUTER = 0.01; // Deeper tip for the center (12–14) bracket
+const CURVE_INWARD_OFFSET = 0.02; // How far the bracket tip pokes inward
+const CURVE_DEEP_OFFSET_OUTER = 0.03; // Deeper tip for the center (12–14) bracket
 const CURVE_DEEP_OFFSET_INNER = 0.03; // Deeper inner tip for center bracket
 const DEFAULT_VERSE_BORDER_WIDTH = 0.0055; // Matches VerseBox default border width
 

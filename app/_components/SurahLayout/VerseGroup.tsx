@@ -8,7 +8,6 @@ import {
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   WHITE_VERSE_BG,
-  WHITE_BASE,
   MAROON_THEME,
   GREEN_THEME,
 } from "../data/theme";
@@ -72,10 +71,9 @@ export function VerseGroup({
             number={v.number}
             bg={finalBg}
             border={borderColor}
-            borderWidth={0.009}
             circleBorderCol={borderColor}
-            circleBg={borderColor}
-            circleTextCol={WHITE_BASE}
+            circleBg={finalBg}
+            circleTextCol={borderColor}
             isPill={true}
             isBumpMap={isBumpMap}
           />

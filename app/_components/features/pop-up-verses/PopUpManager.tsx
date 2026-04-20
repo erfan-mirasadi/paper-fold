@@ -19,7 +19,6 @@ import {
   GREEN_THEME,
   BLUE_THEME,
   CAPSULE_BG_6_19,
-  WHITE_BASE,
 } from "../../data/theme";
 import {
   layoutMath,
@@ -119,7 +118,7 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
       border: S1_INNER_BORDER,
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
       circleBg: S1_VERSE_NUMBER_BG,
-      circleTextCol: "#ffffff",
+      circleTextCol: S1_VERSE_NUMBER_BORDER,
     });
   });
 
@@ -136,8 +135,8 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
     bg: CAPSULE_BG_6_19,
     border: BLUE_THEME,
     circleBorderCol: BLUE_THEME,
-    circleBg: BLUE_THEME,
-    circleTextCol: WHITE_BASE,
+    circleBg: CAPSULE_BG_6_19,
+    circleTextCol: BLUE_THEME,
     isPill: false,
   });
 
@@ -170,8 +169,8 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
       bg: CAPSULE_BG_7_10_15_18,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
-      circleBg: MAROON_THEME,
-      circleTextCol: "#ffffff",
+      circleBg: CAPSULE_BG_7_10_15_18,
+      circleTextCol: MAROON_THEME,
     });
   });
 
@@ -205,8 +204,8 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
       bg: CAPSULE_BG_12_14,
       border: GREEN_THEME,
       circleBorderCol: GREEN_THEME,
-      circleBg: GREEN_THEME,
-      circleTextCol: "#ffffff",
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
     });
   });
 
@@ -236,8 +235,8 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
       bg: CAPSULE_BG_7_10_15_18,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
-      circleBg: MAROON_THEME,
-      circleTextCol: "#ffffff",
+      circleBg: CAPSULE_BG_7_10_15_18,
+      circleTextCol: MAROON_THEME,
     });
   });
 
@@ -254,8 +253,8 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
     bg: CAPSULE_BG_6_19,
     border: BLUE_THEME,
     circleBorderCol: BLUE_THEME,
-    circleBg: BLUE_THEME,
-    circleTextCol: WHITE_BASE,
+    circleBg: CAPSULE_BG_6_19,
+    circleTextCol: BLUE_THEME,
     isPill: false,
   });
 
@@ -275,11 +274,11 @@ export function PopUpManager() {
   const VISIBILITY_THRESHOLDS: Record<string, number> = {
     g_1_2: 0,
     g_3_4: 0,
-    g_7_8: 0.50,
+    g_7_8: 0.5,
     g_9_10: 0.75,
-    g_11_12_13_14: 0.90,
-    g_15_16: 0.90,
-    g_17_18: 0.90,
+    g_11_12_13_14: 0.9,
+    g_15_16: 0.9,
+    g_17_18: 0.9,
   };
 
   return (
@@ -337,7 +336,7 @@ export function PopUpManager() {
           ...getPopUpTrackerPosition([], true, s1Top),
           zBaseOffset,
         ]}
-        scrollThreshold={0.90}
+        scrollThreshold={0.9}
       />
 
       {/* Static Metallic Verse 5 (stuck to paper) */}
