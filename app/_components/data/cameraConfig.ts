@@ -11,16 +11,16 @@ const BASE_CAMERA = {
   },
   viewPresetOffsets: {
     left: {
-      rotateY: -0.58,
-      rotateX: 0.2,
+      rotateY: -0.38,
+      rotateX: 0.1,
     },
     default: {
       rotateY: 0,
       rotateX: 0,
     },
     right: {
-      rotateY: 0.58,
-      rotateX: 0.2,
+      rotateY: 0.38,
+      rotateX: 0.1,
     },
   },
   zoom: {
