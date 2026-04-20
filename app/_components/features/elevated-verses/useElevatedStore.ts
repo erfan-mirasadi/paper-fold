@@ -64,11 +64,19 @@ interface ElevatedStoreState {
   activeSectionIds: ElevatedSectionId[];
   hasEverElevated: boolean;
   phase: ElevatedPhase;
-  isEnabledByScroll: boolean;
-  setEnabledByScroll: (enabled: boolean) => void;
+  unlockedVerseIds: number[];
+  syncScrollOffset: (offset: number) => void;
   elevateVerse: (verseId: number) => void;
   elevateVerses: (verseIds: number[], sectionId?: ElevatedSectionId) => void;
   dismiss: () => void;
+}
+
+function getUnlockedElevatedVerses(offset: number): number[] {
+  if (offset >= 0.9) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+  if (offset >= 0.75) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  if (offset >= 0.5) return [1, 2, 3, 4, 5, 6, 7, 8];
+  if (offset >= 0.25) return [1, 2, 3, 4, 5, 6];
+  return [1, 2, 3, 4, 5];
 }
 
 export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
@@ -78,31 +86,50 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   activeSectionIds: [],
   hasEverElevated: false,
   phase: "idle",
-  isEnabledByScroll: false,
+  unlockedVerseIds: getUnlockedElevatedVerses(0),
 
-  setEnabledByScroll: (enabled) => {
-    const { isEnabledByScroll } = get();
-    if (isEnabledByScroll === enabled) return;
+  syncScrollOffset: (offset) => {
+    const nextUnlocked = getUnlockedElevatedVerses(offset);
+    const { unlockedVerseIds, activeVerseIds, activeSectionId } = get();
 
-    if (!enabled) {
-      set({
-        isEnabledByScroll: false,
-        activeVerseId: null,
-        activeVerseIds: [],
-        activeSectionId: null,
-        activeSectionIds: [],
-        phase: "idle",
-      });
-      return;
+    // Check if the unlocked verses changed
+    if (nextUnlocked.length !== unlockedVerseIds.length) {
+      set({ unlockedVerseIds: nextUnlocked });
+
+      // Identify verses that are active but no longer unlocked
+      const newActive = activeVerseIds.filter((id) => nextUnlocked.includes(id));
+
+      if (newActive.length !== activeVerseIds.length) {
+        if (newActive.length === 0) {
+          set({
+            activeVerseId: null,
+            activeVerseIds: [],
+            activeSectionId: null,
+            activeSectionIds: [],
+            phase: "idle",
+          });
+        } else {
+          const nextSectionIds = resolveSectionIds(newActive);
+          set({
+            activeVerseId: newActive[0] ?? null,
+            activeVerseIds: newActive,
+            activeSectionIds: nextSectionIds,
+            activeSectionId: pickActiveSectionId(
+              nextSectionIds,
+              null,
+              activeSectionId,
+            ),
+          });
+        }
+      }
     }
-
-    set({ isEnabledByScroll: true });
   },
 
-  elevateVerse: (verseId) => {
-    if (!get().isEnabledByScroll) return;
 
-    const { activeVerseIds, hasEverElevated, activeSectionId } = get();
+
+  elevateVerse: (verseId) => {
+    const { activeVerseIds, hasEverElevated, activeSectionId, unlockedVerseIds } = get();
+    if (!unlockedVerseIds.includes(verseId)) return;
     const hasVerse = activeVerseIds.includes(verseId);
     const nextIds = normalizeVerseIds(
       hasVerse
@@ -127,9 +154,11 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   },
 
   elevateVerses: (verseIds, sectionId) => {
-    if (!get().isEnabledByScroll) return;
-
-    const normalized = normalizeVerseIds(verseIds);
+    const { activeVerseIds, hasEverElevated, activeSectionId, unlockedVerseIds } = get();
+    
+    // Only process verseIds that are unlocked
+    const allowedVerseIds = verseIds.filter((id) => unlockedVerseIds.includes(id));
+    const normalized = normalizeVerseIds(allowedVerseIds);
     if (normalized.length === 0) {
       set({
         activeVerseId: null,
@@ -141,7 +170,6 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       return;
     }
 
-    const { activeVerseIds, hasEverElevated, activeSectionId } = get();
     const currentSet = new Set(activeVerseIds);
     const allSelected = normalized.every((id) => currentSet.has(id));
 

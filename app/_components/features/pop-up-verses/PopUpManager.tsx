@@ -1,6 +1,4 @@
 "use client";
-import { useScroll } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
 import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
@@ -273,26 +271,15 @@ export function PopUpManager() {
   const groups = usePopUpStore((state) => state.popUpGroups);
   const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const setScrollThresholdReached = usePopUpStore(
-    (state) => state.setPopUpScrollThresholdReached,
-  );
-
-  const scroll = useScroll();
-  useFrame(() => {
-    if (scroll) {
-      // 0.9 is near the end of the 2-page scroll
-      setScrollThresholdReached(scroll.offset >= 0.9);
-    }
-  });
 
   const VISIBILITY_THRESHOLDS: Record<string, number> = {
     g_1_2: 0,
     g_3_4: 0,
-    g_7_8: 0.15,
-    g_9_10: 0.35,
-    g_11_12_13_14: 0.55,
-    g_15_16: 0.75,
-    g_17_18: 0.85,
+    g_7_8: 0.50,
+    g_9_10: 0.75,
+    g_11_12_13_14: 0.90,
+    g_15_16: 0.90,
+    g_17_18: 0.90,
   };
 
   return (
@@ -350,7 +337,7 @@ export function PopUpManager() {
           ...getPopUpTrackerPosition([], true, s1Top),
           zBaseOffset,
         ]}
-        scrollThreshold={0.88}
+        scrollThreshold={0.90}
       />
 
       {/* Static Metallic Verse 5 (stuck to paper) */}

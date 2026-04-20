@@ -240,11 +240,24 @@ function buildHitboxes(): VerseHitbox[] {
 
 const HITBOXES = buildHitboxes();
 
-const canUseElevatedInteraction = () =>
-  useElevatedStore.getState().isEnabledByScroll;
+const canUseElevatedInteraction = (
+  kind?: string,
+  verseId?: number,
+  verseIds?: number[]
+) => {
+  const unlocked = useElevatedStore.getState().unlockedVerseIds;
+  if (kind === "verse" && typeof verseId === "number") {
+    return unlocked.includes(verseId);
+  }
+  if (kind === "section" && Array.isArray(verseIds)) {
+    return verseIds.some((id) => unlocked.includes(id));
+  }
+  return false;
+};
 
 const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
-  if (!canUseElevatedInteraction()) {
+  const { kind, verseId, verseIds } = e.object.userData;
+  if (!canUseElevatedInteraction(kind, verseId, verseIds)) {
     document.body.style.cursor = "grab";
     return;
   }
@@ -258,12 +271,11 @@ const handlePointerOut = () => {
 };
 
 const handleClick = (e: ThreeEvent<MouseEvent>) => {
-  if (!canUseElevatedInteraction()) return;
+  const { kind, verseId, verseIds, sectionId } = e.object.userData;
+  if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
 
   e.stopPropagation();
   if (e.delta > 2) return;
-
-  const { kind, verseId, verseIds, sectionId } = e.object.userData;
   if (kind === "verse" && typeof verseId === "number") {
     useElevatedStore.getState().elevateVerse(verseId);
     return;
