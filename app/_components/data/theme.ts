@@ -32,7 +32,7 @@ export const S1_VERSE_NUMBER_BORDER = "#8B7C74";
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_INNER_BORDER = "#e2caae";
 export const S1_ANA_BG = "#C4963B";
-export const S1_ANA_BORDER = "#A17B30"; // esmesh baiad avaz she hamon backgrounde capsole 5
+export const S1_ANA_BORDER = "#CFA95E"; // esmesh baiad avaz she hamon backgrounde capsole 5
 
 // Verse 5 Specifics
 export const S1_VERSE_5_NUMBER_BG = "#000000";
@@ -57,12 +57,12 @@ export const S2_OUTER_BG = "#DFDAD8";
 export const S2_OUTER_BORDER = "#8B7C74";
 export const HOLLOW_BORDER_COLOR = "#72665F";
 export const HOLLOW_BORDER_INNER = "#B5ABA6";
-export const HOLLOW_CONNECTOR_INNER_BG_1_3 = "#A0948D";
-export const MAROON_THEME = "#5E7367";
+export const HOLLOW_CONNECTOR_INNER_BG_1_3 = "#A18B7F";
+export const MAROON_THEME = "#7c8cb0";
 export const MAROON_VERSE_BG = "#ebd2dc";
-export const GREEN_THEME = "#813D22";
+export const GREEN_THEME = "#5E7367";
 export const GREEN_VERSE_BG = "#eaf2db";
-export const BLUE_THEME = "#7c8cb0";
+export const BLUE_THEME = "#A17B30";
 export const SG_BG = "#845775";
 export const SG_BORDER = "#F4ECD8";
 // ----------------------------------------------------------------------------
@@ -74,11 +74,11 @@ export const S2_TOP_LABEL_BORDER = "#72665F";
 // ----------------------------------------------------------------------------
 // 6. CAPSULE (VERSE BOX) BACKGROUND COLORS
 // ----------------------------------------------------------------------------
-export const CAPSULE_BG_7_10_15_18 = "#E0E6D0";
-export const CAPSULE_BG_12_14 = "#EED1C9";
-export const CAPSULE_BG_6_19 = "#CEE0E9";
+export const CAPSULE_BG_7_10_15_18 = "#CEE0E9";
+export const CAPSULE_BG_12_14 = "#eaf2db";
+export const CAPSULE_BG_6_19 = "#D9BC81";
 export const WHITE_VERSE_BG = "#ffffff";
-
+// CEE0E9
 // ----------------------------------------------------------------------------
 // 7. GLOBAL FONT PATH
 // ----------------------------------------------------------------------------

@@ -165,7 +165,7 @@ export const layoutMath = {
   anaAyetTabBorderWidth: 0.0035,
   // Positive values move only the Ana Ayet label downward.
   anaAyetLabelDrop: 0.009,
-  sgPad: 0.03,
+  sgPad: 0.04,
   sgBorderWidth: 0.006,
   boxExtOffset: 0.02,
   extraRowGap: 0.01,
@@ -463,9 +463,9 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
 
   return {
     s1: {
-      frameX: startX,
+      frameX: startX - lm.sgPad,
       frameY: lm.s1Top,
-      frameW: lm.sectionW,
+      frameW: lm.sectionW + lm.sgPad * 2,
       frameH: lm.s1H,
       verses: s1Verses,
       anaAyet: {

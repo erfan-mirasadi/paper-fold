@@ -30,8 +30,8 @@ const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
 
 // ── Line width constants
 // Edit these two values to adjust the thickness of the side-curve outlines.
-export const CURVE_OUTER_LINE_WIDTH = 4;
-export const CURVE_INNER_LINE_WIDTH = 4;
+export const CURVE_OUTER_LINE_WIDTH = 2;
+export const CURVE_INNER_LINE_WIDTH = 2;
 
 interface SideCurvesProps {
   layout: LayoutConfig;
