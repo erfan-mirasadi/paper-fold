@@ -13,25 +13,30 @@ const EXTRUSION_STEP = 0.00085;
 
 interface BismillahFloatingText3DProps {
   surfaceZ: number;
+  isDarkMode?: boolean;
 }
 
 export function BismillahFloatingText3D({
   surfaceZ,
+  isDarkMode = false,
 }: BismillahFloatingText3DProps) {
-  const depthColors = useMemo(() => {
-    const nearColor = new THREE.Color("#000000");
-    const farColor = new THREE.Color("#000000");
+  const layers = isDarkMode ? 4 : EXTRUSION_LAYERS;
+  const step = isDarkMode ? 0.0006 : EXTRUSION_STEP;
 
-    return Array.from({ length: EXTRUSION_LAYERS }, (_, i) => {
-      const t = i / Math.max(1, EXTRUSION_LAYERS - 1);
-      return farColor.clone().lerp(nearColor, t).getStyle();
+  const bismillahColor = isDarkMode ? "#F2F2ED" : "#000000";
+
+  const depthColors = useMemo(() => {
+    const color = new THREE.Color(bismillahColor);
+
+    return Array.from({ length: layers }, (_, i) => {
+      return color.clone().getStyle();
     });
-  }, []);
+  }, [bismillahColor, layers]);
 
   return (
     <group position={[0, TOP_EDGE_OFFSET, surfaceZ + FRONT_CLEARANCE]}>
       {depthColors.map((color, i) => {
-        const z = -(EXTRUSION_LAYERS - i) * EXTRUSION_STEP;
+        const z = -(layers - i) * step;
 
         return (
           <Text
@@ -62,7 +67,7 @@ export function BismillahFloatingText3D({
         position={[0, 0, 0.0008]}
         font={QURAN_FONT}
         fontSize={TEXT_SIZES.BISMILLAH}
-        color="#000000"
+        color={bismillahColor}
         anchorX="center"
         anchorY="bottom"
         textAlign="center"
@@ -72,7 +77,7 @@ export function BismillahFloatingText3D({
       >
         {SURAH_DATA.bismillah}
         <meshPhysicalMaterial
-          color="#000000"
+          color={bismillahColor}
           metalness={1}
           roughness={0.12}
           clearcoat={1}

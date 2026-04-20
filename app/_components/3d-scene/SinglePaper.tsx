@@ -101,10 +101,12 @@ const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // 
 
 interface SinglePaperProps {
   isFolded?: boolean;
+  isDarkMode?: boolean;
 }
 
 export const SinglePaper: React.FC<SinglePaperProps> = ({
   isFolded = false,
+  isDarkMode = false,
 }) => {
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
@@ -343,7 +345,10 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
         </meshStandardMaterial>
       </primitive>
 
-      <BismillahFloatingText3D surfaceZ={PAGE_DEPTH / 2} />
+      <BismillahFloatingText3D
+        surfaceZ={PAGE_DEPTH / 2}
+        isDarkMode={isDarkMode}
+      />
     </group>
   );
 };

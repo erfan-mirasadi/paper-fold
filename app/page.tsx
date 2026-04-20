@@ -65,7 +65,7 @@ export default function Home() {
             <Effects glitchTrigger={glitchKey} />
             <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />
-              <Experience />
+              <Experience isDarkMode={isDarkMode} />
               {/* <TafsirScrollTracker /> */}
             </ScrollControls>
             <VerseNeonTracker />

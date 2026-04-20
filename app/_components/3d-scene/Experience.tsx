@@ -20,9 +20,13 @@ import { CAMERA_CONFIG } from "../data/cameraConfig";
 
 interface ExperienceProps {
   isFolded?: boolean;
+  isDarkMode?: boolean;
 }
 
-export function Experience({ isFolded = false }: ExperienceProps) {
+export function Experience({
+  isFolded = false,
+  isDarkMode = false,
+}: ExperienceProps) {
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
     // Dismiss elevated verse on background click
@@ -45,7 +49,7 @@ export function Experience({ isFolded = false }: ExperienceProps) {
       <CameraViewController />
 
       <group rotation-x={-Math.PI / 4}>
-        <SinglePaper isFolded={isFolded} />
+        <SinglePaper isFolded={isFolded} isDarkMode={isDarkMode} />
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels />
         <PopUpManager />

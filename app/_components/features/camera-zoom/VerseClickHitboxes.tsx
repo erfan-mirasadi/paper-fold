@@ -255,21 +255,6 @@ const canUseElevatedInteraction = (
   return false;
 };
 
-const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
-  const { kind, verseId, verseIds } = e.object.userData;
-  if (!canUseElevatedInteraction(kind, verseId, verseIds)) {
-    document.body.style.cursor = "grab";
-    return;
-  }
-
-  e.stopPropagation();
-  document.body.style.cursor = "pointer";
-};
-
-const handlePointerOut = () => {
-  document.body.style.cursor = "grab";
-};
-
 const handleClick = (e: ThreeEvent<MouseEvent>) => {
   const { kind, verseId, verseIds, sectionId } = e.object.userData;
   if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
@@ -306,8 +291,6 @@ export function VerseClickHitboxes() {
             verseIds: hb.verseIds,
           }}
           onClick={handleClick}
-          onPointerOver={handlePointerOver}
-          onPointerOut={handlePointerOut}
           geometry={hitBoxGeom}
           material={hitBoxMaterial}
         />

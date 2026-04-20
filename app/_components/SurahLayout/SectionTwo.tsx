@@ -186,7 +186,7 @@ export function SectionTwo({
           z={0.004}
           text={data.topLabel}
           animateOnScroll={true}
-          scrollStart={0.65}
+          scrollStart={0.55}
           scrollRange={0.18}
           isBumpMap={isBumpMap}
           partialBorder={true}
@@ -201,7 +201,7 @@ export function SectionTwo({
           z={0.004}
           text={data.bottomLabel}
           animateOnScroll={true}
-          scrollStart={0.65}
+          scrollStart={0.55}
           scrollRange={0.18}
           isBumpMap={isBumpMap}
           partialBorder={true}
