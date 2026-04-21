@@ -206,7 +206,7 @@ function ElevatedLayer({
             color="#000000"
             transparent
             depthWrite={false}
-            depthTest={false}
+            depthTest={true}
             toneMapped={false}
             opacity={to(
               [spring.shadowOpacity, spring.shadowVisibility],
