@@ -47,12 +47,16 @@ export function isSectionDragLocked(sectionId: ElevatedSectionId): boolean {
 
 export const useDragState = create<{
   hasDragged: boolean;
+  isPaperDocked: boolean;
   markDragged: () => void;
+  dockPaper: () => void;
   reset: () => void;
 }>((set) => ({
   hasDragged: false,
+  isPaperDocked: false,
   markDragged: () => set({ hasDragged: true }),
-  reset: () => set({ hasDragged: false }),
+  dockPaper: () => set({ isPaperDocked: true }),
+  reset: () => set({ hasDragged: false, isPaperDocked: false }),
 }));
 
 export function resetAllDrags() {

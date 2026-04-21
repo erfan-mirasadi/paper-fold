@@ -4,6 +4,7 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
+import { a, useSpring } from "@react-spring/three";
 import { useCallback } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
@@ -24,10 +25,15 @@ interface ExperienceProps {
   isDarkMode?: boolean;
 }
 
+//variables when elevated verse is draged and paper is docked
+const PAPER_DOCK_X = -0.9;
+const PAPER_DOCK_SCALE = 0.9;
+
 export function Experience({
   isFolded = false,
   isDarkMode = false,
 }: ExperienceProps) {
+  const isPaperDocked = useDragState((s) => s.isPaperDocked);
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
     const { hasDragged } = useDragState.getState();
@@ -41,6 +47,12 @@ export function Experience({
     }
   }, []);
 
+  const { paperOffsetX, paperScale } = useSpring({
+    paperOffsetX: isPaperDocked ? PAPER_DOCK_X : 0,
+    paperScale: isPaperDocked ? PAPER_DOCK_SCALE : 1,
+    config: { mass: 1.4, tension: 170, friction: 26 },
+  });
+
   return (
     <>
       <PerspectiveCamera
@@ -51,13 +63,19 @@ export function Experience({
       <CameraManager />
       <CameraViewController />
 
-      <group rotation-x={-Math.PI / 4}>
+      <a.group
+        rotation-x={-Math.PI / 4}
+        position-x={paperOffsetX}
+        scale-x={paperScale}
+        scale-y={paperScale}
+        scale-z={paperScale}
+      >
         <SinglePaper isFolded={isFolded} isDarkMode={isDarkMode} />
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels />
         <PopUpManager />
         <VerseClickHitboxes />
-      </group>
+      </a.group>
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
         <planeGeometry args={[50, 50]} />

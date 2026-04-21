@@ -2,7 +2,10 @@
 
 import { motion } from "framer-motion";
 import { useFoldStore } from "../3d-scene/ScrollManager";
-import { useDragState, resetAllDrags } from "../features/elevated-verses/drag/dragEngine";
+import {
+  useDragState,
+  resetAllDrags,
+} from "../features/elevated-verses/drag/dragEngine";
 
 interface NavigationOverlayProps {
   isDarkMode?: boolean;
@@ -15,6 +18,7 @@ export function NavigationOverlay({
   const currentOffset = useFoldStore((s) => s.currentOffset);
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
   const hasDragged = useDragState((s) => s.hasDragged);
+  const isPaperDocked = useDragState((s) => s.isPaperDocked);
 
   // Keep label/icon color fixed while the glass surface adapts to theme.
   const accentColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
@@ -148,22 +152,24 @@ export function NavigationOverlay({
         zIndex: 100,
       }}
     >
-      <NavButton
-        onClick={handleSmartTransition}
-        icon={activeIcon}
-        label={buttonLabel}
-        isDarkMode={isDarkMode}
-        isPending={isTransitioning}
-        accentColor={accentColor}
-        textColor={textColor}
-        glassBg={glassBackground}
-        glassBorder={glassBorder}
-        glassShadow={glassShadow}
-        glassHoverBg={glassHoverBackground}
-        glassHoverBorderColor={glassHoverBorderColor}
-        glassHoverShadow={glassHoverShadow}
-        variants={itemVariants}
-      />
+      {!isPaperDocked && (
+        <NavButton
+          onClick={handleSmartTransition}
+          icon={activeIcon}
+          label={buttonLabel}
+          isDarkMode={isDarkMode}
+          isPending={isTransitioning}
+          accentColor={accentColor}
+          textColor={textColor}
+          glassBg={glassBackground}
+          glassBorder={glassBorder}
+          glassShadow={glassShadow}
+          glassHoverBg={glassHoverBackground}
+          glassHoverBorderColor={glassHoverBorderColor}
+          glassHoverShadow={glassHoverShadow}
+          variants={itemVariants}
+        />
+      )}
       {hasDragged && (
         <NavButton
           onClick={resetAllDrags}

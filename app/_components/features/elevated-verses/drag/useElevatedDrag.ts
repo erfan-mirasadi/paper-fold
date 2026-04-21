@@ -1,5 +1,5 @@
 import { useRef, useMemo } from "react";
-import { Plane, Vector3, Quaternion, Matrix4 } from "three";
+import { Plane, Vector3, Quaternion } from "three";
 import { SpringValue } from "@react-spring/three";
 import { ThreeEvent } from "@react-three/fiber";
 import {
@@ -15,6 +15,11 @@ const _delta = new Vector3();
 const _quat = new Quaternion();
 const _pos = new Vector3();
 const _scale = new Vector3();
+
+type PointerCaptureTarget = EventTarget & {
+  setPointerCapture?: (pointerId: number) => void;
+  releasePointerCapture?: (pointerId: number) => void;
+};
 
 /**
  * Ultra-lightweight drag hook for R3F objects.
@@ -83,7 +88,7 @@ export function useElevatedDrag({
 
       // Pointer capture for reliable move/up tracking
       try {
-        (e.target as any)?.setPointerCapture?.(e.pointerId);
+        (e.target as PointerCaptureTarget)?.setPointerCapture?.(e.pointerId);
       } catch {}
 
       if (typeof document !== "undefined") {
@@ -121,12 +126,19 @@ export function useElevatedDrag({
     };
 
     const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
+      const shouldDockPaper = ref.current.dragMarked;
       e.stopPropagation();
       ref.current.active = false;
       ref.current.dragMarked = false;
 
+      if (shouldDockPaper) {
+        useDragState.getState().dockPaper();
+      }
+
       try {
-        (e.target as any)?.releasePointerCapture?.(e.pointerId);
+        (e.target as PointerCaptureTarget)?.releasePointerCapture?.(
+          e.pointerId,
+        );
       } catch {}
 
       if (typeof document !== "undefined") {
