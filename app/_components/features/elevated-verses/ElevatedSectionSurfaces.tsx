@@ -26,10 +26,15 @@ import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
 } from "../../data/theme";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
-import { ELEVATED_RETURN_SYNC_MS, useElevatedStore } from "./useElevatedStore";
+import {
+  ELEVATED_RETURN_SYNC_MS,
+  useElevatedStore,
+  type ElevatedSectionId,
+} from "./useElevatedStore";
+import { dragEngine } from "./drag/dragEngine";
+import { useElevatedDrag } from "./drag/useElevatedDrag";
 
 const SURFACE_NORMAL_SCALE = new Vector2(0.8, 0.8);
-// 1 = no change, lower values make elevated section surfaces darker.
 const ELEVATED_SURFACE_DARKNESS = 0.7;
 
 function clamp(value: number, min: number, max: number): number {
@@ -43,7 +48,6 @@ function buildSectionNormalMap(
   w: number,
   h: number,
 ): Texture {
-  // Lock each elevated surface to the same page-space UV range as the base paper.
   const xStart = clamp(x, 0, PAGE_WIDTH);
   const xEnd = clamp(x + w, 0, PAGE_WIDTH);
   const yTop = clamp(y, -PAGE_HEIGHT, 0);
@@ -127,6 +131,7 @@ function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
   return { liftZ, opacity, shadowOpacity, shadowVisibility };
 }
 
+// ─── Pure visual layer, no drag logic ──────────────────────────────────
 interface ElevatedLayerProps {
   x: number;
   y: number;
@@ -230,6 +235,37 @@ function ElevatedLayer({
   );
 }
 
+// ─── Draggable section wrapper ─────────────────────────────────────────
+// Groups all layers of a section under ONE drag handle, so the whole
+// section moves together when dragged from any point.
+function DraggableSectionGroup({
+  sectionId,
+  isActive,
+  children,
+}: {
+  sectionId: ElevatedSectionId;
+  isActive: boolean;
+  children: React.ReactNode;
+}) {
+  const sectionDrag = dragEngine.sections[sectionId];
+  const dragBind = useElevatedDrag({
+    enabled: isActive,
+    springX: sectionDrag.x,
+    springY: sectionDrag.y,
+    dragSectionId: sectionId,
+  });
+
+  return (
+    <a.group
+      {...dragBind}
+      position-x={sectionDrag.x}
+      position-y={sectionDrag.y}
+    >
+      {children}
+    </a.group>
+  );
+}
+
 export function ElevatedSectionSurfaces() {
   const paperTextureNormal = useTexture(
     "/Paper-Texture-7_normal.png",
@@ -245,13 +281,13 @@ export function ElevatedSectionSurfaces() {
   );
 
   const activeSectionIds = useElevatedStore((s) => s.activeSectionIds);
-  const s1Spring = useSectionSurfaceSpring(activeSectionIds.includes("s1"));
-  const s2TopSpring = useSectionSurfaceSpring(
-    activeSectionIds.includes("s2_top"),
-  );
-  const s2BottomSpring = useSectionSurfaceSpring(
-    activeSectionIds.includes("s2_bottom"),
-  );
+  const s1Active = activeSectionIds.includes("s1");
+  const s2TopActive = activeSectionIds.includes("s2_top");
+  const s2BottomActive = activeSectionIds.includes("s2_bottom");
+
+  const s1Spring = useSectionSurfaceSpring(s1Active);
+  const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
+  const s2BottomSpring = useSectionSurfaceSpring(s2BottomActive);
 
   const s1 = SURAH_TRANSFORMS.s1;
   const s2 = SURAH_TRANSFORMS.s2;
@@ -275,13 +311,7 @@ export function ElevatedSectionSurfaces() {
     const middleH = outerH - innerBorderInset * 2;
 
     return {
-      outer: {
-        x: outerX,
-        y: outerY,
-        w: outerW,
-        h: outerH,
-        radius: 0.025,
-      },
+      outer: { x: outerX, y: outerY, w: outerW, h: outerH, radius: 0.025 },
       middle: {
         x: middleX,
         y: middleY,
@@ -313,110 +343,116 @@ export function ElevatedSectionSurfaces() {
 
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
-      {/* Section 1 outer background stack */}
-      <ElevatedLayer
-        x={s1.frameX}
-        y={s1.frameY}
-        w={s1.frameW}
-        h={s1.frameH}
-        radius={0.02}
-        color={S1_OUTER_BORDER}
-        paperNormalTexture={paperTextureNormal}
-        spring={s1Spring}
-      />
-      <ElevatedLayer
-        x={s1.frameX + s1.borderWidth}
-        y={s1.frameY - s1.borderWidth}
-        w={s1.frameW - s1.borderWidth * 2}
-        h={s1.frameH - s1.borderWidth * 2}
-        radius={0.017}
-        color={S1_OUTER_BG}
-        paperNormalTexture={paperTextureNormal}
-        spring={s1Spring}
-        zOffset={0.001}
-        shadow
-        shadowStrength={0.95}
-      />
+      {/* ─── Section 1 ─────────────────────────────────────────────── */}
+      <DraggableSectionGroup sectionId="s1" isActive={s1Active}>
+        <ElevatedLayer
+          x={s1.frameX}
+          y={s1.frameY}
+          w={s1.frameW}
+          h={s1.frameH}
+          radius={0.02}
+          color={S1_OUTER_BORDER}
+          paperNormalTexture={paperTextureNormal}
+          spring={s1Spring}
+        />
+        <ElevatedLayer
+          x={s1.frameX + s1.borderWidth}
+          y={s1.frameY - s1.borderWidth}
+          w={s1.frameW - s1.borderWidth * 2}
+          h={s1.frameH - s1.borderWidth * 2}
+          radius={0.017}
+          color={S1_OUTER_BG}
+          paperNormalTexture={paperTextureNormal}
+          spring={s1Spring}
+          zOffset={0.001}
+          shadow
+          shadowStrength={0.95}
+        />
+      </DraggableSectionGroup>
 
-      {/* Section 2 top 5-verse connector background stack */}
-      <ElevatedLayer
-        x={topConnector.outer.x}
-        y={topConnector.outer.y}
-        w={topConnector.outer.w}
-        h={topConnector.outer.h}
-        radius={topConnector.outer.radius}
-        color={HOLLOW_BORDER_COLOR}
-        paperNormalTexture={paperTextureNormal}
-        spring={s2TopSpring}
-        shadow
-        shadowStrength={0.62}
-      />
-      <ElevatedLayer
-        x={topConnector.middle.x}
-        y={topConnector.middle.y}
-        w={topConnector.middle.w}
-        h={topConnector.middle.h}
-        radius={topConnector.middle.radius}
-        color={HOLLOW_BORDER_INNER}
-        paperNormalTexture={paperTextureNormal}
-        spring={s2TopSpring}
-        zOffset={0.0006}
-        shadow
-        shadowStrength={0.8}
-      />
-      <ElevatedLayer
-        x={topConnector.fill.x}
-        y={topConnector.fill.y}
-        w={topConnector.fill.w}
-        h={topConnector.fill.h}
-        radius={topConnector.fill.radius}
-        color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-        paperNormalTexture={paperTextureNormal}
-        spring={s2TopSpring}
-        zOffset={0.0012}
-        shadow
-        shadowStrength={0.65}
-      />
+      {/* ─── Section 2 top connector ───────────────────────────────── */}
+      <DraggableSectionGroup sectionId="s2_top" isActive={s2TopActive}>
+        <ElevatedLayer
+          x={topConnector.outer.x}
+          y={topConnector.outer.y}
+          w={topConnector.outer.w}
+          h={topConnector.outer.h}
+          radius={topConnector.outer.radius}
+          color={HOLLOW_BORDER_COLOR}
+          paperNormalTexture={paperTextureNormal}
+          spring={s2TopSpring}
+          shadow
+          shadowStrength={0.62}
+        />
+        <ElevatedLayer
+          x={topConnector.middle.x}
+          y={topConnector.middle.y}
+          w={topConnector.middle.w}
+          h={topConnector.middle.h}
+          radius={topConnector.middle.radius}
+          color={HOLLOW_BORDER_INNER}
+          paperNormalTexture={paperTextureNormal}
+          spring={s2TopSpring}
+          zOffset={0.0006}
+          shadow
+          shadowStrength={0.8}
+        />
+        <ElevatedLayer
+          x={topConnector.fill.x}
+          y={topConnector.fill.y}
+          w={topConnector.fill.w}
+          h={topConnector.fill.h}
+          radius={topConnector.fill.radius}
+          color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+          paperNormalTexture={paperTextureNormal}
+          spring={s2TopSpring}
+          zOffset={0.0012}
+          shadow
+          shadowStrength={0.65}
+        />
+      </DraggableSectionGroup>
 
-      {/* Section 2 bottom 5-verse connector background stack */}
-      <ElevatedLayer
-        x={bottomConnector.outer.x}
-        y={bottomConnector.outer.y}
-        w={bottomConnector.outer.w}
-        h={bottomConnector.outer.h}
-        radius={bottomConnector.outer.radius}
-        color={HOLLOW_BORDER_COLOR}
-        paperNormalTexture={paperTextureNormal}
-        spring={s2BottomSpring}
-        shadow
-        shadowStrength={0.62}
-      />
-      <ElevatedLayer
-        x={bottomConnector.middle.x}
-        y={bottomConnector.middle.y}
-        w={bottomConnector.middle.w}
-        h={bottomConnector.middle.h}
-        radius={bottomConnector.middle.radius}
-        color={HOLLOW_BORDER_INNER}
-        paperNormalTexture={paperTextureNormal}
-        spring={s2BottomSpring}
-        zOffset={0.0006}
-        shadow
-        shadowStrength={0.8}
-      />
-      <ElevatedLayer
-        x={bottomConnector.fill.x}
-        y={bottomConnector.fill.y}
-        w={bottomConnector.fill.w}
-        h={bottomConnector.fill.h}
-        radius={bottomConnector.fill.radius}
-        color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-        paperNormalTexture={paperTextureNormal}
-        spring={s2BottomSpring}
-        zOffset={0.0012}
-        shadow
-        shadowStrength={0.65}
-      />
+      {/* ─── Section 2 bottom connector ────────────────────────────── */}
+      <DraggableSectionGroup sectionId="s2_bottom" isActive={s2BottomActive}>
+        <ElevatedLayer
+          x={bottomConnector.outer.x}
+          y={bottomConnector.outer.y}
+          w={bottomConnector.outer.w}
+          h={bottomConnector.outer.h}
+          radius={bottomConnector.outer.radius}
+          color={HOLLOW_BORDER_COLOR}
+          paperNormalTexture={paperTextureNormal}
+          spring={s2BottomSpring}
+          shadow
+          shadowStrength={0.62}
+        />
+        <ElevatedLayer
+          x={bottomConnector.middle.x}
+          y={bottomConnector.middle.y}
+          w={bottomConnector.middle.w}
+          h={bottomConnector.middle.h}
+          radius={bottomConnector.middle.radius}
+          color={HOLLOW_BORDER_INNER}
+          paperNormalTexture={paperTextureNormal}
+          spring={s2BottomSpring}
+          zOffset={0.0006}
+          shadow
+          shadowStrength={0.8}
+        />
+        <ElevatedLayer
+          x={bottomConnector.fill.x}
+          y={bottomConnector.fill.y}
+          w={bottomConnector.fill.w}
+          h={bottomConnector.fill.h}
+          radius={bottomConnector.fill.radius}
+          color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+          paperNormalTexture={paperTextureNormal}
+          spring={s2BottomSpring}
+          zOffset={0.0012}
+          shadow
+          shadowStrength={0.65}
+        />
+      </DraggableSectionGroup>
     </group>
   );
 }

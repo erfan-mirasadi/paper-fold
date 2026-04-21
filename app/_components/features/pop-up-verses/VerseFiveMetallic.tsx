@@ -33,6 +33,8 @@ import {
   useElevateAnimation,
 } from "../elevated-verses/useElevateAnimation";
 import { a, to, useSpring } from "@react-spring/three";
+import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
+import { dragEngine } from "../elevated-verses/drag/dragEngine";
 
 // --- ADJUSTABLE PARAMETERS ---
 const EXTRUDE_DEPTH = 0.01; // How thick the 3D object is
@@ -104,6 +106,8 @@ export function VerseFiveMetallic() {
 
   const t = SURAH_TRANSFORMS.s1.anaAyet;
   const data = SURAH_DATA.section1.anaAyet;
+  const verseDrag = dragEngine.verses[5];
+  const sectionDrag = dragEngine.sections.s1;
 
   const w = t.w;
   const h = t.h;
@@ -119,6 +123,18 @@ export function VerseFiveMetallic() {
   const labelRadius = labelH / 2;
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
+  const baseX = t.x - PAGE_WIDTH / 2 - BW;
+  const baseY = t.y + BW;
+
+  const dragBind = useElevatedDrag({
+    enabled: isElevated || isSectionSurfaceRaised,
+    springX: verseDrag.x,
+    springY: verseDrag.y,
+    dragVerseId: 5,
+  });
+
+  const dragX = to([verseDrag.x, sectionDrag.x], (vx, sx) => vx + sx);
+  const dragY = to([verseDrag.y, sectionDrag.y], (vy, sy) => vy + sy);
 
   const shadowScale = to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
     const liftProgress = normalizeLiftProgress(lift);
@@ -231,148 +247,155 @@ export function VerseFiveMetallic() {
   const rightPatternX = patternCenterX + PATTERN_PAIR_GAP / 2;
 
   return (
-    <group position={[t.x - PAGE_WIDTH / 2 - BW, t.y + BW, zBasePosition]}>
-      <a.group
-        position-x={shadowX}
-        position-y={shadowY}
-        position-z={to(surfaceLiftZ, (surfaceLift) => {
-          const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
-          const surfaceZBias = SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
-          return -Z_OFFSET + 0.001 + surfaceLift + surfaceZBias;
-        })}
-        scale-x={shadowScale}
-        scale-y={shadowScale}
-      >
-        <mesh renderOrder={90}>
-          <RoundedShapeComponent w={outerW} h={outerH} radius={outerRadius} />
-          <a.meshBasicMaterial
-            color="#000000"
-            transparent
-            depthTest={false}
-            depthWrite={false}
-            toneMapped={false}
-            opacity={finalShadowOpacity}
-          />
-        </mesh>
-      </a.group>
-
-      {/* Animated 3D Body + Content */}
-      <a.group
-        position-z={liftZ}
-        rotation-x={tiltX}
-        scale-x={scale}
-        scale-y={scale}
-      >
-        {/* Metallic Body */}
-        <mesh position={[0, 0, 0]} renderOrder={100}>
-          <extrudeGeometry args={[shape, extrudeSettings]} />
-          <meshStandardMaterial
-            color={S1_ANA_BG}
-            metalness={1}
-            roughness={0.12}
-            envMapIntensity={1.8}
-          />
-        </mesh>
-
-        {/* Content Overlay - Shifted to accommodate border and circle */}
-        <mesh
-          position={[outerW / 2, -outerH / 2, EXTRUDE_DEPTH + 0.001]}
-          renderOrder={101}
+    <a.group {...dragBind} position-x={dragX} position-y={dragY}>
+      <group position={[baseX, baseY, zBasePosition]}>
+        <a.group
+          position-x={shadowX}
+          position-y={shadowY}
+          position-z={to(surfaceLiftZ, (surfaceLift) => {
+            const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+            const surfaceZBias =
+              SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
+            return -Z_OFFSET + 0.001 + surfaceLift + surfaceZBias;
+          })}
+          scale-x={shadowScale}
+          scale-y={shadowScale}
         >
-          <planeGeometry args={[outerW, outerH]} />
-          <meshStandardMaterial
-            transparent
-            opacity={1}
-            metalness={0.1}
-            roughness={0.8}
-          >
-            <RenderTexture
-              attach="map"
-              width={512}
-              height={256}
-              frames={Infinity}
-            >
-              <OrthographicCamera
-                makeDefault
-                manual
-                left={0}
-                right={outerW}
-                top={0}
-                bottom={-outerH}
-                position={[0, 0, 10]}
-              />
-              <group position={[BW, -BW, 0]}>
-                <VerseBox
-                  x={0}
-                  y={0}
-                  z={0}
-                  w={w}
-                  h={h}
-                  verse={data.text}
-                  number={data.number}
-                  bg={S1_ANA_BG}
-                  bgOpacity={0}
-                  border={CAPSULE_BG_5}
-                  circleBorderCol={S1_VERSE_5_NUMBER_BORDER}
-                  circleBg={S1_VERSE_5_NUMBER_BG}
-                  circleTextCol={S1_VERSE_5_NUMBER_TEXT}
-                  textColor={S1_VERSE_5_TEXT}
-                  isPill={false}
-                  shadow={false}
-                />
-              </group>
-            </RenderTexture>
-          </meshStandardMaterial>
-        </mesh>
-
-        <primitive
-          object={patternScene}
-          position={[leftPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
-          scale={[PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE]}
-          renderOrder={105}
-        />
-
-        <primitive
-          object={patternScene.clone(true)}
-          position={[rightPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
-          scale={[-PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE]}
-          renderOrder={105}
-        />
-      </a.group>
-
-      {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
-      <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
-        <group
-          position={[
-            outerW / 2 - labelW / 2,
-            labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
-            EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
-          ]}
-        >
-          <mesh renderOrder={110}>
-            <extrudeGeometry args={[labelInnerShape, labelExtrudeSettings]} />
-            <meshBasicMaterial
-              color={S1_ANA_LABEL_BG}
+          <mesh renderOrder={90}>
+            <RoundedShapeComponent w={outerW} h={outerH} radius={outerRadius} />
+            <a.meshBasicMaterial
+              color="#000000"
+              transparent
+              depthTest={false}
+              depthWrite={false}
               toneMapped={false}
-              side={THREE.DoubleSide}
+              opacity={finalShadowOpacity}
+            />
+          </mesh>
+        </a.group>
+
+        {/* Animated 3D Body + Content */}
+        <a.group
+          position-z={liftZ}
+          rotation-x={tiltX}
+          scale-x={scale}
+          scale-y={scale}
+        >
+          {/* Metallic Body */}
+          <mesh position={[0, 0, 0]} renderOrder={100}>
+            <extrudeGeometry args={[shape, extrudeSettings]} />
+            <meshStandardMaterial
+              color={S1_ANA_BG}
+              metalness={1}
+              roughness={0.12}
+              envMapIntensity={1.8}
             />
           </mesh>
 
-          <Text
-            position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}
-            fontSize={TEXT_SIZES.TOP_LABEL}
-            color={S1_ANA_LABEL_TEXT}
-            anchorX="center"
-            anchorY="middle"
-            fontWeight="bold"
-            material-depthTest={false}
-            material-depthWrite={false}
-            renderOrder={111}
+          {/* Content Overlay - Shifted to accommodate border and circle */}
+          <mesh
+            position={[outerW / 2, -outerH / 2, EXTRUDE_DEPTH + 0.001]}
+            renderOrder={101}
           >
-            Ana Ayet
-          </Text>
-        </group>
-      </a.group>
-    </group>
+            <planeGeometry args={[outerW, outerH]} />
+            <meshStandardMaterial
+              transparent
+              opacity={1}
+              metalness={0.1}
+              roughness={0.8}
+            >
+              <RenderTexture
+                attach="map"
+                width={512}
+                height={256}
+                frames={Infinity}
+              >
+                <OrthographicCamera
+                  makeDefault
+                  manual
+                  left={0}
+                  right={outerW}
+                  top={0}
+                  bottom={-outerH}
+                  position={[0, 0, 10]}
+                />
+                <group position={[BW, -BW, 0]}>
+                  <VerseBox
+                    x={0}
+                    y={0}
+                    z={0}
+                    w={w}
+                    h={h}
+                    verse={data.text}
+                    number={data.number}
+                    bg={S1_ANA_BG}
+                    bgOpacity={0}
+                    border={CAPSULE_BG_5}
+                    circleBorderCol={S1_VERSE_5_NUMBER_BORDER}
+                    circleBg={S1_VERSE_5_NUMBER_BG}
+                    circleTextCol={S1_VERSE_5_NUMBER_TEXT}
+                    textColor={S1_VERSE_5_TEXT}
+                    isPill={false}
+                    shadow={false}
+                  />
+                </group>
+              </RenderTexture>
+            </meshStandardMaterial>
+          </mesh>
+
+          <primitive
+            object={patternScene}
+            position={[leftPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
+            scale={[PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE]}
+            renderOrder={105}
+          />
+
+          <primitive
+            object={patternScene.clone(true)}
+            position={[rightPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
+            scale={[
+              -PATTERN_PAIR_SCALE,
+              PATTERN_PAIR_SCALE,
+              PATTERN_PAIR_SCALE,
+            ]}
+            renderOrder={105}
+          />
+        </a.group>
+
+        {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
+        <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
+          <group
+            position={[
+              outerW / 2 - labelW / 2,
+              labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
+              EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
+            ]}
+          >
+            <mesh renderOrder={110}>
+              <extrudeGeometry args={[labelInnerShape, labelExtrudeSettings]} />
+              <meshBasicMaterial
+                color={S1_ANA_LABEL_BG}
+                toneMapped={false}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+
+            <Text
+              position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}
+              fontSize={TEXT_SIZES.TOP_LABEL}
+              color={S1_ANA_LABEL_TEXT}
+              anchorX="center"
+              anchorY="middle"
+              fontWeight="bold"
+              material-depthTest={false}
+              material-depthWrite={false}
+              renderOrder={111}
+            >
+              Ana Ayet
+            </Text>
+          </group>
+        </a.group>
+      </group>
+    </a.group>
   );
 }

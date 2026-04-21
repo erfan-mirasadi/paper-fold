@@ -21,6 +21,8 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "./useElevatedStore";
+import { dragEngine } from "./drag/dragEngine";
+import { useElevatedDrag } from "./drag/useElevatedDrag";
 
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
@@ -85,25 +87,40 @@ function AnimatedElevatedLabel({
     delay: isActive ? delayMs : 0,
   });
 
+  // Drag: label drags the entire section
+  const sectionDrag = dragEngine.sections[sectionId];
+  const dragBind = useElevatedDrag({
+    enabled: isActive,
+    springX: sectionDrag.x,
+    springY: sectionDrag.y,
+    dragSectionId: sectionId,
+  });
+
   if (!isMounted) return null;
 
   return (
     <a.group
-      // Convert from paper-local (0..PAGE_WIDTH) to centered world space.
-      position={[-PAGE_WIDTH / 2, PAGE_HEIGHT / 2, 0]}
-      position-z={to(liftZ, (lift) => PAGE_DEPTH / 2 + zBaseOffset + lift)}
+      {...dragBind}
+      position-x={sectionDrag.x}
+      position-y={sectionDrag.y}
     >
-      <TopLabel
-        x={PAGE_WIDTH / 2}
-        y={y}
-        z={labelZ}
-        text={text}
-        bgColor={bgColor}
-        borderColor={borderColor}
-        partialBorder={partialBorder}
-        bottomBorder={bottomBorder}
-        renderOrder={renderOrder}
-      />
+      <a.group
+        // Convert from paper-local (0..PAGE_WIDTH) to centered world space.
+        position={[-PAGE_WIDTH / 2, PAGE_HEIGHT / 2, 0]}
+        position-z={to(liftZ, (lift) => PAGE_DEPTH / 2 + zBaseOffset + lift)}
+      >
+        <TopLabel
+          x={PAGE_WIDTH / 2}
+          y={y}
+          z={labelZ}
+          text={text}
+          bgColor={bgColor}
+          borderColor={borderColor}
+          partialBorder={partialBorder}
+          bottomBorder={bottomBorder}
+          renderOrder={renderOrder}
+        />
+      </a.group>
     </a.group>
   );
 }

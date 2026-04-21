@@ -13,6 +13,7 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../elevated-verses/useElevatedStore";
+import { useDragState } from "../elevated-verses/drag/dragEngine";
 
 const hitBoxMaterial = new MeshBasicMaterial({
   transparent: true,
@@ -243,7 +244,7 @@ const HITBOXES = buildHitboxes();
 const canUseElevatedInteraction = (
   kind?: string,
   verseId?: number,
-  verseIds?: number[]
+  verseIds?: number[],
 ) => {
   const unlocked = useElevatedStore.getState().unlockedVerseIds;
   if (kind === "verse" && typeof verseId === "number") {
@@ -261,7 +262,13 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
 
   e.stopPropagation();
   if (e.delta > 2) return;
+
+  const { activeVerseIds } = useElevatedStore.getState();
+  const { hasDragged } = useDragState.getState();
+
   if (kind === "verse" && typeof verseId === "number") {
+    const isActive = activeVerseIds.includes(verseId);
+    if (isActive && hasDragged) return;
     useElevatedStore.getState().elevateVerse(verseId);
     return;
   }
@@ -271,6 +278,9 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
       typeof sectionId === "string" && sectionId in SECTION_VERSE_IDS
         ? (sectionId as ElevatedSectionId)
         : undefined;
+
+    const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
+    if (allSelected && hasDragged) return;
 
     useElevatedStore.getState().elevateVerses(verseIds, validSectionId);
   }

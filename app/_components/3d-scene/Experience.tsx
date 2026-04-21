@@ -15,6 +15,7 @@ import { useCameraStore } from "../features/camera-zoom/useCameraStore";
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
+import { useDragState } from "../features/elevated-verses/drag/dragEngine";
 import { CameraViewController } from "../features/camera-views/CameraViewController";
 import { CAMERA_CONFIG } from "../data/cameraConfig";
 
@@ -29,6 +30,8 @@ export function Experience({
 }: ExperienceProps) {
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
+    const { hasDragged } = useDragState.getState();
+    if (hasDragged) return;
     // Dismiss elevated verse on background click
     useElevatedStore.getState().dismiss();
     // Also handle camera reset if it's ever re-enabled

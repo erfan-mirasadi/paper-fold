@@ -3,9 +3,14 @@ import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
 import { useState } from "react";
-import { useSpring } from "@react-spring/three";
+import { useSpring, a, to } from "@react-spring/three";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 import { useElevateAnimation } from "../elevated-verses/useElevateAnimation";
+import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
+import {
+  dragEngine,
+  getVerseSectionId,
+} from "../elevated-verses/drag/dragEngine";
 import { PopUp3DTracker } from "./ui/PopUp3DTracker";
 import { VerseFiveMetallic } from "./VerseFiveMetallic";
 import {
@@ -270,6 +275,7 @@ export function PopUpManager() {
   const groups = usePopUpStore((state) => state.popUpGroups);
   const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
+  const isCenterSectionRaised = activeSectionIds.includes("s2_center");
 
   const VISIBILITY_THRESHOLDS: Record<string, number> = {
     g_1_2: 0,
@@ -301,6 +307,7 @@ export function PopUpManager() {
             hasEverOpened={hasEverOpened}
             isElevated={isElevated}
             isSectionSurfaceRaised={isSectionSurfaceRaised}
+            isCenterSectionRaised={isCenterSectionRaised}
             zBaseOffset={zBaseOffset}
             backfaceColor={backfaceColor}
           />
@@ -351,6 +358,7 @@ function PopUpCardWrapper({
   hasEverOpened,
   isElevated,
   isSectionSurfaceRaised,
+  isCenterSectionRaised,
   zBaseOffset,
   backfaceColor,
 }: {
@@ -359,6 +367,7 @@ function PopUpCardWrapper({
   hasEverOpened: boolean;
   isElevated: boolean;
   isSectionSurfaceRaised: boolean;
+  isCenterSectionRaised: boolean;
   zBaseOffset: number;
   backfaceColor: string;
 }) {
@@ -395,36 +404,62 @@ function PopUpCardWrapper({
     config: SECTION_SURFACE_SHADOW_MOTION.spring,
   });
 
+  const sectionId = getVerseSectionId(config.id);
+  const verseDrag = dragEngine.verses[config.id];
+  const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
+  const useSectionGroupDrag =
+    isCenterSectionRaised && sectionId === "s2_center" && sectionDrag !== null;
+
+  const dragBind = useElevatedDrag({
+    enabled: isElevated || isSectionSurfaceRaised,
+    springX: useSectionGroupDrag && sectionDrag ? sectionDrag.x : verseDrag.x,
+    springY: useSectionGroupDrag && sectionDrag ? sectionDrag.y : verseDrag.y,
+    dragVerseId: useSectionGroupDrag ? undefined : config.id,
+    dragSectionId: useSectionGroupDrag ? "s2_center" : undefined,
+  });
+
+  const dragX = to(
+    [verseDrag.x, sectionDrag ? sectionDrag.x : verseDrag.x],
+    (vx, sx) => vx + (sectionDrag ? sx : 0),
+  );
+
+  const dragY = to(
+    [verseDrag.y, sectionDrag ? sectionDrag.y : verseDrag.y],
+    (vy, sy) => vy + (sectionDrag ? sy : 0),
+  );
+
   if (!hasEverOpened && !isOpen && !hasEverBeenElevated) return null;
 
   return (
-    <PopUpVerseCard
-      direction={config.direction}
-      hingeX={config.hingeX}
-      y={config.y}
-      w={config.w}
-      h={config.h}
-      zBaseOffset={zBaseOffset}
-      rotValue={config.direction === "left" ? rotLeft : rotRight}
-      foldProgress={foldProgress}
-      shadowGlobalOpacity={shadowGlobalOpacity}
-      zOffset={zOffset}
-      opacity={opacity}
-      liftZ={liftZ}
-      surfaceLiftZ={surfaceLiftZ}
-      tiltX={tiltX}
-      scale={scale}
-      elevateShadowOpacity={elevateShadowOpacity}
-      elevateOpacity={elevateOpacity}
-      isPill={config.isPill !== false}
-      backfaceColor={backfaceColor}
-      verse={config.verse}
-      number={config.number}
-      bg={config.bg}
-      border={config.border}
-      circleBorderCol={config.circleBorderCol}
-      circleBg={config.circleBg}
-      circleTextCol={config.circleTextCol}
-    />
+    <a.group {...dragBind} position-x={dragX} position-y={dragY}>
+      <PopUpVerseCard
+        direction={config.direction}
+        hingeX={config.hingeX}
+        y={config.y}
+        w={config.w}
+        h={config.h}
+        zBaseOffset={zBaseOffset}
+        rotValue={config.direction === "left" ? rotLeft : rotRight}
+        foldProgress={foldProgress}
+        shadowGlobalOpacity={shadowGlobalOpacity}
+        zOffset={zOffset}
+        opacity={opacity}
+        liftZ={liftZ}
+        surfaceLiftZ={surfaceLiftZ}
+        tiltX={tiltX}
+        scale={scale}
+        elevateShadowOpacity={elevateShadowOpacity}
+        elevateOpacity={elevateOpacity}
+        isPill={config.isPill !== false}
+        backfaceColor={backfaceColor}
+        verse={config.verse}
+        number={config.number}
+        bg={config.bg}
+        border={config.border}
+        circleBorderCol={config.circleBorderCol}
+        circleBg={config.circleBg}
+        circleTextCol={config.circleTextCol}
+      />
+    </a.group>
   );
 }

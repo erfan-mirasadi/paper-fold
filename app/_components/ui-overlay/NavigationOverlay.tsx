@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useDragState, resetAllDrags } from "../features/elevated-verses/drag/dragEngine";
 
 interface NavigationOverlayProps {
   isDarkMode?: boolean;
@@ -13,6 +14,7 @@ export function NavigationOverlay({
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
   const currentOffset = useFoldStore((s) => s.currentOffset);
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
+  const hasDragged = useDragState((s) => s.hasDragged);
 
   // Keep label/icon color fixed while the glass surface adapts to theme.
   const accentColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
@@ -85,6 +87,23 @@ export function NavigationOverlay({
     </svg>
   );
 
+  const iconUndo = (
+    <svg
+      width="22"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ color: accentColor }}
+    >
+      <path d="M3 7v6h6" />
+      <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13" />
+    </svg>
+  );
+
   const containerVariants = {
     hidden: { x: -100, opacity: 0 },
     visible: {
@@ -145,6 +164,24 @@ export function NavigationOverlay({
         glassHoverShadow={glassHoverShadow}
         variants={itemVariants}
       />
+      {hasDragged && (
+        <NavButton
+          onClick={resetAllDrags}
+          icon={iconUndo}
+          label="Sıfırla"
+          isDarkMode={isDarkMode}
+          isPending={false}
+          accentColor={accentColor}
+          textColor={textColor}
+          glassBg={glassBackground}
+          glassBorder={glassBorder}
+          glassShadow={glassShadow}
+          glassHoverBg={glassHoverBackground}
+          glassHoverBorderColor={glassHoverBorderColor}
+          glassHoverShadow={glassHoverShadow}
+          variants={itemVariants}
+        />
+      )}
     </motion.div>
   );
 }
