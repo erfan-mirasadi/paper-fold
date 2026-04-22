@@ -9,16 +9,12 @@ import { useCallback } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { PopUpManager } from "../features/pop-up-verses/PopUpManager";
-import { CameraManager } from "./CameraManager";
-import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
-import { useCameraStore } from "../features/camera-zoom/useCameraStore";
-
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
 import { useDragState } from "../features/elevated-verses/drag/dragEngine";
-import { CameraViewController } from "../features/camera-views/CameraViewController";
 import { CAMERA_CONFIG } from "../data/cameraConfig";
+import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -33,24 +29,20 @@ export function Experience({
   isFolded = false,
   isDarkMode = false,
 }: ExperienceProps) {
-  const isPaperDocked = useDragState((s) => s.isPaperDocked);
+  const isPaperMoving = useDragState((s) => s.isPaperDocked);
+  
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
     const { hasDragged } = useDragState.getState();
     if (hasDragged) return;
     // Dismiss elevated verse on background click
     useElevatedStore.getState().dismiss();
-    // Also handle camera reset if it's ever re-enabled
-    const { phase: p, resetCamera } = useCameraStore.getState();
-    if (p === "zoomed") {
-      resetCamera();
-    }
   }, []);
 
   const { paperOffsetX, paperScale } = useSpring({
-    paperOffsetX: isPaperDocked ? PAPER_DOCK_X : 0,
-    paperScale: isPaperDocked ? PAPER_DOCK_SCALE : 1,
-    config: { mass: 1.4, tension: 170, friction: 26 },
+    paperOffsetX: isPaperMoving ? PAPER_DOCK_X : 0,
+    paperScale: isPaperMoving ? PAPER_DOCK_SCALE : 1,
+    config: { mass: 1.4, tension: 170, friction: 31 },
   });
 
   return (
@@ -60,8 +52,6 @@ export function Experience({
         position={CAMERA_CONFIG.initialCamera.position}
         fov={CAMERA_CONFIG.initialCamera.fov}
       />
-      <CameraManager />
-      <CameraViewController />
 
       <a.group
         rotation-x={-Math.PI / 4}
@@ -92,12 +82,9 @@ export function Experience({
 }
 
 function DynamicControls() {
-  const phase = useCameraStore((s) => s.phase);
-  const controlsEnabled = phase === "idle" || phase === "zoomed";
-
   return (
     <OrbitControls
-      enabled={controlsEnabled}
+      enabled={true}
       enableRotate={false}
       enableZoom={false}
       enablePan={false}

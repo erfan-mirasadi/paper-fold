@@ -37,6 +37,8 @@ export const useDragState = create<{
   dockPaper: () => void;
   markVerseDragged: (verseId: number, offset?: { x: number; y: number }) => void;
   markSectionDragged: (sectionId: ElevatedSectionId) => void;
+  unmarkVerseDragged: (verseId: number) => void;
+  unmarkSectionDragged: (sectionId: ElevatedSectionId) => void;
   reset: () => void;
 }>((set) => ({
   hasDragged: false,
@@ -66,6 +68,26 @@ export const useDragState = create<{
       return {
         draggedSectionIds: [...state.draggedSectionIds, sectionId],
         hasDragged: true,
+      };
+    }),
+  unmarkVerseDragged: (verseId) =>
+    set((state) => {
+      const newDraggedVerseIds = state.draggedVerseIds.filter((id) => id !== verseId);
+      const isAnyDragged = newDraggedVerseIds.length > 0 || state.draggedSectionIds.length > 0;
+      return {
+        draggedVerseIds: newDraggedVerseIds,
+        hasDragged: isAnyDragged ? state.hasDragged : false,
+        isPaperDocked: isAnyDragged ? state.isPaperDocked : false,
+      };
+    }),
+  unmarkSectionDragged: (sectionId) =>
+    set((state) => {
+      const newDraggedSectionIds = state.draggedSectionIds.filter((id) => id !== sectionId);
+      const isAnyDragged = state.draggedVerseIds.length > 0 || newDraggedSectionIds.length > 0;
+      return {
+        draggedSectionIds: newDraggedSectionIds,
+        hasDragged: isAnyDragged ? state.hasDragged : false,
+        isPaperDocked: isAnyDragged ? state.isPaperDocked : false,
       };
     }),
   reset: () =>
@@ -106,6 +128,18 @@ export function isVerseDragLocked(verseId: number): boolean {
 
 export function isSectionDragLocked(sectionId: ElevatedSectionId): boolean {
   return draggedSectionIds.has(sectionId);
+}
+
+export function unmarkVerseDragged(verseId: number) {
+  if (!draggedVerseIds.has(verseId)) return;
+  draggedVerseIds.delete(verseId);
+  useDragState.getState().unmarkVerseDragged(verseId);
+}
+
+export function unmarkSectionDragged(sectionId: ElevatedSectionId) {
+  if (!draggedSectionIds.has(sectionId)) return;
+  draggedSectionIds.delete(sectionId);
+  useDragState.getState().unmarkSectionDragged(sectionId);
 }
 
 export function resetAllDrags() {

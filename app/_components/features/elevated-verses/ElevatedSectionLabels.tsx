@@ -107,7 +107,7 @@ function AnimatedElevatedLabel({
     >
       <a.group
         // Convert from paper-local (0..PAGE_WIDTH) to centered world space.
-        position={[-PAGE_WIDTH / 2, PAGE_HEIGHT / 2, 0]}
+        position={[-PAGE_WIDTH / 2, 0, 0]}
         position-z={to(liftZ, (lift) => PAGE_DEPTH / 2 + zBaseOffset + lift)}
       >
         <TopLabel
@@ -128,7 +128,7 @@ function AnimatedElevatedLabel({
 
 export function ElevatedSectionLabels() {
   return (
-    <>
+    <group position={[0, PAGE_HEIGHT / 2, 0]}>
       <AnimatedElevatedLabel
         sectionId="s1"
         y={SURAH_TRANSFORMS.s1.labelPinY}
@@ -174,6 +174,6 @@ export function ElevatedSectionLabels() {
         labelZ={0.00035}
         renderOrder={240}
       />
-    </>
+    </group>
   );
 }

@@ -264,11 +264,12 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
   if (e.delta > 2) return;
 
   const { activeVerseIds } = useElevatedStore.getState();
-  const { hasDragged } = useDragState.getState();
+  const { draggedVerseIds, draggedSectionIds } = useDragState.getState();
 
   if (kind === "verse" && typeof verseId === "number") {
     const isActive = activeVerseIds.includes(verseId);
-    if (isActive && hasDragged) return;
+    const isDragged = draggedVerseIds.includes(verseId);
+    if (isActive && isDragged) return;
     useElevatedStore.getState().elevateVerse(verseId);
     return;
   }
@@ -280,7 +281,9 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
         : undefined;
 
     const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
-    if (allSelected && hasDragged) return;
+    const isDragged = validSectionId ? draggedSectionIds.includes(validSectionId) : false;
+    
+    if (allSelected && isDragged) return;
 
     useElevatedStore.getState().elevateVerses(verseIds, validSectionId);
   }

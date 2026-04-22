@@ -5,9 +5,12 @@ import { ThreeEvent } from "@react-three/fiber";
 import {
   markSectionDragged,
   markVerseDragged,
+  unmarkVerseDragged,
+  unmarkSectionDragged,
   useDragState,
 } from "./dragEngine";
 import { type ElevatedSectionId } from "../useElevatedStore";
+import { PAGE_WIDTH, PAGE_HEIGHT } from "../../../data/SurahConfig";
 
 // Module-level reusable math objects (thread-safe in single-threaded JS)
 const _hit = new Vector3();
@@ -147,13 +150,45 @@ export function useElevatedDrag({
     };
 
     const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
-      const shouldDockPaper = ref.current.dragMarked;
+      const s = ref.current;
+      const shouldDockPaper = s.dragMarked;
       e.stopPropagation();
-      ref.current.active = false;
-      ref.current.dragMarked = false;
+      s.active = false;
+      s.dragMarked = false;
 
-      if (shouldDockPaper) {
-        useDragState.getState().dockPaper();
+      let isInsidePaper = false;
+      if (e.ray.intersectPlane(s.plane, _hit)) {
+        // e.eventObject is the dragged item's top group (a.group), its parent is the paper root coordinate system group.
+        const paperRoot = e.eventObject.parent;
+        
+        if (paperRoot) {
+          const localHit = paperRoot.worldToLocal(_hit.clone());
+          if (
+            localHit.x >= -PAGE_WIDTH / 2 &&
+            localHit.x <= PAGE_WIDTH / 2 &&
+            localHit.y <= 0 &&
+            localHit.y >= -PAGE_HEIGHT
+          ) {
+            isInsidePaper = true;
+          }
+        }
+      }
+
+      if (isInsidePaper) {
+        springX.start(0);
+        springY.start(0);
+        
+        // Remove from dragged state so it perfectly re-attaches and can be dragged again
+        if (typeof dragVerseId === "number") {
+          unmarkVerseDragged(dragVerseId);
+        }
+        if (dragSectionId) {
+          unmarkSectionDragged(dragSectionId);
+        }
+      } else {
+        if (shouldDockPaper) {
+          useDragState.getState().dockPaper();
+        }
       }
 
       try {
