@@ -266,7 +266,7 @@ export function VerseFiveMetallic() {
             <a.meshBasicMaterial
               color="#000000"
               transparent
-              depthTest={true}
+              depthTest={false}
               depthWrite={false}
               toneMapped={false}
               opacity={finalShadowOpacity}

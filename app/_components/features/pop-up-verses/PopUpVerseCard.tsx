@@ -182,7 +182,7 @@ export function PopUpVerseCard({
       shadow: {
         color: "#000000",
         transparent: true,
-        depthTest: true,
+        depthTest: false,
         depthWrite: false,
         toneMapped: false,
       },
