@@ -171,6 +171,16 @@ export const CAPSULE_BORDER_WIDTH = 0.0039;
 // Controls the thickness of the border ring around verse numbers.
 export const CIRCLE_BORDER_WIDTH = 0.0035;
 
+// ----------------------------------------------------------------------------
+// OPPOSITE VERSE CONNECTOR CONFIG
+// Controls the background section connecting opposite (side-by-side) verses.
+// ----------------------------------------------------------------------------
+export const OPPOSITE_VERSE_CONNECTOR = {
+  paddingX: 0.0065,
+  paddingY: 0.0065,
+  radius: 0.05,
+};
+
 // Single source of truth for all three section label widths.
 export const TOP_LABEL_WIDTH = 0.47;
 
@@ -304,6 +314,14 @@ export interface ElementTransform {
   h: number;
 }
 
+export interface RowConnectorTransform {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+  h: number;
+}
+
 /** Pre-computed geometry and per-verse transforms for one verse group cluster. */
 export interface GroupTransforms {
   frameX: number;
@@ -314,6 +332,7 @@ export interface GroupTransforms {
   isCenter: boolean;
   /** Verse number → its exact screen transform. */
   verses: Record<number, ElementTransform>;
+  rowConnectors: RowConnectorTransform[];
 }
 
 export interface S1Transforms {
@@ -322,6 +341,7 @@ export interface S1Transforms {
   frameW: number;
   frameH: number;
   verses: Record<number, ElementTransform>;
+  rowConnectors: RowConnectorTransform[];
   anaAyet: ElementTransform;
   anaAyetTabX: number;
   anaAyetTabY: number;
@@ -394,6 +414,22 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
     };
   });
 
+  const s1Connectors: RowConnectorTransform[] = [];
+  for (let r = 0; r < 2; r++) {
+    const leftV = s1Verses[SURAH_DATA.section1.gridVerses[r * 2].number];
+    const rightV = s1Verses[SURAH_DATA.section1.gridVerses[r * 2 + 1].number];
+    if (leftV && rightV) {
+      s1Connectors.push({
+        x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+        y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+        z: 0.0015,
+        w:
+          rightV.x + rightV.w - leftV.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+        h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+      });
+    }
+  }
+
   // ── SECTION 2 ──────────────────────────────────────────────────────────────
   const s2InnerW = lm.sectionW - lm.s2PadLeftRight * 2;
   const s2BaseX = startX + lm.s2PadLeftRight;
@@ -450,6 +486,25 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
         };
       });
 
+      const rowConnectors: RowConnectorTransform[] = [];
+      for (let r = 0; r < 2; r++) {
+        const leftV = verses[group.verses[r * 2].number];
+        const rightV = verses[group.verses[r * 2 + 1].number];
+        if (leftV && rightV) {
+          rowConnectors.push({
+            x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+            y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+            z: 0.0025,
+            w:
+              rightV.x +
+              rightV.w -
+              leftV.x +
+              OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+            h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+          });
+        }
+      }
+
       return {
         frameX: gBaseX,
         frameY: groupY,
@@ -458,6 +513,7 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
         isPushedIn,
         isCenter: group.isCenter ?? false,
         verses,
+        rowConnectors,
       };
     },
   );
@@ -469,6 +525,7 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
       frameW: lm.sectionW,
       frameH: lm.s1H,
       verses: s1Verses,
+      rowConnectors: s1Connectors,
       anaAyet: {
         x: s1BaseX,
         y: anaAyetY,

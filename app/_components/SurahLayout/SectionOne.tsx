@@ -24,6 +24,7 @@ import {
 } from "../data/theme";
 import {
   S1_NEON_CONFIG,
+  OPPOSITE_VERSE_CONNECTOR,
   type SectionOneData,
   type S1Transforms,
 } from "../data/SurahConfig";
@@ -148,6 +149,28 @@ export function SectionOne({
           />
         </>
       )}
+
+      {/* Row Connectors for opposite verses */}
+      {t.rowConnectors.map((rc, i) => {
+        const leftV = data.gridVerses[i * 2];
+        const rightV = data.gridVerses[i * 2 + 1];
+        if (!leftV || !rightV || (isVerseHidden(leftV.number) && isVerseHidden(rightV.number))) return null;
+
+        return (
+          <UiRect
+            key={`connector-${i}`}
+            x={rc.x}
+            y={rc.y}
+            z={rc.z}
+            w={rc.w}
+            h={rc.h}
+            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+            color={S1_INNER_BORDER}
+            isBumpMap={isBumpMap}
+            bumpColor={BUMP_MAX}
+          />
+        );
+      })}
 
       {/* 2×2 verse grid — positions come from the engine, no math here */}
       {data.gridVerses.map((v) => {

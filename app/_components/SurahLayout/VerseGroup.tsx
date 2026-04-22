@@ -3,15 +3,17 @@
 //          Receives a pre-computed GroupTransforms object from the LayoutEngine.
 //          Does ZERO positional math — positions come directly from the engine.
 
-import { VerseBox } from "./SharedUI";
+import { VerseBox, UiRect } from "./SharedUI";
 import {
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   WHITE_VERSE_BG,
   MAROON_THEME,
   GREEN_THEME,
+  BUMP_MAX,
 } from "../data/theme";
 import type { ColorGroup, GroupTransforms } from "../data/SurahConfig";
+import { OPPOSITE_VERSE_CONNECTOR } from "../data/SurahConfig";
 
 interface VerseGroupProps {
   group: ColorGroup;
@@ -44,6 +46,28 @@ export function VerseGroup({
         isBumpMap={isBumpMap}
         bumpColor={BUMP_MID}
       /> */}
+
+      {/* Row Connectors for opposite verses */}
+      {gt.rowConnectors.map((rc, i) => {
+        const leftV = group.verses[i * 2];
+        const rightV = group.verses[i * 2 + 1];
+        if (!leftV || !rightV || (isVerseHidden(leftV.number) && isVerseHidden(rightV.number))) return null;
+
+        return (
+          <UiRect
+            key={`connector-${i}`}
+            x={rc.x}
+            y={rc.y}
+            z={rc.z}
+            w={rc.w}
+            h={rc.h}
+            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+            color={borderColor}
+            isBumpMap={isBumpMap}
+            bumpColor={BUMP_MAX}
+          />
+        );
+      })}
 
       {/* 2×2 verse grid — position comes from the engine, no math here */}
       {group.verses.map((v) => {
