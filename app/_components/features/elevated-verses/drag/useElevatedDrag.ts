@@ -12,6 +12,7 @@ import { type ElevatedSectionId } from "../useElevatedStore";
 // Module-level reusable math objects (thread-safe in single-threaded JS)
 const _hit = new Vector3();
 const _delta = new Vector3();
+const _normal = new Vector3();
 const _quat = new Quaternion();
 const _pos = new Vector3();
 const _scale = new Vector3();
@@ -20,6 +21,24 @@ type PointerCaptureTarget = EventTarget & {
   setPointerCapture?: (pointerId: number) => void;
   releasePointerCapture?: (pointerId: number) => void;
 };
+
+type DragBindings = {
+  onPointerDown?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerMove?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerUp?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerCancel?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerOver?: (e: ThreeEvent<PointerEvent>) => void;
+  onPointerOut?: () => void;
+};
+
+const EMPTY_DRAG_BINDINGS: DragBindings = {};
+
+function setBodyCursor(cursor: string) {
+  if (typeof document === "undefined") return;
+  if (document.body.style.cursor !== cursor) {
+    document.body.style.cursor = cursor;
+  }
+}
 
 /**
  * Ultra-lightweight drag hook for R3F objects.
@@ -60,17 +79,17 @@ export function useElevatedDrag({
     dragMarked: false,
   });
 
-  return useMemo(() => {
-    if (!enabled) return {};
+  return useMemo<DragBindings>(() => {
+    if (!enabled) return EMPTY_DRAG_BINDINGS;
 
     const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
       e.stopPropagation();
       const s = ref.current;
 
       // Compute the surface normal in world space from the eventObject's Z-axis
-      const normal = new Vector3(0, 0, 1).transformDirection(
-        e.eventObject.matrixWorld,
-      );
+      const normal = _normal
+        .set(0, 0, 1)
+        .transformDirection(e.eventObject.matrixWorld);
       s.plane.setFromNormalAndCoplanarPoint(normal, e.point);
       s.startWorld.copy(e.point);
       s.startSpringX = springX.get();
@@ -91,9 +110,7 @@ export function useElevatedDrag({
         (e.target as PointerCaptureTarget)?.setPointerCapture?.(e.pointerId);
       } catch {}
 
-      if (typeof document !== "undefined") {
-        document.body.style.cursor = "grabbing";
-      }
+      setBodyCursor("grabbing");
     };
 
     const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
@@ -113,16 +130,20 @@ export function useElevatedDrag({
       springY.start(s.startSpringY + _delta.y, { immediate: true });
 
       if (!s.dragMarked) {
+        let didMarkDrag = false;
         if (typeof dragVerseId === "number") {
           markVerseDragged(dragVerseId);
+          didMarkDrag = true;
         }
         if (dragSectionId) {
           markSectionDragged(dragSectionId);
+          didMarkDrag = true;
+        }
+        if (!didMarkDrag) {
+          useDragState.getState().markDragged();
         }
         s.dragMarked = true;
       }
-
-      useDragState.getState().markDragged();
     };
 
     const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
@@ -141,9 +162,7 @@ export function useElevatedDrag({
         );
       } catch {}
 
-      if (typeof document !== "undefined") {
-        document.body.style.cursor = "auto";
-      }
+      setBodyCursor("auto");
     };
 
     return {
@@ -154,15 +173,11 @@ export function useElevatedDrag({
       onPointerOver: (e: ThreeEvent<PointerEvent>) => {
         if (ref.current.active) return;
         e.stopPropagation();
-        if (typeof document !== "undefined") {
-          document.body.style.cursor = "grab";
-        }
+        setBodyCursor("grab");
       },
       onPointerOut: () => {
         if (ref.current.active) return;
-        if (typeof document !== "undefined") {
-          document.body.style.cursor = "auto";
-        }
+        setBodyCursor("auto");
       },
     };
   }, [enabled, springX, springY, dragVerseId, dragSectionId]);

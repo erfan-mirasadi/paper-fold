@@ -2,7 +2,7 @@
 import { useFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSpring, a, to } from "@react-spring/three";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 import { useElevateAnimation } from "../elevated-verses/useElevateAnimation";
@@ -372,9 +372,13 @@ function PopUpCardWrapper({
   backfaceColor: string;
 }) {
   const [hasEverBeenElevated, setHasEverBeenElevated] = useState(isElevated);
-  if (isElevated && !hasEverBeenElevated) {
-    setHasEverBeenElevated(true);
-  }
+  useEffect(() => {
+    if (isElevated) {
+      setHasEverBeenElevated(true);
+    }
+  }, [isElevated]);
+
+  const hasVisibleElevationHistory = hasEverBeenElevated || isElevated;
 
   const {
     rotLeft,
@@ -428,7 +432,7 @@ function PopUpCardWrapper({
     (vy, sy) => vy + (sectionDrag ? sy : 0),
   );
 
-  if (!hasEverOpened && !isOpen && !hasEverBeenElevated) return null;
+  if (!hasEverOpened && !isOpen && !hasVisibleElevationHistory) return null;
 
   return (
     <a.group {...dragBind} position-x={dragX} position-y={dragY}>

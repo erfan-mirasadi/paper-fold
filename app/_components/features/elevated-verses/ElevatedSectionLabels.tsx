@@ -57,8 +57,9 @@ function AnimatedElevatedLabel({
   labelZ = 0.00035,
   renderOrder,
 }: AnimatedLabelProps) {
-  const activeSectionIds = useElevatedStore((s) => s.activeSectionIds);
-  const isActive = activeSectionIds.includes(sectionId);
+  const isActive = useElevatedStore((s) =>
+    s.activeSectionIds.includes(sectionId),
+  );
   const [isMounted, setIsMounted] = useState(isActive);
 
   useEffect(() => {

@@ -280,10 +280,13 @@ export function ElevatedSectionSurfaces() {
     },
   );
 
-  const activeSectionIds = useElevatedStore((s) => s.activeSectionIds);
-  const s1Active = activeSectionIds.includes("s1");
-  const s2TopActive = activeSectionIds.includes("s2_top");
-  const s2BottomActive = activeSectionIds.includes("s2_bottom");
+  const s1Active = useElevatedStore((s) => s.activeSectionIds.includes("s1"));
+  const s2TopActive = useElevatedStore((s) =>
+    s.activeSectionIds.includes("s2_top"),
+  );
+  const s2BottomActive = useElevatedStore((s) =>
+    s.activeSectionIds.includes("s2_bottom"),
+  );
 
   const s1Spring = useSectionSurfaceSpring(s1Active);
   const s2TopSpring = useSectionSurfaceSpring(s2TopActive);

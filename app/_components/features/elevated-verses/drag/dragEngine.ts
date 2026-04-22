@@ -28,11 +28,13 @@ const draggedVerseIds = new Set<number>();
 const draggedSectionIds = new Set<ElevatedSectionId>();
 
 export function markVerseDragged(verseId: number) {
+  if (draggedVerseIds.has(verseId)) return;
   draggedVerseIds.add(verseId);
   useDragState.getState().markDragged();
 }
 
 export function markSectionDragged(sectionId: ElevatedSectionId) {
+  if (draggedSectionIds.has(sectionId)) return;
   draggedSectionIds.add(sectionId);
   useDragState.getState().markDragged();
 }
@@ -54,8 +56,10 @@ export const useDragState = create<{
 }>((set) => ({
   hasDragged: false,
   isPaperDocked: false,
-  markDragged: () => set({ hasDragged: true }),
-  dockPaper: () => set({ isPaperDocked: true }),
+  markDragged: () =>
+    set((state) => (state.hasDragged ? state : { hasDragged: true })),
+  dockPaper: () =>
+    set((state) => (state.isPaperDocked ? state : { isPaperDocked: true })),
   reset: () => set({ hasDragged: false, isPaperDocked: false }),
 }));
 
