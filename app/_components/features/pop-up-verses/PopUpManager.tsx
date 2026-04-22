@@ -10,6 +10,7 @@ import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
 import {
   dragEngine,
   getVerseSectionId,
+  useDragState,
 } from "../elevated-verses/drag/dragEngine";
 import { PopUp3DTracker } from "./ui/PopUp3DTracker";
 import { VerseFiveMetallic } from "./VerseFiveMetallic";
@@ -73,6 +74,8 @@ function getShadowSurfaceSectionId(
   if (verseId >= 15 && verseId <= 19) return "s2_bottom";
   return null;
 }
+
+const ZERO_OFFSET = { x: 0, y: 0 };
 
 const VERSES_CONFIG: VerseConfig[] = (() => {
   const configs: VerseConfig[] = [];
@@ -414,6 +417,11 @@ function PopUpCardWrapper({
   const useSectionGroupDrag =
     isCenterSectionRaised && sectionId === "s2_center" && sectionDrag !== null;
 
+  const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(config.id));
+  const separationOffset = useDragState(
+    (s) => s.separatedVerseOffsets[config.id] || ZERO_OFFSET
+  );
+
   const dragBind = useElevatedDrag({
     enabled: isElevated || isSectionSurfaceRaised,
     springX: useSectionGroupDrag && sectionDrag ? sectionDrag.x : verseDrag.x,
@@ -424,12 +432,12 @@ function PopUpCardWrapper({
 
   const dragX = to(
     [verseDrag.x, sectionDrag ? sectionDrag.x : verseDrag.x],
-    (vx, sx) => vx + (sectionDrag ? sx : 0),
+    (vx, sx) => vx + (isVerseSeparated ? separationOffset.x : (sectionDrag ? sx : 0)),
   );
 
   const dragY = to(
     [verseDrag.y, sectionDrag ? sectionDrag.y : verseDrag.y],
-    (vy, sy) => vy + (sectionDrag ? sy : 0),
+    (vy, sy) => vy + (isVerseSeparated ? separationOffset.y : (sectionDrag ? sy : 0)),
   );
 
   if (!hasEverOpened && !isOpen && !hasVisibleElevationHistory) return null;

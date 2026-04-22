@@ -27,16 +27,77 @@ export const dragEngine = {
 const draggedVerseIds = new Set<number>();
 const draggedSectionIds = new Set<ElevatedSectionId>();
 
+export const useDragState = create<{
+  hasDragged: boolean;
+  isPaperDocked: boolean;
+  draggedVerseIds: number[];
+  draggedSectionIds: ElevatedSectionId[];
+  separatedVerseOffsets: Record<number, { x: number; y: number }>;
+  markDragged: () => void;
+  dockPaper: () => void;
+  markVerseDragged: (verseId: number, offset?: { x: number; y: number }) => void;
+  markSectionDragged: (sectionId: ElevatedSectionId) => void;
+  reset: () => void;
+}>((set) => ({
+  hasDragged: false,
+  isPaperDocked: false,
+  draggedVerseIds: [],
+  draggedSectionIds: [],
+  separatedVerseOffsets: {},
+  markDragged: () =>
+    set((state) => (state.hasDragged ? state : { hasDragged: true })),
+  dockPaper: () =>
+    set((state) => (state.isPaperDocked ? state : { isPaperDocked: true })),
+  markVerseDragged: (verseId, offset) =>
+    set((state) => {
+      if (state.draggedVerseIds.includes(verseId)) return state;
+      const newOffsets = offset
+        ? { ...state.separatedVerseOffsets, [verseId]: offset }
+        : state.separatedVerseOffsets;
+      return {
+        draggedVerseIds: [...state.draggedVerseIds, verseId],
+        separatedVerseOffsets: newOffsets,
+        hasDragged: true,
+      };
+    }),
+  markSectionDragged: (sectionId) =>
+    set((state) => {
+      if (state.draggedSectionIds.includes(sectionId)) return state;
+      return {
+        draggedSectionIds: [...state.draggedSectionIds, sectionId],
+        hasDragged: true,
+      };
+    }),
+  reset: () =>
+    set({
+      hasDragged: false,
+      isPaperDocked: false,
+      draggedVerseIds: [],
+      draggedSectionIds: [],
+      separatedVerseOffsets: {},
+    }),
+}));
+
 export function markVerseDragged(verseId: number) {
   if (draggedVerseIds.has(verseId)) return;
   draggedVerseIds.add(verseId);
-  useDragState.getState().markDragged();
+  
+  const sectionId = getVerseSectionId(verseId);
+  let offset = undefined;
+  if (sectionId) {
+    const sDrag = dragEngine.sections[sectionId];
+    if (sDrag) {
+      offset = { x: sDrag.x.get(), y: sDrag.y.get() };
+    }
+  }
+  
+  useDragState.getState().markVerseDragged(verseId, offset);
 }
 
 export function markSectionDragged(sectionId: ElevatedSectionId) {
   if (draggedSectionIds.has(sectionId)) return;
   draggedSectionIds.add(sectionId);
-  useDragState.getState().markDragged();
+  useDragState.getState().markSectionDragged(sectionId);
 }
 
 export function isVerseDragLocked(verseId: number): boolean {
@@ -46,22 +107,6 @@ export function isVerseDragLocked(verseId: number): boolean {
 export function isSectionDragLocked(sectionId: ElevatedSectionId): boolean {
   return draggedSectionIds.has(sectionId);
 }
-
-export const useDragState = create<{
-  hasDragged: boolean;
-  isPaperDocked: boolean;
-  markDragged: () => void;
-  dockPaper: () => void;
-  reset: () => void;
-}>((set) => ({
-  hasDragged: false,
-  isPaperDocked: false,
-  markDragged: () =>
-    set((state) => (state.hasDragged ? state : { hasDragged: true })),
-  dockPaper: () =>
-    set((state) => (state.isPaperDocked ? state : { isPaperDocked: true })),
-  reset: () => set({ hasDragged: false, isPaperDocked: false }),
-}));
 
 export function resetAllDrags() {
   Object.values(dragEngine.sections).forEach((s) => {

@@ -34,9 +34,10 @@ import {
 } from "../elevated-verses/useElevateAnimation";
 import { a, to, useSpring } from "@react-spring/three";
 import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
-import { dragEngine } from "../elevated-verses/drag/dragEngine";
+import { dragEngine, useDragState } from "../elevated-verses/drag/dragEngine";
 
 // --- ADJUSTABLE PARAMETERS ---
+const ZERO_OFFSET = { x: 0, y: 0 };
 const EXTRUDE_DEPTH = 0.01; // How thick the 3D object is
 const Z_OFFSET = 0.01; // Distance from the paper surface
 const BW = CAPSULE_BORDER_WIDTH; // Using global thickness
@@ -133,8 +134,13 @@ export function VerseFiveMetallic() {
     dragVerseId: 5,
   });
 
-  const dragX = to([verseDrag.x, sectionDrag.x], (vx, sx) => vx + sx);
-  const dragY = to([verseDrag.y, sectionDrag.y], (vy, sy) => vy + sy);
+  const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(5));
+  const separationOffset = useDragState(
+    (s) => s.separatedVerseOffsets[5] || ZERO_OFFSET
+  );
+
+  const dragX = to([verseDrag.x, sectionDrag.x], (vx, sx) => vx + (isVerseSeparated ? separationOffset.x : sx));
+  const dragY = to([verseDrag.y, sectionDrag.y], (vy, sy) => vy + (isVerseSeparated ? separationOffset.y : sy));
 
   const shadowScale = to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
     const liftProgress = normalizeLiftProgress(lift);
