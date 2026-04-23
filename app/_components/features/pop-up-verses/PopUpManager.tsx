@@ -1,5 +1,5 @@
 "use client";
-import { useFoldAnimation } from "./useFoldAnimation";
+import { useFoldAnimation, useMiddleHorizontalFoldAnimation } from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
 import { useEffect, useState } from "react";
@@ -276,6 +276,9 @@ export function PopUpManager() {
   const backfaceColor = "#e8e4d8";
 
   const groups = usePopUpStore((state) => state.popUpGroups);
+  const middleHorizontalFolded = usePopUpStore(
+    (state) => state.middleHorizontalFolded,
+  );
   const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isCenterSectionRaised = activeSectionIds.includes("s2_center");
@@ -296,6 +299,7 @@ export function PopUpManager() {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
         const hasEverOpened = group?.hasEverOpened ?? false;
+        const isMiddleGroup = group?.id === "g_11_12_13_14";
         const isElevated = activeVerseIds.includes(config.id);
         const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id);
         const isSectionSurfaceRaised =
@@ -311,6 +315,7 @@ export function PopUpManager() {
             isElevated={isElevated}
             isSectionSurfaceRaised={isSectionSurfaceRaised}
             isCenterSectionRaised={isCenterSectionRaised}
+            isMiddleHorizontalFolded={isMiddleGroup && middleHorizontalFolded}
             zBaseOffset={zBaseOffset}
             backfaceColor={backfaceColor}
           />
@@ -362,6 +367,7 @@ function PopUpCardWrapper({
   isElevated,
   isSectionSurfaceRaised,
   isCenterSectionRaised,
+  isMiddleHorizontalFolded,
   zBaseOffset,
   backfaceColor,
 }: {
@@ -371,6 +377,7 @@ function PopUpCardWrapper({
   isElevated: boolean;
   isSectionSurfaceRaised: boolean;
   isCenterSectionRaised: boolean;
+  isMiddleHorizontalFolded: boolean;
   zBaseOffset: number;
   backfaceColor: string;
 }) {
@@ -383,14 +390,7 @@ function PopUpCardWrapper({
 
   const hasVisibleElevationHistory = hasEverBeenElevated || isElevated;
 
-  const {
-    rotLeft,
-    rotRight,
-    foldProgress,
-    shadowGlobalOpacity,
-    zOffset,
-    opacity,
-  } = useFoldAnimation(isOpen);
+  const verticalFold = useFoldAnimation(isOpen);
 
   const {
     liftZ,
@@ -410,6 +410,33 @@ function PopUpCardWrapper({
       : 0,
     config: SECTION_SURFACE_SHADOW_MOTION.spring,
   });
+
+  const isMiddleTopRow = config.id === 11 || config.id === 12;
+  const isMiddleBottomRow = config.id === 13 || config.id === 14;
+  const isMiddleFoldCandidate = isMiddleTopRow || isMiddleBottomRow;
+  const isHorizontalFoldActive =
+    isMiddleFoldCandidate && isMiddleHorizontalFolded;
+  const foldVisibility = useFoldAnimation(isOpen || isHorizontalFoldActive);
+
+  const foldProgress = foldVisibility.foldProgress;
+  const shadowGlobalOpacity = foldVisibility.shadowGlobalOpacity;
+  const zOffset = foldVisibility.zOffset;
+  const opacity = foldVisibility.opacity;
+
+  const rotLeft = verticalFold.rotLeft;
+  const rotRight = verticalFold.rotRight;
+  const horizontalDirection: 1 | -1 = isMiddleTopRow ? 1 : -1;
+  const { horizontalTiltX, horizontalLiftZ } = useMiddleHorizontalFoldAnimation(
+    isHorizontalFoldActive,
+    horizontalDirection,
+    isMiddleFoldCandidate,
+  );
+  const middleGapHalf = layoutMath.s2Gap / 2;
+  const horizontalPivotOffsetY = isMiddleTopRow
+    ? -(config.h + middleGapHalf)
+    : isMiddleBottomRow
+      ? middleGapHalf
+      : 0;
 
   const sectionId = getVerseSectionId(config.id);
   const verseDrag = dragEngine.verses[config.id];
@@ -440,7 +467,25 @@ function PopUpCardWrapper({
     (vy, sy) => vy + (isVerseSeparated ? separationOffset.y : (sectionDrag ? sy : 0)),
   );
 
-  if (!hasEverOpened && !isOpen && !hasVisibleElevationHistory) return null;
+  const [hasEverBeenHorizontallyFolded, setHasEverBeenHorizontallyFolded] =
+    useState(isHorizontalFoldActive);
+  useEffect(() => {
+    if (isHorizontalFoldActive) {
+      setHasEverBeenHorizontallyFolded(true);
+    }
+  }, [isHorizontalFoldActive]);
+
+  const hasVisibleHorizontalHistory =
+    isMiddleFoldCandidate && hasEverBeenHorizontallyFolded;
+
+  if (
+    !hasEverOpened &&
+    !isOpen &&
+    !hasVisibleElevationHistory &&
+    !hasVisibleHorizontalHistory
+  ) {
+    return null;
+  }
 
   return (
     <a.group {...dragBind} position-x={dragX} position-y={dragY}>
@@ -459,6 +504,9 @@ function PopUpCardWrapper({
         liftZ={liftZ}
         surfaceLiftZ={surfaceLiftZ}
         tiltX={tiltX}
+        horizontalTiltX={horizontalTiltX}
+        horizontalLiftZ={horizontalLiftZ}
+        horizontalPivotOffsetY={horizontalPivotOffsetY}
         scale={scale}
         elevateShadowOpacity={elevateShadowOpacity}
         elevateOpacity={elevateOpacity}

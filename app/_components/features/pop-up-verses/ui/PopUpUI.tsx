@@ -5,8 +5,14 @@ import { usePopUpStore } from "./usePopUpStore";
 export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const groups = usePopUpStore((state) => state.popUpGroups);
   const allOpen = usePopUpStore((state) => state.popUpAllOpen);
+  const middleHorizontalFolded = usePopUpStore(
+    (state) => state.middleHorizontalFolded,
+  );
   const toggleAll = usePopUpStore((state) => state.toggleAllPopUps);
   const toggleGroup = usePopUpStore((state) => state.togglePopUpGroup);
+  const toggleMiddleHorizontalFold = usePopUpStore(
+    (state) => state.toggleMiddleHorizontalFold,
+  );
 
   return (
     <div
@@ -61,6 +67,8 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
       </div>
 
       {groups.map((group) => {
+        const isMiddleGroup = group.id === "g_11_12_13_14";
+
         return (
           <div
             key={group.id}
@@ -117,6 +125,49 @@ export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
                 }}
               />
             </button>
+
+            {isMiddleGroup && (
+              <button
+                onClick={toggleMiddleHorizontalFold}
+                style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -50%)",
+                  top: 34,
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  background: middleHorizontalFolded
+                    ? isDarkMode
+                      ? "#fff"
+                      : "#111"
+                    : isDarkMode
+                      ? "rgba(255,255,255,0.2)"
+                      : "rgba(0,0,0,0.1)",
+                  border: isDarkMode
+                    ? "2px solid rgba(255,255,255,0.5)"
+                    : "2px solid rgba(0,0,0,0.2)",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                title="Toggle horizontal fold"
+              >
+                <div
+                  style={{
+                    width: 8,
+                    height: 2,
+                    borderRadius: 2,
+                    background: middleHorizontalFolded
+                      ? isDarkMode
+                        ? "#111"
+                        : "#fff"
+                      : isDarkMode
+                        ? "#fff"
+                        : "#111",
+                    margin: "auto",
+                  }}
+                />
+              </button>
+            )}
           </div>
         );
       })}

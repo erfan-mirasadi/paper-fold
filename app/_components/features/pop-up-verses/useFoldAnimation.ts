@@ -98,3 +98,44 @@ export function useFoldAnimation(isFolded: boolean) {
     opacity,
   };
 }
+
+export function useMiddleHorizontalFoldAnimation(
+  isFolded: boolean,
+  direction: 1 | -1,
+  isEnabled: boolean,
+) {
+  const springConfig = {
+    mass: POPUP_TIMING.springMass,
+    tension: POPUP_TIMING.springTension,
+    friction: POPUP_TIMING.springFriction,
+  };
+
+  const { horizontalTiltX } = useSpring({
+    horizontalTiltX: isEnabled && isFolded ? direction * (Math.PI / 3) : 0,
+    from: { horizontalTiltX: 0 },
+    config: springConfig,
+    delay:
+      isEnabled && isFolded
+        ? POPUP_TIMING.appearDelayFold
+        : POPUP_TIMING.hideDelayFold,
+  });
+
+  const { horizontalLiftZ } = useSpring({
+    horizontalLiftZ: isEnabled
+      ? isFolded
+        ? POPUP_TIMING.restDepth
+        : POPUP_TIMING.dipDepth
+      : 0,
+    from: { horizontalLiftZ: isEnabled ? POPUP_TIMING.dipDepth : 0 },
+    config: springConfig,
+    delay:
+      isEnabled && isFolded
+        ? POPUP_TIMING.appearDelayZAndOpacity
+        : POPUP_TIMING.hideDelayZAndOpacity,
+  });
+
+  return {
+    horizontalTiltX,
+    horizontalLiftZ,
+  };
+}

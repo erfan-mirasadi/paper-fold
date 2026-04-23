@@ -26,8 +26,10 @@ interface PopUpStoreState {
   popUpGroups: PopUpGroup[];
   popUpAllOpen: boolean;
   unlockedGroupIds: string[];
+  middleHorizontalFolded: boolean;
   togglePopUpGroup: (id: string) => void;
   toggleAllPopUps: () => void;
+  toggleMiddleHorizontalFold: () => void;
   syncScrollOffset: (offset: number) => void;
 }
 
@@ -42,12 +44,14 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
   popUpGroups: INITIAL_POPUP_GROUPS,
   popUpAllOpen: false,
   unlockedGroupIds: getUnlockedPopUpGroups(0),
+  middleHorizontalFolded: false,
 
   togglePopUpGroup: (id) =>
     set((state) => {
       if (!state.unlockedGroupIds.includes(id)) return state;
 
       let anyClosed = false;
+      const isMiddleGroup = id === "g_11_12_13_14";
       const newGroups = state.popUpGroups.map((g) => {
         if (g.id === id) {
           const newState = !g.isOpen;
@@ -65,6 +69,9 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       return {
         popUpGroups: newGroups,
         popUpAllOpen: !anyClosed,
+        middleHorizontalFolded: isMiddleGroup && newGroups.find((g) => g.id === id)?.isOpen
+          ? false
+          : state.middleHorizontalFolded,
       };
     }),
 
@@ -79,6 +86,30 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       return {
         popUpAllOpen: newAllOpen,
         popUpGroups: newGroups,
+        middleHorizontalFolded: false,
+      };
+    }),
+
+  toggleMiddleHorizontalFold: () =>
+    set((state) => {
+      const middleGroupId = "g_11_12_13_14";
+      const nextHorizontalFolded = !state.middleHorizontalFolded;
+      const newGroups = state.popUpGroups.map((g) => {
+        if (g.id !== middleGroupId) return g;
+        return {
+          ...g,
+          isOpen: nextHorizontalFolded ? false : g.isOpen,
+        };
+      });
+
+      const popUpAllOpen = newGroups.every(
+        (g) => !state.unlockedGroupIds.includes(g.id) || g.isOpen,
+      );
+
+      return {
+        middleHorizontalFolded: nextHorizontalFolded,
+        popUpGroups: newGroups,
+        popUpAllOpen,
       };
     }),
 
@@ -110,6 +141,9 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
         unlockedGroupIds: nextUnlocked,
         popUpGroups: newGroups,
         popUpAllOpen: anyOpen,
+        middleHorizontalFolded: nextUnlocked.includes("g_11_12_13_14")
+          ? state.middleHorizontalFolded
+          : false,
       };
     }),
 }));

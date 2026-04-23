@@ -22,6 +22,9 @@ interface PopUpVerseCardProps {
   liftZ: SpringValue<number>;
   surfaceLiftZ: SpringValue<number>;
   tiltX: SpringValue<number>;
+  horizontalTiltX: SpringValue<number>;
+  horizontalLiftZ: SpringValue<number>;
+  horizontalPivotOffsetY: number;
   scale: SpringValue<number>;
   elevateShadowOpacity: SpringValue<number>;
   elevateOpacity: SpringValue<number>;
@@ -51,6 +54,9 @@ export function PopUpVerseCard({
   liftZ,
   surfaceLiftZ,
   tiltX,
+  horizontalTiltX,
+  horizontalLiftZ,
+  horizontalPivotOffsetY,
   scale,
   elevateShadowOpacity,
   elevateOpacity,
@@ -220,78 +226,93 @@ export function PopUpVerseCard({
         (o1, o2) => Math.max(o1, o2) > 0.01,
       )}
     >
-      <a.mesh
-        position-x={shadowXOffset}
-        position-y={shadowYOffset}
-        renderOrder={90}
-        position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
-          const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
-          const surfaceZBias = SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
-          return SHADOW_CONFIG.baseInsetZ - lift + surfaceLift + surfaceZBias;
-        })}
-        scale-x={shadowScaleX}
-        scale-y={shadowScaleY}
-      >
-        <RoundedShapeComponent w={w} h={h} radius={boxRadius} />
-        <a.meshBasicMaterial
-          {...materialsProps.shadow}
-          opacity={finalShadowOpacity}
-        />
-      </a.mesh>
-
-      <a.group rotation-x={tiltX} scale={scale}>
-        <a.group rotation-y={rotValue} position-z={zOffset}>
-          <group position={[brickGroupXOffset, outerTop, 0]}>
-            <mesh position={[0, 0, -0.008]} renderOrder={100}>
-              <extrudeGeometry args={[shape, extrudeSettings]} />
-              <a.meshStandardMaterial
-                {...materialsProps.front}
-                opacity={to([opacity, elevateOpacity], (o1, o2) =>
-                  Math.max(o1, o2),
-                )}
+      <a.group position-y={horizontalPivotOffsetY}>
+        <a.group rotation-x={horizontalTiltX} position-z={horizontalLiftZ}>
+          <a.group position-y={-horizontalPivotOffsetY}>
+            <a.mesh
+              position-x={shadowXOffset}
+              position-y={shadowYOffset}
+              renderOrder={90}
+              position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
+                const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+                const surfaceZBias =
+                  SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
+                return SHADOW_CONFIG.baseInsetZ - lift + surfaceLift + surfaceZBias;
+              })}
+              scale-x={shadowScaleX}
+              scale-y={shadowScaleY}
+            >
+              <RoundedShapeComponent w={w} h={h} radius={boxRadius} />
+              <a.meshBasicMaterial
+                {...materialsProps.shadow}
+                opacity={finalShadowOpacity}
               />
-            </mesh>
+            </a.mesh>
 
-            <mesh position={[outerW / 2, -outerH / 2, 0.002]} renderOrder={101}>
-              <planeGeometry args={[outerW, outerH]} />
-              <a.meshStandardMaterial
-                {...materialsProps.back}
-                opacity={to([opacity, elevateOpacity], (o1, o2) =>
-                  Math.max(o1, o2),
-                )}
-              >
-                <RenderTexture attach="map" width={512} height={256} frames={2}>
-                  <OrthographicCamera
-                    makeDefault
-                    manual
-                    left={0}
-                    right={outerW}
-                    top={0}
-                    bottom={-outerH}
-                    position={[0, 0, 10]}
-                  />
-                  <group position={[alignX, alignY, 0]}>
-                    <VerseBox
-                      x={0}
-                      y={0}
-                      z={0}
-                      w={w}
-                      h={h}
-                      verse={verse}
-                      number={number}
-                      bg={bg}
-                      border={border}
-                      circleBorderCol={circleBorderCol}
-                      circleBg={circleBg}
-                      circleTextCol={circleTextCol}
-                      isPill={isPill}
-                      shadow={false}
+            <a.group rotation-x={tiltX} scale={scale}>
+              <a.group rotation-y={rotValue} position-z={zOffset}>
+                <group position={[brickGroupXOffset, outerTop, 0]}>
+                  <mesh position={[0, 0, -0.008]} renderOrder={100}>
+                    <extrudeGeometry args={[shape, extrudeSettings]} />
+                    <a.meshStandardMaterial
+                      {...materialsProps.front}
+                      opacity={to([opacity, elevateOpacity], (o1, o2) =>
+                        Math.max(o1, o2),
+                      )}
                     />
-                  </group>
-                </RenderTexture>
-              </a.meshStandardMaterial>
-            </mesh>
-          </group>
+                  </mesh>
+
+                  <mesh
+                    position={[outerW / 2, -outerH / 2, 0.002]}
+                    renderOrder={101}
+                  >
+                    <planeGeometry args={[outerW, outerH]} />
+                    <a.meshStandardMaterial
+                      {...materialsProps.back}
+                      opacity={to([opacity, elevateOpacity], (o1, o2) =>
+                        Math.max(o1, o2),
+                      )}
+                    >
+                      <RenderTexture
+                        attach="map"
+                        width={512}
+                        height={256}
+                        frames={2}
+                      >
+                        <OrthographicCamera
+                          makeDefault
+                          manual
+                          left={0}
+                          right={outerW}
+                          top={0}
+                          bottom={-outerH}
+                          position={[0, 0, 10]}
+                        />
+                        <group position={[alignX, alignY, 0]}>
+                          <VerseBox
+                            x={0}
+                            y={0}
+                            z={0}
+                            w={w}
+                            h={h}
+                            verse={verse}
+                            number={number}
+                            bg={bg}
+                            border={border}
+                            circleBorderCol={circleBorderCol}
+                            circleBg={circleBg}
+                            circleTextCol={circleTextCol}
+                            isPill={isPill}
+                            shadow={false}
+                          />
+                        </group>
+                      </RenderTexture>
+                    </a.meshStandardMaterial>
+                  </mesh>
+                </group>
+              </a.group>
+            </a.group>
+          </a.group>
         </a.group>
       </a.group>
     </a.group>

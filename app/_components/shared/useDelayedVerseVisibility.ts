@@ -6,6 +6,9 @@ import { ELEVATE_TEXTURE_TIMING } from "../features/elevated-verses/useElevateAn
 
 export function useDelayedVerseVisibility() {
   const groups = usePopUpStore((state) => state.popUpGroups);
+  const middleHorizontalFolded = usePopUpStore(
+    (state) => state.middleHorizontalFolded,
+  );
   const activeVerseIds = useElevatedStore((state) => state.activeVerseIds);
 
   // Pop-up delayed state
@@ -21,16 +24,20 @@ export function useDelayedVerseVisibility() {
   const [delayedElevatedState, setDelayedElevatedState] = useState<
     Record<number, boolean>
   >(() => Object.fromEntries(activeVerseIds.map((id) => [id, true])));
+  const [delayedMiddleHorizontalFolded, setDelayedMiddleHorizontalFolded] =
+    useState(middleHorizontalFolded);
 
   // Refs for tracking timeouts so we can cancel specific ones without wiping others
   const groupTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
   const elevatedTimeoutsRef = useRef<Record<number, NodeJS.Timeout>>({});
+  const middleHorizontalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Refs for tracking previous states to detect actual changes
   const prevGroupsOpenRef = useRef<Record<string, boolean>>(
     Object.fromEntries(groups.map((g) => [g.id, g.isOpen])),
   );
   const prevActiveSetRef = useRef<Set<number>>(new Set(activeVerseIds));
+  const prevMiddleHorizontalRef = useRef(middleHorizontalFolded);
 
   // Sync Pop-ups
   useEffect(() => {
@@ -91,6 +98,26 @@ export function useDelayedVerseVisibility() {
     prevActiveSetRef.current = currentSet;
   }, [activeVerseIds]);
 
+  // Sync middle horizontal fold visibility with the same popup timings.
+  useEffect(() => {
+    if (prevMiddleHorizontalRef.current === middleHorizontalFolded) return;
+    prevMiddleHorizontalRef.current = middleHorizontalFolded;
+
+    if (middleHorizontalTimeoutRef.current) {
+      clearTimeout(middleHorizontalTimeoutRef.current);
+    }
+
+    const delay = middleHorizontalFolded
+      ? ORIGINAL_TEXTURE_TIMING.hideDelay
+      : ORIGINAL_TEXTURE_TIMING.showDelay;
+
+    middleHorizontalTimeoutRef.current = setTimeout(() => {
+      setDelayedMiddleHorizontalFolded((prev) =>
+        prev === middleHorizontalFolded ? prev : middleHorizontalFolded,
+      );
+    }, delay);
+  }, [middleHorizontalFolded]);
+
   // Global unmount cleanup
   useEffect(() => {
     const groupTimeouts = groupTimeoutsRef.current;
@@ -99,12 +126,19 @@ export function useDelayedVerseVisibility() {
     return () => {
       Object.values(groupTimeouts).forEach(clearTimeout);
       Object.values(elevatedTimeouts).forEach(clearTimeout);
+      if (middleHorizontalTimeoutRef.current) {
+        clearTimeout(middleHorizontalTimeoutRef.current);
+      }
     };
   }, []);
 
   const isVerseHidden = (verseId: number) => {
     const isElevated = delayedElevatedState[verseId] ?? false;
     if (isElevated) return true;
+
+    const isMiddleVerse =
+      verseId === 11 || verseId === 12 || verseId === 13 || verseId === 14;
+    if (isMiddleVerse && delayedMiddleHorizontalFolded) return true;
 
     const group = groups.find((g) => g.verseIds.includes(verseId));
     if (group) {
