@@ -20,18 +20,18 @@ import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../data/SurahConfig";
 
 const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
-const CURVE_INWARD_OFFSET = 0.02; // How far the bracket tip pokes inward
-const CURVE_DEEP_OFFSET_OUTER = 0.03; // Deeper tip for the center (12–14) bracket
-const CURVE_DEEP_OFFSET_INNER = 0.03; // Deeper inner tip for center bracket
-const DEFAULT_VERSE_BORDER_WIDTH = 0.0055; // Matches VerseBox default border width
+const CURVE_INWARD_OFFSET = 0.015; // How far the bracket tip pokes inward
+const CURVE_DEEP_OFFSET_OUTER = 0.025; // Deeper tip for the center (12–14) bracket
+const CURVE_DEEP_OFFSET_INNER = 0.028; // Deeper inner tip for center bracket
+const DEFAULT_VERSE_BORDER_WIDTH = 0.004; // Matches VerseBox default border width
 
 const INNER_CURVE_GAP = 0.095; // Bow step for inner curves
-const INNER_CURVE_INWARD_OFFSET = 0.008; // Inner tip penetration
+const INNER_CURVE_INWARD_OFFSET = 0.009; // Inner tip penetration
 
 // ── Line width constants
 // Edit these two values to adjust the thickness of the side-curve outlines.
-export const CURVE_OUTER_LINE_WIDTH = 2;
-export const CURVE_INNER_LINE_WIDTH = 2;
+export const CURVE_OUTER_LINE_WIDTH = 4;
+export const CURVE_INNER_LINE_WIDTH = 4;
 
 interface SideCurvesProps {
   layout: LayoutConfig;

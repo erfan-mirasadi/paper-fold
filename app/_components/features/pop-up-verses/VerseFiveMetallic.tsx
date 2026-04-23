@@ -13,6 +13,7 @@ import {
   SURAH_DATA,
   PAGE_WIDTH,
   CAPSULE_BORDER_WIDTH,
+  VERSE_5_6_19_RADIUS,
 } from "../../data/SurahConfig";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
@@ -112,7 +113,7 @@ export function VerseFiveMetallic() {
 
   const w = t.w;
   const h = t.h;
-  const radius = 0.05; // Base radius for non-pill verse
+  const radius = VERSE_5_6_19_RADIUS; // Base radius for non-pill verse
 
   const outerW = w + BW * 2;
   const outerH = h + BW * 2;
@@ -136,11 +137,17 @@ export function VerseFiveMetallic() {
 
   const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(5));
   const separationOffset = useDragState(
-    (s) => s.separatedVerseOffsets[5] || ZERO_OFFSET
+    (s) => s.separatedVerseOffsets[5] || ZERO_OFFSET,
   );
 
-  const dragX = to([verseDrag.x, sectionDrag.x], (vx, sx) => vx + (isVerseSeparated ? separationOffset.x : sx));
-  const dragY = to([verseDrag.y, sectionDrag.y], (vy, sy) => vy + (isVerseSeparated ? separationOffset.y : sy));
+  const dragX = to(
+    [verseDrag.x, sectionDrag.x],
+    (vx, sx) => vx + (isVerseSeparated ? separationOffset.x : sx),
+  );
+  const dragY = to(
+    [verseDrag.y, sectionDrag.y],
+    (vy, sy) => vy + (isVerseSeparated ? separationOffset.y : sy),
+  );
 
   const shadowScale = to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
     const liftProgress = normalizeLiftProgress(lift);

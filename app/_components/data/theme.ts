@@ -18,7 +18,7 @@ export const BUMP_BASE = "#000000";
 // ----------------------------------------------------------------------------
 // 3. CANVAS & PAGE COLORS
 // ----------------------------------------------------------------------------
-export const BG_COLOR = "#FDF8E4";
+export const INNER_CARD_BG = "#ffffff";
 export const PAGE_BG_COLOR = "#f4efec";
 export const CIRCLE_BORDER = "#8e8e8e";
 
@@ -33,13 +33,13 @@ export const S1_ANA_BG = "#C4963B";
 
 export const S1_VERSE_NUMBER_BG = S1_INNER_BG;
 export const S1_VERSE_NUMBER_BORDER = "#8B7C74";
-export const S1_VERSE_NUMBER_TEXT = "#8B7C74";
+export const S1_VERSE_NUMBER_TEXT = "#000000";
 
 // Verse 5 Specifics
 export const CAPSULE_BG_5 = "#DBBD80";
 export const S1_VERSE_5_NUMBER_BG = CAPSULE_BG_5;
 export const S1_VERSE_5_NUMBER_BORDER = "#8B7C74";
-export const S1_VERSE_5_NUMBER_TEXT = "#8B7C74";
+export const S1_VERSE_5_NUMBER_TEXT = "#000000";
 export const S1_VERSE_5_TEXT = "#000000";
 
 export const S1_ANA_LABEL_BG = "#e5ba71";
@@ -67,6 +67,7 @@ export const GREEN_VERSE_BG = "#eaf2db";
 export const BLUE_THEME = "#C4963B";
 export const SG_BG = "#845775";
 export const SG_BORDER = "#F4ECD8";
+export const S2_VERSE_NUMBER_TEXT = "#000000";
 // ----------------------------------------------------------------------------
 // TOP LABEL — Section-specific background & border (Section 2)
 // ----------------------------------------------------------------------------
@@ -93,6 +94,6 @@ export const TEXT_SIZES = {
   TOP_LABEL: 0.023,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,
-  VERSE_TEXT_SMALL: 0.032,
+  VERSE_TEXT_SMALL: 0.0365,
   VERSE_TEXT_BIG: 0.071,
 } as const;

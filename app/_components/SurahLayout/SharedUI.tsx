@@ -18,12 +18,14 @@ import {
   S1_ANA_LABEL_TEXT,
   QURAN_FONT,
   TEXT_SIZES,
+  S2_VERSE_NUMBER_TEXT,
 } from "../data/theme";
 export * from "../data/theme";
 import {
   CAPSULE_BORDER_WIDTH,
   CIRCLE_BORDER_WIDTH,
   TOP_LABEL_WIDTH,
+  VERSE_5_6_19_RADIUS,
 } from "../data/SurahConfig";
 
 // ROUNDED SHAPE GEOMETRY
@@ -423,8 +425,8 @@ export const VerseBox = ({
 
   // Single border width for ALL capsules — tunable from SurahConfig.ts
   const bw = borderWidth ?? CAPSULE_BORDER_WIDTH;
-  const rad = isPill ? h / 2 : 0.05;
-  const cr = Math.min(h * 0.46, 0.035);
+  const rad = isPill ? h / 2 : VERSE_5_6_19_RADIUS;
+  const cr = Math.min(h * 0.28, 0.021);
   const SMALL_PILL_OFFSET = 0.002;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
@@ -432,7 +434,7 @@ export const VerseBox = ({
   const textMaxW = finalW - safeMargin * 2;
   const textX = safeMargin + textMaxW / 2;
 
-  const SMALL_TEXT_SHIFT = -0.02;
+  const SMALL_TEXT_SHIFT = -0.01;
   const versePosX = isPill ? textX - SMALL_TEXT_SHIFT : textX;
 
   return (
@@ -493,9 +495,7 @@ export const VerseBox = ({
         <Text
           position={[0, 0, 0.001]}
           fontSize={TEXT_SIZES.VERSE_NUMBER}
-          color={
-            isBumpMap ? BUMP_MAX : (circleTextCol ?? circleBorderCol ?? border)
-          }
+          color={isBumpMap ? BUMP_MAX : S2_VERSE_NUMBER_TEXT}
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"

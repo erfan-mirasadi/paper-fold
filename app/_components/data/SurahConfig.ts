@@ -72,7 +72,7 @@ const s2Top = s1Top - s1H - gapBetweenS1andS2;
 
 const s2PadTop = 0.035 + s2TopExtra;
 const s2PadBottom = 0.06;
-const bigBoxH = 0.11;
+const bigBoxH = 0.125;
 const groupGap = 0.025;
 const groupPad = 0.012;
 const groupPadBottom = 0.025;
@@ -170,6 +170,9 @@ export const CAPSULE_BORDER_WIDTH = 0.0039;
 
 // Controls the thickness of the border ring around verse numbers.
 export const CIRCLE_BORDER_WIDTH = 0.0035;
+
+// Controls the corner radius for non-pill verse boxes (specifically verses 5, 6 and 19).
+export const VERSE_5_6_19_RADIUS = 0.04;
 
 // ----------------------------------------------------------------------------
 // OPPOSITE VERSE CONNECTOR CONFIG

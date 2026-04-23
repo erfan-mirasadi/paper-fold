@@ -1,5 +1,6 @@
 "use client";
 import { UiRect } from "./SharedUI";
+import { INNER_CARD_BG } from "../data/theme";
 
 interface BoarderProps {
   PW: number;
@@ -8,14 +9,14 @@ interface BoarderProps {
 }
 
 export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
-  const ORIGINAL_CARD_PAD_X = 0.02;
+  const ORIGINAL_CARD_PAD_X = 0.0;
   const ORIGINAL_CARD_PAD_TOP = 0.02;
   const ORIGINAL_CARD_PAD_BOTTOM = 0.02;
 
   const FRAME_PAD = 0.02; // White border thickness
   const HALO_PAD = 0.001; // Subtle gap creating the shadow/glow halo
 
-  const INNER_CARD_COLOR = "#EBEBDF"; // Warm off-white inner fill
+  const INNER_CARD_COLOR = INNER_CARD_BG; // Inner fill from theme
   const FRAME_COLOR = "#ffffff"; // Pure white frame
   const HALO_COLOR = "#ADADAD"; // Soft grey halo shadow
 

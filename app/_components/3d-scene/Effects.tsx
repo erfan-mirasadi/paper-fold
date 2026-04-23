@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import {
   EffectComposer,
   Bloom,
-  Vignette,
+  // Vignette,
   ToneMapping,
   BrightnessContrast,
   Glitch,
@@ -25,7 +25,7 @@ const Effects: React.FC<EffectsProps> = ({
   glitchTrigger = 0,
   brightness = -0.09,
   contrast = 0.23,
-  vignetteDarkness = 0.4,
+  // vignetteDarkness = 0.4,
 }) => {
   const [manualActive, setManualActive] = useState(false);
   const lastTriggerRef = useRef(0);

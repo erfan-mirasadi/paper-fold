@@ -4,9 +4,6 @@ import { Canvas } from "@react-three/fiber";
 import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
-// import {
-//   TafsirScrollTracker,
-// } from "./_components/ui-overlay/TafsirUI";
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
 import {
@@ -18,6 +15,7 @@ import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
 import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
+import { CameraViewController } from "./_components/features/camera-views/CameraViewController";
 import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
 const Experience = dynamic(
   () =>
@@ -28,7 +26,7 @@ const Experience = dynamic(
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [glitchKey, setGlitchKey] = useState(0);
-  const bgColor = isDarkMode ? "#000000" : "#Ffffff";
+  const bgColor = isDarkMode ? "#000000" : "#ffffff";
 
   const handleThemeToggle = () => {
     setIsDarkMode((prev) => !prev);
@@ -66,13 +64,12 @@ export default function Home() {
             <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />
               <Experience isDarkMode={isDarkMode} />
-              {/* <TafsirScrollTracker /> */}
             </ScrollControls>
             <VerseNeonTracker />
+            <CameraViewController />
           </Canvas>
         </div>
       </Suspense>
-      {/* <TafsirUI isDarkMode={isDarkMode} /> */}
       <CameraResetOverlay />
       <PopUpUI isDarkMode={isDarkMode} />
       <VerseNeonHTMLOverlay />
