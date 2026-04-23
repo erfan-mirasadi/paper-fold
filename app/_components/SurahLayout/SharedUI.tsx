@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, useScroll } from "@react-three/drei";
+import { Text, useScroll, useTexture } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -102,6 +102,61 @@ interface UiRectProps {
   emissiveIntensity?: number;
   toneMapped?: boolean;
 }
+
+interface TexturedMaterialProps {
+  url: string;
+  useEmissive: boolean;
+  depthTest: boolean;
+  transparent: boolean;
+  opacity: number;
+  toneMapped: boolean;
+  emissive: string;
+  emissiveIntensity: number;
+}
+
+function TexturedMaterial({
+  url,
+  useEmissive,
+  depthTest,
+  transparent,
+  opacity,
+  toneMapped,
+  emissive,
+  emissiveIntensity,
+}: TexturedMaterialProps) {
+  const texture = useTexture(url, (loadedTexture) => {
+    loadedTexture.colorSpace = THREE.SRGBColorSpace;
+  });
+
+  if (useEmissive) {
+    return (
+      <meshStandardMaterial
+        map={texture}
+        color="#ffffff"
+        depthTest={depthTest}
+        transparent={transparent}
+        opacity={opacity}
+        toneMapped={toneMapped}
+        emissive={emissive}
+        emissiveIntensity={emissiveIntensity}
+        roughness={0.55}
+        metalness={0.15}
+      />
+    );
+  }
+
+  return (
+    <meshBasicMaterial
+      map={texture}
+      color="#ffffff"
+      depthTest={depthTest}
+      transparent={transparent}
+      opacity={opacity}
+      toneMapped={toneMapped}
+    />
+  );
+}
+
 export const UiRect = ({
   x,
   y,
@@ -130,6 +185,8 @@ export const UiRect = ({
   const resolvedOpacity =
     opacity ?? (renderOrder != null && !isBumpMap ? 0.999 : 1);
   const useEmissiveMaterial = Boolean(emissive) && !isBumpMap;
+  const isImage =
+    typeof finalColor === "string" && /\.(jpe?g|png|webp)$/i.test(finalColor);
 
   return (
     <group position={[x, y, z]}>
@@ -160,7 +217,18 @@ export const UiRect = ({
           topOnly={topOnly}
           bottomOnly={bottomOnly}
         />
-        {useEmissiveMaterial ? (
+        {isImage ? (
+          <TexturedMaterial
+            url={finalColor}
+            useEmissive={useEmissiveMaterial}
+            depthTest={depthTest}
+            transparent={resolvedTransparent}
+            opacity={resolvedOpacity}
+            toneMapped={toneMapped ?? false}
+            emissive={emissive || "#000000"}
+            emissiveIntensity={emissiveIntensity ?? 1}
+          />
+        ) : useEmissiveMaterial ? (
           <meshStandardMaterial
             color={finalColor}
             depthTest={depthTest}

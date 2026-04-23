@@ -31,6 +31,19 @@ const RENDER_TEX_HEIGHT = 1700;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
 
+export const PAPER_TEXTURES = {
+  normalUrl: "/Paper-Texture-7_normal.png",
+  diffuseUrl: "/Folded-PaperTextures-001.jpg",
+} as const;
+
+export const PAPER_MATERIAL_CONFIG = {
+  roughness: 0.95,
+  metalness: 0.02,
+  color: paperBaseColor,
+  bumpScale: 0.02,
+  envMapIntensity: 0.6,
+};
+
 export interface TextureToggles {
   diffuse: boolean;
   normal: boolean;
@@ -74,7 +87,7 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   });
 
   const paperTextureNormal = useTexture(
-    "/Paper-Texture-7_normal.png",
+    PAPER_TEXTURES.normalUrl,
     (texture) => {
       texture.colorSpace = NoColorSpace;
       texture.wrapS = RepeatWrapping;
@@ -85,7 +98,7 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   );
 
   const paperTextureDiffuse = useTexture(
-    "/Folded-PaperTextures-001.jpg",
+    PAPER_TEXTURES.diffuseUrl,
     (texture) => {
       texture.colorSpace = SRGBColorSpace;
       texture.wrapS = RepeatWrapping;
@@ -98,12 +111,8 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   return (
     <meshStandardMaterial
       attach="material-4"
-      roughness={0.95}
-      metalness={0.02}
-      color={paperBaseColor}
-      bumpScale={0.02}
+      {...PAPER_MATERIAL_CONFIG}
       normalScale={normalScale}
-      envMapIntensity={0.6}
     >
       {/* MAP: The safe way without breaking SurahLayout's default camera */}
       <RenderTexture

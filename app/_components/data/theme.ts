@@ -25,7 +25,9 @@ export const CIRCLE_BORDER = "#8e8e8e";
 // ----------------------------------------------------------------------------
 // 4. SECTION 1 — UPPER BLOCK PALETTE
 // ----------------------------------------------------------------------------
-export const S1_OUTER_BG = "#A0948D";
+export const SECTION_BG_TEXTURE = "/section-bg.jpeg";
+
+export const S1_OUTER_BG = SECTION_BG_TEXTURE;
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_OUTER_BORDER = "#D9BC81";
 export const S1_INNER_BORDER = "#e2caae";
@@ -59,7 +61,7 @@ export const S2_OUTER_BG = "#DFDAD8";
 export const S2_OUTER_BORDER = "#8B7C74";
 export const HOLLOW_BORDER_COLOR = "#72665F";
 export const HOLLOW_BORDER_INNER = "#B5ABA6";
-export const HOLLOW_CONNECTOR_INNER_BG_1_3 = "#A0948D";
+export const HOLLOW_CONNECTOR_INNER_BG_1_3 = SECTION_BG_TEXTURE;
 export const MAROON_THEME = "#7c8cb0";
 export const MAROON_VERSE_BG = "#ebd2dc";
 export const GREEN_THEME = "#5E7367";

@@ -1,5 +1,5 @@
 "use client";
-import { TopLabel, UiRect, VerseBox } from "./SharedUI";
+import { TopLabel, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
 import { useDelayedHidden } from "../shared/useDelayedHidden";
