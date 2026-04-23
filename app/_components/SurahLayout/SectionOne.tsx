@@ -151,10 +151,11 @@ export function SectionOne({
       )}
 
       {/* Row Connectors for opposite verses */}
-      {t.rowConnectors.map((rc, i) => {
+      {(!hideSectionSurface || isBumpMap) && t.rowConnectors.map((rc, i) => {
         const leftV = data.gridVerses[i * 2];
         const rightV = data.gridVerses[i * 2 + 1];
-        if (!leftV || !rightV || (isVerseHidden(leftV.number) && isVerseHidden(rightV.number))) return null;
+        
+        if (!leftV || !rightV) return null;
 
         return (
           <UiRect

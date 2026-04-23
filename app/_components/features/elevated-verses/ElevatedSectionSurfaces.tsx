@@ -8,6 +8,7 @@ import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
   SURAH_TRANSFORMS,
+  OPPOSITE_VERSE_CONNECTOR,
 } from "../../data/SurahConfig";
 import {
   Color,
@@ -24,6 +25,9 @@ import {
   HOLLOW_BORDER_COLOR,
   HOLLOW_BORDER_INNER,
   HOLLOW_CONNECTOR_INNER_BG_1_3,
+  S1_INNER_BORDER,
+  MAROON_THEME,
+  GREEN_THEME,
 } from "../../data/theme";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
@@ -284,12 +288,16 @@ export function ElevatedSectionSurfaces() {
   const s2TopActive = useElevatedStore((s) =>
     s.activeSectionIds.includes("s2_top"),
   );
+  const s2CenterActive = useElevatedStore((s) =>
+    s.activeSectionIds.includes("s2_center"),
+  );
   const s2BottomActive = useElevatedStore((s) =>
     s.activeSectionIds.includes("s2_bottom"),
   );
 
   const s1Spring = useSectionSurfaceSpring(s1Active);
   const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
+  const s2CenterSpring = useSectionSurfaceSpring(s2CenterActive);
   const s2BottomSpring = useSectionSurfaceSpring(s2BottomActive);
 
   const s1 = SURAH_TRANSFORMS.s1;
@@ -371,6 +379,22 @@ export function ElevatedSectionSurfaces() {
           shadow
           shadowStrength={0.95}
         />
+        {s1.rowConnectors.map((rc, i) => (
+          <ElevatedLayer
+            key={`s1-rc-${i}`}
+            x={rc.x}
+            y={rc.y}
+            w={rc.w}
+            h={rc.h}
+            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+            color={S1_INNER_BORDER}
+            paperNormalTexture={paperTextureNormal}
+            spring={s1Spring}
+            zOffset={0.0015}
+            shadow
+            shadowStrength={0.5}
+          />
+        ))}
       </DraggableSectionGroup>
 
       {/* ─── Section 2 top connector ───────────────────────────────── */}
@@ -413,6 +437,42 @@ export function ElevatedSectionSurfaces() {
           shadow
           shadowStrength={0.65}
         />
+        {s2.groups[0].rowConnectors.map((rc, i) => (
+          <ElevatedLayer
+            key={`s2-top-rc-${i}`}
+            x={rc.x}
+            y={rc.y}
+            w={rc.w}
+            h={rc.h}
+            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+            color={MAROON_THEME}
+            paperNormalTexture={paperTextureNormal}
+            spring={s2TopSpring}
+            zOffset={0.0025}
+            shadow
+            shadowStrength={0.65}
+          />
+        ))}
+      </DraggableSectionGroup>
+
+      {/* ─── Section 2 Center Group ────────────────────────────────────── */}
+      <DraggableSectionGroup sectionId="s2_center" isActive={s2CenterActive}>
+        {s2.groups[1].rowConnectors.map((rc, i) => (
+          <ElevatedLayer
+            key={`s2-center-rc-${i}`}
+            x={rc.x}
+            y={rc.y}
+            w={rc.w}
+            h={rc.h}
+            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+            color={GREEN_THEME}
+            paperNormalTexture={paperTextureNormal}
+            spring={s2CenterSpring}
+            zOffset={0.0025}
+            shadow
+            shadowStrength={0.65}
+          />
+        ))}
       </DraggableSectionGroup>
 
       {/* ─── Section 2 bottom connector ────────────────────────────── */}
@@ -455,6 +515,22 @@ export function ElevatedSectionSurfaces() {
           shadow
           shadowStrength={0.65}
         />
+        {s2.groups[2].rowConnectors.map((rc, i) => (
+          <ElevatedLayer
+            key={`s2-bottom-rc-${i}`}
+            x={rc.x}
+            y={rc.y}
+            w={rc.w}
+            h={rc.h}
+            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+            color={MAROON_THEME}
+            paperNormalTexture={paperTextureNormal}
+            spring={s2BottomSpring}
+            zOffset={0.0025}
+            shadow
+            shadowStrength={0.65}
+          />
+        ))}
       </DraggableSectionGroup>
     </group>
   );

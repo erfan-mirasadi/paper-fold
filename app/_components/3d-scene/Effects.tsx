@@ -48,7 +48,11 @@ const Effects: React.FC<EffectsProps> = ({
   });
 
   return (
-    <EffectComposer multisampling={5} enableNormalPass={false}>
+    <EffectComposer
+      multisampling={0}
+      autoClear={false}
+      enableNormalPass={false}
+    >
       <Bloom
         intensity={2.85}
         luminanceThreshold={1.5}

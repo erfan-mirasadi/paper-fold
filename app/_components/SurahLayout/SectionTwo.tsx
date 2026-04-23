@@ -10,12 +10,12 @@ import {
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
 import {
-  S2_OUTER_BORDER,
-  S2_OUTER_BG,
+  // S2_OUTER_BORDER,
+  // S2_OUTER_BG,
   BLUE_THEME,
   CAPSULE_BG_6_19,
-  BUMP_MAX,
-  BUMP_DEEP,
+  // BUMP_MAX,
+  // BUMP_DEEP,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
 } from "../data/theme";
@@ -65,28 +65,6 @@ export function SectionTwo({
   return (
     <group>
       {/* ─── SECTION OUTER FRAME ─────────────────────────────────────────── */}
-      <UiRect
-        x={t.frameX}
-        y={t.shiftedTop}
-        z={0}
-        w={t.frameW}
-        h={t.shiftedH}
-        radius={0.02}
-        color={S2_OUTER_BORDER}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MAX}
-      />
-      <UiRect
-        x={t.frameX + 0.003}
-        y={t.shiftedTop - 0.003}
-        z={0.001}
-        w={t.frameW - 0.006}
-        h={t.shiftedH - 0.006}
-        radius={0.017}
-        color={S2_OUTER_BG}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_DEEP}
-      />
 
       {/* ─── TOP HOLLOW CONNECTOR ────────────────────────────────────────── */}
       {!hideTopConnector && (
@@ -145,6 +123,7 @@ export function SectionTwo({
           groupTransform={t.groups[index]}
           isBumpMap={isBumpMap}
           isVerseHidden={(id) => isVerseHidden(id)}
+          groupIndex={index}
         />
       ))}
 

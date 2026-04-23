@@ -14,12 +14,18 @@ import {
 } from "../data/theme";
 import type { ColorGroup, GroupTransforms } from "../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../data/SurahConfig";
+import { useDelayedHidden } from "../shared/useDelayedHidden";
+import {
+  ELEVATED_RETURN_SYNC_MS,
+  useElevatedStore,
+} from "../features/elevated-verses/useElevatedStore";
 
 interface VerseGroupProps {
   group: ColorGroup;
   groupTransform: GroupTransforms;
   isBumpMap?: boolean;
   isVerseHidden: (verseId: number) => boolean;
+  groupIndex?: number;
 }
 
 export function VerseGroup({
@@ -27,9 +33,16 @@ export function VerseGroup({
   groupTransform,
   isBumpMap = false,
   isVerseHidden,
+  groupIndex = 0,
 }: VerseGroupProps) {
   const gt = groupTransform;
   const borderColor = gt.isCenter ? GREEN_THEME : MAROON_THEME;
+
+  const sectionId =
+    groupIndex === 0 ? "s2_top" : groupIndex === 1 ? "s2_center" : "s2_bottom";
+  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
+  const isElevatedNow = activeSectionIds.includes(sectionId);
+  const hideConnectors = useDelayedHidden(isElevatedNow, ELEVATED_RETURN_SYNC_MS);
 
   return (
     <group>
@@ -48,10 +61,11 @@ export function VerseGroup({
       /> */}
 
       {/* Row Connectors for opposite verses */}
-      {gt.rowConnectors.map((rc, i) => {
+      {(!hideConnectors || isBumpMap) && gt.rowConnectors.map((rc, i) => {
         const leftV = group.verses[i * 2];
         const rightV = group.verses[i * 2 + 1];
-        if (!leftV || !rightV || (isVerseHidden(leftV.number) && isVerseHidden(rightV.number))) return null;
+        
+        if (!leftV || !rightV) return null;
 
         return (
           <UiRect
