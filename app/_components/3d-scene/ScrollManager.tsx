@@ -76,6 +76,7 @@ export function ScrollManager() {
     const syncCurrentOffset = () => {
       const maxScroll = el.scrollHeight - el.clientHeight;
       const offset = maxScroll <= 0 ? 0 : clamp01(el.scrollTop / maxScroll);
+
       setCurrentOffset(offset);
 
       useElevatedStore.getState().syncScrollOffset(offset);

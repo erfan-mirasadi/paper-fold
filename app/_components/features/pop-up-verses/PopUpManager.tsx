@@ -14,6 +14,7 @@ import {
 } from "../elevated-verses/drag/dragEngine";
 import { PopUp3DTracker } from "./ui/PopUp3DTracker";
 import { VerseFiveMetallic } from "./VerseFiveMetallic";
+import { PopUpHoverSensors } from "./hover-scroll/PopUpHoverSensors";
 import {
   S1_INNER_BG,
   S1_INNER_BORDER,
@@ -276,6 +277,7 @@ export function PopUpManager() {
   const backfaceColor = "#e8e4d8";
 
   const groups = usePopUpStore((state) => state.popUpGroups);
+  const setHoveredGroupId = usePopUpStore((state) => state.setHoveredGroupId);
   const middleHorizontalFolded = usePopUpStore(
     (state) => state.middleHorizontalFolded,
   );
@@ -343,6 +345,13 @@ export function PopUpManager() {
           />
         );
       })}
+
+      <PopUpHoverSensors
+        groups={groups}
+        versesConfig={VERSES_CONFIG}
+        zBaseOffset={zBaseOffset}
+        setHoveredGroupId={setHoveredGroupId}
+      />
 
       {/* Global button anchor at top center of the paper */}
       <PopUp3DTracker
@@ -481,6 +490,7 @@ function PopUpCardWrapper({
   if (
     !hasEverOpened &&
     !isOpen &&
+    !isHorizontalFoldActive &&
     !hasVisibleElevationHistory &&
     !hasVisibleHorizontalHistory
   ) {

@@ -5,6 +5,7 @@ import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
+import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
 import {
   VerseNeonTracker,
@@ -63,6 +64,7 @@ export default function Home() {
             <Effects glitchTrigger={glitchKey} />
             <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />
+              <PopUpHoverScrollController />
               <Experience isDarkMode={isDarkMode} />
             </ScrollControls>
             <VerseNeonTracker />

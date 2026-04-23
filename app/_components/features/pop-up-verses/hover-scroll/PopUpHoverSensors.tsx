@@ -1,0 +1,102 @@
+"use client";
+
+import { useEffect } from "react";
+import type { PopUpGroup } from "../ui/usePopUpStore";
+
+type HoverSensorVerseConfig = {
+  id: number;
+  y: number;
+  w: number;
+  h: number;
+  hingeX: number;
+  direction: "left" | "right";
+};
+
+interface PopUpHoverSensorsProps {
+  groups: PopUpGroup[];
+  versesConfig: HoverSensorVerseConfig[];
+  zBaseOffset: number;
+  setHoveredGroupId: (id: string | null) => void;
+}
+
+const SENSOR_PADDING_X = 0.012;
+const SENSOR_PADDING_Y = 0.01;
+
+const getVerseCenterX = (config: HoverSensorVerseConfig): number =>
+  config.direction === "right"
+    ? config.hingeX + config.w / 2
+    : config.hingeX - config.w / 2;
+
+const getVerseCenterY = (config: HoverSensorVerseConfig): number =>
+  config.y - config.h / 2;
+
+export function PopUpHoverSensors({
+  groups,
+  versesConfig,
+  zBaseOffset,
+  setHoveredGroupId,
+}: PopUpHoverSensorsProps) {
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, []);
+
+  return (
+    <>
+      {groups.map((group) => {
+        const versesInGroup = versesConfig.filter((config) =>
+          group.verseIds.includes(config.id),
+        );
+        if (!versesInGroup.length) return null;
+
+        let minX = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+
+        versesInGroup.forEach((config) => {
+          const centerX = getVerseCenterX(config);
+          const centerY = getVerseCenterY(config);
+          const halfW = config.w / 2;
+          const halfH = config.h / 2;
+
+          minX = Math.min(minX, centerX - halfW);
+          maxX = Math.max(maxX, centerX + halfW);
+          minY = Math.min(minY, centerY - halfH);
+          maxY = Math.max(maxY, centerY + halfH);
+        });
+
+        const width = maxX - minX + SENSOR_PADDING_X * 2;
+        const height = maxY - minY + SENSOR_PADDING_Y * 2;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        return (
+          <mesh
+            key={`hover-sensor-${group.id}`}
+            position={[centerX, centerY, zBaseOffset + 0.006]}
+            onPointerEnter={(event) => {
+              event.stopPropagation();
+              document.body.style.cursor = "ns-resize";
+              setHoveredGroupId(group.id);
+            }}
+            onPointerLeave={(event) => {
+              event.stopPropagation();
+              document.body.style.cursor = "";
+              setHoveredGroupId(null);
+            }}
+          >
+            <planeGeometry args={[width, height]} />
+            <meshBasicMaterial
+              transparent
+              opacity={0}
+              depthWrite={false}
+              depthTest={false}
+            />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}

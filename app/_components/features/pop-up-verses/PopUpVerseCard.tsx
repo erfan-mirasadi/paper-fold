@@ -277,7 +277,7 @@ export function PopUpVerseCard({
                         attach="map"
                         width={512}
                         height={256}
-                        frames={2}
+                        frames={8}
                       >
                         <OrthographicCamera
                           makeDefault

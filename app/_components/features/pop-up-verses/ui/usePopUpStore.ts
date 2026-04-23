@@ -27,9 +27,12 @@ interface PopUpStoreState {
   popUpAllOpen: boolean;
   unlockedGroupIds: string[];
   middleHorizontalFolded: boolean;
+  hoveredGroupId: string | null;
   togglePopUpGroup: (id: string) => void;
   toggleAllPopUps: () => void;
   toggleMiddleHorizontalFold: () => void;
+  setHoveredGroupId: (id: string | null) => void;
+  handleHoverScroll: (direction: "down" | "up") => void;
   syncScrollOffset: (offset: number) => void;
 }
 
@@ -45,6 +48,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
   popUpAllOpen: false,
   unlockedGroupIds: getUnlockedPopUpGroups(0),
   middleHorizontalFolded: false,
+  hoveredGroupId: null,
 
   togglePopUpGroup: (id) =>
     set((state) => {
@@ -113,6 +117,78 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       };
     }),
 
+  setHoveredGroupId: (id) =>
+    set((state) => {
+      if (state.hoveredGroupId === id) return state;
+
+      return {
+        hoveredGroupId: id,
+        // Cancel current folding interaction and reset to default state.
+        popUpGroups: state.popUpGroups.map((g) => ({
+          ...g,
+          isOpen: false,
+        })),
+        popUpAllOpen: false,
+        middleHorizontalFolded: false,
+      };
+    }),
+
+  handleHoverScroll: (direction) =>
+    set((state) => {
+      const hoveredGroupId = state.hoveredGroupId;
+      if (!hoveredGroupId) return state;
+      if (!state.unlockedGroupIds.includes(hoveredGroupId)) return state;
+
+      const isMiddleGroup = hoveredGroupId === "g_11_12_13_14";
+      const middleGroup = state.popUpGroups.find((g) => g.id === "g_11_12_13_14");
+      const middleStage = state.middleHorizontalFolded ? 2 : middleGroup?.isOpen ? 1 : 0;
+
+      let nextMiddleStage = middleStage;
+      if (isMiddleGroup) {
+        // Requested interaction:
+        // down => horizontal fold, up => vertical open.
+        nextMiddleStage = direction === "down" ? 2 : 1;
+      }
+
+      let changed = false;
+      const nextGroups = state.popUpGroups.map((g) => {
+        if (g.id !== hoveredGroupId) {
+          if (!g.isOpen) return g;
+          changed = true;
+          return { ...g, isOpen: false };
+        }
+
+        const nextIsOpen = isMiddleGroup
+          ? nextMiddleStage === 1
+          : direction === "down";
+
+        if (g.isOpen === nextIsOpen) return g;
+        changed = true;
+        return {
+          ...g,
+          isOpen: nextIsOpen,
+          hasEverOpened: g.hasEverOpened || nextIsOpen,
+        };
+      });
+
+      const nextMiddleHorizontalFolded = isMiddleGroup
+        ? nextMiddleStage === 2
+        : false;
+
+      if (
+        !changed &&
+        nextMiddleHorizontalFolded === state.middleHorizontalFolded
+      ) {
+        return state;
+      }
+
+      return {
+        popUpGroups: nextGroups,
+        popUpAllOpen: false,
+        middleHorizontalFolded: nextMiddleHorizontalFolded,
+      };
+    }),
+
   syncScrollOffset: (offset) =>
     set((state) => {
       const nextUnlocked = getUnlockedPopUpGroups(offset);
@@ -144,6 +220,9 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
         middleHorizontalFolded: nextUnlocked.includes("g_11_12_13_14")
           ? state.middleHorizontalFolded
           : false,
+        hoveredGroupId: nextUnlocked.includes(state.hoveredGroupId ?? "")
+          ? state.hoveredGroupId
+          : null,
       };
     }),
 }));
