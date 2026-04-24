@@ -72,11 +72,11 @@ function buildSectionTextureMap(
   const texture = source.clone();
   texture.wrapS = ClampToEdgeWrapping;
   texture.wrapT = ClampToEdgeWrapping;
-  // ShapeGeometry UVs are local x,y coordinates (x: 0 to w, y: 0 to -h).
-  // u_tex = x * (1 / PAGE_WIDTH) + (xStart / PAGE_WIDTH)
-  // v_tex = y * (1 / PAGE_HEIGHT) + ((yTop + PAGE_HEIGHT) / PAGE_HEIGHT)
-  texture.repeat.set(1 / PAGE_WIDTH, 1 / PAGE_HEIGHT);
-  texture.offset.set(xStart / PAGE_WIDTH, (yTop + PAGE_HEIGHT) / PAGE_HEIGHT);
+  // ShapeGeometry UVs: (0,0) = bottom-left of shape, (1,1) = top-right.
+  // We want UV (0,0) → page position (xStart, yBottom) and UV (1,1) → (xEnd, yTop).
+  // texCoord = uv * repeat + offset  →  repeat covers the section's fraction of the page.
+  texture.repeat.set(mappedW / PAGE_WIDTH, mappedH / PAGE_HEIGHT);
+  texture.offset.set(xStart / PAGE_WIDTH, (yBottom + PAGE_HEIGHT) / PAGE_HEIGHT);
   texture.needsUpdate = true;
   return texture;
 }
@@ -177,7 +177,9 @@ function ElevatedLayer({
   sectionBgTexture = null,
 }: ElevatedLayerProps) {
   const usesTextureFill =
-    typeof color === "string" && /\.(jpe?g|png|webp)$/i.test(color);
+    sectionBgTexture != null &&
+    typeof color === "string" &&
+    /\.(jpe?g|png|webp)(\?.*)?$/i.test(color);
   const textureDarkness = clamp(ELEVATED_TEXTURE_DARKNESS, 0, 1);
   const textureTint = 1 - textureDarkness * 0.35;
   const textureOverlayOpacity = textureDarkness * 0.28;

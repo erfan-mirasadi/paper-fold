@@ -9,9 +9,12 @@ import {
   PW,
   START_X,
   layoutMath,
-  SURAH_DATA,
   SURAH_TRANSFORMS,
 } from "../data/SurahConfig";
+import {
+  SURAH_DATA_BY_LANGUAGE,
+  useSurahLanguageStore,
+} from "../data/useSurahLanguageStore";
 import {
   // TEXT_DARK,
   // TEXT_SIZES,
@@ -46,6 +49,9 @@ function SurahLayout({
   isBumpMap = false,
   isFolded = false,
 }: SurahLayoutProps) {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+
   if (imageUrl) {
     return <ImageContent url={imageUrl} />;
   }
@@ -90,7 +96,7 @@ function SurahLayout({
 
       {/* Upper section — receives pre-computed S1Transforms, does zero math */}
       <SectionOne
-        data={SURAH_DATA.section1}
+        data={surahData.section1}
         transforms={SURAH_TRANSFORMS.s1}
         PW={PW}
         isBumpMap={isBumpMap}
@@ -99,7 +105,7 @@ function SurahLayout({
 
       {/* Lower section — receives pre-computed S2Transforms, does zero math */}
       <SectionTwo
-        data={SURAH_DATA.section2}
+        data={surahData.section2}
         transforms={SURAH_TRANSFORMS.s2}
         layout={layoutMath}
         startX={START_X}

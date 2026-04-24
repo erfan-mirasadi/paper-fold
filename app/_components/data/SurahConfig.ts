@@ -4,7 +4,6 @@ export interface Verse {
 }
 
 export interface ColorGroup {
-  /** Verse items in the group. */
   verses: Verse[];
   /**
    * Optional override for the verse background color.

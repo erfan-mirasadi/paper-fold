@@ -19,6 +19,7 @@ import {
   QURAN_FONT,
   TEXT_SIZES,
   S2_VERSE_NUMBER_TEXT,
+  LANGUAGE_TEXT_SCALE,
 } from "../data/theme";
 export * from "../data/theme";
 import {
@@ -27,6 +28,11 @@ import {
   TOP_LABEL_WIDTH,
   VERSE_5_6_19_RADIUS,
 } from "../data/SurahConfig";
+import {
+  ANA_AYET_LABEL_BY_LANGUAGE,
+  useSurahLanguageStore,
+} from "../data/useSurahLanguageStore";
+import { CapsuleVerseTextTransition } from "./CapsuleVerseTextTransition";
 
 // ROUNDED SHAPE GEOMETRY
 interface RoundedShapeProps {
@@ -290,6 +296,9 @@ export function TopLabel({
   bgColor = WHITE_BASE,
   renderOrder,
 }: TopLabelProps) {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
+
   const w = labelWidth;
   const h = 0.046;
   const radius = h / 2;
@@ -384,7 +393,7 @@ export function TopLabel({
       />
       <Text
         position={[w / 2, -h / 2, 0.002]}
-        fontSize={TEXT_SIZES.TOP_LABEL}
+        fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
         color={isBumpMap ? BUMP_MAX : TEXT_LABEL}
         anchorX="center"
         anchorY="middle"
@@ -416,6 +425,10 @@ export function AnaAyetTab({
   z,
   isBumpMap = false,
 }: AnaAyetTabProps) {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
+  const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
+
   const radius = h / 2;
 
   return (
@@ -434,14 +447,14 @@ export function AnaAyetTab({
 
       <Text
         position={[w / 2, -h / 2, 0.002]}
-        fontSize={TEXT_SIZES.TOP_LABEL}
+        fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
         color={isBumpMap ? BUMP_MAX : S1_ANA_LABEL_TEXT}
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
         material-depthTest={false}
       >
-        Ana Ayet
+        {labelText}
       </Text>
     </group>
   );
@@ -487,6 +500,19 @@ export const VerseBox = ({
   bgOpacity = 1,
   textColor,
 }: VerseBoxProps) => {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const isArabic = activeLanguage === "ar";
+  const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
+  const textScale = isPill ? langScale.verseSmall : langScale.verseBig;
+  const textDirection = isArabic ? "rtl" : "ltr";
+  const textFont = isArabic ? QURAN_FONT : undefined;
+  const showVerseNumber = isArabic;
+  const textLineHeight = isArabic ? 1.2 : 1.06;
+  const nonArabicTextTighten = 1;
+  const textPaddingX = isArabic ? 0 : 0.012;
+  const textAlign = isArabic ? "center" : "left";
+  const textAnchorX = isArabic ? "center" : "left";
+
   const shrinkX = 0.001;
   const finalX = x + shrinkX;
   const finalW = w - shrinkX * 2;
@@ -499,11 +525,16 @@ export const VerseBox = ({
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
   const safeMargin = 0.0;
-  const textMaxW = finalW - safeMargin * 2;
-  const textX = safeMargin + textMaxW / 2;
+  const textMaxW =
+    (finalW - safeMargin * 2 - textPaddingX * 2) * nonArabicTextTighten;
+  const textX = isArabic ? safeMargin + textMaxW / 2 : safeMargin + textPaddingX;
 
   const SMALL_TEXT_SHIFT = -0.01;
-  const versePosX = isPill ? textX - SMALL_TEXT_SHIFT : textX;
+  const versePosX = isArabic
+    ? isPill
+      ? textX - SMALL_TEXT_SHIFT
+      : textX
+    : textX;
 
   return (
     <group position={[finalX, y, z]}>
@@ -536,62 +567,64 @@ export const VerseBox = ({
         opacity={bgOpacity}
       />
 
-      {/* Verse number circle */}
-      <group position={[cx, -h / 2, 0.002]}>
-        <mesh renderOrder={12}>
-          <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
-          <meshBasicMaterial
-            color={isBumpMap ? "#222222" : (circleBg ?? bg)}
-            depthTest={false}
-            transparent={!isBumpMap}
-            opacity={0.999}
-          />
-        </mesh>
-        <mesh position={[0, 0, -0.001]} renderOrder={12}>
-          <circleGeometry args={[cr, 48]} />
-          <meshBasicMaterial
-            color={
-              isBumpMap
-                ? BUMP_MAX
-                : (circleBorderCol ?? border ?? CIRCLE_BORDER)
-            }
-            depthTest={false}
-            transparent={!isBumpMap}
-            opacity={0.999}
-          />
-        </mesh>
-        <Text
-          position={[0, 0, 0.001]}
-          fontSize={TEXT_SIZES.VERSE_NUMBER}
-          color={isBumpMap ? BUMP_MAX : S2_VERSE_NUMBER_TEXT}
-          anchorX="center"
-          anchorY="middle"
-          fontWeight="bold"
-          material-depthTest={false}
-          renderOrder={13}
-        >
-          {String(number)}
-        </Text>
-      </group>
+      {/* Verse number circle (Arabic only) */}
+      {showVerseNumber && (
+        <group position={[cx, -h / 2, 0.002]}>
+          <mesh renderOrder={12}>
+            <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
+            <meshBasicMaterial
+              color={isBumpMap ? "#222222" : (circleBg ?? bg)}
+              depthTest={false}
+              transparent={!isBumpMap}
+              opacity={0.999}
+            />
+          </mesh>
+          <mesh position={[0, 0, -0.001]} renderOrder={12}>
+            <circleGeometry args={[cr, 48]} />
+            <meshBasicMaterial
+              color={
+                isBumpMap
+                  ? BUMP_MAX
+                  : (circleBorderCol ?? border ?? CIRCLE_BORDER)
+              }
+              depthTest={false}
+              transparent={!isBumpMap}
+              opacity={0.999}
+            />
+          </mesh>
+          <Text
+            position={[0, 0, 0.001]}
+            fontSize={TEXT_SIZES.VERSE_NUMBER}
+            color={isBumpMap ? BUMP_MAX : (circleTextCol ?? S2_VERSE_NUMBER_TEXT)}
+            anchorX="center"
+            anchorY="middle"
+            fontWeight="bold"
+            material-depthTest={false}
+            renderOrder={13}
+          >
+            {String(number)}
+          </Text>
+        </group>
+      )}
 
-      {/* Arabic verse text */}
-      <Text
+      <CapsuleVerseTextTransition
+        verse={verse}
         position={[versePosX, -h / 2, 0.002]}
         fontSize={
-          isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG
+          (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
+          textScale
         }
         color={isBumpMap ? BUMP_MAX : textColor || TEXT_DARK}
-        anchorX="center"
+        anchorX={textAnchorX}
         anchorY="middle"
         maxWidth={textMaxW}
-        textAlign="center"
-        material-depthTest={false}
-        font={QURAN_FONT}
-        direction="rtl"
-        renderOrder={13}
-      >
-        {verse}
-      </Text>
+        lineHeight={textLineHeight}
+        textAlign={textAlign}
+        font={textFont}
+        direction={textDirection}
+        renderOrder={14}
+        materialDepthTest={false}
+      />
     </group>
   );
 };

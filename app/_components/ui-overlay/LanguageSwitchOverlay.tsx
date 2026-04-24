@@ -1,0 +1,226 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import {
+  SURAH_LANGUAGE_ORDER,
+  type SurahLanguage,
+  useSurahLanguageStore,
+} from "../data/useSurahLanguageStore";
+
+interface LanguageSwitchOverlayProps {
+  isDarkMode: boolean;
+}
+
+const LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
+  ar: "AR",
+  en: "EN",
+  tr: "TR",
+};
+
+export function LanguageSwitchOverlay({
+  isDarkMode,
+}: LanguageSwitchOverlayProps) {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const setLanguage = useSurahLanguageStore((s) => s.setLanguage);
+  const [isOpen, setIsOpen] = useState(false);
+  const BUTTON_W_CLOSED = 62;
+  const BUTTON_W_OPEN = 45;
+  const PANEL_W = 96;
+
+  const buttonTheme = useMemo(() => {
+    const border = isDarkMode
+      ? "1px solid rgba(255,255,255,0.2)"
+      : "1px solid rgba(255,255,255,0.34)";
+    const background = isDarkMode
+      ? "radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%)"
+      : "radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%)";
+    const shadow = isDarkMode
+      ? "0 12px 30px rgba(4, 7, 12, 0.48), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(255,255,255,0.08) inset"
+      : "0 12px 30px rgba(19,22,29,0.16), 0 2px 0 rgba(255,255,255,0.54) inset, 0 -1px 0 rgba(255,255,255,0.24) inset";
+    const text = isDarkMode ? "rgba(241, 246, 255, 0.95)" : "#0F1218";
+    const itemHoverBackground = isDarkMode
+      ? "rgba(188, 208, 238, 0.16)"
+      : "rgba(56, 66, 82, 0.1)";
+    const activeBackground = isDarkMode
+      ? "rgba(210, 228, 255, 0.24)"
+      : "rgba(56, 66, 82, 0.16)";
+    const activeBorder = isDarkMode
+      ? "1px solid rgba(255,255,255,0.24)"
+      : "1px solid rgba(255,255,255,0.55)";
+    const activeShadow = isDarkMode
+      ? "0 6px 16px rgba(0,0,0,0.32)"
+      : "0 6px 14px rgba(35,42,55,0.12)";
+    const panelShadow = isDarkMode
+      ? "0 18px 36px rgba(2, 6, 11, 0.52), 0 1px 0 rgba(255,255,255,0.16) inset"
+      : "0 16px 34px rgba(19,22,29,0.18), 0 1px 0 rgba(255,255,255,0.72) inset";
+    const divider = isDarkMode
+      ? "rgba(255,255,255,0.12)"
+      : "rgba(15, 18, 24, 0.10)";
+
+    return {
+      border,
+      background,
+      shadow,
+      text,
+      itemHoverBackground,
+      activeBackground,
+      activeBorder,
+      activeShadow,
+      panelShadow,
+      divider,
+    };
+  }, [isDarkMode]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 170, damping: 22 }}
+      style={{
+        position: "fixed",
+        top: "16px",
+        right: "142px",
+        zIndex: 100,
+        pointerEvents: "none",
+      }}
+    >
+      <motion.div
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        onFocusCapture={() => setIsOpen(true)}
+        onBlurCapture={() => setIsOpen(false)}
+        style={{
+          pointerEvents: "auto",
+          position: "relative",
+          color: buttonTheme.text,
+          width: `${BUTTON_W_OPEN}px`,
+        }}
+      >
+        <motion.button
+          type="button"
+          aria-label="Language menu"
+          whileHover={{ scale: 1.015 }}
+          whileTap={{ scale: 0.992 }}
+          animate={{ width: isOpen ? BUTTON_W_OPEN : BUTTON_W_CLOSED }}
+          transition={{ type: "spring", stiffness: 330, damping: 30 }}
+          style={{
+            height: "44px",
+            borderRadius: "14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "5px",
+            padding: "0 10px",
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            background: buttonTheme.background,
+            border: buttonTheme.border,
+            boxShadow: buttonTheme.shadow,
+            backdropFilter: "blur(18px) saturate(130%)",
+            WebkitBackdropFilter: "blur(18px) saturate(130%)",
+            cursor: "pointer",
+            color: buttonTheme.text,
+            userSelect: "none",
+            outline: "none",
+          }}
+        >
+          <span>{LABEL_BY_LANGUAGE[activeLanguage]}</span>
+          <motion.span
+            aria-hidden="true"
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ type: "spring", stiffness: 350, damping: 28 }}
+            style={{ display: "inline-flex", opacity: 0.78 }}
+          >
+            <svg
+              viewBox="0 0 16 16"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m3.5 6 4.5 4 4.5-4" />
+            </svg>
+          </motion.span>
+        </motion.button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.985 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              style={{
+                position: "absolute",
+                top: "50px",
+                left: 0,
+                width: `${PANEL_W}px`,
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                padding: "6px",
+                borderRadius: "14px",
+                border: buttonTheme.border,
+                background: buttonTheme.background,
+                boxShadow: buttonTheme.panelShadow,
+                backdropFilter: "blur(18px) saturate(130%)",
+                WebkitBackdropFilter: "blur(18px) saturate(130%)",
+                transformOrigin: "top left",
+              }}
+            >
+              <div
+                aria-hidden="true"
+                style={{
+                  height: 1,
+                  background: buttonTheme.divider,
+                  margin: "2px 6px 4px 6px",
+                  borderRadius: 999,
+                }}
+              />
+              {SURAH_LANGUAGE_ORDER.map((language) => {
+                const isActive = language === activeLanguage;
+                return (
+                  <motion.button
+                    key={language}
+                    type="button"
+                    onClick={() => setLanguage(language)}
+                    whileHover={{
+                      background: buttonTheme.itemHoverBackground,
+                      scale: 1.012,
+                    }}
+                    whileTap={{ scale: 0.99 }}
+                    style={{
+                      height: "34px",
+                      borderRadius: "10px",
+                      border: isActive ? buttonTheme.activeBorder : "none",
+                      background: isActive
+                        ? buttonTheme.activeBackground
+                        : "transparent",
+                      boxShadow: isActive ? buttonTheme.activeShadow : "none",
+                      color: buttonTheme.text,
+                      cursor: "pointer",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.03em",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "100%",
+                    }}
+                  >
+                    {LABEL_BY_LANGUAGE[language]}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
+  );
+}

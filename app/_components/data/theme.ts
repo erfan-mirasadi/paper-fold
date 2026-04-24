@@ -99,3 +99,23 @@ export const TEXT_SIZES = {
   VERSE_TEXT_SMALL: 0.0365,
   VERSE_TEXT_BIG: 0.071,
 } as const;
+
+// Language-specific multipliers for capsule/label fitting.
+// Tune these values to get tighter text fit per language without resizing capsules.
+export const LANGUAGE_TEXT_SCALE = {
+  ar: {
+    verseSmall: 1,
+    verseBig: 1,
+    topLabel: 1,
+  },
+  en: {
+    verseSmall: 0.5,
+    verseBig: 0.3,
+    topLabel: 1,
+  },
+  tr: {
+    verseSmall: 0.55,
+    verseBig: 0.4,
+    topLabel: 1,
+  },
+} as const;

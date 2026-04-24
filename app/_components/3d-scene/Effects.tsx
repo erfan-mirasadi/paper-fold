@@ -5,13 +5,11 @@ import { useFrame } from "@react-three/fiber";
 import {
   EffectComposer,
   Bloom,
-  // Vignette,
-  ToneMapping,
   BrightnessContrast,
   Glitch,
 } from "@react-three/postprocessing";
-import { ToneMappingMode, GlitchMode } from "postprocessing";
-import { Vector2 } from "three";
+import { GlitchMode } from "postprocessing";
+import { HalfFloatType, Vector2 } from "three";
 
 type EffectsProps = {
   glitchTrigger?: number;
@@ -23,9 +21,8 @@ type EffectsProps = {
 
 const Effects: React.FC<EffectsProps> = ({
   glitchTrigger = 0,
-  brightness = -0.09,
-  contrast = 0.23,
-  // vignetteDarkness = 0.4,
+  brightness = -0.1,
+  contrast = 0.1,
 }) => {
   const [manualActive, setManualActive] = useState(false);
   const lastTriggerRef = useRef(0);
@@ -49,27 +46,25 @@ const Effects: React.FC<EffectsProps> = ({
 
   return (
     <EffectComposer
-      multisampling={0}
-      autoClear={false}
       enableNormalPass={false}
+      frameBufferType={HalfFloatType}
+      multisampling={0}
     >
       <Bloom
-        intensity={2.85}
-        luminanceThreshold={1.5}
-        luminanceSmoothing={0}
+        intensity={0.5}
+        luminanceThreshold={1}
+        luminanceSmoothing={0.1}
         mipmapBlur
       />
-      <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <BrightnessContrast brightness={brightness} contrast={contrast} />
-      {/* <Vignette eskil={false} offset={0.2} darkness={vignetteDarkness} /> */}
       <Glitch
         active={manualActive}
         mode={GlitchMode.CONSTANT_WILD}
         delay={new Vector2(0, 0)}
         duration={new Vector2(0.1, 0.2)}
-        strength={new Vector2(0.01, 0.05)} // Back to the strength you liked
-        columns={0.001} // Makes the glitch lines extremely thin and fine
-        dtSize={100} // High resolution noise for smaller glitch bits
+        strength={new Vector2(0.01, 0.05)}
+        columns={0.001}
+        dtSize={100}
         ratio={0.1}
       />
     </EffectComposer>

@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
+// import * as THREE from "three";
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
 import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
@@ -11,10 +12,11 @@ import {
   VerseNeonTracker,
   VerseNeonHTMLOverlay,
 } from "./_components/features/camera-zoom/VerseNeonOverlay";
-import Effects from "./_components/3d-scene/Effects";
+// import Effects from "./_components/3d-scene/Effects";
 import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
 import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
+import { LanguageSwitchOverlay } from "./_components/ui-overlay/LanguageSwitchOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
 import { CameraViewController } from "./_components/features/camera-views/CameraViewController";
 import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
@@ -26,12 +28,12 @@ const Experience = dynamic(
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [glitchKey, setGlitchKey] = useState(0);
+  // const [glitchKey, setGlitchKey] = useState(0);
   const bgColor = isDarkMode ? "#000000" : "#ffffff";
 
   const handleThemeToggle = () => {
     setIsDarkMode((prev) => !prev);
-    setGlitchKey((prev) => prev + 1);
+    // setGlitchKey((prev) => prev + 1);
   };
 
   return (
@@ -55,13 +57,19 @@ export default function Home() {
       >
         <div style={{ width: "100vw", height: "100vh" }}>
           <Canvas
+            // flat
             camera={{
               position: CAMERA_CONFIG.initialCamera.position,
               fov: CAMERA_CONFIG.initialCamera.fov,
             }}
+            // gl={{
+            //   antialias: false,
+            //   toneMapping: THREE.NoToneMapping,
+            //   outputColorSpace: THREE.SRGBColorSpace,
+            // }}
           >
             <color attach="background" args={[bgColor]} />
-            <Effects glitchTrigger={glitchKey} />
+            {/* <Effects glitchTrigger={glitchKey} /> */}
             <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />
               <PopUpHoverScrollController />
@@ -76,6 +84,7 @@ export default function Home() {
       <PopUpUI isDarkMode={isDarkMode} />
       <VerseNeonHTMLOverlay />
       <NavigationOverlay isDarkMode={isDarkMode} />
+      <LanguageSwitchOverlay isDarkMode={isDarkMode} />
       <ThemeToggleOverlay
         isDarkMode={isDarkMode}
         onToggle={handleThemeToggle}

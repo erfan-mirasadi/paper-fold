@@ -1,8 +1,11 @@
 "use client";
-import { useFoldAnimation, useMiddleHorizontalFoldAnimation } from "./useFoldAnimation";
+import {
+  useFoldAnimation,
+  useMiddleHorizontalFoldAnimation,
+} from "./useFoldAnimation";
 import { PopUpVerseCard } from "./PopUpVerseCard";
 import { usePopUpStore } from "./ui/usePopUpStore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSpring, a, to } from "@react-spring/three";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 import { useElevateAnimation } from "../elevated-verses/useElevateAnimation";
@@ -32,10 +35,13 @@ import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
   START_X,
-  SURAH_DATA,
   getPopUpTrackerPosition,
   SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
+import {
+  SURAH_DATA_BY_LANGUAGE,
+  useSurahLanguageStore,
+} from "../../data/useSurahLanguageStore";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 
 interface VerseConfig {
@@ -78,7 +84,9 @@ function getShadowSurfaceSectionId(
 
 const ZERO_OFFSET = { x: 0, y: 0 };
 
-const VERSES_CONFIG: VerseConfig[] = (() => {
+function buildVerseConfigs(
+  surahData: (typeof SURAH_DATA_BY_LANGUAGE)["ar"],
+): VerseConfig[] {
   const configs: VerseConfig[] = [];
   const {
     sectionW,
@@ -101,7 +109,7 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
 
   //  Section 1 (Verses 1 to 4)
   const s1BaseX = START_X + s1Pad;
-  SURAH_DATA.section1.gridVerses.forEach((v, i) => {
+  surahData.section1.gridVerses.forEach((v, i) => {
     const isRightCol = i % 2 !== 0;
     const isBottomRow = i >= 2;
     const w = innerHalfW;
@@ -133,9 +141,9 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
 
   const introT = SURAH_TRANSFORMS.s2.introVerse;
   configs.push({
-    id: SURAH_DATA.section2.introVerse.number,
-    verse: SURAH_DATA.section2.introVerse.text,
-    number: SURAH_DATA.section2.introVerse.number,
+    id: surahData.section2.introVerse.number,
+    verse: surahData.section2.introVerse.text,
+    number: surahData.section2.introVerse.number,
     y: introT.y,
     w: introT.w,
     h: introT.h,
@@ -153,7 +161,7 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
   const s2BaseX = START_X + s2PadLeftRight;
 
   // Group 1 (Verses 7 to 10)
-  SURAH_DATA.section2.colorGroups[0].verses.forEach((v, i) => {
+  surahData.section2.colorGroups[0].verses.forEach((v, i) => {
     const isRightCol = i % 2 !== 0;
     const isBottomRow = i >= 2;
     const w = groupInnerHalfW;
@@ -188,7 +196,7 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
   const g2InnerW = sectionW - s2PadLeftRight * 2 - g2Shrink * 2;
   const g2GroupInnerHalfW = (g2InnerW - groupPad * 2 - s2Gap) / 2;
 
-  SURAH_DATA.section2.colorGroups[1].verses.forEach((v, i) => {
+  surahData.section2.colorGroups[1].verses.forEach((v, i) => {
     const isRightCol = i % 2 !== 0;
     const isBottomRow = i >= 2;
     const w = g2GroupInnerHalfW;
@@ -219,7 +227,7 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
   });
 
   // Group 3 (Verses 15 to 18)
-  SURAH_DATA.section2.colorGroups[2].verses.forEach((v, i) => {
+  surahData.section2.colorGroups[2].verses.forEach((v, i) => {
     const isRightCol = i % 2 !== 0;
     const isBottomRow = i >= 2;
     const w = groupInnerHalfW;
@@ -251,9 +259,9 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
 
   const outroT = SURAH_TRANSFORMS.s2.outroVerse;
   configs.push({
-    id: SURAH_DATA.section2.outroVerse.number,
-    verse: SURAH_DATA.section2.outroVerse.text,
-    number: SURAH_DATA.section2.outroVerse.number,
+    id: surahData.section2.outroVerse.number,
+    verse: surahData.section2.outroVerse.text,
+    number: surahData.section2.outroVerse.number,
     y: outroT.y,
     w: outroT.w,
     h: outroT.h,
@@ -268,10 +276,13 @@ const VERSES_CONFIG: VerseConfig[] = (() => {
   });
 
   return configs;
-})();
+}
 
 export function PopUpManager() {
   const { s1Top } = layoutMath;
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const verseConfigs = useMemo(() => buildVerseConfigs(surahData), [surahData]);
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
@@ -297,7 +308,7 @@ export function PopUpManager() {
 
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
-      {VERSES_CONFIG.map((config) => {
+      {verseConfigs.map((config) => {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
         const hasEverOpened = group?.hasEverOpened ?? false;
@@ -326,7 +337,7 @@ export function PopUpManager() {
 
       {/* Render 3D Trackers for each group at the correct positions */}
       {groups.map((g) => {
-        const versesInGroup = VERSES_CONFIG.filter((c) =>
+        const versesInGroup = verseConfigs.filter((c) =>
           g.verseIds.includes(c.id),
         );
         if (!versesInGroup.length) return null;
@@ -348,7 +359,7 @@ export function PopUpManager() {
 
       <PopUpHoverSensors
         groups={groups}
-        versesConfig={VERSES_CONFIG}
+        versesConfig={verseConfigs}
         zBaseOffset={zBaseOffset}
         setHoveredGroupId={setHoveredGroupId}
       />
@@ -363,7 +374,7 @@ export function PopUpManager() {
         scrollThreshold={0.9}
       />
 
-      {/* Static Metallic Verse 5 (stuck to paper) */}
+      {/* Static Metallic Verse 5 */}
       <VerseFiveMetallic />
     </group>
   );
@@ -392,9 +403,11 @@ function PopUpCardWrapper({
 }) {
   const [hasEverBeenElevated, setHasEverBeenElevated] = useState(isElevated);
   useEffect(() => {
-    if (isElevated) {
+    if (!isElevated) return;
+    const timer = window.setTimeout(() => {
       setHasEverBeenElevated(true);
-    }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [isElevated]);
 
   const hasVisibleElevationHistory = hasEverBeenElevated || isElevated;
@@ -453,9 +466,11 @@ function PopUpCardWrapper({
   const useSectionGroupDrag =
     isCenterSectionRaised && sectionId === "s2_center" && sectionDrag !== null;
 
-  const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(config.id));
+  const isVerseSeparated = useDragState((s) =>
+    s.draggedVerseIds.includes(config.id),
+  );
   const separationOffset = useDragState(
-    (s) => s.separatedVerseOffsets[config.id] || ZERO_OFFSET
+    (s) => s.separatedVerseOffsets[config.id] || ZERO_OFFSET,
   );
 
   const dragBind = useElevatedDrag({
@@ -468,20 +483,24 @@ function PopUpCardWrapper({
 
   const dragX = to(
     [verseDrag.x, sectionDrag ? sectionDrag.x : verseDrag.x],
-    (vx, sx) => vx + (isVerseSeparated ? separationOffset.x : (sectionDrag ? sx : 0)),
+    (vx, sx) =>
+      vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0),
   );
 
   const dragY = to(
     [verseDrag.y, sectionDrag ? sectionDrag.y : verseDrag.y],
-    (vy, sy) => vy + (isVerseSeparated ? separationOffset.y : (sectionDrag ? sy : 0)),
+    (vy, sy) =>
+      vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0),
   );
 
   const [hasEverBeenHorizontallyFolded, setHasEverBeenHorizontallyFolded] =
     useState(isHorizontalFoldActive);
   useEffect(() => {
-    if (isHorizontalFoldActive) {
+    if (!isHorizontalFoldActive) return;
+    const timer = window.setTimeout(() => {
       setHasEverBeenHorizontallyFolded(true);
-    }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [isHorizontalFoldActive]);
 
   const hasVisibleHorizontalHistory =

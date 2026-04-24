@@ -10,11 +10,15 @@ import {
 import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
   SURAH_TRANSFORMS,
-  SURAH_DATA,
   PAGE_WIDTH,
   CAPSULE_BORDER_WIDTH,
   VERSE_5_6_19_RADIUS,
 } from "../../data/SurahConfig";
+import {
+  ANA_AYET_LABEL_BY_LANGUAGE,
+  SURAH_DATA_BY_LANGUAGE,
+  useSurahLanguageStore,
+} from "../../data/useSurahLanguageStore";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
   S1_ANA_BG,
@@ -82,6 +86,10 @@ function normalizeSurfaceLiftProgress(surfaceLift: number) {
 }
 
 export function VerseFiveMetallic() {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const isArabic = activeLanguage === "ar";
+  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const anaAyetLabel = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   const patternGltf = useGLTF("/pattern.glb");
   const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
   const isSectionSurfaceRaised = useElevatedStore((s) =>
@@ -107,7 +115,7 @@ export function VerseFiveMetallic() {
   });
 
   const t = SURAH_TRANSFORMS.s1.anaAyet;
-  const data = SURAH_DATA.section1.anaAyet;
+  const data = surahData.section1.anaAyet;
   const verseDrag = dragEngine.verses[5];
   const sectionDrag = dragEngine.sections.s1;
 
@@ -356,23 +364,31 @@ export function VerseFiveMetallic() {
             </meshStandardMaterial>
           </mesh>
 
-          <primitive
-            object={patternScene}
-            position={[leftPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
-            scale={[PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE, PATTERN_PAIR_SCALE]}
-            renderOrder={105}
-          />
+          {isArabic && (
+            <>
+              <primitive
+                object={patternScene}
+                position={[leftPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
+                scale={[
+                  PATTERN_PAIR_SCALE,
+                  PATTERN_PAIR_SCALE,
+                  PATTERN_PAIR_SCALE,
+                ]}
+                renderOrder={105}
+              />
 
-          <primitive
-            object={patternScene.clone(true)}
-            position={[rightPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
-            scale={[
-              -PATTERN_PAIR_SCALE,
-              PATTERN_PAIR_SCALE,
-              PATTERN_PAIR_SCALE,
-            ]}
-            renderOrder={105}
-          />
+              <primitive
+                object={patternScene.clone(true)}
+                position={[rightPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
+                scale={[
+                  -PATTERN_PAIR_SCALE,
+                  PATTERN_PAIR_SCALE,
+                  PATTERN_PAIR_SCALE,
+                ]}
+                renderOrder={105}
+              />
+            </>
+          )}
         </a.group>
 
         {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
@@ -404,7 +420,7 @@ export function VerseFiveMetallic() {
               material-depthWrite={false}
               renderOrder={111}
             >
-              Ana Ayet
+              {anaAyetLabel}
             </Text>
           </group>
         </a.group>

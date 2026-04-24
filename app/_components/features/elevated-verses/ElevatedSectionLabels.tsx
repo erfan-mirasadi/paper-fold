@@ -6,9 +6,12 @@ import { TopLabel } from "../../SurahLayout/SharedUI";
 import {
   PAGE_HEIGHT,
   PAGE_WIDTH,
-  SURAH_DATA,
   SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
+import {
+  SURAH_DATA_BY_LANGUAGE,
+  useSurahLanguageStore,
+} from "../../data/useSurahLanguageStore";
 import {
   S1_TOP_LABEL_BG,
   S1_TOP_LABEL_BORDER,
@@ -127,12 +130,15 @@ function AnimatedElevatedLabel({
 }
 
 export function ElevatedSectionLabels() {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
       <AnimatedElevatedLabel
         sectionId="s1"
         y={SURAH_TRANSFORMS.s1.labelPinY}
-        text={SURAH_DATA.section1.label}
+        text={surahData.section1.label}
         bgColor={S1_TOP_LABEL_BG}
         borderColor={S1_TOP_LABEL_BORDER}
         delayMs={55}
@@ -145,7 +151,7 @@ export function ElevatedSectionLabels() {
       <AnimatedElevatedLabel
         sectionId="s2_top"
         y={SURAH_TRANSFORMS.s2.topLabelPinY}
-        text={SURAH_DATA.section2.topLabel}
+        text={surahData.section2.topLabel}
         bgColor={S2_TOP_LABEL_BG}
         borderColor={S2_TOP_LABEL_BORDER}
         partialBorder={true}
@@ -161,7 +167,7 @@ export function ElevatedSectionLabels() {
       <AnimatedElevatedLabel
         sectionId="s2_bottom"
         y={SURAH_TRANSFORMS.s2.bottomLabelPinY}
-        text={SURAH_DATA.section2.bottomLabel}
+        text={surahData.section2.bottomLabel}
         bgColor={S2_TOP_LABEL_BG}
         borderColor={S2_TOP_LABEL_BORDER}
         partialBorder={true}
