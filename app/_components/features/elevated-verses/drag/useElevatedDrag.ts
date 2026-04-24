@@ -9,7 +9,7 @@ import {
   unmarkSectionDragged,
   useDragState,
 } from "./dragEngine";
-import { type ElevatedSectionId } from "../useElevatedStore";
+import { useElevatedStore, type ElevatedSectionId } from "../useElevatedStore";
 import { PAGE_WIDTH, PAGE_HEIGHT } from "../../../data/SurahConfig";
 
 // Module-level reusable math objects (thread-safe in single-threaded JS)
@@ -151,16 +151,17 @@ export function useElevatedDrag({
 
     const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
       const s = ref.current;
-      const shouldDockPaper = s.dragMarked;
+      const isAllSectionsMode = useElevatedStore.getState().isAllSectionsMode;
+      const shouldDockPaper = s.dragMarked && !isAllSectionsMode;
       e.stopPropagation();
       s.active = false;
       s.dragMarked = false;
 
       let isInsidePaper = false;
-      if (e.ray.intersectPlane(s.plane, _hit)) {
+      if (!isAllSectionsMode && e.ray.intersectPlane(s.plane, _hit)) {
         // e.eventObject is the dragged item's top group (a.group), its parent is the paper root coordinate system group.
         const paperRoot = e.eventObject.parent;
-        
+
         if (paperRoot) {
           const localHit = paperRoot.worldToLocal(_hit.clone());
           if (
@@ -177,7 +178,7 @@ export function useElevatedDrag({
       if (isInsidePaper) {
         springX.start(0);
         springY.start(0);
-        
+
         // Remove from dragged state so it perfectly re-attaches and can be dragged again
         if (typeof dragVerseId === "number") {
           unmarkVerseDragged(dragVerseId);

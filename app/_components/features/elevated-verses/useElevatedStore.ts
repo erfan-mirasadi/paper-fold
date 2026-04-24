@@ -21,6 +21,10 @@ const SECTION_PRIORITY: ElevatedSectionId[] = [
   "s2_bottom",
 ];
 
+const ALL_ELEVATED_VERSE_IDS = SECTION_PRIORITY.flatMap(
+  (sectionId) => SECTION_VERSE_IDS[sectionId],
+);
+
 function normalizeVerseIds(verseIds: number[]): number[] {
   return Array.from(new Set(verseIds)).sort((a, b) => a - b);
 }
@@ -57,22 +61,29 @@ function pickActiveSectionId(
   return sectionIds[0] ?? null;
 }
 
+function hasAllSections(sectionIds: ElevatedSectionId[]): boolean {
+  return SECTION_PRIORITY.every((sectionId) => sectionIds.includes(sectionId));
+}
+
 interface ElevatedStoreState {
   activeVerseId: number | null;
   activeVerseIds: number[];
   activeSectionId: ElevatedSectionId | null;
   activeSectionIds: ElevatedSectionId[];
+  isAllSectionsMode: boolean;
   hasEverElevated: boolean;
   phase: ElevatedPhase;
   unlockedVerseIds: number[];
   syncScrollOffset: (offset: number) => void;
   elevateVerse: (verseId: number) => void;
   elevateVerses: (verseIds: number[], sectionId?: ElevatedSectionId) => void;
+  showAllSections: () => void;
+  restoreAllSections: () => void;
   dismiss: () => void;
 }
 
 function getUnlockedElevatedVerses(offset: number): number[] {
-  if (offset >= 0.9) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+  if (offset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD) return ALL_ELEVATED_VERSE_IDS;
   if (offset >= 0.75) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   if (offset >= 0.5) return [1, 2, 3, 4, 5, 6, 7, 8];
   if (offset >= 0.25) return [1, 2, 3, 4, 5, 6];
@@ -84,6 +95,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   activeVerseIds: [],
   activeSectionId: null,
   activeSectionIds: [],
+  isAllSectionsMode: false,
   hasEverElevated: false,
   phase: "idle",
   unlockedVerseIds: getUnlockedElevatedVerses(0),
@@ -97,7 +109,9 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       set({ unlockedVerseIds: nextUnlocked });
 
       // Identify verses that are active but no longer unlocked
-      const newActive = activeVerseIds.filter((id) => nextUnlocked.includes(id));
+      const newActive = activeVerseIds.filter((id) =>
+        nextUnlocked.includes(id),
+      );
 
       if (newActive.length !== activeVerseIds.length) {
         if (newActive.length === 0) {
@@ -106,6 +120,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
             activeVerseIds: [],
             activeSectionId: null,
             activeSectionIds: [],
+            isAllSectionsMode: false,
             phase: "idle",
           });
         } else {
@@ -114,6 +129,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
             activeVerseId: newActive[0] ?? null,
             activeVerseIds: newActive,
             activeSectionIds: nextSectionIds,
+            isAllSectionsMode: hasAllSections(nextSectionIds),
             activeSectionId: pickActiveSectionId(
               nextSectionIds,
               null,
@@ -125,10 +141,13 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     }
   },
 
-
-
   elevateVerse: (verseId) => {
-    const { activeVerseIds, hasEverElevated, activeSectionId, unlockedVerseIds } = get();
+    const {
+      activeVerseIds,
+      hasEverElevated,
+      activeSectionId,
+      unlockedVerseIds,
+    } = get();
     if (!unlockedVerseIds.includes(verseId)) return;
     const hasVerse = activeVerseIds.includes(verseId);
     const nextIds = normalizeVerseIds(
@@ -143,6 +162,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       activeVerseId: nextIds[0] ?? null,
       activeVerseIds: nextIds,
       activeSectionIds: nextSectionIds,
+      isAllSectionsMode: hasAllSections(nextSectionIds),
       activeSectionId: pickActiveSectionId(
         nextSectionIds,
         null,
@@ -154,10 +174,17 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   },
 
   elevateVerses: (verseIds, sectionId) => {
-    const { activeVerseIds, hasEverElevated, activeSectionId, unlockedVerseIds } = get();
-    
+    const {
+      activeVerseIds,
+      hasEverElevated,
+      activeSectionId,
+      unlockedVerseIds,
+    } = get();
+
     // Only process verseIds that are unlocked
-    const allowedVerseIds = verseIds.filter((id) => unlockedVerseIds.includes(id));
+    const allowedVerseIds = verseIds.filter((id) =>
+      unlockedVerseIds.includes(id),
+    );
     const normalized = normalizeVerseIds(allowedVerseIds);
     if (normalized.length === 0) {
       set({
@@ -165,6 +192,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
         activeVerseIds: [],
         activeSectionId: null,
         activeSectionIds: [],
+        isAllSectionsMode: false,
         phase: "idle",
       });
       return;
@@ -183,6 +211,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       activeVerseId: nextIds[0] ?? null,
       activeVerseIds: nextIds,
       activeSectionIds: nextSectionIds,
+      isAllSectionsMode: hasAllSections(nextSectionIds),
       activeSectionId: pickActiveSectionId(
         nextSectionIds,
         sectionId,
@@ -193,6 +222,35 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     });
   },
 
+  showAllSections: () => {
+    const { unlockedVerseIds } = get();
+    const canShowAll = ALL_ELEVATED_VERSE_IDS.every((id) =>
+      unlockedVerseIds.includes(id),
+    );
+    if (!canShowAll) return;
+
+    set({
+      activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
+      activeVerseIds: ALL_ELEVATED_VERSE_IDS,
+      activeSectionId: SECTION_PRIORITY[0],
+      activeSectionIds: SECTION_PRIORITY,
+      isAllSectionsMode: true,
+      phase: "elevated",
+      hasEverElevated: true,
+    });
+  },
+
+  restoreAllSections: () => {
+    set({
+      activeVerseId: null,
+      activeVerseIds: [],
+      activeSectionId: null,
+      activeSectionIds: [],
+      isAllSectionsMode: false,
+      phase: "idle",
+    });
+  },
+
   dismiss: () => {
     if (get().phase === "idle") return;
     set({
@@ -200,6 +258,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       activeVerseIds: [],
       activeSectionId: null,
       activeSectionIds: [],
+      isAllSectionsMode: false,
       phase: "idle",
     });
   },

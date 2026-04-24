@@ -17,6 +17,7 @@ import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
 import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
 import { LanguageSwitchOverlay } from "./_components/ui-overlay/LanguageSwitchOverlay";
+import { AllSectionsOverlay } from "./_components/ui-overlay/AllSectionsOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
 import { CameraViewController } from "./_components/features/camera-views/CameraViewController";
 import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
@@ -84,6 +85,7 @@ export default function Home() {
       <PopUpUI isDarkMode={isDarkMode} />
       <VerseNeonHTMLOverlay />
       <NavigationOverlay isDarkMode={isDarkMode} />
+      <AllSectionsOverlay isDarkMode={isDarkMode} />
       <LanguageSwitchOverlay isDarkMode={isDarkMode} />
       <ThemeToggleOverlay
         isDarkMode={isDarkMode}

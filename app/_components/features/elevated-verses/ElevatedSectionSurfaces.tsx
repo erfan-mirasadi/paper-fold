@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
   PAGE_WIDTH,
@@ -46,9 +46,6 @@ import {
 
 const SURFACE_NORMAL_SCALE = new Vector2(0.8, 0.8);
 const ELEVATED_SURFACE_DARKNESS = 0.7;
-// Single darkness knob for elevated texture:
-// 0 = no extra darkness, 1 = max darkness
-const ELEVATED_TEXTURE_DARKNESS = 0.95;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -76,7 +73,10 @@ function buildSectionTextureMap(
   // We want UV (0,0) → page position (xStart, yBottom) and UV (1,1) → (xEnd, yTop).
   // texCoord = uv * repeat + offset  →  repeat covers the section's fraction of the page.
   texture.repeat.set(mappedW / PAGE_WIDTH, mappedH / PAGE_HEIGHT);
-  texture.offset.set(xStart / PAGE_WIDTH, (yBottom + PAGE_HEIGHT) / PAGE_HEIGHT);
+  texture.offset.set(
+    xStart / PAGE_WIDTH,
+    (yBottom + PAGE_HEIGHT) / PAGE_HEIGHT,
+  );
   texture.needsUpdate = true;
   return texture;
 }
@@ -176,42 +176,19 @@ function ElevatedLayer({
   shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
   sectionBgTexture = null,
 }: ElevatedLayerProps) {
-  const usesTextureFill =
-    sectionBgTexture != null &&
-    typeof color === "string" &&
-    /\.(jpe?g|png|webp)(\?.*)?$/i.test(color);
-  const textureDarkness = clamp(ELEVATED_TEXTURE_DARKNESS, 0, 1);
-  const textureTint = 1 - textureDarkness * 0.35;
-  const textureOverlayOpacity = textureDarkness * 0.28;
-  const textureEnvIntensity =
-    PAPER_MATERIAL_CONFIG.envMapIntensity * (1 - textureDarkness * 0.75);
+  const usesTextureFill = sectionBgTexture != null;
   const baseZ = PAGE_DEPTH / 2 + 0.001 + zOffset;
   const shadedColor = useMemo(
     () =>
       usesTextureFill
-        ? new Color("#ffffff").multiplyScalar(textureTint).getStyle()
+        ? "#ffffff"
         : new Color(color).multiplyScalar(ELEVATED_SURFACE_DARKNESS).getStyle(),
-    [color, usesTextureFill, textureTint],
+    [color, usesTextureFill],
   );
   const sectionNormalMap = useMemo(
     () => buildSectionTextureMap(paperNormalTexture, x, y, w, h),
     [paperNormalTexture, x, y, w, h],
   );
-
-  const sectionDiffuseMap = useMemo(
-    () =>
-      usesTextureFill && sectionBgTexture
-        ? buildSectionTextureMap(sectionBgTexture, x, y, w, h)
-        : null,
-    [usesTextureFill, sectionBgTexture, x, y, w, h],
-  );
-
-  useEffect(() => {
-    return () => {
-      sectionNormalMap.dispose();
-      if (sectionDiffuseMap) sectionDiffuseMap.dispose();
-    };
-  }, [sectionNormalMap, sectionDiffuseMap]);
 
   return (
     <a.group
@@ -256,38 +233,26 @@ function ElevatedLayer({
 
       <a.mesh material-opacity={spring.opacity}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
-        <meshStandardMaterial
-          {...PAPER_MATERIAL_CONFIG}
-          color={shadedColor}
-          map={sectionDiffuseMap ?? undefined}
-          transparent
-          opacity={1}
-          envMapIntensity={
-            usesTextureFill
-              ? textureEnvIntensity
-              : PAPER_MATERIAL_CONFIG.envMapIntensity
-          }
-          normalMap={sectionNormalMap}
-          normalScale={SURFACE_NORMAL_SCALE}
-        />
-      </a.mesh>
-
-      {usesTextureFill && textureOverlayOpacity > 0 && (
-        <a.mesh position-z={0.0002}>
-          <RoundedShapeComponent w={w} h={h} radius={radius} />
-          <a.meshBasicMaterial
-            color="#000000"
+        {usesTextureFill ? (
+          <meshBasicMaterial
+            map={sectionBgTexture}
+            color="#ffffff"
             transparent
-            opacity={to(
-              spring.opacity,
-              (baseOpacity) => baseOpacity * textureOverlayOpacity,
-            )}
+            opacity={1}
             toneMapped={false}
-            depthWrite={false}
-            depthTest={false}
           />
-        </a.mesh>
-      )}
+        ) : (
+          <meshStandardMaterial
+            {...PAPER_MATERIAL_CONFIG}
+            color={shadedColor}
+            transparent
+            opacity={1}
+            envMapIntensity={PAPER_MATERIAL_CONFIG.envMapIntensity}
+            normalMap={sectionNormalMap}
+            normalScale={SURFACE_NORMAL_SCALE}
+          />
+        )}
+      </a.mesh>
     </a.group>
   );
 }
@@ -336,12 +301,6 @@ export function ElevatedSectionSurfaces() {
 
   const sectionBgTexture = useTexture(SECTION_BG_TEXTURE, (texture) => {
     texture.colorSpace = SRGBColorSpace;
-    texture.wrapS = ClampToEdgeWrapping;
-    texture.wrapT = ClampToEdgeWrapping;
-    texture.minFilter = LinearFilter;
-    texture.magFilter = LinearFilter;
-    texture.generateMipmaps = false;
-    texture.needsUpdate = true;
   });
 
   const s1Active = useElevatedStore((s) => s.activeSectionIds.includes("s1"));

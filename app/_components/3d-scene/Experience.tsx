@@ -24,13 +24,19 @@ interface ExperienceProps {
 //variables when elevated verse is draged and paper is docked
 const PAPER_DOCK_X = -0.9;
 const PAPER_DOCK_SCALE = 0.9;
+const PAPER_FOCUS_Y = 0;
+const PAPER_FOCUS_Z = -0.7;
+const PAPER_FOCUS_SCALE = 0;
+const PAPER_HIDE_SPRING = { mass: 2.2, tension: 74, friction: 24 };
+const PAPER_RESTORE_SPRING = { mass: 1.1, tension: 150, friction: 28 };
 
 export function Experience({
   isFolded = false,
   isDarkMode = false,
 }: ExperienceProps) {
   const isPaperMoving = useDragState((s) => s.isPaperDocked);
-  
+  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
     const { hasDragged } = useDragState.getState();
@@ -39,10 +45,17 @@ export function Experience({
     useElevatedStore.getState().dismiss();
   }, []);
 
-  const { paperOffsetX, paperScale } = useSpring({
-    paperOffsetX: isPaperMoving ? PAPER_DOCK_X : 0,
-    paperScale: isPaperMoving ? PAPER_DOCK_SCALE : 1,
+  const { sceneOffsetX, sceneScale } = useSpring({
+    sceneOffsetX: isPaperMoving && !isAllSectionsMode ? PAPER_DOCK_X : 0,
+    sceneScale: isPaperMoving && !isAllSectionsMode ? PAPER_DOCK_SCALE : 1,
     config: { mass: 1.4, tension: 170, friction: 31 },
+  });
+
+  const { paperFocusY, paperFocusZ, paperFocusScale } = useSpring({
+    paperFocusY: isAllSectionsMode ? PAPER_FOCUS_Y : 0,
+    paperFocusZ: isAllSectionsMode ? PAPER_FOCUS_Z : 0,
+    paperFocusScale: isAllSectionsMode ? PAPER_FOCUS_SCALE : 1,
+    config: isAllSectionsMode ? PAPER_HIDE_SPRING : PAPER_RESTORE_SPRING,
   });
 
   return (
@@ -55,16 +68,24 @@ export function Experience({
 
       <a.group
         rotation-x={-Math.PI / 4}
-        position-x={paperOffsetX}
-        scale-x={paperScale}
-        scale-y={paperScale}
-        scale-z={paperScale}
+        position-x={sceneOffsetX}
+        scale-x={sceneScale}
+        scale-y={sceneScale}
+        scale-z={sceneScale}
       >
-        <SinglePaper isFolded={isFolded} isDarkMode={isDarkMode} />
+        <a.group
+          position-y={paperFocusY}
+          position-z={paperFocusZ}
+          scale-x={paperFocusScale}
+          scale-y={paperFocusScale}
+          scale-z={paperFocusScale}
+        >
+          <SinglePaper isFolded={isFolded} isDarkMode={isDarkMode} />
+        </a.group>
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels />
         <PopUpManager />
-        <VerseClickHitboxes />
+        {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
