@@ -17,6 +17,7 @@ import {
   S1_ANA_LABEL_BG,
   S1_ANA_LABEL_TEXT,
   QURAN_FONT,
+  LATIN_VERSE_FONT,
   TEXT_SIZES,
   S2_VERSE_NUMBER_TEXT,
   LANGUAGE_TEXT_SCALE,
@@ -519,7 +520,7 @@ export const VerseBox = ({
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
   const textScale = isPill ? langScale.verseSmall : langScale.verseBig;
   const textDirection = isArabic ? "rtl" : "ltr";
-  const textFont = isArabic ? QURAN_FONT : undefined;
+  const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
   const showVerseNumber = isArabic;
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;

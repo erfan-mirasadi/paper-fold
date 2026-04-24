@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fira_Sans_Condensed, Inter } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/ui-overlay/GrainOverlay";
 
 const inter = Inter({ subsets: ["latin"] });
+
+const firaSansCondensed = Fira_Sans_Condensed({
+  weight: ["500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  variable: "--font-fira-sans-condensed",
+});
 
 export const metadata: Metadata = {
   title: "Alak",
@@ -20,7 +27,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.className} h-full antialiased`}
+      className={`${inter.className} ${firaSansCondensed.variable} h-full antialiased`}
     >
       <body>
         <GrainOverlay />

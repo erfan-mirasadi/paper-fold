@@ -88,6 +88,9 @@ export const WHITE_VERSE_BG = "#ffffff";
 // ----------------------------------------------------------------------------
 export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
 
+/** Fira Sans Condensed (Google Fonts) — verse body for EN/TR in Troika `<Text />`; Arabic keeps `QURAN_FONT`. */
+export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
+
 // ----------------------------------------------------------------------------
 // 8. GLOBAL TEXT SIZES
 // ----------------------------------------------------------------------------
