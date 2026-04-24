@@ -13,6 +13,8 @@ export type TextureTransform = {
    * Positive x shifts pattern to the right. Positive y shifts pattern upward.
    */
   offset?: { x?: number; y?: number };
+  /** No mipmaps + linear min: stable brightness on 3D decals when distance changes. */
+  stableSampling?: boolean;
 };
 
 /**
@@ -36,11 +38,18 @@ export function cloneTextureAsAspectCover(
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
 
-  // Best filtering settings to avoid moire (stripes) on fine dot patterns
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.magFilter = LinearFilter;
-  texture.generateMipmaps = true;
-  texture.anisotropy = 16;
+  const stable = transform?.stableSampling === true;
+  if (stable) {
+    texture.generateMipmaps = false;
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
+    texture.anisotropy = 1;
+  } else {
+    texture.minFilter = LinearMipmapLinearFilter;
+    texture.magFilter = LinearFilter;
+    texture.generateMipmaps = true;
+    texture.anisotropy = 16;
+  }
 
   const img = source.image as HTMLImageElement | undefined;
   const imgW = img?.naturalWidth ?? img?.width ?? 0;

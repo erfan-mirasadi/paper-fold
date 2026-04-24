@@ -10,15 +10,7 @@ import {
   SURAH_TRANSFORMS,
   OPPOSITE_VERSE_CONNECTOR,
 } from "../../data/SurahConfig";
-import {
-  Color,
-  ClampToEdgeWrapping,
-  LinearFilter,
-  NoColorSpace,
-  SRGBColorSpace,
-  type Texture,
-  Vector2,
-} from "three";
+import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
 
 import {
   S1_OUTER_BG,
@@ -39,55 +31,18 @@ import {
 } from "./useElevatedStore";
 import { dragEngine } from "./drag/dragEngine";
 import { useElevatedDrag } from "./drag/useElevatedDrag";
-import {
-  PAPER_MATERIAL_CONFIG,
-  PAPER_TEXTURES,
-} from "../../3d-scene/PaperMaterial";
+import { PAPER_MATERIAL_CONFIG } from "../../3d-scene/PaperMaterial";
 import { cloneTextureAsAspectCover } from "../../shared/textureFit";
 
-/** Paper fiber on photo textures — keep subtle to avoid “dusty” patches. */
-const SURFACE_NORMAL_SCALE_TEXTURE = new Vector2(0.45, 0.45);
-/** Verse / flat color fills — lower normal = less mottled gray under lights. */
-const SURFACE_NORMAL_SCALE_SOLID = new Vector2(0.32, 0.32);
 /**
- * Tuned vs paper: solid fills in SurahLayout go through RenderTexture with
- * toneMapped default true, then lit again on the page — elevated gets one pass.
+ * SurahLayout draws section JPEG with meshBasic + toneMapped false, then the page
+ * multiplies paper tint. Elevated uses the same basic path (no extra IBL) so it
+ * matches the bitmap; slightly under paper base so it does not read brighter than
+ * the folded page panel.
  */
-const ELEVATED_SURFACE_DARKNESS = 0.68;
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function buildSectionTextureMap(
-  source: Texture,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-): Texture {
-  const xStart = clamp(x, 0, PAGE_WIDTH);
-  const xEnd = clamp(x + w, 0, PAGE_WIDTH);
-  const yTop = clamp(y, -PAGE_HEIGHT, 0);
-  const yBottom = clamp(y - h, -PAGE_HEIGHT, 0);
-
-  const mappedW = Math.max(xEnd - xStart, 0.0001);
-  const mappedH = Math.max(yTop - yBottom, 0.0001);
-
-  const texture = source.clone();
-  texture.wrapS = ClampToEdgeWrapping;
-  texture.wrapT = ClampToEdgeWrapping;
-  // ShapeGeometry UVs: (0,0) = bottom-left of shape, (1,1) = top-right.
-  // We want UV (0,0) → page position (xStart, yBottom) and UV (1,1) → (xEnd, yTop).
-  // texCoord = uv * repeat + offset  →  repeat covers the section's fraction of the page.
-  texture.repeat.set(mappedW / PAGE_WIDTH, mappedH / PAGE_HEIGHT);
-  texture.offset.set(
-    xStart / PAGE_WIDTH,
-    (yBottom + PAGE_HEIGHT) / PAGE_HEIGHT,
-  );
-  texture.needsUpdate = true;
-  return texture;
-}
+const TEXTURE_FILL_TINT = new Color(PAPER_MATERIAL_CONFIG.color).multiplyScalar(
+  0.86,
+);
 
 type SectionSpring = {
   liftZ: SpringValue<number>;
@@ -164,7 +119,6 @@ interface ElevatedLayerProps {
   h: number;
   radius: number;
   color: string;
-  paperNormalTexture: Texture;
   spring: SectionSpring;
   zOffset?: number;
   shadow?: boolean;
@@ -180,7 +134,6 @@ function ElevatedLayer({
   h,
   radius,
   color,
-  paperNormalTexture,
   spring,
   zOffset = 0,
   shadow = false,
@@ -190,24 +143,18 @@ function ElevatedLayer({
 }: ElevatedLayerProps) {
   const usesTextureFill = sectionBgTexture != null;
   const baseZ = PAGE_DEPTH / 2 + 0.001 + zOffset;
-  const shadedColor = useMemo(
-    () => new Color(color).multiplyScalar(ELEVATED_SURFACE_DARKNESS).getStyle(),
-    [color],
-  );
-  const sectionNormalMap = useMemo(
-    () => buildSectionTextureMap(paperNormalTexture, x, y, w, h),
-    [paperNormalTexture, x, y, w, h],
-  );
-  const fittedSectionBgTexture = useMemo(
-    () =>
-      sectionBgTexture
-        ? cloneTextureAsAspectCover(sectionBgTexture, w, h, undefined, {
-            offset: { y: -0.05 },
-            stableSampling: true,
-          })
-        : null,
-    [sectionBgTexture, w, h],
-  );
+  const fittedSectionBgTexture = useMemo(() => {
+    if (!sectionBgTexture) return null;
+    const tex = cloneTextureAsAspectCover(sectionBgTexture, w, h, undefined, {
+      offset: { y: -0.05 },
+    });
+    tex.generateMipmaps = false;
+    tex.minFilter = LinearFilter;
+    tex.magFilter = LinearFilter;
+    tex.anisotropy = 1;
+    tex.needsUpdate = true;
+    return tex;
+  }, [sectionBgTexture, w, h]);
 
   return (
     <a.group
@@ -253,26 +200,19 @@ function ElevatedLayer({
       <a.mesh material-opacity={spring.opacity}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         {usesTextureFill ? (
-          <meshStandardMaterial
-            {...PAPER_MATERIAL_CONFIG}
+          <meshBasicMaterial
             map={fittedSectionBgTexture}
+            color={TEXTURE_FILL_TINT}
             transparent
             opacity={1}
-            metalness={0}
-            roughness={1}
-            envMapIntensity={0.22}
-            normalMap={sectionNormalMap}
-            normalScale={SURFACE_NORMAL_SCALE_TEXTURE}
+            toneMapped={false}
           />
         ) : (
-          <meshStandardMaterial
-            {...PAPER_MATERIAL_CONFIG}
-            color={shadedColor}
+          <meshBasicMaterial
+            color={color}
             transparent
             opacity={1}
-            envMapIntensity={PAPER_MATERIAL_CONFIG.envMapIntensity}
-            normalMap={sectionNormalMap}
-            normalScale={SURFACE_NORMAL_SCALE_SOLID}
+            toneMapped
           />
         )}
       </a.mesh>
@@ -312,16 +252,6 @@ function DraggableSectionGroup({
 }
 
 export function ElevatedSectionSurfaces() {
-  const paperTextureNormal = useTexture(PAPER_TEXTURES.normalUrl, (texture) => {
-    texture.colorSpace = NoColorSpace;
-    texture.wrapS = ClampToEdgeWrapping;
-    texture.wrapT = ClampToEdgeWrapping;
-    texture.minFilter = LinearFilter;
-    texture.magFilter = LinearFilter;
-    texture.generateMipmaps = false;
-    texture.needsUpdate = true;
-  });
-
   const sectionBgTexture = useTexture(SECTION_BG_TEXTURE, (texture) => {
     texture.colorSpace = SRGBColorSpace;
   });
@@ -409,7 +339,6 @@ export function ElevatedSectionSurfaces() {
           h={s1.frameH}
           radius={0.02}
           color={S1_OUTER_BORDER}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(S1_OUTER_BORDER)}
           spring={s1Spring}
         />
@@ -420,7 +349,6 @@ export function ElevatedSectionSurfaces() {
           h={s1.frameH - s1.borderWidth * 2}
           radius={0.017}
           color={S1_OUTER_BG}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(S1_OUTER_BG)}
           spring={s1Spring}
           zOffset={0.001}
@@ -436,12 +364,9 @@ export function ElevatedSectionSurfaces() {
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={S1_INNER_BORDER}
-            paperNormalTexture={paperTextureNormal}
             sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
             spring={s1Spring}
             zOffset={0.0015}
-            shadow
-            shadowStrength={0.5}
           />
         ))}
       </DraggableSectionGroup>
@@ -455,7 +380,6 @@ export function ElevatedSectionSurfaces() {
           h={topConnector.outer.h}
           radius={topConnector.outer.radius}
           color={HOLLOW_BORDER_COLOR}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
           spring={s2TopSpring}
           shadow
@@ -468,7 +392,6 @@ export function ElevatedSectionSurfaces() {
           h={topConnector.middle.h}
           radius={topConnector.middle.radius}
           color={HOLLOW_BORDER_INNER}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
           spring={s2TopSpring}
           zOffset={0.0006}
@@ -482,7 +405,6 @@ export function ElevatedSectionSurfaces() {
           h={topConnector.fill.h}
           radius={topConnector.fill.radius}
           color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
           spring={s2TopSpring}
           zOffset={0.0012}
@@ -498,12 +420,9 @@ export function ElevatedSectionSurfaces() {
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={MAROON_THEME}
-            paperNormalTexture={paperTextureNormal}
             sectionBgTexture={getTextureForColor(MAROON_THEME)}
             spring={s2TopSpring}
             zOffset={0.0025}
-            shadow
-            shadowStrength={0.65}
           />
         ))}
       </DraggableSectionGroup>
@@ -519,12 +438,9 @@ export function ElevatedSectionSurfaces() {
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={GREEN_THEME}
-            paperNormalTexture={paperTextureNormal}
             sectionBgTexture={getTextureForColor(GREEN_THEME)}
             spring={s2CenterSpring}
             zOffset={0.0025}
-            shadow
-            shadowStrength={0.65}
           />
         ))}
       </DraggableSectionGroup>
@@ -538,7 +454,6 @@ export function ElevatedSectionSurfaces() {
           h={bottomConnector.outer.h}
           radius={bottomConnector.outer.radius}
           color={HOLLOW_BORDER_COLOR}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
           spring={s2BottomSpring}
           shadow
@@ -551,7 +466,6 @@ export function ElevatedSectionSurfaces() {
           h={bottomConnector.middle.h}
           radius={bottomConnector.middle.radius}
           color={HOLLOW_BORDER_INNER}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
           spring={s2BottomSpring}
           zOffset={0.0006}
@@ -565,7 +479,6 @@ export function ElevatedSectionSurfaces() {
           h={bottomConnector.fill.h}
           radius={bottomConnector.fill.radius}
           color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-          paperNormalTexture={paperTextureNormal}
           sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
           spring={s2BottomSpring}
           zOffset={0.0012}
@@ -581,12 +494,9 @@ export function ElevatedSectionSurfaces() {
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={MAROON_THEME}
-            paperNormalTexture={paperTextureNormal}
             sectionBgTexture={getTextureForColor(MAROON_THEME)}
             spring={s2BottomSpring}
             zOffset={0.0025}
-            shadow
-            shadowStrength={0.65}
           />
         ))}
       </DraggableSectionGroup>
