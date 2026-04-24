@@ -43,6 +43,7 @@ import {
   PAPER_MATERIAL_CONFIG,
   PAPER_TEXTURES,
 } from "../../3d-scene/PaperMaterial";
+import { cloneTextureAsAspectCover } from "../../shared/textureFit";
 
 const SURFACE_NORMAL_SCALE = new Vector2(0.8, 0.8);
 const ELEVATED_SURFACE_DARKNESS = 0.7;
@@ -189,6 +190,15 @@ function ElevatedLayer({
     () => buildSectionTextureMap(paperNormalTexture, x, y, w, h),
     [paperNormalTexture, x, y, w, h],
   );
+  const fittedSectionBgTexture = useMemo(
+    () =>
+      sectionBgTexture
+        ? cloneTextureAsAspectCover(sectionBgTexture, w, h, undefined, {
+            offset: { y: -0.05 },
+          })
+        : null,
+    [sectionBgTexture, w, h],
+  );
 
   return (
     <a.group
@@ -235,7 +245,7 @@ function ElevatedLayer({
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         {usesTextureFill ? (
           <meshBasicMaterial
-            map={sectionBgTexture}
+            map={fittedSectionBgTexture}
             color="#ffffff"
             transparent
             opacity={1}
