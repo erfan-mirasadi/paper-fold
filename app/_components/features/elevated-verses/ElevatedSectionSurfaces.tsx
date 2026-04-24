@@ -45,8 +45,15 @@ import {
 } from "../../3d-scene/PaperMaterial";
 import { cloneTextureAsAspectCover } from "../../shared/textureFit";
 
-const SURFACE_NORMAL_SCALE = new Vector2(0.8, 0.8);
-const ELEVATED_SURFACE_DARKNESS = 0.7;
+/** Paper fiber on photo textures — keep subtle to avoid “dusty” patches. */
+const SURFACE_NORMAL_SCALE_TEXTURE = new Vector2(0.45, 0.45);
+/** Verse / flat color fills — lower normal = less mottled gray under lights. */
+const SURFACE_NORMAL_SCALE_SOLID = new Vector2(0.32, 0.32);
+/**
+ * Tuned vs paper: solid fills in SurahLayout go through RenderTexture with
+ * toneMapped default true, then lit again on the page — elevated gets one pass.
+ */
+const ELEVATED_SURFACE_DARKNESS = 0.68;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -94,12 +101,14 @@ const SECTION_SURFACE = {
   liftDelayMs: 120,
   opacityShowDelayMs: 0,
   opacityHideDelayMs: ELEVATED_RETURN_SYNC_MS,
-  shadowOpacity: 0.26,
+  shadowOpacity: 0.12,
   spring: {
     mass: 2.2,
     tension: 85,
     friction: 22,
   },
+  /** Snappier hide so we spend less time semi-transparent over the page (gray haze). */
+  opacityHideSpring: { mass: 0.75, tension: 320, friction: 28 },
 };
 
 const VERSE_MIMIC_SHADOW = {
@@ -107,7 +116,7 @@ const VERSE_MIMIC_SHADOW = {
   offsetY: -0.004,
   insetZ: -0.001,
   scale: 1.05,
-  opacityFlat: 0.6,
+  opacityFlat: 0.28,
 };
 
 function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
@@ -125,7 +134,9 @@ function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
       ? SECTION_SURFACE.opacityShowDelayMs
       : SECTION_SURFACE.opacityHideDelayMs,
     immediate: isActive,
-    config: SECTION_SURFACE.spring,
+    config: isActive
+      ? SECTION_SURFACE.spring
+      : SECTION_SURFACE.opacityHideSpring,
   });
 
   const { shadowOpacity } = useSpring({
@@ -180,11 +191,8 @@ function ElevatedLayer({
   const usesTextureFill = sectionBgTexture != null;
   const baseZ = PAGE_DEPTH / 2 + 0.001 + zOffset;
   const shadedColor = useMemo(
-    () =>
-      usesTextureFill
-        ? "#ffffff"
-        : new Color(color).multiplyScalar(ELEVATED_SURFACE_DARKNESS).getStyle(),
-    [color, usesTextureFill],
+    () => new Color(color).multiplyScalar(ELEVATED_SURFACE_DARKNESS).getStyle(),
+    [color],
   );
   const sectionNormalMap = useMemo(
     () => buildSectionTextureMap(paperNormalTexture, x, y, w, h),
@@ -195,6 +203,7 @@ function ElevatedLayer({
       sectionBgTexture
         ? cloneTextureAsAspectCover(sectionBgTexture, w, h, undefined, {
             offset: { y: -0.05 },
+            stableSampling: true,
           })
         : null,
     [sectionBgTexture, w, h],
@@ -244,12 +253,16 @@ function ElevatedLayer({
       <a.mesh material-opacity={spring.opacity}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         {usesTextureFill ? (
-          <meshBasicMaterial
+          <meshStandardMaterial
+            {...PAPER_MATERIAL_CONFIG}
             map={fittedSectionBgTexture}
-            color="#ffffff"
             transparent
             opacity={1}
-            toneMapped={false}
+            metalness={0}
+            roughness={1}
+            envMapIntensity={0.22}
+            normalMap={sectionNormalMap}
+            normalScale={SURFACE_NORMAL_SCALE_TEXTURE}
           />
         ) : (
           <meshStandardMaterial
@@ -259,7 +272,7 @@ function ElevatedLayer({
             opacity={1}
             envMapIntensity={PAPER_MATERIAL_CONFIG.envMapIntensity}
             normalMap={sectionNormalMap}
-            normalScale={SURFACE_NORMAL_SCALE}
+            normalScale={SURFACE_NORMAL_SCALE_SOLID}
           />
         )}
       </a.mesh>

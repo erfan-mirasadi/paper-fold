@@ -33,6 +33,7 @@ import {
   useSurahLanguageStore,
 } from "../data/useSurahLanguageStore";
 import { CapsuleVerseTextTransition } from "./CapsuleVerseTextTransition";
+import { cloneTextureAsAspectCover } from "../shared/textureFit";
 
 // ROUNDED SHAPE GEOMETRY
 interface RoundedShapeProps {
@@ -111,6 +112,8 @@ interface UiRectProps {
 
 interface TexturedMaterialProps {
   url: string;
+  w: number;
+  h: number;
   useEmissive: boolean;
   depthTest: boolean;
   transparent: boolean;
@@ -122,6 +125,8 @@ interface TexturedMaterialProps {
 
 function TexturedMaterial({
   url,
+  w,
+  h,
   useEmissive,
   depthTest,
   transparent,
@@ -133,11 +138,18 @@ function TexturedMaterial({
   const texture = useTexture(url, (loadedTexture) => {
     loadedTexture.colorSpace = THREE.SRGBColorSpace;
   });
+  const fittedTexture = useMemo(
+    () =>
+      cloneTextureAsAspectCover(texture, w, h, undefined, {
+        offset: { y: -0.05 },
+      }),
+    [texture, w, h],
+  );
 
   if (useEmissive) {
     return (
       <meshStandardMaterial
-        map={texture}
+        map={fittedTexture}
         color="#ffffff"
         depthTest={depthTest}
         transparent={transparent}
@@ -153,7 +165,7 @@ function TexturedMaterial({
 
   return (
     <meshBasicMaterial
-      map={texture}
+      map={fittedTexture}
       color="#ffffff"
       depthTest={depthTest}
       transparent={transparent}
@@ -226,6 +238,8 @@ export const UiRect = ({
         {isImage ? (
           <TexturedMaterial
             url={finalColor}
+            w={w}
+            h={h}
             useEmissive={useEmissiveMaterial}
             depthTest={depthTest}
             transparent={resolvedTransparent}
@@ -527,7 +541,9 @@ export const VerseBox = ({
   const safeMargin = 0.0;
   const textMaxW =
     (finalW - safeMargin * 2 - textPaddingX * 2) * nonArabicTextTighten;
-  const textX = isArabic ? safeMargin + textMaxW / 2 : safeMargin + textPaddingX;
+  const textX = isArabic
+    ? safeMargin + textMaxW / 2
+    : safeMargin + textPaddingX;
 
   const SMALL_TEXT_SHIFT = -0.01;
   const versePosX = isArabic
@@ -595,7 +611,9 @@ export const VerseBox = ({
           <Text
             position={[0, 0, 0.001]}
             fontSize={TEXT_SIZES.VERSE_NUMBER}
-            color={isBumpMap ? BUMP_MAX : (circleTextCol ?? S2_VERSE_NUMBER_TEXT)}
+            color={
+              isBumpMap ? BUMP_MAX : (circleTextCol ?? S2_VERSE_NUMBER_TEXT)
+            }
             anchorX="center"
             anchorY="middle"
             fontWeight="bold"
