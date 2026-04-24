@@ -494,6 +494,8 @@ interface VerseBoxProps {
   isBumpMap?: boolean;
   bgOpacity?: number;
   textColor?: string;
+  /** Capsule verse text enter fade; 0 avoids dim stack with pop-up RenderTexture. */
+  verseTextEnterDurationMs?: number;
 }
 export const VerseBox = ({
   x,
@@ -514,6 +516,7 @@ export const VerseBox = ({
   isBumpMap = false,
   bgOpacity = 1,
   textColor,
+  verseTextEnterDurationMs,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -643,6 +646,7 @@ export const VerseBox = ({
         direction={textDirection}
         renderOrder={14}
         materialDepthTest={false}
+        enterDurationMs={verseTextEnterDurationMs}
       />
     </group>
   );

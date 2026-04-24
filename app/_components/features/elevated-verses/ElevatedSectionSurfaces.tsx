@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
   PAGE_WIDTH,
@@ -155,6 +155,13 @@ function ElevatedLayer({
     tex.needsUpdate = true;
     return tex;
   }, [sectionBgTexture, w, h]);
+
+  useEffect(() => {
+    const tex = fittedSectionBgTexture;
+    return () => {
+      tex?.dispose();
+    };
+  }, [fittedSectionBgTexture]);
 
   return (
     <a.group

@@ -78,6 +78,8 @@ export function useElevateAnimation(isElevated: boolean) {
     delay: isElevated
       ? ELEVATE_TIMING.appearDelayZAndOpacity
       : ELEVATE_TIMING.hideDelayZAndOpacity,
+    /** Avoid stacking with Troika text fade-in inside RenderTexture (double dim). */
+    immediate: isElevated,
   });
 
   const { shadowOpacity } = useSpring({

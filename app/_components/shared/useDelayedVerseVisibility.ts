@@ -133,8 +133,10 @@ export function useDelayedVerseVisibility() {
   }, []);
 
   const isVerseHidden = (verseId: number) => {
-    const isElevated = delayedElevatedState[verseId] ?? false;
-    if (isElevated) return true;
+    // Hide paper verse as soon as store says elevated (no one-frame wait for
+    // delayedElevatedState). Delayed map still drives the post-dismiss window.
+    if (activeVerseIds.includes(verseId)) return true;
+    if (delayedElevatedState[verseId]) return true;
 
     const isMiddleVerse =
       verseId === 11 || verseId === 12 || verseId === 13 || verseId === 14;

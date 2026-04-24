@@ -304,6 +304,7 @@ export function PopUpVerseCard({
                             circleTextCol={circleTextCol}
                             isPill={isPill}
                             shadow={false}
+                            verseTextEnterDurationMs={0}
                           />
                         </group>
                       </RenderTexture>

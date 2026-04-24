@@ -35,6 +35,8 @@ interface CapsuleVerseTextTransitionProps {
   direction?: "auto" | "ltr" | "rtl";
   renderOrder?: number;
   materialDepthTest?: boolean;
+  /** 0 = no fade on enter (e.g. RenderTexture pop-up card). Default cross-fade for layout changes. */
+  enterDurationMs?: number;
 }
 
 export function CapsuleVerseTextTransition({
@@ -51,6 +53,7 @@ export function CapsuleVerseTextTransition({
   direction,
   renderOrder,
   materialDepthTest = false,
+  enterDurationMs = 240,
 }: CapsuleVerseTextTransitionProps) {
   const item: TransitionPayload = {
     key: [
@@ -87,11 +90,16 @@ export function CapsuleVerseTextTransition({
 
   const transitions = useTransition(item, {
     keys: (payload) => payload.key,
-    from: { opacity: 0 },
+    from: { opacity: enterDurationMs > 0 ? 0 : 1 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
     exitBeforeEnter: true,
-    config: { duration: 240 },
+    config: (_item, _index, state) => {
+      const phase = state as "mount" | "enter" | "update" | "leave";
+      return phase === "leave"
+        ? { duration: 240 }
+        : { duration: enterDurationMs };
+    },
   });
 
   return transitions((style, payload) => (
