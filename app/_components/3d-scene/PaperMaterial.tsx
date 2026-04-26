@@ -33,11 +33,8 @@ const CREASE_NORMAL_OPACITY = 2;
 const PAPER_NORMAL_OPACITY = 2;
 const paperBaseColor = new Color(PAGE_BG_COLOR);
 
-// HARDCODED HIGH-RES: Bypass DPR issues entirely by forcing a massive 2x resolution.
-// This guarantees ultra-crisp SDF generation and layout rendering on Windows.
-const QUALITY_MULTIPLIER = 2;
-const RENDER_TEX_WIDTH = 1200 * QUALITY_MULTIPLIER; // 2400
-const RENDER_TEX_HEIGHT = 1700 * QUALITY_MULTIPLIER; // 3400
+const BASE_RENDER_TEX_WIDTH = 1200;
+const BASE_RENDER_TEX_HEIGHT = 1700;
 
 const TEXTURE_SETTLE_DELAY_MS = 1200;
 const TEXTURE_READY_DELAY_MS = 600;
@@ -116,12 +113,31 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
   isFolded = false,
   onReady,
 }) => {
-  const { gl } = useThree();
+  const { gl, size } = useThree();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
   const normalScale = toggles.normal
     ? NORMAL_SCALE_ENABLED
     : NORMAL_SCALE_DISABLED;
+
+  // Mobile GPUs (especially iOS Safari) are sensitive to large offscreen render targets.
+  // Clamp render texture size to device limits and use a smaller multiplier on small viewports.
+  const isSmallViewport = size.width <= 820 || size.height <= 820;
+  const maxTextureSize = gl.capabilities.maxTextureSize || 4096;
+
+  const targetMultiplier = isSmallViewport ? 1 : 2;
+  const targetW = BASE_RENDER_TEX_WIDTH * targetMultiplier;
+  const targetH = BASE_RENDER_TEX_HEIGHT * targetMultiplier;
+
+  const clampedScale = Math.min(
+    1,
+    (maxTextureSize - 16) / Math.max(targetW, targetH),
+  );
+  const renderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
+  const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
+
+  const colorSamples = isSmallViewport ? 2 : 4;
+  const normalSamples = isSmallViewport ? 1 : 2;
   const renderTextureKey = [
     activeLanguage,
     fontsReady ? "fonts-ready" : "fonts-loading",
@@ -216,10 +232,10 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
       <RenderTexture
         key={mapKey}
         attach="map"
-        width={RENDER_TEX_WIDTH}
-        height={RENDER_TEX_HEIGHT}
+        width={renderTexWidth}
+        height={renderTexHeight}
         frames={mapFrames}
-        samples={4}
+        samples={colorSamples}
       >
         <color attach="background" args={[PAGE_BG_COLOR]} />
 
@@ -251,10 +267,10 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
       {toggles.normal && (
         <RenderTexture
           attach="normalMap"
-          width={RENDER_TEX_WIDTH}
-          height={RENDER_TEX_HEIGHT}
+          width={renderTexWidth}
+          height={renderTexHeight}
           frames={1}
-          samples={2}
+          samples={normalSamples}
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera
