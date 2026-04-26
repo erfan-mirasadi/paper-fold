@@ -1,10 +1,12 @@
+// app/_components/3d-scene/PaperMaterial.tsx
 "use client";
-import React from "react";
+import React, { useRef, useMemo } from "react";
 import {
   OrthographicCamera,
   RenderTexture,
   useTexture,
 } from "@react-three/drei";
+import { useThree, useFrame } from "@react-three/fiber";
 import {
   FOLD_Y_POSITIONS,
   SurahLayout as PaperContent,
@@ -16,6 +18,7 @@ import {
   ClampToEdgeWrapping,
   Color,
   LinearFilter,
+  MeshStandardMaterial,
   NoColorSpace,
   RepeatWrapping,
   SRGBColorSpace,
@@ -29,9 +32,13 @@ const CREASE_BAND_HEIGHT = 0.03;
 const CREASE_NORMAL_OPACITY = 2;
 const PAPER_NORMAL_OPACITY = 2;
 const paperBaseColor = new Color("#f2f0e6");
-const RENDER_TEX_WIDTH = 1200;
-const RENDER_TEX_HEIGHT = 1700;
-const PAGE_TEXTURE_SETTLE_FRAMES = 30;
+
+// Base texture dims — scaled up by DPR at runtime so text is always crisp
+const BASE_RENDER_TEX_WIDTH = 1200;
+const BASE_RENDER_TEX_HEIGHT = 1700;
+
+// 120 frames gives troika enough time to finish its SDF atlas even at 144 Hz
+const PAGE_TEXTURE_SETTLE_FRAMES = 120;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
 const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
@@ -104,6 +111,7 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   toggles,
   isFolded = false,
 }) => {
+  const { gl } = useThree();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
   const normalScale = toggles.normal
@@ -115,6 +123,38 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     isFolded ? "folded" : "flat",
     toggles.diffuse ? "diffuse" : "flat-color",
   ].join("-");
+
+  // Force a minimum scale of 2 to ensure crisp text on Windows laptops with DPR=1
+  // This guarantees high base resolution before applying MSAA (samples=8)
+  const [texW, texH] = useMemo(() => {
+    const scale = Math.max(gl.getPixelRatio(), 2);
+    return [
+      Math.round(BASE_RENDER_TEX_WIDTH * scale),
+      Math.round(BASE_RENDER_TEX_HEIGHT * scale),
+    ];
+  }, [gl]);
+
+  // Material ref used to set max anisotropy once the RenderTexture map is ready
+  const matRef = useRef<MeshStandardMaterial>(null);
+  const anisotropyApplied = useRef(false);
+
+  // Reset flag whenever the texture key changes (language switch, font reload…)
+  React.useEffect(() => {
+    anisotropyApplied.current = false;
+  }, [renderTextureKey]);
+
+  // Set max anisotropy as soon as the map exists — runs at most a couple of frames
+  useFrame(() => {
+    if (anisotropyApplied.current) return;
+    const map = matRef.current?.map;
+    if (!map) return;
+    const maxAniso = gl.capabilities.getMaxAnisotropy();
+    if (map.anisotropy !== maxAniso) {
+      map.anisotropy = maxAniso;
+      map.needsUpdate = true;
+    }
+    anisotropyApplied.current = true;
+  });
 
   // Load texture maps at the top to ensure they are available for uniforms
   const creaseNormalMap = useTexture("/crease-normal-1.png", (texture) => {
@@ -152,18 +192,20 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
 
   return (
     <meshStandardMaterial
+      ref={matRef}
       attach="material-4"
       {...PAPER_MATERIAL_CONFIG}
       normalScale={normalScale}
       onBeforeCompile={onBeforeCompile}
     >
-      {/* MAP: The safe way without breaking SurahLayout's default camera */}
+      {/* MAP: Added samples={8} to enable MSAA for ultra-crisp text rendering on Windows */}
       <RenderTexture
         key={renderTextureKey}
         attach="map"
-        width={RENDER_TEX_WIDTH}
-        height={RENDER_TEX_HEIGHT}
+        width={texW}
+        height={texH}
         frames={PAGE_TEXTURE_SETTLE_FRAMES}
+        samples={8}
       >
         <color attach="background" args={["#f2f0e6"]} />
 
@@ -185,9 +227,10 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
       {toggles.normal && (
         <RenderTexture
           attach="normalMap"
-          width={RENDER_TEX_WIDTH}
-          height={RENDER_TEX_HEIGHT}
+          width={BASE_RENDER_TEX_WIDTH}
+          height={BASE_RENDER_TEX_HEIGHT}
           frames={1}
+          samples={4}
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera

@@ -1,10 +1,11 @@
+// app/page.tsx
 "use client";
 
 import { Canvas } from "@react-three/fiber";
 import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
-// import * as THREE from "three";
+import * as THREE from "three";
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
 import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
@@ -58,16 +59,18 @@ export default function Home() {
       >
         <div style={{ width: "100vw", height: "100vh" }}>
           <Canvas
-            // flat
+            // Enable antialiasing explicitly and ensure proper color space rendering
+            dpr={[1, 2]}
             camera={{
               position: CAMERA_CONFIG.initialCamera.position,
               fov: CAMERA_CONFIG.initialCamera.fov,
             }}
-            // gl={{
-            //   antialias: false,
-            //   toneMapping: THREE.NoToneMapping,
-            //   outputColorSpace: THREE.SRGBColorSpace,
-            // }}
+            gl={{
+              antialias: true,
+              powerPreference: "high-performance",
+              toneMapping: THREE.NoToneMapping,
+              outputColorSpace: THREE.SRGBColorSpace,
+            }}
           >
             <color attach="background" args={[bgColor]} />
             {/* <Effects glitchTrigger={glitchKey} /> */}
