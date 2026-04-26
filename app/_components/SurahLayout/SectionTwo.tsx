@@ -1,7 +1,6 @@
 "use client";
 import { TopLabel, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
-import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
 import { useDelayedHidden } from "../shared/useDelayedHidden";
 import {
   ELEVATED_RETURN_SYNC_MS,
@@ -39,7 +38,6 @@ export function SectionTwo({
   startX,
   PW,
 }: SectionTwoProps) {
-  const isVerseHidden = useDelayedVerseVisibility();
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const hideTopConnectorNow = activeSectionIds.includes("s2_top");
   const hideBottomConnectorNow = activeSectionIds.includes("s2_bottom");
@@ -53,8 +51,6 @@ export function SectionTwo({
     ELEVATED_RETURN_SYNC_MS,
   );
 
-  const hideTopLabel = hideTopConnector;
-  const hideBottomLabel = hideBottomConnector;
   const t = transforms;
   const edgeVerseBorderWidth = t.borderWidth;
 
@@ -89,24 +85,22 @@ export function SectionTwo({
       )}
 
       {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
-      {!isVerseHidden(data.introVerse.number) && (
-        <VerseBox
-          x={t.introVerse.x}
-          y={t.introVerse.y}
-          z={t.introVerse.z}
-          w={t.introVerse.w}
-          h={t.introVerse.h}
-          verse={data.introVerse.text}
-          number={data.introVerse.number}
-          bg={CAPSULE_BG_6_19}
-          border={BLUE_THEME}
-          circleBorderCol={BLUE_THEME}
-          circleBg={CAPSULE_BG_6_19}
-          circleTextCol={BLUE_THEME}
-          isPill={false}
-          borderWidth={edgeVerseBorderWidth}
-        />
-      )}
+      <VerseBox
+        x={t.introVerse.x}
+        y={t.introVerse.y}
+        z={t.introVerse.z}
+        w={t.introVerse.w}
+        h={t.introVerse.h}
+        verse={data.introVerse.text}
+        number={data.introVerse.number}
+        bg={CAPSULE_BG_6_19}
+        border={BLUE_THEME}
+        circleBorderCol={BLUE_THEME}
+        circleBg={CAPSULE_BG_6_19}
+        circleTextCol={BLUE_THEME}
+        isPill={false}
+        borderWidth={edgeVerseBorderWidth}
+      />
 
       {/* ─── VERSE GROUPS — mapped from pre-computed group transforms ─────── */}
       {data.colorGroups.map((group, index) => (
@@ -114,30 +108,27 @@ export function SectionTwo({
           key={index}
           group={group}
           groupTransform={t.groups[index]}
-          isVerseHidden={(id) => isVerseHidden(id)}
           groupIndex={index}
         />
       ))}
 
       {/* ─── OUTRO VERSE (verse 19) ──────────────────────────────────────── */}
-      {!isVerseHidden(data.outroVerse.number) && (
-        <VerseBox
-          x={t.outroVerse.x}
-          y={t.outroVerse.y}
-          z={t.outroVerse.z}
-          w={t.outroVerse.w}
-          h={t.outroVerse.h}
-          verse={data.outroVerse.text}
-          number={data.outroVerse.number}
-          bg={CAPSULE_BG_6_19}
-          border={BLUE_THEME}
-          circleBorderCol={BLUE_THEME}
-          circleBg={CAPSULE_BG_6_19}
-          circleTextCol={BLUE_THEME}
-          isPill={false}
-          borderWidth={edgeVerseBorderWidth}
-        />
-      )}
+      <VerseBox
+        x={t.outroVerse.x}
+        y={t.outroVerse.y}
+        z={t.outroVerse.z}
+        w={t.outroVerse.w}
+        h={t.outroVerse.h}
+        verse={data.outroVerse.text}
+        number={data.outroVerse.number}
+        bg={CAPSULE_BG_6_19}
+        border={BLUE_THEME}
+        circleBorderCol={BLUE_THEME}
+        circleBg={CAPSULE_BG_6_19}
+        circleTextCol={BLUE_THEME}
+        isPill={false}
+        borderWidth={edgeVerseBorderWidth}
+      />
 
       {/* ─── SIDE CURVES (still read raw layout math) ────────────────────── */}
       <SideCurves
@@ -147,35 +138,25 @@ export function SectionTwo({
       />
 
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
-      {!hideTopLabel && (
-        <TopLabel
-          x={PW / 2}
-          y={t.topLabelPinY}
-          z={0.004}
-          text={data.topLabel}
-          animateOnScroll={true}
-          scrollStart={0.55}
-          scrollRange={0.18}
-          partialBorder={true}
-          bgColor={S2_TOP_LABEL_BG}
-          borderColor={S2_TOP_LABEL_BORDER}
-        />
-      )}
-      {!hideBottomLabel && (
-        <TopLabel
-          x={PW / 2}
-          y={t.bottomLabelPinY}
-          z={0.004}
-          text={data.bottomLabel}
-          animateOnScroll={true}
-          scrollStart={0.55}
-          scrollRange={0.18}
-          partialBorder={true}
-          bottomBorder={true}
-          bgColor={S2_TOP_LABEL_BG}
-          borderColor={S2_TOP_LABEL_BORDER}
-        />
-      )}
+      <TopLabel
+        x={PW / 2}
+        y={t.topLabelPinY}
+        z={0.004}
+        text={data.topLabel}
+        partialBorder={true}
+        bgColor={S2_TOP_LABEL_BG}
+        borderColor={S2_TOP_LABEL_BORDER}
+      />
+      <TopLabel
+        x={PW / 2}
+        y={t.bottomLabelPinY}
+        z={0.004}
+        text={data.bottomLabel}
+        partialBorder={true}
+        bottomBorder={true}
+        bgColor={S2_TOP_LABEL_BG}
+        borderColor={S2_TOP_LABEL_BORDER}
+      />
     </group>
   );
 }

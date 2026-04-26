@@ -1,6 +1,5 @@
 "use client";
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
-import { useDelayedVerseVisibility } from "../shared/useDelayedVerseVisibility";
 import { useDelayedHidden } from "../shared/useDelayedHidden";
 import {
   ELEVATED_RETURN_SYNC_MS,
@@ -42,7 +41,6 @@ export function SectionOne({
   const neon = S1_NEON_CONFIG;
   const frameRadius = 0.02;
   const topLabelCutoutW = neon.topLabelGapWidth + neon.topLabelGapPadding * 2;
-  const isVerseHidden = useDelayedVerseVisibility();
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const hideSectionSurfaceNow = activeSectionIds.includes("s1");
   const hideSectionSurface = useDelayedHidden(
@@ -161,7 +159,6 @@ export function SectionOne({
 
       {/* 2×2 verse grid — positions come from the engine, no math here */}
       {data.gridVerses.map((v) => {
-        if (isVerseHidden(v.number)) return null;
         const vt = t.verses[v.number];
 
         return (
@@ -185,25 +182,22 @@ export function SectionOne({
       })}
 
       {/* AnaAyet — y offset absorbed by LayoutEngine, no wrapper group needed */}
-      {/* Hidden to allow MetallicVerseFive (PopUpManager) to render in its place */}
-      {data.anaAyet.number !== 5 && !isVerseHidden(data.anaAyet.number) && (
-        <VerseBox
-          x={t.anaAyet.x}
-          y={t.anaAyet.y}
-          z={t.anaAyet.z}
-          w={t.anaAyet.w}
-          h={t.anaAyet.h}
-          verse={data.anaAyet.text}
-          number={data.anaAyet.number}
-          bg={S1_ANA_BG}
-          border={CAPSULE_BG_5}
-          circleBorderCol={CAPSULE_BG_5}
-          circleBg={S1_ANA_BG}
-          circleTextCol={CAPSULE_BG_5}
-          isPill={false}
-        />
-      )}
-      {!hideSectionSurface && data.anaAyet.number !== 5 && (
+      <VerseBox
+        x={t.anaAyet.x}
+        y={t.anaAyet.y}
+        z={t.anaAyet.z}
+        w={t.anaAyet.w}
+        h={t.anaAyet.h}
+        verse={data.anaAyet.text}
+        number={data.anaAyet.number}
+        bg={S1_ANA_BG}
+        border={CAPSULE_BG_5}
+        circleBorderCol={CAPSULE_BG_5}
+        circleBg={S1_ANA_BG}
+        circleTextCol={CAPSULE_BG_5}
+        isPill={false}
+      />
+      {!hideSectionSurface && (
         <AnaAyetTab
           x={t.anaAyetTabX}
           y={t.anaAyetTabY}

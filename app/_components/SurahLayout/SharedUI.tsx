@@ -1,9 +1,8 @@
 "use client";
 
-import { Text, useScroll, useTexture } from "@react-three/drei";
+import { Text, useTexture } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
 import {
   WHITE_BASE,
   SHADOW_BLACK,
@@ -272,9 +271,6 @@ interface TopLabelProps {
   z?: number;
   text: string;
   labelWidth?: number;
-  animateOnScroll?: boolean;
-  scrollStart?: number;
-  scrollRange?: number;
   partialBorder?: boolean;
   borderColor?: string;
   bottomBorder?: boolean;
@@ -289,9 +285,6 @@ export function TopLabel({
   z = 0,
   text,
   labelWidth = TOP_LABEL_WIDTH,
-  animateOnScroll = false,
-  scrollStart = 0.4,
-  scrollRange = 0.15,
   partialBorder = false,
   borderColor = HOLLOW_BORDER_COLOR,
   bottomBorder = false,
@@ -307,58 +300,6 @@ export function TopLabel({
   const radius = h / 2;
 
   const groupRef = useRef<THREE.Group>(null);
-  const scroll = useScroll();
-
-  useFrame(() => {
-    if (animateOnScroll && scroll && groupRef.current) {
-      let targetOpacity = 0;
-      if (scroll.offset > scrollStart) {
-        targetOpacity = Math.min(
-          (scroll.offset - scrollStart) / scrollRange,
-          1,
-        );
-      }
-
-      groupRef.current.traverse((child: THREE.Object3D) => {
-        const node = child as THREE.Object3D & {
-          isMesh?: boolean;
-          text?: string;
-          material?: THREE.Material & {
-            color?: THREE.Color;
-            fillOpacity?: number;
-            opacity?: number;
-            transparent?: boolean;
-          };
-        };
-
-        if (node.isMesh || node.text !== undefined) {
-          const mat = node.material;
-          node.visible = targetOpacity > 0;
-
-          if (mat && targetOpacity > 0) {
-            const isBlackShadow =
-              mat.color &&
-              mat.color.getHexString &&
-              mat.color.getHexString() === "000000";
-
-            if (node.text !== undefined || mat.fillOpacity !== undefined) {
-              mat.fillOpacity = targetOpacity;
-              mat.opacity = targetOpacity;
-            } else {
-              if (!isBlackShadow) {
-                mat.transparent = targetOpacity < 1;
-                mat.opacity = targetOpacity;
-              } else {
-                mat.transparent = true;
-                mat.opacity = targetOpacity * 0.12;
-              }
-            }
-          }
-        }
-      });
-    }
-  });
-
   const borderThickness = 0.004;
 
   return (
@@ -414,13 +355,7 @@ interface AnaAyetTabProps {
   h: number;
   z: number;
 }
-export function AnaAyetTab({
-  x,
-  y,
-  w,
-  h,
-  z,
-}: AnaAyetTabProps) {
+export function AnaAyetTab({ x, y, w, h, z }: AnaAyetTabProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
@@ -472,7 +407,7 @@ interface VerseBoxProps {
   shadow?: boolean;
   bgOpacity?: number;
   textColor?: string;
-  /** Capsule verse text enter fade; 0 avoids dim stack with pop-up RenderTexture. */
+  /** 0 avoids capturing invisible text inside finite-frame RenderTextures. */
   verseTextEnterDurationMs?: number;
 }
 export const VerseBox = ({
@@ -493,7 +428,7 @@ export const VerseBox = ({
   shadow = true,
   bgOpacity = 1,
   textColor,
-  verseTextEnterDurationMs,
+  verseTextEnterDurationMs = 0,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";

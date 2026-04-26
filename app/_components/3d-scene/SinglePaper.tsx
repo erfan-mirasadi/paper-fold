@@ -5,7 +5,7 @@ import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
 } from "../SurahLayout/index";
-import { getFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
+import { writeFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { useEffect, useMemo, useRef } from "react";
@@ -95,6 +95,8 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
 }) => {
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
+  const foldAnglesRef = useRef(new Float32Array(FOLD_Y_POSITIONS.length));
+  const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
   const scroll = useScroll();
 
   // Audio Setup
@@ -161,10 +163,13 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
       }
     }
 
-    const targetFoldAngles = getFoldAnglesForScroll(paperProgress);
-    const foldContributions = new Float32Array(bones.length);
+    const targetFoldAngles = foldAnglesRef.current;
+    const foldContributions = foldContributionsRef.current;
+    writeFoldAnglesForScroll(paperProgress, targetFoldAngles);
+    foldContributions.fill(0, 0, bones.length);
 
-    targetFoldAngles.forEach((totalAngle, foldIdx) => {
+    for (let foldIdx = 0; foldIdx < targetFoldAngles.length; foldIdx++) {
+      const totalAngle = targetFoldAngles[foldIdx];
       const rawBonePos = foldBonePositions[foldIdx];
       const lowerBone = Math.floor(rawBonePos);
       const upperBone = Math.min(lowerBone + 1, bones.length - 1);
@@ -172,7 +177,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
 
       foldContributions[lowerBone] += totalAngle * (1 - blendToUpper);
       foldContributions[upperBone] += totalAngle * blendToUpper;
-    });
+    }
 
     for (let i = 0; i < bones.length; i++) {
       const target = i === 0 ? group.current : bones[i];

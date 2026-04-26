@@ -22,7 +22,7 @@ import {
   // QURAN_FONT,
 } from "../data/theme";
 
-export { PAGE_WIDTH, PAGE_HEIGHT, PW, layoutMath };
+export { PAGE_WIDTH, PAGE_HEIGHT, PW, layoutMath, SURAH_TRANSFORMS };
 export { FOLD_Y_POSITIONS } from "../data/SurahConfig";
 export { SurahLayout, SurahLayout as PaperContent };
 

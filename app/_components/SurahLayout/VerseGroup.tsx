@@ -22,14 +22,12 @@ import {
 interface VerseGroupProps {
   group: ColorGroup;
   groupTransform: GroupTransforms;
-  isVerseHidden: (verseId: number) => boolean;
   groupIndex?: number;
 }
 
 export function VerseGroup({
   group,
   groupTransform,
-  isVerseHidden,
   groupIndex = 0,
 }: VerseGroupProps) {
   const gt = groupTransform;
@@ -78,8 +76,6 @@ export function VerseGroup({
 
       {/* 2×2 verse grid — position comes from the engine, no math here */}
       {group.verses.map((v) => {
-        if (isVerseHidden(v.number)) return null;
-
         const vt = gt.verses[v.number];
         if (!vt) return null;
 
@@ -87,8 +83,8 @@ export function VerseGroup({
         const finalBg =
           v.number >= 11 && v.number <= 14
             ? CAPSULE_BG_12_14
-            : (group.verseBg ??
-              (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_10_15_18));
+            : group.verseBg ??
+              (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_10_15_18);
 
         return (
           <VerseBox

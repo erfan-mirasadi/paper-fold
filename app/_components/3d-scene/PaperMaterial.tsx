@@ -21,6 +21,9 @@ import {
   SRGBColorSpace,
   Vector2,
 } from "three";
+import { usePaperMasking } from "./usePaperMasking";
+import { useSurahLanguageStore } from "../data/useSurahLanguageStore";
+import { LATIN_VERSE_FONT, QURAN_FONT } from "../data/theme";
 
 const CREASE_BAND_HEIGHT = 0.03;
 const CREASE_NORMAL_OPACITY = 2;
@@ -28,8 +31,41 @@ const PAPER_NORMAL_OPACITY = 2;
 const paperBaseColor = new Color("#f2f0e6");
 const RENDER_TEX_WIDTH = 1200;
 const RENDER_TEX_HEIGHT = 1700;
+const PAGE_TEXTURE_SETTLE_FRAMES = 30;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
+const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
+
+async function preloadFontUrl(fontUrl: string) {
+  if (typeof FontFace === "undefined") {
+    await fetch(fontUrl);
+    return;
+  }
+
+  const fontFace = new FontFace(`paper-text-${fontUrl}`, `url(${fontUrl})`);
+  await fontFace.load();
+  document.fonts.add(fontFace);
+}
+
+function usePageTextFontsReady() {
+  const [fontsReady, setFontsReady] = React.useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    Promise.all(PAGE_TEXT_FONTS.map(preloadFontUrl))
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setFontsReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return fontsReady;
+}
 
 export const PAPER_TEXTURES = {
   normalUrl: "/Paper-Texture-7_normal.png",
@@ -68,11 +104,19 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   toggles,
   isFolded = false,
 }) => {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const fontsReady = usePageTextFontsReady();
   const normalScale = toggles.normal
     ? NORMAL_SCALE_ENABLED
     : NORMAL_SCALE_DISABLED;
+  const renderTextureKey = [
+    activeLanguage,
+    fontsReady ? "fonts-ready" : "fonts-loading",
+    isFolded ? "folded" : "flat",
+    toggles.diffuse ? "diffuse" : "flat-color",
+  ].join("-");
 
-  // Load texture maps
+  // Load texture maps at the top to ensure they are available for uniforms
   const creaseNormalMap = useTexture("/crease-normal-1.png", (texture) => {
     texture.colorSpace = NoColorSpace;
     texture.wrapS = RepeatWrapping;
@@ -85,16 +129,13 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     texture.needsUpdate = true;
   });
 
-  const paperTextureNormal = useTexture(
-    PAPER_TEXTURES.normalUrl,
-    (texture) => {
-      texture.colorSpace = NoColorSpace;
-      texture.wrapS = RepeatWrapping;
-      texture.wrapT = RepeatWrapping;
-      texture.repeat.set(1, 1);
-      texture.needsUpdate = true;
-    },
-  );
+  const paperTextureNormal = useTexture(PAPER_TEXTURES.normalUrl, (texture) => {
+    texture.colorSpace = NoColorSpace;
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
+    texture.repeat.set(1, 1);
+    texture.needsUpdate = true;
+  });
 
   const paperTextureDiffuse = useTexture(
     PAPER_TEXTURES.diffuseUrl,
@@ -107,17 +148,22 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     },
   );
 
+  const { onBeforeCompile } = usePaperMasking(paperTextureDiffuse);
+
   return (
     <meshStandardMaterial
       attach="material-4"
       {...PAPER_MATERIAL_CONFIG}
       normalScale={normalScale}
+      onBeforeCompile={onBeforeCompile}
     >
       {/* MAP: The safe way without breaking SurahLayout's default camera */}
       <RenderTexture
+        key={renderTextureKey}
         attach="map"
         width={RENDER_TEX_WIDTH}
         height={RENDER_TEX_HEIGHT}
+        frames={PAGE_TEXTURE_SETTLE_FRAMES}
       >
         <color attach="background" args={["#f2f0e6"]} />
 
@@ -132,8 +178,7 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
           </mesh>
         )}
 
-        {/* We keep PaperContent completely untouched */}
-        <PaperContent isFolded={isFolded} />
+        {fontsReady && <PaperContent isFolded={isFolded} />}
       </RenderTexture>
 
       {/* NORMAL MAP */}

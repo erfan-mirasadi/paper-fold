@@ -11,7 +11,7 @@ import {
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
 } from "../data/theme";
-import { AnimatedArrow } from "./AnimatedArrow";
+// import { AnimatedArrow } from "./AnimatedArrow";
 import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
@@ -195,7 +195,7 @@ const CurvePair = ({
       </mesh>
 
       {/* Two staggered animated arrows per bracket for a layered look */}
-      <AnimatedArrow
+      {/* <AnimatedArrow
         outerTipX={outerTipX}
         innerTipX={innerTipX}
         outerYTop={outerYTop}
@@ -228,7 +228,7 @@ const CurvePair = ({
         floatIntensity={0.0009}
         glowSize={2}
         shouldHide={shouldHide}
-      />
+      /> */}
     </group>
   );
 };

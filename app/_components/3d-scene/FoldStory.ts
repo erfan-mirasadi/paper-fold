@@ -119,6 +119,15 @@ const foldStateToAngle = (state: FoldState) =>
   state.direction * state.angleFactor * FOLDED_ANGLE;
 
 export const getFoldAnglesForScroll = (offset: number): number[] => {
+  const angles = new Array<number>(FOLD_STORY_STEPS[0].folds.length);
+  writeFoldAnglesForScroll(offset, angles);
+  return angles;
+};
+
+export const writeFoldAnglesForScroll = (
+  offset: number,
+  target: { [index: number]: number; length: number },
+) => {
   const maxStageIndex = FOLD_STORY_STEPS.length - 1;
   const clampedOffset = MathUtils.clamp(offset, 0, 1);
   const rawStage = clampedOffset * maxStageIndex;
@@ -137,13 +146,18 @@ export const getFoldAnglesForScroll = (offset: number): number[] => {
     easedT = 1;
   }
 
-  return FOLD_STORY_STEPS[fromIndex].folds.map((fromFold, foldIndex) => {
+  for (
+    let foldIndex = 0;
+    foldIndex < FOLD_STORY_STEPS[fromIndex].folds.length;
+    foldIndex++
+  ) {
+    const fromFold = FOLD_STORY_STEPS[fromIndex].folds[foldIndex];
     const toFold = FOLD_STORY_STEPS[toIndex].folds[foldIndex];
     const fromAngle = foldStateToAngle(fromFold);
     const toAngle = foldStateToAngle(toFold);
 
-    return MathUtils.lerp(fromAngle, toAngle, easedT);
-  });
+    target[foldIndex] = MathUtils.lerp(fromAngle, toAngle, easedT);
+  }
 };
 
 export const getOffsetForId = (id: string): number => {

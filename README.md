@@ -36,7 +36,6 @@ In short: texture is not static image mapping, it is a live-rendered scene proje
 ### 2) Dynamic and Animated Texture Pipeline
 
 - Real-time color texture from Surah layout (`RenderTexture`).
-- Separate bump pass for embossed UI/verse surfaces.
 - Separate normal pass combining paper normal texture and crease bands.
 - Texture visibility timing is synchronized with pop-up and elevate animations.
 - Animated texture refresh is used in interactive cards (`frames={2}` and `frames={Infinity}` where needed).
