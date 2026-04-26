@@ -1,24 +1,24 @@
-// app/page.tsx
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { ScrollControls } from "@react-three/drei";
+import { Preload, ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
-import { Suspense, useState } from "react";
-import * as THREE from "three"; // We need this uncommented for the gl config
-import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
+import { Suspense, useCallback, useState } from "react";
+import * as THREE from "three";
 import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
-import {
-  VerseNeonTracker,
-  VerseNeonHTMLOverlay,
-} from "./_components/features/camera-zoom/VerseNeonOverlay";
+// VerseNeonOverlay is currently fully commented out (not a module).
+// import {
+//   VerseNeonTracker,
+//   VerseNeonHTMLOverlay,
+// } from "./_components/features/camera-zoom/VerseNeonOverlay";
 // import Effects from "./_components/3d-scene/Effects";
 import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
 import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
 import { LanguageSwitchOverlay } from "./_components/ui-overlay/LanguageSwitchOverlay";
 import { AllSectionsOverlay } from "./_components/ui-overlay/AllSectionsOverlay";
+import { SiteLoadingOverlay } from "./_components/ui-overlay/SiteLoadingOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
 import { CameraViewController } from "./_components/features/camera-views/CameraViewController";
 import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
@@ -30,6 +30,7 @@ const Experience = dynamic(
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSceneReady, setIsSceneReady] = useState(false);
   // const [glitchKey, setGlitchKey] = useState(0);
   const bgColor = isDarkMode ? "#000000" : "#ffffff";
 
@@ -37,6 +38,10 @@ export default function Home() {
     setIsDarkMode((prev) => !prev);
     // setGlitchKey((prev) => prev + 1);
   };
+
+  const handleSceneReady = useCallback(() => {
+    setIsSceneReady(true);
+  }, []);
 
   return (
     <main
@@ -48,46 +53,44 @@ export default function Home() {
         transition: "background-color 0.5s ease",
       }}
     >
-      <Suspense
-        fallback={
-          <div
-            style={{ color: isDarkMode ? "white" : "black", padding: "20px" }}
-          >
-            Loading 3D...
-          </div>
-        }
-      >
-        <div style={{ width: "100vw", height: "100vh" }}>
+      <Suspense fallback={<SiteLoadingOverlay isDarkMode={isDarkMode} />}>
+        <div
+          style={{
+            width: "100vw",
+            height: "100vh",
+            opacity: isSceneReady ? 1 : 0,
+            transition: "opacity 0.45s ease",
+          }}
+        >
           <Canvas
-            // Force minimum DPR of 1.5 for Windows laptops to ensure high-res text
-            dpr={[1.5, 2]}
             camera={{
               position: CAMERA_CONFIG.initialCamera.position,
               fov: CAMERA_CONFIG.initialCamera.fov,
             }}
-            // Enable antialias and proper color spaces for the best text rendering
-            // gl={{
-            //   antialias: true,
-            //   powerPreference: "high-performance",
-            //   toneMapping: THREE.NoToneMapping,
-            //   outputColorSpace: THREE.SRGBColorSpace,
-            // }}
+            gl={{
+              antialias: true,
+              powerPreference: "high-performance",
+              toneMapping: THREE.NoToneMapping,
+              outputColorSpace: THREE.SRGBColorSpace,
+            }}
           >
             <color attach="background" args={[bgColor]} />
             {/* <Effects glitchTrigger={glitchKey} /> */}
             <ScrollControls pages={2} damping={0.28}>
               <ScrollManager />
               <PopUpHoverScrollController />
-              <Experience isDarkMode={isDarkMode} />
+              <Experience isDarkMode={isDarkMode} onReady={handleSceneReady} />
             </ScrollControls>
-            <VerseNeonTracker />
+            {/* <VerseNeonTracker /> */}
             <CameraViewController />
+            <Preload all />
           </Canvas>
         </div>
       </Suspense>
+      {!isSceneReady && <SiteLoadingOverlay isDarkMode={isDarkMode} />}
       <CameraResetOverlay />
-      <PopUpUI isDarkMode={isDarkMode} />
-      <VerseNeonHTMLOverlay />
+      {/* PopUpUI removed: hover/scroll flow doesn't need DOM anchors */}
+      {/* <VerseNeonHTMLOverlay /> */}
       <NavigationOverlay isDarkMode={isDarkMode} />
       <AllSectionsOverlay isDarkMode={isDarkMode} />
       <LanguageSwitchOverlay isDarkMode={isDarkMode} />

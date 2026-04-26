@@ -1,6 +1,5 @@
-// app/_components/3d-scene/PaperMaterial.tsx
 "use client";
-import React, { useRef } from "react";
+import { memo, useEffect, useRef, useState, type FC } from "react";
 import {
   OrthographicCamera,
   RenderTexture,
@@ -27,12 +26,12 @@ import {
 } from "three";
 import { usePaperMasking } from "./usePaperMasking";
 import { useSurahLanguageStore } from "../data/useSurahLanguageStore";
-import { LATIN_VERSE_FONT, QURAN_FONT } from "../data/theme";
+import { LATIN_VERSE_FONT, PAGE_BG_COLOR, QURAN_FONT } from "../data/theme";
 
 const CREASE_BAND_HEIGHT = 0.03;
 const CREASE_NORMAL_OPACITY = 2;
 const PAPER_NORMAL_OPACITY = 2;
-const paperBaseColor = new Color("#f2f0e6");
+const paperBaseColor = new Color(PAGE_BG_COLOR);
 
 // HARDCODED HIGH-RES: Bypass DPR issues entirely by forcing a massive 2x resolution.
 // This guarantees ultra-crisp SDF generation and layout rendering on Windows.
@@ -40,8 +39,9 @@ const QUALITY_MULTIPLIER = 2;
 const RENDER_TEX_WIDTH = 1200 * QUALITY_MULTIPLIER; // 2400
 const RENDER_TEX_HEIGHT = 1700 * QUALITY_MULTIPLIER; // 3400
 
-const TEXTURE_SETTLE_DELAY_MS = 2000;
-const TEXTURE_CAPTURE_FRAMES = 8;
+const TEXTURE_SETTLE_DELAY_MS = 1200;
+const TEXTURE_READY_DELAY_MS = 600;
+const TEXTURE_CAPTURE_FRAMES = 4;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
 const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
@@ -58,9 +58,9 @@ async function preloadFontUrl(fontUrl: string) {
 }
 
 function usePageTextFontsReady() {
-  const [fontsReady, setFontsReady] = React.useState(false);
+  const [fontsReady, setFontsReady] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let cancelled = false;
 
     Promise.all(PAGE_TEXT_FONTS.map(preloadFontUrl))
@@ -99,6 +99,7 @@ export interface TextureToggles {
 interface PaperMaterialProps {
   toggles: TextureToggles;
   isFolded?: boolean;
+  onReady?: () => void;
 }
 
 function areTogglesEqual(a: TextureToggles, b: TextureToggles): boolean {
@@ -110,9 +111,10 @@ function areTogglesEqual(a: TextureToggles, b: TextureToggles): boolean {
   );
 }
 
-const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
+const PaperMaterialComponent: FC<PaperMaterialProps> = ({
   toggles,
   isFolded = false,
+  onReady,
 }) => {
   const { gl } = useThree();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
@@ -127,21 +129,25 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     toggles.diffuse ? "diffuse" : "flat-color",
   ].join("-");
 
-  const [settled, setSettled] = React.useState(false);
+  const [settledKey, setSettledKey] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    setSettled(false);
+  useEffect(() => {
     if (!fontsReady) return;
-    const t = setTimeout(() => setSettled(true), TEXTURE_SETTLE_DELAY_MS);
+    const t = setTimeout(
+      () => setSettledKey(renderTextureKey),
+      TEXTURE_SETTLE_DELAY_MS,
+    );
     return () => clearTimeout(t);
-  }, [renderTextureKey]);
+  }, [fontsReady, renderTextureKey]);
+
+  const settled = fontsReady && settledKey === renderTextureKey;
 
   const mapKey = settled ? `${renderTextureKey}-settled` : renderTextureKey;
   const mapFrames = settled ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
 
   const matRef = useRef<MeshStandardMaterial>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!settled) return;
     const t = setTimeout(() => {
       const map = matRef.current?.map;
@@ -153,6 +159,18 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     }, 300);
     return () => clearTimeout(t);
   }, [settled, gl]);
+
+  useEffect(() => {
+    if (!settled || !onReady) return;
+
+    const t = window.setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(onReady);
+      });
+    }, TEXTURE_READY_DELAY_MS);
+
+    return () => window.clearTimeout(t);
+  }, [settled, onReady]);
 
   const creaseNormalMap = useTexture("/crease-normal-1.png", (texture) => {
     texture.colorSpace = NoColorSpace;
@@ -201,9 +219,9 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
         width={RENDER_TEX_WIDTH}
         height={RENDER_TEX_HEIGHT}
         frames={mapFrames}
-        samples={8}
+        samples={4}
       >
-        <color attach="background" args={["#f2f0e6"]} />
+        <color attach="background" args={[PAGE_BG_COLOR]} />
 
         {/* CRITICAL FIX: OrthographicCamera ensures Troika Text calculates SDF size correctly 
             and prevents perspective distortion on low DPR devices. */}
@@ -236,7 +254,7 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
           width={RENDER_TEX_WIDTH}
           height={RENDER_TEX_HEIGHT}
           frames={1}
-          samples={4}
+          samples={2}
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera
@@ -334,9 +352,10 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   );
 };
 
-export const PaperMaterial = React.memo(
+export const PaperMaterial = memo(
   PaperMaterialComponent,
   (prevProps, nextProps) =>
     prevProps.isFolded === nextProps.isFolded &&
+    prevProps.onReady === nextProps.onReady &&
     areTogglesEqual(prevProps.toggles, nextProps.toggles),
 );

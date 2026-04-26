@@ -7,7 +7,7 @@ import {
   ZOOM_DISTANCE,
   CAMERA_LERP_SPEED,
   CAMERA_RESET_LERP_SPEED,
-} from "../features/camera-zoom/useCameraStore";
+} from "./useCameraStore";
 
 export const EDGE_THRESHOLD = 0.65;
 export const EDGE_PAN_SPEED = 0.005;
@@ -87,8 +87,7 @@ const computeClampedZoomDestination = (
   _spherical.makeSafe();
 
   orbitOffset.setFromSpherical(_spherical);
-  if (controls?._quatInverse)
-    orbitOffset.applyQuaternion(controls._quatInverse);
+  if (controls?._quatInverse) orbitOffset.applyQuaternion(controls._quatInverse);
 
   outPosition.copy(lookAt).add(orbitOffset);
 };
@@ -265,3 +264,4 @@ export function CameraManager() {
 
   return null;
 }
+

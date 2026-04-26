@@ -86,12 +86,14 @@ interface SinglePaperProps {
   isFolded?: boolean;
   isDarkMode?: boolean;
   toggles?: TextureToggles;
+  onReady?: () => void;
 }
 
 export const SinglePaper: React.FC<SinglePaperProps> = ({
   isFolded = false,
   isDarkMode = false,
   toggles = { diffuse: true, normal: true, roughness: false, ao: false },
+  onReady,
 }) => {
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
@@ -190,7 +192,11 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     <group ref={group} position={[0, PAGE_HEIGHT / 2, 0]}>
       <primitive object={manualSkinnedMesh} ref={skinnedMeshRef}>
         {/* The abstracted material component is injected here */}
-        <PaperMaterial toggles={toggles} isFolded={isFolded} />
+        <PaperMaterial
+          toggles={toggles}
+          isFolded={isFolded}
+          onReady={onReady}
+        />
       </primitive>
 
       <BismillahFloatingText3D

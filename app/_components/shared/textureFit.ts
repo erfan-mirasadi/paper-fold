@@ -7,20 +7,10 @@ import {
 } from "three";
 
 export type TextureTransform = {
-  /**
-   * UV offset (RepeatWrapping).
-   * Units are UV (0..1). You can use values outside 0..1 too; it will wrap.
-   * Positive x shifts pattern to the right. Positive y shifts pattern upward.
-   */
   offset?: { x?: number; y?: number };
-  /** No mipmaps + linear min: stable brightness on 3D decals when distance changes. */
   stableSampling?: boolean;
 };
 
-/**
- * Creates a repeating pattern texture with custom scale.
- * Removes the need for manual canvas blur, utilizing Three.js native mipmaps.
- */
 export function cloneTextureAsAspectCover(
   source: Texture,
   surfaceWidth: number,
@@ -30,11 +20,7 @@ export function cloneTextureAsAspectCover(
 ): Texture {
   // Clone the texture so each surface can have independent repeats
   const texture = source.clone();
-
-  // Apply standard color space
   texture.colorSpace = SRGBColorSpace;
-
-  // Use RepeatWrapping for patterns instead of ClampToEdgeWrapping
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
 

@@ -15,7 +15,6 @@ import {
   getVerseSectionId,
   useDragState,
 } from "../elevated-verses/drag/dragEngine";
-import { PopUp3DTracker } from "./ui/PopUp3DTracker";
 import { VerseFiveMetallic } from "./VerseFiveMetallic";
 import { PopUpHoverSensors } from "./hover-scroll/PopUpHoverSensors";
 import {
@@ -335,43 +334,11 @@ export function PopUpManager() {
         );
       })}
 
-      {/* Render 3D Trackers for each group at the correct positions */}
-      {groups.map((g) => {
-        const versesInGroup = verseConfigs.filter((c) =>
-          g.verseIds.includes(c.id),
-        );
-        if (!versesInGroup.length) return null;
-
-        const [btnX, centerY] = getPopUpTrackerPosition(versesInGroup);
-
-        // Determine specific scroll threshold mapping. Default 0 if missing.
-        const threshold = VISIBILITY_THRESHOLDS[g.id] ?? 0;
-
-        return (
-          <PopUp3DTracker
-            key={`tracker-${g.id}`}
-            id={g.id}
-            worldPosition={[btnX, centerY, zBaseOffset]}
-            scrollThreshold={threshold}
-          />
-        );
-      })}
-
       <PopUpHoverSensors
         groups={groups}
         versesConfig={verseConfigs}
         zBaseOffset={zBaseOffset}
         setHoveredGroupId={setHoveredGroupId}
-      />
-
-      {/* Global button anchor at top center of the paper */}
-      <PopUp3DTracker
-        id="global"
-        worldPosition={[
-          ...getPopUpTrackerPosition([], true, s1Top),
-          zBaseOffset,
-        ]}
-        scrollThreshold={0.9}
       />
 
       {/* Static Metallic Verse 5 */}

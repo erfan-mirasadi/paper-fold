@@ -1,6 +1,6 @@
 export const WHITE_BASE = "#ffffff";
 export const SHADOW_BLACK = "#000000";
-export const TEXT_DARK = "#1a1a1a";
+export const TEXT_DARK = "#000000";
 export const TEXT_LABEL = "#4a423a";
 
 // ----------------------------------------------------------------------------

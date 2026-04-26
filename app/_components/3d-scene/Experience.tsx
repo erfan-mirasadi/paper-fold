@@ -19,6 +19,7 @@ import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
 interface ExperienceProps {
   isFolded?: boolean;
   isDarkMode?: boolean;
+  onReady?: () => void;
 }
 
 //variables when elevated verse is draged and paper is docked
@@ -33,6 +34,7 @@ const PAPER_RESTORE_SPRING = { mass: 1.1, tension: 150, friction: 28 };
 export function Experience({
   isFolded = false,
   isDarkMode = false,
+  onReady,
 }: ExperienceProps) {
   const isPaperMoving = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
@@ -80,7 +82,11 @@ export function Experience({
           scale-y={paperFocusScale}
           scale-z={paperFocusScale}
         >
-          <SinglePaper isFolded={isFolded} isDarkMode={isDarkMode} />
+          <SinglePaper
+            isFolded={isFolded}
+            isDarkMode={isDarkMode}
+            onReady={onReady}
+          />
         </a.group>
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels />
