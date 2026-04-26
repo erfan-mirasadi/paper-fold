@@ -1,10 +1,11 @@
 "use client";
-import React from "react";
+import React, { useRef, useMemo } from "react";
 import {
   OrthographicCamera,
   RenderTexture,
   useTexture,
 } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import {
   FOLD_Y_POSITIONS,
   SurahLayout as PaperContent,
@@ -16,6 +17,8 @@ import {
   ClampToEdgeWrapping,
   Color,
   LinearFilter,
+  LinearMipmapLinearFilter,
+  MeshStandardMaterial,
   NoColorSpace,
   RepeatWrapping,
   SRGBColorSpace,
@@ -29,9 +32,13 @@ const CREASE_BAND_HEIGHT = 0.03;
 const CREASE_NORMAL_OPACITY = 2;
 const PAPER_NORMAL_OPACITY = 2;
 const paperBaseColor = new Color("#f2f0e6");
-const RENDER_TEX_WIDTH = 1200;
-const RENDER_TEX_HEIGHT = 1700;
-const PAGE_TEXTURE_SETTLE_FRAMES = 30;
+
+// Base texture dims — scaled up by DPR at runtime
+const BASE_RENDER_TEX_WIDTH = 1200;
+const BASE_RENDER_TEX_HEIGHT = 1700;
+
+const TEXTURE_SETTLE_DELAY_MS = 2000;
+const TEXTURE_CAPTURE_FRAMES = 8;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
 const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
@@ -104,6 +111,7 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
   toggles,
   isFolded = false,
 }) => {
+  const { gl } = useThree();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
   const normalScale = toggles.normal
@@ -116,7 +124,42 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     toggles.diffuse ? "diffuse" : "flat-color",
   ].join("-");
 
-  // Load texture maps at the top to ensure they are available for uniforms
+  // Dynamic scaling based on Device Pixel Ratio to fix blurriness
+  const [texW, texH] = useMemo(() => {
+    const scale = Math.max(gl.getPixelRatio(), 1.5);
+    return [
+      Math.round(BASE_RENDER_TEX_WIDTH * scale),
+      Math.round(BASE_RENDER_TEX_HEIGHT * scale),
+    ];
+  }, [gl]);
+
+  const [settled, setSettled] = React.useState(false);
+
+  React.useEffect(() => {
+    setSettled(false);
+    if (!fontsReady) return;
+    const t = setTimeout(() => setSettled(true), TEXTURE_SETTLE_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [renderTextureKey]);
+
+  const mapKey = settled ? `${renderTextureKey}-settled` : renderTextureKey;
+  const mapFrames = settled ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
+
+  const matRef = useRef<MeshStandardMaterial>(null);
+
+  React.useEffect(() => {
+    if (!settled) return;
+    const t = setTimeout(() => {
+      const map = matRef.current?.map;
+      if (!map) return;
+      map.generateMipmaps = true;
+      map.minFilter = LinearMipmapLinearFilter;
+      map.anisotropy = gl.capabilities.getMaxAnisotropy();
+      map.needsUpdate = true;
+    }, 300);
+    return () => clearTimeout(t);
+  }, [settled, gl]);
+
   const creaseNormalMap = useTexture("/crease-normal-1.png", (texture) => {
     texture.colorSpace = NoColorSpace;
     texture.wrapS = RepeatWrapping;
@@ -152,18 +195,19 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
 
   return (
     <meshStandardMaterial
+      ref={matRef}
       attach="material-4"
       {...PAPER_MATERIAL_CONFIG}
       normalScale={normalScale}
       onBeforeCompile={onBeforeCompile}
     >
-      {/* MAP: The safe way without breaking SurahLayout's default camera */}
       <RenderTexture
-        key={renderTextureKey}
+        key={mapKey}
         attach="map"
-        width={RENDER_TEX_WIDTH}
-        height={RENDER_TEX_HEIGHT}
-        frames={PAGE_TEXTURE_SETTLE_FRAMES}
+        width={texW}
+        height={texH}
+        frames={mapFrames}
+        samples={8}
       >
         <color attach="background" args={["#f2f0e6"]} />
 
@@ -181,13 +225,13 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
         {fontsReady && <PaperContent isFolded={isFolded} />}
       </RenderTexture>
 
-      {/* NORMAL MAP */}
       {toggles.normal && (
         <RenderTexture
           attach="normalMap"
-          width={RENDER_TEX_WIDTH}
-          height={RENDER_TEX_HEIGHT}
+          width={BASE_RENDER_TEX_WIDTH}
+          height={BASE_RENDER_TEX_HEIGHT}
           frames={1}
+          samples={4}
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera
@@ -213,7 +257,6 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
             />
           </mesh>
 
-          {/* Crease lines directly in the normal map */}
           {FOLD_Y_POSITIONS.map((y, i) => (
             <mesh
               key={i}

@@ -340,6 +340,7 @@ export function TopLabel({
         fontWeight="bold"
         material-depthTest={false}
         renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+        sdfGlyphSize={128}
       >
         {text}
       </Text>
@@ -382,6 +383,7 @@ export function AnaAyetTab({ x, y, w, h, z }: AnaAyetTabProps) {
         anchorY="middle"
         fontWeight="bold"
         material-depthTest={false}
+        sdfGlyphSize={128}
       >
         {labelText}
       </Text>
@@ -525,6 +527,7 @@ export const VerseBox = ({
             fontWeight="bold"
             material-depthTest={false}
             renderOrder={13}
+            sdfGlyphSize={128}
           >
             {String(number)}
           </Text>

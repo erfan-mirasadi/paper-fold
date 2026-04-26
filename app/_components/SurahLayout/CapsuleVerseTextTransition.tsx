@@ -119,6 +119,7 @@ export function CapsuleVerseTextTransition({
         font={payload.font}
         direction={payload.direction}
         renderOrder={payload.renderOrder}
+        sdfGlyphSize={128}
       >
         {payload.verse}
       </AnimatedText>

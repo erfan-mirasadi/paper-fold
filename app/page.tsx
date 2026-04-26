@@ -1,10 +1,11 @@
+// app/page.tsx
 "use client";
 
 import { Canvas } from "@react-three/fiber";
 import { ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
-// import * as THREE from "three";
+import * as THREE from "three"; // We need this uncommented for the gl config
 import { PopUpUI } from "./_components/features/pop-up-verses/ui/PopUpUI";
 import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
@@ -58,13 +59,16 @@ export default function Home() {
       >
         <div style={{ width: "100vw", height: "100vh" }}>
           <Canvas
-            // flat
+            // Force minimum DPR of 1.5 for Windows laptops to ensure high-res text
+            dpr={[1.5, 2]}
             camera={{
               position: CAMERA_CONFIG.initialCamera.position,
               fov: CAMERA_CONFIG.initialCamera.fov,
             }}
+            // Enable antialias and proper color spaces for the best text rendering
             // gl={{
-            //   antialias: false,
+            //   antialias: true,
+            //   powerPreference: "high-performance",
             //   toneMapping: THREE.NoToneMapping,
             //   outputColorSpace: THREE.SRGBColorSpace,
             // }}
