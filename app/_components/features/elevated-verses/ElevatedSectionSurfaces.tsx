@@ -41,7 +41,7 @@ import { cloneTextureAsAspectCover } from "../../shared/textureFit";
  * the folded page panel.
  */
 const TEXTURE_FILL_TINT = new Color(PAPER_MATERIAL_CONFIG.color).multiplyScalar(
-  0.86,
+  1.3,
 );
 
 type SectionSpring = {
@@ -215,12 +215,7 @@ function ElevatedLayer({
             toneMapped={false}
           />
         ) : (
-          <meshBasicMaterial
-            color={color}
-            transparent
-            opacity={1}
-            toneMapped
-          />
+          <meshBasicMaterial color={color} transparent opacity={1} toneMapped />
         )}
       </a.mesh>
     </a.group>
