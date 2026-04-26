@@ -67,7 +67,7 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
 
   // Fluid placement/size: mobile + XL remain familiar; mid-sizes tighten up.
-  const rightOffset = "clamp(146px, 18vw, 214px)";
+  const rightOffset = "clamp(192px, 24vw, 240px)";
   const buttonW = "clamp(46px, 5.4vw, 54px)";
   const buttonH = "clamp(38px, 4.2vw, 44px)";
   const radius = "clamp(12px, 1.4vw, 14px)";

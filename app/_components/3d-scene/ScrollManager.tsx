@@ -73,16 +73,7 @@ export function ScrollManager() {
     const touchScrollClass = "scroll-controls-touch-scroll";
 
     el.classList.add(hiddenScrollbarClass);
-
-    // Mobile-only: ensure touch scrolling works reliably (esp. iOS Safari).
-    // We keep desktop behavior unchanged.
-    const isTouchDevice =
-      typeof window !== "undefined" &&
-      (window.matchMedia?.("(pointer: coarse)")?.matches ||
-        navigator.maxTouchPoints > 0);
-    if (isTouchDevice) {
-      el.classList.add(touchScrollClass);
-    }
+    el.classList.add(touchScrollClass);
 
     const syncCurrentOffset = () => {
       const maxScroll = el.scrollHeight - el.clientHeight;

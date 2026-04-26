@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fira_Sans_Condensed, Inter } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/ui-overlay/GrainOverlay";
@@ -16,6 +16,20 @@ export const metadata: Metadata = {
   title: "Alak",
   description:
     "Alak is an interactive 3D visualization of the first verses of the Quran, designed to evoke a sense of wonder and connection to the text. It combines traditional Arabic calligraphy with modern web technologies to create an immersive experience that invites exploration and reflection.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Alak",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

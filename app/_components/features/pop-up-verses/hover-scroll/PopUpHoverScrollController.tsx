@@ -38,11 +38,10 @@ export function PopUpHoverScrollController() {
 
     window.addEventListener("wheel", handleWheel, {
       passive: false,
-      capture: true,
     });
 
     return () => {
-      window.removeEventListener("wheel", handleWheel, true);
+      window.removeEventListener("wheel", handleWheel);
       wheelAccumulatorRef.current = 0;
       lastFoldTriggerAtRef.current = 0;
     };

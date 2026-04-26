@@ -111,11 +111,10 @@ export function Experience({
 function DynamicControls() {
   return (
     <OrbitControls
-      enabled={true}
+      enabled={false}
       enableRotate={false}
       enableZoom={false}
       enablePan={false}
-      makeDefault={true}
       minAzimuthAngle={CAMERA_CONFIG.orbitControls.minAzimuthAngle}
       maxAzimuthAngle={CAMERA_CONFIG.orbitControls.maxAzimuthAngle}
       minPolarAngle={CAMERA_CONFIG.orbitControls.minPolarAngle}

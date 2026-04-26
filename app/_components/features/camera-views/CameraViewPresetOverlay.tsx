@@ -128,8 +128,8 @@ export function CameraViewPresetOverlay() {
       <style jsx>{`
         .camera-presets-root {
           position: fixed;
-          left: 10px;
-          bottom: 10px;
+          left: calc(var(--safe-left) + 10px);
+          bottom: calc(var(--safe-bottom) + 10px);
           z-index: 999993;
           pointer-events: none;
           user-select: none;
@@ -232,8 +232,8 @@ export function CameraViewPresetOverlay() {
 
         @media (max-width: 760px) {
           .camera-presets-root {
-            left: 8px;
-            bottom: 8px;
+            left: calc(var(--safe-left) + 8px);
+            bottom: calc(var(--safe-bottom) + 8px);
             transform: scale(${CAMERA_PRESET_SCALE * 0.93});
           }
 

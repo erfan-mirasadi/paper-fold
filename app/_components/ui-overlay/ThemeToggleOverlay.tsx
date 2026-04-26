@@ -86,7 +86,7 @@ export function ThemeToggleOverlay({
       style={{
         position: "fixed",
         top: "16px",
-        right: "24px",
+        right: "16px",
         zIndex: 100,
         pointerEvents: "none",
       }}

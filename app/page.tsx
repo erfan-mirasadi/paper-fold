@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Preload, ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import * as THREE from "three";
 import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
 import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
@@ -31,8 +31,16 @@ const Experience = dynamic(
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSceneReady, setIsSceneReady] = useState(false);
-  // const [glitchKey, setGlitchKey] = useState(0);
-  const bgColor = isDarkMode ? "#000000" : "#ffffff";
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const bgColor = isDarkMode && !isMobile ? "#000000" : "#ffffff";
 
   const handleThemeToggle = () => {
     setIsDarkMode((prev) => !prev);
@@ -47,7 +55,7 @@ export default function Home() {
     <main
       style={{
         width: "100vw",
-        height: "100vh",
+        height: "100dvh",
         backgroundColor: bgColor,
         overflow: "hidden",
         transition: "background-color 0.5s ease",
@@ -57,7 +65,7 @@ export default function Home() {
         <div
           style={{
             width: "100vw",
-            height: "100vh",
+            height: "100dvh",
             opacity: isSceneReady ? 1 : 0,
             transition: "opacity 0.45s ease",
           }}

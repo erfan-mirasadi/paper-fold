@@ -25,7 +25,7 @@ export function LanguageSwitchOverlay({
   const setLanguage = useSurahLanguageStore((s) => s.setLanguage);
   const [isOpen, setIsOpen] = useState(false);
   // Fluid sizing: keep mobile + XL feeling consistent, smooth in-between.
-  const rightOffset = "clamp(96px, 12vw, 142px)";
+  const rightOffset = "clamp(118px, 15vw, 160px)";
   const buttonH = "clamp(38px, 4.2vw, 44px)";
   const buttonRadius = "clamp(12px, 1.4vw, 14px)";
   const fontSize = "clamp(10px, 1.15vw, 11px)";
