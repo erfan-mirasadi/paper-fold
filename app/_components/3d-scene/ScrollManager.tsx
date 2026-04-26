@@ -70,8 +70,19 @@ export function ScrollManager() {
 
     const el = scroll.el;
     const hiddenScrollbarClass = "scroll-controls-hide-scrollbar";
+    const touchScrollClass = "scroll-controls-touch-scroll";
 
     el.classList.add(hiddenScrollbarClass);
+
+    // Mobile-only: ensure touch scrolling works reliably (esp. iOS Safari).
+    // We keep desktop behavior unchanged.
+    const isTouchDevice =
+      typeof window !== "undefined" &&
+      (window.matchMedia?.("(pointer: coarse)")?.matches ||
+        navigator.maxTouchPoints > 0);
+    if (isTouchDevice) {
+      el.classList.add(touchScrollClass);
+    }
 
     const syncCurrentOffset = () => {
       const maxScroll = el.scrollHeight - el.clientHeight;
@@ -91,6 +102,7 @@ export function ScrollManager() {
       el.removeEventListener("scroll", syncCurrentOffset);
       window.removeEventListener("resize", syncCurrentOffset);
       el.classList.remove(hiddenScrollbarClass);
+      el.classList.remove(touchScrollClass);
     };
   }, [scroll.el, setCurrentOffset]);
 

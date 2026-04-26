@@ -24,9 +24,19 @@ export function LanguageSwitchOverlay({
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const setLanguage = useSurahLanguageStore((s) => s.setLanguage);
   const [isOpen, setIsOpen] = useState(false);
-  const BUTTON_W_CLOSED = 62;
-  const BUTTON_W_OPEN = 45;
-  const PANEL_W = 96;
+  // Fluid sizing: keep mobile + XL feeling consistent, smooth in-between.
+  const rightOffset = "clamp(96px, 12vw, 142px)";
+  const buttonH = "clamp(38px, 4.2vw, 44px)";
+  const buttonRadius = "clamp(12px, 1.4vw, 14px)";
+  const fontSize = "clamp(10px, 1.15vw, 11px)";
+  const itemFontSize = fontSize;
+  const BUTTON_W_CLOSED = "clamp(52px, 6vw, 62px)";
+  const BUTTON_W_OPEN = "clamp(40px, 4.8vw, 45px)";
+  const PANEL_W = "clamp(84px, 9.5vw, 96px)";
+  const panelTop = "calc(" + buttonH + " + 6px)";
+  const panelPad = "clamp(5px, 0.7vw, 6px)";
+  const panelRadius = buttonRadius;
+  const itemH = "clamp(30px, 3.2vw, 34px)";
 
   const buttonTheme = useMemo(() => {
     const border = isDarkMode
@@ -80,7 +90,7 @@ export function LanguageSwitchOverlay({
       style={{
         position: "fixed",
         top: "16px",
-        right: "142px",
+        right: rightOffset,
         zIndex: 100,
         pointerEvents: "none",
       }}
@@ -94,7 +104,7 @@ export function LanguageSwitchOverlay({
           pointerEvents: "auto",
           position: "relative",
           color: buttonTheme.text,
-          width: `${BUTTON_W_OPEN}px`,
+          width: BUTTON_W_OPEN,
         }}
       >
         <motion.button
@@ -105,14 +115,14 @@ export function LanguageSwitchOverlay({
           animate={{ width: isOpen ? BUTTON_W_OPEN : BUTTON_W_CLOSED }}
           transition={{ type: "spring", stiffness: 330, damping: 30 }}
           style={{
-            height: "44px",
-            borderRadius: "14px",
+            height: buttonH,
+            borderRadius: buttonRadius,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "5px",
             padding: "0 10px",
-            fontSize: "11px",
+            fontSize,
             fontWeight: 700,
             letterSpacing: "0.03em",
             background: buttonTheme.background,
@@ -157,14 +167,14 @@ export function LanguageSwitchOverlay({
               transition={{ type: "spring", stiffness: 320, damping: 28 }}
               style={{
                 position: "absolute",
-                top: "50px",
+                top: panelTop,
                 left: 0,
-                width: `${PANEL_W}px`,
+                width: PANEL_W,
                 display: "flex",
                 flexDirection: "column",
                 gap: "4px",
-                padding: "6px",
-                borderRadius: "14px",
+                padding: panelPad,
+                borderRadius: panelRadius,
                 border: buttonTheme.border,
                 background: buttonTheme.background,
                 boxShadow: buttonTheme.panelShadow,
@@ -195,8 +205,8 @@ export function LanguageSwitchOverlay({
                     }}
                     whileTap={{ scale: 0.99 }}
                     style={{
-                      height: "34px",
-                      borderRadius: "10px",
+                      height: itemH,
+                      borderRadius: "clamp(9px, 1.1vw, 10px)",
                       border: isActive ? buttonTheme.activeBorder : "none",
                       background: isActive
                         ? buttonTheme.activeBackground
@@ -204,7 +214,7 @@ export function LanguageSwitchOverlay({
                       boxShadow: isActive ? buttonTheme.activeShadow : "none",
                       color: buttonTheme.text,
                       cursor: "pointer",
-                      fontSize: "11px",
+                      fontSize: itemFontSize,
                       fontWeight: 700,
                       letterSpacing: "0.03em",
                       display: "flex",

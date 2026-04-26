@@ -20,6 +20,11 @@ export function NavigationOverlay({
   const hasDragged = useDragState((s) => s.hasDragged);
   const isPaperDocked = useDragState((s) => s.isPaperDocked);
 
+  // Fluid sizing keeps mobile + XL consistent while smoothing mid sizes.
+  const insetX = "clamp(14px, 2.2vw, 24px)";
+  const insetY = "clamp(12px, 2vw, 16px)";
+  const stackGap = "clamp(8px, 1.2vw, 10px)";
+
   // Keep label/icon color fixed while the glass surface adapts to theme.
   const accentColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
   const textColor = accentColor;
@@ -144,11 +149,11 @@ export function NavigationOverlay({
       animate="visible"
       style={{
         position: "fixed",
-        top: "14px", // Positioned below the camera reset button
-        left: "18px",
+        top: insetY, // Positioned below the camera reset button
+        left: insetX,
         display: "flex",
         flexDirection: "column",
-        gap: "10px",
+        gap: stackGap,
         zIndex: 100,
       }}
     >
@@ -224,6 +229,14 @@ function NavButton({
   glassHoverShadow,
   variants,
 }: NavButtonProps) {
+  const btnH = "clamp(40px, 4.4vw, 46px)";
+  const btnMinW = "clamp(58px, 6.2vw, 66px)";
+  const btnPadX = "clamp(6px, 1vw, 7px)";
+  const btnPadY = "clamp(2px, 0.6vw, 3px)";
+  const btnRadius = "clamp(10px, 1.35vw, 11px)";
+  const labelFont = "clamp(9.5px, 1.2vw, 10.5px)";
+  const iconScale = "clamp(0.92, 1.1vw, 1)";
+
   const handleClick = () => {
     if (isPending) return;
     onClick();
@@ -254,16 +267,16 @@ function NavButton({
         WebkitBackdropFilter: "blur(18px) saturate(130%)",
         color: textColor,
         cursor: isPending ? "wait" : "pointer",
-        height: "46px",
-        minWidth: "66px",
-        padding: "3px 7px",
-        borderRadius: "11px",
+        height: btnH,
+        minWidth: btnMinW,
+        padding: `${btnPadY} ${btnPadX}`,
+        borderRadius: btnRadius,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         gap: "2px",
-        fontSize: "10.5px",
+        fontSize: labelFont,
         fontWeight: 600,
         letterSpacing: "0.01em",
         boxShadow: glassShadow,
@@ -364,6 +377,7 @@ function NavButton({
             : "none",
           zIndex: 2,
           pointerEvents: "none",
+          transform: `scale(${iconScale})`,
         }}
       >
         {icon}

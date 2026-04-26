@@ -70,8 +70,8 @@ pageGeometry.setAttribute(
   new Float32BufferAttribute(skinWeights, 4),
 );
 
-const paperBaseColor = new Color("#f2f0e6");
-const paperBackColor = new Color(PAGE_BG_COLOR);
+const paperBaseColor = new Color(PAGE_BG_COLOR);
+const paperBackColor = new Color("#ffffff");
 const staticSideL = new MeshStandardMaterial({ color: paperBaseColor }); // side L
 const staticSideR = new MeshStandardMaterial({
   color: "#111",

@@ -61,6 +61,13 @@ html::-webkit-scrollbar {
   -ms-overflow-style: none !important;
 }
 
+.scroll-controls-touch-scroll {
+  /* Mobile: allow native touch scrolling inside ScrollControls */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
 .scroll-controls-hide-scrollbar::-webkit-scrollbar {
   width: 0 !important;
   height: 0 !important;

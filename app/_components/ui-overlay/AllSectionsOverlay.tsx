@@ -66,6 +66,12 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
   const showAllSections = useElevatedStore((s) => s.showAllSections);
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
 
+  // Fluid placement/size: mobile + XL remain familiar; mid-sizes tighten up.
+  const rightOffset = "clamp(146px, 18vw, 214px)";
+  const buttonW = "clamp(46px, 5.4vw, 54px)";
+  const buttonH = "clamp(38px, 4.2vw, 44px)";
+  const radius = "clamp(12px, 1.4vw, 14px)";
+
   const canShowControl =
     isAllSectionsMode || currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD;
 
@@ -114,7 +120,7 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
           style={{
             position: "fixed",
             top: "16px",
-            right: "214px",
+            right: rightOffset,
             zIndex: 100,
             pointerEvents: "none",
           }}
@@ -137,9 +143,9 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
             style={{
               pointerEvents: "auto",
               position: "relative",
-              width: "54px",
-              height: "44px",
-              borderRadius: "14px",
+              width: buttonW,
+              height: buttonH,
+              borderRadius: radius,
               border: buttonTheme.border,
               background: buttonTheme.background,
               boxShadow: buttonTheme.shadow,
