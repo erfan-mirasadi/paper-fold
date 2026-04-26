@@ -1,5 +1,6 @@
+// app/_components/3d-scene/PaperMaterial.tsx
 "use client";
-import React, { useRef, useMemo } from "react";
+import React, { useRef } from "react";
 import {
   OrthographicCamera,
   RenderTexture,
@@ -33,9 +34,11 @@ const CREASE_NORMAL_OPACITY = 2;
 const PAPER_NORMAL_OPACITY = 2;
 const paperBaseColor = new Color("#f2f0e6");
 
-// Base texture dims — scaled up by DPR at runtime
-const BASE_RENDER_TEX_WIDTH = 1200;
-const BASE_RENDER_TEX_HEIGHT = 1700;
+// HARDCODED HIGH-RES: Bypass DPR issues entirely by forcing a massive 2x resolution.
+// This guarantees ultra-crisp SDF generation and layout rendering on Windows.
+const QUALITY_MULTIPLIER = 2;
+const RENDER_TEX_WIDTH = 1200 * QUALITY_MULTIPLIER; // 2400
+const RENDER_TEX_HEIGHT = 1700 * QUALITY_MULTIPLIER; // 3400
 
 const TEXTURE_SETTLE_DELAY_MS = 2000;
 const TEXTURE_CAPTURE_FRAMES = 8;
@@ -124,15 +127,6 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
     toggles.diffuse ? "diffuse" : "flat-color",
   ].join("-");
 
-  // Dynamic scaling based on Device Pixel Ratio to fix blurriness
-  const [texW, texH] = useMemo(() => {
-    const scale = Math.max(gl.getPixelRatio(), 1.5);
-    return [
-      Math.round(BASE_RENDER_TEX_WIDTH * scale),
-      Math.round(BASE_RENDER_TEX_HEIGHT * scale),
-    ];
-  }, [gl]);
-
   const [settled, setSettled] = React.useState(false);
 
   React.useEffect(() => {
@@ -204,12 +198,23 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
       <RenderTexture
         key={mapKey}
         attach="map"
-        width={texW}
-        height={texH}
+        width={RENDER_TEX_WIDTH}
+        height={RENDER_TEX_HEIGHT}
         frames={mapFrames}
         samples={8}
       >
         <color attach="background" args={["#f2f0e6"]} />
+
+        {/* CRITICAL FIX: OrthographicCamera ensures Troika Text calculates SDF size correctly 
+            and prevents perspective distortion on low DPR devices. */}
+        <OrthographicCamera
+          makeDefault
+          left={0}
+          right={PAGE_WIDTH}
+          top={0}
+          bottom={-PAGE_HEIGHT}
+          position={[0, 0, 5]}
+        />
 
         {toggles.diffuse && (
           <mesh position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, -10]}>
@@ -228,8 +233,8 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
       {toggles.normal && (
         <RenderTexture
           attach="normalMap"
-          width={BASE_RENDER_TEX_WIDTH}
-          height={BASE_RENDER_TEX_HEIGHT}
+          width={RENDER_TEX_WIDTH}
+          height={RENDER_TEX_HEIGHT}
           frames={1}
           samples={4}
         >
