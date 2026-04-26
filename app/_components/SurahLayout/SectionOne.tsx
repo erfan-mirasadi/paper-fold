@@ -16,8 +16,6 @@ import {
   S1_VERSE_NUMBER_BG,
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
-  BUMP_MAX,
-  BUMP_DEEP,
   S1_TOP_LABEL_BG,
   S1_TOP_LABEL_BORDER,
   S1_NEON_GOLD,
@@ -33,7 +31,6 @@ interface SectionOneProps {
   data: SectionOneData;
   transforms: S1Transforms;
   PW: number;
-  isBumpMap?: boolean;
   isFolded?: boolean;
 }
 
@@ -41,7 +38,6 @@ export function SectionOne({
   data,
   transforms,
   PW,
-  isBumpMap = false,
 }: SectionOneProps) {
   const neon = S1_NEON_CONFIG;
   const frameRadius = 0.02;
@@ -62,67 +58,63 @@ export function SectionOne({
       {/* Outer wrapper — border layer */}
       {!hideSectionSurface && (
         <>
-          {!isBumpMap && (
-            <>
-              {/* Smooth outer glow following the same corner profile as section 1 */}
-              <UiRect
-                x={t.frameX - neon.outerHaloPad}
-                y={t.frameY + neon.outerHaloPad}
-                z={neon.haloZ - 0.0005}
-                w={t.frameW + neon.outerHaloPad * 2}
-                h={t.frameH + neon.outerHaloPad * 2}
-                radius={frameRadius + neon.outerHaloPad}
-                color={S1_NEON_GOLD}
-                transparent
-                opacity={neon.outerHaloOpacity}
-                emissive={S1_NEON_GOLD}
-                emissiveIntensity={neon.outerHaloEmissiveIntensity}
-                toneMapped={false}
-                depthTest={true}
-              />
+          {/* Smooth outer glow following the same corner profile as section 1 */}
+          <UiRect
+            x={t.frameX - neon.outerHaloPad}
+            y={t.frameY + neon.outerHaloPad}
+            z={neon.haloZ - 0.0005}
+            w={t.frameW + neon.outerHaloPad * 2}
+            h={t.frameH + neon.outerHaloPad * 2}
+            radius={frameRadius + neon.outerHaloPad}
+            color={S1_NEON_GOLD}
+            transparent
+            opacity={neon.outerHaloOpacity}
+            emissive={S1_NEON_GOLD}
+            emissiveIntensity={neon.outerHaloEmissiveIntensity}
+            toneMapped={false}
+            depthTest={true}
+          />
 
-              {/* Smooth inner glow hugging the border */}
-              <UiRect
-                x={t.frameX - neon.haloPad}
-                y={t.frameY + neon.haloPad}
-                z={neon.haloZ}
-                w={t.frameW + neon.haloPad * 2}
-                h={t.frameH + neon.haloPad * 2}
-                radius={frameRadius + neon.haloPad}
-                color={S1_NEON_GOLD}
-                transparent
-                opacity={neon.haloOpacity}
-                emissive={S1_NEON_GOLD}
-                emissiveIntensity={neon.haloEmissiveIntensity}
-                toneMapped={false}
-                depthTest={true}
-              />
+          {/* Smooth inner glow hugging the border */}
+          <UiRect
+            x={t.frameX - neon.haloPad}
+            y={t.frameY + neon.haloPad}
+            z={neon.haloZ}
+            w={t.frameW + neon.haloPad * 2}
+            h={t.frameH + neon.haloPad * 2}
+            radius={frameRadius + neon.haloPad}
+            color={S1_NEON_GOLD}
+            transparent
+            opacity={neon.haloOpacity}
+            emissive={S1_NEON_GOLD}
+            emissiveIntensity={neon.haloEmissiveIntensity}
+            toneMapped={false}
+            depthTest={true}
+          />
 
-              {/* Center cutout: prevents the section background from turning neon */}
-              <UiRect
-                x={t.frameX}
-                y={t.frameY}
-                z={neon.haloZ + 0.0006}
-                w={t.frameW}
-                h={t.frameH}
-                radius={frameRadius}
-                color={S1_OUTER_BORDER}
-                depthTest={true}
-              />
+          {/* Center cutout: prevents the section background from turning neon */}
+          <UiRect
+            x={t.frameX}
+            y={t.frameY}
+            z={neon.haloZ + 0.0006}
+            w={t.frameW}
+            h={t.frameH}
+            radius={frameRadius}
+            color={S1_OUTER_BORDER}
+            depthTest={true}
+          />
 
-              {/* Top label cutout: removes neon where the label sits */}
-              <UiRect
-                x={PW / 2 - topLabelCutoutW / 2}
-                y={t.frameY + neon.topLabelGapYOffset}
-                z={neon.haloZ + 0.0008}
-                w={topLabelCutoutW}
-                h={neon.topLabelGapHeight}
-                radius={Math.min(neon.topLabelGapHeight / 2, 0.03)}
-                color={S1_OUTER_BORDER}
-                depthTest={true}
-              />
-            </>
-          )}
+          {/* Top label cutout: removes neon where the label sits */}
+          <UiRect
+            x={PW / 2 - topLabelCutoutW / 2}
+            y={t.frameY + neon.topLabelGapYOffset}
+            z={neon.haloZ + 0.0008}
+            w={topLabelCutoutW}
+            h={neon.topLabelGapHeight}
+            radius={Math.min(neon.topLabelGapHeight / 2, 0.03)}
+            color={S1_OUTER_BORDER}
+            depthTest={true}
+          />
           <UiRect
             x={t.frameX}
             y={t.frameY}
@@ -132,8 +124,6 @@ export function SectionOne({
             radius={0.02}
             color={S1_OUTER_BORDER}
             shadow
-            isBumpMap={isBumpMap}
-            bumpColor={BUMP_MAX}
           />
           {/* Outer wrapper — fill layer */}
           <UiRect
@@ -144,14 +134,12 @@ export function SectionOne({
             h={t.frameH - t.borderWidth * 2}
             radius={0.017}
             color={S1_OUTER_BG}
-            isBumpMap={isBumpMap}
-            bumpColor={BUMP_DEEP}
           />
         </>
       )}
 
       {/* Row Connectors for opposite verses */}
-      {(!hideSectionSurface || isBumpMap) && t.rowConnectors.map((rc, i) => {
+      {!hideSectionSurface && t.rowConnectors.map((rc, i) => {
         const leftV = data.gridVerses[i * 2];
         const rightV = data.gridVerses[i * 2 + 1];
         
@@ -167,8 +155,6 @@ export function SectionOne({
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={S1_INNER_BORDER}
-            isBumpMap={isBumpMap}
-            bumpColor={BUMP_MAX}
           />
         );
       })}
@@ -194,7 +180,6 @@ export function SectionOne({
             circleBg={S1_VERSE_NUMBER_BG}
             circleTextCol={S1_VERSE_NUMBER_TEXT}
             isPill={true}
-            isBumpMap={isBumpMap}
           />
         );
       })}
@@ -216,7 +201,6 @@ export function SectionOne({
           circleBg={S1_ANA_BG}
           circleTextCol={CAPSULE_BG_5}
           isPill={false}
-          isBumpMap={isBumpMap}
         />
       )}
       {!hideSectionSurface && data.anaAyet.number !== 5 && (
@@ -226,7 +210,6 @@ export function SectionOne({
           w={t.anaAyetTabW}
           h={t.anaAyetTabH}
           z={0.005}
-          isBumpMap={isBumpMap}
         />
       )}
 
@@ -237,7 +220,6 @@ export function SectionOne({
           y={t.labelPinY}
           z={0.004}
           text={data.label}
-          isBumpMap={isBumpMap}
           bgColor={S1_TOP_LABEL_BG}
           borderColor={S1_TOP_LABEL_BORDER}
         />

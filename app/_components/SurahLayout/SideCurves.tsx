@@ -10,8 +10,6 @@ import {
   CAPSULE_BG_7_10_15_18,
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
-  BUMP_MID,
-  BUMP_LOWER,
 } from "../data/theme";
 import { AnimatedArrow } from "./AnimatedArrow";
 import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
@@ -38,7 +36,6 @@ interface SideCurvesProps {
   startX: number;
 
   borderWidth?: number;
-  isBumpMap?: boolean;
 }
 const getSmoothCurvePoints = (
   tipX: number,
@@ -68,7 +65,6 @@ const CurvePair = ({
   fillColor,
   isRight,
   shouldHide = false,
-  isBumpMap = false,
 }: {
   outerYTop: number;
   outerYBot: number;
@@ -82,7 +78,6 @@ const CurvePair = ({
   fillColor?: string;
   isRight: boolean;
   shouldHide?: boolean;
-  isBumpMap?: boolean;
 }) => {
   const outerPoints = useMemo(
     () => getSmoothCurvePoints(outerTipX, outerControlX, outerYTop, outerYBot),
@@ -164,8 +159,8 @@ const CurvePair = ({
     }
   });
 
-  const activeColor = isBumpMap ? BUMP_MID : color;
-  const activeFillColor = isBumpMap ? BUMP_LOWER : (fillColor ?? color);
+  const activeColor = color;
+  const activeFillColor = fillColor ?? color;
 
   return (
     <group ref={groupRef} position={[0, 0, 0.0012]}>
@@ -242,7 +237,6 @@ export const SideCurves = ({
   layout,
   startX,
   borderWidth = DEFAULT_VERSE_BORDER_WIDTH,
-  isBumpMap = false,
 }: SideCurvesProps) => {
   const groups = usePopUpStore((state) => state.popUpGroups);
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
@@ -363,7 +357,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_6_19}
         isRight={false}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       {/* Bracket 2 (maroon): verse 7–8 ↔ verse 17–18 */}
@@ -380,7 +373,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       {/* Bracket 3 (maroon): verse 9–10 ↔ verse 15–16 */}
@@ -397,7 +389,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={false}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       {/* Bracket 4 (innermost, green): verse 11–12 ↔ verse 13–14 */}
@@ -414,7 +405,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_12_14}
         isRight={false}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       {/* ════════════ RIGHT SIDE ════════════ */}
@@ -432,7 +422,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_6_19}
         isRight={true}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       <CurvePair
@@ -448,7 +437,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       <CurvePair
@@ -464,7 +452,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_7_10_15_18}
         isRight={true}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
 
       <CurvePair
@@ -480,7 +467,6 @@ export const SideCurves = ({
         fillColor={CAPSULE_BG_12_14}
         isRight={true}
         shouldHide={shouldHide}
-        isBumpMap={isBumpMap}
       />
     </group>
   );

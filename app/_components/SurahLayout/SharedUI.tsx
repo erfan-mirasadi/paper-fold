@@ -9,9 +9,6 @@ import {
   SHADOW_BLACK,
   TEXT_DARK,
   TEXT_LABEL,
-  BUMP_MAX,
-  BUMP_MID_HIGH,
-  BUMP_LOWER,
   HOLLOW_BORDER_COLOR,
   CIRCLE_BORDER,
   S1_ANA_LABEL_BG,
@@ -100,8 +97,6 @@ interface UiRectProps {
   shadow?: boolean;
   depthTest?: boolean;
   renderOrder?: number;
-  isBumpMap?: boolean;
-  bumpColor?: string;
   topOnly?: boolean;
   bottomOnly?: boolean;
   opacity?: number;
@@ -187,8 +182,6 @@ export const UiRect = ({
   shadow = false,
   depthTest = false,
   renderOrder,
-  isBumpMap = false,
-  bumpColor = BUMP_MAX,
   topOnly = false,
   bottomOnly = false,
   opacity,
@@ -197,20 +190,17 @@ export const UiRect = ({
   emissiveIntensity,
   toneMapped,
 }: UiRectProps) => {
-  const finalColor = isBumpMap ? bumpColor : color;
+  const finalColor = color;
   const resolvedTransparent =
-    transparent ??
-    (opacity !== undefined || (renderOrder != null && !isBumpMap));
-  const resolvedOpacity =
-    opacity ?? (renderOrder != null && !isBumpMap ? 0.999 : 1);
-  const useEmissiveMaterial = Boolean(emissive) && !isBumpMap;
+    transparent ?? (opacity !== undefined || renderOrder != null);
+  const resolvedOpacity = opacity ?? (renderOrder != null ? 0.999 : 1);
+  const useEmissiveMaterial = Boolean(emissive);
   const isImage =
     typeof finalColor === "string" && /\.(jpe?g|png|webp)$/i.test(finalColor);
 
   return (
     <group position={[x, y, z]}>
-      {/* Drop shadow layer — skipped in bump map passes */}
-      {shadow && !isBumpMap && (
+      {shadow && (
         <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
           <RoundedShapeComponent
             w={w}
@@ -285,7 +275,6 @@ interface TopLabelProps {
   animateOnScroll?: boolean;
   scrollStart?: number;
   scrollRange?: number;
-  isBumpMap?: boolean;
   partialBorder?: boolean;
   borderColor?: string;
   bottomBorder?: boolean;
@@ -303,7 +292,6 @@ export function TopLabel({
   animateOnScroll = false,
   scrollStart = 0.4,
   scrollRange = 0.15,
-  isBumpMap = false,
   partialBorder = false,
   borderColor = HOLLOW_BORDER_COLOR,
   bottomBorder = false,
@@ -322,8 +310,7 @@ export function TopLabel({
   const scroll = useScroll();
 
   useFrame(() => {
-    // Scroll animation is completely disabled for bump map passes
-    if (animateOnScroll && scroll && groupRef.current && !isBumpMap) {
+    if (animateOnScroll && scroll && groupRef.current) {
       let targetOpacity = 0;
       if (scroll.offset > scrollStart) {
         targetOpacity = Math.min(
@@ -386,8 +373,6 @@ export function TopLabel({
           radius={radius + borderThickness}
           color={borderColor}
           shadow={!partialBorder}
-          isBumpMap={isBumpMap}
-          bumpColor={BUMP_MAX}
           topOnly={partialBorder && !bottomBorder}
           bottomOnly={partialBorder && bottomBorder}
           renderOrder={renderOrder}
@@ -401,15 +386,13 @@ export function TopLabel({
         h={h}
         radius={radius}
         color={bgColor}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_LOWER}
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
       <Text
         position={[w / 2, -h / 2, 0.002]}
         fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-        color={isBumpMap ? BUMP_MAX : TEXT_LABEL}
+        color={TEXT_LABEL}
         anchorX="center"
         anchorY="middle"
         fontStyle="normal"
@@ -430,7 +413,6 @@ interface AnaAyetTabProps {
   w: number;
   h: number;
   z: number;
-  isBumpMap?: boolean;
 }
 export function AnaAyetTab({
   x,
@@ -438,7 +420,6 @@ export function AnaAyetTab({
   w,
   h,
   z,
-  isBumpMap = false,
 }: AnaAyetTabProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
@@ -456,14 +437,12 @@ export function AnaAyetTab({
         h={h}
         radius={radius}
         color={S1_ANA_LABEL_BG}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MID_HIGH}
       />
 
       <Text
         position={[w / 2, -h / 2, 0.002]}
         fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-        color={isBumpMap ? BUMP_MAX : S1_ANA_LABEL_TEXT}
+        color={S1_ANA_LABEL_TEXT}
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
@@ -491,7 +470,6 @@ interface VerseBoxProps {
   isPill?: boolean;
   borderWidth?: number;
   shadow?: boolean;
-  isBumpMap?: boolean;
   bgOpacity?: number;
   textColor?: string;
   /** Capsule verse text enter fade; 0 avoids dim stack with pop-up RenderTexture. */
@@ -513,7 +491,6 @@ export const VerseBox = ({
   isPill = true,
   borderWidth,
   shadow = true,
-  isBumpMap = false,
   bgOpacity = 1,
   textColor,
   verseTextEnterDurationMs,
@@ -569,8 +546,6 @@ export const VerseBox = ({
         color={border}
         shadow={shadow}
         renderOrder={10}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MAX}
       />
       {/* Inner fill */}
       <UiRect
@@ -582,8 +557,6 @@ export const VerseBox = ({
         radius={rad}
         color={bg}
         renderOrder={11}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_LOWER}
         opacity={bgOpacity}
       />
 
@@ -593,31 +566,25 @@ export const VerseBox = ({
           <mesh renderOrder={12}>
             <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
             <meshBasicMaterial
-              color={isBumpMap ? "#222222" : (circleBg ?? bg)}
+              color={circleBg ?? bg}
               depthTest={false}
-              transparent={!isBumpMap}
+              transparent={true}
               opacity={0.999}
             />
           </mesh>
           <mesh position={[0, 0, -0.001]} renderOrder={12}>
             <circleGeometry args={[cr, 48]} />
             <meshBasicMaterial
-              color={
-                isBumpMap
-                  ? BUMP_MAX
-                  : (circleBorderCol ?? border ?? CIRCLE_BORDER)
-              }
+              color={circleBorderCol ?? border ?? CIRCLE_BORDER}
               depthTest={false}
-              transparent={!isBumpMap}
+              transparent={true}
               opacity={0.999}
             />
           </mesh>
           <Text
             position={[0, 0, 0.001]}
             fontSize={TEXT_SIZES.VERSE_NUMBER}
-            color={
-              isBumpMap ? BUMP_MAX : (circleTextCol ?? S2_VERSE_NUMBER_TEXT)
-            }
+            color={circleTextCol ?? S2_VERSE_NUMBER_TEXT}
             anchorX="center"
             anchorY="middle"
             fontWeight="bold"
@@ -636,7 +603,7 @@ export const VerseBox = ({
           (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
           textScale
         }
-        color={isBumpMap ? BUMP_MAX : textColor || TEXT_DARK}
+        color={textColor || TEXT_DARK}
         anchorX={textAnchorX}
         anchorY="middle"
         maxWidth={textMaxW}

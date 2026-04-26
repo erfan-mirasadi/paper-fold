@@ -19,7 +19,6 @@ This project's main technique is dynamic texture projection with WebGL:
 - Quran layout is rendered in real time into textures using `RenderTexture`.
 - These textures are attached to a deforming 3D paper material as:
   - `map` (main color/content)
-  - `bumpMap` (embossed depth feel)
   - `normalMap` (crease and surface normal detail)
 - The paper itself is a skinned mesh with many bones, so text and graphics bend with the fold in real time.
 

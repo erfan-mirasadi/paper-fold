@@ -14,8 +14,6 @@ import {
   // S2_OUTER_BG,
   BLUE_THEME,
   CAPSULE_BG_6_19,
-  // BUMP_MAX,
-  // BUMP_DEEP,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
 } from "../data/theme";
@@ -31,7 +29,6 @@ interface SectionTwoProps {
   layout: LayoutConfig;
   startX: number;
   PW: number;
-  isBumpMap?: boolean;
   isFolded?: boolean;
 }
 
@@ -41,7 +38,6 @@ export function SectionTwo({
   layout,
   startX,
   PW,
-  isBumpMap = false,
 }: SectionTwoProps) {
   const isVerseHidden = useDelayedVerseVisibility();
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
@@ -76,7 +72,6 @@ export function SectionTwo({
           yBottom={t.topConnectorY - t.topConnectorH}
           height={t.topConnectorH}
           borderWidth={t.borderWidth}
-          isBumpMap={isBumpMap}
         />
       )}
 
@@ -90,7 +85,6 @@ export function SectionTwo({
           yBottom={t.bottomConnectorY - t.bottomConnectorH}
           height={t.bottomConnectorH}
           borderWidth={t.borderWidth}
-          isBumpMap={isBumpMap}
         />
       )}
 
@@ -111,7 +105,6 @@ export function SectionTwo({
           circleTextCol={BLUE_THEME}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
-          isBumpMap={isBumpMap}
         />
       )}
 
@@ -121,7 +114,6 @@ export function SectionTwo({
           key={index}
           group={group}
           groupTransform={t.groups[index]}
-          isBumpMap={isBumpMap}
           isVerseHidden={(id) => isVerseHidden(id)}
           groupIndex={index}
         />
@@ -144,7 +136,6 @@ export function SectionTwo({
           circleTextCol={BLUE_THEME}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
-          isBumpMap={isBumpMap}
         />
       )}
 
@@ -152,7 +143,6 @@ export function SectionTwo({
       <SideCurves
         layout={layout}
         startX={startX}
-        isBumpMap={isBumpMap}
         borderWidth={edgeVerseBorderWidth}
       />
 
@@ -166,7 +156,6 @@ export function SectionTwo({
           animateOnScroll={true}
           scrollStart={0.55}
           scrollRange={0.18}
-          isBumpMap={isBumpMap}
           partialBorder={true}
           bgColor={S2_TOP_LABEL_BG}
           borderColor={S2_TOP_LABEL_BORDER}
@@ -181,7 +170,6 @@ export function SectionTwo({
           animateOnScroll={true}
           scrollStart={0.55}
           scrollRange={0.18}
-          isBumpMap={isBumpMap}
           partialBorder={true}
           bottomBorder={true}
           bgColor={S2_TOP_LABEL_BG}

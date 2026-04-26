@@ -10,7 +10,6 @@ import {
   WHITE_VERSE_BG,
   MAROON_THEME,
   GREEN_THEME,
-  BUMP_MAX,
 } from "../data/theme";
 import type { ColorGroup, GroupTransforms } from "../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../data/SurahConfig";
@@ -23,7 +22,6 @@ import {
 interface VerseGroupProps {
   group: ColorGroup;
   groupTransform: GroupTransforms;
-  isBumpMap?: boolean;
   isVerseHidden: (verseId: number) => boolean;
   groupIndex?: number;
 }
@@ -31,7 +29,6 @@ interface VerseGroupProps {
 export function VerseGroup({
   group,
   groupTransform,
-  isBumpMap = false,
   isVerseHidden,
   groupIndex = 0,
 }: VerseGroupProps) {
@@ -56,12 +53,10 @@ export function VerseGroup({
         radius={0.015}
         color={gt.isCenter ? GREEN_THEME : HOLLOW_BORDER_COLOR}
         shadow={gt.isCenter}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MID}
       /> */}
 
       {/* Row Connectors for opposite verses */}
-      {(!hideConnectors || isBumpMap) && gt.rowConnectors.map((rc, i) => {
+      {!hideConnectors && gt.rowConnectors.map((rc, i) => {
         const leftV = group.verses[i * 2];
         const rightV = group.verses[i * 2 + 1];
         
@@ -77,8 +72,6 @@ export function VerseGroup({
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={borderColor}
-            isBumpMap={isBumpMap}
-            bumpColor={BUMP_MAX}
           />
         );
       })}
@@ -113,7 +106,6 @@ export function VerseGroup({
             circleBg={finalBg}
             circleTextCol={borderColor}
             isPill={true}
-            isBumpMap={isBumpMap}
           />
         );
       })}

@@ -40,7 +40,6 @@ export const PAPER_MATERIAL_CONFIG = {
   roughness: 0.95,
   metalness: 0.02,
   color: paperBaseColor,
-  bumpScale: 0.02,
   envMapIntensity: 0.6,
 };
 
@@ -135,15 +134,6 @@ const PaperMaterialComponent: React.FC<PaperMaterialProps> = ({
 
         {/* We keep PaperContent completely untouched */}
         <PaperContent isFolded={isFolded} />
-      </RenderTexture>
-
-      {/* BUMP MAP */}
-      <RenderTexture
-        attach="bumpMap"
-        width={RENDER_TEX_WIDTH}
-        height={RENDER_TEX_HEIGHT}
-      >
-        <PaperContent isBumpMap={true} />
       </RenderTexture>
 
       {/* NORMAL MAP */}

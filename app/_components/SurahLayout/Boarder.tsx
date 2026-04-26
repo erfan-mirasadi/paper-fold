@@ -5,10 +5,9 @@ import { INNER_CARD_BG } from "../data/theme";
 interface BoarderProps {
   PW: number;
   PAGE_HEIGHT: number;
-  isBumpMap?: boolean;
 }
 
-export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
+export function Boarder({ PW, PAGE_HEIGHT }: BoarderProps) {
   const ORIGINAL_CARD_PAD_X = 0.0;
   const ORIGINAL_CARD_PAD_TOP = 0.02;
   const ORIGINAL_CARD_PAD_BOTTOM = 0.02;
@@ -43,7 +42,7 @@ export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
 
   return (
     <group position={[0, 0, -0.01]}>
-      {/* Outer halo — invisible on bump map pass (no physical height) */}
+      {/* Outer halo */}
       <UiRect
         x={HALO_X}
         y={HALO_Y}
@@ -53,10 +52,8 @@ export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
         radius={FRAME_RADIUS + 0.02}
         color={HALO_COLOR}
         shadow
-        isBumpMap={isBumpMap}
-        bumpColor="#000000"
       />
-      {/* White frame — max extrusion on bump map */}
+      {/* White frame */}
       <UiRect
         x={FRAME_X}
         y={FRAME_Y}
@@ -65,8 +62,6 @@ export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
         h={FRAME_H}
         radius={FRAME_RADIUS}
         color={FRAME_COLOR}
-        isBumpMap={isBumpMap}
-        bumpColor="#ffffff"
       />
       {/* Inner warm fill — slightly indented from the frame */}
       <UiRect
@@ -77,8 +72,6 @@ export function Boarder({ PW, PAGE_HEIGHT, isBumpMap = false }: BoarderProps) {
         h={INNER_FILL_H}
         radius={FRAME_RADIUS - 0.002}
         color={INNER_CARD_COLOR}
-        isBumpMap={isBumpMap}
-        bumpColor="#111111"
       />
     </group>
   );

@@ -4,18 +4,6 @@ export const TEXT_DARK = "#1a1a1a";
 export const TEXT_LABEL = "#4a423a";
 
 // ----------------------------------------------------------------------------
-// 2. BUMP MAP GRAYSCALE LEVELS
-// White = Highest extrusion, Black = Lowest (flat base surface)
-// ----------------------------------------------------------------------------
-export const BUMP_MAX = "#ffffff";
-export const BUMP_HIGH = "#e3e3e3";
-export const BUMP_MID_HIGH = "#555555";
-export const BUMP_MID = "#444444";
-export const BUMP_LOWER = "#333333";
-export const BUMP_DEEP = "#222222";
-export const BUMP_BASE = "#000000";
-
-// ----------------------------------------------------------------------------
 // 3. CANVAS & PAGE COLORS
 // ----------------------------------------------------------------------------
 export const INNER_CARD_BG = "#ffffff";

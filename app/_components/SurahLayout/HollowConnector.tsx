@@ -3,8 +3,6 @@ import { UiRect } from "./SharedUI";
 import {
   HOLLOW_BORDER_COLOR,
   HOLLOW_CONNECTOR_INNER_BG_1_3,
-  BUMP_MAX,
-  BUMP_LOWER,
 } from "../data/theme";
 
 interface HollowConnectorProps {
@@ -15,7 +13,6 @@ interface HollowConnectorProps {
   yBottom: number;
   height: number;
   borderWidth: number;
-  isBumpMap?: boolean;
   opacity?: number;
 }
 
@@ -26,7 +23,6 @@ export function HollowConnector({
   yTop,
   height,
   borderWidth: bw,
-  isBumpMap = false,
   opacity,
 }: HollowConnectorProps) {
   // Bias the outer border so the "extra" framing appears on the
@@ -48,8 +44,6 @@ export function HollowConnector({
         h={outerH}
         radius={0.025}
         color={HOLLOW_BORDER_COLOR}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_MAX}
         opacity={opacity}
       />
       {/* Inner fill layer — matches Section 2 background to create hollow look */}
@@ -61,8 +55,6 @@ export function HollowConnector({
         h={height}
         radius={0.022}
         color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-        isBumpMap={isBumpMap}
-        bumpColor={BUMP_LOWER}
         opacity={opacity}
       />
     </>

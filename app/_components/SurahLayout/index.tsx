@@ -19,8 +19,6 @@ import {
   // TEXT_DARK,
   // TEXT_SIZES,
   PAGE_BG_COLOR,
-  BUMP_BASE,
-  // BUMP_MAX,
   // QURAN_FONT,
 } from "../data/theme";
 
@@ -40,13 +38,11 @@ const ImageContent: React.FC<{ url: string }> = ({ url }) => {
 
 interface SurahLayoutProps {
   imageUrl?: string;
-  isBumpMap?: boolean;
   isFolded?: boolean;
 }
 
 function SurahLayout({
   imageUrl,
-  isBumpMap = false,
   isFolded = false,
 }: SurahLayoutProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
@@ -56,7 +52,7 @@ function SurahLayout({
     return <ImageContent url={imageUrl} />;
   }
 
-  const activeBg = isBumpMap ? BUMP_BASE : PAGE_BG_COLOR;
+  const activeBg = PAGE_BG_COLOR;
 
   return (
     <>
@@ -77,13 +73,13 @@ function SurahLayout({
       />
 
       {/* Outer decorative card border */}
-      <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} isBumpMap={isBumpMap} />
+      <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} />
 
       {/* Bismillah header */}
       {/* <Text
         position={[PW / 2, -0.085, 0.02]}
         fontSize={TEXT_SIZES.BISMILLAH}
-        color={isBumpMap ? BUMP_MAX : TEXT_DARK}
+        color={TEXT_DARK}
         anchorX="center"
         anchorY="middle"
         textAlign="center"
@@ -99,7 +95,6 @@ function SurahLayout({
         data={surahData.section1}
         transforms={SURAH_TRANSFORMS.s1}
         PW={PW}
-        isBumpMap={isBumpMap}
         isFolded={isFolded}
       />
 
@@ -110,7 +105,6 @@ function SurahLayout({
         layout={layoutMath}
         startX={START_X}
         PW={PW}
-        isBumpMap={isBumpMap}
         isFolded={isFolded}
       />
     </>
