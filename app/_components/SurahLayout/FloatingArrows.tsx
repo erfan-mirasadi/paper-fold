@@ -170,6 +170,12 @@ const AnimatedArrow = ({
 
   const globalOpacityRef = useRef(0);
   const localTimeRef = useRef(0);
+  
+  // THREE.Path uses Vector2 for getPoint/getTangent
+  const curvePosition2D = useRef(new THREE.Vector2());
+  const curveTangent2D = useRef(new THREE.Vector2());
+  
+  // Resulting 3D vectors
   const curvePositionRef = useRef(new THREE.Vector3());
   const curveTangentRef = useRef(new THREE.Vector3());
   const curveNormalRef = useRef(new THREE.Vector3());
@@ -235,8 +241,12 @@ const AnimatedArrow = ({
     const curveTangent = curveTangentRef.current;
     const curveNormal = curveNormalRef.current;
 
-    centerCurve.getPoint(t, curvePosition);
-    centerCurve.getTangent(t, curveTangent);
+    // Correctly sample from 2D path into 3D refs
+    centerCurve.getPoint(t, curvePosition2D.current);
+    centerCurve.getTangent(t, curveTangent2D.current);
+    
+    curvePosition.set(curvePosition2D.current.x, curvePosition2D.current.y, 0.0005);
+    curveTangent.set(curveTangent2D.current.x, curveTangent2D.current.y, 0).normalize();
 
     const floatFrequency = 3.0;
     const floatOffset = Math.sin(state.clock.elapsedTime * floatFrequency + delay) * floatIntensity;
