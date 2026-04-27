@@ -278,10 +278,10 @@ export const SideCurves = ({
 
   // Second bracket (maroon): spans verse 7/8 top → verse 17/18 bottom
   const y8 = g1Y - groupPad;
-  const y18 = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2 - 0.01;
+  const y18 = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2;
 
   // Third bracket (maroon): spans verse 9/10 top → verse 15/16 bottom
-  const y10 = g1Y - groupPad - smallBoxH2 - s2Gap - 0.01;
+  const y10 = g1Y - groupPad - smallBoxH2 - s2Gap;
   const y16 = g3Y - groupPad - smallBoxH2;
 
   // Inner bracket (green): spans verse 11/12 top → verse 13/14 bottom

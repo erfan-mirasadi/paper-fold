@@ -1,7 +1,7 @@
 type Vec3 = [number, number, number];
 
 const BASE_CAMERA = {
-  position: [0, 1.5, 1.6] as Vec3,
+  position: [0, 1.6, 1.6] as Vec3,
   fov: 50,
   orbitLimits: {
     minAzimuthAngle: -Math.PI / 4,

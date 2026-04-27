@@ -253,7 +253,7 @@ export const SURAH_DATA = {
         // Group 1 — Upper maroon block (verses 7–10)
         isPushedIn: false,
         isCenter: false,
-        extraRowGap: 0.01,
+        extraRowGap: 0,
         verses: [
           { number: 8, text: "إِنَّ إِلَىٰ رَبِّكَ الرُّجْعَىٰ" },
           { number: 7, text: "أَنْ رَآهُ اسْتَغْنَىٰ" },
@@ -277,7 +277,7 @@ export const SURAH_DATA = {
         // Group 3 — Lower maroon block (verses 15–18)
         isPushedIn: false,
         isCenter: false,
-        extraRowGap: 0.01,
+        extraRowGap: 0,
         verses: [
           { number: 16, text: "نَاصِيَةٍ كَاذِبَةٍ خَاطِئَةٍ" },
           {
