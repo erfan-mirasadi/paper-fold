@@ -6,6 +6,7 @@ import {
   useDragState,
   resetAllDrags,
 } from "../features/elevated-verses/drag/dragEngine";
+import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 
 interface NavigationOverlayProps {
   isDarkMode?: boolean;
@@ -19,6 +20,7 @@ export function NavigationOverlay({
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
   const hasDragged = useDragState((s) => s.hasDragged);
   const isPaperDocked = useDragState((s) => s.isPaperDocked);
+  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
 
   // Fluid sizing keeps mobile + XL consistent while smoothing mid sizes.
   const insetX = "clamp(14px, 2.2vw, 24px)";
@@ -157,7 +159,7 @@ export function NavigationOverlay({
         zIndex: 100,
       }}
     >
-      {!isPaperDocked && (
+      {!isPaperDocked && !isAllSectionsMode && (
         <NavButton
           onClick={handleSmartTransition}
           icon={activeIcon}
