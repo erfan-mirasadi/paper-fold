@@ -1,19 +1,15 @@
 "use client";
 import * as THREE from "three";
 import { useMemo } from "react";
-import {
-  RenderTexture,
-  OrthographicCamera,
-  Text,
-  useGLTF,
-} from "@react-three/drei";
+import { RenderTexture, OrthographicCamera, Text } from "@react-three/drei";
+import { useLoader } from "@react-three/fiber";
+import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
-  SURAH_TRANSFORMS,
-  PAGE_WIDTH,
   CAPSULE_BORDER_WIDTH,
   VERSE_5_6_19_RADIUS,
 } from "../../data/SurahConfig";
+import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import {
   ANA_AYET_LABEL_BY_LANGUAGE,
   SURAH_DATA_BY_LANGUAGE,
@@ -50,14 +46,17 @@ const ANA_LABEL_DEPTH = 0.0035;
 const ANA_LABEL_Z_OFFSET = 0.0025;
 const ANA_LABEL_PIN_OVERLAP = 0.0015;
 
-// Pattern pair controls (requested simple tuning only)
-const PATTERN_PAIR_SCALE = 0.001;
-const PATTERN_PAIR_GAP = 0.59;
-const PATTERN_PAIR_OFFSET_X = 0.015;
-const PATTERN_PAIR_OFFSET_Y = 0.01;
+const DECORATIVE_SVG_SIZE = 295;
+const DECORATIVE_SVG_SCALE = 0.00042;
+const DECORATIVE_SVG_COLOR = "#8B7C74";
+const DECORATIVE_SVG_INSET_X = 0.2;
+const DECORATIVE_SVG_Z_OFFSET = 0.004;
+const DECORATIVE_SVG_BRACKET_ROTATION = (Math.PI * 3) / 4;
+
+const CAPSULE_SIDE_EXPAND = 0.025;
 
 const METALLIC_SHADOW = {
-  opacityRest: 0.24,
+  opacityRest: 0,
   opacityLifted: 0.5,
   scaleRest: 1.02,
   scaleLifted: 1.14,
@@ -85,12 +84,55 @@ function normalizeSurfaceLiftProgress(surfaceLift: number) {
   return Math.max(0, Math.min(1, ratio));
 }
 
+function DecorativeSvg({
+  shapes,
+  x,
+  y,
+  rotationZ,
+  mirrorX = false,
+}: {
+  shapes: THREE.Shape[];
+  x: number;
+  y: number;
+  rotationZ: number;
+  mirrorX?: boolean;
+}) {
+  return (
+    <group
+      position={[x, y, EXTRUDE_DEPTH + DECORATIVE_SVG_Z_OFFSET]}
+      rotation={[0, 0, rotationZ]}
+      scale={[
+        mirrorX ? -DECORATIVE_SVG_SCALE : DECORATIVE_SVG_SCALE,
+        -DECORATIVE_SVG_SCALE,
+        DECORATIVE_SVG_SCALE,
+      ]}
+    >
+      <group position={[-DECORATIVE_SVG_SIZE / 2, -DECORATIVE_SVG_SIZE / 2, 0]}>
+        {shapes.map((shape, index) => (
+          <mesh key={index} renderOrder={105}>
+            <shapeGeometry args={[shape]} />
+            <meshBasicMaterial
+              color={DECORATIVE_SVG_COLOR}
+              transparent
+              opacity={1}
+              toneMapped={false}
+              depthWrite={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 export function VerseFiveMetallic() {
+  const runtime = useSurahLayoutRuntime();
+  const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const isArabic = activeLanguage === "ar";
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
   const anaAyetLabel = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
-  const patternGltf = useGLTF("/pattern.glb");
+  const decorativeSvg = useLoader(SVGLoader, "/decorative.svg");
   const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
   const isSectionSurfaceRaised = useElevatedStore((s) =>
     s.activeSectionIds.includes("s1"),
@@ -119,7 +161,7 @@ export function VerseFiveMetallic() {
   const verseDrag = dragEngine.verses[5];
   const sectionDrag = dragEngine.sections.s1;
 
-  const w = t.w;
+  const w = t.w + CAPSULE_SIDE_EXPAND * 2;
   const h = t.h;
   const radius = VERSE_5_6_19_RADIUS; // Base radius for non-pill verse
 
@@ -133,7 +175,7 @@ export function VerseFiveMetallic() {
   const labelRadius = labelH / 2;
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
-  const baseX = t.x - PAGE_WIDTH / 2 - BW;
+  const baseX = t.x - PAGE_WIDTH / 2 - BW - CAPSULE_SIDE_EXPAND;
   const baseY = t.y + BW;
 
   const dragBind = useElevatedDrag({
@@ -247,25 +289,12 @@ export function VerseFiveMetallic() {
     [],
   );
 
-  const patternScene = useMemo(() => {
-    const cloned = patternGltf.scene.clone(true);
+  const decorativeShapes = useMemo(
+    () => decorativeSvg.paths.flatMap((path) => SVGLoader.createShapes(path)),
+    [decorativeSvg.paths],
+  );
 
-    cloned.traverse((obj) => {
-      if (!(obj instanceof THREE.Mesh)) return;
-
-      obj.material = new THREE.MeshBasicMaterial({
-        color: "#8B7C74",
-        toneMapped: false,
-      });
-    });
-
-    return cloned;
-  }, [patternGltf.scene]);
-
-  const patternCenterX = outerW / 2 + PATTERN_PAIR_OFFSET_X;
-  const patternCenterY = -outerH / 2 + PATTERN_PAIR_OFFSET_Y;
-  const leftPatternX = patternCenterX - PATTERN_PAIR_GAP / 2;
-  const rightPatternX = patternCenterX + PATTERN_PAIR_GAP / 2;
+  const decorativeY = -outerH / 2;
 
   return (
     <a.group {...dragBind} position-x={dragX} position-y={dragY}>
@@ -364,28 +393,21 @@ export function VerseFiveMetallic() {
             </meshStandardMaterial>
           </mesh>
 
-          {isArabic && (
+          {activeLanguage === "ar" && (
             <>
-              <primitive
-                object={patternScene}
-                position={[leftPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
-                scale={[
-                  PATTERN_PAIR_SCALE,
-                  PATTERN_PAIR_SCALE,
-                  PATTERN_PAIR_SCALE,
-                ]}
-                renderOrder={105}
+              <DecorativeSvg
+                shapes={decorativeShapes}
+                x={outerW - DECORATIVE_SVG_INSET_X}
+                y={decorativeY}
+                rotationZ={-DECORATIVE_SVG_BRACKET_ROTATION}
               />
 
-              <primitive
-                object={patternScene.clone(true)}
-                position={[rightPatternX, patternCenterY, EXTRUDE_DEPTH + 0.0035]}
-                scale={[
-                  -PATTERN_PAIR_SCALE,
-                  PATTERN_PAIR_SCALE,
-                  PATTERN_PAIR_SCALE,
-                ]}
-                renderOrder={105}
+              <DecorativeSvg
+                shapes={decorativeShapes}
+                x={DECORATIVE_SVG_INSET_X}
+                y={decorativeY}
+                rotationZ={DECORATIVE_SVG_BRACKET_ROTATION}
+                mirrorX
               />
             </>
           )}

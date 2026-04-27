@@ -1,3 +1,5 @@
+import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
+
 export interface Verse {
   number: number;
   text: string;
@@ -48,117 +50,135 @@ export interface SectionTwoData {
 // ----------------------------------------------------------------------------
 
 // --- Page Dimensions ---
-export const PAGE_WIDTH = 1.46;
+export const BASE_PAGE_WIDTH = 1.54;
 export const PAGE_HEIGHT = 1.76;
-export const PW = PAGE_WIDTH;
-export const PADDING = 0.19;
-export const CONTENT_W = PW - PADDING * 2;
-export const START_X = PADDING;
 
-// --- Section 1 (Top Block) ---
-const s1Top = -0.06;
-const s1Pad = 0.045;
-const gap = 0.02;
-const s1AnaGap = 0.05;
-const smallBoxH = 0.07;
-const anaAyetH = 0.132;
-const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + s1AnaGap + anaAyetH;
+export function createLayoutMath(pageWidth: number) {
+  const PAGE_WIDTH = pageWidth;
+  const PW = PAGE_WIDTH;
+  const PADDING = 0.29;
+  const CONTENT_W = PW - PADDING * 2;
+  const START_X = PADDING;
 
-// --- Section 2 (Main Lower Block) ---
-const gapBetweenS1andS2 = 0.09;
-const s2TopExtra = 0.019;
-const s2Top = s1Top - s1H - gapBetweenS1andS2;
+  // --- Section 1 (Top Block) ---
+  const s1Top = -0.06;
+  const s1Pad = 0.045;
+  const gap = 0.02;
+  const s1AnaGap = 0.05;
+  const smallBoxH = 0.07;
+  const anaAyetH = 0.132;
+  const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + s1AnaGap + anaAyetH;
 
-const s2PadTop = 0.035 + s2TopExtra;
-const s2PadBottom = 0.06;
-const bigBoxH = 0.125;
-const groupGap = 0.025;
-const groupPad = 0.012;
-const groupPadBottom = 0.025;
-const s2Gap = 0.02;
-const smallBoxH2 = 0.075;
-const groupH = groupPad + groupPadBottom + (smallBoxH2 * 2 + s2Gap);
-const middleExtraGap = 0.033;
+  // --- Section 2 (Main Lower Block) ---
+  const gapBetweenS1andS2 = 0.09;
+  const s2TopExtra = 0.019;
+  const s2Top = s1Top - s1H - gapBetweenS1andS2;
 
-const s2H =
-  s2PadTop +
-  s2PadBottom +
-  bigBoxH * 2 +
-  groupGap * 4 +
-  groupH * 3 +
-  middleExtraGap * 2;
+  const s2PadTop = 0.035 + s2TopExtra;
+  const s2PadBottom = 0.06;
+  const bigBoxH = 0.125;
+  const groupGap = 0.025;
+  const groupPad = 0.012;
+  const groupPadBottom = 0.025;
+  const s2Gap = 0.02;
+  const smallBoxH2 = 0.075;
+  const groupH = groupPad + groupPadBottom + (smallBoxH2 * 2 + s2Gap);
+  const middleExtraGap = 0.033;
 
-// --- Element Y Positions ---
-const v6Y = s2Top - s2PadTop;
-const baseG1Y = v6Y - bigBoxH - groupGap;
-const baseG2Y = baseG1Y - groupH - (groupGap + middleExtraGap);
-const baseG3Y = baseG2Y - groupH - (groupGap + middleExtraGap);
-const baseV19Y = baseG3Y - groupH - groupGap;
+  const s2H =
+    s2PadTop +
+    s2PadBottom +
+    bigBoxH * 2 +
+    groupGap * 4 +
+    groupH * 3 +
+    middleExtraGap * 2;
 
-const g1Y = baseG1Y;
-const g2Y = baseG2Y;
-const g3Y = baseG3Y;
-const v19Y = baseV19Y;
+  // --- Element Y Positions ---
+  const v6Y = s2Top - s2PadTop;
+  const baseG1Y = v6Y - bigBoxH - groupGap;
+  const baseG2Y = baseG1Y - groupH - (groupGap + middleExtraGap);
+  const baseG3Y = baseG2Y - groupH - (groupGap + middleExtraGap);
+  const baseV19Y = baseG3Y - groupH - groupGap;
 
-// ----------------------------------------------------------------------------
-// EXPORTED LAYOUT OBJECT
-// Passed as `layout` prop down to SectionOne, SectionTwo, and SideCurves.
-// ----------------------------------------------------------------------------
-export const layoutMath = {
-  // Section 1
-  sectionW: CONTENT_W,
-  innerW: CONTENT_W - s1Pad * 2,
-  innerHalfW: (CONTENT_W - s1Pad * 2 - gap) / 2,
-  s1Top,
-  s1Pad,
-  gap,
-  s1AnaGap,
-  smallBoxH,
-  anaAyetH,
-  s1H,
+  const g1Y = baseG1Y;
+  const g2Y = baseG2Y;
+  const g3Y = baseG3Y;
+  const v19Y = baseV19Y;
 
-  // Section 2
-  s2Top,
-  s2Pad: s2PadTop,
-  s2PadTop,
-  s2PadBottom,
-  bigBoxH,
-  groupGap,
-  groupPad,
-  s2Gap,
-  smallBoxH2,
-  groupH,
-  s2H,
+  // ----------------------------------------------------------------------------
+  // EXPORTED LAYOUT OBJECT
+  // Passed as `layout` prop down to SectionOne, SectionTwo, and SideCurves.
+  // ----------------------------------------------------------------------------
+  return {
+    PAGE_WIDTH,
+    PAGE_HEIGHT,
+    PW,
+    PADDING,
+    CONTENT_W,
+    START_X,
+    // Section 1
+    sectionW: CONTENT_W,
+    innerW: CONTENT_W - s1Pad * 2,
+    innerHalfW: (CONTENT_W - s1Pad * 2 - gap) / 2,
+    s1Top,
+    s1Pad,
+    gap,
+    s1AnaGap,
+    smallBoxH,
+    anaAyetH,
+    s1H,
 
-  // Absolute Y placements
-  v6Y,
-  g1Y,
-  g2Y,
-  g3Y,
-  v19Y,
-  baseG1Y,
-  baseG3Y,
+    // Section 2
+    s2Top,
+    s2Pad: s2PadTop,
+    s2PadTop,
+    s2PadBottom,
+    bigBoxH,
+    groupGap,
+    groupPad,
+    s2Gap,
+    smallBoxH2,
+    groupH,
+    s2H,
 
-  // Group inner widths
-  groupInnerW: CONTENT_W - 0.07 - groupPad * 2,
-  groupInnerHalfW: (CONTENT_W - 0.07 - groupPad * 2 - s2Gap) / 2,
+    // Absolute Y placements
+    v6Y,
+    g1Y,
+    g2Y,
+    g3Y,
+    v19Y,
+    baseG1Y,
+    baseG3Y,
 
-  // Spacing & decoration offsets
-  s2PadLeftRight: 0.035,
-  g2Shrink: 0.01,
-  s1BorderWidth: 0,
-  anaAyetTabW: 0.2,
-  anaAyetTabH: 0.032,
-  anaAyetTabBorderWidth: 0.0035,
-  // Positive values move only the Ana Ayet label downward.
-  anaAyetLabelDrop: 0.015, // Increased to move the label further down independently!
-  sgPad: 0.03,
-  sgBorderWidth: 0.006,
-  boxExtOffset: 0.02,
-  extraRowGap: 0.01,
-} satisfies Record<string, number>;
+    // Group inner widths
+    groupInnerW: CONTENT_W - 0.07 - groupPad * 2,
+    groupInnerHalfW: (CONTENT_W - 0.07 - groupPad * 2 - s2Gap) / 2,
 
-export type LayoutConfig = typeof layoutMath;
+    // Spacing & decoration offsets
+    s2PadLeftRight: 0.035,
+    g2Shrink: 0.01,
+    s1BorderWidth: 0,
+    anaAyetTabW: 0.2,
+    anaAyetTabH: 0.032,
+    anaAyetTabBorderWidth: 0.0035,
+    // Positive values move only the Ana Ayet label downward.
+    anaAyetLabelDrop: 0.015, // Increased to move the label further down independently!
+    sgPad: 0.03,
+    sgBorderWidth: 0.006,
+    boxExtOffset: 0.02,
+    extraRowGap: 0.01,
+  } satisfies Record<string, number>;
+}
+
+export const layoutMath = createLayoutMath(BASE_PAGE_WIDTH);
+export type LayoutConfig = ReturnType<typeof createLayoutMath>;
+
+// Legacy named exports (base layout). Prefer using `createLayoutMath(...)`.
+export const PAGE_WIDTH = layoutMath.PAGE_WIDTH;
+export const PW = layoutMath.PW;
+export const PADDING = layoutMath.PADDING;
+export const CONTENT_W = layoutMath.CONTENT_W;
+export const START_X = layoutMath.START_X;
 
 // ----------------------------------------------------------------------------
 // CAPSULE BORDER WIDTH
@@ -183,6 +203,8 @@ export const OPPOSITE_VERSE_CONNECTOR = {
   radius: 0.05,
 };
 
+export const VERSE_TEXT_RIGHT_PADDING = 0.003;
+
 // Single source of truth for all three section label widths.
 export const TOP_LABEL_WIDTH = 0.47;
 
@@ -206,96 +228,24 @@ export const S1_NEON_CONFIG = {
 // EXPORTED FOLD POSITIONS
 // Used by animation engine to know where page fold-lines sit.
 // ----------------------------------------------------------------------------
-export const FOLD_Y_POSITIONS: readonly [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-] = [
-  s2Top + gapBetweenS1andS2 / 2, // New fold: between 5 and 6
-  v6Y - bigBoxH - groupGap / 2,
-  g1Y - groupPad - smallBoxH2 - s2Gap / 2,
-  g1Y - groupH - (groupGap + middleExtraGap) / 2,
-  g2Y - groupPad - smallBoxH2 - s2Gap / 2,
-  g2Y - groupH - (groupGap + middleExtraGap) / 2,
-  g3Y - groupPad - smallBoxH2 - s2Gap / 2,
-  g3Y - groupH - groupGap / 2,
-] as const;
+export function createFoldYPositions(
+  lm: LayoutConfig,
+): readonly [number, number, number, number, number, number, number, number] {
+  return [
+    lm.s2Top + 0.09 / 2, // between s1 and s2 (gapBetweenS1andS2 / 2)
+    lm.v6Y - lm.bigBoxH - lm.groupGap / 2,
+    lm.g1Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+    lm.g1Y - lm.groupH - (lm.groupGap + 0.033) / 2, // middleExtraGap / 2
+    lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+    lm.g2Y - lm.groupH - (lm.groupGap + 0.033) / 2,
+    lm.g3Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+    lm.g3Y - lm.groupH - lm.groupGap / 2,
+  ] as const;
+}
 
-// ----------------------------------------------------------------------------
-// SURAH CONTENT DATA
-// The actual Quranic verses and section labels.
-// ColorGroup flags (isPushedIn, isCenter, extraRowGap) drive UI behavior.
-// ----------------------------------------------------------------------------
-export const SURAH_DATA = {
-  bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+export const FOLD_Y_POSITIONS = createFoldYPositions(layoutMath);
 
-  section1: {
-    label: "Beş ayetlik Ana Böl.",
-    gridVerses: [
-      { number: 2, text: "خَلَقَ الْإِنْسَانَ مِنْ عَلَقٍ" },
-      { number: 1, text: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ" },
-      { number: 4, text: "الَّذِي عَلَّمَ بِالْقَلَمِ" },
-      { number: 3, text: "اقْرَأْ وَرَبُّكَ الْأَكْرَمُ" },
-    ],
-    anaAyet: { number: 5, text: "عَلَّمَ الْإِنْسَانَ مَا لَمْ يَعْلَمْ" },
-  } satisfies SectionOneData,
-
-  section2: {
-    topLabel: "Beş ayetlik 1. Açıklama Böl.",
-    introVerse: { number: 6, text: "كَلَّا إِنَّ الْإِنْسَانَ لَيَطْغَىٰ" },
-    colorGroups: [
-      {
-        // Group 1 — Upper maroon block (verses 7–10)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
-        verses: [
-          { number: 8, text: "إِنَّ إِلَىٰ رَبِّكَ الرُّجْعَىٰ" },
-          { number: 7, text: "أَنْ رَآهُ اسْتَغْنَىٰ" },
-          { number: 10, text: "عَبْدًا إِذَا صَلَّىٰ" },
-          { number: 9, text: "أَرَأَيْتَ الَّذِي يَنْهَىٰ" },
-        ],
-      },
-      {
-        // Group 2 — Center green block (verses 11–14), indented/pushed in
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [
-          { number: 12, text: "أَوْ أَمَرَ بِالتَّقْوَىٰ" },
-          { number: 11, text: "أَرَأَيْتَ إِنْ كَانَ عَلَى الْهُدَىٰ" },
-          { number: 14, text: "أَلَمْ يَعْلَمْ بِأَنَّ اللَّهَ يَرَىٰ" },
-          { number: 13, text: "أَرَأَيْتَ إِنْ كَذَّبَ وَتَوَلَّىٰ" },
-        ],
-      },
-      {
-        // Group 3 — Lower maroon block (verses 15–18)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
-        verses: [
-          { number: 16, text: "نَاصِيَةٍ كَاذِبَةٍ خَاطِئَةٍ" },
-          {
-            number: 15,
-            text: "كَلَّا لئِنْ لَمْ يَنْتَهِ لَنَسْفَعًا بِالنَّاصِيَةِ",
-          },
-          { number: 18, text: "سَنَدْعُ الزَّبَانِيَةَ" },
-          { number: 17, text: "فَلْيَدْعُ نَادِيَهُ" },
-        ],
-      },
-    ] satisfies ColorGroup[],
-    outroVerse: {
-      number: 19,
-      text: "كَلَّا لَا تُطِعْهُ وَاسْجُدْ وَاقْتَرِبْ",
-    },
-    bottomLabel: "Beş ayetlik 2. Açıklama Böl.",
-  } satisfies SectionTwoData,
-};
+export { SURAH_DATA };
 
 // ============================================================================
 // LAYOUT ENGINE — AXIS-AGNOSTIC POSITION COMPUTER
@@ -388,9 +338,10 @@ export interface SurahTransforms {
  * the entire Surah layout in a single pass. Call this once at module load
  * time and share the result across all rendering components.
  */
-export function buildSurahTransforms(startX: number): SurahTransforms {
-  const lm = layoutMath;
-
+export function buildSurahTransforms(
+  lm: LayoutConfig,
+  startX: number,
+): SurahTransforms {
   // ── SECTION 1 ──────────────────────────────────────────────────────────────
   const s1BaseX = startX + lm.s1Pad;
   // AnaAyet y absorbs the legacy <group position={[0, -0.01, 0]}> offset so
@@ -583,17 +534,18 @@ export function buildSurahTransforms(startX: number): SurahTransforms {
 
 // Module-level singleton — computed once at boot since all inputs are static constants.
 // All components import `SURAH_TRANSFORMS` directly; no prop-drilling of math needed.
-export const SURAH_TRANSFORMS = buildSurahTransforms(START_X);
+export const SURAH_TRANSFORMS = buildSurahTransforms(layoutMath, START_X);
 
 export function getPopUpTrackerPosition(
   verses: { y: number; h: number }[],
   isGlobal = false,
   s1Top = 0,
+  pageWidth = PAGE_WIDTH,
 ): [number, number] {
   if (isGlobal) {
     return [0, s1Top + 0.25];
   }
   const centerY = verses[0].y - verses[0].h / 2;
-  const btnX = -PAGE_WIDTH / 2 - 0.05;
+  const btnX = -pageWidth / 2 - 0.05;
   return [btnX, centerY];
 }

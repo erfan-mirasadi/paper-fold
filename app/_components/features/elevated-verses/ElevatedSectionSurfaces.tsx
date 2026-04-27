@@ -5,11 +5,10 @@ import { useTexture } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { RoundedShapeComponent } from "../../SurahLayout/SharedUI";
 import {
-  PAGE_WIDTH,
   PAGE_HEIGHT,
-  SURAH_TRANSFORMS,
   OPPOSITE_VERSE_CONNECTOR,
 } from "../../data/SurahConfig";
+import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
 
 import {
@@ -141,6 +140,8 @@ function ElevatedLayer({
   shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
   sectionBgTexture = null,
 }: ElevatedLayerProps) {
+  const runtime = useSurahLayoutRuntime();
+  const PAGE_WIDTH = runtime.PAGE_WIDTH;
   const usesTextureFill = sectionBgTexture != null;
   const baseZ = PAGE_DEPTH / 2 + 0.001 + zOffset;
   const fittedSectionBgTexture = useMemo(() => {
@@ -254,6 +255,9 @@ function DraggableSectionGroup({
 }
 
 export function ElevatedSectionSurfaces() {
+  const runtime = useSurahLayoutRuntime();
+  const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
+
   const sectionBgTexture = useTexture(SECTION_BG_TEXTURE, (texture) => {
     texture.colorSpace = SRGBColorSpace;
   });

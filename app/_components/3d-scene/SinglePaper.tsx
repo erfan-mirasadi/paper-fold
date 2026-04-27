@@ -1,5 +1,6 @@
 "use client";
 import { useScroll } from "@react-three/drei";
+import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
 import {
   FOLD_Y_POSITIONS,
   PAGE_WIDTH,
@@ -35,40 +36,6 @@ const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
 export const foldBonePositions: readonly number[] = FOLD_Y_POSITIONS.map((y) =>
   Math.min(Math.max(Math.abs(y) / SEGMENT_HEIGHT, 0), PAGE_SEGMENTS),
-);
-
-const pageGeometry = new BoxGeometry(
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-  PAGE_DEPTH,
-  2,
-  PAGE_SEGMENTS,
-);
-
-pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
-
-const position = pageGeometry.attributes.position;
-const vertex = new Vector3();
-const skinIndexes: number[] = [];
-const skinWeights: number[] = [];
-
-for (let i = 0; i < position.count; i++) {
-  vertex.fromBufferAttribute(position, i);
-  const distFromTop = -vertex.y;
-  let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
-  skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
-  const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
-  skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
-  skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
-}
-
-pageGeometry.setAttribute(
-  "skinIndex",
-  new Uint16BufferAttribute(skinIndexes, 4),
-);
-pageGeometry.setAttribute(
-  "skinWeight",
-  new Float32BufferAttribute(skinWeights, 4),
 );
 
 const paperBaseColor = new Color(PAGE_BG_COLOR);
@@ -124,7 +91,43 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     };
   }, []);
 
+  const runtime = useSurahLayoutRuntime();
+
   const manualSkinnedMesh = useMemo(() => {
+    const pageGeometry = new BoxGeometry(
+      runtime.PAGE_WIDTH,
+      PAGE_HEIGHT,
+      PAGE_DEPTH,
+      2,
+      PAGE_SEGMENTS,
+    );
+
+    pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
+
+    const position = pageGeometry.attributes.position;
+    const vertex = new Vector3();
+    const skinIndexes: number[] = [];
+    const skinWeights: number[] = [];
+
+    for (let i = 0; i < position.count; i++) {
+      vertex.fromBufferAttribute(position, i);
+      const distFromTop = -vertex.y;
+      let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
+      skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
+      const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
+      skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
+      skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
+    }
+
+    pageGeometry.setAttribute(
+      "skinIndex",
+      new Uint16BufferAttribute(skinIndexes, 4),
+    );
+    pageGeometry.setAttribute(
+      "skinWeight",
+      new Float32BufferAttribute(skinWeights, 4),
+    );
+
     const bones: Bone[] = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
       const bone = new Bone();
@@ -150,7 +153,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
     return mesh;
-  }, []);
+  }, [runtime.PAGE_WIDTH]);
 
   useFrame((_, delta) => {
     if (!skinnedMeshRef.current || !group.current) return;

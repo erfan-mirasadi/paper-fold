@@ -2,19 +2,10 @@
 
 import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import {
-  layoutMath,
-  START_X,
-  PW,
-  CAPSULE_BORDER_WIDTH,
-} from "../data/SurahConfig";
-import {
-  BLUE_THEME,
-  MAROON_THEME,
-  GREEN_THEME,
-} from "../data/theme";
+import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
+import { BLUE_THEME, MAROON_THEME, GREEN_THEME } from "../data/theme";
 import {
   CURVE_GAP,
   CURVE_INWARD_OFFSET,
@@ -23,7 +14,6 @@ import {
   DEFAULT_VERSE_BORDER_WIDTH,
   INNER_CURVE_GAP,
   INNER_CURVE_INWARD_OFFSET,
-  BRACKET_ROUNDNESS,
 } from "./SideCurves";
 
 /**
@@ -170,12 +160,7 @@ const AnimatedArrow = ({
 
   const globalOpacityRef = useRef(0);
   const localTimeRef = useRef(0);
-  
-  // THREE.Path uses Vector2 for getPoint/getTangent
-  const curvePosition2D = useRef(new THREE.Vector2());
-  const curveTangent2D = useRef(new THREE.Vector2());
-  
-  // Resulting 3D vectors
+
   const curvePositionRef = useRef(new THREE.Vector3());
   const curveTangentRef = useRef(new THREE.Vector3());
   const curveNormalRef = useRef(new THREE.Vector3());
@@ -184,25 +169,41 @@ const AnimatedArrow = ({
   const CONTRAST_BOOST = 0.65;
   const GLOW_STRENGTH = 1.0;
 
-  const centerCurve = useMemo(() => {
-    const tipX = (outerTipX + innerTipX) / 2;
-    const controlX = (outerControlX + innerControlX) / 2;
-    const yTop = (outerYTop + innerYTop) / 2;
-    const yBot = (outerYBot + innerYBot) / 2;
-
-    const path = new THREE.Path();
-    const h = Math.abs(yTop - yBot);
-    const rY = h * BRACKET_ROUNDNESS;
-    const k = 0.5522;
-
-    path.moveTo(tipX, yTop);
-    path.bezierCurveTo(controlX, yTop, controlX, yTop - rY * k, controlX, yTop - rY);
-    path.lineTo(controlX, yBot + rY);
-    path.bezierCurveTo(controlX, yBot + rY * k, controlX, yBot, tipX, yBot);
-
-    path.updateArcLengths();
-    return path;
-  }, [outerTipX, innerTipX, outerControlX, innerControlX, outerYTop, innerYTop, outerYBot, innerYBot]);
+  const centerCurve = useMemo(
+    () =>
+      new THREE.CubicBezierCurve3(
+        new THREE.Vector3(
+          (outerTipX + innerTipX) / 2,
+          (outerYTop + innerYTop) / 2,
+          0,
+        ),
+        new THREE.Vector3(
+          (outerControlX + innerControlX) / 2,
+          (outerYTop + innerYTop) / 2,
+          0,
+        ),
+        new THREE.Vector3(
+          (outerControlX + innerControlX) / 2,
+          (outerYBot + innerYBot) / 2,
+          0,
+        ),
+        new THREE.Vector3(
+          (outerTipX + innerTipX) / 2,
+          (outerYBot + innerYBot) / 2,
+          0,
+        ),
+      ),
+    [
+      outerTipX,
+      innerTipX,
+      outerControlX,
+      innerControlX,
+      outerYTop,
+      innerYTop,
+      outerYBot,
+      innerYBot,
+    ],
+  );
 
   const textures = useMemo<ArrowTextures>(() => getArrowTextures(), []);
   const { glowTexture, flareTexture, shadowTexture } = textures;
@@ -224,7 +225,12 @@ const AnimatedArrow = ({
     // React to scroll offset for hiding/showing (fading)
     const shouldHide = scroll.offset < ARROW_FADE_THRESHOLD;
     const targetOp = shouldHide ? 0 : 1;
-    globalOpacityRef.current = THREE.MathUtils.damp(globalOpacityRef.current, targetOp, 4, delta);
+    globalOpacityRef.current = THREE.MathUtils.damp(
+      globalOpacityRef.current,
+      targetOp,
+      4,
+      delta,
+    );
     const go = globalOpacityRef.current;
 
     if (go < 0.001) {
@@ -241,22 +247,22 @@ const AnimatedArrow = ({
     const curveTangent = curveTangentRef.current;
     const curveNormal = curveNormalRef.current;
 
-    // Correctly sample from 2D path into 3D refs
-    centerCurve.getPoint(t, curvePosition2D.current);
-    centerCurve.getTangent(t, curveTangent2D.current);
-    
-    curvePosition.set(curvePosition2D.current.x, curvePosition2D.current.y, 0.0005);
-    curveTangent.set(curveTangent2D.current.x, curveTangent2D.current.y, 0).normalize();
+    centerCurve.getPoint(t, curvePosition);
+    centerCurve.getTangent(t, curveTangent);
+    curveTangent.normalize();
 
     const floatFrequency = 3.0;
-    const floatOffset = Math.sin(state.clock.elapsedTime * floatFrequency + delay) * floatIntensity;
+    const floatOffset =
+      Math.sin(state.clock.elapsedTime * floatFrequency + delay) *
+      floatIntensity;
 
     curveNormal.set(-curveTangent.y, curveTangent.x, 0).normalize();
     curvePosition.addScaledVector(curveNormal, floatOffset);
     curvePosition.z = 0.0005;
 
     groupRef.current.position.copy(curvePosition);
-    groupRef.current.rotation.z = Math.atan2(curveTangent.y, curveTangent.x) - Math.PI / 2;
+    groupRef.current.rotation.z =
+      Math.atan2(curveTangent.y, curveTangent.x) - Math.PI / 2;
 
     innerGroupRef.current.rotation.z = state.clock.elapsedTime * 0.3 + delay;
     flareRef.current.rotation.z -= 0.02;
@@ -281,33 +287,77 @@ const AnimatedArrow = ({
     <group ref={groupRef} renderOrder={1002}>
       <group ref={innerGroupRef}>
         <mesh position={[0.003, -0.003, -0.0002]} renderOrder={998}>
-          <planeGeometry args={[arrowSize * shadowSize, arrowSize * shadowSize]} />
-          <meshBasicMaterial ref={shadowMaterialRef} map={shadowTexture} transparent depthWrite={false} />
+          <planeGeometry
+            args={[arrowSize * shadowSize, arrowSize * shadowSize]}
+          />
+          <meshBasicMaterial
+            ref={shadowMaterialRef}
+            map={shadowTexture}
+            transparent
+            depthWrite={false}
+          />
         </mesh>
 
         <mesh renderOrder={999}>
-          <planeGeometry args={[arrowSize * shadowSize * 1.3, arrowSize * shadowSize * 1.3]} />
-          <meshBasicMaterial ref={darkHaloMaterialRef} map={shadowTexture} transparent depthWrite={false} />
+          <planeGeometry
+            args={[arrowSize * shadowSize * 1.3, arrowSize * shadowSize * 1.3]}
+          />
+          <meshBasicMaterial
+            ref={darkHaloMaterialRef}
+            map={shadowTexture}
+            transparent
+            depthWrite={false}
+          />
         </mesh>
 
         <mesh renderOrder={1000}>
           <planeGeometry args={[arrowSize * glowSize, arrowSize * glowSize]} />
-          <meshBasicMaterial ref={outerGlowMaterialRef} map={glowTexture} color={color} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
+          <meshBasicMaterial
+            ref={outerGlowMaterialRef}
+            map={glowTexture}
+            color={color}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
 
         <mesh renderOrder={1001}>
-          <planeGeometry args={[arrowSize * glowSize * 0.6, arrowSize * glowSize * 0.6]} />
-          <meshBasicMaterial ref={glowMaterialRef} map={glowTexture} color={color} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
+          <planeGeometry
+            args={[arrowSize * glowSize * 0.6, arrowSize * glowSize * 0.6]}
+          />
+          <meshBasicMaterial
+            ref={glowMaterialRef}
+            map={glowTexture}
+            color={color}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
 
         <mesh ref={flareRef} renderOrder={1002}>
-          <planeGeometry args={[arrowSize * flareSize, arrowSize * flareSize]} />
-          <meshBasicMaterial ref={flareMaterialRef} map={flareTexture} color={color} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
+          <planeGeometry
+            args={[arrowSize * flareSize, arrowSize * flareSize]}
+          />
+          <meshBasicMaterial
+            ref={flareMaterialRef}
+            map={flareTexture}
+            color={color}
+            transparent
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
 
         <mesh renderOrder={1003}>
           <circleGeometry args={[arrowSize * 0.5, 32]} />
-          <meshBasicMaterial ref={coreMaterialRef} color="#FFFFFF" transparent depthWrite={false} />
+          <meshBasicMaterial
+            ref={coreMaterialRef}
+            color="#FFFFFF"
+            transparent
+            depthWrite={false}
+          />
         </mesh>
       </group>
     </group>
@@ -317,11 +367,9 @@ const AnimatedArrow = ({
 // --- FloatingArrows Component (Exported) ---
 
 export const FloatingArrows = () => {
-  const scroll = useScroll();
-
-  const layout = layoutMath;
-  const startX = START_X;
-  const borderWidth = CAPSULE_BORDER_WIDTH;
+  const { layoutMath: layout, START_X: startX, PW, SURAH_TRANSFORMS } =
+    useSurahLayoutRuntime();
+  const borderWidth = SURAH_TRANSFORMS.s2.borderWidth;
 
   const {
     s2Pad,
@@ -401,14 +449,114 @@ export const FloatingArrows = () => {
 
   return (
     <group position={[-PW / 2, 0, 0.01]}>
-      <AnimatedArrow outerTipX={tipX_L} innerTipX={innerTipX_L} outerYTop={y6} innerYTop={y6_bot} outerControlX={control1_L} innerControlX={innerControl1_L} outerYBot={y19} innerYBot={y19_top} color={BLUE_THEME} speed={0.05} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_L} innerTipX={innerTipX_L} outerYTop={y8} innerYTop={y8_bot} outerControlX={control2_L} innerControlX={innerControl2_L} outerYBot={y18} innerYBot={y18_top} color={MAROON_THEME} speed={0.06} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_L} innerTipX={innerTipX_L} outerYTop={y10} innerYTop={y10_bot} outerControlX={control3_L} innerControlX={innerControl3_L} outerYBot={y16} innerYBot={y16_top} color={MAROON_THEME} speed={0.055} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_12_14_L} innerTipX={innerTipX_12_14_L} outerYTop={y12} innerYTop={y12_bot} outerControlX={control4_L} innerControlX={innerControl4_L} outerYBot={y14} innerYBot={y14_top} color={GREEN_THEME} speed={0.07} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_R} innerTipX={innerTipX_R} outerYTop={y6} innerYTop={y6_bot} outerControlX={control1_R} innerControlX={innerControl1_R} outerYBot={y19} innerYBot={y19_top} color={BLUE_THEME} speed={0.05} delay={0.5} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_R} innerTipX={innerTipX_R} outerYTop={y8} innerYTop={y8_bot} outerControlX={control2_R} innerControlX={innerControl2_R} outerYBot={y18} innerYBot={y18_top} color={MAROON_THEME} speed={0.06} delay={0.7} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_R} innerTipX={innerTipX_R} outerYTop={y10} innerYTop={y10_bot} outerControlX={control3_R} innerControlX={innerControl3_R} outerYBot={y16} innerYBot={y16_top} color={MAROON_THEME} speed={0.055} delay={0.3} {...arrowProps} />
-      <AnimatedArrow outerTipX={tipX_12_14_R} innerTipX={innerTipX_12_14_R} outerYTop={y12} innerYTop={y12_bot} outerControlX={control4_R} innerControlX={innerControl4_R} outerYBot={y14} innerYBot={y14_top} color={GREEN_THEME} speed={0.07} delay={0.2} {...arrowProps} />
+      <AnimatedArrow
+        outerTipX={tipX_L}
+        innerTipX={innerTipX_L}
+        outerYTop={y6}
+        innerYTop={y6_bot}
+        outerControlX={control1_L}
+        innerControlX={innerControl1_L}
+        outerYBot={y19}
+        innerYBot={y19_top}
+        color={BLUE_THEME}
+        speed={0.05}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_L}
+        innerTipX={innerTipX_L}
+        outerYTop={y8}
+        innerYTop={y8_bot}
+        outerControlX={control2_L}
+        innerControlX={innerControl2_L}
+        outerYBot={y18}
+        innerYBot={y18_top}
+        color={MAROON_THEME}
+        speed={0.06}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_L}
+        innerTipX={innerTipX_L}
+        outerYTop={y10}
+        innerYTop={y10_bot}
+        outerControlX={control3_L}
+        innerControlX={innerControl3_L}
+        outerYBot={y16}
+        innerYBot={y16_top}
+        color={MAROON_THEME}
+        speed={0.055}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_12_14_L}
+        innerTipX={innerTipX_12_14_L}
+        outerYTop={y12}
+        innerYTop={y12_bot}
+        outerControlX={control4_L}
+        innerControlX={innerControl4_L}
+        outerYBot={y14}
+        innerYBot={y14_top}
+        color={GREEN_THEME}
+        speed={0.07}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_R}
+        innerTipX={innerTipX_R}
+        outerYTop={y6}
+        innerYTop={y6_bot}
+        outerControlX={control1_R}
+        innerControlX={innerControl1_R}
+        outerYBot={y19}
+        innerYBot={y19_top}
+        color={BLUE_THEME}
+        speed={0.05}
+        delay={0.5}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_R}
+        innerTipX={innerTipX_R}
+        outerYTop={y8}
+        innerYTop={y8_bot}
+        outerControlX={control2_R}
+        innerControlX={innerControl2_R}
+        outerYBot={y18}
+        innerYBot={y18_top}
+        color={MAROON_THEME}
+        speed={0.06}
+        delay={0.7}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_R}
+        innerTipX={innerTipX_R}
+        outerYTop={y10}
+        innerYTop={y10_bot}
+        outerControlX={control3_R}
+        innerControlX={innerControl3_R}
+        outerYBot={y16}
+        innerYBot={y16_top}
+        color={MAROON_THEME}
+        speed={0.055}
+        delay={0.3}
+        {...arrowProps}
+      />
+      <AnimatedArrow
+        outerTipX={tipX_12_14_R}
+        innerTipX={innerTipX_12_14_R}
+        outerYTop={y12}
+        innerYTop={y12_bot}
+        outerControlX={control4_R}
+        innerControlX={innerControl4_R}
+        outerYBot={y14}
+        innerYBot={y14_top}
+        color={GREEN_THEME}
+        speed={0.07}
+        delay={0.2}
+        {...arrowProps}
+      />
     </group>
   );
 };

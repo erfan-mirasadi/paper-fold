@@ -24,6 +24,7 @@ import {
   CIRCLE_BORDER_WIDTH,
   TOP_LABEL_WIDTH,
   VERSE_5_6_19_RADIUS,
+  VERSE_TEXT_RIGHT_PADDING,
 } from "../data/SurahConfig";
 import {
   ANA_AYET_LABEL_BY_LANGUAGE,
@@ -438,12 +439,9 @@ export const VerseBox = ({
   const textScale = isPill ? langScale.verseSmall : langScale.verseBig;
   const textDirection = isArabic ? "rtl" : "ltr";
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
-  const showVerseNumber = isArabic;
+  const showVerseNumber = true;
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;
-  const textPaddingX = isArabic ? 0 : 0.012;
-  const textAlign = isArabic ? "center" : "left";
-  const textAnchorX = isArabic ? "center" : "left";
 
   const shrinkX = 0.001;
   const finalX = x + shrinkX;
@@ -456,10 +454,28 @@ export const VerseBox = ({
   const SMALL_PILL_OFFSET = 0.002;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
+  const centerTextInCapsule = !isPill;
+
+  // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
+  const circleEnd = cx + cr;
+  const numberSidePadding = showVerseNumber ? circleEnd + 0.012 : 0.012;
+  const textPaddingX = isArabic || centerTextInCapsule ? 0 : numberSidePadding;
+
+  const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
+  const textAnchorX = isArabic || centerTextInCapsule ? "center" : "left";
+
   const safeMargin = 0.0;
+  const centeredSidePadding = centerTextInCapsule ? numberSidePadding : 0;
   const textMaxW =
-    (finalW - safeMargin * 2 - textPaddingX * 2) * nonArabicTextTighten;
-  const textX = isArabic
+    (finalW -
+      safeMargin * 2 -
+      centeredSidePadding * 2 -
+      textPaddingX -
+      (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
+    nonArabicTextTighten;
+  const textX = centerTextInCapsule
+    ? finalW / 2
+    : isArabic
     ? safeMargin + textMaxW / 2
     : safeMargin + textPaddingX;
 

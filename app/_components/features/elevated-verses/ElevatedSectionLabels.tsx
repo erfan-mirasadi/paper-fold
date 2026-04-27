@@ -5,9 +5,8 @@ import { a, to, useSpring } from "@react-spring/three";
 import { TopLabel } from "../../SurahLayout/SharedUI";
 import {
   PAGE_HEIGHT,
-  PAGE_WIDTH,
-  SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
+import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import {
   SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
@@ -60,6 +59,9 @@ function AnimatedElevatedLabel({
   labelZ = 0.00035,
   renderOrder,
 }: AnimatedLabelProps) {
+  const runtime = useSurahLayoutRuntime();
+  const PAGE_WIDTH = runtime.PAGE_WIDTH;
+
   const isActive = useElevatedStore((s) =>
     s.activeSectionIds.includes(sectionId),
   );
@@ -130,6 +132,9 @@ function AnimatedElevatedLabel({
 }
 
 export function ElevatedSectionLabels() {
+  const runtime = useSurahLayoutRuntime();
+  const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
+
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
 

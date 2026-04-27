@@ -87,8 +87,8 @@ export const TEXT_SIZES = {
   TOP_LABEL: 0.023,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,
-  VERSE_TEXT_SMALL: 0.043,
-  VERSE_TEXT_BIG: 0.076,
+  VERSE_TEXT_SMALL: 0.0365,
+  VERSE_TEXT_BIG: 0.071,
 } as const;
 
 // Language-specific multipliers for capsule/label fitting.
@@ -100,13 +100,13 @@ export const LANGUAGE_TEXT_SCALE = {
     topLabel: 1,
   },
   en: {
-    verseSmall: 0.5,
-    verseBig: 0.3,
+    verseSmall: 0.67,
+    verseBig: 0.5,
     topLabel: 1,
   },
   tr: {
-    verseSmall: 0.55,
-    verseBig: 0.4,
+    verseSmall: 0.72,
+    verseBig: 0.5,
     topLabel: 1,
   },
 } as const;

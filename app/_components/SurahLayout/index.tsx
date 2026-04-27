@@ -3,14 +3,7 @@ import { OrthographicCamera, useTexture } from "@react-three/drei";
 import { Boarder } from "./Boarder";
 import { SectionOne } from "./SectionOne";
 import { SectionTwo } from "./SectionTwo";
-import {
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-  PW,
-  START_X,
-  layoutMath,
-  SURAH_TRANSFORMS,
-} from "../data/SurahConfig";
+import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
 import {
   SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
@@ -22,11 +15,21 @@ import {
   // QURAN_FONT,
 } from "../data/theme";
 
-export { PAGE_WIDTH, PAGE_HEIGHT, PW, layoutMath, SURAH_TRANSFORMS };
+export {
+  PAGE_WIDTH,
+  PAGE_HEIGHT,
+  PW,
+  layoutMath,
+  SURAH_TRANSFORMS,
+} from "../data/SurahConfig";
 export { FOLD_Y_POSITIONS } from "../data/SurahConfig";
 export { SurahLayout, SurahLayout as PaperContent };
 
-const ImageContent: React.FC<{ url: string }> = ({ url }) => {
+const ImageContent: React.FC<{
+  url: string;
+  PW: number;
+  PAGE_HEIGHT: number;
+}> = ({ url, PW, PAGE_HEIGHT }) => {
   const texture = useTexture(url);
   return (
     <mesh position={[PW / 2, -PAGE_HEIGHT / 2, 0]}>
@@ -41,15 +44,19 @@ interface SurahLayoutProps {
   isFolded?: boolean;
 }
 
-function SurahLayout({
-  imageUrl,
-  isFolded = false,
-}: SurahLayoutProps) {
+function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const runtime = useSurahLayoutRuntime();
 
   if (imageUrl) {
-    return <ImageContent url={imageUrl} />;
+    return (
+      <ImageContent
+        url={imageUrl}
+        PW={runtime.PW}
+        PAGE_HEIGHT={runtime.PAGE_HEIGHT}
+      />
+    );
   }
 
   const activeBg = PAGE_BG_COLOR;
@@ -57,8 +64,8 @@ function SurahLayout({
   return (
     <>
       {/* Full-page background plane */}
-      <mesh position={[PW / 2, -PAGE_HEIGHT / 2, -0.05]}>
-        <planeGeometry args={[PW * 1.5, PAGE_HEIGHT * 1.5]} />
+      <mesh position={[runtime.PW / 2, -runtime.PAGE_HEIGHT / 2, -0.05]}>
+        <planeGeometry args={[runtime.PW * 1.5, runtime.PAGE_HEIGHT * 1.5]} />
         <meshBasicMaterial color={activeBg} />
       </mesh>
 
@@ -66,14 +73,14 @@ function SurahLayout({
       <OrthographicCamera
         makeDefault
         left={0}
-        right={PAGE_WIDTH}
+        right={runtime.PAGE_WIDTH}
         top={0}
-        bottom={-PAGE_HEIGHT}
+        bottom={-runtime.PAGE_HEIGHT}
         position={[0, 0, 5]}
       />
 
       {/* Outer decorative card border */}
-      <Boarder PW={PW} PAGE_HEIGHT={PAGE_HEIGHT} />
+      <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} />
 
       {/* Bismillah header */}
       {/* <Text
@@ -93,18 +100,18 @@ function SurahLayout({
       {/* Upper section — receives pre-computed S1Transforms, does zero math */}
       <SectionOne
         data={surahData.section1}
-        transforms={SURAH_TRANSFORMS.s1}
-        PW={PW}
+        transforms={runtime.SURAH_TRANSFORMS.s1}
+        PW={runtime.PW}
         isFolded={isFolded}
       />
 
       {/* Lower section — receives pre-computed S2Transforms, does zero math */}
       <SectionTwo
         data={surahData.section2}
-        transforms={SURAH_TRANSFORMS.s2}
-        layout={layoutMath}
-        startX={START_X}
-        PW={PW}
+        transforms={runtime.SURAH_TRANSFORMS.s2}
+        layout={runtime.layoutMath}
+        startX={runtime.START_X}
+        PW={runtime.PW}
         isFolded={isFolded}
       />
     </>

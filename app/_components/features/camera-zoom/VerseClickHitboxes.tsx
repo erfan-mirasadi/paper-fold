@@ -1,13 +1,13 @@
 "use client";
+import { useMemo } from "react";
 
 import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
 import {
-  PAGE_WIDTH,
   PAGE_HEIGHT,
   SURAH_DATA,
-  SURAH_TRANSFORMS,
 } from "../../data/SurahConfig";
+import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
   useElevatedStore,
@@ -47,10 +47,11 @@ const LABEL_HITBOX = {
   height: 0.07,
 };
 
-function buildHitboxes(): VerseHitbox[] {
+function buildHitboxes(runtime: ReturnType<typeof useSurahLayoutRuntime>): VerseHitbox[] {
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;
   const zSection = zFront - 0.0008;
+  const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
   const s1 = SURAH_TRANSFORMS.s1;
   SURAH_DATA.section1.gridVerses.forEach((v) => {
@@ -239,8 +240,6 @@ function buildHitboxes(): VerseHitbox[] {
   return hitboxes;
 }
 
-const HITBOXES = buildHitboxes();
-
 const canUseElevatedInteraction = (
   kind?: string,
   verseId?: number,
@@ -290,9 +289,12 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
 };
 
 export function VerseClickHitboxes() {
+  const runtime = useSurahLayoutRuntime();
+  const hitboxes = useMemo(() => buildHitboxes(runtime), [runtime]);
+
   return (
     <group position={[0, PAGE_HEIGHT / 2, 0]}>
-      {HITBOXES.map((hb) => (
+      {hitboxes.map((hb) => (
         <mesh
           key={`hitbox-${hb.key}`}
           position={[hb.cx, hb.cy, hb.cz]}

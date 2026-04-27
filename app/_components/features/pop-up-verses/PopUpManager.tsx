@@ -30,17 +30,10 @@ import {
   CAPSULE_BG_6_19,
 } from "../../data/theme";
 import {
-  layoutMath,
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-  START_X,
-  getPopUpTrackerPosition,
-  SURAH_TRANSFORMS,
-} from "../../data/SurahConfig";
-import {
   SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
 } from "../../data/useSurahLanguageStore";
+import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 
 interface VerseConfig {
@@ -85,49 +78,28 @@ const ZERO_OFFSET = { x: 0, y: 0 };
 
 function buildVerseConfigs(
   surahData: (typeof SURAH_DATA_BY_LANGUAGE)["ar"],
+  runtime: ReturnType<typeof useSurahLayoutRuntime>,
 ): VerseConfig[] {
   const configs: VerseConfig[] = [];
-  const {
-    sectionW,
-    s1Top,
-    s1Pad,
-    gap,
-    smallBoxH,
-    innerHalfW,
-    s2PadLeftRight,
-    groupPad,
-    s2Gap,
-    smallBoxH2,
-    groupInnerHalfW,
-    g1Y,
-    g2Y,
-    g3Y,
-    g2Shrink,
-    extraRowGap,
-  } = layoutMath;
+  const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  //  Section 1 (Verses 1 to 4)
-  const s1BaseX = START_X + s1Pad;
+  // Section 1 (Verses 1 to 4)
   surahData.section1.gridVerses.forEach((v, i) => {
     const isRightCol = i % 2 !== 0;
-    const isBottomRow = i >= 2;
-    const w = innerHalfW;
-    const h = smallBoxH;
+    const t = SURAH_TRANSFORMS.s1.verses[v.number];
+    if (!t) return;
 
-    const localX = s1BaseX + (isRightCol ? w + gap : 0);
-    const worldX = localX - PAGE_WIDTH / 2;
-    const y = s1Top - s1Pad - (isBottomRow ? h + gap : 0);
-
+    const worldX = t.x - PAGE_WIDTH / 2;
     const direction = isRightCol ? "right" : "left";
-    const hingeX = isRightCol ? worldX : worldX + w;
+    const hingeX = isRightCol ? worldX : worldX + t.w;
 
     configs.push({
       id: v.number,
       verse: v.text,
       number: v.number,
-      y,
-      w,
-      h,
+      y: t.y,
+      w: t.w,
+      h: t.h,
       hingeX,
       direction,
       bg: S1_INNER_BG,
@@ -156,103 +128,35 @@ function buildVerseConfigs(
     isPill: false,
   });
 
-  // 2. Section 2 Bases
-  const s2BaseX = START_X + s2PadLeftRight;
+  // Section 2 Color Groups
+  surahData.section2.colorGroups.forEach((group, gIdx) => {
+    const bg = gIdx === 1 ? CAPSULE_BG_12_14 : CAPSULE_BG_7_10_15_18;
+    const border = gIdx === 1 ? GREEN_THEME : MAROON_THEME;
 
-  // Group 1 (Verses 7 to 10)
-  surahData.section2.colorGroups[0].verses.forEach((v, i) => {
-    const isRightCol = i % 2 !== 0;
-    const isBottomRow = i >= 2;
-    const w = groupInnerHalfW;
-    const h = smallBoxH2;
+    group.verses.forEach((v, i) => {
+      const isRightCol = i % 2 !== 0;
+      const t = SURAH_TRANSFORMS.s2.groups[gIdx].verses[v.number];
+      if (!t) return;
 
-    const localX = s2BaseX + groupPad + (isRightCol ? w + s2Gap : 0);
-    const worldX = localX - PAGE_WIDTH / 2;
-    const y = g1Y - groupPad - (isBottomRow ? h + s2Gap + extraRowGap : 0);
+      const worldX = t.x - PAGE_WIDTH / 2;
+      const direction = isRightCol ? "right" : "left";
+      const hingeX = isRightCol ? worldX : worldX + t.w;
 
-    const direction = isRightCol ? "right" : "left";
-    const hingeX = isRightCol ? worldX : worldX + w;
-
-    configs.push({
-      id: v.number,
-      verse: v.text,
-      number: v.number,
-      y,
-      w,
-      h,
-      hingeX,
-      direction,
-      bg: CAPSULE_BG_7_10_15_18,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_7_10_15_18,
-      circleTextCol: MAROON_THEME,
-    });
-  });
-
-  // Group 2 (Verses 11 to 14)
-  const g2BaseX = s2BaseX + g2Shrink;
-  const g2InnerW = sectionW - s2PadLeftRight * 2 - g2Shrink * 2;
-  const g2GroupInnerHalfW = (g2InnerW - groupPad * 2 - s2Gap) / 2;
-
-  surahData.section2.colorGroups[1].verses.forEach((v, i) => {
-    const isRightCol = i % 2 !== 0;
-    const isBottomRow = i >= 2;
-    const w = g2GroupInnerHalfW;
-    const h = smallBoxH2;
-
-    const localX = g2BaseX + groupPad + (isRightCol ? w + s2Gap : 0);
-    const worldX = localX - PAGE_WIDTH / 2;
-    const y = g2Y - groupPad - (isBottomRow ? h + s2Gap : 0);
-
-    const direction = isRightCol ? "right" : "left";
-    const hingeX = isRightCol ? worldX : worldX + w;
-
-    configs.push({
-      id: v.number,
-      verse: v.text,
-      number: v.number,
-      y,
-      w,
-      h,
-      hingeX,
-      direction,
-      bg: CAPSULE_BG_12_14,
-      border: GREEN_THEME,
-      circleBorderCol: GREEN_THEME,
-      circleBg: CAPSULE_BG_12_14,
-      circleTextCol: GREEN_THEME,
-    });
-  });
-
-  // Group 3 (Verses 15 to 18)
-  surahData.section2.colorGroups[2].verses.forEach((v, i) => {
-    const isRightCol = i % 2 !== 0;
-    const isBottomRow = i >= 2;
-    const w = groupInnerHalfW;
-    const h = smallBoxH2;
-
-    const localX = s2BaseX + groupPad + (isRightCol ? w + s2Gap : 0);
-    const worldX = localX - PAGE_WIDTH / 2;
-    const y = g3Y - groupPad - (isBottomRow ? h + s2Gap + extraRowGap : 0);
-
-    const direction = isRightCol ? "right" : "left";
-    const hingeX = isRightCol ? worldX : worldX + w;
-
-    configs.push({
-      id: v.number,
-      verse: v.text,
-      number: v.number,
-      y,
-      w,
-      h,
-      hingeX,
-      direction,
-      bg: CAPSULE_BG_7_10_15_18,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_7_10_15_18,
-      circleTextCol: MAROON_THEME,
+      configs.push({
+        id: v.number,
+        verse: v.text,
+        number: v.number,
+        y: t.y,
+        w: t.w,
+        h: t.h,
+        hingeX,
+        direction,
+        bg,
+        border,
+        circleBorderCol: border,
+        circleBg: bg,
+        circleTextCol: border,
+      });
     });
   });
 
@@ -278,10 +182,14 @@ function buildVerseConfigs(
 }
 
 export function PopUpManager() {
-  const { s1Top } = layoutMath;
+  const runtime = useSurahLayoutRuntime();
+  const { s1Top } = runtime.layoutMath;
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
-  const verseConfigs = useMemo(() => buildVerseConfigs(surahData), [surahData]);
+  const verseConfigs = useMemo(
+    () => buildVerseConfigs(surahData, runtime),
+    [surahData, runtime],
+  );
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
@@ -306,7 +214,7 @@ export function PopUpManager() {
   };
 
   return (
-    <group position={[0, PAGE_HEIGHT / 2, 0]}>
+    <group position={[0, runtime.PAGE_HEIGHT / 2, 0]}>
       {verseConfigs.map((config) => {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;
@@ -368,6 +276,7 @@ function PopUpCardWrapper({
   zBaseOffset: number;
   backfaceColor: string;
 }) {
+  const runtime = useSurahLayoutRuntime();
   const [hasEverBeenElevated, setHasEverBeenElevated] = useState(isElevated);
   useEffect(() => {
     if (!isElevated) return;
@@ -420,7 +329,7 @@ function PopUpCardWrapper({
     horizontalDirection,
     isMiddleFoldCandidate,
   );
-  const middleGapHalf = layoutMath.s2Gap / 2;
+  const middleGapHalf = runtime.layoutMath.s2Gap / 2;
   const horizontalPivotOffsetY = isMiddleTopRow
     ? -(config.h + middleGapHalf)
     : isMiddleBottomRow
