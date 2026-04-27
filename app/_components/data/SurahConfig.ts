@@ -48,10 +48,10 @@ export interface SectionTwoData {
 // ----------------------------------------------------------------------------
 
 // --- Page Dimensions ---
-export const PAGE_WIDTH = 1.54;
+export const PAGE_WIDTH = 1.46;
 export const PAGE_HEIGHT = 1.76;
 export const PW = PAGE_WIDTH;
-export const PADDING = 0.29;
+export const PADDING = 0.19;
 export const CONTENT_W = PW - PADDING * 2;
 export const START_X = PADDING;
 

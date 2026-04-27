@@ -11,21 +11,22 @@ import {
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
 } from "../data/theme";
-// import { AnimatedArrow } from "./AnimatedArrow";
 import { usePopUpStore } from "../features/pop-up-verses/ui/usePopUpStore";
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../data/SurahConfig";
 
-const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
-const CURVE_INWARD_OFFSET = 0.015; // How far the bracket tip pokes inward
-const CURVE_DEEP_OFFSET_OUTER = 0.025; // Deeper tip for the center (12–14) bracket
-const CURVE_DEEP_OFFSET_INNER = 0.028; // Deeper inner tip for center bracket
-const DEFAULT_VERSE_BORDER_WIDTH = 0.004; // Matches VerseBox default border width
+export const CURVE_GAP = 0.049; // Bow step between nesting levels (outer)
+export const CURVE_INWARD_OFFSET = 0.015; // How far the bracket tip pokes inward
+export const CURVE_DEEP_OFFSET_OUTER = 0.025; // Deeper tip for the center (12–14) bracket
+export const CURVE_DEEP_OFFSET_INNER = 0.028; // Deeper inner tip for center bracket
+export const DEFAULT_VERSE_BORDER_WIDTH = 0.004; // Matches VerseBox default border width
 
-const INNER_CURVE_GAP = 0.095; // Bow step for inner curves
-const INNER_CURVE_INWARD_OFFSET = 0.009; // Inner tip penetration
-
+export const INNER_CURVE_GAP = 0.042; // Bow step for inner curves
+export const INNER_CURVE_INWARD_OFFSET = 0.009; // Inner tip penetration
+// ── Curve shape constants
+// 0.0 is a sharp square bracket [], 0.5 is a full smooth curve ()
+export const BRACKET_ROUNDNESS = 0.4;
 // ── Line width constants
 // Edit these two values to adjust the thickness of the side-curve outlines.
 export const CURVE_OUTER_LINE_WIDTH = 2;
@@ -43,13 +44,33 @@ const getSmoothCurvePoints = (
   yTop: number,
   yBot: number,
 ) => {
-  const curve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(tipX, yTop, 0),
-    new THREE.Vector3(controlX, yTop, 0),
-    new THREE.Vector3(controlX, yBot, 0),
-    new THREE.Vector3(tipX, yBot, 0),
+  const path = new THREE.Path();
+  const h = Math.abs(yTop - yBot);
+  // rY determines how much of the height is devoted to the curve.
+  const rY = h * BRACKET_ROUNDNESS;
+  // Mathematical constant (Kappa) to approximate a circular arc with a Cubic Bezier.
+  const k = 0.5522;
+
+  path.moveTo(tipX, yTop);
+
+  // Corner 1: From tip to the vertical side.
+  // The second control point is pulled down by k to create a fuller, rounder shoulder.
+  path.bezierCurveTo(
+    controlX,
+    yTop,
+    controlX,
+    yTop - rY * k,
+    controlX,
+    yTop - rY,
   );
-  return curve.getPoints(50);
+
+  // Straight vertical segment in the middle (visible when BRACKET_ROUNDNESS < 0.5)
+  path.lineTo(controlX, yBot + rY);
+
+  // Corner 2: From vertical side back to tip.
+  path.bezierCurveTo(controlX, yBot + rY * k, controlX, yBot, tipX, yBot);
+
+  return path.getPoints(50);
 };
 // CurvePair — renders one nested bracket (outer line + inner line + fill mesh)
 const CurvePair = ({
@@ -63,7 +84,6 @@ const CurvePair = ({
   innerTipX,
   color,
   fillColor,
-  isRight,
   shouldHide = false,
 }: {
   outerYTop: number;
@@ -194,41 +214,6 @@ const CurvePair = ({
         />
       </mesh>
 
-      {/* Two staggered animated arrows per bracket for a layered look */}
-      {/* <AnimatedArrow
-        outerTipX={outerTipX}
-        innerTipX={innerTipX}
-        outerYTop={outerYTop}
-        innerYTop={innerYTop}
-        outerControlX={outerControlX}
-        innerControlX={innerControlX}
-        outerYBot={outerYBot}
-        innerYBot={innerYBot}
-        color={color}
-        delay={isRight ? 0.2 : 0}
-        speed={0.05}
-        arrowSize={0.005}
-        floatIntensity={0.0005}
-        glowSize={2}
-        shouldHide={shouldHide}
-      />
-      <AnimatedArrow
-        outerTipX={outerTipX}
-        innerTipX={innerTipX}
-        outerYTop={outerYTop}
-        innerYTop={innerYTop}
-        outerControlX={outerControlX}
-        innerControlX={innerControlX}
-        outerYBot={outerYBot}
-        innerYBot={innerYBot}
-        color={color}
-        delay={isRight ? 0.7 : 0.5}
-        speed={0.06}
-        arrowSize={0.004}
-        floatIntensity={0.0009}
-        glowSize={2}
-        shouldHide={shouldHide}
-      /> */}
     </group>
   );
 };

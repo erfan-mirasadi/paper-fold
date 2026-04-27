@@ -15,6 +15,7 @@ import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSecti
 import { useDragState } from "../features/elevated-verses/drag/dragEngine";
 import { CAMERA_CONFIG } from "../data/cameraConfig";
 import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
+import { BackgroundText } from "./BackgroundText";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -98,6 +99,8 @@ export function Experience({
         <planeGeometry args={[50, 50]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
+
+      <BackgroundText isDarkMode={isDarkMode} />
 
       <DynamicControls />
 
