@@ -106,7 +106,7 @@ export const LANGUAGE_TEXT_SCALE = {
   },
   tr: {
     verseSmall: 0.72,
-    verseBig: 0.5,
+    verseBig: 0.49,
     topLabel: 1,
   },
 } as const;

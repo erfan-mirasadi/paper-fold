@@ -35,6 +35,7 @@ import {
 } from "../elevated-verses/useElevateAnimation";
 import { a, to, useSpring } from "@react-spring/three";
 import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
+import { calculateSectionBounds } from "../elevated-verses/drag/boundsHelper";
 import { dragEngine, useDragState } from "../elevated-verses/drag/dragEngine";
 
 // --- ADJUSTABLE PARAMETERS ---
@@ -178,11 +179,19 @@ export function VerseFiveMetallic() {
   const baseX = t.x - PAGE_WIDTH / 2 - BW - CAPSULE_SIDE_EXPAND;
   const baseY = t.y + BW;
 
+  const sectionBounds = useMemo(
+    () => calculateSectionBounds("s1", SURAH_TRANSFORMS, PAGE_WIDTH),
+    [SURAH_TRANSFORMS, PAGE_WIDTH],
+  );
+
   const dragBind = useElevatedDrag({
     enabled: isElevated || isSectionSurfaceRaised,
     springX: verseDrag.x,
     springY: verseDrag.y,
     dragVerseId: 5,
+    sectionBounds,
+    sectionSpringX: sectionDrag.x,
+    sectionSpringY: sectionDrag.y,
   });
 
   const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(5));
@@ -354,12 +363,7 @@ export function VerseFiveMetallic() {
               metalness={0.1}
               roughness={0.8}
             >
-              <RenderTexture
-                attach="map"
-                width={512}
-                height={256}
-                frames={Infinity}
-              >
+              <RenderTexture attach="map" width={512} height={256} frames={4}>
                 <OrthographicCamera
                   makeDefault
                   manual

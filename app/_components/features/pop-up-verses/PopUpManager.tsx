@@ -15,6 +15,7 @@ import {
   getVerseSectionId,
   useDragState,
 } from "../elevated-verses/drag/dragEngine";
+import { calculateSectionBounds } from "../elevated-verses/drag/boundsHelper";
 import { VerseFiveMetallic } from "./VerseFiveMetallic";
 import { PopUpHoverSensors } from "./hover-scroll/PopUpHoverSensors";
 import {
@@ -64,6 +65,26 @@ const SECTION_SURFACE_SHADOW_MOTION = {
     friction: 22,
   },
 } as const;
+
+/** Static verse-pair mapping: paired verses share a single drag lead. */
+const VERSE_PAIR_LEAD: Record<number, number> = {
+  1: 1,
+  2: 1,
+  3: 3,
+  4: 3,
+  7: 7,
+  8: 7,
+  9: 9,
+  10: 9,
+  11: 11,
+  12: 11,
+  13: 13,
+  14: 13,
+  15: 15,
+  16: 15,
+  17: 17,
+  18: 17,
+};
 
 function getShadowSurfaceSectionId(
   verseId: number,
@@ -337,27 +358,7 @@ function PopUpCardWrapper({
       : 0;
 
   const sectionId = getVerseSectionId(config.id);
-
-  // Define pairings and determine the "lead" verse for shared dragging
-  const pairs: Record<number, number> = {
-    1: 1,
-    2: 1,
-    3: 3,
-    4: 3,
-    7: 7,
-    8: 7,
-    9: 9,
-    10: 9,
-    11: 11,
-    12: 11,
-    13: 13,
-    14: 13,
-    15: 15,
-    16: 15,
-    17: 17,
-    18: 17,
-  };
-  const leadVerseId = pairs[config.id] ?? config.id;
+  const leadVerseId = VERSE_PAIR_LEAD[config.id] ?? config.id;
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
@@ -371,6 +372,15 @@ function PopUpCardWrapper({
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
+  const sectionBounds = useMemo(() => {
+    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === "s2_center") return undefined;
+    return calculateSectionBounds(
+      sectionId,
+      runtime.SURAH_TRANSFORMS,
+      runtime.PAGE_WIDTH,
+    );
+  }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
+
   const dragBind = useElevatedDrag({
     enabled: isElevated || isSectionSurfaceRaised,
     springX:
@@ -379,6 +389,9 @@ function PopUpCardWrapper({
       useSectionGroupDrag && sectionDrag ? sectionDrag.y : leadVerseDrag.y,
     dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
     dragSectionId: useSectionGroupDrag ? "s2_center" : undefined,
+    sectionBounds,
+    sectionSpringX: sectionDrag?.x,
+    sectionSpringY: sectionDrag?.y,
   });
 
   const dragX = to(
