@@ -1,4 +1,5 @@
 "use client";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Canvas } from "@react-three/fiber";
 import { Preload, ScrollControls } from "@react-three/drei";
@@ -62,13 +63,14 @@ export default function Home() {
         transition: "background-color 0.5s ease",
       }}
     >
-      <Suspense fallback={<SiteLoadingOverlay isDarkMode={isDarkMode} />}>
+      <Suspense fallback={null}>
         <div
           style={{
             width: "100vw",
             height: "100dvh",
             opacity: isSceneReady ? 1 : 0,
-            transition: "opacity 0.45s ease",
+            transition: "opacity 0.5s ease",
+            transitionDelay: isSceneReady ? "0.2s" : "0s",
           }}
         >
           <Canvas
@@ -96,19 +98,29 @@ export default function Home() {
           </Canvas>
         </div>
       </Suspense>
-      {!isSceneReady && <SiteLoadingOverlay isDarkMode={isDarkMode} />}
-      <CameraResetOverlay />
-      {/* PopUpUI removed: hover/scroll flow doesn't need DOM anchors */}
-      {/* <VerseNeonHTMLOverlay /> */}
-      <NavigationOverlay isDarkMode={isDarkMode} />
-      <TitleOverlay isDarkMode={isDarkMode} />
-      <AllSectionsOverlay isDarkMode={isDarkMode} />
-      <LanguageSwitchOverlay isDarkMode={isDarkMode} />
-      <ThemeToggleOverlay
-        isDarkMode={isDarkMode}
-        onToggle={handleThemeToggle}
-      />
-      <CameraViewPresetOverlay />
+      <AnimatePresence>
+        {!isSceneReady && (
+          <SiteLoadingOverlay key="site-loader" isDarkMode={isDarkMode} />
+        )}
+      </AnimatePresence>
+      {isSceneReady && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <CameraResetOverlay />
+          <NavigationOverlay isDarkMode={isDarkMode} />
+          <TitleOverlay isDarkMode={isDarkMode} />
+          <AllSectionsOverlay isDarkMode={isDarkMode} />
+          <LanguageSwitchOverlay isDarkMode={isDarkMode} />
+          <ThemeToggleOverlay
+            isDarkMode={isDarkMode}
+            onToggle={handleThemeToggle}
+          />
+          <CameraViewPresetOverlay />
+        </motion.div>
+      )}
     </main>
   );
 }

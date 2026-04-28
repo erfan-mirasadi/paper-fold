@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import Image from "next/image";
 
 interface TitleOverlayProps {
   isDarkMode?: boolean;
@@ -13,7 +12,7 @@ export function TitleOverlay({ isDarkMode = false }: TitleOverlayProps) {
   const insetY = "clamp(12px, 2vw, 16px)";
   const buttonH = "clamp(38px, 4.2vw, 44px)";
   const radius = "clamp(12px, 1.4vw, 14px)";
-  const fontSize = "clamp(14px, 1.6vw, 17px)";
+  const fontSize = "clamp(14px, 1.6vw, 22px)";
   const paddingX = "clamp(24px, 3vw, 40px)";
 
   const theme = useMemo(() => {
@@ -30,11 +29,6 @@ export function TitleOverlay({ isDarkMode = false }: TitleOverlayProps) {
 
     return { border, background, shadow, text };
   }, [isDarkMode]);
-
-  // --- ADJUSTABLE DECORATION SETTINGS ---
-  const decoOpacity = 0.3; // Scale 0 to 1
-  const decoSize = 36; // Size of the decorative element
-  // --------------------------------------
 
   return (
     <motion.div
@@ -67,70 +61,6 @@ export function TitleOverlay({ isDarkMode = false }: TitleOverlayProps) {
         overflow: "hidden",
       }}
     >
-      {/* Decorative Corners */}
-      <Image
-        src="/decorative.svg"
-        alt=""
-        width={decoSize}
-        height={decoSize}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          zIndex: 1,
-          opacity: decoOpacity,
-          pointerEvents: "none",
-          filter: isDarkMode ? "invert(1) brightness(1.5)" : "none",
-        }}
-      />
-      <Image
-        src="/decorative.svg"
-        alt=""
-        width={decoSize}
-        height={decoSize}
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          zIndex: 1,
-          opacity: decoOpacity,
-          pointerEvents: "none",
-          transform: "rotate(90deg)",
-          filter: isDarkMode ? "invert(1) brightness(1.5)" : "none",
-        }}
-      />
-      <Image
-        src="/decorative.svg"
-        alt=""
-        width={decoSize}
-        height={decoSize}
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          zIndex: 1,
-          opacity: decoOpacity,
-          pointerEvents: "none",
-          transform: "rotate(-90deg)",
-          filter: isDarkMode ? "invert(1) brightness(1.5)" : "none",
-        }}
-      />
-      <Image
-        src="/decorative.svg"
-        alt=""
-        width={decoSize}
-        height={decoSize}
-        style={{
-          position: "absolute",
-          bottom: 0,
-          right: 0,
-          zIndex: 1,
-          opacity: decoOpacity,
-          pointerEvents: "none",
-          transform: "rotate(180deg)",
-          filter: isDarkMode ? "invert(1) brightness(1.5)" : "none",
-        }}
-      />
       ALAK SURESİ
     </motion.div>
   );

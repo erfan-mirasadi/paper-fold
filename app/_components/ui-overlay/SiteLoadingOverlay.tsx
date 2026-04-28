@@ -1,6 +1,5 @@
 "use client";
-
-import type { CSSProperties } from "react";
+import { motion } from "framer-motion";
 
 interface SiteLoadingOverlayProps {
   isDarkMode?: boolean;
@@ -9,15 +8,28 @@ interface SiteLoadingOverlayProps {
 export function SiteLoadingOverlay({
   isDarkMode = false,
 }: SiteLoadingOverlayProps) {
+  // Keeping all your original text and glow colors
   const textColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
-  const mutedText = isDarkMode
-    ? "rgba(241,246,255,0.56)"
-    : "rgba(15,18,24,0.58)";
-  const accent = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
   const glow = isDarkMode ? "rgba(210,228,255,0.55)" : "rgba(35,42,55,0.24)";
 
+  // Dynamic fill and stroke colors based on the theme
+  const fillColor = isDarkMode ? "#ffffff" : "#0F1218";
+  const strokeColor = isDarkMode ? "#ffffff" : "#0F1218";
+
   return (
-    <div
+    <motion.div
+      key="loading-overlay"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ 
+        opacity: 0,
+        scale: 1.05,
+        filter: "blur(10px)"
+      }}
+      transition={{ 
+        duration: 0.7, 
+        ease: [0.22, 1, 0.36, 1] 
+      }}
       aria-live="polite"
       aria-busy="true"
       role="status"
@@ -27,11 +39,10 @@ export function SiteLoadingOverlay({
         zIndex: 1000,
         display: "grid",
         placeItems: "center",
-        background: "transparent",
+        background: isDarkMode ? "#000" : "#fff",
         color: textColor,
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-        backdropFilter: "blur(16px) saturate(125%)",
-        WebkitBackdropFilter: "blur(16px) saturate(125%)",
+        willChange: "opacity, transform, filter",
       }}
     >
       <div
@@ -44,142 +55,53 @@ export function SiteLoadingOverlay({
           pointerEvents: "none",
         }}
       >
-        <div
-          className="quran-fold-loader"
-          style={
-            {
-              "--loader-accent": accent,
-              "--loader-glow": glow,
-            } as CSSProperties
-          }
-        >
-          <i />
-          <i />
-          <i />
-          <b />
-        </div>
-
-        <div
+        <motion.svg
+          width="120"
+          height="120"
+          viewBox="0 0 200 200" // Updated to match your SVG exact dimensions
+          xmlns="http://www.w3.org/2000/svg"
           style={{
-            marginTop: 22,
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: "0.01em",
-            textShadow: isDarkMode
-              ? "0 1px 18px rgba(210,228,255,0.34)"
-              : "0 1px 18px rgba(255,255,255,0.78)",
+            filter: `drop-shadow(0 10px 20px ${glow})`,
+            overflow: "visible",
           }}
         >
-          Loading...
-        </div>
+          <motion.path
+            // Added fillRule and clipRule in camelCase for React compatibility
+            fillRule="evenodd"
+            clipRule="evenodd"
+            // Inserted your exact SVG path data
+            d="M116.755 30.2797C136.237 -21.6484 176.299 4.9945 187.955 38.2775C193.879 60.4506 192.022 69.3363 192.362 80.4691C208.249 121.733 199.765 186.465 163.024 193.019C126.313 199.566 101.203 181.385 101.101 181.312C100.975 181.413 74.7317 204.297 38.037 197.752C-8.82899 189.393 -3.18727 116.351 7.05684 83.5987C7.39706 72.4659 6.22494 61.2631 12.1489 39.09L12.1485 39.0898C23.8045 5.80679 65.0379 -19.3301 84.0475 30.8595C98.28 79.7179 63.7622 85.5694 19.5811 71.8919C18.7693 73.4866 16.8 79.8898 17.1459 80.5853C27.4664 101.333 61.5588 128.224 101.101 152.696C140.644 128.224 166.851 100.29 182.273 79.31C182.733 78.6841 180.766 70.9361 179.954 69.3417C134.149 86.6124 102.523 79.1381 116.755 30.2797ZM10.884 96.233C5.93113 120.709 6.84122 154.503 31.4116 165.719C45.0528 171.947 62.229 168.672 76.1159 163.765C72.9308 161.197 69.7516 158.668 66.6039 156.164C42.1912 136.744 20.1609 118.604 10.884 96.233ZM190.043 91.017C180.766 113.388 152.82 142.366 127.424 161.143C141.571 166.939 157.152 165.748 170.793 159.52C191.55 145.843 195.146 116.286 190.043 91.017ZM73.8508 41.523C70.0241 25.6434 45.5564 31.9025 35.3518 45.3481C37.2259 45.7081 38.5683 45.9525 40.3682 46.19C47.3619 47.1131 75.3518 52.3666 73.8508 41.523ZM164.184 43.8413C153.98 30.3956 132.179 25.6433 128.352 41.523C126.851 52.3666 157.191 44.7643 164.184 43.8413Z"
+            strokeWidth="1.5"
+            stroke={strokeColor}
+            initial={{
+              pathLength: 0,
+              fill: "rgba(0, 0, 0, 0)",
+            }}
+            animate={{
+              pathLength: 1,
+              fill: fillColor,
+            }}
+            transition={{
+              // Animation for the drawing stroke
+              pathLength: {
+                duration: 2.5,
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatType: "reverse",
+                repeatDelay: 1,
+              },
+              // Animation for the filling color
+              fill: {
+                duration: 1.5,
+                ease: "easeIn",
+                repeat: Infinity,
+                repeatType: "reverse",
+                repeatDelay: 2,
+              },
+            }}
+          />
+        </motion.svg>
       </div>
-
-      <style jsx>{`
-        .quran-fold-loader {
-          position: relative;
-          width: 92px;
-          height: 92px;
-          transform-style: preserve-3d;
-          perspective: 520px;
-          filter: drop-shadow(0 18px 30px var(--loader-glow));
-        }
-
-        .quran-fold-loader i {
-          position: absolute;
-          inset: 12px;
-          border: 1.4px solid transparent;
-          border-top-color: var(--loader-accent);
-          border-right-color: color-mix(
-            in srgb,
-            var(--loader-accent) 54%,
-            transparent
-          );
-          border-radius: 999px;
-          opacity: 0.92;
-          transform-style: preserve-3d;
-          --orbit-x: 68deg;
-          --orbit-y: 0deg;
-          --orbit-start: 0deg;
-          animation: quran-fold-orbit 1.45s cubic-bezier(0.55, 0, 0.45, 1)
-            infinite;
-        }
-
-        .quran-fold-loader i:nth-child(1) {
-          --orbit-x: 68deg;
-          --orbit-y: 0deg;
-          --orbit-start: 0deg;
-        }
-
-        .quran-fold-loader i:nth-child(2) {
-          inset: 18px;
-          opacity: 0.68;
-          animation-duration: 1.95s;
-          animation-direction: reverse;
-          --orbit-x: 62deg;
-          --orbit-y: 58deg;
-          --orbit-start: 46deg;
-        }
-
-        .quran-fold-loader i:nth-child(3) {
-          inset: 26px;
-          opacity: 0.48;
-          animation-duration: 2.35s;
-          --orbit-x: 74deg;
-          --orbit-y: -50deg;
-          --orbit-start: 92deg;
-        }
-
-        .quran-fold-loader b {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          width: 9px;
-          height: 9px;
-          border-radius: 999px;
-          background: var(--loader-accent);
-          box-shadow:
-            0 0 18px var(--loader-glow),
-            0 0 42px var(--loader-glow);
-          transform: translate(-50%, -50%);
-          animation: quran-fold-core 1.45s ease-in-out infinite;
-        }
-
-        @keyframes quran-fold-orbit {
-          from {
-            transform: rotateX(var(--orbit-x)) rotateY(var(--orbit-y))
-              rotateZ(var(--orbit-start));
-          }
-          to {
-            transform: rotateX(var(--orbit-x)) rotateY(var(--orbit-y))
-              rotateZ(calc(var(--orbit-start) + 360deg));
-          }
-        }
-
-        @keyframes quran-fold-core {
-          0%,
-          100% {
-            opacity: 0.48;
-            transform: translate(-50%, -50%) scale(0.72);
-          }
-          50% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-          }
-        }
-
-        @supports not (color: color-mix(in srgb, white, transparent)) {
-          .quran-fold-loader i {
-            border-right-color: rgba(255, 255, 255, 0.38);
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .quran-fold-loader i,
-          .quran-fold-loader b {
-            animation-duration: 3.6s;
-          }
-        }
-      `}</style>
-    </div>
+    </motion.div>
   );
 }

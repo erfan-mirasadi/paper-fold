@@ -101,6 +101,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   unlockedVerseIds: getUnlockedElevatedVerses(0),
 
   syncScrollOffset: (offset) => {
+    if (get().isAllSectionsMode) return;
     const nextUnlocked = getUnlockedElevatedVerses(offset);
     const { unlockedVerseIds, activeVerseIds, activeSectionId } = get();
 

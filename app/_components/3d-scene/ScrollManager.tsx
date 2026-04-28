@@ -97,6 +97,45 @@ export function ScrollManager() {
     };
   }, [scroll.el, setCurrentOffset]);
 
+  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+
+  useEffect(() => {
+    if (!scroll.el) return;
+    const el = scroll.el;
+
+    if (isAllSectionsMode) {
+      el.style.overflow = "hidden";
+    } else {
+      el.style.overflow = "auto";
+    }
+
+    const preventDefault = (e: Event) => {
+      if (isAllSectionsMode) {
+        e.preventDefault();
+      }
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (isAllSectionsMode) {
+        const keys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Home", "End"];
+        if (keys.includes(e.key)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    // We block wheel and touchmove to stop scrolling, but keep pointer events for dragging
+    el.addEventListener("wheel", preventDefault, { passive: false });
+    el.addEventListener("touchmove", preventDefault, { passive: false });
+    el.addEventListener("keydown", handleKey as any);
+
+    return () => {
+      el.removeEventListener("wheel", preventDefault);
+      el.removeEventListener("touchmove", preventDefault);
+      el.removeEventListener("keydown", handleKey as any);
+    };
+  }, [scroll.el, isAllSectionsMode]);
+
   useEffect(() => {
     if (!targetStageId || !scroll.el) return;
 
