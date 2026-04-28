@@ -211,7 +211,7 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
     ],
     anaAyet: {
       number: 5,
-      text: "Now Allah has taught an unlettered man, Muhammad (Peace be upon him), by revelation, things he did not know before, that is, He made him a Messenger for Himself.",
+      text: "Now Allah has taught an unlettered man, Muhammad (PBUH), by revelation, things he did not know before, that is, He made him a Messenger for Himself.",
     },
   } satisfies SectionOneData,
 

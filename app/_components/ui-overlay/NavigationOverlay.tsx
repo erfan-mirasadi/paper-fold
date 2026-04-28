@@ -22,8 +22,8 @@ export function NavigationOverlay({
   const isPaperDocked = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
 
-  // Fluid sizing keeps mobile + XL consistent while smoothing mid sizes.
-  const insetX = "clamp(14px, 2.2vw, 24px)";
+  // Fluid placement/size: match other overlays on the right
+  const rightOffset = "clamp(170px, 24vw, 240px)";
   const insetY = "clamp(12px, 2vw, 16px)";
   const stackGap = "clamp(8px, 1.2vw, 10px)";
 
@@ -116,7 +116,7 @@ export function NavigationOverlay({
   );
 
   const containerVariants = {
-    hidden: { x: -100, opacity: 0 },
+    hidden: { x: 20, opacity: 0 },
     visible: {
       x: 0,
       opacity: 1,
@@ -130,7 +130,7 @@ export function NavigationOverlay({
   } as const;
 
   const itemVariants = {
-    hidden: { x: -20, opacity: 0 },
+    hidden: { x: 20, opacity: 0 },
     visible: { x: 0, opacity: 1 },
   } as const;
 
@@ -151,8 +151,8 @@ export function NavigationOverlay({
       animate="visible"
       style={{
         position: "fixed",
-        top: insetY, // Positioned below the camera reset button
-        left: insetX,
+        top: insetY,
+        right: rightOffset,
         display: "flex",
         flexDirection: "column",
         gap: stackGap,

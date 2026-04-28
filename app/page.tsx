@@ -15,6 +15,7 @@ import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraRes
 // import Effects from "./_components/3d-scene/Effects";
 import { ScrollManager } from "./_components/3d-scene/ScrollManager";
 import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
+import { TitleOverlay } from "./_components/ui-overlay/TitleOverlay";
 import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
 import { LanguageSwitchOverlay } from "./_components/ui-overlay/LanguageSwitchOverlay";
 import { AllSectionsOverlay } from "./_components/ui-overlay/AllSectionsOverlay";
@@ -100,6 +101,7 @@ export default function Home() {
       {/* PopUpUI removed: hover/scroll flow doesn't need DOM anchors */}
       {/* <VerseNeonHTMLOverlay /> */}
       <NavigationOverlay isDarkMode={isDarkMode} />
+      <TitleOverlay isDarkMode={isDarkMode} />
       <AllSectionsOverlay isDarkMode={isDarkMode} />
       <LanguageSwitchOverlay isDarkMode={isDarkMode} />
       <ThemeToggleOverlay

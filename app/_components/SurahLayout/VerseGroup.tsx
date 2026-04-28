@@ -1,7 +1,8 @@
 "use client";
 import { VerseBox, UiRect } from "./SharedUI";
 import {
-  CAPSULE_BG_7_10_15_18,
+  CAPSULE_BG_7_8_17_18,
+  CAPSULE_BG_9_10_15_16,
   CAPSULE_BG_12_14,
   WHITE_VERSE_BG,
   MAROON_THEME,
@@ -64,8 +65,11 @@ export function VerseGroup({ group, groupTransform }: VerseGroupProps) {
         const finalBg =
           v.number >= 11 && v.number <= 14
             ? CAPSULE_BG_12_14
-            : (group.verseBg ??
-              (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_10_15_18));
+            : [7, 8, 17, 18].includes(v.number)
+              ? CAPSULE_BG_7_8_17_18
+              : [9, 10, 15, 16].includes(v.number)
+                ? CAPSULE_BG_9_10_15_16
+                : (group.verseBg ?? (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_8_17_18));
 
         return (
           <VerseBox

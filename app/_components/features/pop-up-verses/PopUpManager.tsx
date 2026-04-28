@@ -23,7 +23,8 @@ import {
   S1_INNER_BORDER,
   S1_VERSE_NUMBER_BG,
   S1_VERSE_NUMBER_BORDER,
-  CAPSULE_BG_7_10_15_18,
+  CAPSULE_BG_7_8_17_18,
+  CAPSULE_BG_9_10_15_16,
   CAPSULE_BG_12_14,
   MAROON_THEME,
   GREEN_THEME,
@@ -149,15 +150,22 @@ function buildVerseConfigs(
     isPill: false,
   });
 
-  // Section 2 Color Groups
   surahData.section2.colorGroups.forEach((group, gIdx) => {
-    const bg = gIdx === 1 ? CAPSULE_BG_12_14 : CAPSULE_BG_7_10_15_18;
-    const border = gIdx === 1 ? GREEN_THEME : MAROON_THEME;
-
     group.verses.forEach((v, i) => {
       const isRightCol = i % 2 !== 0;
       const t = SURAH_TRANSFORMS.s2.groups[gIdx].verses[v.number];
       if (!t) return;
+
+      const vNum = v.number;
+      let bg = gIdx === 1 ? CAPSULE_BG_12_14 : CAPSULE_BG_7_8_17_18;
+      if (vNum === 9 || vNum === 10 || vNum === 15 || vNum === 16) {
+        bg = CAPSULE_BG_9_10_15_16;
+      }
+      if (vNum === 7 || vNum === 8 || vNum === 17 || vNum === 18) {
+        bg = CAPSULE_BG_7_8_17_18;
+      }
+
+      const border = gIdx === 1 ? GREEN_THEME : MAROON_THEME;
 
       const worldX = t.x - PAGE_WIDTH / 2;
       const direction = isRightCol ? "right" : "left";

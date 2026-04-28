@@ -67,7 +67,7 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
 
   // Fluid placement/size: mobile + XL remain familiar; mid-sizes tighten up.
-  const rightOffset = "clamp(192px, 24vw, 240px)";
+  const rightOffset = "clamp(250px, 35vw, 340px)";
   const buttonW = "clamp(46px, 5.4vw, 54px)";
   const buttonH = "clamp(38px, 4.2vw, 44px)";
   const radius = "clamp(12px, 1.4vw, 14px)";
@@ -96,7 +96,15 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
       ? "radial-gradient(circle, rgba(168,194,255,0.22) 0%, rgba(168,194,255,0) 72%)"
       : "radial-gradient(circle, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0) 72%)";
 
-    return { border, background, hoverBackground, shadow, hoverShadow, text, glow };
+    return {
+      border,
+      background,
+      hoverBackground,
+      shadow,
+      hoverShadow,
+      text,
+      glow,
+    };
   }, [isDarkMode]);
 
   const handleClick = () => {
@@ -163,7 +171,9 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
           >
             <motion.span
               aria-hidden="true"
-              animate={{ opacity: isAllSectionsMode ? [0.14, 0.3, 0.14] : 0.16 }}
+              animate={{
+                opacity: isAllSectionsMode ? [0.14, 0.3, 0.14] : 0.16,
+              }}
               transition={{
                 duration: 1.4,
                 ease: "easeInOut",

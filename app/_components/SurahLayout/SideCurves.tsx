@@ -7,7 +7,8 @@ import {
   BLUE_THEME,
   MAROON_THEME,
   GREEN_THEME,
-  CAPSULE_BG_7_10_15_18,
+  CAPSULE_BG_7_8_17_18,
+  CAPSULE_BG_9_10_15_16,
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
 } from "../data/theme";
@@ -330,7 +331,7 @@ export const SideCurves = ({
         innerControlX={innerControl2_L}
         innerTipX={innerTipX_L}
         color={MAROON_THEME}
-        fillColor={CAPSULE_BG_7_10_15_18}
+        fillColor={CAPSULE_BG_7_8_17_18}
         shouldHide={shouldHide}
       />
 
@@ -345,7 +346,7 @@ export const SideCurves = ({
         innerControlX={innerControl3_L}
         innerTipX={innerTipX_L}
         color={MAROON_THEME}
-        fillColor={CAPSULE_BG_7_10_15_18}
+        fillColor={CAPSULE_BG_9_10_15_16}
         shouldHide={shouldHide}
       />
 
@@ -390,7 +391,7 @@ export const SideCurves = ({
         innerControlX={innerControl2_R}
         innerTipX={innerTipX_R}
         color={MAROON_THEME}
-        fillColor={CAPSULE_BG_7_10_15_18}
+        fillColor={CAPSULE_BG_7_8_17_18}
         shouldHide={shouldHide}
       />
 
@@ -404,7 +405,7 @@ export const SideCurves = ({
         innerControlX={innerControl3_R}
         innerTipX={innerTipX_R}
         color={MAROON_THEME}
-        fillColor={CAPSULE_BG_7_10_15_18}
+        fillColor={CAPSULE_BG_9_10_15_16}
         shouldHide={shouldHide}
       />
 
