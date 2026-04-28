@@ -162,11 +162,20 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
   useEffect(() => {
     const timeouts: Record<string, NodeJS.Timeout> = {};
 
-    const updateVerse = (id: number, visible: boolean, delay: number) => {
+    const updateVerse = (id: number, delay: number) => {
       const key = `v${id}`;
       if (timeouts[key]) clearTimeout(timeouts[key]);
       timeouts[key] = setTimeout(() => {
-        uniforms.uVerseVisibility.value[id] = visible ? 1.0 : 0.0;
+        const s = usePopUpStore.getState();
+        const e = useElevatedStore.getState();
+
+        const g = s.popUpGroups.find((group) => group.verseIds.includes(id));
+        const isHidden =
+          e.activeVerseIds.includes(id) ||
+          (g?.isOpen ?? false) ||
+          (id >= 11 && id <= 14 && s.middleHorizontalFolded);
+
+        uniforms.uVerseVisibility.value[id] = isHidden ? 0.0 : 1.0;
         delete timeouts[key];
       }, delay);
     };
@@ -208,47 +217,56 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     });
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
+      const idsToCheck = new Set<number>();
+
       state.popUpGroups.forEach((g, idx) => {
         if (g.isOpen !== prevState.popUpGroups[idx]?.isOpen) {
-          const delay = g.isOpen
-            ? ORIGINAL_TEXTURE_TIMING.hideDelay
-            : ORIGINAL_TEXTURE_TIMING.showDelay;
-          g.verseIds.forEach((id) => {
-            if (!useElevatedStore.getState().activeVerseIds.includes(id)) {
-              updateVerse(id, !g.isOpen, delay);
-            }
-          });
+          g.verseIds.forEach((id) => idsToCheck.add(id));
         }
       });
+
       if (state.middleHorizontalFolded !== prevState.middleHorizontalFolded) {
-        const delay = state.middleHorizontalFolded
+        [11, 12, 13, 14].forEach((id) => idsToCheck.add(id));
+      }
+
+      idsToCheck.forEach((id) => {
+        const g = state.popUpGroups.find((group) => group.verseIds.includes(id));
+        const shouldBeHidden =
+          (g?.isOpen ?? false) ||
+          (id >= 11 && id <= 14 && state.middleHorizontalFolded) ||
+          useElevatedStore.getState().activeVerseIds.includes(id);
+
+        const delay = shouldBeHidden
           ? ORIGINAL_TEXTURE_TIMING.hideDelay
           : ORIGINAL_TEXTURE_TIMING.showDelay;
-        [11, 12, 13, 14].forEach((id) => {
-          if (!useElevatedStore.getState().activeVerseIds.includes(id)) {
-            updateVerse(id, !state.middleHorizontalFolded, delay);
-          }
-        });
-      }
+
+        updateVerse(id, delay);
+      });
     });
 
     const unsubElevated = useElevatedStore.subscribe((state, prevState) => {
+      const idsToCheck = new Set<number>();
       state.activeVerseIds.forEach((id) => {
-        if (!prevState.activeVerseIds.includes(id))
-          updateVerse(id, false, ELEVATE_TEXTURE_TIMING.hideDelay);
+        if (!prevState.activeVerseIds.includes(id)) idsToCheck.add(id);
       });
       prevState.activeVerseIds.forEach((id) => {
-        if (!state.activeVerseIds.includes(id)) {
-          const g = usePopUpStore
-            .getState()
-            .popUpGroups.find((group) => group.verseIds.includes(id));
-          const isMid =
-            id >= 11 &&
-            id <= 14 &&
-            usePopUpStore.getState().middleHorizontalFolded;
-          if (!g?.isOpen && !isMid)
-            updateVerse(id, true, ELEVATE_TEXTURE_TIMING.showDelay);
-        }
+        if (!state.activeVerseIds.includes(id)) idsToCheck.add(id);
+      });
+
+      idsToCheck.forEach((id) => {
+        const g = usePopUpStore
+          .getState()
+          .popUpGroups.find((group) => group.verseIds.includes(id));
+        const shouldBeHidden =
+          state.activeVerseIds.includes(id) ||
+          (g?.isOpen ?? false) ||
+          (id >= 11 && id <= 14 && usePopUpStore.getState().middleHorizontalFolded);
+
+        const delay = shouldBeHidden
+          ? ELEVATE_TEXTURE_TIMING.hideDelay
+          : ELEVATE_TEXTURE_TIMING.showDelay;
+
+        updateVerse(id, delay);
       });
 
       Object.entries(sectionMap).forEach(([sid, idx]) => {

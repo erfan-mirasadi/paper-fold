@@ -146,8 +146,8 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       let nextMiddleStage = middleStage;
       if (isMiddleGroup) {
         // Requested interaction:
-        // down => horizontal fold, up => vertical open.
-        nextMiddleStage = direction === "down" ? 2 : 1;
+        // down => vertical open (consistent with others), up => horizontal fold (the "other one").
+        nextMiddleStage = direction === "down" ? 1 : 2;
       }
 
       let changed = false;
