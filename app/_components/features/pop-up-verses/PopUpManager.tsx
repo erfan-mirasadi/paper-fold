@@ -337,34 +337,58 @@ function PopUpCardWrapper({
       : 0;
 
   const sectionId = getVerseSectionId(config.id);
-  const verseDrag = dragEngine.verses[config.id];
+
+  // Define pairings and determine the "lead" verse for shared dragging
+  const pairs: Record<number, number> = {
+    1: 1,
+    2: 1,
+    3: 3,
+    4: 3,
+    7: 7,
+    8: 7,
+    9: 9,
+    10: 9,
+    11: 11,
+    12: 11,
+    13: 13,
+    14: 13,
+    15: 15,
+    16: 15,
+    17: 17,
+    18: 17,
+  };
+  const leadVerseId = pairs[config.id] ?? config.id;
+  const leadVerseDrag = dragEngine.verses[leadVerseId];
+
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
   const useSectionGroupDrag =
     isCenterSectionRaised && sectionId === "s2_center" && sectionDrag !== null;
 
   const isVerseSeparated = useDragState((s) =>
-    s.draggedVerseIds.includes(config.id),
+    s.draggedVerseIds.includes(leadVerseId),
   );
   const separationOffset = useDragState(
-    (s) => s.separatedVerseOffsets[config.id] || ZERO_OFFSET,
+    (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
   const dragBind = useElevatedDrag({
     enabled: isElevated || isSectionSurfaceRaised,
-    springX: useSectionGroupDrag && sectionDrag ? sectionDrag.x : verseDrag.x,
-    springY: useSectionGroupDrag && sectionDrag ? sectionDrag.y : verseDrag.y,
-    dragVerseId: useSectionGroupDrag ? undefined : config.id,
+    springX:
+      useSectionGroupDrag && sectionDrag ? sectionDrag.x : leadVerseDrag.x,
+    springY:
+      useSectionGroupDrag && sectionDrag ? sectionDrag.y : leadVerseDrag.y,
+    dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
     dragSectionId: useSectionGroupDrag ? "s2_center" : undefined,
   });
 
   const dragX = to(
-    [verseDrag.x, sectionDrag ? sectionDrag.x : verseDrag.x],
+    [leadVerseDrag.x, sectionDrag ? sectionDrag.x : leadVerseDrag.x],
     (vx, sx) =>
       vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0),
   );
 
   const dragY = to(
-    [verseDrag.y, sectionDrag ? sectionDrag.y : verseDrag.y],
+    [leadVerseDrag.y, sectionDrag ? sectionDrag.y : leadVerseDrag.y],
     (vy, sy) =>
       vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0),
   );
