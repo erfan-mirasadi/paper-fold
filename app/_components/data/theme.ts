@@ -83,7 +83,7 @@ export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
 // 8. GLOBAL TEXT SIZES
 // ----------------------------------------------------------------------------
 export const TEXT_SIZES = {
-  BISMILLAH: 0.056,
+  BISMILLAH: 0.066,
   TOP_LABEL: 0.023,
   ANA_AYET_TAB: 0.016,
   VERSE_NUMBER: 0.024,

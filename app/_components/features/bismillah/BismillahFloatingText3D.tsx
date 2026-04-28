@@ -10,8 +10,8 @@ import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 const TOP_EDGE_OFFSET = 0.01;
 const MANUAL_DOWN_SHIFT = -0.0008;
 const FRONT_CLEARANCE = 0.016;
-const EXTRUSION_LAYERS = 8;
-const EXTRUSION_STEP = 0.00085;
+const EXTRUSION_LAYERS = 3;
+const EXTRUSION_STEP = 0.00095;
 
 interface BismillahFloatingText3DProps {
   surfaceZ: number;

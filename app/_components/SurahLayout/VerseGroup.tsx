@@ -1,8 +1,4 @@
 "use client";
-// Purpose: Renders a single thematic 2×2 verse cluster inside Section 2.
-//          Receives a pre-computed GroupTransforms object from the LayoutEngine.
-//          Does ZERO positional math — positions come directly from the engine.
-
 import { VerseBox, UiRect } from "./SharedUI";
 import {
   CAPSULE_BG_7_10_15_18,
@@ -13,11 +9,6 @@ import {
 } from "../data/theme";
 import type { ColorGroup, GroupTransforms } from "../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../data/SurahConfig";
-import { useDelayedHidden } from "../shared/useDelayedHidden";
-import {
-  ELEVATED_RETURN_SYNC_MS,
-  useElevatedStore,
-} from "../features/elevated-verses/useElevatedStore";
 
 interface VerseGroupProps {
   group: ColorGroup;
@@ -25,19 +16,9 @@ interface VerseGroupProps {
   groupIndex?: number;
 }
 
-export function VerseGroup({
-  group,
-  groupTransform,
-  groupIndex = 0,
-}: VerseGroupProps) {
+export function VerseGroup({ group, groupTransform }: VerseGroupProps) {
   const gt = groupTransform;
   const borderColor = gt.isCenter ? GREEN_THEME : MAROON_THEME;
-
-  const sectionId =
-    groupIndex === 0 ? "s2_top" : groupIndex === 1 ? "s2_center" : "s2_bottom";
-  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const isElevatedNow = activeSectionIds.includes(sectionId);
-  const hideConnectors = useDelayedHidden(isElevatedNow, ELEVATED_RETURN_SYNC_MS);
 
   return (
     <group>
@@ -54,10 +35,10 @@ export function VerseGroup({
       /> */}
 
       {/* Row Connectors for opposite verses */}
-      {!hideConnectors && gt.rowConnectors.map((rc, i) => {
+      {gt.rowConnectors.map((rc, i) => {
         const leftV = group.verses[i * 2];
         const rightV = group.verses[i * 2 + 1];
-        
+
         if (!leftV || !rightV) return null;
 
         return (
@@ -83,8 +64,8 @@ export function VerseGroup({
         const finalBg =
           v.number >= 11 && v.number <= 14
             ? CAPSULE_BG_12_14
-            : group.verseBg ??
-              (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_10_15_18);
+            : (group.verseBg ??
+              (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_10_15_18));
 
         return (
           <VerseBox

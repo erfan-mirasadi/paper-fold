@@ -234,10 +234,13 @@ export function PopUpVerseCard({
               position-y={shadowYOffset}
               renderOrder={90}
               position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
-                const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+                const surfaceProgress =
+                  normalizeSurfaceLiftProgress(surfaceLift);
                 const surfaceZBias =
                   SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
-                return SHADOW_CONFIG.baseInsetZ - lift + surfaceLift + surfaceZBias;
+                return (
+                  SHADOW_CONFIG.baseInsetZ - lift + surfaceLift + surfaceZBias
+                );
               })}
               scale-x={shadowScaleX}
               scale-y={shadowScaleY}

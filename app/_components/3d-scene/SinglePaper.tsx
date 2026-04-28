@@ -60,7 +60,7 @@ interface SinglePaperProps {
 export const SinglePaper: React.FC<SinglePaperProps> = ({
   isFolded = false,
   isDarkMode = false,
-  toggles = { diffuse: true, normal: true, roughness: false, ao: false },
+  toggles = { diffuse: true, normal: true },
   onReady,
 }) => {
   const group = useRef<Group>(null);

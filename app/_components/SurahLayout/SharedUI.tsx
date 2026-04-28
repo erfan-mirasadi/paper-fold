@@ -30,7 +30,6 @@ import {
   ANA_AYET_LABEL_BY_LANGUAGE,
   useSurahLanguageStore,
 } from "../data/useSurahLanguageStore";
-import { CapsuleVerseTextTransition } from "./CapsuleVerseTextTransition";
 import { cloneTextureAsAspectCover } from "../shared/textureFit";
 
 // ROUNDED SHAPE GEOMETRY
@@ -476,8 +475,8 @@ export const VerseBox = ({
   const textX = centerTextInCapsule
     ? finalW / 2
     : isArabic
-    ? safeMargin + textMaxW / 2
-    : safeMargin + textPaddingX;
+      ? safeMargin + textMaxW / 2
+      : safeMargin + textPaddingX;
 
   const SMALL_TEXT_SHIFT = -0.01;
   const versePosX = isArabic
@@ -550,8 +549,7 @@ export const VerseBox = ({
         </group>
       )}
 
-      <CapsuleVerseTextTransition
-        verse={verse}
+      <Text
         position={[versePosX, -h / 2, 0.002]}
         fontSize={
           (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
@@ -566,9 +564,12 @@ export const VerseBox = ({
         font={textFont}
         direction={textDirection}
         renderOrder={14}
-        materialDepthTest={false}
-        enterDurationMs={verseTextEnterDurationMs}
-      />
+        material-depthTest={false}
+        material-transparent={true}
+        sdfGlyphSize={128}
+      >
+        {verse}
+      </Text>
     </group>
   );
 };

@@ -1,11 +1,6 @@
 "use client";
 import { TopLabel, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
-import { useDelayedHidden } from "../shared/useDelayedHidden";
-import {
-  ELEVATED_RETURN_SYNC_MS,
-  useElevatedStore,
-} from "../features/elevated-verses/useElevatedStore";
 import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
 import {
@@ -38,19 +33,6 @@ export function SectionTwo({
   startX,
   PW,
 }: SectionTwoProps) {
-  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const hideTopConnectorNow = activeSectionIds.includes("s2_top");
-  const hideBottomConnectorNow = activeSectionIds.includes("s2_bottom");
-
-  const hideTopConnector = useDelayedHidden(
-    hideTopConnectorNow,
-    ELEVATED_RETURN_SYNC_MS,
-  );
-  const hideBottomConnector = useDelayedHidden(
-    hideBottomConnectorNow,
-    ELEVATED_RETURN_SYNC_MS,
-  );
-
   const t = transforms;
   const edgeVerseBorderWidth = t.borderWidth;
 
@@ -59,30 +41,26 @@ export function SectionTwo({
       {/* ─── SECTION OUTER FRAME ─────────────────────────────────────────── */}
 
       {/* ─── TOP HOLLOW CONNECTOR ────────────────────────────────────────── */}
-      {!hideTopConnector && (
-        <HollowConnector
-          position="top"
-          boxX={t.connectorX}
-          boxW={t.connectorW}
-          yTop={t.topConnectorY}
-          yBottom={t.topConnectorY - t.topConnectorH}
-          height={t.topConnectorH}
-          borderWidth={t.borderWidth}
-        />
-      )}
+      <HollowConnector
+        position="top"
+        boxX={t.connectorX}
+        boxW={t.connectorW}
+        yTop={t.topConnectorY}
+        yBottom={t.topConnectorY - t.topConnectorH}
+        height={t.topConnectorH}
+        borderWidth={t.borderWidth}
+      />
 
       {/* ─── BOTTOM HOLLOW CONNECTOR ─────────────────────────────────────── */}
-      {!hideBottomConnector && (
-        <HollowConnector
-          position="bottom"
-          boxX={t.connectorX}
-          boxW={t.connectorW}
-          yTop={t.bottomConnectorY}
-          yBottom={t.bottomConnectorY - t.bottomConnectorH}
-          height={t.bottomConnectorH}
-          borderWidth={t.borderWidth}
-        />
-      )}
+      <HollowConnector
+        position="bottom"
+        boxX={t.connectorX}
+        boxW={t.connectorW}
+        yTop={t.bottomConnectorY}
+        yBottom={t.bottomConnectorY - t.bottomConnectorH}
+        height={t.bottomConnectorH}
+        borderWidth={t.borderWidth}
+      />
 
       {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
       <VerseBox

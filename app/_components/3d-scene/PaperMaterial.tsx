@@ -89,8 +89,6 @@ export const PAPER_MATERIAL_CONFIG = {
 export interface TextureToggles {
   diffuse: boolean;
   normal: boolean;
-  roughness: boolean;
-  ao: boolean;
 }
 
 interface PaperMaterialProps {
@@ -100,12 +98,7 @@ interface PaperMaterialProps {
 }
 
 function areTogglesEqual(a: TextureToggles, b: TextureToggles): boolean {
-  return (
-    a.diffuse === b.diffuse &&
-    a.normal === b.normal &&
-    a.roughness === b.roughness &&
-    a.ao === b.ao
-  );
+  return a.diffuse === b.diffuse && a.normal === b.normal;
 }
 
 const PaperMaterialComponent: FC<PaperMaterialProps> = ({
@@ -158,7 +151,6 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
 
   const settled = fontsReady && settledKey === renderTextureKey;
 
-  const mapKey = settled ? `${renderTextureKey}-settled` : renderTextureKey;
   const mapFrames = settled ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
 
   const matRef = useRef<MeshStandardMaterial>(null);
@@ -230,7 +222,7 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
       onBeforeCompile={onBeforeCompile}
     >
       <RenderTexture
-        key={mapKey}
+        key={renderTextureKey}
         attach="map"
         width={renderTexWidth}
         height={renderTexHeight}

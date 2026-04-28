@@ -7,138 +7,157 @@ import {
 } from "../features/elevated-verses/useElevatedStore";
 import { ORIGINAL_TEXTURE_TIMING } from "../features/pop-up-verses/useFoldAnimation";
 import { ELEVATE_TEXTURE_TIMING } from "../features/elevated-verses/useElevateAnimation";
-import {
-  SURAH_TRANSFORMS,
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-  FOLD_Y_POSITIONS,
-} from "../SurahLayout/index";
 import { S1_INNER_BORDER } from "../data/theme";
+import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
+import { VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
+
+export const MASK_CONFIG = {
+  // Increase this to make the full section masks larger (e.g., 0.02, 0.03)
+  sectionExpand: 0.013,
+  // Increase this to make the capsule/verse masks larger (e.g., 0.005, 0.01)
+  verseExpand: 0.006,
+};
 
 interface PaperMaskShader {
   uniforms: Record<string, unknown>;
   fragmentShader: string;
 }
 
-// Pre-compute verse rectangles (x, y, w, h)
-const VERSE_RECTS = (() => {
-  const rects = new Float32Array(20 * 4);
-  const s1 = SURAH_TRANSFORMS.s1;
-  const s2 = SURAH_TRANSFORMS.s2;
-
-  Object.entries(s1.verses).forEach(([num, t]) => {
-    const i = parseInt(num);
-    rects[i * 4 + 0] = t.x;
-    rects[i * 4 + 1] = t.y;
-    rects[i * 4 + 2] = t.w;
-    rects[i * 4 + 3] = t.h;
-  });
-  rects[5 * 4 + 0] = s1.anaAyet.x;
-  rects[5 * 4 + 1] = s1.anaAyet.y;
-  rects[5 * 4 + 2] = s1.anaAyet.w;
-  rects[5 * 4 + 3] = s1.anaAyet.h;
-  rects[6 * 4 + 0] = s2.introVerse.x;
-  rects[6 * 4 + 1] = s2.introVerse.y;
-  rects[6 * 4 + 2] = s2.introVerse.w;
-  rects[6 * 4 + 3] = s2.introVerse.h;
-  s2.groups.forEach((g) => {
-    Object.entries(g.verses).forEach(([num, t]) => {
-      const i = parseInt(num);
-      rects[i * 4 + 0] = t.x;
-      rects[i * 4 + 1] = t.y;
-      rects[i * 4 + 2] = t.w;
-      rects[i * 4 + 3] = t.h;
-    });
-  });
-  rects[19 * 4 + 0] = s2.outroVerse.x;
-  rects[19 * 4 + 1] = s2.outroVerse.y;
-  rects[19 * 4 + 2] = s2.outroVerse.w;
-  rects[19 * 4 + 3] = s2.outroVerse.h;
-
-  return rects;
-})();
-
-// Pre-compute section rectangles (split S2 into 3 sub-sections)
-const SECTION_RECTS = (() => {
-  const rects = new Float32Array(4 * 4);
-  const s1 = SURAH_TRANSFORMS.s1;
-  const s2 = SURAH_TRANSFORMS.s2;
-  const PAD = 0.02; // Tightened padding to match the section border size
-
-  // 0: S1 Frame (Expanded)
-  rects[0 * 4 + 0] = s1.frameX - PAD / 2;
-  rects[0 * 4 + 1] = s1.frameY + PAD / 2;
-  rects[0 * 4 + 2] = s1.frameW + PAD;
-  rects[0 * 4 + 3] = s1.frameH + PAD;
-
-  // 1: S2 Top Frame (Intro + G1)
-  // From top of S2 to fold between G1 and G2
-  rects[1 * 4 + 0] = s2.frameX - PAD / 2;
-  rects[1 * 4 + 1] = s2.shiftedTop + PAD / 2;
-  rects[1 * 4 + 2] = s2.frameW + PAD;
-  rects[1 * 4 + 3] = s2.shiftedTop - FOLD_Y_POSITIONS[3] + PAD;
-
-  // 2: S2 Center Frame (G2)
-  // From fold G1-G2 to fold G2-G3
-  rects[2 * 4 + 0] = s2.frameX - PAD / 2;
-  rects[2 * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2;
-  rects[2 * 4 + 2] = s2.frameW + PAD;
-  rects[2 * 4 + 3] = FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD;
-
-  // 3: S2 Bottom Frame (G3 + Outro)
-  // From fold G2-G3 to bottom of S2
-  rects[3 * 4 + 0] = s2.frameX - PAD / 2;
-  rects[3 * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2;
-  rects[3 * 4 + 2] = s2.frameW + PAD;
-  rects[3 * 4 + 3] = FOLD_Y_POSITIONS[5] - s2.shiftedBot + PAD;
-
-  return rects;
-})();
-
-// Pre-compute background colors for verses (revealed when verse is hidden)
-const VERSE_BG_COLORS = (() => {
-  const colors = new Float32Array(20 * 3);
-  const tempCol = new Color();
-  const setCol = (i: number, hex: string) => {
-    tempCol.set(hex);
-    colors[i * 3 + 0] = tempCol.r;
-    colors[i * 3 + 1] = tempCol.g;
-    colors[i * 3 + 2] = tempCol.b;
-  };
-
-  // Section 1: Use the inner border/connector color as requested
-  for (let i = 1; i <= 5; i++) setCol(i, S1_INNER_BORDER);
-
-  // Section 2: Individual verses (6, 19)
-  const BLUE = "#C4963B";
-  setCol(6, BLUE);
-  setCol(19, BLUE);
-
-  // Section 2: Groups (uses group theme colors)
-  const MAROON = "#7c8cb0";
-  const GREEN = "#5E7367";
-
-  [7, 8, 9, 10].forEach((i) => setCol(i, MAROON));
-  [11, 12, 13, 14].forEach((i) => setCol(i, GREEN));
-  [15, 16, 17, 18].forEach((i) => setCol(i, MAROON));
-
-  return colors;
-})();
-
 export function usePaperMasking(paperTextureDiffuse: Texture) {
+  // Read exact layout numbers dynamically to support language swapping
+  const { PAGE_WIDTH, PAGE_HEIGHT, SURAH_TRANSFORMS, FOLD_Y_POSITIONS } =
+    useSurahLayoutRuntime();
+
+  // Memoize geometry to avoid creating Float32Arrays constantly
+  const { verseRects, verseRadii, sectionRects, verseBgColors } =
+    useMemo(() => {
+      const s1 = SURAH_TRANSFORMS.s1;
+      const s2 = SURAH_TRANSFORMS.s2;
+
+      const vRects = new Float32Array(20 * 4);
+      const vRadii = new Float32Array(20);
+
+      const setVerseRect = (
+        num: number,
+        t: { x: number; y: number; w: number; h: number },
+        isPill: boolean,
+      ) => {
+        vRects[num * 4 + 0] = t.x;
+        vRects[num * 4 + 1] = t.y;
+        vRects[num * 4 + 2] = t.w;
+        vRects[num * 4 + 3] = t.h;
+        vRadii[num] = isPill ? t.h / 2.0 : VERSE_5_6_19_RADIUS;
+      };
+
+      Object.entries(s1.verses).forEach(([num, t]) =>
+        setVerseRect(parseInt(num), t, true),
+      );
+      setVerseRect(5, s1.anaAyet, false);
+      setVerseRect(6, s2.introVerse, false);
+      s2.groups.forEach((g) => {
+        Object.entries(g.verses).forEach(([num, t]) =>
+          setVerseRect(parseInt(num), t, true),
+        );
+      });
+      setVerseRect(19, s2.outroVerse, false);
+
+      const sRects = new Float32Array(4 * 4);
+      const PAD = 0.02;
+      const exp = MASK_CONFIG.sectionExpand;
+
+      sRects[0 * 4 + 0] = s1.frameX - PAD / 2 - exp;
+      sRects[0 * 4 + 1] = s1.frameY + PAD / 2 + exp;
+      sRects[0 * 4 + 2] = s1.frameW + PAD + exp * 2;
+      sRects[0 * 4 + 3] = s1.frameH + PAD + exp * 2;
+
+      sRects[1 * 4 + 0] = s2.frameX - PAD / 2 - exp;
+      sRects[1 * 4 + 1] = s2.shiftedTop + PAD / 2 + exp;
+      sRects[1 * 4 + 2] = s2.frameW + PAD + exp * 2;
+      sRects[1 * 4 + 3] = s2.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
+
+      sRects[2 * 4 + 0] = s2.frameX - PAD / 2 - exp;
+      sRects[2 * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
+      sRects[2 * 4 + 2] = s2.frameW + PAD + exp * 2;
+      sRects[2 * 4 + 3] =
+        FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
+
+      sRects[3 * 4 + 0] = s2.frameX - PAD / 2 - exp;
+      sRects[3 * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
+      sRects[3 * 4 + 2] = s2.frameW + PAD + exp * 2;
+      sRects[3 * 4 + 3] = FOLD_Y_POSITIONS[5] - s2.shiftedBot + PAD + exp * 2;
+
+      const bgColors = new Float32Array(20 * 3);
+      const tempCol = new Color();
+      const setCol = (i: number, hex: string) => {
+        tempCol.set(hex);
+        bgColors[i * 3 + 0] = tempCol.r;
+        bgColors[i * 3 + 1] = tempCol.g;
+        bgColors[i * 3 + 2] = tempCol.b;
+      };
+
+      for (let i = 1; i <= 5; i++) setCol(i, S1_INNER_BORDER);
+      const BLUE = "#C4963B";
+      setCol(6, BLUE);
+      setCol(19, BLUE);
+      const MAROON = "#7c8cb0";
+      const GREEN = "#5E7367";
+      [7, 8, 9, 10].forEach((i) => setCol(i, MAROON));
+      [11, 12, 13, 14].forEach((i) => setCol(i, GREEN));
+      [15, 16, 17, 18].forEach((i) => setCol(i, MAROON));
+
+      return {
+        verseRects: vRects,
+        verseRadii: vRadii,
+        sectionRects: sRects,
+        verseBgColors: bgColors,
+      };
+    }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS]);
+
+  // CRITICAL FIX: The uniforms object MUST be stable (empty dependency array).
   const uniforms = useMemo(
     () => ({
       uVerseVisibility: { value: new Float32Array(20).fill(1.0) },
       uSectionVisibility: { value: new Float32Array(4).fill(1.0) },
-      uVerseRects: { value: VERSE_RECTS },
-      uSectionRects: { value: SECTION_RECTS },
-      uVerseBgColors: { value: VERSE_BG_COLORS },
-      uPageWidth: { value: PAGE_WIDTH },
-      uPageHeight: { value: PAGE_HEIGHT },
+      uVerseRects: { value: new Float32Array(20 * 4) },
+      uVerseRadii: { value: new Float32Array(20) },
+      uSectionRects: { value: new Float32Array(4 * 4) },
+      uVerseBgColors: { value: new Float32Array(20 * 3) },
+      uPageWidth: { value: 1.54 },
+      uPageHeight: { value: 1.76 },
       uBaseTexture: { value: paperTextureDiffuse },
+      uVerseExpand: { value: 0.005 },
     }),
-    [paperTextureDiffuse],
+    [],
   );
+
+  // Sync the latest layout values into the stable uniforms object safely
+  // Using .set() ensures Three.js WebGL bindings don't get detached!
+  useEffect(() => {
+    (uniforms.uVerseRects.value as Float32Array).set(verseRects);
+    (uniforms.uVerseRadii.value as Float32Array).set(verseRadii);
+    (uniforms.uSectionRects.value as Float32Array).set(sectionRects);
+    (uniforms.uVerseBgColors.value as Float32Array).set(verseBgColors);
+    uniforms.uPageWidth.value = PAGE_WIDTH;
+    uniforms.uPageHeight.value = PAGE_HEIGHT;
+  }, [
+    verseRects,
+    verseRadii,
+    sectionRects,
+    verseBgColors,
+    PAGE_WIDTH,
+    PAGE_HEIGHT,
+    uniforms,
+  ]);
+
+  // Sync texture separately so it doesn't cause unnecessary re-evaluations
+  useEffect(() => {
+    uniforms.uBaseTexture.value = paperTextureDiffuse;
+  }, [paperTextureDiffuse, uniforms]);
+
+  // Sync mask scale separately
+  useEffect(() => {
+    uniforms.uVerseExpand.value = MASK_CONFIG.verseExpand;
+  }, [uniforms]);
 
   useEffect(() => {
     const timeouts: Record<string, NodeJS.Timeout> = {};
@@ -161,11 +180,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       }, delay);
     };
 
-    // Initial Sync
     const s = usePopUpStore.getState();
     const e = useElevatedStore.getState();
 
-    // Verses initial
     for (let i = 1; i <= 19; i++) {
       let hidden = e.activeVerseIds.includes(i);
       if (!hidden) {
@@ -176,7 +193,6 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniforms.uVerseVisibility.value[i] = hidden ? 0.0 : 1.0;
     }
 
-    // Sections initial sync
     const sectionMap: Record<ElevatedSectionId, number> = {
       s1: 0,
       s2_top: 1,
@@ -217,7 +233,6 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     });
 
     const unsubElevated = useElevatedStore.subscribe((state, prevState) => {
-      // Verse changes
       state.activeVerseIds.forEach((id) => {
         if (!prevState.activeVerseIds.includes(id))
           updateVerse(id, false, ELEVATE_TEXTURE_TIMING.hideDelay);
@@ -235,7 +250,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
             updateVerse(id, true, ELEVATE_TEXTURE_TIMING.showDelay);
         }
       });
-      // Section changes
+
       Object.entries(sectionMap).forEach(([sid, idx]) => {
         const now = state.activeSectionIds.includes(sid as ElevatedSectionId);
         const prev = prevState.activeSectionIds.includes(
@@ -268,6 +283,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform float uVerseVisibility[20];
       uniform float uSectionVisibility[4];
       uniform vec4 uVerseRects[20];
+      uniform float uVerseRadii[20];
+      uniform float uVerseExpand;
       uniform vec4 uSectionRects[4];
       uniform vec3 uVerseBgColors[20];
       uniform float uPageWidth;
@@ -281,7 +298,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       float lx = vMapUv.x * uPageWidth;
       float ly = (vMapUv.y - 1.0) * uPageHeight;
 
-      // 1. Check Full Section Masking (Highest priority)
+      // 1. Check Full Section Masking
       bool sectionHidden = false;
       for (int i = 0; i < 4; i++) {
         vec4 r = uSectionRects[i];
@@ -296,23 +313,34 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       if (sectionHidden) {
         diffuseColor = texture2D(uBaseTexture, vMapUv);
       } else {
-        // 2. Check Individual Verse Masking
+        // 2. Check Individual Verse Masking with SDF (Rounded rectangles)
         for (int i = 1; i <= 19; i++) {
+          if (uVerseVisibility[i] >= 0.5) continue; // Shader optimization
+
           vec4 r = uVerseRects[i];
           
-          // Shrink the verse mask slightly for a cleaner "cutout" look
-          float shrink = 0.005;
-          float rx = r.x + shrink;
-          float ry = r.y - shrink;
-          float rw = r.z - shrink * 2.0;
-          float rh = r.w - shrink * 2.0;
+          float expand = uVerseExpand;
+          float rx = r.x - expand;
+          float ry = r.y + expand;
+          float rw = r.z + expand * 2.0;
+          float rh = r.w + expand * 2.0;
+          
+          // FAST AABB CHECK (Massive GPU Performance Boost)
+          // Skip expensive SDF math if the pixel is outside the expanded verse box
+          if (lx < rx || lx > rx + rw || ly < ry - rh || ly > ry) continue;
 
-          if (lx >= rx && lx <= rx + rw && ly >= ry - rh && ly <= ry) {
-            if (uVerseVisibility[i] < 0.5) {
-              // Instead of blank paper, use the background color of the section/connector
-              diffuseColor = vec4(uVerseBgColors[i], 1.0);
-              break;
-            }
+          float rad = uVerseRadii[i] + expand;
+          
+          vec2 center = vec2(rx + rw / 2.0, ry - rh / 2.0);
+          vec2 halfSize = vec2(rw / 2.0, rh / 2.0);
+          
+          // Signed Distance Field (SDF) Math
+          vec2 d = abs(vec2(lx, ly) - center) - halfSize + vec2(rad);
+          float dist = min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - rad;
+
+          if (dist <= 0.0) {
+            diffuseColor = vec4(uVerseBgColors[i], 1.0);
+            break;
           }
         }
       }
