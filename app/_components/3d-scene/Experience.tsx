@@ -114,14 +114,14 @@ function DynamicControls() {
   return (
     <OrbitControls
       enabled={true}
-      enableRotate={false}
-      enableZoom={false}
-      enablePan={false}
+      enableRotate={true}
+      enableZoom={true}
+      enablePan={true}
       makeDefault={true}
-      minAzimuthAngle={CAMERA_CONFIG.orbitControls.minAzimuthAngle}
-      maxAzimuthAngle={CAMERA_CONFIG.orbitControls.maxAzimuthAngle}
-      minPolarAngle={CAMERA_CONFIG.orbitControls.minPolarAngle}
-      maxPolarAngle={CAMERA_CONFIG.orbitControls.maxPolarAngle}
+      // minAzimuthAngle={CAMERA_CONFIG.orbitControls.minAzimuthAngle}
+      // maxAzimuthAngle={CAMERA_CONFIG.orbitControls.maxAzimuthAngle}
+      // minPolarAngle={CAMERA_CONFIG.orbitControls.minPolarAngle}
+      // maxPolarAngle={CAMERA_CONFIG.orbitControls.maxPolarAngle}
     />
   );
 }
