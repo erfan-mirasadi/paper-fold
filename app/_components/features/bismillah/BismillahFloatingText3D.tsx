@@ -1,11 +1,11 @@
 "use client";
 
-import { Text } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
 import { PAGE_WIDTH, SURAH_DATA } from "../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../data/theme";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
+import { CanvasText } from "../../shared/CanvasText";
 
 const TOP_EDGE_OFFSET = 0.01;
 const MANUAL_DOWN_SHIFT = -0.0008;
@@ -39,6 +39,10 @@ export function BismillahFloatingText3D({
     });
   }, [bismillahColor, layers]);
 
+  const bismillahText = SURAH_DATA.bismillah;
+  const maxWidth = PAGE_WIDTH * 0.9;
+  const bismillahHeight = 0.14; // Tighter height for Bismillah
+
   return (
     <group
       position={[
@@ -51,43 +55,43 @@ export function BismillahFloatingText3D({
         const z = -(layers - i) * step;
 
         return (
-          <Text
+          <CanvasText
             key={`bismillah-depth-${i}`}
-            position={[0, 0, z]}
+            text={bismillahText}
             font={QURAN_FONT}
             fontSize={TEXT_SIZES.BISMILLAH}
             color={color}
-            anchorX="center"
-            anchorY="bottom"
             textAlign="center"
-            direction="rtl"
-            maxWidth={PAGE_WIDTH * 0.9}
+            verticalAlign="bottom"
+            width={maxWidth}
+            height={bismillahHeight}
+            position={[0, bismillahHeight / 2, z]}
             renderOrder={baseRenderOrder + i}
           >
-            {SURAH_DATA.bismillah}
             <meshStandardMaterial
               color={color}
               metalness={0.95}
               roughness={0.3}
               envMapIntensity={1.6}
+              transparent
+              depthTest={false}
             />
-          </Text>
+          </CanvasText>
         );
       })}
 
-      <Text
-        position={[0, 0, 0.0008]}
+      <CanvasText
+        text={bismillahText}
         font={QURAN_FONT}
         fontSize={TEXT_SIZES.BISMILLAH}
         color={bismillahColor}
-        anchorX="center"
-        anchorY="bottom"
         textAlign="center"
-        direction="rtl"
-        maxWidth={PAGE_WIDTH * 0.9}
+        verticalAlign="bottom"
+        width={maxWidth}
+        height={bismillahHeight}
+        position={[0, bismillahHeight / 2, 0.0008]}
         renderOrder={frontRenderOrder}
       >
-        {SURAH_DATA.bismillah}
         <meshPhysicalMaterial
           color={bismillahColor}
           metalness={1}
@@ -95,8 +99,10 @@ export function BismillahFloatingText3D({
           clearcoat={1}
           clearcoatRoughness={0.08}
           envMapIntensity={2}
+          transparent
+          depthTest={false}
         />
-      </Text>
+      </CanvasText>
     </group>
   );
 }

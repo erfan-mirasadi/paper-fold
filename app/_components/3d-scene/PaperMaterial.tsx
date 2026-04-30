@@ -38,7 +38,7 @@ const BASE_RENDER_TEX_HEIGHT = 1700;
 
 const TEXTURE_SETTLE_DELAY_MS = 600;
 const TEXTURE_READY_DELAY_MS = 200;
-const TEXTURE_CAPTURE_FRAMES = 4;
+const TEXTURE_CAPTURE_FRAMES = 1;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
 const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
@@ -49,7 +49,8 @@ async function preloadFontUrl(fontUrl: string) {
     return;
   }
 
-  const fontFace = new FontFace(`paper-text-${fontUrl}`, `url(${fontUrl})`);
+  const familyName = fontUrl === QURAN_FONT ? "QuranFont" : "LatinFont";
+  const fontFace = new FontFace(familyName, `url(${fontUrl})`);
   await fontFace.load();
   document.fonts.add(fontFace);
 }

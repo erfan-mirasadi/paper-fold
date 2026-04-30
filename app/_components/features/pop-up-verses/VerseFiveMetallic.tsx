@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { useMemo } from "react";
 import { RenderTexture, OrthographicCamera, Text } from "@react-three/drei";
+import { CanvasText } from "../../shared/CanvasText";
 import { useLoader } from "@react-three/fiber";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { VerseBox, RoundedShapeComponent } from "../../SurahLayout/SharedUI";
@@ -17,6 +18,7 @@ import {
 } from "../../data/useSurahLanguageStore";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
+  QURAN_FONT,
   S1_ANA_BG,
   CAPSULE_BG_5,
   S1_ANA_LABEL_BG,
@@ -435,19 +437,33 @@ export function VerseFiveMetallic() {
               />
             </mesh>
 
-            <Text
-              position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}
-              fontSize={TEXT_SIZES.TOP_LABEL}
-              color={S1_ANA_LABEL_TEXT}
-              anchorX="center"
-              anchorY="middle"
-              fontWeight="bold"
-              material-depthTest={false}
-              material-depthWrite={false}
-              renderOrder={111}
-            >
-              {anaAyetLabel}
-            </Text>
+            {activeLanguage === "ar" ? (
+              <group position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}>
+                <CanvasText
+                  text={anaAyetLabel}
+                  font={QURAN_FONT}
+                  fontSize={TEXT_SIZES.TOP_LABEL}
+                  color={S1_ANA_LABEL_TEXT}
+                  textAlign="center"
+                  width={labelW}
+                  height={labelH}
+                />
+              </group>
+            ) : (
+              <Text
+                position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}
+                fontSize={TEXT_SIZES.TOP_LABEL}
+                color={S1_ANA_LABEL_TEXT}
+                anchorX="center"
+                anchorY="middle"
+                fontWeight="bold"
+                material-depthTest={false}
+                material-depthWrite={false}
+                renderOrder={111}
+              >
+                {anaAyetLabel}
+              </Text>
+            )}
           </group>
         </a.group>
       </group>

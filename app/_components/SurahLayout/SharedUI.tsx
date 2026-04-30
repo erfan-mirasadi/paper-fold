@@ -31,6 +31,7 @@ import {
   useSurahLanguageStore,
 } from "../data/useSurahLanguageStore";
 import { cloneTextureAsAspectCover } from "../shared/textureFit";
+import { CanvasText } from "../shared/CanvasText";
 
 // ROUNDED SHAPE GEOMETRY
 interface RoundedShapeProps {
@@ -330,20 +331,34 @@ export function TopLabel({
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
-      <Text
-        position={[w / 2, -h / 2, 0.002]}
-        fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-        color={TEXT_LABEL}
-        anchorX="center"
-        anchorY="middle"
-        fontStyle="normal"
-        fontWeight="bold"
-        material-depthTest={false}
-        renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
-        sdfGlyphSize={128}
-      >
-        {text}
-      </Text>
+      {activeLanguage === "ar" ? (
+        <group position={[w / 2, -h / 2, 0.002]}>
+          <CanvasText
+            text={text}
+            font={QURAN_FONT}
+            fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+            color={TEXT_LABEL}
+            textAlign="center"
+            width={w}
+            height={h}
+          />
+        </group>
+      ) : (
+        <Text
+          position={[w / 2, -h / 2, 0.002]}
+          fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+          color={TEXT_LABEL}
+          anchorX="center"
+          anchorY="middle"
+          fontStyle="normal"
+          fontWeight="bold"
+          material-depthTest={false}
+          renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+          sdfGlyphSize={128}
+        >
+          {text}
+        </Text>
+      )}
     </group>
   );
 }
@@ -375,18 +390,32 @@ export function AnaAyetTab({ x, y, w, h, z }: AnaAyetTabProps) {
         color={S1_ANA_LABEL_BG}
       />
 
-      <Text
-        position={[w / 2, -h / 2, 0.002]}
-        fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-        color={S1_ANA_LABEL_TEXT}
-        anchorX="center"
-        anchorY="middle"
-        fontWeight="bold"
-        material-depthTest={false}
-        sdfGlyphSize={128}
-      >
-        {labelText}
-      </Text>
+      {activeLanguage === "ar" ? (
+        <group position={[w / 2, -h / 2, 0.002]}>
+          <CanvasText
+            text={labelText}
+            font={QURAN_FONT}
+            fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+            color={S1_ANA_LABEL_TEXT}
+            textAlign="center"
+            width={w}
+            height={h}
+          />
+        </group>
+      ) : (
+        <Text
+          position={[w / 2, -h / 2, 0.002]}
+          fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+          color={S1_ANA_LABEL_TEXT}
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+          material-depthTest={false}
+          sdfGlyphSize={128}
+        >
+          {labelText}
+        </Text>
+      )}
     </group>
   );
 }
@@ -549,27 +578,46 @@ export const VerseBox = ({
         </group>
       )}
 
-      <Text
-        position={[versePosX, -h / 2, 0.002]}
-        fontSize={
-          (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
-          textScale
-        }
-        color={textColor || TEXT_DARK}
-        anchorX={textAnchorX}
-        anchorY="middle"
-        maxWidth={textMaxW}
-        lineHeight={textLineHeight}
-        textAlign={textAlign}
-        font={textFont}
-        direction={textDirection}
-        renderOrder={14}
-        material-depthTest={false}
-        material-transparent={true}
-        sdfGlyphSize={128}
-      >
-        {verse}
-      </Text>
+      {isArabic ? (
+        <group position={[versePosX, -h / 2, 0.002]}>
+          <CanvasText
+            text={verse}
+            font={textFont}
+            fontSize={
+              (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
+              textScale
+            }
+            color={textColor || TEXT_DARK}
+            maxWidth={textMaxW}
+            lineHeight={textLineHeight}
+            textAlign={textAlign}
+            width={textMaxW}
+            height={h}
+          />
+        </group>
+      ) : (
+        <Text
+          position={[versePosX, -h / 2, 0.002]}
+          fontSize={
+            (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
+            textScale
+          }
+          color={textColor || TEXT_DARK}
+          anchorX={textAnchorX}
+          anchorY="middle"
+          maxWidth={textMaxW}
+          lineHeight={textLineHeight}
+          textAlign={textAlign}
+          font={textFont}
+          direction={textDirection}
+          renderOrder={14}
+          material-depthTest={false}
+          material-transparent={true}
+          sdfGlyphSize={128}
+        >
+          {verse}
+        </Text>
+      )}
     </group>
   );
 };

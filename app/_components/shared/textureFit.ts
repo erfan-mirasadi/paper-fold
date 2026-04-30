@@ -15,7 +15,7 @@ export function cloneTextureAsAspectCover(
   source: Texture,
   surfaceWidth: number,
   surfaceHeight: number,
-  scale: number = 0.0015,
+  scale: number = 0.001,
   transform?: TextureTransform,
 ): Texture {
   // Clone the texture so each surface can have independent repeats
