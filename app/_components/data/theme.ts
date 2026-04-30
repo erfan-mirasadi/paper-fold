@@ -76,10 +76,7 @@ export const WHITE_VERSE_BG = "#ffffff";
 // 7. GLOBAL FONT PATH
 // ----------------------------------------------------------------------------
 export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
-
-/** Fira Sans Condensed (Google Fonts) — verse body for EN/TR in Troika `<Text />`; Arabic keeps `QURAN_FONT`. */
 export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
-/** Vazirmatn — cleaner font for labels and UI elements in Latin. */
 export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
 
 // ----------------------------------------------------------------------------
@@ -88,7 +85,7 @@ export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
 export const TEXT_SIZES = {
   BISMILLAH: 0.066,
   TOP_LABEL: 0.027,
-  ANA_AYET_TAB: 0.036,
+  ANA_AYET_TAB: 0.023,
   VERSE_NUMBER: 0.024,
   VERSE_TEXT_SMALL: 0.0365,
   VERSE_TEXT_BIG: 0.071,

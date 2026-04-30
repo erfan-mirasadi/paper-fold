@@ -81,22 +81,6 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
 
       {/* Outer decorative card border */}
       <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} />
-
-      {/* Bismillah header */}
-      {/* <Text
-        position={[PW / 2, -0.085, 0.02]}
-        fontSize={TEXT_SIZES.BISMILLAH}
-        color={TEXT_DARK}
-        anchorX="center"
-        anchorY="middle"
-        textAlign="center"
-        material-depthTest={false}
-        font={QURAN_FONT}
-        direction="rtl"
-      >
-        {SURAH_DATA.bismillah}
-      </Text> */}
-
       {/* Upper section — receives pre-computed S1Transforms, does zero math */}
       <SectionOne
         data={surahData.section1}

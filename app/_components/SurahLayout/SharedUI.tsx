@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, useTexture } from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
@@ -332,21 +332,19 @@ export function TopLabel({
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
-      <Text
-        position={[w / 2, -h / 2, 0.002]}
-        fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-        color={TEXT_LABEL}
-        anchorX="center"
-        anchorY="middle"
-        fontStyle="normal"
-        fontWeight="bold"
-        font={LATIN_LABEL_FONT}
-        material-depthTest={false}
-        renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
-        sdfGlyphSize={128}
-      >
-        {text}
-      </Text>
+      <group position={[w / 2, -h / 2, 0.002]}>
+        <CanvasText
+          text={text}
+          font={LATIN_LABEL_FONT}
+          fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+          color={TEXT_LABEL}
+          width={w}
+          height={h}
+          textAlign="center"
+          fontWeight="bold"
+          renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+        />
+      </group>
     </group>
   );
 }
@@ -380,20 +378,19 @@ export function AnaAyetTab({ x, y, w, h, z, renderOrder }: AnaAyetTabProps) {
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
 
-      <Text
-        position={[w / 2, -h / 2, 0.002]}
-        fontSize={TEXT_SIZES.ANA_AYET_TAB * anaAyetScale}
-        color={S1_ANA_LABEL_TEXT}
-        anchorX="center"
-        anchorY="middle"
-        fontWeight="bold"
-        font={LATIN_LABEL_FONT}
-        material-depthTest={false}
-        renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
-        sdfGlyphSize={128}
-      >
-        {labelText}
-      </Text>
+      <group position={[w / 2, -h / 2, 0.002]}>
+        <CanvasText
+          text={labelText}
+          font={LATIN_LABEL_FONT}
+          fontSize={TEXT_SIZES.ANA_AYET_TAB * anaAyetScale}
+          color={S1_ANA_LABEL_TEXT}
+          width={w}
+          height={h}
+          textAlign="center"
+          fontWeight="bold"
+          renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+        />
+      </group>
     </group>
   );
 }
@@ -437,13 +434,11 @@ export const VerseBox = ({
   shadow = true,
   bgOpacity = 1,
   textColor,
-  verseTextEnterDurationMs = 0,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
   const textScale = isPill ? langScale.verseSmall : langScale.verseBig;
-  const textDirection = isArabic ? "rtl" : "ltr";
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
   const showVerseNumber = true;
   const textLineHeight = isArabic ? 1.2 : 1.06;
@@ -468,7 +463,6 @@ export const VerseBox = ({
   const textPaddingX = isArabic || centerTextInCapsule ? 0 : numberSidePadding;
 
   const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
-  const textAnchorX = isArabic || centerTextInCapsule ? "center" : "left";
 
   const safeMargin = 0.0;
   const centeredSidePadding = centerTextInCapsule ? numberSidePadding : 0;
@@ -540,63 +534,45 @@ export const VerseBox = ({
               opacity={0.999}
             />
           </mesh>
-          <Text
-            position={[0, 0, 0.001]}
-            fontSize={TEXT_SIZES.VERSE_NUMBER}
-            color={circleTextCol ?? S2_VERSE_NUMBER_TEXT}
-            anchorX="center"
-            anchorY="middle"
-            fontWeight="bold"
-            material-depthTest={false}
-            renderOrder={13}
-            sdfGlyphSize={128}
-          >
-            {String(number)}
-          </Text>
+          <group position={[0, 0, 0.001]}>
+            <CanvasText
+              text={String(number)}
+              font={LATIN_LABEL_FONT}
+              fontSize={TEXT_SIZES.VERSE_NUMBER}
+              color={circleTextCol ?? S2_VERSE_NUMBER_TEXT}
+              width={cr * 2}
+              height={cr * 2}
+              textAlign="center"
+              fontWeight="bold"
+              renderOrder={13}
+            />
+          </group>
         </group>
       )}
 
-      {isArabic ? (
-        <group position={[versePosX, -h / 2, 0.002]}>
-          <CanvasText
-            text={verse}
-            font={textFont}
-            fontSize={
-              (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
-              textScale
-            }
-            color={textColor || TEXT_DARK}
-            maxWidth={textMaxW}
-            lineHeight={textLineHeight}
-            textAlign={textAlign}
-            width={textMaxW}
-            height={h}
-            renderOrder={14}
-          />
-        </group>
-      ) : (
-        <Text
-          position={[versePosX, -h / 2, 0.002]}
+      <group
+        position={[
+          textAlign === "center" ? versePosX : versePosX + textMaxW / 2,
+          -h / 2,
+          0.002,
+        ]}
+      >
+        <CanvasText
+          text={verse}
+          font={textFont}
           fontSize={
             (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
             textScale
           }
           color={textColor || TEXT_DARK}
-          anchorX={textAnchorX}
-          anchorY="middle"
           maxWidth={textMaxW}
           lineHeight={textLineHeight}
           textAlign={textAlign}
-          font={textFont}
-          direction={textDirection}
+          width={textMaxW}
+          height={h}
           renderOrder={14}
-          material-depthTest={false}
-          material-transparent={true}
-          sdfGlyphSize={128}
-        >
-          {verse}
-        </Text>
-      )}
+        />
+      </group>
     </group>
   );
 };

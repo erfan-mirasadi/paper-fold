@@ -15,10 +15,11 @@ interface CanvasTextProps {
   verticalAlign?: "top" | "middle" | "bottom";
   width: number;
   height: number;
-  /** Resolution multiplier for high quality text. */
   resolution?: number;
   renderOrder?: number;
   position?: [number, number, number];
+  fontWeight?: string | number;
+  fontStyle?: string;
   children?: React.ReactNode;
 }
 
@@ -36,6 +37,8 @@ export function CanvasText({
   resolution = 3,
   renderOrder = 15,
   position = [0, 0, 0],
+  fontWeight = "normal",
+  fontStyle = "normal",
   children,
 }: CanvasTextProps) {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -53,7 +56,6 @@ export function CanvasText({
     const canvas = document.createElement("canvas");
 
     // Decreased scaleFactor to save VRAM and improve performance
-    // 128 is usually more than enough for crisp text
     const scaleFactor = 1024;
 
     const dpr = resolution;
@@ -69,7 +71,7 @@ export function CanvasText({
     // Font names match what we registered in PaperMaterial.tsx
     const fontName = font === QURAN_FONT ? "QuranFont" : "LatinFont";
     const scaledFontSize = fontSize * scaleFactor * dpr;
-    ctx.font = `${scaledFontSize}px "${fontName}", Arial`;
+    ctx.font = `${fontStyle} ${fontWeight} ${scaledFontSize}px "${fontName}", Arial`;
     ctx.fillStyle = color;
     ctx.textAlign = textAlign;
     ctx.textBaseline =
@@ -137,6 +139,8 @@ export function CanvasText({
     maxWidth,
     lineHeight,
     fontsLoaded,
+    fontWeight,
+    fontStyle,
   ]);
 
   useEffect(() => {
@@ -151,13 +155,16 @@ export function CanvasText({
     <mesh renderOrder={renderOrder} position={position}>
       <planeGeometry args={[width, height]} />
       {children ? (
-        cloneElement(children as React.ReactElement<{ map: THREE.CanvasTexture }>, {
-          map: texture,
-        })
+        cloneElement(
+          children as React.ReactElement<{ map: THREE.CanvasTexture }>,
+          {
+            map: texture,
+          },
+        )
       ) : (
         <meshBasicMaterial
           map={texture}
-          color="#ffffff" // Ensure it's not tinted black
+          color="#ffffff"
           transparent={true}
           toneMapped={false}
           depthTest={false}
