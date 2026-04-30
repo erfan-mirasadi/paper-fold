@@ -1,7 +1,7 @@
 type Vec3 = [number, number, number];
 
 const BASE_CAMERA = {
-  position: [0, 1.6, 1.6] as Vec3,
+  position: [0, 1.45, 1.48] as Vec3,
   fov: 50,
   orbitLimits: {
     minAzimuthAngle: -Math.PI / 4,
@@ -11,7 +11,7 @@ const BASE_CAMERA = {
   },
   viewPresetOffsets: {
     left: {
-      rotateY: -0.38,
+      rotateY: -0.45,
       rotateX: 0.1,
     },
     default: {
@@ -19,7 +19,7 @@ const BASE_CAMERA = {
       rotateX: 0,
     },
     right: {
-      rotateY: 0.38,
+      rotateY: 0.45,
       rotateX: 0.1,
     },
   },

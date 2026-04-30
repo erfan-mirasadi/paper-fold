@@ -7,7 +7,7 @@ import { QURAN_FONT, TEXT_SIZES } from "../../data/theme";
 import { useElevatedStore } from "../elevated-verses/useElevatedStore";
 import { CanvasText } from "../../shared/CanvasText";
 
-const TOP_EDGE_OFFSET = 0.01;
+const TOP_EDGE_OFFSET = -0.02;
 const MANUAL_DOWN_SHIFT = -0.0008;
 const FRONT_CLEARANCE = 0.016;
 const EXTRUSION_LAYERS = 3;

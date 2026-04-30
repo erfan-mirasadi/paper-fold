@@ -243,7 +243,7 @@ export function PopUpManager() {
   };
 
   return (
-    <group position={[0, runtime.PAGE_HEIGHT / 2, 0]}>
+    <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
       {verseConfigs.map((config) => {
         const group = groups.find((g) => g.verseIds.includes(config.id));
         const isOpen = group?.isOpen ?? false;

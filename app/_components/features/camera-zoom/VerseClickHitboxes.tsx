@@ -3,10 +3,7 @@ import { useMemo } from "react";
 
 import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
-import {
-  PAGE_HEIGHT,
-  SURAH_DATA,
-} from "../../data/SurahConfig";
+import { SURAH_DATA } from "../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import {
@@ -47,7 +44,9 @@ const LABEL_HITBOX = {
   height: 0.07,
 };
 
-function buildHitboxes(runtime: ReturnType<typeof useSurahLayoutRuntime>): VerseHitbox[] {
+function buildHitboxes(
+  runtime: ReturnType<typeof useSurahLayoutRuntime>,
+): VerseHitbox[] {
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;
   const zSection = zFront - 0.0008;
@@ -280,8 +279,10 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
         : undefined;
 
     const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
-    const isDragged = validSectionId ? draggedSectionIds.includes(validSectionId) : false;
-    
+    const isDragged = validSectionId
+      ? draggedSectionIds.includes(validSectionId)
+      : false;
+
     if (allSelected && isDragged) return;
 
     useElevatedStore.getState().elevateVerses(verseIds, validSectionId);
@@ -293,7 +294,7 @@ export function VerseClickHitboxes() {
   const hitboxes = useMemo(() => buildHitboxes(runtime), [runtime]);
 
   return (
-    <group position={[0, PAGE_HEIGHT / 2, 0]}>
+    <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
       {hitboxes.map((hb) => (
         <mesh
           key={`hitbox-${hb.key}`}

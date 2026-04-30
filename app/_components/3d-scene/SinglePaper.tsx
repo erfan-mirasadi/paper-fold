@@ -1,11 +1,7 @@
 "use client";
 import { useScroll } from "@react-three/drei";
 import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
-import {
-  FOLD_Y_POSITIONS,
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-} from "../SurahLayout/index";
+import { FOLD_Y_POSITIONS, PAGE_HEIGHT } from "../SurahLayout/index";
 import { FloatingArrows } from "../SurahLayout/FloatingArrows";
 import { writeFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
@@ -202,7 +198,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
   });
 
   return (
-    <group ref={group} position={[0, PAGE_HEIGHT / 2, 0]}>
+    <group ref={group} position={[0, runtime.SCENE_CENTER_Y, 0]}>
       <primitive object={manualSkinnedMesh} ref={skinnedMeshRef}>
         {/* The abstracted material component is injected here */}
         <PaperMaterial

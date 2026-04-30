@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react";
 import { a, to, useSpring } from "@react-spring/three";
 import { TopLabel } from "../../SurahLayout/SharedUI";
-import {
-  PAGE_HEIGHT,
-} from "../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import {
   SURAH_DATA_BY_LANGUAGE,
@@ -139,7 +136,7 @@ export function ElevatedSectionLabels() {
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
 
   return (
-    <group position={[0, PAGE_HEIGHT / 2, 0]}>
+    <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
       <AnimatedElevatedLabel
         sectionId="s1"
         y={SURAH_TRANSFORMS.s1.labelPinY}

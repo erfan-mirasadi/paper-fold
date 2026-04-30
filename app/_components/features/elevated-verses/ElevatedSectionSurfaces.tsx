@@ -4,10 +4,7 @@ import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { RoundedShapeComponent } from "../../SurahLayout/SharedUI";
-import {
-  PAGE_HEIGHT,
-  OPPOSITE_VERSE_CONNECTOR,
-} from "../../data/SurahConfig";
+import { OPPOSITE_VERSE_CONNECTOR } from "../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
 
@@ -30,7 +27,10 @@ import {
 } from "./useElevatedStore";
 import { dragEngine } from "./drag/dragEngine";
 import { useElevatedDrag } from "./drag/useElevatedDrag";
-import { calculateSectionBounds, type SectionBounds } from "./drag/boundsHelper";
+import {
+  calculateSectionBounds,
+  type SectionBounds,
+} from "./drag/boundsHelper";
 import { PAPER_MATERIAL_CONFIG } from "../../3d-scene/PaperMaterial";
 import { cloneTextureAsAspectCover } from "../../shared/textureFit";
 
@@ -339,15 +339,45 @@ export function ElevatedSectionSurfaces() {
       ? sectionBgTexture
       : null;
 
-  const s1Bounds = useMemo(() => isAllSectionsMode ? undefined : calculateSectionBounds("s1", SURAH_TRANSFORMS, runtime.PAGE_WIDTH), [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
-  const s2TopBounds = useMemo(() => isAllSectionsMode ? undefined : calculateSectionBounds("s2_top", SURAH_TRANSFORMS, runtime.PAGE_WIDTH), [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
+  const s1Bounds = useMemo(
+    () =>
+      isAllSectionsMode
+        ? undefined
+        : calculateSectionBounds("s1", SURAH_TRANSFORMS, runtime.PAGE_WIDTH),
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
+  );
+  const s2TopBounds = useMemo(
+    () =>
+      isAllSectionsMode
+        ? undefined
+        : calculateSectionBounds(
+            "s2_top",
+            SURAH_TRANSFORMS,
+            runtime.PAGE_WIDTH,
+          ),
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
+  );
   const s2CenterBounds = undefined;
-  const s2BottomBounds = useMemo(() => isAllSectionsMode ? undefined : calculateSectionBounds("s2_bottom", SURAH_TRANSFORMS, runtime.PAGE_WIDTH), [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
+  const s2BottomBounds = useMemo(
+    () =>
+      isAllSectionsMode
+        ? undefined
+        : calculateSectionBounds(
+            "s2_bottom",
+            SURAH_TRANSFORMS,
+            runtime.PAGE_WIDTH,
+          ),
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
+  );
 
   return (
-    <group position={[0, PAGE_HEIGHT / 2, 0]}>
+    <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
       {/* ─── Section 1 ─────────────────────────────────────────────── */}
-      <DraggableSectionGroup sectionId="s1" isActive={s1Active} sectionBounds={s1Bounds}>
+      <DraggableSectionGroup
+        sectionId="s1"
+        isActive={s1Active}
+        sectionBounds={s1Bounds}
+      >
         <ElevatedLayer
           x={s1.frameX}
           y={s1.frameY}
@@ -388,7 +418,11 @@ export function ElevatedSectionSurfaces() {
       </DraggableSectionGroup>
 
       {/* ─── Section 2 top connector ───────────────────────────────── */}
-      <DraggableSectionGroup sectionId="s2_top" isActive={s2TopActive} sectionBounds={s2TopBounds}>
+      <DraggableSectionGroup
+        sectionId="s2_top"
+        isActive={s2TopActive}
+        sectionBounds={s2TopBounds}
+      >
         <ElevatedLayer
           x={topConnector.outer.x}
           y={topConnector.outer.y}
@@ -444,7 +478,11 @@ export function ElevatedSectionSurfaces() {
       </DraggableSectionGroup>
 
       {/* ─── Section 2 Center Group ────────────────────────────────────── */}
-      <DraggableSectionGroup sectionId="s2_center" isActive={s2CenterActive} sectionBounds={s2CenterBounds}>
+      <DraggableSectionGroup
+        sectionId="s2_center"
+        isActive={s2CenterActive}
+        sectionBounds={s2CenterBounds}
+      >
         {s2.groups[1].rowConnectors.map((rc, i) => (
           <ElevatedLayer
             key={`s2-center-rc-${i}`}
@@ -462,7 +500,11 @@ export function ElevatedSectionSurfaces() {
       </DraggableSectionGroup>
 
       {/* ─── Section 2 bottom connector ────────────────────────────── */}
-      <DraggableSectionGroup sectionId="s2_bottom" isActive={s2BottomActive} sectionBounds={s2BottomBounds}>
+      <DraggableSectionGroup
+        sectionId="s2_bottom"
+        isActive={s2BottomActive}
+        sectionBounds={s2BottomBounds}
+      >
         <ElevatedLayer
           x={bottomConnector.outer.x}
           y={bottomConnector.outer.y}

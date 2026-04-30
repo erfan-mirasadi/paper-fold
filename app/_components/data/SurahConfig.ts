@@ -52,6 +52,7 @@ export interface SectionTwoData {
 // --- Page Dimensions ---
 export const BASE_PAGE_WIDTH = 1.54;
 export const PAGE_HEIGHT = 1.76;
+export const SCENE_CENTER_Y_OFFSET = -0.045; // Centralized offset for the entire paper scene
 
 export function createLayoutMath(pageWidth: number) {
   const PAGE_WIDTH = pageWidth;
@@ -71,19 +72,20 @@ export function createLayoutMath(pageWidth: number) {
 
   // --- Section 2 (Main Lower Block) ---
   const gapBetweenS1andS2 = 0.09;
-  const s2TopExtra = 0.019;
   const s2Top = s1Top - s1H - gapBetweenS1andS2;
 
-  const s2PadTop = 0.035 + s2TopExtra;
-  const s2PadBottom = 0.06;
+  // Symmetric padding for top and bottom sections (verses 6-10 and 15-19)
+  const s2VerticalPad = 0.052;
+  const s2PadTop = s2VerticalPad;
+  const s2PadBottom = s2VerticalPad;
   const bigBoxH = 0.125;
-  const groupGap = 0.025;
+  const groupGap = 0.035;
   const groupPad = 0.012;
-  const groupPadBottom = 0.025;
+  const groupPadBottom = 0.012;
   const s2Gap = 0.02;
   const smallBoxH2 = 0.075;
   const groupH = groupPad + groupPadBottom + (smallBoxH2 * 2 + s2Gap);
-  const middleExtraGap = 0.033;
+  const middleExtraGap = 0.03;
 
   const s2H =
     s2PadTop +
@@ -396,12 +398,16 @@ export function buildSurahTransforms(
   const connX = s2BaseX - lm.sgPad;
   const connW = s2InnerW + lm.sgPad * 2;
 
+  // Since Section 1 (Top Block, verses 6-10) and Section 3 (Bottom Block, verses 15-19)
+  // are perfectly symmetrical, we calculate the outer box dimensions once to ensure
+  // they are exactly identical.
   const tBox_Y = shiftedTop;
-  const tBox_H =
+  const outerSectionH =
     tBox_Y - ((lm.baseG1Y || lm.g1Y) - lm.groupH - lm.boxExtOffset);
+  const tBox_H = outerSectionH;
 
   const bBox_Y = (lm.baseG3Y || lm.g3Y) + lm.boxExtOffset;
-  const bBox_H = bBox_Y - shiftedBot;
+  const bBox_H = outerSectionH; // Forcing EXACT same height as the top section!
 
   // ── GROUP TRANSFORMS ───────────────────────────────────────────────────────
   const groupYPositions = [lm.g1Y, lm.g2Y, lm.g3Y];
