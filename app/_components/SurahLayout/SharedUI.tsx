@@ -14,6 +14,7 @@ import {
   S1_ANA_LABEL_TEXT,
   QURAN_FONT,
   LATIN_VERSE_FONT,
+  LATIN_LABEL_FONT,
   TEXT_SIZES,
   S2_VERSE_NUMBER_TEXT,
   LANGUAGE_TEXT_SCALE,
@@ -331,34 +332,21 @@ export function TopLabel({
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
-      {activeLanguage === "ar" ? (
-        <group position={[w / 2, -h / 2, 0.002]}>
-          <CanvasText
-            text={text}
-            font={QURAN_FONT}
-            fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-            color={TEXT_LABEL}
-            textAlign="center"
-            width={w}
-            height={h}
-          />
-        </group>
-      ) : (
-        <Text
-          position={[w / 2, -h / 2, 0.002]}
-          fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-          color={TEXT_LABEL}
-          anchorX="center"
-          anchorY="middle"
-          fontStyle="normal"
-          fontWeight="bold"
-          material-depthTest={false}
-          renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
-          sdfGlyphSize={128}
-        >
-          {text}
-        </Text>
-      )}
+      <Text
+        position={[w / 2, -h / 2, 0.002]}
+        fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+        color={TEXT_LABEL}
+        anchorX="center"
+        anchorY="middle"
+        fontStyle="normal"
+        fontWeight="bold"
+        font={LATIN_LABEL_FONT}
+        material-depthTest={false}
+        renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+        sdfGlyphSize={128}
+      >
+        {text}
+      </Text>
     </group>
   );
 }
@@ -370,11 +358,12 @@ interface AnaAyetTabProps {
   w: number;
   h: number;
   z: number;
+  renderOrder?: number;
 }
-export function AnaAyetTab({ x, y, w, h, z }: AnaAyetTabProps) {
+export function AnaAyetTab({ x, y, w, h, z, renderOrder }: AnaAyetTabProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
-  const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
+  const anaAyetScale = LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet;
 
   const radius = h / 2;
 
@@ -388,34 +377,23 @@ export function AnaAyetTab({ x, y, w, h, z }: AnaAyetTabProps) {
         h={h}
         radius={radius}
         color={S1_ANA_LABEL_BG}
+        renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
       />
 
-      {activeLanguage === "ar" ? (
-        <group position={[w / 2, -h / 2, 0.002]}>
-          <CanvasText
-            text={labelText}
-            font={QURAN_FONT}
-            fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-            color={S1_ANA_LABEL_TEXT}
-            textAlign="center"
-            width={w}
-            height={h}
-          />
-        </group>
-      ) : (
-        <Text
-          position={[w / 2, -h / 2, 0.002]}
-          fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
-          color={S1_ANA_LABEL_TEXT}
-          anchorX="center"
-          anchorY="middle"
-          fontWeight="bold"
-          material-depthTest={false}
-          sdfGlyphSize={128}
-        >
-          {labelText}
-        </Text>
-      )}
+      <Text
+        position={[w / 2, -h / 2, 0.002]}
+        fontSize={TEXT_SIZES.ANA_AYET_TAB * anaAyetScale}
+        color={S1_ANA_LABEL_TEXT}
+        anchorX="center"
+        anchorY="middle"
+        fontWeight="bold"
+        font={LATIN_LABEL_FONT}
+        material-depthTest={false}
+        renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+        sdfGlyphSize={128}
+      >
+        {labelText}
+      </Text>
     </group>
   );
 }
@@ -593,6 +571,7 @@ export const VerseBox = ({
             textAlign={textAlign}
             width={textMaxW}
             height={h}
+            renderOrder={14}
           />
         </group>
       ) : (

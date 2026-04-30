@@ -70,6 +70,10 @@ export function LanguageSwitchOverlay({
       ? "rgba(255,255,255,0.12)"
       : "rgba(15, 18, 24, 0.10)";
 
+    const transparentBackground = isDarkMode
+      ? "rgba(210, 228, 255, 0)"
+      : "rgba(56, 66, 82, 0)";
+
     return {
       border,
       background,
@@ -77,6 +81,7 @@ export function LanguageSwitchOverlay({
       text,
       itemHoverBackground,
       activeBackground,
+      transparentBackground,
       activeBorder,
       activeShadow,
       panelShadow,
@@ -274,7 +279,7 @@ export function LanguageSwitchOverlay({
                         border: isActive ? buttonTheme.activeBorder : "none",
                         background: isActive
                           ? buttonTheme.activeBackground
-                          : "transparent",
+                          : buttonTheme.transparentBackground,
                         boxShadow: isActive ? buttonTheme.activeShadow : "none",
                         color: buttonTheme.text,
                         cursor: "pointer",

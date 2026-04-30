@@ -151,7 +151,9 @@ export function CanvasText({
     <mesh renderOrder={renderOrder} position={position}>
       <planeGeometry args={[width, height]} />
       {children ? (
-        cloneElement(children as React.ReactElement, { map: texture })
+        cloneElement(children as React.ReactElement<{ map: THREE.CanvasTexture }>, {
+          map: texture,
+        })
       ) : (
         <meshBasicMaterial
           map={texture}
