@@ -41,18 +41,38 @@ export function CanvasText({
   fontStyle = "normal",
   children,
 }: CanvasTextProps) {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
 
   useEffect(() => {
-    document.fonts.ready.then(() => {
-      // Small delay ensures the browser has fully registered the new FontFaces
-      setTimeout(() => setFontsLoaded(true), 100);
-    });
+    let active = true;
+
+    const handleFontsReady = () => {
+      document.fonts.ready.then(() => {
+        if (active) {
+          // Small delay ensures the browser has fully registered the new FontFaces
+          setTimeout(() => setFontsLoadedKey((k) => k + 1), 100);
+        }
+      });
+    };
+
+    handleFontsReady();
+
+    if ("fonts" in document) {
+      document.fonts.addEventListener("loadingdone", handleFontsReady);
+      return () => {
+        active = false;
+        document.fonts.removeEventListener("loadingdone", handleFontsReady);
+      };
+    }
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const texture = useMemo(() => {
     // Force re-run when fonts are loaded
-    const _ = fontsLoaded;
+    if (fontsLoadedKey < 0) return null; // Use the variable to satisfy the linter
     const canvas = document.createElement("canvas");
 
     // Decreased scaleFactor to save VRAM and improve performance
@@ -138,7 +158,7 @@ export function CanvasText({
     resolution,
     maxWidth,
     lineHeight,
-    fontsLoaded,
+    fontsLoadedKey,
     fontWeight,
     fontStyle,
   ]);

@@ -5,7 +5,7 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { a, useSpring } from "@react-spring/three";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { PopUpManager } from "../features/pop-up-verses/PopUpManager";
@@ -15,7 +15,6 @@ import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSecti
 import { useDragState } from "../features/elevated-verses/drag/dragEngine";
 import { CAMERA_CONFIG } from "../data/cameraConfig";
 import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
-// import { BackgroundText } from "./BackgroundText";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -39,6 +38,35 @@ export function Experience({
 }: ExperienceProps) {
   const isPaperMoving = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  // We track both environment and paper readiness separately to avoid stutter
+  const [envReady, setEnvReady] = useState(false);
+  const [paperReady, setPaperReady] = useState(false);
+
+  // Mount Environment very quickly to get the heavy PMREM baking out of the way
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setEnvReady(true);
+    }, 100); // Reduced delay significantly to hide the CPU spike
+    return () => clearTimeout(t);
+  }, []);
+
+  // Intercept the paper's onReady event
+  const handlePaperReady = useCallback(() => {
+    setPaperReady(true);
+  }, []);
+
+  // Only tell the parent component the scene is fully ready when BOTH
+  // the paper is rendered AND the environment HDR is baked.
+  useEffect(() => {
+    if (paperReady && envReady) {
+      // Give the GPU a 500ms breathing room after compiling everything
+      // so the fade-in transition doesn't stutter.
+      const timer = setTimeout(() => {
+        onReady?.();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [paperReady, envReady, onReady]);
 
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
@@ -86,7 +114,7 @@ export function Experience({
           <SinglePaper
             isFolded={isFolded}
             isDarkMode={isDarkMode}
-            onReady={onReady}
+            onReady={handlePaperReady} // Using our intercepted handler here
           />
         </a.group>
         <ElevatedSectionSurfaces />
@@ -103,7 +131,7 @@ export function Experience({
       {/* <BackgroundText isDarkMode={isDarkMode} /> */}
 
       <DynamicControls />
-      <Environment preset="apartment" />
+      {envReady && <Environment preset="apartment" />}
       <ambientLight intensity={0.8} />
       <directionalLight position={[2, 5, 2]} intensity={1.5} />
     </>

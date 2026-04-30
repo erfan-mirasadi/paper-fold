@@ -34,12 +34,25 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    // Mount the Canvas almost immediately using requestAnimationFrame.
+    // This pushes the heavy initial WebGL blocking to the very start of the load,
+    // right before the loader animation is fully visible to the user.
+    const rafId = requestAnimationFrame(() => {
+      setCanvasReady(true);
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const bgColor = isDarkMode && !isMobile ? "#000000" : "#ffffff";
@@ -61,41 +74,50 @@ export default function Home() {
         backgroundColor: bgColor,
         overflow: "hidden",
         transition: "background-color 0.5s ease",
+        position: "relative", // Ensure relative positioning for absolute children
       }}
     >
       <Suspense fallback={null}>
         <div
           style={{
-            width: "100vw",
-            height: "100dvh",
+            position: "absolute",
+            inset: 0,
             opacity: isSceneReady ? 1 : 0,
-            transition: "opacity 0.5s ease",
-            transitionDelay: isSceneReady ? "0.2s" : "0s",
+            // Prevent pointer events while hidden to avoid blocking UI interactions
+            pointerEvents: isSceneReady ? "auto" : "none",
+            // Apple-like buttery smooth ease transition
+            transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
           }}
         >
-          <Canvas
-            camera={{
-              position: CAMERA_CONFIG.initialCamera.position,
-              fov: CAMERA_CONFIG.initialCamera.fov,
-            }}
-            gl={{
-              antialias: true,
-              powerPreference: "high-performance",
-              toneMapping: THREE.NoToneMapping,
-              outputColorSpace: THREE.SRGBColorSpace,
-            }}
-          >
-            <color attach="background" args={[bgColor]} />
-            {/* <Effects glitchTrigger={glitchKey} /> */}
-            <ScrollControls pages={2} damping={0.28}>
-              <ScrollManager />
-              <PopUpHoverScrollController />
-              <Experience isDarkMode={isDarkMode} onReady={handleSceneReady} />
-            </ScrollControls>
-            {/* <VerseNeonTracker /> */}
-            <CameraViewController />
-            <Preload all />
-          </Canvas>
+          {canvasReady && (
+            <Canvas
+              camera={{
+                position: CAMERA_CONFIG.initialCamera.position,
+                fov: CAMERA_CONFIG.initialCamera.fov,
+              }}
+              gl={{
+                antialias: true,
+                powerPreference: "high-performance",
+                toneMapping: THREE.NoToneMapping,
+                outputColorSpace: THREE.SRGBColorSpace,
+              }}
+              frameloop="always"
+            >
+              <color attach="background" args={[bgColor]} />
+              {/* <Effects glitchTrigger={glitchKey} /> */}
+              <ScrollControls pages={2} damping={0.28}>
+                <ScrollManager />
+                <PopUpHoverScrollController />
+                <Experience
+                  isDarkMode={isDarkMode}
+                  onReady={handleSceneReady}
+                />
+              </ScrollControls>
+              {/* <VerseNeonTracker /> */}
+              <CameraViewController />
+              <Preload all />
+            </Canvas>
+          )}
         </div>
       </Suspense>
       <AnimatePresence>
