@@ -38,27 +38,18 @@ export function Experience({
 }: ExperienceProps) {
   const isPaperMoving = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
-  // We track both environment and paper readiness separately to avoid stutter
-  const [envReady, setEnvReady] = useState(false);
+  // We track paper readiness
   const [paperReady, setPaperReady] = useState(false);
-
-  // Mount Environment very quickly to get the heavy PMREM baking out of the way
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setEnvReady(true);
-    }, 100); // Reduced delay significantly to hide the CPU spike
-    return () => clearTimeout(t);
-  }, []);
 
   // Intercept the paper's onReady event
   const handlePaperReady = useCallback(() => {
     setPaperReady(true);
   }, []);
 
-  // Only tell the parent component the scene is fully ready when BOTH
-  // the paper is rendered AND the environment HDR is baked.
+  // Only tell the parent component the scene is fully ready when
+  // the paper is rendered.
   useEffect(() => {
-    if (paperReady && envReady) {
+    if (paperReady) {
       // Give the GPU a 500ms breathing room after compiling everything
       // so the fade-in transition doesn't stutter.
       const timer = setTimeout(() => {
@@ -66,7 +57,7 @@ export function Experience({
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [paperReady, envReady, onReady]);
+  }, [paperReady, onReady]);
 
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
     if (e.delta > 2) return;
@@ -96,7 +87,6 @@ export function Experience({
         position={CAMERA_CONFIG.initialCamera.position}
         fov={CAMERA_CONFIG.initialCamera.fov}
       />
-
       <a.group
         rotation-x={-Math.PI / 4}
         position-x={sceneOffsetX}
@@ -122,18 +112,15 @@ export function Experience({
         <PopUpManager />
         {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
-
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
         <planeGeometry args={[50, 50]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-
       {/* <BackgroundText isDarkMode={isDarkMode} /> */}
-
       <DynamicControls />
-      {envReady && <Environment preset="apartment" />}
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[2, 5, 2]} intensity={1.5} />
+      <Environment preset="apartment" />
+      <ambientLight intensity={1} />
+      <directionalLight position={[0, 4.2, -2]} intensity={1} />
     </>
   );
 }
