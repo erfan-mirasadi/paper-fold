@@ -75,7 +75,7 @@ export function createLayoutMath(pageWidth: number) {
   const s2Top = s1Top - s1H - gapBetweenS1andS2;
 
   // Symmetric padding for top and bottom sections (verses 6-10 and 15-19)
-  const s2VerticalPad = 0.052;
+  const s2VerticalPad = 0.054;
   const s2PadTop = s2VerticalPad;
   const s2PadBottom = s2VerticalPad;
   const bigBoxH = 0.125;

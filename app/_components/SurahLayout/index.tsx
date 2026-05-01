@@ -1,6 +1,6 @@
 "use client";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { Boarder } from "./Boarder";
+// import { Boarder } from "./Boarder";
 import { SectionOne } from "./SectionOne";
 import { SectionTwo } from "./SectionTwo";
 import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
@@ -80,7 +80,7 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
       />
 
       {/* Outer decorative card border */}
-      <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} />
+      {/* <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} /> */}
       {/* Upper section — receives pre-computed S1Transforms, does zero math */}
       <SectionOne
         data={surahData.section1}

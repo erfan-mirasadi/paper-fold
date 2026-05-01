@@ -42,6 +42,7 @@ const TEXTURE_CAPTURE_FRAMES = 1;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
 const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
+const FRAME_OPACITY = 0.15;
 
 async function preloadFontUrl(fontUrl: string) {
   if (typeof FontFace === "undefined") {
@@ -212,6 +213,11 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
     },
   );
 
+  const frameTexture = useTexture("/grunge-frame-3.png", (texture) => {
+    texture.colorSpace = SRGBColorSpace;
+    texture.needsUpdate = true;
+  });
+
   const { onBeforeCompile } = usePaperMasking(paperTextureDiffuse);
 
   return (
@@ -255,6 +261,17 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
         )}
 
         {fontsReady && <PaperContent isFolded={isFolded} />}
+
+        <mesh position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, 2]}>
+          <planeGeometry args={[PAGE_WIDTH, PAGE_HEIGHT]} />
+          <meshBasicMaterial
+            map={frameTexture}
+            transparent={true}
+            opacity={FRAME_OPACITY}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
       </RenderTexture>
 
       {toggles.normal && (
