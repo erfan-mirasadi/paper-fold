@@ -26,6 +26,9 @@ import {
   TOP_LABEL_WIDTH,
   VERSE_5_6_19_RADIUS,
   VERSE_TEXT_RIGHT_PADDING,
+  SMALL_TEXT_SHIFT,
+  BIG_VERSE_VERTICAL_SHIFT,
+  SMALL_VERSE_VERTICAL_SHIFT,
 } from "../data/SurahConfig";
 import {
   ANA_AYET_LABEL_BY_LANGUAGE,
@@ -479,12 +482,18 @@ export const VerseBox = ({
       ? safeMargin + textMaxW / 2
       : safeMargin + textPaddingX;
 
-  const SMALL_TEXT_SHIFT = -0.01;
+  // Visual centering adjustments moved to SurahConfig.ts
   const versePosX = isArabic
     ? isPill
       ? textX - SMALL_TEXT_SHIFT
       : textX
     : textX;
+
+  const verticalShift = isArabic
+    ? isPill
+      ? SMALL_VERSE_VERTICAL_SHIFT
+      : BIG_VERSE_VERTICAL_SHIFT
+    : 0;
 
   return (
     <group position={[finalX, y, z]}>
@@ -553,7 +562,7 @@ export const VerseBox = ({
       <group
         position={[
           textAlign === "center" ? versePosX : versePosX + textMaxW / 2,
-          -h / 2,
+          -h / 2 + verticalShift,
           0.002,
         ]}
       >

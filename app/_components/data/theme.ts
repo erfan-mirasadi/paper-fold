@@ -87,7 +87,7 @@ export const TEXT_SIZES = {
   TOP_LABEL: 0.027,
   ANA_AYET_TAB: 0.023,
   VERSE_NUMBER: 0.024,
-  VERSE_TEXT_SMALL: 0.0365,
+  VERSE_TEXT_SMALL: 0.038,
   VERSE_TEXT_BIG: 0.071,
 } as const;
 
@@ -107,7 +107,7 @@ export const LANGUAGE_TEXT_SCALE = {
     anaAyet: 1,
   },
   tr: {
-    verseSmall: 0.72,
+    verseSmall: 0.67,
     verseBig: 0.49,
     topLabel: 1,
     anaAyet: 1,

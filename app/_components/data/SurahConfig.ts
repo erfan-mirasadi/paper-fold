@@ -211,6 +211,11 @@ export const VERSE_TEXT_RIGHT_PADDING = 0.003;
 export const TOP_LABEL_WIDTH = 0.47;
 
 // Section 1 neon border tuning.
+export const SMALL_TEXT_SHIFT = -0.018;
+export const BIG_VERSE_VERTICAL_SHIFT = -0.006;
+export const SMALL_VERSE_VERTICAL_SHIFT = -0.005;
+
+// Section 1 neon border tuning.
 // Sizes live here so glow spread can be adjusted without touching JSX.
 export const S1_NEON_CONFIG = {
   haloPad: 0.014,
