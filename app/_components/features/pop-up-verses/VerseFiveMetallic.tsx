@@ -395,6 +395,7 @@ export function VerseFiveMetallic() {
                     textColor={S1_VERSE_5_TEXT}
                     isPill={false}
                     shadow={false}
+                    textOffsetY={-0.004}
                   />
                 </group>
               </RenderTexture>
@@ -440,7 +441,7 @@ export function VerseFiveMetallic() {
             </mesh>
 
             <group
-              position={[labelW / 2, -labelH / 2, ANA_LABEL_DEPTH + 0.002]}
+              position={[labelW / 2, -labelH / 2 - 0.002, ANA_LABEL_DEPTH + 0.002]}
             >
               <CanvasText
                 text={anaAyetLabel}

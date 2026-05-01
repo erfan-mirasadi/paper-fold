@@ -418,6 +418,7 @@ interface VerseBoxProps {
   textColor?: string;
   /** 0 avoids capturing invisible text inside finite-frame RenderTextures. */
   verseTextEnterDurationMs?: number;
+  textOffsetY?: number;
 }
 export const VerseBox = ({
   x,
@@ -437,6 +438,7 @@ export const VerseBox = ({
   shadow = true,
   bgOpacity = 1,
   textColor,
+  textOffsetY = 0,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -562,7 +564,7 @@ export const VerseBox = ({
       <group
         position={[
           textAlign === "center" ? versePosX : versePosX + textMaxW / 2,
-          -h / 2 + verticalShift,
+          -h / 2 + verticalShift + textOffsetY,
           0.002,
         ]}
       >
