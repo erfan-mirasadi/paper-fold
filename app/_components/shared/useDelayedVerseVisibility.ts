@@ -140,7 +140,15 @@ export function useDelayedVerseVisibility() {
 
     const isMiddleVerse =
       verseId === 11 || verseId === 12 || verseId === 13 || verseId === 14;
-    if (isMiddleVerse && delayedMiddleHorizontalFolded) return true;
+    if (
+      isMiddleVerse &&
+      ((delayedMiddleHorizontalFolded === "left" &&
+        (verseId === 12 || verseId === 14)) ||
+        (delayedMiddleHorizontalFolded === "right" &&
+          (verseId === 11 || verseId === 13)))
+    ) {
+      return true;
+    }
 
     const group = groups.find((g) => g.verseIds.includes(verseId));
     if (group) {

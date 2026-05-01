@@ -7,6 +7,8 @@ export type PopUpGroup = {
   hasEverOpened: boolean;
 };
 
+export type MiddleHorizontalColumn = "left" | "right";
+
 const INITIAL_POPUP_GROUPS: PopUpGroup[] = [
   { id: "g_1_2", verseIds: [1, 2], isOpen: false, hasEverOpened: false },
   { id: "g_3_4", verseIds: [3, 4], isOpen: false, hasEverOpened: false },
@@ -26,18 +28,31 @@ interface PopUpStoreState {
   popUpGroups: PopUpGroup[];
   popUpAllOpen: boolean;
   unlockedGroupIds: string[];
-  middleHorizontalFolded: boolean;
+  middleHorizontalFolded: MiddleHorizontalColumn | null;
   hoveredGroupId: string | null;
+  hoveredMiddleColumn: MiddleHorizontalColumn | null;
   togglePopUpGroup: (id: string) => void;
   toggleAllPopUps: () => void;
   toggleMiddleHorizontalFold: () => void;
-  setHoveredGroupId: (id: string | null) => void;
+  setHoveredGroupId: (
+    id: string | null,
+    column?: MiddleHorizontalColumn | null,
+  ) => void;
   handleHoverScroll: (direction: "down" | "up") => void;
   syncScrollOffset: (offset: number) => void;
 }
 
 export function getUnlockedPopUpGroups(offset: number): string[] {
-  if (offset >= 0.9) return ["g_1_2", "g_3_4", "g_7_8", "g_9_10", "g_11_12_13_14", "g_15_16", "g_17_18"];
+  if (offset >= 0.9)
+    return [
+      "g_1_2",
+      "g_3_4",
+      "g_7_8",
+      "g_9_10",
+      "g_11_12_13_14",
+      "g_15_16",
+      "g_17_18",
+    ];
   if (offset >= 0.75) return ["g_1_2", "g_3_4", "g_7_8", "g_9_10"];
   if (offset >= 0.5) return ["g_1_2", "g_3_4", "g_7_8"];
   return ["g_1_2", "g_3_4"];
@@ -47,8 +62,9 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
   popUpGroups: INITIAL_POPUP_GROUPS,
   popUpAllOpen: false,
   unlockedGroupIds: getUnlockedPopUpGroups(0),
-  middleHorizontalFolded: false,
+  middleHorizontalFolded: null,
   hoveredGroupId: null,
+  hoveredMiddleColumn: null,
 
   togglePopUpGroup: (id) =>
     set((state) => {
@@ -73,9 +89,10 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       return {
         popUpGroups: newGroups,
         popUpAllOpen: !anyClosed,
-        middleHorizontalFolded: isMiddleGroup && newGroups.find((g) => g.id === id)?.isOpen
-          ? false
-          : state.middleHorizontalFolded,
+        middleHorizontalFolded:
+          isMiddleGroup && newGroups.find((g) => g.id === id)?.isOpen
+            ? null
+            : state.middleHorizontalFolded,
       };
     }),
 
@@ -85,19 +102,23 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       const newGroups = state.popUpGroups.map((g) => ({
         ...g,
         isOpen: state.unlockedGroupIds.includes(g.id) ? newAllOpen : false,
-        hasEverOpened: state.unlockedGroupIds.includes(g.id) ? (g.hasEverOpened || newAllOpen) : g.hasEverOpened,
+        hasEverOpened: state.unlockedGroupIds.includes(g.id)
+          ? g.hasEverOpened || newAllOpen
+          : g.hasEverOpened,
       }));
       return {
         popUpAllOpen: newAllOpen,
         popUpGroups: newGroups,
-        middleHorizontalFolded: false,
+        middleHorizontalFolded: null,
       };
     }),
 
   toggleMiddleHorizontalFold: () =>
     set((state) => {
       const middleGroupId = "g_11_12_13_14";
-      const nextHorizontalFolded = !state.middleHorizontalFolded;
+      const nextHorizontalFolded = state.middleHorizontalFolded
+        ? null
+        : (state.hoveredMiddleColumn ?? "left");
       const newGroups = state.popUpGroups.map((g) => {
         if (g.id !== middleGroupId) return g;
         return {
@@ -117,19 +138,32 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       };
     }),
 
-  setHoveredGroupId: (id) =>
+  setHoveredGroupId: (id, column = null) =>
     set((state) => {
-      if (state.hoveredGroupId === id) return state;
+      const nextColumn = id === "g_11_12_13_14" ? column : null;
+      if (
+        state.hoveredGroupId === id &&
+        state.hoveredMiddleColumn === nextColumn
+      ) {
+        return state;
+      }
+
+      if (state.hoveredGroupId === id) {
+        return {
+          hoveredMiddleColumn: nextColumn,
+        };
+      }
 
       return {
         hoveredGroupId: id,
+        hoveredMiddleColumn: nextColumn,
         // Cancel current folding interaction and reset to default state.
         popUpGroups: state.popUpGroups.map((g) => ({
           ...g,
           isOpen: false,
         })),
         popUpAllOpen: false,
-        middleHorizontalFolded: false,
+        middleHorizontalFolded: null,
       };
     }),
 
@@ -140,14 +174,11 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       if (!state.unlockedGroupIds.includes(hoveredGroupId)) return state;
 
       const isMiddleGroup = hoveredGroupId === "g_11_12_13_14";
-      const middleGroup = state.popUpGroups.find((g) => g.id === "g_11_12_13_14");
-      const middleStage = state.middleHorizontalFolded ? 2 : middleGroup?.isOpen ? 1 : 0;
+      const nextMiddleHorizontalFolded =
+        isMiddleGroup && direction === "up" ? state.hoveredMiddleColumn : null;
 
-      let nextMiddleStage = middleStage;
-      if (isMiddleGroup) {
-        // Requested interaction:
-        // down => vertical open (consistent with others), up => horizontal fold (the "other one").
-        nextMiddleStage = direction === "down" ? 1 : 2;
+      if (isMiddleGroup && direction === "up" && !state.hoveredMiddleColumn) {
+        return state;
       }
 
       let changed = false;
@@ -158,9 +189,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
           return { ...g, isOpen: false };
         }
 
-        const nextIsOpen = isMiddleGroup
-          ? nextMiddleStage === 1
-          : direction === "down";
+        const nextIsOpen = direction === "down";
 
         if (g.isOpen === nextIsOpen) return g;
         changed = true;
@@ -170,10 +199,6 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
           hasEverOpened: g.hasEverOpened || nextIsOpen,
         };
       });
-
-      const nextMiddleHorizontalFolded = isMiddleGroup
-        ? nextMiddleStage === 2
-        : false;
 
       if (
         !changed &&
@@ -192,7 +217,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
   syncScrollOffset: (offset) =>
     set((state) => {
       const nextUnlocked = getUnlockedPopUpGroups(offset);
-      
+
       // If unlocked list hasn't changed, do nothing
       if (
         nextUnlocked.length === state.unlockedGroupIds.length &&
@@ -219,9 +244,12 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
         popUpAllOpen: anyOpen,
         middleHorizontalFolded: nextUnlocked.includes("g_11_12_13_14")
           ? state.middleHorizontalFolded
-          : false,
+          : null,
         hoveredGroupId: nextUnlocked.includes(state.hoveredGroupId ?? "")
           ? state.hoveredGroupId
+          : null,
+        hoveredMiddleColumn: nextUnlocked.includes("g_11_12_13_14")
+          ? state.hoveredMiddleColumn
           : null,
       };
     }),

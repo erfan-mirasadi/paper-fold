@@ -264,7 +264,9 @@ export function PopUpManager() {
             isElevated={isElevated}
             isSectionSurfaceRaised={isSectionSurfaceRaised}
             isCenterSectionRaised={isCenterSectionRaised}
-            isMiddleHorizontalFolded={isMiddleGroup && middleHorizontalFolded}
+            middleHorizontalFolded={
+              isMiddleGroup ? middleHorizontalFolded : null
+            }
             zBaseOffset={zBaseOffset}
             backfaceColor={backfaceColor}
           />
@@ -291,7 +293,7 @@ function PopUpCardWrapper({
   isElevated,
   isSectionSurfaceRaised,
   isCenterSectionRaised,
-  isMiddleHorizontalFolded,
+  middleHorizontalFolded,
   zBaseOffset,
   backfaceColor,
 }: {
@@ -301,7 +303,7 @@ function PopUpCardWrapper({
   isElevated: boolean;
   isSectionSurfaceRaised: boolean;
   isCenterSectionRaised: boolean;
-  isMiddleHorizontalFolded: boolean;
+  middleHorizontalFolded: "left" | "right" | null;
   zBaseOffset: number;
   backfaceColor: string;
 }) {
@@ -340,9 +342,18 @@ function PopUpCardWrapper({
 
   const isMiddleTopRow = config.id === 11 || config.id === 12;
   const isMiddleBottomRow = config.id === 13 || config.id === 14;
-  const isMiddleFoldCandidate = isMiddleTopRow || isMiddleBottomRow;
+  const isMiddleFoldCandidate =
+    config.id === 11 ||
+    config.id === 12 ||
+    config.id === 13 ||
+    config.id === 14;
+  const isMiddleLeftColumn =
+    isMiddleFoldCandidate && config.direction === "left";
+  const isMiddleRightColumn =
+    isMiddleFoldCandidate && config.direction === "right";
   const isHorizontalFoldActive =
-    isMiddleFoldCandidate && isMiddleHorizontalFolded;
+    (middleHorizontalFolded === "left" && isMiddleLeftColumn) ||
+    (middleHorizontalFolded === "right" && isMiddleRightColumn);
   const foldVisibility = useFoldAnimation(isOpen || isHorizontalFoldActive);
 
   const foldProgress = foldVisibility.foldProgress;
@@ -381,7 +392,8 @@ function PopUpCardWrapper({
   );
 
   const sectionBounds = useMemo(() => {
-    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === "s2_center") return undefined;
+    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === "s2_center")
+      return undefined;
     return calculateSectionBounds(
       sectionId,
       runtime.SURAH_TRANSFORMS,

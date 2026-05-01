@@ -16,7 +16,10 @@ interface PopUpHoverSensorsProps {
   groups: PopUpGroup[];
   versesConfig: HoverSensorVerseConfig[];
   zBaseOffset: number;
-  setHoveredGroupId: (id: string | null) => void;
+  setHoveredGroupId: (
+    id: string | null,
+    column?: "left" | "right" | null,
+  ) => void;
 }
 
 const SENSOR_PADDING_X = 0.012;
@@ -72,6 +75,9 @@ export function PopUpHoverSensors({
         const centerX = (minX + maxX) / 2;
         const centerY = (minY + maxY) / 2;
 
+        const isMiddleGroup = group.id === "g_11_12_13_14";
+        const resolveColumn = (x: number) => (x <= centerX ? "left" : "right");
+
         return (
           <mesh
             key={`hover-sensor-${group.id}`}
@@ -79,7 +85,14 @@ export function PopUpHoverSensors({
             onPointerEnter={(event) => {
               event.stopPropagation();
               document.body.style.cursor = "ns-resize";
-              setHoveredGroupId(group.id);
+              setHoveredGroupId(
+                group.id,
+                isMiddleGroup ? resolveColumn(event.point.x) : null,
+              );
+            }}
+            onPointerMove={(event) => {
+              if (!isMiddleGroup) return;
+              setHoveredGroupId(group.id, resolveColumn(event.point.x));
             }}
             onPointerLeave={(event) => {
               event.stopPropagation();

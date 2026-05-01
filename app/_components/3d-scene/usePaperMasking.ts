@@ -23,6 +23,19 @@ interface PaperMaskShader {
   fragmentShader: string;
 }
 
+const isMiddleHorizontalFoldedForVerse = (
+  state: { middleHorizontalFolded: "left" | "right" | null },
+  verseId: number,
+) => {
+  if (state.middleHorizontalFolded === "left") {
+    return verseId === 12 || verseId === 14;
+  }
+  if (state.middleHorizontalFolded === "right") {
+    return verseId === 11 || verseId === 13;
+  }
+  return false;
+};
+
 export function usePaperMasking(paperTextureDiffuse: Texture) {
   // Read exact layout numbers dynamically to support language swapping
   const { PAGE_WIDTH, PAGE_HEIGHT, SURAH_TRANSFORMS, FOLD_Y_POSITIONS } =
@@ -173,7 +186,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const isHidden =
           e.activeVerseIds.includes(id) ||
           (g?.isOpen ?? false) ||
-          (id >= 11 && id <= 14 && s.middleHorizontalFolded);
+          isMiddleHorizontalFoldedForVerse(s, id);
 
         uniforms.uVerseVisibility.value[id] = isHidden ? 0.0 : 1.0;
         delete timeouts[key];
@@ -198,7 +211,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = s.popUpGroups.find((group) => group.verseIds.includes(i));
         if (g?.isOpen) hidden = true;
       }
-      if (i >= 11 && i <= 14 && s.middleHorizontalFolded) hidden = true;
+      if (isMiddleHorizontalFoldedForVerse(s, i)) hidden = true;
       uniforms.uVerseVisibility.value[i] = hidden ? 0.0 : 1.0;
     }
 
@@ -233,7 +246,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = state.popUpGroups.find((group) => group.verseIds.includes(id));
         const shouldBeHidden =
           (g?.isOpen ?? false) ||
-          (id >= 11 && id <= 14 && state.middleHorizontalFolded) ||
+          isMiddleHorizontalFoldedForVerse(state, id) ||
           useElevatedStore.getState().activeVerseIds.includes(id);
 
         const delay = shouldBeHidden
@@ -260,7 +273,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const shouldBeHidden =
           state.activeVerseIds.includes(id) ||
           (g?.isOpen ?? false) ||
-          (id >= 11 && id <= 14 && usePopUpStore.getState().middleHorizontalFolded);
+          isMiddleHorizontalFoldedForVerse(usePopUpStore.getState(), id);
 
         const delay = shouldBeHidden
           ? ELEVATE_TEXTURE_TIMING.hideDelay
