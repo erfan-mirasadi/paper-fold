@@ -181,12 +181,12 @@ export default function Page() {
         {/* Main Centered Title */}
         <div className="relative z-10 w-full flex items-center justify-center">
           <AnimatedText
-            text="ensanlara oku"
+            text="Ensanlara Oku"
             variant="title"
             glow={true}
             noWrap={true}
             animationType="fadeIn"
-            className="lowercase text-[15vw] md:text-[13vw] leading-none text-white w-full justify-center"
+            className="text-[15vw] md:text-[11vw] leading-none text-white w-full justify-center font-sans"
           />
         </div>
       </section>

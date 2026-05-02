@@ -12,7 +12,7 @@ function cn(...inputs: ClassValue[]) {
 export interface AnimatedTextProps {
   text: string;
   // Controls the HTML tag rendered
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
   // Custom Tailwind classes
   className?: string;
   // Enables the intense glowing effect seen on "it's wearable"
@@ -42,10 +42,12 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
 
   // Base typography styles matching the ORYZO references
   const variantStyles = {
-    title: "text-6xl md:text-8xl font-bold tracking-tighter uppercase font-serif",
+    title:
+      "text-6xl md:text-8xl font-bold tracking-tighter uppercase font-serif",
     subtitle: "text-3xl md:text-5xl font-semibold tracking-tight font-serif",
     body: "text-lg md:text-xl font-normal leading-relaxed font-sans",
-    caption: "text-sm md:text-base font-medium uppercase tracking-widest font-sans",
+    caption:
+      "text-sm md:text-base font-medium uppercase tracking-widest font-sans",
   };
 
   // Glow effect styles
@@ -101,7 +103,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
 
   // Convert the dynamically chosen Tag to a motion component
   // We use type assertion here to satisfy TypeScript for dynamic motion tags
-  const MotionTag = motion[Tag as keyof typeof motion] as any;
+  const MotionTag = motion[Tag as keyof typeof motion] as typeof motion.div;
 
   return (
     <MotionTag
