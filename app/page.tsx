@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 // import { motion, AnimatePresence } from "framer-motion";
 
 // import { Canvas } from "@react-three/fiber";
@@ -148,47 +148,66 @@
 // }
 
 import Image from "next/image";
+import { Suspense, useEffect, useState } from "react";
+import { Canvas } from "@react-three/fiber";
 import { AnimatedText } from "./_components/ui-overlay/AnimatedText";
+import InteractiveSandScene from "./_components/3d-scene/InteractiveSandScene";
+import { SiteLoadingOverlay } from "./_components/ui-overlay/SiteLoadingOverlay";
 
 export default function Page() {
+  const [sandReady, setSandReady] = useState(false);
+  const [particlesActive, setParticlesActive] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);
+
+  useEffect(() => {
+    if (!sandReady) return;
+    setParticlesActive(true);
+    setShowTitle(true);
+  }, [sandReady]);
+
   return (
     <main className="bg-black h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth scrollbar-hide">
-      {/* Slide 1: Hero Image 1 - Oku */}
+      {!sandReady && <SiteLoadingOverlay isDarkMode={true} />}
+      {/* Slide 1: Sand + Hero Image + Single Title */}
       <section className="relative snap-start h-screen w-full flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden">
-        <Image
-          src="/intro/hero.png"
-          alt="Hero Background"
-          fill
-          className="object-cover opacity-50"
-          priority
-        />
-        {/* Top Texts - Absolute to not affect main centering */}
-        <div className="absolute top-16 md:top-24 left-0 w-full z-10 flex flex-col items-center space-y-4">
-          <AnimatedText
-            text="Yaratan Rabbinin adıyla"
-            variant="body"
-            animationType="flyInTop"
-            className="text-gray-400 uppercase tracking-[0.3em] text-xs md:text-sm"
-          />
-          <AnimatedText
-            text="İLK 5 AYET"
-            variant="caption"
-            animationType="flyInBottom"
-            className="text-white/50 tracking-[0.5em] text-[10px] md:text-xs"
+        <div className="absolute inset-0 z-0">
+          <Suspense fallback={<div className="w-full h-full bg-black" />}>
+            <Canvas
+              camera={{ position: [0, 0, 5], fov: 45 }}
+              gl={{ antialias: true }}
+            >
+              <InteractiveSandScene
+                onReady={() => setSandReady(true)}
+                particlesActive={particlesActive}
+              />
+            </Canvas>
+          </Suspense>
+        </div>
+        <div
+          className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-700 ${
+            sandReady ? "opacity-50" : "opacity-0"
+          }`}
+        >
+          <Image
+            src="/intro/hero.png"
+            alt="Hero Background"
+            fill
+            className="object-cover"
+            priority
           />
         </div>
 
-        {/* Main Centered Title */}
-        <div className="relative z-10 w-full flex items-center justify-center">
-          <AnimatedText
-            text="Ensanlara Oku"
-            variant="title"
-            glow={true}
-            noWrap={true}
-            animationType="fadeIn"
-            className="text-[15vw] md:text-[11vw] leading-none text-white w-full justify-center font-sans"
-          />
-        </div>
+        {showTitle && (
+          <div className="relative z-20 w-full flex items-center justify-center pointer-events-none">
+            <AnimatedText
+              text="Alak Suresi"
+              variant="title"
+              noWrap={true}
+              animationType="fadeIn"
+              className="text-[16vw] md:text-[12vw] leading-none text-white w-full justify-center font-sans"
+            />
+          </div>
+        )}
       </section>
 
       {/* Slide 2: Hero Image 2 - Tavzif ve Vazife */}
