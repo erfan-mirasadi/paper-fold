@@ -1,15 +1,19 @@
+
 import type { Metadata, Viewport } from "next";
-import { Fira_Sans_Condensed, Inter } from "next/font/google";
+import { Manrope, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/ui-overlay/GrainOverlay";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ 
+  subsets: ["latin"],
+  variable: "--font-manrope",
+});
 
-const firaSansCondensed = Fira_Sans_Condensed({
-  weight: ["500", "600", "700"],
-  subsets: ["latin", "latin-ext"],
+const cormorantGaramond = Cormorant_Garamond({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
   display: "swap",
-  variable: "--font-fira-sans-condensed",
+  variable: "--font-cormorant",
 });
 
 export const metadata: Metadata = {
@@ -43,11 +47,11 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="tr"
       suppressHydrationWarning
-      className={`${inter.className} ${firaSansCondensed.variable} h-full antialiased`}
+      className={`${manrope.variable} ${cormorantGaramond.variable} h-full antialiased`}
     >
-      <body>
+      <body className="font-sans">
         <GrainOverlay />
         {children}
       </body>
