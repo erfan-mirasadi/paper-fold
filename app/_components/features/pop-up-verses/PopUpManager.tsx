@@ -38,6 +38,7 @@ import {
 import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
 import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useIntroSectionOffset } from "../../3d-scene/intro/useIntroSectionAnimation";
 
 interface VerseConfig {
   id: number;
@@ -403,7 +404,9 @@ function PopUpCardWrapper({
   }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
 
   const dragBind = useElevatedDrag({
-    enabled: (isElevated || isSectionSurfaceRaised) && !useFoldStore.getState().isIntroActive,
+    enabled:
+      (isElevated || isSectionSurfaceRaised) &&
+      !useFoldStore.getState().isIntroActive,
     springX:
       useSectionGroupDrag && sectionDrag ? sectionDrag.x : leadVerseDrag.x,
     springY:
@@ -426,6 +429,8 @@ function PopUpCardWrapper({
     (vy, sy) =>
       vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0),
   );
+
+  const introSectionMotionRef = useIntroSectionOffset(sectionId);
 
   const [hasEverBeenHorizontallyFolded, setHasEverBeenHorizontallyFolded] =
     useState(isHorizontalFoldActive);
@@ -451,38 +456,40 @@ function PopUpCardWrapper({
   }
 
   return (
-    <a.group {...dragBind} position-x={dragX} position-y={dragY}>
-      <PopUpVerseCard
-        direction={config.direction}
-        hingeX={config.hingeX}
-        y={config.y}
-        w={config.w}
-        h={config.h}
-        zBaseOffset={zBaseOffset}
-        rotValue={config.direction === "left" ? rotLeft : rotRight}
-        foldProgress={foldProgress}
-        shadowGlobalOpacity={shadowGlobalOpacity}
-        zOffset={zOffset}
-        opacity={opacity}
-        liftZ={liftZ}
-        surfaceLiftZ={surfaceLiftZ}
-        tiltX={tiltX}
-        horizontalTiltX={horizontalTiltX}
-        horizontalLiftZ={horizontalLiftZ}
-        horizontalPivotOffsetY={horizontalPivotOffsetY}
-        scale={scale}
-        elevateShadowOpacity={elevateShadowOpacity}
-        elevateOpacity={elevateOpacity}
-        isPill={config.isPill !== false}
-        backfaceColor={backfaceColor}
-        verse={config.verse}
-        number={config.number}
-        bg={config.bg}
-        border={config.border}
-        circleBorderCol={config.circleBorderCol}
-        circleBg={config.circleBg}
-        circleTextCol={config.circleTextCol}
-      />
-    </a.group>
+    <group ref={introSectionMotionRef}>
+      <a.group {...dragBind} position-x={dragX} position-y={dragY}>
+        <PopUpVerseCard
+          direction={config.direction}
+          hingeX={config.hingeX}
+          y={config.y}
+          w={config.w}
+          h={config.h}
+          zBaseOffset={zBaseOffset}
+          rotValue={config.direction === "left" ? rotLeft : rotRight}
+          foldProgress={foldProgress}
+          shadowGlobalOpacity={shadowGlobalOpacity}
+          zOffset={zOffset}
+          opacity={opacity}
+          liftZ={liftZ}
+          surfaceLiftZ={surfaceLiftZ}
+          tiltX={tiltX}
+          horizontalTiltX={horizontalTiltX}
+          horizontalLiftZ={horizontalLiftZ}
+          horizontalPivotOffsetY={horizontalPivotOffsetY}
+          scale={scale}
+          elevateShadowOpacity={elevateShadowOpacity}
+          elevateOpacity={elevateOpacity}
+          isPill={config.isPill !== false}
+          backfaceColor={backfaceColor}
+          verse={config.verse}
+          number={config.number}
+          bg={config.bg}
+          border={config.border}
+          circleBorderCol={config.circleBorderCol}
+          circleBg={config.circleBg}
+          circleTextCol={config.circleTextCol}
+        />
+      </a.group>
+    </group>
   );
 }

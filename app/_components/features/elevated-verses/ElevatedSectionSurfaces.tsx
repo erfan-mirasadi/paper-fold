@@ -34,6 +34,7 @@ import {
 } from "./drag/boundsHelper";
 import { PAPER_MATERIAL_CONFIG } from "../../3d-scene/PaperMaterial";
 import { cloneTextureAsAspectCover } from "../../shared/textureFit";
+import { useIntroSectionOffset } from "../../3d-scene/intro/useIntroSectionAnimation";
 
 /**
  * SurahLayout draws section JPEG with meshBasic + toneMapped false, then the page
@@ -371,194 +372,207 @@ export function ElevatedSectionSurfaces() {
     [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
   );
 
+  const s1IntroRef = useIntroSectionOffset("s1");
+  const s2TopIntroRef = useIntroSectionOffset("s2_top");
+  const s2CenterIntroRef = useIntroSectionOffset("s2_center");
+  const s2BottomIntroRef = useIntroSectionOffset("s2_bottom");
+
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
       {/* ─── Section 1 ─────────────────────────────────────────────── */}
-      <DraggableSectionGroup
-        sectionId="s1"
-        isActive={s1Active}
-        sectionBounds={s1Bounds}
-      >
-        <ElevatedLayer
-          x={s1.frameX}
-          y={s1.frameY}
-          w={s1.frameW}
-          h={s1.frameH}
-          radius={0.02}
-          color={S1_OUTER_BORDER}
-          sectionBgTexture={getTextureForColor(S1_OUTER_BORDER)}
-          spring={s1Spring}
-        />
-        <ElevatedLayer
-          x={s1.frameX + s1.borderWidth}
-          y={s1.frameY - s1.borderWidth}
-          w={s1.frameW - s1.borderWidth * 2}
-          h={s1.frameH - s1.borderWidth * 2}
-          radius={0.017}
-          color={S1_OUTER_BG}
-          sectionBgTexture={getTextureForColor(S1_OUTER_BG)}
-          spring={s1Spring}
-          zOffset={0.001}
-          shadow
-          shadowStrength={0.95}
-        />
-        {s1.rowConnectors.map((rc, i) => (
+      <group ref={s1IntroRef}>
+        <DraggableSectionGroup
+          sectionId="s1"
+          isActive={s1Active}
+          sectionBounds={s1Bounds}
+        >
           <ElevatedLayer
-            key={`s1-rc-${i}`}
-            x={rc.x}
-            y={rc.y}
-            w={rc.w}
-            h={rc.h}
-            radius={OPPOSITE_VERSE_CONNECTOR.radius}
-            color={S1_INNER_BORDER}
-            sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
+            x={s1.frameX}
+            y={s1.frameY}
+            w={s1.frameW}
+            h={s1.frameH}
+            radius={0.02}
+            color={S1_OUTER_BORDER}
+            sectionBgTexture={getTextureForColor(S1_OUTER_BORDER)}
             spring={s1Spring}
-            zOffset={0.0015}
           />
-        ))}
-      </DraggableSectionGroup>
+          <ElevatedLayer
+            x={s1.frameX + s1.borderWidth}
+            y={s1.frameY - s1.borderWidth}
+            w={s1.frameW - s1.borderWidth * 2}
+            h={s1.frameH - s1.borderWidth * 2}
+            radius={0.017}
+            color={S1_OUTER_BG}
+            sectionBgTexture={getTextureForColor(S1_OUTER_BG)}
+            spring={s1Spring}
+            zOffset={0.001}
+            shadow
+            shadowStrength={0.95}
+          />
+          {s1.rowConnectors.map((rc, i) => (
+            <ElevatedLayer
+              key={`s1-rc-${i}`}
+              x={rc.x}
+              y={rc.y}
+              w={rc.w}
+              h={rc.h}
+              radius={OPPOSITE_VERSE_CONNECTOR.radius}
+              color={S1_INNER_BORDER}
+              sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
+              spring={s1Spring}
+              zOffset={0.0015}
+            />
+          ))}
+        </DraggableSectionGroup>
+      </group>
 
       {/* ─── Section 2 top connector ───────────────────────────────── */}
-      <DraggableSectionGroup
-        sectionId="s2_top"
-        isActive={s2TopActive}
-        sectionBounds={s2TopBounds}
-      >
-        <ElevatedLayer
-          x={topConnector.outer.x}
-          y={topConnector.outer.y}
-          w={topConnector.outer.w}
-          h={topConnector.outer.h}
-          radius={topConnector.outer.radius}
-          color={HOLLOW_BORDER_COLOR}
-          sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
-          spring={s2TopSpring}
-          shadow
-          shadowStrength={0.62}
-        />
-        <ElevatedLayer
-          x={topConnector.middle.x}
-          y={topConnector.middle.y}
-          w={topConnector.middle.w}
-          h={topConnector.middle.h}
-          radius={topConnector.middle.radius}
-          color={HOLLOW_BORDER_INNER}
-          sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
-          spring={s2TopSpring}
-          zOffset={0.0006}
-          shadow
-          shadowStrength={0.8}
-        />
-        <ElevatedLayer
-          x={topConnector.fill.x}
-          y={topConnector.fill.y}
-          w={topConnector.fill.w}
-          h={topConnector.fill.h}
-          radius={topConnector.fill.radius}
-          color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-          sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
-          spring={s2TopSpring}
-          zOffset={0.0012}
-          shadow
-          shadowStrength={0.65}
-        />
-        {s2.groups[0].rowConnectors.map((rc, i) => (
+      <group ref={s2TopIntroRef}>
+        <DraggableSectionGroup
+          sectionId="s2_top"
+          isActive={s2TopActive}
+          sectionBounds={s2TopBounds}
+        >
           <ElevatedLayer
-            key={`s2-top-rc-${i}`}
-            x={rc.x}
-            y={rc.y}
-            w={rc.w}
-            h={rc.h}
-            radius={OPPOSITE_VERSE_CONNECTOR.radius}
-            color={MAROON_THEME}
-            sectionBgTexture={getTextureForColor(MAROON_THEME)}
+            x={topConnector.outer.x}
+            y={topConnector.outer.y}
+            w={topConnector.outer.w}
+            h={topConnector.outer.h}
+            radius={topConnector.outer.radius}
+            color={HOLLOW_BORDER_COLOR}
+            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
             spring={s2TopSpring}
-            zOffset={0.0025}
+            shadow
+            shadowStrength={0.62}
           />
-        ))}
-      </DraggableSectionGroup>
+          <ElevatedLayer
+            x={topConnector.middle.x}
+            y={topConnector.middle.y}
+            w={topConnector.middle.w}
+            h={topConnector.middle.h}
+            radius={topConnector.middle.radius}
+            color={HOLLOW_BORDER_INNER}
+            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
+            spring={s2TopSpring}
+            zOffset={0.0006}
+            shadow
+            shadowStrength={0.8}
+          />
+          <ElevatedLayer
+            x={topConnector.fill.x}
+            y={topConnector.fill.y}
+            w={topConnector.fill.w}
+            h={topConnector.fill.h}
+            radius={topConnector.fill.radius}
+            color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+            sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
+            spring={s2TopSpring}
+            zOffset={0.0012}
+            shadow
+            shadowStrength={0.65}
+          />
+          {s2.groups[0].rowConnectors.map((rc, i) => (
+            <ElevatedLayer
+              key={`s2-top-rc-${i}`}
+              x={rc.x}
+              y={rc.y}
+              w={rc.w}
+              h={rc.h}
+              radius={OPPOSITE_VERSE_CONNECTOR.radius}
+              color={MAROON_THEME}
+              sectionBgTexture={getTextureForColor(MAROON_THEME)}
+              spring={s2TopSpring}
+              zOffset={0.0025}
+            />
+          ))}
+        </DraggableSectionGroup>
+      </group>
 
       {/* ─── Section 2 Center Group ────────────────────────────────────── */}
-      <DraggableSectionGroup
-        sectionId="s2_center"
-        isActive={s2CenterActive}
-        sectionBounds={s2CenterBounds}
-      >
-        {s2.groups[1].rowConnectors.map((rc, i) => (
-          <ElevatedLayer
-            key={`s2-center-rc-${i}`}
-            x={rc.x}
-            y={rc.y}
-            w={rc.w}
-            h={rc.h}
-            radius={OPPOSITE_VERSE_CONNECTOR.radius}
-            color={GREEN_THEME}
-            sectionBgTexture={getTextureForColor(GREEN_THEME)}
-            spring={s2CenterSpring}
-            zOffset={0.0025}
-          />
-        ))}
-      </DraggableSectionGroup>
+      <group ref={s2CenterIntroRef}>
+        <DraggableSectionGroup
+          sectionId="s2_center"
+          isActive={s2CenterActive}
+          sectionBounds={s2CenterBounds}
+        >
+          {s2.groups[1].rowConnectors.map((rc, i) => (
+            <ElevatedLayer
+              key={`s2-center-rc-${i}`}
+              x={rc.x}
+              y={rc.y}
+              w={rc.w}
+              h={rc.h}
+              radius={OPPOSITE_VERSE_CONNECTOR.radius}
+              color={GREEN_THEME}
+              sectionBgTexture={getTextureForColor(GREEN_THEME)}
+              spring={s2CenterSpring}
+              zOffset={0.0025}
+            />
+          ))}
+        </DraggableSectionGroup>
+      </group>
 
       {/* ─── Section 2 bottom connector ────────────────────────────── */}
-      <DraggableSectionGroup
-        sectionId="s2_bottom"
-        isActive={s2BottomActive}
-        sectionBounds={s2BottomBounds}
-      >
-        <ElevatedLayer
-          x={bottomConnector.outer.x}
-          y={bottomConnector.outer.y}
-          w={bottomConnector.outer.w}
-          h={bottomConnector.outer.h}
-          radius={bottomConnector.outer.radius}
-          color={HOLLOW_BORDER_COLOR}
-          sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
-          spring={s2BottomSpring}
-          shadow
-          shadowStrength={0.62}
-        />
-        <ElevatedLayer
-          x={bottomConnector.middle.x}
-          y={bottomConnector.middle.y}
-          w={bottomConnector.middle.w}
-          h={bottomConnector.middle.h}
-          radius={bottomConnector.middle.radius}
-          color={HOLLOW_BORDER_INNER}
-          sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
-          spring={s2BottomSpring}
-          zOffset={0.0006}
-          shadow
-          shadowStrength={0.8}
-        />
-        <ElevatedLayer
-          x={bottomConnector.fill.x}
-          y={bottomConnector.fill.y}
-          w={bottomConnector.fill.w}
-          h={bottomConnector.fill.h}
-          radius={bottomConnector.fill.radius}
-          color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-          sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
-          spring={s2BottomSpring}
-          zOffset={0.0012}
-          shadow
-          shadowStrength={0.65}
-        />
-        {s2.groups[2].rowConnectors.map((rc, i) => (
+      <group ref={s2BottomIntroRef}>
+        <DraggableSectionGroup
+          sectionId="s2_bottom"
+          isActive={s2BottomActive}
+          sectionBounds={s2BottomBounds}
+        >
           <ElevatedLayer
-            key={`s2-bottom-rc-${i}`}
-            x={rc.x}
-            y={rc.y}
-            w={rc.w}
-            h={rc.h}
-            radius={OPPOSITE_VERSE_CONNECTOR.radius}
-            color={MAROON_THEME}
-            sectionBgTexture={getTextureForColor(MAROON_THEME)}
+            x={bottomConnector.outer.x}
+            y={bottomConnector.outer.y}
+            w={bottomConnector.outer.w}
+            h={bottomConnector.outer.h}
+            radius={bottomConnector.outer.radius}
+            color={HOLLOW_BORDER_COLOR}
+            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
             spring={s2BottomSpring}
-            zOffset={0.0025}
+            shadow
+            shadowStrength={0.62}
           />
-        ))}
-      </DraggableSectionGroup>
+          <ElevatedLayer
+            x={bottomConnector.middle.x}
+            y={bottomConnector.middle.y}
+            w={bottomConnector.middle.w}
+            h={bottomConnector.middle.h}
+            radius={bottomConnector.middle.radius}
+            color={HOLLOW_BORDER_INNER}
+            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
+            spring={s2BottomSpring}
+            zOffset={0.0006}
+            shadow
+            shadowStrength={0.8}
+          />
+          <ElevatedLayer
+            x={bottomConnector.fill.x}
+            y={bottomConnector.fill.y}
+            w={bottomConnector.fill.w}
+            h={bottomConnector.fill.h}
+            radius={bottomConnector.fill.radius}
+            color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+            sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
+            spring={s2BottomSpring}
+            zOffset={0.0012}
+            shadow
+            shadowStrength={0.65}
+          />
+          {s2.groups[2].rowConnectors.map((rc, i) => (
+            <ElevatedLayer
+              key={`s2-bottom-rc-${i}`}
+              x={rc.x}
+              y={rc.y}
+              w={rc.w}
+              h={rc.h}
+              radius={OPPOSITE_VERSE_CONNECTOR.radius}
+              color={MAROON_THEME}
+              sectionBgTexture={getTextureForColor(MAROON_THEME)}
+              spring={s2BottomSpring}
+              zOffset={0.0025}
+            />
+          ))}
+        </DraggableSectionGroup>
+      </group>
     </group>
   );
 }

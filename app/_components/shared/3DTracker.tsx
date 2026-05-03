@@ -6,6 +6,11 @@ import { Object3D, Vector3 } from "three";
 
 export interface Shared3DTrackerProps {
   position?: [number, number, number];
+  /**
+   * Add `gl.domElement.getBoundingClientRect()` so projected pixels match
+   * `position: fixed` DOM overlays (canvas-relative → viewport-relative).
+   */
+  addCanvasBoundingRectToClientCoords?: boolean;
   domElementId?: string;
   onFrameUpdate?: (
     x: number,
@@ -18,6 +23,7 @@ export interface Shared3DTrackerProps {
 
 export function Shared3DTracker({
   position = [0, 0, 0],
+  addCanvasBoundingRectToClientCoords = false,
   domElementId,
   onFrameUpdate,
   children,
@@ -27,7 +33,7 @@ export function Shared3DTracker({
   // Allocate vector once per mount to prevent GC spikes
   const vectorRef = useRef(new Vector3());
 
-  const { size, camera } = useThree();
+  const { size, camera, gl } = useThree();
 
   useFrame(() => {
     if (!objRef.current) return;
@@ -39,8 +45,14 @@ export function Shared3DTracker({
     objRef.current.getWorldPosition(_vector);
     _vector.project(camera);
 
-    const x = (_vector.x * 0.5 + 0.5) * size.width;
-    const y = (_vector.y * -0.5 + 0.5) * size.height;
+    let x = (_vector.x * 0.5 + 0.5) * size.width;
+    let y = (_vector.y * -0.5 + 0.5) * size.height;
+
+    if (addCanvasBoundingRectToClientCoords) {
+      const r = gl.domElement.getBoundingClientRect();
+      x += r.left;
+      y += r.top;
+    }
 
     // Visibility heuristic: within frustum and roughly on screen bounds
     const isOnScreen =

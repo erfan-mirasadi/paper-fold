@@ -20,9 +20,9 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
 /** The first INTRO_SCROLL_FRACTION of the total scroll height is reserved for
  *  the intro sequence. The fold story only plays over the remaining portion. */
-export const INTRO_SCROLL_FRACTION = 0.3;
+export const INTRO_SCROLL_FRACTION = 0.4;
 // Extra scroll space reserved for a smooth camera handoff before the base scene.
-export const INTRO_HANDOFF_FRACTION = 0.06;
+export const INTRO_HANDOFF_FRACTION = 0.1;
 const INTRO_MAX_FRACTION = 0.95;
 
 interface FoldStoreState {

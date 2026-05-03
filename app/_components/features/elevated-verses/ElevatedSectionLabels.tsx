@@ -23,6 +23,9 @@ import {
 import { dragEngine } from "./drag/dragEngine";
 import { useElevatedDrag } from "./drag/useElevatedDrag";
 import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useIntroSectionOffset } from "../../3d-scene/intro/useIntroSectionAnimation";
+import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
+import { IntroCenterGuideReporter } from "../intro/section-guides/IntroCenterGuideReporter";
 
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
@@ -39,6 +42,8 @@ type AnimatedLabelProps = {
   zBaseOffset?: number;
   labelZ?: number;
   renderOrder?: number;
+  introGuidesActive?: boolean;
+  pageWidth: number;
 };
 
 function AnimatedElevatedLabel({
@@ -56,9 +61,10 @@ function AnimatedElevatedLabel({
   zBaseOffset = 0.002,
   labelZ = 0.00035,
   renderOrder,
+  introGuidesActive = false,
+  pageWidth,
 }: AnimatedLabelProps) {
-  const runtime = useSurahLayoutRuntime();
-  const PAGE_WIDTH = runtime.PAGE_WIDTH;
+  const PAGE_WIDTH = pageWidth;
 
   const isActive = useElevatedStore((s) =>
     s.activeSectionIds.includes(sectionId),
@@ -100,36 +106,54 @@ function AnimatedElevatedLabel({
     dragSectionId: sectionId,
   });
 
+  const introRef = useIntroSectionOffset(sectionId);
+
   if (!isMounted) return null;
 
   return (
-    <a.group
-      {...dragBind}
-      position-x={sectionDrag.x}
-      position-y={sectionDrag.y}
-    >
+    <group ref={introRef}>
       <a.group
-        // Convert from paper-local (0..PAGE_WIDTH) to centered world space.
-        position={[-PAGE_WIDTH / 2, 0, 0]}
-        position-z={to(liftZ, (lift) => PAGE_DEPTH / 2 + zBaseOffset + lift)}
+        {...dragBind}
+        position-x={sectionDrag.x}
+        position-y={sectionDrag.y}
       >
-        <TopLabel
-          x={PAGE_WIDTH / 2}
-          y={y}
-          z={labelZ}
-          text={text}
-          bgColor={bgColor}
-          borderColor={borderColor}
-          partialBorder={partialBorder}
-          bottomBorder={bottomBorder}
-          renderOrder={renderOrder}
-        />
+        <a.group
+          // Convert from paper-local (0..PAGE_WIDTH) to centered world space.
+          position={[-PAGE_WIDTH / 2, 0, 0]}
+          position-z={to(liftZ, (lift) => PAGE_DEPTH / 2 + zBaseOffset + lift)}
+        >
+          <TopLabel
+            x={PAGE_WIDTH / 2}
+            y={y}
+            z={labelZ}
+            text={text}
+            bgColor={bgColor}
+            borderColor={borderColor}
+            partialBorder={partialBorder}
+            bottomBorder={bottomBorder}
+            renderOrder={renderOrder}
+          />
+          {introGuidesActive ? (
+            <IntroGuide3DReporter
+              guideId={sectionId}
+              pinY={y}
+              labelZ={labelZ}
+              pageWidth={PAGE_WIDTH}
+            />
+          ) : null}
+        </a.group>
       </a.group>
-    </a.group>
+    </group>
   );
 }
 
-export function ElevatedSectionLabels() {
+type ElevatedSectionLabelsProps = {
+  introGuidesActive?: boolean;
+};
+
+export function ElevatedSectionLabels({
+  introGuidesActive = false,
+}: ElevatedSectionLabelsProps) {
   const runtime = useSurahLayoutRuntime();
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
 
@@ -138,6 +162,7 @@ export function ElevatedSectionLabels() {
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
+      {introGuidesActive ? <IntroCenterGuideReporter /> : null}
       <AnimatedElevatedLabel
         sectionId="s1"
         y={SURAH_TRANSFORMS.s1.labelPinY}
@@ -149,6 +174,8 @@ export function ElevatedSectionLabels() {
         tension={96}
         friction={24}
         renderOrder={220}
+        introGuidesActive={introGuidesActive}
+        pageWidth={runtime.PAGE_WIDTH}
       />
 
       <AnimatedElevatedLabel
@@ -165,6 +192,8 @@ export function ElevatedSectionLabels() {
         zBaseOffset={0.0022}
         labelZ={0.00035}
         renderOrder={240}
+        introGuidesActive={introGuidesActive}
+        pageWidth={runtime.PAGE_WIDTH}
       />
 
       <AnimatedElevatedLabel
@@ -182,6 +211,8 @@ export function ElevatedSectionLabels() {
         zBaseOffset={0.0022}
         labelZ={0.00035}
         renderOrder={240}
+        introGuidesActive={introGuidesActive}
+        pageWidth={runtime.PAGE_WIDTH}
       />
     </group>
   );

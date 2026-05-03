@@ -42,6 +42,7 @@ import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
 import { calculateSectionBounds } from "../elevated-verses/drag/boundsHelper";
 import { dragEngine, useDragState } from "../elevated-verses/drag/dragEngine";
 import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useIntroSectionOffset } from "../../3d-scene/intro/useIntroSectionAnimation";
 
 // --- ADJUSTABLE PARAMETERS ---
 const ZERO_OFFSET = { x: 0, y: 0 };
@@ -190,7 +191,9 @@ export function VerseFiveMetallic() {
   );
 
   const dragBind = useElevatedDrag({
-    enabled: (isElevated || isSectionSurfaceRaised) && !useFoldStore.getState().isIntroActive,
+    enabled:
+      (isElevated || isSectionSurfaceRaised) &&
+      !useFoldStore.getState().isIntroActive,
     springX: verseDrag.x,
     springY: verseDrag.y,
     dragVerseId: 5,
@@ -310,157 +313,171 @@ export function VerseFiveMetallic() {
 
   const decorativeY = -outerH / 2;
 
+  const introMotionRef = useIntroSectionOffset("s1");
+
   return (
-    <a.group {...dragBind} position-x={dragX} position-y={dragY}>
-      <group position={[baseX, baseY, zBasePosition]}>
-        <a.group
-          position-x={shadowX}
-          position-y={shadowY}
-          position-z={to(surfaceLiftZ, (surfaceLift) => {
-            const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
-            const surfaceZBias =
-              SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
-            return -Z_OFFSET + 0.001 + surfaceLift + surfaceZBias;
-          })}
-          scale-x={shadowScale}
-          scale-y={shadowScale}
-        >
-          <mesh renderOrder={90}>
-            <RoundedShapeComponent w={outerW} h={outerH} radius={outerRadius} />
-            <a.meshBasicMaterial
-              color="#000000"
-              transparent
-              depthTest={false}
-              depthWrite={false}
-              toneMapped={false}
-              opacity={finalShadowOpacity}
-            />
-          </mesh>
-        </a.group>
-
-        {/* Animated 3D Body + Content */}
-        <a.group
-          position-z={liftZ}
-          rotation-x={tiltX}
-          scale-x={scale}
-          scale-y={scale}
-        >
-          {/* Metallic Body */}
-          <mesh position={[0, 0, 0]} renderOrder={100}>
-            <extrudeGeometry args={[shape, extrudeSettings]} />
-            <meshStandardMaterial
-              color={S1_ANA_BG}
-              metalness={1}
-              roughness={0.12}
-              envMapIntensity={1.8}
-            />
-          </mesh>
-
-          {/* Content Overlay - Shifted to accommodate border and circle */}
-          <mesh
-            position={[outerW / 2, -outerH / 2, EXTRUDE_DEPTH + 0.001]}
-            renderOrder={101}
+    <group ref={introMotionRef}>
+      <a.group {...dragBind} position-x={dragX} position-y={dragY}>
+        <group position={[baseX, baseY, zBasePosition]}>
+          <a.group
+            position-x={shadowX}
+            position-y={shadowY}
+            position-z={to(surfaceLiftZ, (surfaceLift) => {
+              const surfaceProgress = normalizeSurfaceLiftProgress(surfaceLift);
+              const surfaceZBias =
+                SHADOW_CONFIG.surfaceLiftZBias * surfaceProgress;
+              return -Z_OFFSET + 0.001 + surfaceLift + surfaceZBias;
+            })}
+            scale-x={shadowScale}
+            scale-y={shadowScale}
           >
-            <planeGeometry args={[outerW, outerH]} />
-            <meshStandardMaterial
-              transparent
-              opacity={1}
-              metalness={0.1}
-              roughness={0.8}
-            >
-              <RenderTexture attach="map" width={512} height={256} frames={4}>
-                <OrthographicCamera
-                  makeDefault
-                  manual
-                  left={0}
-                  right={outerW}
-                  top={0}
-                  bottom={-outerH}
-                  position={[0, 0, 10]}
-                />
-                <group position={[BW, -BW, 0]}>
-                  <VerseBox
-                    x={0}
-                    y={0}
-                    z={0}
-                    w={w}
-                    h={h}
-                    verse={data.text}
-                    number={data.number}
-                    bg={S1_ANA_BG}
-                    bgOpacity={0}
-                    border={CAPSULE_BG_5}
-                    circleBorderCol={S1_VERSE_5_NUMBER_BORDER}
-                    circleBg={S1_VERSE_5_NUMBER_BG}
-                    circleTextCol={S1_VERSE_5_NUMBER_TEXT}
-                    textColor={S1_VERSE_5_TEXT}
-                    isPill={false}
-                    shadow={false}
-                    textOffsetY={-0.004}
-                  />
-                </group>
-              </RenderTexture>
-            </meshStandardMaterial>
-          </mesh>
-
-          {activeLanguage === "ar" && (
-            <>
-              <DecorativeSvg
-                shapes={decorativeShapes}
-                x={outerW - DECORATIVE_SVG_INSET_X}
-                y={decorativeY}
-                rotationZ={-DECORATIVE_SVG_BRACKET_ROTATION}
+            <mesh renderOrder={90}>
+              <RoundedShapeComponent
+                w={outerW}
+                h={outerH}
+                radius={outerRadius}
               />
-
-              <DecorativeSvg
-                shapes={decorativeShapes}
-                x={DECORATIVE_SVG_INSET_X}
-                y={decorativeY}
-                rotationZ={DECORATIVE_SVG_BRACKET_ROTATION}
-                mirrorX
-              />
-            </>
-          )}
-        </a.group>
-
-        {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
-        <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
-          <group
-            position={[
-              outerW / 2 - labelW / 2,
-              labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
-              EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
-            ]}
-          >
-            <mesh renderOrder={110}>
-              <extrudeGeometry args={[labelInnerShape, labelExtrudeSettings]} />
-              <meshBasicMaterial
-                color={S1_ANA_LABEL_BG}
+              <a.meshBasicMaterial
+                color="#000000"
+                transparent
+                depthTest={false}
+                depthWrite={false}
                 toneMapped={false}
-                side={THREE.DoubleSide}
+                opacity={finalShadowOpacity}
+              />
+            </mesh>
+          </a.group>
+
+          {/* Animated 3D Body + Content */}
+          <a.group
+            position-z={liftZ}
+            rotation-x={tiltX}
+            scale-x={scale}
+            scale-y={scale}
+          >
+            {/* Metallic Body */}
+            <mesh position={[0, 0, 0]} renderOrder={100}>
+              <extrudeGeometry args={[shape, extrudeSettings]} />
+              <meshStandardMaterial
+                color={S1_ANA_BG}
+                metalness={1}
+                roughness={0.12}
+                envMapIntensity={1.8}
               />
             </mesh>
 
-            <group
-              position={[labelW / 2, -labelH / 2 - 0.002, ANA_LABEL_DEPTH + 0.002]}
+            {/* Content Overlay - Shifted to accommodate border and circle */}
+            <mesh
+              position={[outerW / 2, -outerH / 2, EXTRUDE_DEPTH + 0.001]}
+              renderOrder={101}
             >
-              <CanvasText
-                text={anaAyetLabel}
-                font={activeLanguage === "ar" ? QURAN_FONT : LATIN_LABEL_FONT}
-                fontSize={
-                  TEXT_SIZES.ANA_AYET_TAB *
-                  LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet
-                }
-                color={S1_ANA_LABEL_TEXT}
-                textAlign="center"
-                width={labelW}
-                height={labelH}
-                fontWeight="bold"
-              />
+              <planeGeometry args={[outerW, outerH]} />
+              <meshStandardMaterial
+                transparent
+                opacity={1}
+                metalness={0.1}
+                roughness={0.8}
+              >
+                <RenderTexture attach="map" width={512} height={256} frames={4}>
+                  <OrthographicCamera
+                    makeDefault
+                    manual
+                    left={0}
+                    right={outerW}
+                    top={0}
+                    bottom={-outerH}
+                    position={[0, 0, 10]}
+                  />
+                  <group position={[BW, -BW, 0]}>
+                    <VerseBox
+                      x={0}
+                      y={0}
+                      z={0}
+                      w={w}
+                      h={h}
+                      verse={data.text}
+                      number={data.number}
+                      bg={S1_ANA_BG}
+                      bgOpacity={0}
+                      border={CAPSULE_BG_5}
+                      circleBorderCol={S1_VERSE_5_NUMBER_BORDER}
+                      circleBg={S1_VERSE_5_NUMBER_BG}
+                      circleTextCol={S1_VERSE_5_NUMBER_TEXT}
+                      textColor={S1_VERSE_5_TEXT}
+                      isPill={false}
+                      shadow={false}
+                      textOffsetY={-0.004}
+                    />
+                  </group>
+                </RenderTexture>
+              </meshStandardMaterial>
+            </mesh>
+
+            {activeLanguage === "ar" && (
+              <>
+                <DecorativeSvg
+                  shapes={decorativeShapes}
+                  x={outerW - DECORATIVE_SVG_INSET_X}
+                  y={decorativeY}
+                  rotationZ={-DECORATIVE_SVG_BRACKET_ROTATION}
+                />
+
+                <DecorativeSvg
+                  shapes={decorativeShapes}
+                  x={DECORATIVE_SVG_INSET_X}
+                  y={decorativeY}
+                  rotationZ={DECORATIVE_SVG_BRACKET_ROTATION}
+                  mirrorX
+                />
+              </>
+            )}
+          </a.group>
+
+          {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
+          <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
+            <group
+              position={[
+                outerW / 2 - labelW / 2,
+                labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
+                EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
+              ]}
+            >
+              <mesh renderOrder={110}>
+                <extrudeGeometry
+                  args={[labelInnerShape, labelExtrudeSettings]}
+                />
+                <meshBasicMaterial
+                  color={S1_ANA_LABEL_BG}
+                  toneMapped={false}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+
+              <group
+                position={[
+                  labelW / 2,
+                  -labelH / 2 - 0.002,
+                  ANA_LABEL_DEPTH + 0.002,
+                ]}
+              >
+                <CanvasText
+                  text={anaAyetLabel}
+                  font={activeLanguage === "ar" ? QURAN_FONT : LATIN_LABEL_FONT}
+                  fontSize={
+                    TEXT_SIZES.ANA_AYET_TAB *
+                    LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet
+                  }
+                  color={S1_ANA_LABEL_TEXT}
+                  textAlign="center"
+                  width={labelW}
+                  height={labelH}
+                  fontWeight="bold"
+                />
+              </group>
             </group>
-          </group>
-        </a.group>
-      </group>
-    </a.group>
+          </a.group>
+        </group>
+      </a.group>
+    </group>
   );
 }

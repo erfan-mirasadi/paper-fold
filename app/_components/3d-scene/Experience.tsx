@@ -140,7 +140,7 @@ export function Experience({
           </a.group>
         )}
         <ElevatedSectionSurfaces />
-        <ElevatedSectionLabels />
+        <ElevatedSectionLabels introGuidesActive={isIntroActive} />
         <PopUpManager />
         {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>

@@ -25,6 +25,8 @@ export interface AnimatedTextProps {
   staggerDelay?: number;
   // Prevents text from wrapping to multiple lines
   noWrap?: boolean;
+  // Custom styles
+  style?: React.CSSProperties;
 }
 
 export const AnimatedText: React.FC<AnimatedTextProps> = ({
@@ -36,6 +38,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
   animationType = "flyInBottom",
   staggerDelay = 0.05,
   noWrap = false,
+  style,
 }) => {
   // Split text into an array of words for individual animation
   const words = text.split(" ");
@@ -119,7 +122,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
         variantStyles[variant],
         className,
       )}
-      style={glowStyles}
+      style={{ ...glowStyles, ...style }}
     >
       {words.map((word, index) => (
         <motion.span

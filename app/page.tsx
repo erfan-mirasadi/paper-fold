@@ -24,6 +24,7 @@ import { AllSectionsOverlay } from "./_components/ui-overlay/AllSectionsOverlay"
 import { SiteLoadingOverlay } from "./_components/ui-overlay/SiteLoadingOverlay";
 import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
 import { CameraViewController } from "./_components/features/camera-views/CameraViewController";
+import { IntroSectionGuidesOverlay } from "./_components/features/intro/ui/IntroSectionGuidesOverlay";
 import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
 const Experience = dynamic(
   () =>
@@ -134,7 +135,10 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          {/* Hide all overlays during the intro phase */}
+          {isIntroActive && (
+            <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
+          )}
+          {/* Hide standard chrome while intro runs */}
           {!isIntroActive && (
             <>
               <CameraResetOverlay />
