@@ -1,5 +1,4 @@
 "use client";
-import { useScroll } from "@react-three/drei";
 import { useSurahLayoutRuntime } from "../data/useSurahLayoutRuntime";
 import { FOLD_Y_POSITIONS, PAGE_HEIGHT } from "../SurahLayout/index";
 import { FloatingArrows } from "../SurahLayout/FloatingArrows";
@@ -23,6 +22,7 @@ import {
 import { BismillahFloatingText3D } from "../features/bismillah/BismillahFloatingText3D";
 import { PAGE_BG_COLOR } from "../data/theme";
 import { PaperMaterial, TextureToggles } from "./PaperMaterial";
+import { useFoldStore } from "./ScrollManager";
 
 const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;
@@ -63,7 +63,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const foldAnglesRef = useRef(new Float32Array(FOLD_Y_POSITIONS.length));
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
-  const scroll = useScroll();
+  const storyOffset = useFoldStore((s) => s.currentOffset);
   const [showArrows, setShowArrows] = useState(false);
 
   // Audio Setup
@@ -154,7 +154,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
   useFrame((_, delta) => {
     if (!skinnedMeshRef.current || !group.current) return;
     const bones = skinnedMeshRef.current.skeleton.bones;
-    const paperProgress = scroll.offset;
+    const paperProgress = storyOffset;
 
     const isAtEnd = paperProgress > 0.85;
     // Use functional update or check against a ref to avoid stale closure issues

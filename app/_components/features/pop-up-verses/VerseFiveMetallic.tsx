@@ -41,6 +41,7 @@ import { a, to, useSpring } from "@react-spring/three";
 import { useElevatedDrag } from "../elevated-verses/drag/useElevatedDrag";
 import { calculateSectionBounds } from "../elevated-verses/drag/boundsHelper";
 import { dragEngine, useDragState } from "../elevated-verses/drag/dragEngine";
+import { useFoldStore } from "../../3d-scene/ScrollManager";
 
 // --- ADJUSTABLE PARAMETERS ---
 const ZERO_OFFSET = { x: 0, y: 0 };
@@ -189,7 +190,7 @@ export function VerseFiveMetallic() {
   );
 
   const dragBind = useElevatedDrag({
-    enabled: isElevated || isSectionSurfaceRaised,
+    enabled: (isElevated || isSectionSurfaceRaised) && !useFoldStore.getState().isIntroActive,
     springX: verseDrag.x,
     springY: verseDrag.y,
     dragVerseId: 5,

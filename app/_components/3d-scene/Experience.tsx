@@ -5,16 +5,19 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { a, useSpring } from "@react-spring/three";
-import { useCallback, useEffect, useState } from "react";
-import { ThreeEvent } from "@react-three/fiber";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { PopUpManager } from "../features/pop-up-verses/PopUpManager";
 import { useElevatedStore } from "../features/elevated-verses/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../features/elevated-verses/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../features/elevated-verses/ElevatedSectionLabels";
 import { useDragState } from "../features/elevated-verses/drag/dragEngine";
-import { CAMERA_CONFIG } from "../data/cameraConfig";
+import { CAMERA_CONFIG, INTRO_CAMERA_CONFIG } from "../data/cameraConfig";
 import { VerseClickHitboxes } from "../features/camera-zoom/VerseClickHitboxes";
+import { useFoldStore } from "./ScrollManager";
+import { useCameraStore } from "../features/camera-zoom/useCameraStore";
+import { IntroExperience } from "./intro/IntroExperience";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -22,7 +25,7 @@ interface ExperienceProps {
   onReady?: () => void;
 }
 
-//variables when elevated verse is draged and paper is docked
+// variables when elevated verse is draged and paper is docked
 const PAPER_DOCK_X = -0.9;
 const PAPER_DOCK_SCALE = 0.9;
 const PAPER_FOCUS_Y = 0;
@@ -38,6 +41,8 @@ export function Experience({
 }: ExperienceProps) {
   const isPaperMoving = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
+
   // We track paper readiness
   const [paperReady, setPaperReady] = useState(false);
 
@@ -46,26 +51,50 @@ export function Experience({
     setPaperReady(true);
   }, []);
 
-  // Only tell the parent component the scene is fully ready when
-  // the paper is rendered.
-  useEffect(() => {
-    if (paperReady) {
-      // Give the GPU a 500ms breathing room after compiling everything
-      // so the fade-in transition doesn't stutter.
-      const timer = setTimeout(() => {
-        onReady?.();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [paperReady, onReady]);
+  // Scene Readiness Management
+  const readyFiredRef = useRef(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
-    if (e.delta > 2) return;
-    const { hasDragged } = useDragState.getState();
-    if (hasDragged) return;
-    // Dismiss elevated verse on background click
-    useElevatedStore.getState().dismiss();
-  }, []);
+  useEffect(() => {
+    // We are "ready" if we are in the intro (no paper needed) OR if the paper is compiled.
+    const isReady = isIntroActive || paperReady;
+
+    if (isReady && !readyFiredRef.current) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(() => {
+        if (!readyFiredRef.current) {
+          readyFiredRef.current = true;
+          onReady?.();
+        }
+      }, 500);
+    }
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [isIntroActive, paperReady, onReady]);
+
+  // Ensure the elevated store is in the correct state for the intro
+  useEffect(() => {
+    if (isIntroActive) {
+      useElevatedStore.getState().forceShowAllSections();
+    } else {
+      useElevatedStore.getState().restoreAllSections();
+    }
+  }, [isIntroActive]);
+
+  const handleBackgroundClick = useCallback(
+    (e: ThreeEvent<MouseEvent>) => {
+      if (isIntroActive) return;
+      if (e.delta > 2) return;
+      const { hasDragged } = useDragState.getState();
+      if (hasDragged) return;
+      // Dismiss elevated verse on background click
+      useElevatedStore.getState().dismiss();
+    },
+    [isIntroActive],
+  );
 
   const { sceneOffsetX, sceneScale } = useSpring({
     sceneOffsetX: isPaperMoving && !isAllSectionsMode ? PAPER_DOCK_X : 0,
@@ -87,6 +116,7 @@ export function Experience({
         position={CAMERA_CONFIG.initialCamera.position}
         fov={CAMERA_CONFIG.initialCamera.fov}
       />
+      <IntroCameraScrollController />
       <a.group
         rotation-x={-Math.PI / 4}
         position-x={sceneOffsetX}
@@ -94,30 +124,36 @@ export function Experience({
         scale-y={sceneScale}
         scale-z={sceneScale}
       >
-        <a.group
-          position-y={paperFocusY}
-          position-z={paperFocusZ}
-          scale-x={paperFocusScale}
-          scale-y={paperFocusScale}
-          scale-z={paperFocusScale}
-        >
-          <SinglePaper
-            isFolded={isFolded}
-            isDarkMode={isDarkMode}
-            onReady={handlePaperReady} // Using our intercepted handler here
-          />
-        </a.group>
+        {!isIntroActive && (
+          <a.group
+            position-y={paperFocusY}
+            position-z={paperFocusZ}
+            scale-x={paperFocusScale}
+            scale-y={paperFocusScale}
+            scale-z={paperFocusScale}
+          >
+            <SinglePaper
+              isFolded={isFolded}
+              isDarkMode={isDarkMode}
+              onReady={handlePaperReady}
+            />
+          </a.group>
+        )}
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels />
         <PopUpManager />
         {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
+
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
         <planeGeometry args={[50, 50]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      {/* <BackgroundText isDarkMode={isDarkMode} /> */}
-      <DynamicControls />
+
+      {/* Imported the dedicated IntroExperience component */}
+      <IntroExperience isIntroActive={isIntroActive} isDarkMode={isDarkMode} />
+
+      <DynamicControls isIntroActive={isIntroActive} />
       <Environment preset="apartment" />
       <ambientLight intensity={1} />
       <directionalLight position={[0, 4.2, -2]} intensity={1} />
@@ -125,7 +161,25 @@ export function Experience({
   );
 }
 
-function DynamicControls() {
+function DynamicControls({ isIntroActive }: { isIntroActive: boolean }) {
+  if (isIntroActive) {
+    const allowOrbit = INTRO_CAMERA_CONFIG.allowOrbit;
+
+    return (
+      <OrbitControls
+        enabled={true}
+        enableRotate={allowOrbit}
+        enableZoom={allowOrbit}
+        enablePan={allowOrbit}
+        makeDefault={true}
+        minAzimuthAngle={-Infinity}
+        maxAzimuthAngle={Infinity}
+        minPolarAngle={0}
+        maxPolarAngle={Math.PI}
+      />
+    );
+  }
+
   return (
     <OrbitControls
       enabled={true}
@@ -139,4 +193,77 @@ function DynamicControls() {
       maxPolarAngle={CAMERA_CONFIG.orbitControls.maxPolarAngle}
     />
   );
+}
+
+type OrbitControlsLike = {
+  target?: {
+    x: number;
+    y: number;
+    z: number;
+    set: (x: number, y: number, z: number) => void;
+  };
+  update?: () => void;
+};
+
+const easeInOutCubic = (t: number): number => {
+  if (t < 0.5) return 4 * t * t * t;
+  return 1 - Math.pow(-2 * t + 2, 3) / 2;
+};
+
+const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
+
+function IntroCameraScrollController() {
+  useFrame((state) => {
+    if (useCameraStore.getState().phase !== "idle") return;
+
+    const { isIntroActive, introProgress, introHandoffProgress } =
+      useFoldStore.getState();
+
+    if (!isIntroActive) return;
+
+    const controls = state.controls as OrbitControlsLike | undefined;
+    const offsetScale = 1 - introProgress;
+    const [introX, introY, introZ] = INTRO_CAMERA_CONFIG.introPosition;
+    const [introTX, introTY, introTZ] = INTRO_CAMERA_CONFIG.introTarget;
+    const [offX, offY, offZ] = INTRO_CAMERA_CONFIG.scrollOffset;
+
+    const introCamX = introX + offX * offsetScale;
+    const introCamY = introY + offY * offsetScale;
+    const introCamZ = introZ + offZ * offsetScale;
+
+    const follow = INTRO_CAMERA_CONFIG.targetFollow;
+    const introLookX = introTX + offX * offsetScale * follow;
+    const introLookY = introTY + offY * offsetScale * follow;
+    const introLookZ = introTZ + offZ * offsetScale * follow;
+
+    let camX = introCamX;
+    let camY = introCamY;
+    let camZ = introCamZ;
+    let lookX = introLookX;
+    let lookY = introLookY;
+    let lookZ = introLookZ;
+
+    if (introHandoffProgress > 0) {
+      const eased = easeInOutCubic(clamp01(introHandoffProgress));
+      const [baseX, baseY, baseZ] = CAMERA_CONFIG.initialCamera.position;
+      const [baseTX, baseTY, baseTZ] = CAMERA_CONFIG.initialCamera.target;
+
+      camX = introCamX + (baseX - introCamX) * eased;
+      camY = introCamY + (baseY - introCamY) * eased;
+      camZ = introCamZ + (baseZ - introCamZ) * eased;
+      lookX = introLookX + (baseTX - introLookX) * eased;
+      lookY = introLookY + (baseTY - introLookY) * eased;
+      lookZ = introLookZ + (baseTZ - introLookZ) * eased;
+    }
+
+    state.camera.position.set(camX, camY, camZ);
+    state.camera.lookAt(lookX, lookY, lookZ);
+
+    if (controls?.target?.set) {
+      controls.target.set(lookX, lookY, lookZ);
+      controls.update?.();
+    }
+  });
+
+  return null;
 }

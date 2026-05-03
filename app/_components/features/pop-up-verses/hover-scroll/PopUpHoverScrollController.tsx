@@ -2,15 +2,18 @@
 
 import { useEffect, useRef } from "react";
 import { usePopUpStore } from "../ui/usePopUpStore";
+import { useFoldStore } from "../../../3d-scene/ScrollManager";
 
 const FOLD_SCROLL_THRESHOLD_PX = 4;
 const FOLD_TRIGGER_COOLDOWN_MS = 80;
 
 export function PopUpHoverScrollController() {
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
   const wheelAccumulatorRef = useRef(0);
   const lastFoldTriggerAtRef = useRef(0);
 
   useEffect(() => {
+    if (isIntroActive) return;
     const handleWheel = (event: WheelEvent) => {
       const hoveredGroupId = usePopUpStore.getState().hoveredGroupId;
       if (!hoveredGroupId) return;

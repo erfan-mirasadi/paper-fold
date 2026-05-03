@@ -78,6 +78,9 @@ interface ElevatedStoreState {
   elevateVerse: (verseId: number) => void;
   elevateVerses: (verseIds: number[], sectionId?: ElevatedSectionId) => void;
   showAllSections: () => void;
+  /** Like showAllSections but bypasses the scroll-unlock check.
+   *  Used by the intro sequence where scroll is at 0. */
+  forceShowAllSections: () => void;
   restoreAllSections: () => void;
   dismiss: () => void;
 }
@@ -261,6 +264,19 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     set({
       activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
       activeVerseIds: ALL_ELEVATED_VERSE_IDS,
+      activeSectionId: SECTION_PRIORITY[0],
+      activeSectionIds: SECTION_PRIORITY,
+      isAllSectionsMode: true,
+      phase: "elevated",
+      hasEverElevated: true,
+    });
+  },
+
+  forceShowAllSections: () => {
+    set({
+      activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
+      activeVerseIds: ALL_ELEVATED_VERSE_IDS,
+      unlockedVerseIds: ALL_ELEVATED_VERSE_IDS,
       activeSectionId: SECTION_PRIORITY[0],
       activeSectionIds: SECTION_PRIORITY,
       isAllSectionsMode: true,

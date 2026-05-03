@@ -37,6 +37,7 @@ import {
 } from "../../data/useSurahLanguageStore";
 import { useSurahLayoutRuntime } from "../../data/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../../3d-scene/SinglePaper";
+import { useFoldStore } from "../../3d-scene/ScrollManager";
 
 interface VerseConfig {
   id: number;
@@ -402,7 +403,7 @@ function PopUpCardWrapper({
   }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
 
   const dragBind = useElevatedDrag({
-    enabled: isElevated || isSectionSurfaceRaised,
+    enabled: (isElevated || isSectionSurfaceRaised) && !useFoldStore.getState().isIntroActive,
     springX:
       useSectionGroupDrag && sectionDrag ? sectionDrag.x : leadVerseDrag.x,
     springY:

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import type { PopUpGroup } from "../ui/usePopUpStore";
+import { useFoldStore } from "../../../3d-scene/ScrollManager";
 
 type HoverSensorVerseConfig = {
   id: number;
@@ -39,11 +40,15 @@ export function PopUpHoverSensors({
   zBaseOffset,
   setHoveredGroupId,
 }: PopUpHoverSensorsProps) {
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
+
   useEffect(() => {
     return () => {
       document.body.style.cursor = "";
     };
   }, []);
+
+  if (isIntroActive) return null;
 
   return (
     <>

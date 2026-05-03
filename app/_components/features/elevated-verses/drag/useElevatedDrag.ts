@@ -12,6 +12,7 @@ import {
 import { useElevatedStore, type ElevatedSectionId } from "../useElevatedStore";
 import { PAGE_WIDTH, PAGE_HEIGHT } from "../../../data/SurahConfig";
 import { SectionBounds } from "./boundsHelper";
+import { useFoldStore } from "../../../3d-scene/ScrollManager";
 
 // Module-level reusable math objects (thread-safe in single-threaded JS)
 const _hit = new Vector3();
@@ -77,6 +78,8 @@ export function useElevatedDrag({
   });
 
   return useMemo<DragBindings>(() => {
+    // Completely disable drag during the intro sequence
+    if (useFoldStore.getState().isIntroActive) return EMPTY_DRAG_BINDINGS;
     if (!enabled) return EMPTY_DRAG_BINDINGS;
 
     const onPointerDown = (e: ThreeEvent<PointerEvent>) => {

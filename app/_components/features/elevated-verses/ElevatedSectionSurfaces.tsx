@@ -27,6 +27,7 @@ import {
 } from "./useElevatedStore";
 import { dragEngine } from "./drag/dragEngine";
 import { useElevatedDrag } from "./drag/useElevatedDrag";
+import { useFoldStore } from "../../3d-scene/ScrollManager";
 import {
   calculateSectionBounds,
   type SectionBounds,
@@ -240,7 +241,7 @@ function DraggableSectionGroup({
 }) {
   const sectionDrag = dragEngine.sections[sectionId];
   const dragBind = useElevatedDrag({
-    enabled: isActive,
+    enabled: isActive && !useFoldStore.getState().isIntroActive,
     springX: sectionDrag.x,
     springY: sectionDrag.y,
     dragSectionId: sectionId,

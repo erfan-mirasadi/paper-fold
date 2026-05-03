@@ -18,11 +18,24 @@ const easeInOutCubic = (t: number): number => {
 
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
+/** The first INTRO_SCROLL_FRACTION of the total scroll height is reserved for
+ *  the intro sequence. The fold story only plays over the remaining portion. */
+export const INTRO_SCROLL_FRACTION = 0.3;
+// Extra scroll space reserved for a smooth camera handoff before the base scene.
+export const INTRO_HANDOFF_FRACTION = 0.06;
+const INTRO_MAX_FRACTION = 0.95;
+
 interface FoldStoreState {
   targetStageId: string | null;
   transitionToken: number;
   isTransitioning: boolean;
   currentOffset: number;
+  /** True while the user is in the intro + handoff scroll band. */
+  isIntroActive: boolean;
+  /** 0..1 progress within the intro scroll band. */
+  introProgress: number;
+  /** 0..1 progress through the intro-to-base handoff band. */
+  introHandoffProgress: number;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   resetTransition: () => void;
@@ -33,6 +46,9 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   transitionToken: 0,
   isTransitioning: false,
   currentOffset: 0,
+  isIntroActive: true,
+  introProgress: 0,
+  introHandoffProgress: 0,
 
   triggerTransition: (id) =>
     set((state) => ({
@@ -44,12 +60,34 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
 }));
 
+const getIntroBands = () => {
+  const introEnd = clamp01(INTRO_SCROLL_FRACTION);
+  const handoffEnd = Math.min(
+    INTRO_MAX_FRACTION,
+    introEnd + Math.max(0, INTRO_HANDOFF_FRACTION),
+  );
+  return { introEnd, handoffEnd };
+};
+
+const getStoryOffsetForRaw = (rawOffset: number): number => {
+  const { handoffEnd } = getIntroBands();
+  if (rawOffset < handoffEnd) return 0;
+  const usableRange = Math.max(1 - handoffEnd, 0.00001);
+  return clamp01((rawOffset - handoffEnd) / usableRange);
+};
+
+const getRawOffsetForStory = (storyOffset: number): number => {
+  const { handoffEnd } = getIntroBands();
+  const usableRange = Math.max(1 - handoffEnd, 0);
+  if (usableRange <= 0) return 1;
+  return clamp01(handoffEnd + clamp01(storyOffset) * usableRange);
+};
+
 export function ScrollManager() {
   const scroll = useScroll();
   const targetStageId = useFoldStore((s) => s.targetStageId);
   const transitionToken = useFoldStore((s) => s.transitionToken);
   const setCurrentOffset = useFoldStore((s) => s.setCurrentOffset);
-
   const activeRunIdRef = useRef(0);
   const frameIdRef = useRef<number | null>(null);
   const timeoutIdRef = useRef<number | null>(null);
@@ -77,12 +115,31 @@ export function ScrollManager() {
 
     const syncCurrentOffset = () => {
       const maxScroll = el.scrollHeight - el.clientHeight;
-      const offset = maxScroll <= 0 ? 0 : clamp01(el.scrollTop / maxScroll);
+      const rawOffset = maxScroll <= 0 ? 0 : clamp01(el.scrollTop / maxScroll);
 
-      setCurrentOffset(offset);
+      // ── Intro intercept ────────────────────────────────────────────
+      // Intro band -> camera-only scroll.
+      // Handoff band -> smooth camera blend to base before story begins.
+      const { introEnd, handoffEnd } = getIntroBands();
+      const introActive = rawOffset < handoffEnd;
+      const introProgress = introEnd <= 0 ? 1 : clamp01(rawOffset / introEnd);
+      const handoffProgress =
+        rawOffset <= introEnd
+          ? 0
+          : clamp01(
+              (rawOffset - introEnd) / Math.max(handoffEnd - introEnd, 0.00001),
+            );
+      const storyOffset = getStoryOffsetForRaw(rawOffset);
 
-      useElevatedStore.getState().syncScrollOffset(offset);
-      usePopUpStore.getState().syncScrollOffset(offset);
+      useFoldStore.setState({
+        isIntroActive: introActive,
+        introProgress,
+        introHandoffProgress: handoffProgress,
+      });
+      setCurrentOffset(storyOffset);
+
+      useElevatedStore.getState().syncScrollOffset(storyOffset);
+      usePopUpStore.getState().syncScrollOffset(storyOffset);
     };
 
     syncCurrentOffset();
@@ -98,26 +155,37 @@ export function ScrollManager() {
   }, [scroll.el, setCurrentOffset]);
 
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   useEffect(() => {
     if (!scroll.el) return;
     const el = scroll.el;
 
-    if (isAllSectionsMode) {
+    const shouldLockScroll = isAllSectionsMode && !isIntroActive;
+
+    if (shouldLockScroll) {
       el.style.overflow = "hidden";
     } else {
       el.style.overflow = "auto";
     }
 
     const preventDefault = (e: Event) => {
-      if (isAllSectionsMode) {
+      if (shouldLockScroll) {
         e.preventDefault();
       }
     };
 
     const handleKey = (e: KeyboardEvent) => {
-      if (isAllSectionsMode) {
-        const keys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Home", "End"];
+      if (shouldLockScroll) {
+        const keys = [
+          "ArrowUp",
+          "ArrowDown",
+          "PageUp",
+          "PageDown",
+          " ",
+          "Home",
+          "End",
+        ];
         if (keys.includes(e.key)) {
           e.preventDefault();
         }
@@ -134,7 +202,7 @@ export function ScrollManager() {
       el.removeEventListener("touchmove", preventDefault);
       el.removeEventListener("keydown", handleKey as any);
     };
-  }, [scroll.el, isAllSectionsMode]);
+  }, [scroll.el, isAllSectionsMode, isIntroActive]);
 
   useEffect(() => {
     if (!targetStageId || !scroll.el) return;
@@ -211,7 +279,9 @@ export function ScrollManager() {
         return;
       }
 
-      const currentOffset = clamp01(el.scrollTop / maxScroll);
+      const currentOffset = getStoryOffsetForRaw(
+        clamp01(el.scrollTop / maxScroll),
+      );
       const currentStage = currentOffset * maxStageIndex;
       const direction = targetIndex >= currentStage ? 1 : -1;
       const stageOffsets: number[] = [];
@@ -234,12 +304,13 @@ export function ScrollManager() {
       }
 
       let fromTop = el.scrollTop;
-      const baseStageSize = 1 / maxStageIndex;
+      const { handoffEnd } = getIntroBands();
+      const baseStageSize = Math.max(1 - handoffEnd, 0.00001) / maxStageIndex;
 
       for (let i = 0; i < stageOffsets.length; i++) {
         if (activeRunIdRef.current !== thisRunId) return;
 
-        const toTop = stageOffsets[i] * maxScroll;
+        const toTop = getRawOffsetForStory(stageOffsets[i]) * maxScroll;
         const segmentOffsetSize = Math.abs((toTop - fromTop) / maxScroll);
         const durationScale = Math.max(segmentOffsetSize / baseStageSize, 0.45);
         const segmentDuration = STEP_SCROLL_DURATION_MS * durationScale;
@@ -260,7 +331,10 @@ export function ScrollManager() {
         }
       }
 
-      el.scrollTo({ top: targetOffset * maxScroll, behavior: "auto" });
+      el.scrollTo({
+        top: getRawOffsetForStory(targetOffset) * maxScroll,
+        behavior: "auto",
+      });
       setCurrentOffset(targetOffset);
 
       if (activeRunIdRef.current === thisRunId) {

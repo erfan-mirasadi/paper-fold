@@ -22,6 +22,7 @@ import {
 } from "./useElevatedStore";
 import { dragEngine } from "./drag/dragEngine";
 import { useElevatedDrag } from "./drag/useElevatedDrag";
+import { useFoldStore } from "../../3d-scene/ScrollManager";
 
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
@@ -93,7 +94,7 @@ function AnimatedElevatedLabel({
   // Drag: label drags the entire section
   const sectionDrag = dragEngine.sections[sectionId];
   const dragBind = useElevatedDrag({
-    enabled: isActive,
+    enabled: isActive && !useFoldStore.getState().isIntroActive,
     springX: sectionDrag.x,
     springY: sectionDrag.y,
     dragSectionId: sectionId,
