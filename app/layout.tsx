@@ -1,10 +1,9 @@
-
 import type { Metadata, Viewport } from "next";
 import { Manrope, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import GrainOverlay from "./_components/ui-overlay/GrainOverlay";
+import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
 
-const manrope = Manrope({ 
+const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
 });

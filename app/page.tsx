@@ -6,29 +6,31 @@ import { Preload, ScrollControls } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import * as THREE from "three";
-import { PopUpHoverScrollController } from "./_components/features/pop-up-verses/hover-scroll/PopUpHoverScrollController";
-import { CameraResetOverlay } from "./_components/features/camera-zoom/CameraResetOverlay";
+import { PopUpHoverScrollController } from "./_components/canvas/pop-up-verses/hover-scroll/PopUpHoverScrollController";
+import { CameraResetOverlay } from "./_components/canvas/camera-zoom/CameraResetOverlay";
 // VerseNeonOverlay is currently fully commented out (not a module).
 // import {
 //   VerseNeonTracker,
 //   VerseNeonHTMLOverlay,
-// } from "./_components/features/camera-zoom/VerseNeonOverlay";
-// import Effects from "./_components/3d-scene/Effects";
-import { ScrollManager } from "./_components/3d-scene/ScrollManager";
-import { useFoldStore } from "./_components/3d-scene/ScrollManager";
-import { NavigationOverlay } from "./_components/ui-overlay/NavigationOverlay";
-import { TitleOverlay } from "./_components/ui-overlay/TitleOverlay";
-import { ThemeToggleOverlay } from "./_components/ui-overlay/ThemeToggleOverlay";
-import { LanguageSwitchOverlay } from "./_components/ui-overlay/LanguageSwitchOverlay";
-import { AllSectionsOverlay } from "./_components/ui-overlay/AllSectionsOverlay";
-import { SiteLoadingOverlay } from "./_components/ui-overlay/SiteLoadingOverlay";
-import { CameraViewPresetOverlay } from "./_components/features/camera-views/CameraViewPresetOverlay";
-import { CameraViewController } from "./_components/features/camera-views/CameraViewController";
-import { IntroSectionGuidesOverlay } from "./_components/features/intro/ui/IntroSectionGuidesOverlay";
-import { CAMERA_CONFIG } from "./_components/data/cameraConfig";
+// } from "./_components/canvas/camera-zoom/VerseNeonOverlay";
+// import Effects from "./_components/canvas/3d-scene/Effects";
+import { ScrollManager } from "./_components/canvas/3d-scene/ScrollManager";
+import { useFoldStore } from "./_components/canvas/3d-scene/ScrollManager";
+import { NavigationOverlay } from "./_components/dom/ui-overlay/NavigationOverlay";
+import { TitleOverlay } from "./_components/dom/ui-overlay/TitleOverlay";
+import { ThemeToggleOverlay } from "./_components/dom/ui-overlay/ThemeToggleOverlay";
+import { LanguageSwitchOverlay } from "./_components/dom/ui-overlay/LanguageSwitchOverlay";
+import { AllSectionsOverlay } from "./_components/dom/ui-overlay/AllSectionsOverlay";
+import { SiteLoadingOverlay } from "./_components/dom/ui-overlay/SiteLoadingOverlay";
+import { CameraViewPresetOverlay } from "./_components/dom/ui-overlay/CameraViewPresetOverlay";
+import { CameraViewController } from "./_components/canvas/camera-views/CameraViewController";
+import { IntroSectionGuidesOverlay } from "./_components/dom/IntroSectionGuidesOverlay";
+import { CAMERA_CONFIG } from "./data/cameraConfig";
 const Experience = dynamic(
   () =>
-    import("./_components/3d-scene/Experience").then((mod) => mod.Experience),
+    import("./_components/canvas/3d-scene/Experience").then(
+      (mod) => mod.Experience,
+    ),
   { ssr: false },
 );
 
@@ -162,9 +164,9 @@ export default function Home() {
 // import Image from "next/image";
 // import { Suspense, useEffect, useState } from "react";
 // import { Canvas } from "@react-three/fiber";
-// import { AnimatedText } from "./_components/ui-overlay/AnimatedText";
-// import InteractiveSandScene from "./_components/3d-scene/InteractiveSandScene";
-// import { SiteLoadingOverlay } from "./_components/ui-overlay/SiteLoadingOverlay";
+// import { AnimatedText } from "./_components/dom/ui-overlay/AnimatedText";
+// import InteractiveSandScene from "./_components/canvas/3d-scene/InteractiveSandScene";
+// import { SiteLoadingOverlay } from "./_components/dom/ui-overlay/SiteLoadingOverlay";
 
 // export default function Page() {
 //   const [sandReady, setSandReady] = useState(false);
