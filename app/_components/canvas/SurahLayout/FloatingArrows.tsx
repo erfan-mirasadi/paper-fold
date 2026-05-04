@@ -1,11 +1,11 @@
 "use client";
 
-import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { BLUE_THEME, MAROON_THEME, GREEN_THEME } from "../../../data/theme";
+import { useFoldStore } from "../3d-scene/ScrollManager";
 import {
   CURVE_GAP,
   CURVE_INWARD_OFFSET,
@@ -146,7 +146,6 @@ const AnimatedArrow = ({
   shadowSize = 6,
   flareSize = 14,
 }: AnimatedArrowProps) => {
-  const scroll = useScroll();
   const groupRef = useRef<THREE.Group>(null);
   const innerGroupRef = useRef<THREE.Group>(null);
   const flareRef = useRef<THREE.Mesh>(null);
@@ -223,7 +222,7 @@ const AnimatedArrow = ({
       return;
 
     // React to scroll offset for hiding/showing (fading)
-    const shouldHide = scroll.offset < ARROW_FADE_THRESHOLD;
+    const shouldHide = useFoldStore.getState().rawOffset < ARROW_FADE_THRESHOLD;
     const targetOp = shouldHide ? 0 : 1;
     globalOpacityRef.current = THREE.MathUtils.damp(
       globalOpacityRef.current,

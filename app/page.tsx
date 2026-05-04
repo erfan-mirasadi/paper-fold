@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Canvas } from "@react-three/fiber";
-import { Preload, ScrollControls } from "@react-three/drei";
+import { Preload } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import * as THREE from "three";
@@ -25,6 +25,7 @@ import { SiteLoadingOverlay } from "./_components/dom/ui-overlay/SiteLoadingOver
 import { CameraViewPresetOverlay } from "./_components/dom/ui-overlay/CameraViewPresetOverlay";
 import { CameraViewController } from "./_components/canvas/camera-views/CameraViewController";
 import { IntroSectionGuidesOverlay } from "./_components/dom/IntroSectionGuidesOverlay";
+import { LenisProvider } from "./_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "./data/cameraConfig";
 const Experience = dynamic(
   () =>
@@ -33,6 +34,8 @@ const Experience = dynamic(
     ),
   { ssr: false },
 );
+
+const SCROLL_PAGES = 2;
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -73,91 +76,97 @@ export default function Home() {
   }, []);
 
   return (
-    <main
-      style={{
-        width: "100vw",
-        height: "100dvh",
-        backgroundColor: bgColor,
-        overflow: "hidden",
-        transition: "background-color 0.5s ease",
-        position: "relative", // Ensure relative positioning for absolute children
-      }}
-    >
-      <Suspense fallback={null}>
+    <LenisProvider>
+      <main
+        style={{
+          width: "100vw",
+          minHeight: "100dvh",
+          backgroundColor: bgColor,
+          transition: "background-color 0.5s ease",
+          position: "relative", // Ensure relative positioning for absolute children
+        }}
+      >
         <div
+          aria-hidden="true"
           style={{
-            position: "absolute",
-            inset: 0,
-            opacity: isSceneReady ? 1 : 0,
-            // Prevent pointer events while hidden to avoid blocking UI interactions
-            pointerEvents: isSceneReady ? "auto" : "none",
-            // Apple-like buttery smooth ease transition
-            transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
+            height: `${SCROLL_PAGES * 100}vh`,
+            pointerEvents: "none",
           }}
-        >
-          {canvasReady && (
-            <Canvas
-              camera={{
-                position: CAMERA_CONFIG.initialCamera.position,
-                fov: CAMERA_CONFIG.initialCamera.fov,
-              }}
-              gl={{
-                antialias: true,
-                powerPreference: "high-performance",
-                toneMapping: THREE.NoToneMapping,
-                outputColorSpace: THREE.SRGBColorSpace,
-              }}
-              frameloop="always"
-            >
-              <color attach="background" args={[bgColor]} />
-              {/* <Effects glitchTrigger={glitchKey} /> */}
-              <ScrollControls pages={2} damping={0.28}>
+        />
+        <Suspense fallback={null}>
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              opacity: isSceneReady ? 1 : 0,
+              // Prevent pointer events while hidden to avoid blocking UI interactions
+              pointerEvents: isSceneReady ? "auto" : "none",
+              // Apple-like buttery smooth ease transition
+              transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
+            }}
+          >
+            {canvasReady && (
+              <Canvas
+                camera={{
+                  position: CAMERA_CONFIG.initialCamera.position,
+                  fov: CAMERA_CONFIG.initialCamera.fov,
+                }}
+                gl={{
+                  antialias: true,
+                  powerPreference: "high-performance",
+                  toneMapping: THREE.NoToneMapping,
+                  outputColorSpace: THREE.SRGBColorSpace,
+                }}
+                frameloop="always"
+              >
+                <color attach="background" args={[bgColor]} />
+                {/* <Effects glitchTrigger={glitchKey} /> */}
                 <ScrollManager />
                 <PopUpHoverScrollController />
                 <Experience
                   isDarkMode={isDarkMode}
                   onReady={handleSceneReady}
                 />
-              </ScrollControls>
-              {/* <VerseNeonTracker /> */}
-              <CameraViewController />
-              <Preload all />
-            </Canvas>
+                {/* <VerseNeonTracker /> */}
+                <CameraViewController />
+                <Preload all />
+              </Canvas>
+            )}
+          </div>
+        </Suspense>
+        <AnimatePresence>
+          {!isSceneReady && (
+            <SiteLoadingOverlay key="site-loader" isDarkMode={isDarkMode} />
           )}
-        </div>
-      </Suspense>
-      <AnimatePresence>
-        {!isSceneReady && (
-          <SiteLoadingOverlay key="site-loader" isDarkMode={isDarkMode} />
+        </AnimatePresence>
+        {isSceneReady && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            {isIntroActive && (
+              <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
+            )}
+            {/* Hide standard chrome while intro runs */}
+            {!isIntroActive && (
+              <>
+                <CameraResetOverlay />
+                <NavigationOverlay isDarkMode={isDarkMode} />
+                <TitleOverlay isDarkMode={isDarkMode} />
+                <AllSectionsOverlay isDarkMode={isDarkMode} />
+                <LanguageSwitchOverlay isDarkMode={isDarkMode} />
+                <ThemeToggleOverlay
+                  isDarkMode={isDarkMode}
+                  onToggle={handleThemeToggle}
+                />
+                <CameraViewPresetOverlay />
+              </>
+            )}
+          </motion.div>
         )}
-      </AnimatePresence>
-      {isSceneReady && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          {isIntroActive && (
-            <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
-          )}
-          {/* Hide standard chrome while intro runs */}
-          {!isIntroActive && (
-            <>
-              <CameraResetOverlay />
-              <NavigationOverlay isDarkMode={isDarkMode} />
-              <TitleOverlay isDarkMode={isDarkMode} />
-              <AllSectionsOverlay isDarkMode={isDarkMode} />
-              <LanguageSwitchOverlay isDarkMode={isDarkMode} />
-              <ThemeToggleOverlay
-                isDarkMode={isDarkMode}
-                onToggle={handleThemeToggle}
-              />
-              <CameraViewPresetOverlay />
-            </>
-          )}
-        </motion.div>
-      )}
-    </main>
+      </main>
+    </LenisProvider>
   );
 }
 

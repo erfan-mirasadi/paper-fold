@@ -124,21 +124,20 @@ export function Experience({
         scale-y={sceneScale}
         scale-z={sceneScale}
       >
-        {!isIntroActive && (
-          <a.group
-            position-y={paperFocusY}
-            position-z={paperFocusZ}
-            scale-x={paperFocusScale}
-            scale-y={paperFocusScale}
-            scale-z={paperFocusScale}
-          >
-            <SinglePaper
-              isFolded={isFolded}
-              isDarkMode={isDarkMode}
-              onReady={handlePaperReady}
-            />
-          </a.group>
-        )}
+        <a.group
+          visible={!isIntroActive}
+          position-y={paperFocusY}
+          position-z={paperFocusZ}
+          scale-x={paperFocusScale}
+          scale-y={paperFocusScale}
+          scale-z={paperFocusScale}
+        >
+          <SinglePaper
+            isFolded={isFolded}
+            isDarkMode={isDarkMode}
+            onReady={handlePaperReady}
+          />
+        </a.group>
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels introGuidesActive={isIntroActive} />
         <PopUpManager />

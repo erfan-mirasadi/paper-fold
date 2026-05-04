@@ -1,11 +1,12 @@
 "use client";
 
-import { useScroll } from "@react-three/drei";
-import { useEffect, useRef } from "react";
+import type Lenis from "lenis";
+import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
 import { FOLD_STORY_STEPS, getOffsetForId } from "./FoldStory";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
+import { useLenis } from "../../dom/LenisProvider";
 
 const STEP_SCROLL_DURATION_MS = 820;
 const STEP_PAUSE_MS = 450;
@@ -30,6 +31,7 @@ interface FoldStoreState {
   transitionToken: number;
   isTransitioning: boolean;
   currentOffset: number;
+  rawOffset: number;
   /** True while the user is in the intro + handoff scroll band. */
   isIntroActive: boolean;
   /** 0..1 progress within the intro scroll band. */
@@ -38,6 +40,7 @@ interface FoldStoreState {
   introHandoffProgress: number;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
+  setRawOffset: (offset: number) => void;
   resetTransition: () => void;
 }
 
@@ -46,6 +49,7 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   transitionToken: 0,
   isTransitioning: false,
   currentOffset: 0,
+  rawOffset: 0,
   isIntroActive: true,
   introProgress: 0,
   introHandoffProgress: 0,
@@ -57,6 +61,7 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
       isTransitioning: true,
     })),
   setCurrentOffset: (offset) => set({ currentOffset: clamp01(offset) }),
+  setRawOffset: (offset) => set({ rawOffset: clamp01(offset) }),
   resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
 }));
 
@@ -84,7 +89,7 @@ const getRawOffsetForStory = (storyOffset: number): number => {
 };
 
 export function ScrollManager() {
-  const scroll = useScroll();
+  const lenis = useLenis();
   const targetStageId = useFoldStore((s) => s.targetStageId);
   const transitionToken = useFoldStore((s) => s.transitionToken);
   const setCurrentOffset = useFoldStore((s) => s.setCurrentOffset);
@@ -103,70 +108,64 @@ export function ScrollManager() {
     }
   };
 
+  const syncCurrentOffset = useCallback((lenisInstance: Lenis) => {
+    const maxScroll = Math.max(lenisInstance.limit, 0);
+    const rawOffset =
+      maxScroll <= 0 ? 0 : clamp01(lenisInstance.scroll / maxScroll);
+
+    // ── Intro intercept ────────────────────────────────────────────
+    // Intro band -> camera-only scroll.
+    // Handoff band -> smooth camera blend to base before story begins.
+    const { introEnd, handoffEnd } = getIntroBands();
+    const introActive = rawOffset < handoffEnd;
+    const introProgress = introEnd <= 0 ? 1 : clamp01(rawOffset / introEnd);
+    const handoffProgress =
+      rawOffset <= introEnd
+        ? 0
+        : clamp01(
+            (rawOffset - introEnd) / Math.max(handoffEnd - introEnd, 0.00001),
+          );
+    const storyOffset = getStoryOffsetForRaw(rawOffset);
+
+    useFoldStore.setState({
+      currentOffset: storyOffset,
+      rawOffset,
+      isIntroActive: introActive,
+      introProgress,
+      introHandoffProgress: handoffProgress,
+    });
+
+    useElevatedStore.getState().syncScrollOffset(storyOffset);
+    usePopUpStore.getState().syncScrollOffset(storyOffset);
+  }, []);
+
   useEffect(() => {
-    if (!scroll.el) return;
+    if (!lenis) return;
 
-    const el = scroll.el;
-    const hiddenScrollbarClass = "scroll-controls-hide-scrollbar";
-    const touchScrollClass = "scroll-controls-touch-scroll";
+    const handleSync = () => syncCurrentOffset(lenis);
 
-    el.classList.add(hiddenScrollbarClass);
-    el.classList.add(touchScrollClass);
-
-    const syncCurrentOffset = () => {
-      const maxScroll = el.scrollHeight - el.clientHeight;
-      const rawOffset = maxScroll <= 0 ? 0 : clamp01(el.scrollTop / maxScroll);
-
-      // ── Intro intercept ────────────────────────────────────────────
-      // Intro band -> camera-only scroll.
-      // Handoff band -> smooth camera blend to base before story begins.
-      const { introEnd, handoffEnd } = getIntroBands();
-      const introActive = rawOffset < handoffEnd;
-      const introProgress = introEnd <= 0 ? 1 : clamp01(rawOffset / introEnd);
-      const handoffProgress =
-        rawOffset <= introEnd
-          ? 0
-          : clamp01(
-              (rawOffset - introEnd) / Math.max(handoffEnd - introEnd, 0.00001),
-            );
-      const storyOffset = getStoryOffsetForRaw(rawOffset);
-
-      useFoldStore.setState({
-        isIntroActive: introActive,
-        introProgress,
-        introHandoffProgress: handoffProgress,
-      });
-      setCurrentOffset(storyOffset);
-
-      useElevatedStore.getState().syncScrollOffset(storyOffset);
-      usePopUpStore.getState().syncScrollOffset(storyOffset);
-    };
-
-    syncCurrentOffset();
-    el.addEventListener("scroll", syncCurrentOffset, { passive: true });
-    window.addEventListener("resize", syncCurrentOffset);
+    syncCurrentOffset(lenis);
+    lenis.on("scroll", handleSync);
+    window.addEventListener("resize", handleSync);
 
     return () => {
-      el.removeEventListener("scroll", syncCurrentOffset);
-      window.removeEventListener("resize", syncCurrentOffset);
-      el.classList.remove(hiddenScrollbarClass);
-      el.classList.remove(touchScrollClass);
+      lenis.off("scroll", handleSync);
+      window.removeEventListener("resize", handleSync);
     };
-  }, [scroll.el, setCurrentOffset]);
+  }, [lenis, syncCurrentOffset]);
 
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   useEffect(() => {
-    if (!scroll.el) return;
-    const el = scroll.el;
+    if (!lenis) return;
 
     const shouldLockScroll = isAllSectionsMode && !isIntroActive;
 
     if (shouldLockScroll) {
-      el.style.overflow = "hidden";
+      lenis.stop();
     } else {
-      el.style.overflow = "auto";
+      lenis.start();
     }
 
     const preventDefault = (e: Event) => {
@@ -193,19 +192,19 @@ export function ScrollManager() {
     };
 
     // We block wheel and touchmove to stop scrolling, but keep pointer events for dragging
-    el.addEventListener("wheel", preventDefault, { passive: false });
-    el.addEventListener("touchmove", preventDefault, { passive: false });
-    el.addEventListener("keydown", handleKey as any);
+    window.addEventListener("wheel", preventDefault, { passive: false });
+    window.addEventListener("touchmove", preventDefault, { passive: false });
+    window.addEventListener("keydown", handleKey);
 
     return () => {
-      el.removeEventListener("wheel", preventDefault);
-      el.removeEventListener("touchmove", preventDefault);
-      el.removeEventListener("keydown", handleKey as any);
+      window.removeEventListener("wheel", preventDefault);
+      window.removeEventListener("touchmove", preventDefault);
+      window.removeEventListener("keydown", handleKey);
     };
-  }, [scroll.el, isAllSectionsMode, isIntroActive]);
+  }, [lenis, isAllSectionsMode, isIntroActive]);
 
   useEffect(() => {
-    if (!targetStageId || !scroll.el) return;
+    if (!targetStageId || !lenis) return;
 
     const targetIndex = FOLD_STORY_STEPS.findIndex(
       (step) => step.id === targetStageId,
@@ -224,14 +223,13 @@ export function ScrollManager() {
     clearPendingWork();
 
     const animateSegment = (
-      el: HTMLElement,
       fromTop: number,
       toTop: number,
       durationMs: number,
     ): Promise<boolean> =>
       new Promise((resolve) => {
         if (Math.abs(toTop - fromTop) <= SCROLL_SNAP_EPSILON_PX) {
-          el.scrollTo({ top: toTop, behavior: "auto" });
+          lenis.scrollTo(toTop, { immediate: true });
           resolve(true);
           return;
         }
@@ -246,9 +244,8 @@ export function ScrollManager() {
 
           const t = Math.min((now - startAt) / durationMs, 1);
           const easedT = easeInOutCubic(t);
-          el.scrollTo({
-            top: fromTop + (toTop - fromTop) * easedT,
-            behavior: "auto",
+          lenis.scrollTo(fromTop + (toTop - fromTop) * easedT, {
+            immediate: true,
           });
 
           if (t < 1) {
@@ -272,15 +269,14 @@ export function ScrollManager() {
       });
 
     const runStepByStepScroll = async () => {
-      const el = scroll.el;
-      const maxScroll = el.scrollHeight - el.clientHeight;
+      const maxScroll = lenis.limit;
       if (maxScroll <= 0 || maxStageIndex <= 0) {
         useFoldStore.setState({ isTransitioning: false, targetStageId: null });
         return;
       }
 
       const currentOffset = getStoryOffsetForRaw(
-        clamp01(el.scrollTop / maxScroll),
+        clamp01(lenis.scroll / maxScroll),
       );
       const currentStage = currentOffset * maxStageIndex;
       const direction = targetIndex >= currentStage ? 1 : -1;
@@ -303,7 +299,7 @@ export function ScrollManager() {
         stageOffsets.push(targetOffset);
       }
 
-      let fromTop = el.scrollTop;
+      let fromTop = lenis.scroll;
       const { handoffEnd } = getIntroBands();
       const baseStageSize = Math.max(1 - handoffEnd, 0.00001) / maxStageIndex;
 
@@ -315,12 +311,7 @@ export function ScrollManager() {
         const durationScale = Math.max(segmentOffsetSize / baseStageSize, 0.45);
         const segmentDuration = STEP_SCROLL_DURATION_MS * durationScale;
 
-        const finished = await animateSegment(
-          el,
-          fromTop,
-          toTop,
-          segmentDuration,
-        );
+        const finished = await animateSegment(fromTop, toTop, segmentDuration);
         if (!finished) return;
 
         fromTop = toTop;
@@ -331,9 +322,8 @@ export function ScrollManager() {
         }
       }
 
-      el.scrollTo({
-        top: getRawOffsetForStory(targetOffset) * maxScroll,
-        behavior: "auto",
+      lenis.scrollTo(getRawOffsetForStory(targetOffset) * maxScroll, {
+        immediate: true,
       });
       setCurrentOffset(targetOffset);
 
@@ -350,7 +340,7 @@ export function ScrollManager() {
       }
       clearPendingWork();
     };
-  }, [targetStageId, transitionToken, scroll.el, setCurrentOffset]);
+  }, [targetStageId, transitionToken, lenis, setCurrentOffset]);
 
   useEffect(
     () => () => {

@@ -9,7 +9,6 @@
   --safe-right: env(safe-area-inset-right, 0px);
 }
 
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -29,10 +28,24 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   /* Allow manipulation but prevent full page selection */
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-y pinch-zoom;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {

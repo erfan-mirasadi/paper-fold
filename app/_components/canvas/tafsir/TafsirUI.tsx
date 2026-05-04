@@ -1,21 +1,20 @@
 "use client";
 
-import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TAFSIR_DATA } from "./tafsir-data";
 import { useTafsirStore } from "../../../stores/useTafsirStore";
+import { useFoldStore } from "../3d-scene/ScrollManager";
 
 export function TafsirScrollTracker() {
-  const scroll = useScroll();
   const prevRef = useRef<number | null>(null);
   const setTafsirActiveId = useTafsirStore((state) => state.setTafsirActiveId);
 
   useFrame(() => {
-    if (!scroll) return;
+    const storyOffset = useFoldStore.getState().currentOffset;
     const active = TAFSIR_DATA.find(
-      (d) => scroll.offset >= d.scrollStart && scroll.offset <= d.scrollEnd,
+      (d) => storyOffset >= d.scrollStart && storyOffset <= d.scrollEnd,
     );
     const newId = active?.id ?? null;
     if (newId !== prevRef.current) {
