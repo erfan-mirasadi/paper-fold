@@ -1,5 +1,5 @@
 import { VerseFiveMetallic } from "../SurahLayout/VerseFiveMetallic";
-import { PopUpHoverSensors } from "../pop-up-verses/hover-scroll/PopUpHoverSensors";
+import { PopUpHoverSensors } from "../pop-up-verses/PopUpHoverSensors";
 import { VerseController } from "./VerseController";
 import { buildVerseConfigs } from "../../../data/surahDataGenerator";
 import {

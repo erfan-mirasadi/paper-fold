@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import type { PopUpGroup } from "../../../../stores/usePopUpStore";
-import { useFoldStore } from "../../orchestrator/ScrollManager";
+import type { PopUpGroup } from "../../../stores/usePopUpStore";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 
 type HoverSensorVerseConfig = {
   id: number;

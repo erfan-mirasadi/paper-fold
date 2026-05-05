@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { usePopUpStore } from "../../../../stores/usePopUpStore";
-import { useFoldStore } from "../../orchestrator/ScrollManager";
-import { useElevatedStore } from "../../../../stores/useElevatedStore";
-import { useLenis } from "../../../dom/LenisProvider";
+import { usePopUpStore } from "../../../stores/usePopUpStore";
+import { useFoldStore } from "../orchestrator/ScrollManager";
+import { useElevatedStore } from "../../../stores/useElevatedStore";
+import { useLenis } from "../../dom/LenisProvider";
 
 const FOLD_SCROLL_THRESHOLD_PX = 4;
 const FOLD_TRIGGER_COOLDOWN_MS = 80;

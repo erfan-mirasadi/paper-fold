@@ -6,8 +6,7 @@ import { Preload } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import * as THREE from "three";
-import { PopUpHoverScrollController } from "./_components/canvas/pop-up-verses/hover-scroll/PopUpHoverScrollController";
-import { CameraResetOverlay } from "./_components/canvas/camera-zoom/CameraResetOverlay";
+import { PopUpHoverScrollController } from "./_components/canvas/pop-up-verses/PopUpHoverScrollController";
 // VerseNeonOverlay is currently fully commented out (not a module).
 // import {
 //   VerseNeonTracker,
@@ -151,7 +150,6 @@ export default function Home() {
             {/* Hide standard chrome while intro runs */}
             {!isIntroActive && (
               <>
-                <CameraResetOverlay />
                 <NavigationOverlay isDarkMode={isDarkMode} />
                 <TitleOverlay isDarkMode={isDarkMode} />
                 <AllSectionsOverlay isDarkMode={isDarkMode} />
