@@ -8,7 +8,7 @@ import { a, useSpring } from "@react-spring/three";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
-import { PopUpManager } from "../pop-up-verses/PopUpManager";
+import { VersesRenderer } from "../verses-object/VersesRenderer";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../elevated-verses/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../elevated-verses/ElevatedSectionLabels";
@@ -140,7 +140,7 @@ export function Experience({
         </a.group>
         <ElevatedSectionSurfaces />
         <ElevatedSectionLabels introGuidesActive={isIntroActive} />
-        <PopUpManager />
+        <VersesRenderer />
         {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
 

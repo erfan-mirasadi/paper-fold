@@ -7,7 +7,7 @@ import { VerseBox, RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
 import { ELEVATE_TIMING } from "../../../hooks/useElevateAnimation";
 
-interface PopUpVerseCardProps {
+export interface VerseMeshProps {
   hingeX: number;
   y: number;
   w: number;
@@ -39,7 +39,7 @@ interface PopUpVerseCardProps {
   circleTextCol: string;
 }
 
-export function PopUpVerseCard({
+export function VerseMesh({
   hingeX,
   y,
   w,
@@ -68,7 +68,7 @@ export function PopUpVerseCard({
   circleBorderCol,
   circleBg,
   circleTextCol,
-}: PopUpVerseCardProps) {
+}: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
     return Math.max(0, Math.min(1, ratio));
