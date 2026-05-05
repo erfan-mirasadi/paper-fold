@@ -8,7 +8,7 @@ import {
   introGuideAnchorInLabelLiftGroup,
   introGuideMarkerDomId,
 } from "./introGuideAnchorLayout";
-import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useFoldStore } from "../../orchestrator/ScrollManager";
 
 type ReporterProps = {
   guideId: ElevatedSectionId;

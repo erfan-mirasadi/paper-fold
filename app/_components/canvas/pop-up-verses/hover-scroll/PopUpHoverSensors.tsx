@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import type { PopUpGroup } from "../../../../stores/usePopUpStore";
-import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useFoldStore } from "../../orchestrator/ScrollManager";
 
 type HoverSensorVerseConfig = {
   id: number;

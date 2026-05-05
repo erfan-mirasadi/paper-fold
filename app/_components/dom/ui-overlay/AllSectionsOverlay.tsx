@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo } from "react";
-import { useFoldStore } from "../../canvas/3d-scene/ScrollManager";
+import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import {
   ELEVATED_SCROLL_UNLOCK_THRESHOLD,
   useElevatedStore,

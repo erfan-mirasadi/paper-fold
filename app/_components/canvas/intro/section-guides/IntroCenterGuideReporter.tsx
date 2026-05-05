@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { Shared3DTracker } from "../../shared/3DTracker";
 import { useSurahLayoutRuntime } from "../../../../hooks/useSurahLayoutRuntime";
-import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useFoldStore } from "../../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../../hooks/useIntroSectionAnimation";
 import {
   introGuideCenterAnchorSceneLocal,

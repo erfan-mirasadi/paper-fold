@@ -27,7 +27,7 @@ import {
 } from "../../../stores/useElevatedStore";
 import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
-import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 import {
   calculateSectionBounds,
   type SectionBounds,

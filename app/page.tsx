@@ -14,8 +14,8 @@ import { CameraResetOverlay } from "./_components/canvas/camera-zoom/CameraReset
 //   VerseNeonHTMLOverlay,
 // } from "./_components/canvas/camera-zoom/VerseNeonOverlay";
 // import Effects from "./_components/canvas/3d-scene/Effects";
-import { ScrollManager } from "./_components/canvas/3d-scene/ScrollManager";
-import { useFoldStore } from "./_components/canvas/3d-scene/ScrollManager";
+import { ScrollManager } from "./_components/canvas/orchestrator/ScrollManager";
+import { useFoldStore } from "./_components/canvas/orchestrator/ScrollManager";
 import { NavigationOverlay } from "./_components/dom/ui-overlay/NavigationOverlay";
 import { TitleOverlay } from "./_components/dom/ui-overlay/TitleOverlay";
 import { ThemeToggleOverlay } from "./_components/dom/ui-overlay/ThemeToggleOverlay";
@@ -23,7 +23,7 @@ import { LanguageSwitchOverlay } from "./_components/dom/ui-overlay/LanguageSwit
 import { AllSectionsOverlay } from "./_components/dom/ui-overlay/AllSectionsOverlay";
 import { SiteLoadingOverlay } from "./_components/dom/ui-overlay/SiteLoadingOverlay";
 import { CameraViewPresetOverlay } from "./_components/dom/ui-overlay/CameraViewPresetOverlay";
-import { CameraViewController } from "./_components/canvas/camera-views/CameraViewController";
+import { CameraViewController } from "./_components/canvas/orchestrator/CameraViewController";
 import { IntroSectionGuidesOverlay } from "./_components/dom/IntroSectionGuidesOverlay";
 import { LenisProvider } from "./_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "./data/cameraConfig";

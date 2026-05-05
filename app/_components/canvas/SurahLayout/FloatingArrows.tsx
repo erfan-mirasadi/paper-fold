@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { BLUE_THEME, MAROON_THEME, GREEN_THEME } from "../../../data/theme";
-import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 import {
   CURVE_GAP,
   CURVE_INWARD_OFFSET,

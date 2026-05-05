@@ -15,7 +15,7 @@ import {
 } from "../stores/useElevatedStore";
 import { PAGE_WIDTH, PAGE_HEIGHT } from "../data/SurahConfig";
 import { SectionBounds } from "../utils/boundsHelper";
-import { useFoldStore } from "../_components/canvas/3d-scene/ScrollManager";
+import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 
 // Module-level reusable math objects (thread-safe in single-threaded JS)
 const _hit = new Vector3();

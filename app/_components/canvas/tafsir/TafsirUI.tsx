@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TAFSIR_DATA } from "./tafsir-data";
 import { useTafsirStore } from "../../../stores/useTafsirStore";
-import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 
 export function TafsirScrollTracker() {
   const prevRef = useRef<number | null>(null);

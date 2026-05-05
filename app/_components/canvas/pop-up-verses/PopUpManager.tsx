@@ -37,7 +37,7 @@ import {
 } from "../../../hooks/useSurahLanguageStore";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
-import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 
 interface VerseConfig {

@@ -7,7 +7,7 @@ import {
 } from "../canvas/intro/section-guides/introGuideAnchorLayout";
 import { INTRO_SECTION_GUIDE_UI_TEXT } from "../../data/introSectionGuideCopy";
 import { AnimatedText } from "./ui-overlay/AnimatedText";
-import { useFoldStore } from "../canvas/3d-scene/ScrollManager";
+import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 
 interface IntroSectionGuidesOverlayProps {
   isDarkMode?: boolean;

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePopUpStore } from "../../../../stores/usePopUpStore";
-import { useFoldStore } from "../../3d-scene/ScrollManager";
+import { useFoldStore } from "../../orchestrator/ScrollManager";
 import { useElevatedStore } from "../../../../stores/useElevatedStore";
 import { useLenis } from "../../../dom/LenisProvider";
 

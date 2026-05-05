@@ -22,7 +22,7 @@ import {
 import { BismillahFloatingText3D } from "../SurahLayout/BismillahFloatingText3D";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import { PaperMaterial, TextureToggles } from "./PaperMaterial";
-import { useFoldStore } from "./ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 
 const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;

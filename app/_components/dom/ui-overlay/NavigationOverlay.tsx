@@ -1,11 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useFoldStore } from "../../canvas/3d-scene/ScrollManager";
-import {
-  useDragState,
-  resetAllDrags,
-} from "../../../utils/dragEngine";
+import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
+import { useDragState, resetAllDrags } from "../../../utils/dragEngine";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 
 interface NavigationOverlayProps {

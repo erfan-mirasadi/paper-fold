@@ -22,7 +22,7 @@ import {
 } from "../../../stores/useElevatedStore";
 import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
-import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
 import { IntroCenterGuideReporter } from "../intro/section-guides/IntroCenterGuideReporter";

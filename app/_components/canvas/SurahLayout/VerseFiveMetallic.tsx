@@ -41,7 +41,7 @@ import { a, to, useSpring } from "@react-spring/three";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { calculateSectionBounds } from "../../../utils/boundsHelper";
 import { dragEngine, useDragState } from "../../../utils/dragEngine";
-import { useFoldStore } from "../3d-scene/ScrollManager";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 
 // --- ADJUSTABLE PARAMETERS ---

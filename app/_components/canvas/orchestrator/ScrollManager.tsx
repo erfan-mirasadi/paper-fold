@@ -3,7 +3,7 @@
 import type Lenis from "lenis";
 import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
-import { FOLD_STORY_STEPS, getOffsetForId } from "./FoldStory";
+import { FOLD_STORY_STEPS, getOffsetForId } from "../3d-scene/FoldStory";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
@@ -19,12 +19,14 @@ const easeInOutCubic = (t: number): number => {
 
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
-/** The first INTRO_SCROLL_FRACTION of the total scroll height is reserved for
- *  the intro sequence. The fold story only plays over the remaining portion. */
-export const INTRO_SCROLL_FRACTION = 0.4;
-// Extra scroll space reserved for a smooth camera handoff before the base scene.
-export const INTRO_HANDOFF_FRACTION = 0.1;
-const INTRO_MAX_FRACTION = 0.95;
+// Master Scroll Timeline Configuration
+// Configured in percentages (0 to 100) for easier understanding and maintenance.
+// Adjust these values if you add new pages or change the intro duration.
+export const SCROLL_TIMELINE = {
+  intro: { start: 0, end: 40 }, // First 40% of scroll is reserved for the intro sequence
+  handoff: { start: 40, end: 50 }, // Next 10% for smooth camera handoff to the base scene
+  story: { start: 50, end: 100 }, // Remaining 50% for the fold story
+};
 
 interface FoldStoreState {
   targetStageId: string | null;
@@ -65,27 +67,29 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
 }));
 
-const getIntroBands = () => {
-  const introEnd = clamp01(INTRO_SCROLL_FRACTION);
-  const handoffEnd = Math.min(
-    INTRO_MAX_FRACTION,
-    introEnd + Math.max(0, INTRO_HANDOFF_FRACTION),
-  );
-  return { introEnd, handoffEnd };
+const getBandProgress = (
+  rawOffset: number,
+  startPct: number,
+  endPct: number,
+): number => {
+  const start = startPct / 100;
+  const end = endPct / 100;
+  if (start >= end) return rawOffset >= end ? 1 : 0;
+  return clamp01((rawOffset - start) / (end - start));
 };
 
 const getStoryOffsetForRaw = (rawOffset: number): number => {
-  const { handoffEnd } = getIntroBands();
-  if (rawOffset < handoffEnd) return 0;
-  const usableRange = Math.max(1 - handoffEnd, 0.00001);
-  return clamp01((rawOffset - handoffEnd) / usableRange);
+  return getBandProgress(
+    rawOffset,
+    SCROLL_TIMELINE.story.start,
+    SCROLL_TIMELINE.story.end,
+  );
 };
 
 const getRawOffsetForStory = (storyOffset: number): number => {
-  const { handoffEnd } = getIntroBands();
-  const usableRange = Math.max(1 - handoffEnd, 0);
-  if (usableRange <= 0) return 1;
-  return clamp01(handoffEnd + clamp01(storyOffset) * usableRange);
+  const start = SCROLL_TIMELINE.story.start / 100;
+  const end = SCROLL_TIMELINE.story.end / 100;
+  return start + clamp01(storyOffset) * (end - start);
 };
 
 export function ScrollManager() {
@@ -116,15 +120,17 @@ export function ScrollManager() {
     // ── Intro intercept ────────────────────────────────────────────
     // Intro band -> camera-only scroll.
     // Handoff band -> smooth camera blend to base before story begins.
-    const { introEnd, handoffEnd } = getIntroBands();
-    const introActive = rawOffset < handoffEnd;
-    const introProgress = introEnd <= 0 ? 1 : clamp01(rawOffset / introEnd);
-    const handoffProgress =
-      rawOffset <= introEnd
-        ? 0
-        : clamp01(
-            (rawOffset - introEnd) / Math.max(handoffEnd - introEnd, 0.00001),
-          );
+    const introActive = rawOffset < SCROLL_TIMELINE.story.start / 100;
+    const introProgress = getBandProgress(
+      rawOffset,
+      SCROLL_TIMELINE.intro.start,
+      SCROLL_TIMELINE.intro.end,
+    );
+    const handoffProgress = getBandProgress(
+      rawOffset,
+      SCROLL_TIMELINE.handoff.start,
+      SCROLL_TIMELINE.handoff.end,
+    );
     const storyOffset = getStoryOffsetForRaw(rawOffset);
 
     useFoldStore.setState({
@@ -300,8 +306,8 @@ export function ScrollManager() {
       }
 
       let fromTop = lenis.scroll;
-      const { handoffEnd } = getIntroBands();
-      const baseStageSize = Math.max(1 - handoffEnd, 0.00001) / maxStageIndex;
+      const storyStart = SCROLL_TIMELINE.story.start / 100;
+      const baseStageSize = Math.max(1 - storyStart, 0.00001) / maxStageIndex;
 
       for (let i = 0; i < stageOffsets.length; i++) {
         if (activeRunIdRef.current !== thisRunId) return;

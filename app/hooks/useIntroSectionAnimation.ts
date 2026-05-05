@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
-import { useFoldStore } from "../_components/canvas/3d-scene/ScrollManager";
+import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
 
 /**
