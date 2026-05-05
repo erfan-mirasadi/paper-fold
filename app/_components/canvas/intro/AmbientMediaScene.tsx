@@ -1,18 +1,18 @@
 "use client";
 
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { shaderMaterial, useVideoTexture, useTexture } from '@react-three/drei';
-import * as THREE from 'three';
-import { extend } from '@react-three/fiber';
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { shaderMaterial, useVideoTexture, useTexture } from "@react-three/drei";
+import * as THREE from "three";
+import { extend } from "@react-three/fiber";
 
 // Custom shader for fading edges and applying a fake blur
 const FadedMaterial = shaderMaterial(
   {
     uTexture: new THREE.Texture(),
-    uFadeRadius: 0.2,       // Controls the thickness of the faded edge
-    uAlphaMultiplier: 1.0,  // Controls overall transparency (useful for the background glow)
-    uBlurAmount: 0.0,       // Distance of the blur samples
+    uFadeRadius: 0.2, // Controls the thickness of the faded edge
+    uAlphaMultiplier: 1.0, // Controls overall transparency (useful for the background glow)
+    uBlurAmount: 0.0, // Distance of the blur samples
   },
   // Vertex Shader
   `
@@ -70,32 +70,39 @@ const FadedMaterial = shaderMaterial(
 
     gl_FragColor = vec4(color.rgb, color.a * finalAlpha);
   }
-  `
+  `,
 );
 
 // Register the custom material so R3F can use it as a JSX element
 extend({ FadedMaterial });
 
-// Add types for JSX
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      fadedMaterial: any;
-    }
+import { ThreeElement } from '@react-three/fiber';
+
+// Add types for R3F JSX elements
+declare module '@react-three/fiber' {
+  interface ThreeElements {
+    fadedMaterial: ThreeElement<any>;
   }
 }
 
-export function AmbientMediaScene({ 
-  src, 
-  isVideo = false, 
-  position = [0, 0, 0] as [number, number, number],
-  rotation = [0, 0, 0] as [number, number, number]
-}) {
+interface AmbientMediaSceneProps {
+  src: string;
+  isVideo?: boolean;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+}
+
+export function AmbientMediaScene({
+  src,
+  isVideo = false,
+  position = [0, 0, 0],
+  rotation = [0, 0, 0],
+}: AmbientMediaSceneProps) {
   // Automatically load texture based on media type
   const texture = isVideo ? useVideoTexture(src) : useTexture(src);
 
-  const mainMatRef = useRef<any>();
-  const glowMatRef = useRef<any>();
+  const mainMatRef = useRef<any>(null);
+  const glowMatRef = useRef<any>(null);
 
   useFrame(() => {
     // Keep uniforms updated with the active texture
@@ -111,10 +118,10 @@ export function AmbientMediaScene({
         <fadedMaterial
           ref={glowMatRef}
           transparent={true}
-          uFadeRadius={0.4}       // Much softer edge for the glow
+          uFadeRadius={0.4} // Much softer edge for the glow
           uAlphaMultiplier={0.35} // Lower opacity so it feels like a subtle reflection
-          uBlurAmount={0.03}      // Applies the 9-tap fake blur
-          depthWrite={false}      // Prevents sorting issues with transparency
+          uBlurAmount={0.03} // Applies the 9-tap fake blur
+          depthWrite={false} // Prevents sorting issues with transparency
         />
       </mesh>
 
@@ -124,9 +131,9 @@ export function AmbientMediaScene({
         <fadedMaterial
           ref={mainMatRef}
           transparent={true}
-          uFadeRadius={0.15}      // Crisp but faded edge
-          uAlphaMultiplier={1.0}  // Full opacity in the center
-          uBlurAmount={0.0}       // No blur on the main video/image
+          uFadeRadius={0.15} // Crisp but faded edge
+          uAlphaMultiplier={1.0} // Full opacity in the center
+          uBlurAmount={0.0} // No blur on the main video/image
         />
       </mesh>
     </group>

@@ -4,7 +4,7 @@ import type Lenis from "lenis";
 import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
 import { FOLD_STORY_STEPS, getOffsetForId } from "../3d-scene/FoldStory";
-import { useElevatedStore } from "../../../stores/useElevatedStore";
+import { useElevatedStore, type ElevatedSectionId } from "../../../stores/useElevatedStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
 
