@@ -108,11 +108,15 @@ function IntroGuideHudRow({
       }}
     >
       <div
+        onMouseEnter={() => useFoldStore.getState().setActiveAmbientMediaId(sectionId)}
+        onMouseLeave={() => useFoldStore.getState().setActiveAmbientMediaId(null)}
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-start",
           transform: "translate(-100%, -100%)",
+          pointerEvents: "auto",
+          cursor: "pointer",
         }}
       >
         <svg

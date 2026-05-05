@@ -40,6 +40,9 @@ interface FoldStoreState {
   introProgress: number;
   /** 0..1 progress through the intro-to-base handoff band. */
   introHandoffProgress: number;
+  /** The ID of the currently hovered intro section guide. */
+  activeAmbientMediaId: ElevatedSectionId | null;
+  setActiveAmbientMediaId: (id: ElevatedSectionId | null) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   setRawOffset: (offset: number) => void;
@@ -55,6 +58,9 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   isIntroActive: true,
   introProgress: 0,
   introHandoffProgress: 0,
+
+  activeAmbientMediaId: null,
+  setActiveAmbientMediaId: (id) => set({ activeAmbientMediaId: id }),
 
   triggerTransition: (id) =>
     set((state) => ({

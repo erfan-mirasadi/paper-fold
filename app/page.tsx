@@ -24,6 +24,7 @@ import { SiteLoadingOverlay } from "./_components/dom/ui-overlay/SiteLoadingOver
 import { CameraViewPresetOverlay } from "./_components/dom/ui-overlay/CameraViewPresetOverlay";
 import { CameraViewController } from "./_components/canvas/orchestrator/CameraViewController";
 import { IntroSectionGuidesOverlay } from "./_components/dom/IntroSectionGuidesOverlay";
+import AmbientMedia from "./_components/dom/AmbientMedia";
 import { LenisProvider } from "./_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "./data/cameraConfig";
 const Experience = dynamic(
@@ -145,7 +146,12 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             {isIntroActive && (
-              <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
+              <>
+                <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
+                <div className="fixed top-12 right-0 w-[350px] md:w-[600px] z-[100] pointer-events-none">
+                  <AmbientMedia />
+                </div>
+              </>
             )}
             <ThemeToggleOverlay
               isDarkMode={isDarkMode}
