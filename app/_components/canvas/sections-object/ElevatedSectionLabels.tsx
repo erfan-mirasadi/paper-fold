@@ -44,6 +44,7 @@ type AnimatedLabelProps = {
   renderOrder?: number;
   introGuidesActive?: boolean;
   pageWidth: number;
+  depthTest?: boolean;
 };
 
 function AnimatedElevatedLabel({
@@ -63,6 +64,7 @@ function AnimatedElevatedLabel({
   renderOrder,
   introGuidesActive = false,
   pageWidth,
+  depthTest = false,
 }: AnimatedLabelProps) {
   const PAGE_WIDTH = pageWidth;
 
@@ -132,6 +134,7 @@ function AnimatedElevatedLabel({
             partialBorder={partialBorder}
             bottomBorder={bottomBorder}
             renderOrder={renderOrder}
+            depthTest={depthTest}
           />
           {introGuidesActive ? (
             <IntroGuide3DReporter
@@ -176,6 +179,7 @@ export function ElevatedSectionLabels({
         renderOrder={220}
         introGuidesActive={introGuidesActive}
         pageWidth={runtime.PAGE_WIDTH}
+        depthTest={true}
       />
 
       <AnimatedElevatedLabel
@@ -194,6 +198,7 @@ export function ElevatedSectionLabels({
         renderOrder={240}
         introGuidesActive={introGuidesActive}
         pageWidth={runtime.PAGE_WIDTH}
+        depthTest={true}
       />
 
       <AnimatedElevatedLabel
@@ -213,6 +218,7 @@ export function ElevatedSectionLabels({
         renderOrder={240}
         introGuidesActive={introGuidesActive}
         pageWidth={runtime.PAGE_WIDTH}
+        depthTest={true}
       />
     </group>
   );

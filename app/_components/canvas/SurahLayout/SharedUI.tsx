@@ -282,6 +282,7 @@ interface TopLabelProps {
   noBorder?: boolean;
   bgColor?: string;
   renderOrder?: number;
+  depthTest?: boolean;
 }
 
 export function TopLabel({
@@ -296,6 +297,7 @@ export function TopLabel({
   noBorder = false,
   bgColor = WHITE_BASE,
   renderOrder,
+  depthTest = false,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
@@ -322,6 +324,7 @@ export function TopLabel({
           topOnly={partialBorder && !bottomBorder}
           bottomOnly={partialBorder && bottomBorder}
           renderOrder={renderOrder}
+          depthTest={depthTest}
         />
       )}
       <UiRect
@@ -334,6 +337,7 @@ export function TopLabel({
         color={bgColor}
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+        depthTest={depthTest}
       />
       <group position={[w / 2, -h / 2, 0.002]}>
         <CanvasText
@@ -346,6 +350,7 @@ export function TopLabel({
           textAlign="center"
           fontWeight="bold"
           renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+          depthTest={depthTest}
         />
       </group>
     </group>
@@ -360,8 +365,9 @@ interface AnaAyetTabProps {
   h: number;
   z: number;
   renderOrder?: number;
+  depthTest?: boolean;
 }
-export function AnaAyetTab({ x, y, w, h, z, renderOrder }: AnaAyetTabProps) {
+export function AnaAyetTab({ x, y, w, h, z, renderOrder, depthTest = false }: AnaAyetTabProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   const anaAyetScale = LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet;
@@ -379,6 +385,7 @@ export function AnaAyetTab({ x, y, w, h, z, renderOrder }: AnaAyetTabProps) {
         radius={radius}
         color={S1_ANA_LABEL_BG}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+        depthTest={depthTest}
       />
 
       <group position={[w / 2, -h / 2, 0.002]}>
@@ -392,6 +399,7 @@ export function AnaAyetTab({ x, y, w, h, z, renderOrder }: AnaAyetTabProps) {
           textAlign="center"
           fontWeight="bold"
           renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+          depthTest={depthTest}
         />
       </group>
     </group>

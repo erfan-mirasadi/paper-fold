@@ -144,6 +144,7 @@ export function VerseFiveMetallic() {
   const isSectionSurfaceRaised = useElevatedStore((s) =>
     s.activeSectionIds.includes("s1"),
   );
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   const {
     liftZ,
@@ -234,6 +235,7 @@ export function VerseFiveMetallic() {
   const finalShadowOpacity = to(
     [elevateShadowOpacity, liftZ],
     (elevateOpacity, lift) => {
+      if (isIntroActive) return 0;
       const liftProgress = normalizeLiftProgress(lift);
       const blend = Math.pow(liftProgress, METALLIC_SHADOW.fadePower);
       const liftedTarget = Math.max(

@@ -20,6 +20,7 @@ interface CanvasTextProps {
   position?: [number, number, number];
   fontWeight?: string | number;
   fontStyle?: string;
+  depthTest?: boolean;
   children?: React.ReactNode;
 }
 
@@ -39,6 +40,7 @@ export function CanvasText({
   position = [0, 0, 0],
   fontWeight = "normal",
   fontStyle = "normal",
+  depthTest = false,
   children,
 }: CanvasTextProps) {
   const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
@@ -187,7 +189,7 @@ export function CanvasText({
           color="#ffffff"
           transparent={true}
           toneMapped={false}
-          depthTest={false}
+          depthTest={depthTest}
         />
       )}
     </mesh>

@@ -37,6 +37,7 @@ export interface VerseMeshProps {
   circleBorderCol: string;
   circleBg: string;
   circleTextCol: string;
+  suppressShadow?: boolean;
 }
 
 export function VerseMesh({
@@ -68,6 +69,7 @@ export function VerseMesh({
   circleBorderCol,
   circleBg,
   circleTextCol,
+  suppressShadow = false,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
@@ -165,6 +167,7 @@ export function VerseMesh({
   const finalShadowOpacity = to(
     [shadowGlobalOpacity, foldProgress, opacity, elevateShadowOpacity, liftZ],
     (globalOp, foldP, mainOp, elShadowOp, lift) => {
+      if (suppressShadow) return 0;
       const dynamicOpacity =
         SHADOW_CONFIG.opacityFlat -
         foldP * (SHADOW_CONFIG.opacityFlat - SHADOW_CONFIG.opacityFolded);

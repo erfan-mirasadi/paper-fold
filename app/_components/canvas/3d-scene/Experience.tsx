@@ -155,7 +155,10 @@ export function Experience({
       <DynamicControls isIntroActive={isIntroActive} />
       <Environment preset="apartment" />
       <ambientLight intensity={1} />
-      <directionalLight position={[0, 4.2, -2]} intensity={1} />
+
+      {!isAllSectionsMode && (
+        <directionalLight position={[0, 4.2, -2]} intensity={1} />
+      )}
     </>
   );
 }

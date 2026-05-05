@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
@@ -127,6 +127,8 @@ interface ElevatedLayerProps {
   shadowStrength?: number;
   shadowInsetZ?: number;
   sectionBgTexture?: Texture | null;
+  /** When true the shadow is fully suppressed (e.g. during intro flight). */
+  suppressShadow?: boolean;
 }
 
 function ElevatedLayer({
@@ -142,6 +144,7 @@ function ElevatedLayer({
   shadowStrength = 1,
   shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
   sectionBgTexture = null,
+  suppressShadow = false,
 }: ElevatedLayerProps) {
   const runtime = useSurahLayoutRuntime();
   const PAGE_WIDTH = runtime.PAGE_WIDTH;
@@ -201,8 +204,10 @@ function ElevatedLayer({
             opacity={to(
               [spring.shadowOpacity, spring.shadowVisibility],
               (shadowOp, vis) =>
-                Math.max(vis * VERSE_MIMIC_SHADOW.opacityFlat, shadowOp) *
-                shadowStrength,
+                suppressShadow
+                  ? 0
+                  : Math.max(vis * VERSE_MIMIC_SHADOW.opacityFlat, shadowOp) *
+                    shadowStrength,
             )}
           />
         </a.mesh>
@@ -279,6 +284,7 @@ export function ElevatedSectionSurfaces() {
     s.activeSectionIds.includes("s2_bottom"),
   );
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   const s1Spring = useSectionSurfaceSpring(s1Active);
   const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
@@ -408,6 +414,7 @@ export function ElevatedSectionSurfaces() {
             zOffset={0.001}
             shadow
             shadowStrength={0.95}
+            suppressShadow={isIntroActive}
           />
           {s1.rowConnectors.map((rc, i) => (
             <ElevatedLayer
@@ -444,6 +451,7 @@ export function ElevatedSectionSurfaces() {
             spring={s2TopSpring}
             shadow
             shadowStrength={0.62}
+            suppressShadow={isIntroActive}
           />
           <ElevatedLayer
             x={topConnector.middle.x}
@@ -457,6 +465,7 @@ export function ElevatedSectionSurfaces() {
             zOffset={0.0006}
             shadow
             shadowStrength={0.8}
+            suppressShadow={isIntroActive}
           />
           <ElevatedLayer
             x={topConnector.fill.x}
@@ -470,6 +479,7 @@ export function ElevatedSectionSurfaces() {
             zOffset={0.0012}
             shadow
             shadowStrength={0.65}
+            suppressShadow={isIntroActive}
           />
           {s2.groups[0].rowConnectors.map((rc, i) => (
             <ElevatedLayer
@@ -530,6 +540,7 @@ export function ElevatedSectionSurfaces() {
             spring={s2BottomSpring}
             shadow
             shadowStrength={0.62}
+            suppressShadow={isIntroActive}
           />
           <ElevatedLayer
             x={bottomConnector.middle.x}
@@ -543,6 +554,7 @@ export function ElevatedSectionSurfaces() {
             zOffset={0.0006}
             shadow
             shadowStrength={0.8}
+            suppressShadow={isIntroActive}
           />
           <ElevatedLayer
             x={bottomConnector.fill.x}
@@ -556,6 +568,7 @@ export function ElevatedSectionSurfaces() {
             zOffset={0.0012}
             shadow
             shadowStrength={0.65}
+            suppressShadow={isIntroActive}
           />
           {s2.groups[2].rowConnectors.map((rc, i) => (
             <ElevatedLayer

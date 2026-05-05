@@ -87,6 +87,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const isElevated = useElevatedStore((state) => state.activeVerseIds.includes(config.id));
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isCenterSectionRaised = activeSectionIds.includes("s2_center");
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id);
   const isSectionSurfaceRaised =
@@ -270,6 +271,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBorderCol={config.circleBorderCol}
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
+          suppressShadow={isIntroActive}
         />
       </a.group>
     </group>
