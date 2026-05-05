@@ -1,15 +1,15 @@
 import { useMemo, useEffect, useCallback } from "react";
 import { Color, type Texture } from "three";
-import { usePopUpStore } from "../../../stores/usePopUpStore";
+import { usePopUpStore } from "../stores/usePopUpStore";
 import {
   useElevatedStore,
   type ElevatedSectionId,
-} from "../../../stores/useElevatedStore";
-import { ORIGINAL_TEXTURE_TIMING } from "../../../hooks/useFoldAnimation";
-import { ELEVATE_TEXTURE_TIMING } from "../../../hooks/useElevateAnimation";
-import { S1_INNER_BORDER } from "../../../data/theme";
-import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { VERSE_5_6_19_RADIUS } from "../../../data/SurahConfig";
+} from "../stores/useElevatedStore";
+import { ORIGINAL_TEXTURE_TIMING } from "./useFoldAnimation";
+import { ELEVATE_TEXTURE_TIMING } from "./useElevateAnimation";
+import { S1_INNER_BORDER } from "../data/theme";
+import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
+import { VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
 
 export const MASK_CONFIG = {
   // Increase this to make the full section masks larger (e.g., 0.02, 0.03)

@@ -147,6 +147,10 @@ export default function Home() {
             {isIntroActive && (
               <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
             )}
+            <ThemeToggleOverlay
+              isDarkMode={isDarkMode}
+              onToggle={handleThemeToggle}
+            />
             {/* Hide standard chrome while intro runs */}
             {!isIntroActive && (
               <>
@@ -154,10 +158,6 @@ export default function Home() {
                 <TitleOverlay isDarkMode={isDarkMode} />
                 <AllSectionsOverlay isDarkMode={isDarkMode} />
                 <LanguageSwitchOverlay isDarkMode={isDarkMode} />
-                <ThemeToggleOverlay
-                  isDarkMode={isDarkMode}
-                  onToggle={handleThemeToggle}
-                />
                 <CameraViewPresetOverlay />
               </>
             )}

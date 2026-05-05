@@ -24,7 +24,7 @@ import {
   SRGBColorSpace,
   Vector2,
 } from "three";
-import { usePaperMasking } from "./usePaperMasking";
+import { usePaperMasking } from "../../../hooks/usePaperMasking";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
   LATIN_VERSE_FONT,
