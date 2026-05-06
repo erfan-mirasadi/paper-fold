@@ -66,13 +66,14 @@ function IntroGuideHudRow({
   const id = introGuideMarkerDomId(sectionId);
 
   const introProgress = useFoldStore((s) => s.introProgress);
+  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   // Calculate row-specific progress
   const index = INTRO_SECTION_GUIDE_ORDER.indexOf(sectionId);
   const numSteps = INTRO_SECTION_GUIDE_ORDER.length;
-  const startOffset = 0.05;
-  const endOffset = 0.9;
+  const startOffset = 0.35;
+  const endOffset = 0.95;
   const usable = endOffset - startOffset;
   const perStep = usable / numSteps;
 
@@ -84,7 +85,22 @@ function IntroGuideHudRow({
     1,
   );
 
-  const isVisible = isIntroActive && introProgress >= myStart;
+  // Calculate fade-out during handoff (sequential based on reverse index)
+  // Compressed into the first 60% of the handoff to make them disappear faster.
+  const fadeOutWindow = 0.7;
+  const reversedIndex = numSteps - 1 - index;
+  const handoffStart = (reversedIndex * fadeOutWindow) / numSteps;
+  const handoffEnd = handoffStart + fadeOutWindow / numSteps;
+  const handoffFadeOut = Math.min(
+    Math.max(
+      (introHandoffProgress - handoffStart) / (handoffEnd - handoffStart),
+      0,
+    ),
+    1,
+  );
+
+  const isVisible =
+    isIntroActive && introProgress >= myStart && handoffFadeOut < 1;
 
   // Create a unique ID for the gradient based on the sectionId
   const gradientId = `dot-gradient-${sectionId}`;
@@ -108,8 +124,12 @@ function IntroGuideHudRow({
       }}
     >
       <div
-        onMouseEnter={() => useFoldStore.getState().setActiveAmbientMediaId(sectionId)}
-        onMouseLeave={() => useFoldStore.getState().setActiveAmbientMediaId(null)}
+        onMouseEnter={() =>
+          useFoldStore.getState().setActiveAmbientMediaId(sectionId)
+        }
+        onMouseLeave={() =>
+          useFoldStore.getState().setActiveAmbientMediaId(null)
+        }
         style={{
           display: "flex",
           flexDirection: "row",
@@ -117,6 +137,7 @@ function IntroGuideHudRow({
           transform: "translate(-100%, -100%)",
           pointerEvents: "auto",
           cursor: "pointer",
+          opacity: 1 - handoffFadeOut,
         }}
       >
         <svg

@@ -74,7 +74,7 @@ export function BismillahFloatingText3D({
               roughness={0.3}
               envMapIntensity={1.6}
               transparent
-              depthTest={false}
+              depthTest={true}
             />
           </CanvasText>
         );
@@ -100,7 +100,7 @@ export function BismillahFloatingText3D({
           clearcoatRoughness={0.08}
           envMapIntensity={2}
           transparent
-          depthTest={false}
+          depthTest={true}
         />
       </CanvasText>
     </group>

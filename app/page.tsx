@@ -25,6 +25,7 @@ import { CameraViewPresetOverlay } from "./_components/dom/ui-overlay/CameraView
 import { CameraViewController } from "./_components/canvas/orchestrator/CameraViewController";
 import { IntroSectionGuidesOverlay } from "./_components/dom/IntroSectionGuidesOverlay";
 import AmbientMedia from "./_components/dom/AmbientMedia";
+import JoinedStepOverlay from "./_components/dom/JoinedStepOverlay";
 import { LenisProvider } from "./_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "./data/cameraConfig";
 const Experience = dynamic(
@@ -35,7 +36,7 @@ const Experience = dynamic(
   { ssr: false },
 );
 
-const SCROLL_PAGES = 2;
+const SCROLL_PAGES = 5;
 const MAIN_OVERLAY_DELAY_MS = 350;
 
 export default function Home() {
@@ -180,6 +181,10 @@ export default function Home() {
                 <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
                 <div className="fixed top-12 right-0 w-[350px] md:w-[600px] z-[100] pointer-events-none">
                   <AmbientMedia />
+                </div>
+                {/* Render the extracted Apple-style border behind the main UI controls */}
+                <div className="fixed inset-0 z-[80] pointer-events-none">
+                  <JoinedStepOverlay isDarkMode={isDarkMode} />
                 </div>
               </>
             )}

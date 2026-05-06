@@ -190,7 +190,7 @@ export function ElevatedSectionLabels({
         borderColor={S2_TOP_LABEL_BORDER}
         partialBorder={true}
         delayMs={95}
-        liftHeight={0.092}
+        liftHeight={0.14}
         tension={90}
         friction={23}
         zBaseOffset={0.0022}
@@ -210,7 +210,7 @@ export function ElevatedSectionLabels({
         partialBorder={true}
         bottomBorder={true}
         delayMs={130}
-        liftHeight={0.096}
+        liftHeight={0.14}
         tension={84}
         friction={22}
         zBaseOffset={0.0022}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 import { INTRO_MEDIA_DATA } from "../../data/introMedia";
@@ -35,6 +35,7 @@ const MediaElement = ({ src, isVideo, className = "" }: MediaElementProps) => {
       fill
       className={`object-cover ${className}`}
       priority
+      sizes="100vw"
     />
   );
 };
@@ -44,11 +45,35 @@ export default function AmbientMedia({
   isVideo: propIsVideo,
 }: AmbientMediaProps) {
   const activeId = useFoldStore((s) => s.activeAmbientMediaId);
-  
-  const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : null;
-  
-  const src = propSrc || activeMedia?.src || "/intro/video-sample.mp4";
-  const isVideo = propIsVideo !== undefined ? propIsVideo : (activeMedia?.isVideo ?? true);
+  const introProgress = useFoldStore((s) => s.introProgress);
+  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
+
+  // Strictly trigger only when the sections have fully met at the center
+  const isJoinedStep = introProgress >= 0.99 && introHandoffProgress < 0.05;
+
+  const mediaKeys = Object.keys(INTRO_MEDIA_DATA) as Array<
+    keyof typeof INTRO_MEDIA_DATA
+  >;
+
+  const [loopIndex, setLoopIndex] = useState(0);
+
+  // Loop through media every 4 seconds ONLY when exactly at the joined step
+  useEffect(() => {
+    if (activeId || !isJoinedStep) return;
+
+    const interval = setInterval(() => {
+      setLoopIndex((prev) => (prev + 1) % mediaKeys.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [activeId, mediaKeys.length, isJoinedStep]);
+
+  const currentLoopMedia = INTRO_MEDIA_DATA[mediaKeys[loopIndex]];
+  const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentLoopMedia;
+
+  const src = propSrc || activeMedia?.src;
+  const isVideo =
+    propIsVideo !== undefined ? propIsVideo : (activeMedia?.isVideo ?? true);
 
   // Mask that fades on Top, Bottom, and Left, but stays sharp on the Right.
   const maskStyle: React.CSSProperties = {
@@ -60,46 +85,36 @@ export default function AmbientMedia({
     maskComposite: "intersect",
   };
 
-  const showMedia = !!(propSrc || activeMedia);
+  const showMedia = !!src && (isJoinedStep || !!activeId);
 
   return (
-    <div className="relative w-full max-w-full ml-auto mr-0 aspect-video flex items-center justify-center p-0 mt-60 mb-4">
-      <AnimatePresence>
+    <div className="relative w-full max-w-full ml-auto mr-0 aspect-video flex items-center justify-center p-0 mt-60 mb-4 z-[2]">
+      <AnimatePresence mode="sync">
         {showMedia && (
           <motion.div
             key={src}
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 30 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
             className="absolute inset-0 w-full h-full"
             style={{ willChange: "transform, opacity" }}
           >
-            {/* Extreme Ambient Glow: Ultra-diffused multi-tier layers */}
-            {/* Tier 1: Ultra-Massive Atmospheric Bleed */}
-            <div className="absolute inset-0 z-0 scale-[3.5] opacity-30 blur-[180px] saturate-200 pointer-events-none mix-blend-screen">
-              <MediaElement src={src} isVideo={isVideo} />
-            </div>
-
-            {/* Tier 2: Mid-range Intense Glow */}
-            <div className="absolute inset-0 z-0 scale-[2.2] opacity-50 blur-[100px] saturate-150 pointer-events-none mix-blend-screen">
-              <MediaElement src={src} isVideo={isVideo} />
-            </div>
-
-            {/* Tier 3: Core Wrap Glow */}
-            <div className="absolute inset-0 z-0 scale-[1.3] opacity-70 blur-[45px] pointer-events-none">
+            {/* Optimized Ambient Glow: Single high-performance layer instead of 3. 
+                Massively reduces GPU overhead while maintaining the premium glow effect. */}
+            <div className="absolute inset-0 z-0 scale-[2.2] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu">
               <MediaElement src={src} isVideo={isVideo} />
             </div>
 
             {/* Foreground Layer: The Media with the custom mask */}
             <div
-              className="absolute inset-0 z-10 w-full h-full overflow-hidden"
+              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu"
               style={maskStyle}
             >
               <MediaElement src={src} isVideo={isVideo} />
             </div>
           </motion.div>
-        )}
+          )}
       </AnimatePresence>
     </div>
   );

@@ -24,7 +24,10 @@ const computeTargets = (
   allSections: boolean,
 ) => {
   if (introNowActive || handoff < 1) {
-    const t = handoff; // 0 = hidden, 1 = normal
+    // Delay paper animation to the second half of the handoff so intro sections 
+    // are seen moving and stacking below each other first.
+    let t = Math.max(0, (handoff - 0.5) * 2);
+    t = t * t * (3 - 2 * t); // Smoothstep easing for a natural start and end
 
     return {
       isHandoff: true,
