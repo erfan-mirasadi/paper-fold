@@ -6,7 +6,7 @@ import {
 } from "@react-three/drei";
 import { a, useSpring } from "@react-spring/three";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ThreeEvent } from "@react-three/fiber";
+import { ThreeEvent, useThree } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { VersesRenderer } from "../verses-object/VersesRenderer";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
@@ -42,6 +42,7 @@ export function Experience({
   const isPaperMoving = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const { gl, scene, camera } = useThree();
 
   // We track paper readiness
   const [paperReady, setPaperReady] = useState(false);
@@ -74,6 +75,13 @@ export function Experience({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [isIntroActive, paperReady, onReady]);
+
+  // Background Compilation
+  useEffect(() => {
+    if (isIntroActive && paperReady) {
+      gl.compileAsync(scene, camera).catch(() => {});
+    }
+  }, [isIntroActive, paperReady, gl, scene, camera]);
 
   // Ensure the elevated store is in the correct state for the intro
   useEffect(() => {
@@ -125,7 +133,6 @@ export function Experience({
         scale-z={sceneScale}
       >
         <a.group
-          visible={!isIntroActive}
           position-y={paperFocusY}
           position-z={paperFocusZ}
           scale-x={paperFocusScale}

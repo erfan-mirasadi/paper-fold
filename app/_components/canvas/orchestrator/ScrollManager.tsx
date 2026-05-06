@@ -23,8 +23,8 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 // Configured in percentages (0 to 100) for easier understanding and maintenance.
 // Adjust these values if you add new pages or change the intro duration.
 export const SCROLL_TIMELINE = {
-  intro: { start: 0, end: 40 }, // First 40% of scroll is reserved for the intro sequence
-  handoff: { start: 40, end: 50 }, // Next 10% for smooth camera handoff to the base scene
+  intro: { start: 0, end: 30 }, // First 30% of scroll is reserved for the intro sequence
+  handoff: { start: 30, end: 50 }, // Next 20% for smooth camera handoff to the base scene
   story: { start: 50, end: 100 }, // Remaining 50% for the fold story
 };
 
