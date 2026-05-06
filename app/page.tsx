@@ -36,12 +36,15 @@ const Experience = dynamic(
 );
 
 const SCROLL_PAGES = 2;
+const MAIN_OVERLAY_DELAY_MS = 350;
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [showMainOverlays, setShowMainOverlays] = useState(false);
+  const [mountMainOverlays, setMountMainOverlays] = useState(false);
   // Mirror isIntroActive from the Zustand store so overlay rendering re-evaluates
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
@@ -63,6 +66,33 @@ export default function Home() {
       cancelAnimationFrame(rafId);
     };
   }, []);
+
+  useEffect(() => {
+    if (isIntroActive) {
+      setShowMainOverlays(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowMainOverlays(true);
+    }, MAIN_OVERLAY_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isIntroActive]);
+
+  useEffect(() => {
+    if (!isSceneReady) return;
+    // Pre-mount heavy overlays offscreen to avoid a first-frame hitch at handoff.
+    const timeoutId = window.setTimeout(() => {
+      setMountMainOverlays(true);
+    }, 200);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isSceneReady]);
 
   const bgColor = isDarkMode && !isMobile ? "#000000" : "#ffffff";
 
@@ -158,14 +188,21 @@ export default function Home() {
               onToggle={handleThemeToggle}
             />
             {/* Hide standard chrome while intro runs */}
-            {!isIntroActive && (
-              <>
+            {mountMainOverlays && (
+              <div
+                style={{
+                  opacity: showMainOverlays ? 1 : 0,
+                  pointerEvents: showMainOverlays ? "auto" : "none",
+                  transition: "opacity 0.45s ease",
+                  willChange: "opacity",
+                }}
+              >
                 <NavigationOverlay isDarkMode={isDarkMode} />
                 <TitleOverlay isDarkMode={isDarkMode} />
                 <AllSectionsOverlay isDarkMode={isDarkMode} />
                 <LanguageSwitchOverlay isDarkMode={isDarkMode} />
                 <CameraViewPresetOverlay />
-              </>
+              </div>
             )}
           </motion.div>
         )}

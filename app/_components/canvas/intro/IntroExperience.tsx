@@ -1,6 +1,5 @@
 "use client";
-import { IntroReflectivePlane } from "./IntroReflectivePlane";
-import { SvgParticles } from "./SvgParticles";
+// import { IntroReflectivePlane } from "./IntroReflectivePlane";
 
 interface IntroExperienceProps {
   isIntroActive: boolean;
@@ -13,13 +12,6 @@ export function IntroExperience({
   return (
     <group name="intro-scene" visible={isIntroActive}>
       {/* <IntroReflectivePlane isDarkMode={isDarkMode} /> */}
-      <SvgParticles
-        svgUrl="/logo.svg"
-        scale={0.005}
-        position={[1, 2, 1.23]}
-        rotation={[0, -0.9, 0]}
-        isDarkMode={isDarkMode}
-      />
     </group>
   );
 }

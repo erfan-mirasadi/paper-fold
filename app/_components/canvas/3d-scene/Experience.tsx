@@ -3,8 +3,9 @@ import {
   Environment,
   OrbitControls,
   PerspectiveCamera,
+  SpotLight,
 } from "@react-three/drei";
-import { a, useSpring } from "@react-spring/three";
+import { a } from "@react-spring/three";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
@@ -18,6 +19,7 @@ import { VerseClickHitboxes } from "../verses-object/VerseClickHitboxes";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { IntroExperience } from "../intro/IntroExperience";
 import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollController";
+import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -25,21 +27,11 @@ interface ExperienceProps {
   onReady?: () => void;
 }
 
-// variables when elevated verse is draged and paper is docked
-const PAPER_DOCK_X = -0.9;
-const PAPER_DOCK_SCALE = 0.9;
-const PAPER_FOCUS_Y = 0;
-const PAPER_FOCUS_Z = -0.7;
-const PAPER_FOCUS_SCALE = 0;
-const PAPER_HIDE_SPRING = { mass: 2.2, tension: 74, friction: 24 };
-const PAPER_RESTORE_SPRING = { mass: 1.1, tension: 150, friction: 28 };
-
 export function Experience({
   isFolded = false,
   isDarkMode = false,
   onReady,
 }: ExperienceProps) {
-  const isPaperMoving = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
   const { gl, scene, camera } = useThree();
@@ -83,13 +75,15 @@ export function Experience({
     }
   }, [isIntroActive, paperReady, gl, scene, camera]);
 
-  // Ensure the elevated store is in the correct state for the intro
+  // Ensure the elevated store is in the correct state for the intro.
+  // restoreAllSections() is intentionally deferred until introHandoffProgress
+  // has reached 1 so the boolean flip never interrupts scroll-driven springs.
   useEffect(() => {
     if (isIntroActive) {
       useElevatedStore.getState().forceShowAllSections();
-    } else {
-      useElevatedStore.getState().restoreAllSections();
     }
+    // The "else" path (restoreAllSections) is handled inside syncSceneTargets
+    // once the handoff scroll progress is complete.
   }, [isIntroActive]);
 
   const handleBackgroundClick = useCallback(
@@ -104,18 +98,13 @@ export function Experience({
     [isIntroActive],
   );
 
-  const { sceneOffsetX, sceneScale } = useSpring({
-    sceneOffsetX: isPaperMoving && !isAllSectionsMode ? PAPER_DOCK_X : 0,
-    sceneScale: isPaperMoving && !isAllSectionsMode ? PAPER_DOCK_SCALE : 1,
-    config: { mass: 1.4, tension: 170, friction: 31 },
-  });
-
-  const { paperFocusY, paperFocusZ, paperFocusScale } = useSpring({
-    paperFocusY: isAllSectionsMode ? PAPER_FOCUS_Y : 0,
-    paperFocusZ: isAllSectionsMode ? PAPER_FOCUS_Z : 0,
-    paperFocusScale: isAllSectionsMode ? PAPER_FOCUS_SCALE : 1,
-    config: isAllSectionsMode ? PAPER_HIDE_SPRING : PAPER_RESTORE_SPRING,
-  });
+  const {
+    sceneOffsetX,
+    sceneScale,
+    paperFocusY,
+    paperFocusZ,
+    paperFocusScale,
+  } = useIntroToPaperScroll();
 
   return (
     <>
@@ -162,6 +151,19 @@ export function Experience({
       <DynamicControls isIntroActive={isIntroActive} />
       <Environment preset="apartment" />
       <ambientLight intensity={1} />
+      <SpotLight
+        castShadow
+        penumbra={1}
+        distance={13}
+        angle={0.45}
+        attenuation={4} // Controls how the light falls off
+        anglePower={4} // Controls the sharpness of the light cone
+        intensity={1}
+        color="#ffddaa" // Warm, cinematic yellow/orange like your reference image
+        position={[1, 0.9, 3]}
+        // depthBuffer={new Float32Array(100000000)}
+        volumetric // This is the magic prop that creates the visible light beam!
+      />
 
       {!isAllSectionsMode && (
         <directionalLight position={[0, 4.2, -2]} intensity={1} />
