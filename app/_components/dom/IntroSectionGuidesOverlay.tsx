@@ -69,6 +69,21 @@ function IntroGuideHudRow({
   const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
+  const activeAmbientMediaId = useFoldStore((s) => s.activeAmbientMediaId);
+  const loopedAmbientMediaId = useFoldStore((s) => s.loopedAmbientMediaId);
+
+  // A section is "active" if it's either hovered OR auto-looping (hover takes priority)
+  const effectiveActiveId = activeAmbientMediaId || loopedAmbientMediaId;
+  const isActive = effectiveActiveId === sectionId;
+  const isAnyActive = effectiveActiveId !== null;
+
+  // Apple-style focus opacity - made more subtle (0.55 instead of 0.25)
+  const focusOpacity = isAnyActive ? (isActive ? 1 : 0.55) : 1;
+
+  // Determine dark mode context for monochrome styling
+  const isDarkMode = textColor.includes("232");
+  const activeColor = isDarkMode ? "#ffffff" : "#000000";
+
   // Calculate row-specific progress
   const index = INTRO_SECTION_GUIDE_ORDER.indexOf(sectionId);
   const numSteps = INTRO_SECTION_GUIDE_ORDER.length;
@@ -108,6 +123,8 @@ function IntroGuideHudRow({
   // Determine how many dots to render for the custom dotted trail
   const numDots = 24;
 
+  const isHoverEnabled = introProgress >= 0.99 && introHandoffProgress === 0;
+
   return (
     <div
       id={id}
@@ -124,20 +141,26 @@ function IntroGuideHudRow({
       }}
     >
       <div
-        onMouseEnter={() =>
-          useFoldStore.getState().setActiveAmbientMediaId(sectionId)
-        }
-        onMouseLeave={() =>
-          useFoldStore.getState().setActiveAmbientMediaId(null)
-        }
+        onMouseEnter={() => {
+          if (!isHoverEnabled) return;
+          useFoldStore.getState().setActiveAmbientMediaId(sectionId);
+        }}
+        onMouseLeave={() => {
+          if (!isHoverEnabled) return;
+          useFoldStore.getState().setActiveAmbientMediaId(null);
+        }}
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-start",
-          transform: "translate(-100%, -100%)",
-          pointerEvents: "auto",
-          cursor: "pointer",
-          opacity: 1 - handoffFadeOut,
+          // X: calc(0% - 60px + 32px) aligns the left of the actual content 32px to the right of the anchor.
+          // Y: calc(-100% + 60px) aligns the bottom of the actual content exactly to the anchor (goes UP from the corner).
+          padding: "60px",
+          transform: "translate(calc(0% - 60px + 12px), calc(-100% + 60px))",
+          pointerEvents: isHoverEnabled ? "auto" : "none",
+          cursor: isHoverEnabled ? "pointer" : "default",
+          opacity: (1 - handoffFadeOut) * focusOpacity,
+          transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <svg
@@ -155,8 +178,14 @@ function IntroGuideHudRow({
               y2={polePx}
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="0%" stopColor="#000000" />
-              <stop offset="100%" stopColor="#808080" />
+              <stop
+                offset="0%"
+                stopColor={isDarkMode ? "#ffffff" : "#000000"}
+              />
+              <stop
+                offset="100%"
+                stopColor={isDarkMode ? "rgba(255,255,255,0)" : "rgba(0,0,0,0)"}
+              />
             </linearGradient>
           </defs>
 
@@ -184,7 +213,16 @@ function IntroGuideHudRow({
               const opacity = baseOpacity * dotProgress;
 
               return (
-                <circle key={i} cx={6} cy={y} r={radius} opacity={opacity} />
+                <circle
+                  key={i}
+                  cx={6}
+                  cy={y}
+                  r={radius}
+                  opacity={opacity}
+                  style={{
+                    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                />
               );
             })}
           </g>
@@ -193,6 +231,7 @@ function IntroGuideHudRow({
           style={{
             opacity: Math.min(Math.max((rowProgress - 0.7) / 0.3, 0), 1),
             transition: "opacity 0.3s ease-out",
+            marginLeft: "12px",
           }}
         >
           <AnimatedText
@@ -200,16 +239,17 @@ function IntroGuideHudRow({
             as="span"
             variant="caption"
             className="mr-2"
-            glow={true}
+            glow={false}
             style={{
               marginTop: -2,
               fontSize: "clamp(12px, 1.55vw, 15px)",
-              fontWeight: 600,
-              letterSpacing: "0.02em",
-              color: textColor,
+              fontWeight: isActive ? 700 : 600,
+              letterSpacing: isActive ? "0.04em" : "0.02em",
+              color: isActive ? activeColor : textColor,
               lineHeight: 1.25,
-              textShadow: "0 1px 8px rgba(0,0,0,0.18)",
+              textShadow: "none",
               textTransform: "none",
+              transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           />
         </div>

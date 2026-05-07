@@ -35,10 +35,14 @@ const MediaElement = ({ src, isVideo, className = "" }: MediaElementProps) => {
       fill
       className={`object-cover ${className}`}
       priority
-      sizes="100vw"
+      sizes="(max-width: 768px) 350px, 600px"
     />
   );
 };
+
+const mediaKeys = Object.keys(INTRO_MEDIA_DATA) as Array<
+  keyof typeof INTRO_MEDIA_DATA
+>;
 
 export default function AmbientMedia({
   src: propSrc,
@@ -51,22 +55,26 @@ export default function AmbientMedia({
   // Strictly trigger only when the sections have fully met at the center
   const isJoinedStep = introProgress >= 0.99 && introHandoffProgress < 0.05;
 
-  const mediaKeys = Object.keys(INTRO_MEDIA_DATA) as Array<
-    keyof typeof INTRO_MEDIA_DATA
-  >;
-
   const [loopIndex, setLoopIndex] = useState(0);
 
   // Loop through media every 4 seconds ONLY when exactly at the joined step
   useEffect(() => {
-    if (activeId || !isJoinedStep) return;
+    if (!isJoinedStep) {
+      useFoldStore.getState().setLoopedAmbientMediaId(null);
+      return;
+    }
+
+    // Sync the current looped ID with the store for 3D synchronization
+    useFoldStore.getState().setLoopedAmbientMediaId(mediaKeys[loopIndex]);
+
+    if (activeId) return;
 
     const interval = setInterval(() => {
       setLoopIndex((prev) => (prev + 1) % mediaKeys.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [activeId, mediaKeys.length, isJoinedStep]);
+  }, [activeId, isJoinedStep, loopIndex]);
 
   const currentLoopMedia = INTRO_MEDIA_DATA[mediaKeys[loopIndex]];
   const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentLoopMedia;
@@ -88,7 +96,7 @@ export default function AmbientMedia({
   const showMedia = !!src && (isJoinedStep || !!activeId);
 
   return (
-    <div className="relative w-full max-w-full ml-auto mr-0 aspect-video flex items-center justify-center p-0 mt-60 mb-4 z-[2]">
+    <div className="relative w-full max-w-full ml-auto mr-0 aspect-video flex items-center justify-center p-0 mt-60 mb-4 z-2">
       <AnimatePresence mode="sync">
         {showMedia && (
           <motion.div
@@ -114,7 +122,7 @@ export default function AmbientMedia({
               <MediaElement src={src} isVideo={isVideo} />
             </div>
           </motion.div>
-          )}
+        )}
       </AnimatePresence>
     </div>
   );

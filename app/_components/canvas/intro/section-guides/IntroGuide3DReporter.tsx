@@ -4,26 +4,16 @@ import { useEffect } from "react";
 
 import { Shared3DTracker } from "../../shared/3DTracker";
 import type { ElevatedSectionId } from "../../../../stores/useElevatedStore";
-import {
-  introGuideAnchorInLabelLiftGroup,
-  introGuideMarkerDomId,
-} from "./introGuideAnchorLayout";
+import { introGuideMarkerDomId } from "./introGuideAnchorLayout";
 import { useFoldStore } from "../../orchestrator/ScrollManager";
 
 type ReporterProps = {
   guideId: ElevatedSectionId;
-  pinY: number;
-  labelZ?: number;
-  pageWidth: number;
+  position: [number, number, number];
 };
 
-export function IntroGuide3DReporter({
-  guideId,
-  pinY,
-  labelZ = 0.00035,
-  pageWidth,
-}: ReporterProps) {
-  const anchor = introGuideAnchorInLabelLiftGroup(pageWidth, pinY, labelZ);
+export function IntroGuide3DReporter({ guideId, position }: ReporterProps) {
+  const anchor = position;
 
   useEffect(() => {
     const id = introGuideMarkerDomId(guideId);

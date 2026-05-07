@@ -24,8 +24,7 @@ import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
-import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
-import { IntroCenterGuideReporter } from "../intro/section-guides/IntroCenterGuideReporter";
+
 
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
@@ -42,8 +41,6 @@ type AnimatedLabelProps = {
   zBaseOffset?: number;
   labelZ?: number;
   renderOrder?: number;
-  introGuidesActive?: boolean;
-  pageWidth: number;
   depthTest?: boolean;
 };
 
@@ -62,11 +59,9 @@ function AnimatedElevatedLabel({
   zBaseOffset = 0.002,
   labelZ = 0.00035,
   renderOrder,
-  introGuidesActive = false,
-  pageWidth,
   depthTest = false,
 }: AnimatedLabelProps) {
-  const PAGE_WIDTH = pageWidth;
+  const PAGE_WIDTH = useSurahLayoutRuntime().PAGE_WIDTH;
 
   const isActive = useElevatedStore((s) =>
     s.activeSectionIds.includes(sectionId),
@@ -136,14 +131,6 @@ function AnimatedElevatedLabel({
             renderOrder={renderOrder}
             depthTest={depthTest}
           />
-          {introGuidesActive ? (
-            <IntroGuide3DReporter
-              guideId={sectionId}
-              pinY={y}
-              labelZ={labelZ}
-              pageWidth={PAGE_WIDTH}
-            />
-          ) : null}
         </a.group>
       </a.group>
     </group>
@@ -165,7 +152,6 @@ export function ElevatedSectionLabels({
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
-      {introGuidesActive ? <IntroCenterGuideReporter /> : null}
       <AnimatedElevatedLabel
         sectionId="s1"
         y={SURAH_TRANSFORMS.s1.labelPinY}
@@ -177,8 +163,6 @@ export function ElevatedSectionLabels({
         tension={96}
         friction={24}
         renderOrder={220}
-        introGuidesActive={introGuidesActive}
-        pageWidth={runtime.PAGE_WIDTH}
         depthTest={true}
       />
 
@@ -196,8 +180,6 @@ export function ElevatedSectionLabels({
         zBaseOffset={0.0022}
         labelZ={0.00035}
         renderOrder={240}
-        introGuidesActive={introGuidesActive}
-        pageWidth={runtime.PAGE_WIDTH}
         depthTest={true}
       />
 
@@ -216,8 +198,6 @@ export function ElevatedSectionLabels({
         zBaseOffset={0.0022}
         labelZ={0.00035}
         renderOrder={240}
-        introGuidesActive={introGuidesActive}
-        pageWidth={runtime.PAGE_WIDTH}
         depthTest={true}
       />
     </group>

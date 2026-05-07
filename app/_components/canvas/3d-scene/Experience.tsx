@@ -134,7 +134,7 @@ export function Experience({
             onReady={handlePaperReady}
           />
         </a.group>
-        <ElevatedSectionSurfaces />
+        <ElevatedSectionSurfaces introGuidesActive={isIntroActive} />
         <ElevatedSectionLabels introGuidesActive={isIntroActive} />
         <VersesRenderer />
         {!isAllSectionsMode && <VerseClickHitboxes />}

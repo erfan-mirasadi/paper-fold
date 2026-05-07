@@ -50,7 +50,6 @@ html.lenis body {
 
 @media (max-width: 768px) {
   :root {
-    --background: #ffffff;
   }
   .scroll-controls-touch-scroll {
     /* Mobile: allow native touch scrolling inside ScrollControls */

@@ -42,7 +42,10 @@ interface FoldStoreState {
   introHandoffProgress: number;
   /** The ID of the currently hovered intro section guide. */
   activeAmbientMediaId: ElevatedSectionId | null;
+  /** The ID of the currently auto-looping ambient media. */
+  loopedAmbientMediaId: ElevatedSectionId | null;
   setActiveAmbientMediaId: (id: ElevatedSectionId | null) => void;
+  setLoopedAmbientMediaId: (id: ElevatedSectionId | null) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   setRawOffset: (offset: number) => void;
@@ -60,7 +63,9 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   introHandoffProgress: 0,
 
   activeAmbientMediaId: null,
+  loopedAmbientMediaId: null,
   setActiveAmbientMediaId: (id) => set({ activeAmbientMediaId: id }),
+  setLoopedAmbientMediaId: (id) => set({ loopedAmbientMediaId: id }),
 
   triggerTransition: (id) =>
     set((state) => ({

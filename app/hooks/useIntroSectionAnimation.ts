@@ -41,7 +41,16 @@ function getTransformTarget(
   scatterX: number,
   scatterY: number,
   scatterZ: number,
-): { x: number; y: number; z: number; scale: number } {
+  time: number = 0,
+): {
+  x: number;
+  y: number;
+  z: number;
+  scale: number;
+  rx: number;
+  ry: number;
+  rz: number;
+} {
   const { introProgress, isIntroActive, introHandoffProgress } =
     useFoldStore.getState();
 
@@ -50,7 +59,7 @@ function getTransformTarget(
   if (!isIntroActive && introHandoffProgress >= 1) {
     if (!_identityReadyAt) _identityReadyAt = Date.now();
     if (Date.now() - _identityReadyAt > 1500)
-      return { x: 0, y: 0, z: 0, scale: 1 };
+      return { x: 0, y: 0, z: 0, scale: 1, rx: 0, ry: 0, rz: 0 };
   } else {
     _identityReadyAt = 0;
   }
@@ -62,6 +71,9 @@ function getTransformTarget(
   let y = scatterY * invT;
   let z = scatterZ * invT;
   let scale = 1;
+  let rx = 0;
+  let ry = 0;
+  let rz = 0;
 
   if (sectionId) {
     const handoffT = easeInOut(clamp01(introHandoffProgress));
@@ -72,9 +84,26 @@ function getTransformTarget(
       z += target.z * handoffT;
       scale -= (1 - target.scale) * handoffT;
     }
+
+    // Creative Highlight Effect at the "joined step"
+    if (handoffT === 0 && introProgress >= 0.99) {
+      const { activeAmbientMediaId, loopedAmbientMediaId } =
+        useFoldStore.getState();
+      const highlightedId = activeAmbientMediaId || loopedAmbientMediaId;
+
+      if (highlightedId === sectionId) {
+        z += 0.05; // Elevate towards camera
+        // Add a very subtle breathing float (khalaqiat) - reduced intensity
+        y += 0.07 + Math.sin(time * 1.5) * 0.006;
+        scale *= 1.06; // Scale up to emphasize
+        // Add a tiny dynamic tilt
+        rx -= -0.05 + Math.sin(time * 1.2) * 0.004;
+        ry -= 0; // Slight pan for 3D feel
+      }
+    }
   }
 
-  return { x, y, z, scale };
+  return { x, y, z, scale, rx, ry, rz };
 }
 
 export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
@@ -88,15 +117,28 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
   const liveY = useRef(initial.y);
   const liveZ = useRef(initial.z);
   const liveScale = useRef(initial.scale);
+  const liveRx = useRef(initial.rx);
+  const liveRy = useRef(initial.ry);
+  const liveRz = useRef(initial.rz);
 
-  useFrame((_, delta) => {
-    const target = getTransformTarget(sectionId, scatterX, scatterY, scatterZ);
+  useFrame((state, delta) => {
+    const target = getTransformTarget(
+      sectionId,
+      scatterX,
+      scatterY,
+      scatterZ,
+      state.clock.elapsedTime,
+    );
 
-    const factor = Math.min(delta * 9, 1);
+    // Changed from 9 to 4.5 for a much softer (narm-tar) and premium transition
+    const factor = Math.min(delta * 4.5, 1);
     liveX.current += (target.x - liveX.current) * factor;
     liveY.current += (target.y - liveY.current) * factor;
     liveZ.current += (target.z - liveZ.current) * factor;
     liveScale.current += (target.scale - liveScale.current) * factor;
+    liveRx.current += (target.rx - liveRx.current) * factor;
+    liveRy.current += (target.ry - liveRy.current) * factor;
+    liveRz.current += (target.rz - liveRz.current) * factor;
 
     const g = groupRef.current;
     if (g) {
@@ -104,6 +146,7 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
       g.position.y = liveY.current;
       g.position.z = liveZ.current;
       g.scale.setScalar(liveScale.current);
+      g.rotation.set(liveRx.current, liveRy.current, liveRz.current);
     }
   });
 

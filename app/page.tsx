@@ -40,7 +40,7 @@ const SCROLL_PAGES = 5;
 const MAIN_OVERLAY_DELAY_MS = 350;
 
 export default function Home() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
@@ -95,7 +95,7 @@ export default function Home() {
     };
   }, [isSceneReady]);
 
-  const bgColor = isDarkMode && !isMobile ? "#000000" : "#ffffff";
+  const bgColor = isDarkMode ? "#000000" : "#ffffff";
 
   const handleThemeToggle = () => {
     setIsDarkMode((prev) => !prev);

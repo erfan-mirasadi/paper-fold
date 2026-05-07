@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
@@ -35,6 +35,7 @@ import {
 import { PAPER_MATERIAL_CONFIG } from "../3d-scene/PaperMaterial";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
+import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
 
 /**
  * SurahLayout draws section JPEG with meshBasic + toneMapped false, then the page
@@ -265,7 +266,11 @@ function DraggableSectionGroup({
   );
 }
 
-export function ElevatedSectionSurfaces() {
+export function ElevatedSectionSurfaces({
+  introGuidesActive = false,
+}: {
+  introGuidesActive?: boolean;
+}) {
   const runtime = useSurahLayoutRuntime();
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
 
@@ -392,6 +397,16 @@ export function ElevatedSectionSurfaces() {
           isActive={s1Active}
           sectionBounds={s1Bounds}
         >
+          {introGuidesActive && (
+            <IntroGuide3DReporter
+              guideId="s1"
+              position={[
+                s1.frameX - runtime.PAGE_WIDTH / 2 + s1.frameW,
+                s1.frameY,
+                0.005,
+              ]}
+            />
+          )}
           <ElevatedLayer
             x={s1.frameX}
             y={s1.frameY}
@@ -440,6 +455,16 @@ export function ElevatedSectionSurfaces() {
           isActive={s2TopActive}
           sectionBounds={s2TopBounds}
         >
+          {introGuidesActive && (
+            <IntroGuide3DReporter
+              guideId="s2_top"
+              position={[
+                s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
+                s2.shiftedTop,
+                0.005,
+              ]}
+            />
+          )}
           <ElevatedLayer
             x={topConnector.outer.x}
             y={topConnector.outer.y}
@@ -505,6 +530,16 @@ export function ElevatedSectionSurfaces() {
           isActive={s2CenterActive}
           sectionBounds={s2CenterBounds}
         >
+          {introGuidesActive && (
+            <IntroGuide3DReporter
+              guideId="s2_center"
+              position={[
+                s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
+                s2.groups[1].frameY,
+                0.005,
+              ]}
+            />
+          )}
           {s2.groups[1].rowConnectors.map((rc, i) => (
             <ElevatedLayer
               key={`s2-center-rc-${i}`}
@@ -529,6 +564,16 @@ export function ElevatedSectionSurfaces() {
           isActive={s2BottomActive}
           sectionBounds={s2BottomBounds}
         >
+          {introGuidesActive && (
+            <IntroGuide3DReporter
+              guideId="s2_bottom"
+              position={[
+                s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
+                s2.groups[2].frameY,
+                0.005,
+              ]}
+            />
+          )}
           <ElevatedLayer
             x={bottomConnector.outer.x}
             y={bottomConnector.outer.y}
