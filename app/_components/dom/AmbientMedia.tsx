@@ -96,7 +96,7 @@ export default function AmbientMedia({
   const showMedia = !!src && (isJoinedStep || !!activeId);
 
   return (
-    <div className="relative w-full max-w-full ml-auto mr-0 aspect-video flex items-center justify-center p-0 mt-60 mb-4 z-2">
+    <div className="relative w-full h-full flex items-center justify-center p-0">
       <AnimatePresence mode="sync">
         {showMedia && (
           <motion.div
@@ -110,13 +110,13 @@ export default function AmbientMedia({
           >
             {/* Optimized Ambient Glow: Single high-performance layer instead of 3. 
                 Massively reduces GPU overhead while maintaining the premium glow effect. */}
-            <div className="absolute inset-0 z-0 scale-[2.2] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu">
+            <div className="absolute inset-0 z-0 scale-[1.3] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-right">
               <MediaElement src={src} isVideo={isVideo} />
             </div>
 
             {/* Foreground Layer: The Media with the custom mask */}
             <div
-              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu"
+              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-[0.7] origin-right"
               style={maskStyle}
             >
               <MediaElement src={src} isVideo={isVideo} />

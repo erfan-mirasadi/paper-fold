@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { ElevatedSectionId } from "../../stores/useElevatedStore";
 import {
   INTRO_SECTION_GUIDE_ORDER,
@@ -22,6 +23,14 @@ export function IntroSectionGuidesOverlay({
   const textColor = isDarkMode
     ? "rgba(232,243,255,0.94)"
     : "rgba(17,29,52,0.92)";
+
+  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
+
+  useEffect(() => {
+    if (introHandoffProgress > 0) {
+      useFoldStore.getState().setActiveAmbientMediaId(null);
+    }
+  }, [introHandoffProgress]);
 
   return (
     <div
@@ -146,7 +155,6 @@ function IntroGuideHudRow({
           useFoldStore.getState().setActiveAmbientMediaId(sectionId);
         }}
         onMouseLeave={() => {
-          if (!isHoverEnabled) return;
           useFoldStore.getState().setActiveAmbientMediaId(null);
         }}
         style={{

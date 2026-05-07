@@ -27,6 +27,8 @@ export interface AnimatedTextProps {
   noWrap?: boolean;
   // Custom styles
   style?: React.CSSProperties;
+  // Custom classes for the word spans
+  spanClassName?: string;
 }
 
 export const AnimatedText: React.FC<AnimatedTextProps> = ({
@@ -39,6 +41,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
   staggerDelay = 0.05,
   noWrap = false,
   style,
+  spanClassName,
 }) => {
   // Split text into an array of words for individual animation
   const words = text.split(" ");
@@ -59,7 +62,6 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
     ? {
         textShadow:
           "0 0 20px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.6), 0 0 100px rgba(255, 255, 255, 0.4)",
-        color: "#ffffff",
       }
     : {};
 
@@ -117,7 +119,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
       initial="hidden"
       viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
       className={cn(
-        "flex text-white",
+        "flex",
         noWrap ? "flex-nowrap whitespace-nowrap" : "flex-wrap",
         variantStyles[variant],
         className,
@@ -128,7 +130,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
         <motion.span
           variants={childVariants}
           key={index}
-          className="mr-[0.25em] inline-block"
+          className={cn("mr-[0.25em] inline-block", spanClassName)}
         >
           {word}
         </motion.span>

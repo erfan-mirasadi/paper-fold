@@ -26,6 +26,8 @@ import { CameraViewController } from "./_components/canvas/orchestrator/CameraVi
 import { IntroSectionGuidesOverlay } from "./_components/dom/IntroSectionGuidesOverlay";
 import AmbientMedia from "./_components/dom/AmbientMedia";
 import JoinedStepOverlay from "./_components/dom/JoinedStepOverlay";
+import { IntroBackgroundTextOverlay } from "./_components/dom/IntroBackgroundTextOverlay";
+import { HeroTitleOverlay } from "./_components/dom/ui-overlay/HeroTitleOverlay";
 import { LenisProvider } from "./_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "./data/cameraConfig";
 const Experience = dynamic(
@@ -124,6 +126,13 @@ export default function Home() {
             pointerEvents: "none",
           }}
         />
+
+        <IntroBackgroundTextOverlay isDarkMode={isDarkMode} />
+
+        <div className="fixed inset-y-0 right-0 w-1/2 pointer-events-none">
+          <AmbientMedia />
+        </div>
+
         <Suspense fallback={null}>
           <div
             style={{
@@ -150,7 +159,7 @@ export default function Home() {
                 }}
                 frameloop="always"
               >
-                <color attach="background" args={[bgColor]} />
+                {/* <color attach="background" args={[bgColor]} /> Removed to allow transparent background for background text */}
                 {/* <Effects glitchTrigger={glitchKey} /> */}
                 <ScrollManager />
                 <PopUpHoverScrollController />
@@ -178,10 +187,8 @@ export default function Home() {
           >
             {isIntroActive && (
               <>
+                <HeroTitleOverlay isDarkMode={isDarkMode} />
                 <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
-                <div className="fixed top-12 right-0 w-[350px] md:w-[600px] z-[100] pointer-events-none">
-                  <AmbientMedia />
-                </div>
                 {/* Render the extracted Apple-style border behind the main UI controls */}
                 <div className="fixed inset-0 z-[80] pointer-events-none">
                   <JoinedStepOverlay isDarkMode={isDarkMode} />

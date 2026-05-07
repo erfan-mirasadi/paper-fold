@@ -6,9 +6,9 @@ import type { ElevatedSectionId } from "../stores/useElevatedStore";
 
 export const INTRO_SECTION_SCATTER: Record<
   ElevatedSectionId,
-  [number, number, number]
+  [number, number, number, number?, number?, number?]
 > = {
-  s1: [0.3, 0, 1],
+  s1: [0.7, -0.8, 2, 0.7, -0.81, -0.07], // x, y, z, rx, ry, rz
   s2_top: [0, -0.6, -0.4],
   s2_center: [0.06, -0.55, -1.2],
   s2_bottom: [0, -0.63, 0.5],
@@ -41,6 +41,9 @@ function getTransformTarget(
   scatterX: number,
   scatterY: number,
   scatterZ: number,
+  scatterRx: number = 0,
+  scatterRy: number = 0,
+  scatterRz: number = 0,
   time: number = 0,
 ): {
   x: number;
@@ -71,9 +74,9 @@ function getTransformTarget(
   let y = scatterY * invT;
   let z = scatterZ * invT;
   let scale = 1;
-  let rx = 0;
-  let ry = 0;
-  let rz = 0;
+  let rx = scatterRx * invT;
+  let ry = scatterRy * invT;
+  let rz = scatterRz * invT;
 
   if (sectionId) {
     const handoffT = easeInOut(clamp01(introHandoffProgress));
@@ -110,9 +113,20 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
   const scatterX = sectionId ? INTRO_SECTION_SCATTER[sectionId][0] : 0;
   const scatterY = sectionId ? INTRO_SECTION_SCATTER[sectionId][1] : 0;
   const scatterZ = sectionId ? INTRO_SECTION_SCATTER[sectionId][2] : 0;
+  const scatterRx = sectionId ? INTRO_SECTION_SCATTER[sectionId][3] || 0 : 0;
+  const scatterRy = sectionId ? INTRO_SECTION_SCATTER[sectionId][4] || 0 : 0;
+  const scatterRz = sectionId ? INTRO_SECTION_SCATTER[sectionId][5] || 0 : 0;
   const groupRef = useRef<Group>(null);
 
-  const initial = getTransformTarget(sectionId, scatterX, scatterY, scatterZ);
+  const initial = getTransformTarget(
+    sectionId,
+    scatterX,
+    scatterY,
+    scatterZ,
+    scatterRx,
+    scatterRy,
+    scatterRz,
+  );
   const liveX = useRef(initial.x);
   const liveY = useRef(initial.y);
   const liveZ = useRef(initial.z);
@@ -127,6 +141,9 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
       scatterX,
       scatterY,
       scatterZ,
+      scatterRx,
+      scatterRy,
+      scatterRz,
       state.clock.elapsedTime,
     );
 
