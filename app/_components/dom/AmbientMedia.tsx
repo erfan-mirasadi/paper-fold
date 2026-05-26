@@ -83,13 +83,13 @@ export default function AmbientMedia({
   const isVideo =
     propIsVideo !== undefined ? propIsVideo : (activeMedia?.isVideo ?? true);
 
-  // Mask that fades on Top, Bottom, and Left, but stays sharp on the Right.
+  // Mask that fades smoothly on all edges: Top, Bottom, Left, and Right.
   const maskStyle: React.CSSProperties = {
     WebkitMaskImage:
-      "linear-gradient(to right, transparent 0%, black 60%), linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+      "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)",
     WebkitMaskComposite: "source-in",
     maskImage:
-      "linear-gradient(to right, transparent 0%, black 60%), linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+      "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)",
     maskComposite: "intersect",
   };
 
@@ -110,13 +110,13 @@ export default function AmbientMedia({
           >
             {/* Optimized Ambient Glow: Single high-performance layer instead of 3. 
                 Massively reduces GPU overhead while maintaining the premium glow effect. */}
-            <div className="absolute inset-0 z-0 scale-[1.3] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-right">
+            <div className="absolute inset-0 z-0 scale-[1.4] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
               <MediaElement src={src} isVideo={isVideo} />
             </div>
 
             {/* Foreground Layer: The Media with the custom mask */}
             <div
-              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-[0.7] origin-right"
+              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-100 origin-center"
               style={maskStyle}
             >
               <MediaElement src={src} isVideo={isVideo} />

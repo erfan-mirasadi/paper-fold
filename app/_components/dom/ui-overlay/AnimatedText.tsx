@@ -20,7 +20,7 @@ export interface AnimatedTextProps {
   // Predetermined typography styles
   variant?: "title" | "subtitle" | "body" | "caption";
   // Direction of the entrance animation
-  animationType?: "flyInBottom" | "flyInTop" | "fadeIn";
+  animationType?: "flyInBottom" | "flyInTop" | "fadeIn" | "flyInLeft";
   // Time between each word animating
   staggerDelay?: number;
   // Prevents text from wrapping to multiple lines
@@ -57,13 +57,15 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
   };
 
   // Glow effect styles
-  // The intense glow requires a heavy text-shadow, typically layered for a natural bloom
+  // Optimized text-shadow for better performance (less GPU lag) and much better contrast
   const glowStyles = glow
     ? {
         textShadow:
-          "0 0 20px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.6), 0 0 100px rgba(255, 255, 255, 0.4)",
+          "0 4px 12px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 255, 255, 0.5)",
       }
-    : {};
+    : {
+        textShadow: "0 2px 10px rgba(0, 0, 0, 0.7)",
+      };
 
   // Container variants to handle the staggering of children (words)
   const containerVariants: Variants = {
@@ -81,7 +83,13 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
   const getInitialY = () => {
     if (animationType === "flyInTop") return -40;
     if (animationType === "flyInBottom") return 40;
-    return 0; // fadeIn
+    return 0; // fadeIn, flyInLeft
+  };
+
+  // Determine the starting X position based on animationType
+  const getInitialX = () => {
+    if (animationType === "flyInLeft") return -40;
+    return 0;
   };
 
   // Child variants for individual words
@@ -89,6 +97,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
     visible: {
       opacity: 1,
       y: 0,
+      x: 0,
       transition: {
         type: "spring",
         damping: 20,
@@ -98,6 +107,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
     hidden: {
       opacity: 0,
       y: getInitialY(),
+      x: getInitialX(),
       transition: {
         type: "spring",
         damping: 20,

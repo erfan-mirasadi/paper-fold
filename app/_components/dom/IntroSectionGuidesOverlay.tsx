@@ -134,6 +134,22 @@ function IntroGuideHudRow({
 
   const isHoverEnabled = introProgress >= 0.99 && introHandoffProgress === 0;
 
+  // The unselected height constraint (55% length)
+  const unselectedProgress = 0.55;
+  const effectiveRowProgress = isActive
+    ? rowProgress
+    : Math.min(rowProgress, unselectedProgress);
+
+  // Place the text near the dot that has dotProgress = 0.5, so it doesn't look detached
+  const textNorm = Math.max(0, Math.min((effectiveRowProgress - 0.1) / 0.8, 1));
+  const textTranslateY = polePx * (1 - textNorm);
+
+  // Transition parameters for hover vs scroll
+  const animDuration = isHoverEnabled ? "1.5s" : "0.4s";
+  const animEasing = isHoverEnabled
+    ? "cubic-bezier(0.22, 1, 0.36, 1)"
+    : "cubic-bezier(0.16, 1, 0.3, 1)";
+
   return (
     <div
       id={id}
@@ -192,7 +208,9 @@ function IntroGuideHudRow({
               />
               <stop
                 offset="100%"
-                stopColor={isDarkMode ? "rgba(255,255,255,0)" : "rgba(0,0,0,0)"}
+                stopColor={
+                  isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"
+                }
               />
             </linearGradient>
           </defs>
@@ -208,7 +226,10 @@ function IntroGuideHudRow({
               // Individual dot progress: how much of the "growth" has reached this dot
               // We add a little bit of stagger/spread
               const dotProgress = Math.min(
-                Math.max((rowProgress - normFromBottom * 0.8) / 0.2, 0),
+                Math.max(
+                  (effectiveRowProgress - normFromBottom * 0.8) / 0.2,
+                  0,
+                ),
                 1,
               );
 
@@ -217,8 +238,15 @@ function IntroGuideHudRow({
               const radius = baseRadius * dotProgress;
 
               // Subtle fade: bottom dots become slightly transparent for a sleek look
-              const baseOpacity = 1 - (i * 0.5) / (numDots - 1);
+              const baseOpacity = 1 - (i * 0.2) / (numDots - 1);
               const opacity = baseOpacity * dotProgress;
+
+              // Smooth wave delays for growing (when active) and shrinking (when inactive)
+              const delay = isHoverEnabled
+                ? isActive
+                  ? normFromBottom * 0.4
+                  : (1 - normFromBottom) * 0.2
+                : 0;
 
               return (
                 <circle
@@ -228,7 +256,7 @@ function IntroGuideHudRow({
                   r={radius}
                   opacity={opacity}
                   style={{
-                    transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                    transition: `all ${animDuration} ${animEasing} ${delay}s`,
                   }}
                 />
               );
@@ -238,8 +266,11 @@ function IntroGuideHudRow({
         <div
           style={{
             opacity: Math.min(Math.max((rowProgress - 0.7) / 0.3, 0), 1),
-            transition: "opacity 0.3s ease-out",
-            marginLeft: "12px",
+            transform: `translateY(${textTranslateY}px)`,
+            transition: isHoverEnabled
+              ? `opacity 0.3s ease-out, transform ${animDuration} ${animEasing}`
+              : `opacity 0.3s ease-out`,
+            // marginLeft: "2px",
           }}
         >
           <AnimatedText

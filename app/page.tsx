@@ -129,18 +129,26 @@ export default function Home() {
 
         <IntroBackgroundTextOverlay isDarkMode={isDarkMode} />
 
-        <div className="fixed inset-y-0 right-0 w-1/2 pointer-events-none">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none">
           <AmbientMedia />
         </div>
+
+        {/* Soft static shadow removed in favor of dynamic Canvas drop-shadow */}
 
         <Suspense fallback={null}>
           <div
             style={{
               position: "fixed",
               inset: 0,
+              zIndex: 30,
               opacity: isSceneReady ? 1 : 0,
               // Prevent pointer events while hidden to avoid blocking UI interactions
               pointerEvents: isSceneReady ? "auto" : "none",
+              // Dynamically cast a glassy soft shadow based on the 3D canvas alpha channel!
+              // This makes each capsule accurately cast its own shadow onto the footage below.
+              filter: isDarkMode 
+                ? "drop-shadow(0 20px 30px rgba(0,0,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
+                : "drop-shadow(0 20px 30px rgba(255,255,255,0.8)) drop-shadow(0 4px 12px rgba(255,255,255,0.5))",
               // Apple-like buttery smooth ease transition
               transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
             }}
@@ -184,6 +192,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
+            className="relative z-40 pointer-events-none"
           >
             {isIntroActive && (
               <>

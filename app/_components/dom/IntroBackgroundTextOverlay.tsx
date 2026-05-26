@@ -22,9 +22,7 @@ export function IntroBackgroundTextOverlay({
     : null;
 
   return (
-    <div
-      className="pointer-events-none fixed inset-0 flex items-center justify-center p-6 md:p-12 overflow-hidden"
-    >
+    <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden">
       <AnimatePresence mode="wait">
         {data && (
           <motion.div
@@ -33,14 +31,21 @@ export function IntroBackgroundTextOverlay({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 1.05, y: -20 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative flex flex-col items-center max-w-[50vw] text-center translate-x-8"
+            className="relative flex flex-col items-center w-[65vw] text-center translate-x-8"
+            style={{
+              // Use drop-shadow instead of background so it perfectly outlines the text
+              // without creating any blocky frames or large radial circles.
+              filter: isDarkMode
+                ? "drop-shadow(0 4px 24px rgba(0,0,0,0.8)) drop-shadow(0 2px 8px rgba(0,0,0,0.6))"
+                : "drop-shadow(0 4px 24px rgba(255,255,255,0.8)) drop-shadow(0 2px 8px rgba(255,255,255,0.6))",
+            }}
           >
             {data.caption && (
               <AnimatedText
                 text={data.caption}
                 variant="caption"
-                animationType="flyInTop"
-                className={`mb-4 tracking-widest w-full justify-center ${
+                animationType="flyInLeft"
+                className={`mb-4 tracking-widest text-lg md:text-xl w-full justify-center ${
                   isDarkMode ? "text-[#db5001]" : "text-[#b24000]"
                 }`}
               />
@@ -50,7 +55,8 @@ export function IntroBackgroundTextOverlay({
                 text={data.title}
                 variant="title"
                 animationType="flyInBottom"
-                className={`tracking-[0.05em] text-[12vw] md:text-[10vw] mb-6 font-bold leading-none select-none w-full justify-center ${
+                glow={true}
+                className={`tracking-[0.05em] text-[12vw] md:text-[9vw] mb-6 font-bold leading-none select-none w-full justify-center ${
                   isDarkMode ? "text-white" : "text-black"
                 }`}
               />
@@ -59,8 +65,8 @@ export function IntroBackgroundTextOverlay({
               <AnimatedText
                 text={data.subtitle}
                 variant="subtitle"
-                animationType="fadeIn"
-                className={`mb-4 w-full justify-center ${
+                animationType="flyInLeft"
+                className={`mb-4 w-full text-4xl md:text-5xl justify-center ${
                   isDarkMode ? "text-white" : "text-black"
                 } font-light italic`}
               />
@@ -72,7 +78,7 @@ export function IntroBackgroundTextOverlay({
                 animationType="fadeIn"
                 className={`${
                   isDarkMode ? "text-zinc-300" : "text-zinc-600"
-                } text-xl md:text-2xl mt-4 w-full justify-center`}
+                } text-2xl md:text-3xl mt-4 w-full justify-center`}
               />
             )}
           </motion.div>
