@@ -142,19 +142,25 @@ export default function Home() {
               inset: 0,
               zIndex: 30,
               opacity: isSceneReady ? 1 : 0,
-              // Prevent pointer events while hidden to avoid blocking UI interactions
-              pointerEvents: isSceneReady ? "auto" : "none",
+              // Prevent pointer events while hidden or during intro to avoid blocking UI interactions behind canvas
+              pointerEvents: isSceneReady && !isIntroActive ? "auto" : "none",
               // Dynamically cast a glassy soft shadow based on the 3D canvas alpha channel!
               // This makes each capsule accurately cast its own shadow onto the footage below.
-              filter: isDarkMode 
+              filter: isDarkMode
                 ? "drop-shadow(0 20px 30px rgba(0,0,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
                 : "drop-shadow(0 20px 30px rgba(255,255,255,0.8)) drop-shadow(0 4px 12px rgba(255,255,255,0.5))",
               // Apple-like buttery smooth ease transition
               transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
             }}
           >
+            {/* Render Intro Guides INSIDE the Canvas wrapper but BEFORE Canvas, so they share the filter and aren't shadowed, but get occluded by 3D pixels */}
+            {isSceneReady && isIntroActive && (
+              <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
+            )}
             {canvasReady && (
               <Canvas
+                style={{ pointerEvents: isIntroActive ? "none" : "auto" }}
+                eventSource={typeof document !== 'undefined' ? document.body : undefined}
                 camera={{
                   position: CAMERA_CONFIG.initialCamera.position,
                   fov: CAMERA_CONFIG.initialCamera.fov,
@@ -197,7 +203,6 @@ export default function Home() {
             {isIntroActive && (
               <>
                 <HeroTitleOverlay isDarkMode={isDarkMode} />
-                <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
                 {/* Render the extracted Apple-style border behind the main UI controls */}
                 <div className="fixed inset-0 z-[80] pointer-events-none">
                   <JoinedStepOverlay isDarkMode={isDarkMode} />

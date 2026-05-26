@@ -1,7 +1,11 @@
 "use client";
 import * as THREE from "three";
 import { useMemo } from "react";
-import { RenderTexture, OrthographicCamera } from "@react-three/drei";
+import {
+  RenderTexture,
+  OrthographicCamera,
+  useTexture,
+} from "@react-three/drei";
 import { CanvasText } from "../shared/CanvasText";
 import { useLoader } from "@react-three/fiber";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
@@ -130,6 +134,46 @@ function DecorativeSvg({
         ))}
       </group>
     </group>
+  );
+}
+
+function BorderSvg({
+  x,
+  y,
+  w,
+  h,
+  z,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  z: number;
+}) {
+  const texture = useTexture("/Small Borders 13a.svg", (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+  // ضریب‌های ساده برای تغییر سایز نسبت به خود کپسول:
+  // 1.0 یعنی دقیقاً هم‌عرض/هم‌ارتفاع کپسول باشه.
+  // مثلاً 1.1 یعنی ۱۰ درصد بزرگتر بشه، یا 0.9 یعنی کوچیکتر بشه.
+  const widthScale = 1.01;
+  const heightScale = 1.08;
+
+  const renderW = w * widthScale;
+  const renderH = h * heightScale;
+
+  return (
+    <mesh position={[x + w / 2, y - h / 2, z]} renderOrder={102}>
+      <planeGeometry args={[renderW, renderH]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        depthTest={true}
+        depthWrite={false}
+        opacity={1}
+        toneMapped={false}
+      />
+    </mesh>
   );
 }
 
@@ -417,6 +461,7 @@ export function VerseFiveMetallic() {
 
             {activeLanguage === "ar" && (
               <>
+                {/* --- DECORATIVE SVG COMMENTED OUT ---
                 <DecorativeSvg
                   shapes={decorativeShapes}
                   x={outerW - DECORATIVE_SVG_INSET_X}
@@ -430,6 +475,16 @@ export function VerseFiveMetallic() {
                   y={decorativeY}
                   rotationZ={DECORATIVE_SVG_BRACKET_ROTATION}
                   mirrorX
+                />
+                --- */}
+
+                {/* New SVG Border */}
+                <BorderSvg
+                  x={0}
+                  y={0}
+                  w={outerW}
+                  h={outerH}
+                  z={EXTRUDE_DEPTH + 0.002}
                 />
               </>
             )}

@@ -68,23 +68,27 @@ function getShadowSurfaceSectionId(
 
 export function VerseController({ config }: { config: VerseConfig }) {
   const runtime = useSurahLayoutRuntime();
-  
+
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
 
-  const group = usePopUpStore((state) => 
-    state.popUpGroups.find((g) => g.verseIds.includes(config.id))
+  const group = usePopUpStore((state) =>
+    state.popUpGroups.find((g) => g.verseIds.includes(config.id)),
   );
   const isOpen = group?.isOpen ?? false;
   const hasEverOpened = group?.hasEverOpened ?? false;
-  
+
   const isMiddleGroup = group?.id === "g_11_12_13_14";
   const middleHorizontalFolded = usePopUpStore(
-    (state) => state.middleHorizontalFolded
+    (state) => state.middleHorizontalFolded,
   );
-  const middleHorizontalFoldedValue = isMiddleGroup ? middleHorizontalFolded : null;
+  const middleHorizontalFoldedValue = isMiddleGroup
+    ? middleHorizontalFolded
+    : null;
 
-  const isElevated = useElevatedStore((state) => state.activeVerseIds.includes(config.id));
+  const isElevated = useElevatedStore((state) =>
+    state.activeVerseIds.includes(config.id),
+  );
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isCenterSectionRaised = activeSectionIds.includes("s2_center");
   const isIntroActive = useFoldStore((s) => s.isIntroActive);

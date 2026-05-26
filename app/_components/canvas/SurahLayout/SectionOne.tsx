@@ -1,5 +1,7 @@
 "use client";
 import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
+import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
 import {
   S1_OUTER_BORDER,
   S1_OUTER_BG,
@@ -28,6 +30,49 @@ interface SectionOneProps {
   isFolded?: boolean;
 }
 
+function BorderSvg({
+  x,
+  y,
+  w,
+  h,
+  z,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  z: number;
+}) {
+  const texture = useTexture("/small-borders-7a.svg", (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+  const svgW = 2956;
+  const svgH = 976;
+
+  // Base scale based on the section's frame
+  const baseScale = Math.max(w / svgW, h / svgH) * 1.05;
+
+  // Adjustments: decrease width from sides by a lot, increase height a bit
+  const widthMultiplier = 0.79;
+  const heightMultiplier = 1.1;
+
+  const renderW = svgW * baseScale * widthMultiplier;
+  const renderH = svgH * baseScale * heightMultiplier;
+
+  return (
+    <mesh position={[x + w / 2, y - h / 2, z]} renderOrder={1}>
+      <planeGeometry args={[renderW, renderH]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        depthTest={true}
+        opacity={1}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
 export function SectionOne({ data, transforms, PW }: SectionOneProps) {
   const neon = S1_NEON_CONFIG;
   const frameRadius = 0.02;
@@ -38,7 +83,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
   return (
     <group>
       <>
-        {/* Smooth outer glow following the same corner profile as section 1 */}
+        {/* --- NEON BORDERS COMMENTED OUT ---
         <UiRect
           x={t.frameX - neon.outerHaloPad}
           y={t.frameY + neon.outerHaloPad}
@@ -55,7 +100,6 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           depthTest={true}
         />
 
-        {/* Smooth inner glow hugging the border */}
         <UiRect
           x={t.frameX - neon.haloPad}
           y={t.frameY + neon.haloPad}
@@ -72,7 +116,6 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           depthTest={true}
         />
 
-        {/* Center cutout: prevents the section background from turning neon */}
         <UiRect
           x={t.frameX}
           y={t.frameY}
@@ -84,7 +127,6 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           depthTest={true}
         />
 
-        {/* Top label cutout: removes neon where the label sits */}
         <UiRect
           x={PW / 2 - topLabelCutoutW / 2}
           y={t.frameY + neon.topLabelGapYOffset}
@@ -95,6 +137,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           color={S1_OUTER_BORDER}
           depthTest={true}
         />
+        --- */}
         <UiRect
           x={t.frameX}
           y={t.frameY}
@@ -114,6 +157,15 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           h={t.frameH - t.borderWidth * 2}
           radius={0.017}
           color={S1_OUTER_BG}
+        />
+
+        {/* Decorative SVG Border */}
+        <BorderSvg
+          x={t.frameX}
+          y={t.frameY}
+          w={t.frameW}
+          h={t.frameH}
+          z={0.002}
         />
       </>
 
@@ -184,6 +236,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         w={t.anaAyetTabW}
         h={t.anaAyetTabH}
         z={0.005}
+        renderOrder={100}
       />
 
       {/* Section title label pinned to the top edge */}
@@ -195,6 +248,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           text={data.label}
           bgColor={S1_TOP_LABEL_BG}
           borderColor={S1_TOP_LABEL_BORDER}
+          renderOrder={100}
         />
       )}
     </group>

@@ -8,7 +8,7 @@ export const INTRO_SECTION_SCATTER: Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
 > = {
-  s1: [0.7, -0.8, 2, 0.7, -0.81, -0.07], // x, y, z, rx, ry, rz
+  s1: [0.92, -0.6, 2.04, 0.7, -0.81, -0.07], // x, y, z, rx, ry, rz
   s2_top: [0, -0.6, -0.4],
   s2_center: [0.06, -0.55, -1.2],
   s2_bottom: [0, -0.63, 0.5],
@@ -95,12 +95,12 @@ function getTransformTarget(
       const highlightedId = activeAmbientMediaId || loopedAmbientMediaId;
 
       if (highlightedId === sectionId) {
-        z += 0.05; // Elevate towards camera
-        // Add a very subtle breathing float (khalaqiat) - reduced intensity
-        y += 0.07 + Math.sin(time * 1.5) * 0.006;
+        z += 0.25; // Elevate towards camera
+        // Add a very subtle breathing float (khalaqiat) - increased height
+        y += -0.05 + Math.sin(time * 1.5) * 0.006;
         scale *= 1.06; // Scale up to emphasize
         // Add a tiny dynamic tilt
-        rx -= -0.05 + Math.sin(time * 1.2) * 0.004;
+        rx -= -0.07 + Math.sin(time * 1.2) * 0.004;
         ry -= 0; // Slight pan for 3D feel
       }
     }

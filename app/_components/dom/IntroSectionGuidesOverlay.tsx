@@ -38,7 +38,6 @@ export function IntroSectionGuidesOverlay({
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 120,
         overflow: "visible",
       }}
     >
@@ -166,13 +165,6 @@ function IntroGuideHudRow({
       }}
     >
       <div
-        onMouseEnter={() => {
-          if (!isHoverEnabled) return;
-          useFoldStore.getState().setActiveAmbientMediaId(sectionId);
-        }}
-        onMouseLeave={() => {
-          useFoldStore.getState().setActiveAmbientMediaId(null);
-        }}
         style={{
           display: "flex",
           flexDirection: "row",
@@ -181,8 +173,7 @@ function IntroGuideHudRow({
           // Y: calc(-100% + 60px) aligns the bottom of the actual content exactly to the anchor (goes UP from the corner).
           padding: "60px",
           transform: "translate(calc(0% - 60px + 12px), calc(-100% + 60px))",
-          pointerEvents: isHoverEnabled ? "auto" : "none",
-          cursor: isHoverEnabled ? "pointer" : "default",
+          pointerEvents: "none",
           opacity: (1 - handoffFadeOut) * focusOpacity,
           transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
@@ -264,12 +255,20 @@ function IntroGuideHudRow({
           </g>
         </svg>
         <div
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isHoverEnabled) return;
+            const store = useFoldStore.getState();
+            store.setActiveAmbientMediaId(store.activeAmbientMediaId === sectionId ? null : sectionId);
+          }}
           style={{
             opacity: Math.min(Math.max((rowProgress - 0.7) / 0.3, 0), 1),
             transform: `translateY(${textTranslateY}px)`,
             transition: isHoverEnabled
               ? `opacity 0.3s ease-out, transform ${animDuration} ${animEasing}`
               : `opacity 0.3s ease-out`,
+            pointerEvents: isHoverEnabled ? "auto" : "none",
+            cursor: isHoverEnabled ? "pointer" : "default",
             // marginLeft: "2px",
           }}
         >
