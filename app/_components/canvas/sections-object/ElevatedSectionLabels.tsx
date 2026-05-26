@@ -149,57 +149,60 @@ export function ElevatedSectionLabels({
 
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
-      <AnimatedElevatedLabel
-        sectionId="s1"
-        y={SURAH_TRANSFORMS.s1.labelPinY}
-        text={surahData.section1.label}
-        bgColor={S1_TOP_LABEL_BG}
-        borderColor={S1_TOP_LABEL_BORDER}
-        delayMs={55}
-        liftHeight={0.14}
-        tension={96}
-        friction={24}
-        renderOrder={220}
-        depthTest={true}
-      />
+      <group visible={!isIntroActive}>
+        <AnimatedElevatedLabel
+          sectionId="s1"
+          y={SURAH_TRANSFORMS.s1.labelPinY}
+          text={surahData.section1.label}
+          bgColor={S1_TOP_LABEL_BG}
+          borderColor={S1_TOP_LABEL_BORDER}
+          delayMs={55}
+          liftHeight={0.14}
+          tension={96}
+          friction={24}
+          renderOrder={220}
+          depthTest={true}
+        />
 
-      <AnimatedElevatedLabel
-        sectionId="s2_top"
-        y={SURAH_TRANSFORMS.s2.topLabelPinY}
-        text={surahData.section2.topLabel}
-        bgColor={S2_TOP_LABEL_BG}
-        borderColor={S2_TOP_LABEL_BORDER}
-        partialBorder={true}
-        delayMs={95}
-        liftHeight={0.14}
-        tension={90}
-        friction={23}
-        zBaseOffset={0.0022}
-        labelZ={0.00035}
-        renderOrder={240}
-        depthTest={true}
-      />
+        <AnimatedElevatedLabel
+          sectionId="s2_top"
+          y={SURAH_TRANSFORMS.s2.topLabelPinY}
+          text={surahData.section2.topLabel}
+          bgColor={S2_TOP_LABEL_BG}
+          borderColor={S2_TOP_LABEL_BORDER}
+          partialBorder={true}
+          delayMs={95}
+          liftHeight={0.14}
+          tension={90}
+          friction={23}
+          zBaseOffset={0.0022}
+          labelZ={0.00035}
+          renderOrder={240}
+          depthTest={true}
+        />
 
-      <AnimatedElevatedLabel
-        sectionId="s2_bottom"
-        y={SURAH_TRANSFORMS.s2.bottomLabelPinY}
-        text={surahData.section2.bottomLabel}
-        bgColor={S2_TOP_LABEL_BG}
-        borderColor={S2_TOP_LABEL_BORDER}
-        partialBorder={true}
-        bottomBorder={true}
-        delayMs={130}
-        liftHeight={0.14}
-        tension={84}
-        friction={22}
-        zBaseOffset={0.0022}
-        labelZ={0.00035}
-        renderOrder={240}
-        depthTest={true}
-      />
+        <AnimatedElevatedLabel
+          sectionId="s2_bottom"
+          y={SURAH_TRANSFORMS.s2.bottomLabelPinY}
+          text={surahData.section2.bottomLabel}
+          bgColor={S2_TOP_LABEL_BG}
+          borderColor={S2_TOP_LABEL_BORDER}
+          partialBorder={true}
+          bottomBorder={true}
+          delayMs={130}
+          liftHeight={0.14}
+          tension={84}
+          friction={22}
+          zBaseOffset={0.0022}
+          labelZ={0.00035}
+          renderOrder={240}
+          depthTest={true}
+        />
+      </group>
     </group>
   );
 }

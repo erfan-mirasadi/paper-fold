@@ -407,44 +407,46 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <ElevatedLayer
-            x={s1.frameX}
-            y={s1.frameY}
-            w={s1.frameW}
-            h={s1.frameH}
-            radius={0.02}
-            color={S1_OUTER_BORDER}
-            sectionBgTexture={getTextureForColor(S1_OUTER_BORDER)}
-            spring={s1Spring}
-          />
-          <ElevatedLayer
-            x={s1.frameX + s1.borderWidth}
-            y={s1.frameY - s1.borderWidth}
-            w={s1.frameW - s1.borderWidth * 2}
-            h={s1.frameH - s1.borderWidth * 2}
-            radius={0.017}
-            color={S1_OUTER_BG}
-            sectionBgTexture={getTextureForColor(S1_OUTER_BG)}
-            spring={s1Spring}
-            zOffset={0.001}
-            shadow
-            shadowStrength={0.95}
-            suppressShadow={isIntroActive}
-          />
-          {s1.rowConnectors.map((rc, i) => (
+          <group visible={!isIntroActive}>
             <ElevatedLayer
-              key={`s1-rc-${i}`}
-              x={rc.x}
-              y={rc.y}
-              w={rc.w}
-              h={rc.h}
-              radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={S1_INNER_BORDER}
-              sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
+              x={s1.frameX}
+              y={s1.frameY}
+              w={s1.frameW}
+              h={s1.frameH}
+              radius={0.02}
+              color={S1_OUTER_BORDER}
+              sectionBgTexture={getTextureForColor(S1_OUTER_BORDER)}
               spring={s1Spring}
-              zOffset={0.0015}
             />
-          ))}
+            <ElevatedLayer
+              x={s1.frameX + s1.borderWidth}
+              y={s1.frameY - s1.borderWidth}
+              w={s1.frameW - s1.borderWidth * 2}
+              h={s1.frameH - s1.borderWidth * 2}
+              radius={0.017}
+              color={S1_OUTER_BG}
+              sectionBgTexture={getTextureForColor(S1_OUTER_BG)}
+              spring={s1Spring}
+              zOffset={0.001}
+              shadow
+              shadowStrength={0.95}
+              suppressShadow={isIntroActive}
+            />
+            {s1.rowConnectors.map((rc, i) => (
+              <ElevatedLayer
+                key={`s1-rc-${i}`}
+                x={rc.x}
+                y={rc.y}
+                w={rc.w}
+                h={rc.h}
+                radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                color={S1_INNER_BORDER}
+                sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
+                spring={s1Spring}
+                zOffset={0.0015}
+              />
+            ))}
+          </group>
         </DraggableSectionGroup>
       </group>
 
@@ -465,61 +467,63 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <ElevatedLayer
-            x={topConnector.outer.x}
-            y={topConnector.outer.y}
-            w={topConnector.outer.w}
-            h={topConnector.outer.h}
-            radius={topConnector.outer.radius}
-            color={HOLLOW_BORDER_COLOR}
-            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
-            spring={s2TopSpring}
-            shadow
-            shadowStrength={0.62}
-            suppressShadow={isIntroActive}
-          />
-          <ElevatedLayer
-            x={topConnector.middle.x}
-            y={topConnector.middle.y}
-            w={topConnector.middle.w}
-            h={topConnector.middle.h}
-            radius={topConnector.middle.radius}
-            color={HOLLOW_BORDER_INNER}
-            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
-            spring={s2TopSpring}
-            zOffset={0.0006}
-            shadow
-            shadowStrength={0.8}
-            suppressShadow={isIntroActive}
-          />
-          <ElevatedLayer
-            x={topConnector.fill.x}
-            y={topConnector.fill.y}
-            w={topConnector.fill.w}
-            h={topConnector.fill.h}
-            radius={topConnector.fill.radius}
-            color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-            sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
-            spring={s2TopSpring}
-            zOffset={0.0012}
-            shadow
-            shadowStrength={0.65}
-            suppressShadow={isIntroActive}
-          />
-          {s2.groups[0].rowConnectors.map((rc, i) => (
+          <group visible={!isIntroActive}>
             <ElevatedLayer
-              key={`s2-top-rc-${i}`}
-              x={rc.x}
-              y={rc.y}
-              w={rc.w}
-              h={rc.h}
-              radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={MAROON_THEME}
-              sectionBgTexture={getTextureForColor(MAROON_THEME)}
+              x={topConnector.outer.x}
+              y={topConnector.outer.y}
+              w={topConnector.outer.w}
+              h={topConnector.outer.h}
+              radius={topConnector.outer.radius}
+              color={HOLLOW_BORDER_COLOR}
+              sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
               spring={s2TopSpring}
-              zOffset={0.0025}
+              shadow
+              shadowStrength={0.62}
+              suppressShadow={isIntroActive}
             />
-          ))}
+            <ElevatedLayer
+              x={topConnector.middle.x}
+              y={topConnector.middle.y}
+              w={topConnector.middle.w}
+              h={topConnector.middle.h}
+              radius={topConnector.middle.radius}
+              color={HOLLOW_BORDER_INNER}
+              sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
+              spring={s2TopSpring}
+              zOffset={0.0006}
+              shadow
+              shadowStrength={0.8}
+              suppressShadow={isIntroActive}
+            />
+            <ElevatedLayer
+              x={topConnector.fill.x}
+              y={topConnector.fill.y}
+              w={topConnector.fill.w}
+              h={topConnector.fill.h}
+              radius={topConnector.fill.radius}
+              color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+              sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
+              spring={s2TopSpring}
+              zOffset={0.0012}
+              shadow
+              shadowStrength={0.65}
+              suppressShadow={isIntroActive}
+            />
+            {s2.groups[0].rowConnectors.map((rc, i) => (
+              <ElevatedLayer
+                key={`s2-top-rc-${i}`}
+                x={rc.x}
+                y={rc.y}
+                w={rc.w}
+                h={rc.h}
+                radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                color={MAROON_THEME}
+                sectionBgTexture={getTextureForColor(MAROON_THEME)}
+                spring={s2TopSpring}
+                zOffset={0.0025}
+              />
+            ))}
+          </group>
         </DraggableSectionGroup>
       </group>
 
@@ -540,20 +544,22 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          {s2.groups[1].rowConnectors.map((rc, i) => (
-            <ElevatedLayer
-              key={`s2-center-rc-${i}`}
-              x={rc.x}
-              y={rc.y}
-              w={rc.w}
-              h={rc.h}
-              radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={GREEN_THEME}
-              sectionBgTexture={getTextureForColor(GREEN_THEME)}
-              spring={s2CenterSpring}
-              zOffset={0.0025}
-            />
-          ))}
+          <group visible={!isIntroActive}>
+            {s2.groups[1].rowConnectors.map((rc, i) => (
+              <ElevatedLayer
+                key={`s2-center-rc-${i}`}
+                x={rc.x}
+                y={rc.y}
+                w={rc.w}
+                h={rc.h}
+                radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                color={GREEN_THEME}
+                sectionBgTexture={getTextureForColor(GREEN_THEME)}
+                spring={s2CenterSpring}
+                zOffset={0.0025}
+              />
+            ))}
+          </group>
         </DraggableSectionGroup>
       </group>
 
@@ -574,61 +580,63 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <ElevatedLayer
-            x={bottomConnector.outer.x}
-            y={bottomConnector.outer.y}
-            w={bottomConnector.outer.w}
-            h={bottomConnector.outer.h}
-            radius={bottomConnector.outer.radius}
-            color={HOLLOW_BORDER_COLOR}
-            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
-            spring={s2BottomSpring}
-            shadow
-            shadowStrength={0.62}
-            suppressShadow={isIntroActive}
-          />
-          <ElevatedLayer
-            x={bottomConnector.middle.x}
-            y={bottomConnector.middle.y}
-            w={bottomConnector.middle.w}
-            h={bottomConnector.middle.h}
-            radius={bottomConnector.middle.radius}
-            color={HOLLOW_BORDER_INNER}
-            sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
-            spring={s2BottomSpring}
-            zOffset={0.0006}
-            shadow
-            shadowStrength={0.8}
-            suppressShadow={isIntroActive}
-          />
-          <ElevatedLayer
-            x={bottomConnector.fill.x}
-            y={bottomConnector.fill.y}
-            w={bottomConnector.fill.w}
-            h={bottomConnector.fill.h}
-            radius={bottomConnector.fill.radius}
-            color={HOLLOW_CONNECTOR_INNER_BG_1_3}
-            sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
-            spring={s2BottomSpring}
-            zOffset={0.0012}
-            shadow
-            shadowStrength={0.65}
-            suppressShadow={isIntroActive}
-          />
-          {s2.groups[2].rowConnectors.map((rc, i) => (
+          <group visible={!isIntroActive}>
             <ElevatedLayer
-              key={`s2-bottom-rc-${i}`}
-              x={rc.x}
-              y={rc.y}
-              w={rc.w}
-              h={rc.h}
-              radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={MAROON_THEME}
-              sectionBgTexture={getTextureForColor(MAROON_THEME)}
+              x={bottomConnector.outer.x}
+              y={bottomConnector.outer.y}
+              w={bottomConnector.outer.w}
+              h={bottomConnector.outer.h}
+              radius={bottomConnector.outer.radius}
+              color={HOLLOW_BORDER_COLOR}
+              sectionBgTexture={getTextureForColor(HOLLOW_BORDER_COLOR)}
               spring={s2BottomSpring}
-              zOffset={0.0025}
+              shadow
+              shadowStrength={0.62}
+              suppressShadow={isIntroActive}
             />
-          ))}
+            <ElevatedLayer
+              x={bottomConnector.middle.x}
+              y={bottomConnector.middle.y}
+              w={bottomConnector.middle.w}
+              h={bottomConnector.middle.h}
+              radius={bottomConnector.middle.radius}
+              color={HOLLOW_BORDER_INNER}
+              sectionBgTexture={getTextureForColor(HOLLOW_BORDER_INNER)}
+              spring={s2BottomSpring}
+              zOffset={0.0006}
+              shadow
+              shadowStrength={0.8}
+              suppressShadow={isIntroActive}
+            />
+            <ElevatedLayer
+              x={bottomConnector.fill.x}
+              y={bottomConnector.fill.y}
+              w={bottomConnector.fill.w}
+              h={bottomConnector.fill.h}
+              radius={bottomConnector.fill.radius}
+              color={HOLLOW_CONNECTOR_INNER_BG_1_3}
+              sectionBgTexture={getTextureForColor(HOLLOW_CONNECTOR_INNER_BG_1_3)}
+              spring={s2BottomSpring}
+              zOffset={0.0012}
+              shadow
+              shadowStrength={0.65}
+              suppressShadow={isIntroActive}
+            />
+            {s2.groups[2].rowConnectors.map((rc, i) => (
+              <ElevatedLayer
+                key={`s2-bottom-rc-${i}`}
+                x={rc.x}
+                y={rc.y}
+                w={rc.w}
+                h={rc.h}
+                radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                color={MAROON_THEME}
+                sectionBgTexture={getTextureForColor(MAROON_THEME)}
+                spring={s2BottomSpring}
+                zOffset={0.0025}
+              />
+            ))}
+          </group>
         </DraggableSectionGroup>
       </group>
     </group>
