@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, FC } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   EffectComposer,
@@ -19,7 +19,7 @@ type EffectsProps = {
   vignetteDarkness?: number;
 };
 
-const Effects: React.FC<EffectsProps> = ({
+const Effects: FC<EffectsProps> = ({
   glitchTrigger = 0,
   brightness = -0.1,
   contrast = 0.1,

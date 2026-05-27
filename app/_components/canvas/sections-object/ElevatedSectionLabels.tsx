@@ -137,13 +137,7 @@ function AnimatedElevatedLabel({
   );
 }
 
-type ElevatedSectionLabelsProps = {
-  introGuidesActive?: boolean;
-};
-
-export function ElevatedSectionLabels({
-  introGuidesActive = false,
-}: ElevatedSectionLabelsProps) {
+export function ElevatedSectionLabels() {
   const runtime = useSurahLayoutRuntime();
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
 

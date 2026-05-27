@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import {
   ELEVATED_SCROLL_UNLOCK_THRESHOLD,
@@ -61,7 +61,16 @@ function RestoreIcon() {
 }
 
 export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
-  const currentOffset = useFoldStore((s) => s.currentOffset);
+  const [isPastThreshold, setIsPastThreshold] = useState(
+    () => useFoldStore.getState().currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD
+  );
+
+  useEffect(() => {
+    return useFoldStore.subscribe((state) => {
+      const past = state.currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD;
+      setIsPastThreshold((prev) => (prev !== past ? past : prev));
+    });
+  }, []);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const showAllSections = useElevatedStore((s) => s.showAllSections);
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
@@ -72,8 +81,7 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
   const buttonH = "clamp(38px, 4.2vw, 44px)";
   const radius = "clamp(12px, 1.4vw, 14px)";
 
-  const canShowControl =
-    isAllSectionsMode || currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD;
+  const canShowControl = isAllSectionsMode || isPastThreshold;
 
   const buttonTheme = useMemo(() => {
     const border = isDarkMode

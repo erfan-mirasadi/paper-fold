@@ -266,11 +266,7 @@ function DraggableSectionGroup({
   );
 }
 
-export function ElevatedSectionSurfaces({
-  introGuidesActive = false,
-}: {
-  introGuidesActive?: boolean;
-}) {
+export function ElevatedSectionSurfaces() {
   const runtime = useSurahLayoutRuntime();
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
 
@@ -413,7 +409,7 @@ export function ElevatedSectionSurfaces({
           isActive={s1Active}
           sectionBounds={s1Bounds}
         >
-          {introGuidesActive && (
+          {isIntroActive && (
             <IntroGuide3DReporter
               guideId="s1"
               position={[
@@ -473,7 +469,7 @@ export function ElevatedSectionSurfaces({
           isActive={s2TopActive}
           sectionBounds={s2TopBounds}
         >
-          {introGuidesActive && (
+          {isIntroActive && (
             <IntroGuide3DReporter
               guideId="s2_top"
               position={[
@@ -550,7 +546,7 @@ export function ElevatedSectionSurfaces({
           isActive={s2CenterActive}
           sectionBounds={s2CenterBounds}
         >
-          {introGuidesActive && (
+          {isIntroActive && (
             <IntroGuide3DReporter
               guideId="s2_center"
               position={[
@@ -586,7 +582,7 @@ export function ElevatedSectionSurfaces({
           isActive={s2BottomActive}
           sectionBounds={s2BottomBounds}
         >
-          {introGuidesActive && (
+          {isIntroActive && (
             <IntroGuide3DReporter
               guideId="s2_bottom"
               position={[

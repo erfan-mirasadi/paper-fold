@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ReactNode } from "react";
 import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
@@ -56,7 +57,7 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html

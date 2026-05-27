@@ -34,7 +34,6 @@ export function Experience({
   onReady,
 }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
-  const isIntroActive = useFoldStore((s) => s.isIntroActive);
   const { gl, scene, camera } = useThree();
 
   // We track paper readiness
@@ -67,36 +66,40 @@ export function Experience({
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [isIntroActive, paperReady, onReady]);
+  }, [paperReady, onReady]);
 
   // Background Compilation
   useEffect(() => {
-    if (isIntroActive && paperReady) {
+    if (paperReady && useFoldStore.getState().isIntroActive) {
       gl.compileAsync(scene, camera).catch(() => {});
     }
-  }, [isIntroActive, paperReady, gl, scene, camera]);
+  }, [paperReady, gl, scene, camera]);
 
   // Ensure the elevated store is in the correct state for the intro.
   // restoreAllSections() is intentionally deferred until introHandoffProgress
   // has reached 1 so the boolean flip never interrupts scroll-driven springs.
   useEffect(() => {
-    if (isIntroActive) {
+    const unsub = useFoldStore.subscribe((state, prevState) => {
+      if (state.isIntroActive && !prevState.isIntroActive) {
+        useElevatedStore.getState().forceShowAllSections();
+      }
+    });
+    if (useFoldStore.getState().isIntroActive) {
       useElevatedStore.getState().forceShowAllSections();
     }
-    // The "else" path (restoreAllSections) is handled inside syncSceneTargets
-    // once the handoff scroll progress is complete.
-  }, [isIntroActive]);
+    return unsub;
+  }, []);
 
   const handleBackgroundClick = useCallback(
     (e: ThreeEvent<MouseEvent>) => {
-      if (isIntroActive) return;
+      if (useFoldStore.getState().isIntroActive) return;
       if (e.delta > 2) return;
       const { hasDragged } = useDragState.getState();
       if (hasDragged) return;
       // Dismiss elevated verse on background click
       useElevatedStore.getState().dismiss();
     },
-    [isIntroActive],
+    [],
   );
 
   const {
@@ -135,8 +138,8 @@ export function Experience({
             onReady={handlePaperReady}
           />
         </a.group>
-        <ElevatedSectionSurfaces introGuidesActive={isIntroActive} />
-        <ElevatedSectionLabels introGuidesActive={isIntroActive} />
+        <ElevatedSectionSurfaces />
+        <ElevatedSectionLabels />
         <VersesRenderer />
         {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
@@ -151,9 +154,9 @@ export function Experience({
       </mesh>
 
       {/* Imported the dedicated IntroExperience component */}
-      <IntroExperience isIntroActive={isIntroActive} isDarkMode={isDarkMode} />
+      <IntroExperience isDarkMode={isDarkMode} />
 
-      <DynamicControls isIntroActive={isIntroActive} />
+      <DynamicControls />
       <Environment preset="apartment" />
       <ambientLight intensity={1} />
       <SpotLight
@@ -177,36 +180,51 @@ export function Experience({
   );
 }
 
-function DynamicControls({ isIntroActive }: { isIntroActive: boolean }) {
-  if (isIntroActive) {
-    const allowOrbit = INTRO_CAMERA_CONFIG.allowOrbit;
+function DynamicControls() {
+  const controlsRef = useRef<any>(null);
 
-    return (
-      <OrbitControls
-        enabled={true}
-        enableRotate={allowOrbit}
-        enableZoom={allowOrbit}
-        enablePan={allowOrbit}
-        makeDefault={true}
-        minAzimuthAngle={-Infinity}
-        maxAzimuthAngle={Infinity}
-        minPolarAngle={0}
-        maxPolarAngle={Math.PI}
-      />
-    );
-  }
+  useEffect(() => {
+    const updateControls = (isActive: boolean) => {
+      const controls = controlsRef.current;
+      if (!controls) return;
+
+      if (isActive) {
+        const allowOrbit = INTRO_CAMERA_CONFIG.allowOrbit;
+        controls.enableRotate = allowOrbit;
+        controls.enableZoom = allowOrbit;
+        controls.enablePan = allowOrbit;
+        controls.minAzimuthAngle = -Infinity;
+        controls.maxAzimuthAngle = Infinity;
+        controls.minPolarAngle = 0;
+        controls.maxPolarAngle = Math.PI;
+      } else {
+        controls.enableRotate = false;
+        controls.enableZoom = false;
+        controls.enablePan = false;
+        controls.minAzimuthAngle = CAMERA_CONFIG.orbitControls.minAzimuthAngle;
+        controls.maxAzimuthAngle = CAMERA_CONFIG.orbitControls.maxAzimuthAngle;
+        controls.minPolarAngle = CAMERA_CONFIG.orbitControls.minPolarAngle;
+        controls.maxPolarAngle = CAMERA_CONFIG.orbitControls.maxPolarAngle;
+      }
+    };
+
+    const unsubscribe = useFoldStore.subscribe((state, prevState) => {
+      if (state.isIntroActive !== prevState.isIntroActive) {
+        updateControls(state.isIntroActive);
+      }
+    });
+
+    // Initial setup
+    updateControls(useFoldStore.getState().isIntroActive);
+
+    return unsubscribe;
+  }, []);
 
   return (
     <OrbitControls
+      ref={controlsRef}
       enabled={true}
-      enableRotate={false}
-      enableZoom={false}
-      enablePan={false}
       makeDefault={true}
-      minAzimuthAngle={CAMERA_CONFIG.orbitControls.minAzimuthAngle}
-      maxAzimuthAngle={CAMERA_CONFIG.orbitControls.maxAzimuthAngle}
-      minPolarAngle={CAMERA_CONFIG.orbitControls.minPolarAngle}
-      maxPolarAngle={CAMERA_CONFIG.orbitControls.maxPolarAngle}
     />
   );
 }

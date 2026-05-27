@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, memo, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import { useDragState, resetAllDrags } from "../../../utils/dragEngine";
@@ -13,11 +14,22 @@ export function NavigationOverlay({
   isDarkMode = false,
 }: NavigationOverlayProps) {
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
-  const currentOffset = useFoldStore((s) => s.currentOffset);
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
   const hasDragged = useDragState((s) => s.hasDragged);
   const isPaperDocked = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+
+  // Replace 60fps reactive scroll hook with a discrete state that only updates when crossing 0.5
+  const [isEndStage, setIsEndStage] = useState(
+    () => useFoldStore.getState().currentOffset < 0.5
+  );
+
+  useEffect(() => {
+    return useFoldStore.subscribe((state) => {
+      const currentIsEnd = state.currentOffset < 0.5;
+      setIsEndStage((prev) => (prev !== currentIsEnd ? currentIsEnd : prev));
+    });
+  }, []);
 
   // Fluid placement/size: match other overlays on the right
   const rightOffset = "clamp(170px, 24vw, 240px)";
@@ -131,8 +143,7 @@ export function NavigationOverlay({
     visible: { x: 0, opacity: 1 },
   } as const;
 
-  const nextStageId: "end" | "pre-start" =
-    currentOffset < 0.5 ? "end" : "pre-start";
+  const nextStageId: "end" | "pre-start" = isEndStage ? "end" : "pre-start";
   const activeIcon = nextStageId === "end" ? iconUnfold : iconFold;
   const buttonLabel = nextStageId === "end" ? "Aç" : "Kapat";
 
@@ -198,7 +209,7 @@ export function NavigationOverlay({
 
 interface NavButtonProps {
   onClick: () => void;
-  icon: React.ReactNode;
+  icon: ReactNode;
   label?: string;
   isDarkMode: boolean;
   isPending: boolean;
@@ -212,7 +223,8 @@ interface NavButtonProps {
   glassHoverShadow: string;
   variants: import("framer-motion").Variants;
 }
-function NavButton({
+
+const NavButton = memo(function NavButton({
   onClick,
   icon,
   label,
@@ -396,4 +408,4 @@ function NavButton({
       )}
     </motion.button>
   );
-}
+});

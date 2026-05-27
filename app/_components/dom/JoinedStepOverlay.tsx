@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 
@@ -7,11 +7,19 @@ interface JoinedStepOverlayProps {
 }
 
 export default function JoinedStepOverlay({ isDarkMode }: JoinedStepOverlayProps) {
-  const introProgress = useFoldStore((s) => s.introProgress);
-  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
+  // Use a localized state driven by vanilla subscribe to guarantee zero React re-renders during scroll.
+  // This state only updates EXACTLY TWICE: once when entering the joined step, and once when leaving.
+  const [isJoinedStep, setIsJoinedStep] = useState(() => {
+    const s = useFoldStore.getState();
+    return s.introProgress >= 0.99 && s.introHandoffProgress < 0.05;
+  });
 
-  // Strictly trigger only when the sections have fully met at the center
-  const isJoinedStep = introProgress >= 0.99 && introHandoffProgress < 0.05;
+  useEffect(() => {
+    return useFoldStore.subscribe((state) => {
+      const joined = state.introProgress >= 0.99 && state.introHandoffProgress < 0.05;
+      setIsJoinedStep(joined);
+    });
+  }, []);
 
   return (
     <AnimatePresence>

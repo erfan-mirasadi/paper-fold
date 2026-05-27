@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 import { INTRO_MEDIA_DATA } from "../../data/introMedia";
 import { AnimatedText } from "./ui-overlay/AnimatedText";
@@ -13,11 +14,19 @@ export function IntroBackgroundTextOverlay({
   const activeAmbientMediaId = useFoldStore((s) => s.activeAmbientMediaId);
   const loopedAmbientMediaId = useFoldStore((s) => s.loopedAmbientMediaId);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
-  const introProgress = useFoldStore((s) => s.introProgress);
-  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
 
-  // Strictly trigger only when the sections have fully met at the center (Page 2)
-  const isJoinedStep = introProgress >= 0.99 && introHandoffProgress < 0.05;
+  // Localized discrete state to shield from 60fps scroll renders
+  const [isJoinedStep, setIsJoinedStep] = useState(() => {
+    const s = useFoldStore.getState();
+    return s.introProgress >= 0.99 && s.introHandoffProgress < 0.05;
+  });
+
+  useEffect(() => {
+    return useFoldStore.subscribe((state) => {
+      const joined = state.introProgress >= 0.99 && state.introHandoffProgress < 0.05;
+      setIsJoinedStep(joined);
+    });
+  }, []);
 
   if (!isIntroActive || !isJoinedStep) return null;
 

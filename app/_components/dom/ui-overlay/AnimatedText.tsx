@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { CSSProperties, FC, ReactNode, JSX } from "react";
 import { motion, Variants } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -12,7 +12,7 @@ function cn(...inputs: ClassValue[]) {
 export interface AnimatedTextProps {
   text: string;
   // Controls the HTML tag rendered
-  as?: keyof React.JSX.IntrinsicElements;
+  as?: keyof JSX.IntrinsicElements;
   // Custom Tailwind classes
   className?: string;
   // Enables the intense glowing effect seen on "it's wearable"
@@ -28,14 +28,14 @@ export interface AnimatedTextProps {
   // Enables a heavy, cinematic word-by-word animation (non-spring)
   cinematic?: boolean;
   // Custom styles
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   // Custom classes for the word spans
   spanClassName?: string;
   // Custom class for line break spans to control vertical spacing between lines
   lineGapClass?: string;
 }
 
-export const AnimatedText: React.FC<AnimatedTextProps> = ({
+export const AnimatedText: FC<AnimatedTextProps> = ({
   text,
   as: Tag = "h2",
   className,
@@ -135,7 +135,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
 
   // Split text by \n to handle manual line breaks
   const lines = text.split("\n");
-  const renderElements: React.ReactNode[] = [];
+  const renderElements: ReactNode[] = [];
 
   lines.forEach((line, lineIndex) => {
     // Split each line into words

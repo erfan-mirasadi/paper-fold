@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
@@ -77,7 +77,7 @@ const _liveTransforms: Record<ElevatedSectionId, Transform7> = {
 /** Group refs registered by consumers — the controller applies transforms to all of them. */
 const _registeredGroups: Record<
   ElevatedSectionId,
-  Set<React.RefObject<Group | null>>
+  Set<RefObject<Group | null>>
 > = {
   s1: new Set(),
   s2_top: new Set(),

@@ -1,11 +1,11 @@
 "use client";
 
 import Lenis from "lenis";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 
 const LenisContext = createContext<Lenis | null>(null);
 
-export function LenisProvider({ children }: { children: React.ReactNode }) {
+export function LenisProvider({ children }: { children: ReactNode }) {
   const rafIdRef = useRef<number | null>(null);
   const [lenis] = useState<Lenis | null>(() => {
     if (typeof window === "undefined") return null;

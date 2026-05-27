@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, CSSProperties } from "react";
 import Image from "next/image";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 import { INTRO_MEDIA_DATA } from "../../data/introMedia";
@@ -50,11 +50,19 @@ export default function AmbientMedia({
   isVideo: propIsVideo,
 }: AmbientMediaProps) {
   const activeId = useFoldStore((s) => s.activeAmbientMediaId);
-  const introProgress = useFoldStore((s) => s.introProgress);
-  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
 
-  // Strictly trigger only when the sections have fully met at the center
-  const isJoinedStep = introProgress >= 0.99 && introHandoffProgress < 0.05;
+  // Localized discrete state to shield from 60fps scroll renders
+  const [isJoinedStep, setIsJoinedStep] = useState(() => {
+    const s = useFoldStore.getState();
+    return s.introProgress >= 0.99 && s.introHandoffProgress < 0.05;
+  });
+
+  useEffect(() => {
+    return useFoldStore.subscribe((state) => {
+      const joined = state.introProgress >= 0.99 && state.introHandoffProgress < 0.05;
+      setIsJoinedStep(joined);
+    });
+  }, []);
 
   const [loopIndex, setLoopIndex] = useState(0);
 
@@ -85,7 +93,7 @@ export default function AmbientMedia({
     propIsVideo !== undefined ? propIsVideo : (activeMedia?.isVideo ?? true);
 
   // Mask that fades smoothly on all edges: Top, Bottom, Left, and Right.
-  const maskStyle: React.CSSProperties = {
+  const maskStyle: CSSProperties = {
     WebkitMaskImage:
       "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)",
     WebkitMaskComposite: "source-in",

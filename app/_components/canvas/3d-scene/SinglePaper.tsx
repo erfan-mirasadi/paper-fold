@@ -5,7 +5,7 @@ import { FloatingArrows } from "../SurahLayout/FloatingArrows";
 import { writeFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, FC } from "react";
 import {
   Bone,
   BoxGeometry,
@@ -18,6 +18,7 @@ import {
   SkinnedMesh,
   Uint16BufferAttribute,
   Vector3,
+  Material,
 } from "three";
 import { BismillahFloatingText3D } from "../SurahLayout/BismillahFloatingText3D";
 import { PAGE_BG_COLOR } from "../../../data/theme";
@@ -53,7 +54,7 @@ interface SinglePaperProps {
   onReady?: () => void;
 }
 
-export const SinglePaper: React.FC<SinglePaperProps> = ({
+export const SinglePaper: FC<SinglePaperProps> = ({
   isFolded = false,
   isDarkMode = false,
   toggles = { diffuse: true, normal: true },
@@ -155,7 +156,7 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     return () => {
       if (manualSkinnedMesh) {
         manualSkinnedMesh.geometry.dispose();
-        const mats = manualSkinnedMesh.material as THREE.Material[];
+        const mats = manualSkinnedMesh.material as Material[];
         if (Array.isArray(mats)) {
           // Dispose the dynamically created materials (index 4 and 5)
           mats[4]?.dispose();
