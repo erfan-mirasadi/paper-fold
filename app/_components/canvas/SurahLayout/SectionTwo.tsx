@@ -1,0 +1,140 @@
+"use client";
+import { TopLabel, VerseBox } from "./SharedUI";
+import { SideCurves } from "./SideCurves";
+import { HollowConnector } from "./HollowConnector";
+import { VerseGroup } from "./VerseGroup";
+import {
+  // S2_OUTER_BORDER,
+  // S2_OUTER_BG,
+  BLUE_THEME,
+  CAPSULE_BG_6_19,
+  S2_TOP_LABEL_BG,
+  S2_TOP_LABEL_BORDER,
+} from "../../../data/theme";
+import type {
+  SectionTwoData,
+  LayoutConfig,
+  S2Transforms,
+} from "../../../data/SurahConfig";
+
+interface SectionTwoProps {
+  data: SectionTwoData;
+  transforms: S2Transforms;
+  layout: LayoutConfig;
+  startX: number;
+  PW: number;
+  isFolded?: boolean;
+}
+
+export function SectionTwo({
+  data,
+  transforms,
+  layout,
+  startX,
+  PW,
+}: SectionTwoProps) {
+  const t = transforms;
+  const edgeVerseBorderWidth = t.borderWidth;
+
+  return (
+    <group>
+      {/* ─── SECTION OUTER FRAME ─────────────────────────────────────────── */}
+
+      {/* ─── TOP HOLLOW CONNECTOR ────────────────────────────────────────── */}
+      <HollowConnector
+        position="top"
+        boxX={t.connectorX}
+        boxW={t.connectorW}
+        yTop={t.topConnectorY}
+        yBottom={t.topConnectorY - t.topConnectorH}
+        height={t.topConnectorH}
+        borderWidth={t.borderWidth}
+      />
+
+      {/* ─── BOTTOM HOLLOW CONNECTOR ─────────────────────────────────────── */}
+      <HollowConnector
+        position="bottom"
+        boxX={t.connectorX}
+        boxW={t.connectorW}
+        yTop={t.bottomConnectorY}
+        yBottom={t.bottomConnectorY - t.bottomConnectorH}
+        height={t.bottomConnectorH}
+        borderWidth={t.borderWidth}
+      />
+
+      {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
+      <VerseBox
+        x={t.introVerse.x}
+        y={t.introVerse.y}
+        z={t.introVerse.z}
+        w={t.introVerse.w}
+        h={t.introVerse.h}
+        verse={data.introVerse.text}
+        number={data.introVerse.number}
+        bg={CAPSULE_BG_6_19}
+        border={BLUE_THEME}
+        circleBorderCol={BLUE_THEME}
+        circleBg={CAPSULE_BG_6_19}
+        circleTextCol={BLUE_THEME}
+        isPill={false}
+        borderWidth={edgeVerseBorderWidth}
+      />
+
+      {/* ─── VERSE GROUPS — mapped from pre-computed group transforms ─────── */}
+      {data.colorGroups.map((group, index) => (
+        <VerseGroup
+          key={index}
+          group={group}
+          groupTransform={t.groups[index]}
+          groupIndex={index}
+        />
+      ))}
+
+      {/* ─── OUTRO VERSE (verse 19) ──────────────────────────────────────── */}
+      <VerseBox
+        x={t.outroVerse.x}
+        y={t.outroVerse.y}
+        z={t.outroVerse.z}
+        w={t.outroVerse.w}
+        h={t.outroVerse.h}
+        verse={data.outroVerse.text}
+        number={data.outroVerse.number}
+        bg={CAPSULE_BG_6_19}
+        border={BLUE_THEME}
+        circleBorderCol={BLUE_THEME}
+        circleBg={CAPSULE_BG_6_19}
+        circleTextCol={BLUE_THEME}
+        isPill={false}
+        borderWidth={edgeVerseBorderWidth}
+      />
+
+      {/* ─── SIDE CURVES (still read raw layout math) ────────────────────── */}
+      <SideCurves
+        layout={layout}
+        startX={startX}
+        borderWidth={edgeVerseBorderWidth}
+      />
+
+      {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
+      <TopLabel
+        x={PW / 2}
+        y={t.topLabelPinY}
+        z={0.004}
+        text={data.topLabel}
+        partialBorder={true}
+        bgColor={S2_TOP_LABEL_BG}
+        borderColor={S2_TOP_LABEL_BORDER}
+      />
+      <TopLabel
+        x={PW / 2}
+        y={t.bottomLabelPinY}
+        z={0.004}
+        text={data.bottomLabel}
+        partialBorder={true}
+        bottomBorder={true}
+        bgColor={S2_TOP_LABEL_BG}
+        borderColor={S2_TOP_LABEL_BORDER}
+      />
+    </group>
+  );
+}

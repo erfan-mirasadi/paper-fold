@@ -1,15 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Fira_Sans_Condensed, Inter } from "next/font/google";
+import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text } from "next/font/google";
 import "./globals.css";
-import GrainOverlay from "./_components/ui-overlay/GrainOverlay";
+import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+});
 
-const firaSansCondensed = Fira_Sans_Condensed({
-  weight: ["500", "600", "700"],
-  subsets: ["latin", "latin-ext"],
+const cormorantGaramond = Cormorant_Garamond({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
   display: "swap",
-  variable: "--font-fira-sans-condensed",
+  variable: "--font-cormorant",
+});
+
+const poppins = Poppins({
+  weight: ["400", "600", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-poppins",
+});
+
+const dmSerifText = DM_Serif_Text({
+  weight: ["400"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-serif",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +50,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#ffffff",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -43,11 +60,11 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="tr"
       suppressHydrationWarning
-      className={`${inter.className} ${firaSansCondensed.variable} h-full antialiased`}
+      className={`${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} h-full antialiased`}
     >
-      <body>
+      <body className="font-sans">
         <GrainOverlay />
         {children}
       </body>
