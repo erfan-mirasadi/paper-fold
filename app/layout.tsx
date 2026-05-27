@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Cormorant_Garamond } from "next/font/google";
+import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
 
@@ -13,6 +13,20 @@ const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-cormorant",
+});
+
+const poppins = Poppins({
+  weight: ["400", "600", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-poppins",
+});
+
+const dmSerifText = DM_Serif_Text({
+  weight: ["400"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-serif",
 });
 
 export const metadata: Metadata = {
@@ -48,7 +62,7 @@ export default function RootLayout({
     <html
       lang="tr"
       suppressHydrationWarning
-      className={`${manrope.variable} ${cormorantGaramond.variable} h-full antialiased`}
+      className={`${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} h-full antialiased`}
     >
       <body className="font-sans">
         <GrainOverlay />

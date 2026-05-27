@@ -13,16 +13,31 @@ export function IntroBackgroundTextOverlay({
   const activeAmbientMediaId = useFoldStore((s) => s.activeAmbientMediaId);
   const loopedAmbientMediaId = useFoldStore((s) => s.loopedAmbientMediaId);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const introProgress = useFoldStore((s) => s.introProgress);
+  const introHandoffProgress = useFoldStore((s) => s.introHandoffProgress);
 
-  if (!isIntroActive) return null;
+  // Strictly trigger only when the sections have fully met at the center (Page 2)
+  const isJoinedStep = introProgress >= 0.99 && introHandoffProgress < 0.05;
+
+  if (!isIntroActive || !isJoinedStep) return null;
 
   const effectiveActiveId = activeAmbientMediaId || loopedAmbientMediaId;
   const data = effectiveActiveId
     ? INTRO_MEDIA_DATA[effectiveActiveId]?.backgroundText
     : null;
 
+  const toSentenceCase = (str: string) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
+  const toLowerCase = (str: string) => {
+    if (!str) return "";
+    return str.toLowerCase();
+  };
+
   return (
-    <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden z-[40]">
       <AnimatePresence mode="wait">
         {data && (
           <motion.div
@@ -31,54 +46,59 @@ export function IntroBackgroundTextOverlay({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 1.05, y: -20 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative flex flex-col items-center w-[65vw] text-center translate-x-8"
-            style={{
-              // Use drop-shadow instead of background so it perfectly outlines the text
-              // without creating any blocky frames or large radial circles.
-              filter: isDarkMode
-                ? "drop-shadow(0 4px 24px rgba(0,0,0,0.8)) drop-shadow(0 2px 8px rgba(0,0,0,0.6))"
-                : "drop-shadow(0 4px 24px rgba(255,255,255,0.8)) drop-shadow(0 2px 8px rgba(255,255,255,0.6))",
-            }}
+            className="relative flex flex-col items-center w-[65vw] text-center translate-x-16 md:translate-x-20"
           >
             {data.caption && (
               <AnimatedText
-                text={data.caption}
+                text={toSentenceCase(data.caption)}
                 variant="caption"
                 animationType="flyInLeft"
-                className={`mb-4 tracking-widest text-lg md:text-xl w-full justify-center ${
-                  isDarkMode ? "text-[#db5001]" : "text-[#b24000]"
+                cinematic={true}
+                style={{ textShadow: "none" }}
+                className={`mb-4 tracking-widest text-lg md:text-xl font-[family-name:var(--font-poppins)] font-medium w-full justify-center ${
+                  isDarkMode ? "text-white/50" : "text-black/50"
                 }`}
               />
             )}
             {data.title && (
               <AnimatedText
-                text={data.title}
+                text={toSentenceCase(data.title)}
                 variant="title"
                 animationType="flyInBottom"
-                glow={true}
-                className={`tracking-[0.05em] text-[12vw] md:text-[9vw] mb-6 font-bold leading-none select-none w-full justify-center ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
+                cinematic={true}
+                style={{
+                  textShadow: "none",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
+                  maskImage:
+                    "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
+                }}
+                lineGapClass="-mt-4 md:-mt-8"
+                className={`font-semibold font-[family-name:var(--font-poppins)] leading-[1] select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} ${data.titleSize ? data.titleSize : "text-[9vw] md:text-[7vw]"}`}
               />
             )}
             {data.subtitle && (
               <AnimatedText
-                text={data.subtitle}
+                text={toLowerCase(data.subtitle)}
                 variant="subtitle"
                 animationType="flyInLeft"
-                className={`mb-4 w-full text-4xl md:text-5xl justify-center ${
-                  isDarkMode ? "text-white" : "text-black"
-                } font-light italic`}
+                cinematic={true}
+                style={{ textShadow: "none" }}
+                className={`font-[family-name:var(--font-dm-serif)] italic leading-[1] select-none w-full justify-center text-4xl md:text-5xl -mt-2 md:-mt-4 mb-4 ${
+                  isDarkMode ? "text-white/90" : "text-black/90"
+                }`}
               />
             )}
             {data.body && (
               <AnimatedText
-                text={data.body}
+                text={toLowerCase(data.body)}
                 variant="body"
                 animationType="fadeIn"
-                className={`${
-                  isDarkMode ? "text-zinc-300" : "text-zinc-600"
-                } text-2xl md:text-3xl mt-4 w-full justify-center`}
+                cinematic={true}
+                style={{ textShadow: "none" }}
+                className={`font-[family-name:var(--font-dm-serif)] italic leading-[1] select-none w-full justify-center text-2xl md:text-3xl -mt-2 md:-mt-4 ${
+                  isDarkMode ? "text-white/90" : "text-black/90"
+                }`}
               />
             )}
           </motion.div>

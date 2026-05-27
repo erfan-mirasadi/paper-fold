@@ -129,7 +129,7 @@ export default function Home() {
 
         <IntroBackgroundTextOverlay isDarkMode={isDarkMode} />
 
-        <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none z-[10]">
           <AmbientMedia />
         </div>
 

@@ -71,7 +71,7 @@ export default function AmbientMedia({
 
     const interval = setInterval(() => {
       setLoopIndex((prev) => (prev + 1) % mediaKeys.length);
-    }, 4000);
+    }, 10000); // Increased from 4000 to 10000 to allow time for reading text
 
     return () => clearInterval(interval);
   }, [activeId, isJoinedStep, loopIndex]);

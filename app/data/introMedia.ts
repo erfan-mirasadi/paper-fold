@@ -8,6 +8,7 @@ export interface IntroMediaItem {
     title?: string;
     subtitle?: string;
     body?: string; // Using body for longer descriptions as a UI best practice
+    titleSize?: string; // Allows overriding the auto-calculated title font size
   };
 }
 
@@ -17,9 +18,9 @@ export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
     isVideo: true,
     backgroundText: {
       caption: "Muhkem",
-      title: "Tebliğ ve irşat vazifesinin tarifi tebliği",
+      title: "Tebliğ\nirşat vazifesinin \ntarifi tebliği",
       // Moved the long explanation to body, keeping it semantic for the frontend
-      body: "Risâlet makamının rütbesinin vazifesinin dünyaya ilânı",
+      body: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
     },
   },
   s2_top: {
@@ -27,7 +28,7 @@ export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
     isVideo: false,
     backgroundText: {
       caption: "Ebu Cehilin dünyası",
-      title: "Tuğyan ve zulüm ve inkar ve istiğna",
+      title: "Tuğyan\n zulüm\ninkar \nistiğna",
     },
   },
   s2_center: {
@@ -35,7 +36,7 @@ export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
     isVideo: false,
     backgroundText: {
       // Missing caption or body from the client is fine, the component will handle it gracefully
-      title: "Dışarıdan bakanlara hitap",
+      title: "Dışarıdan bakanlara\n hitap",
     },
   },
   s2_bottom: {
@@ -43,7 +44,7 @@ export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
     isVideo: false,
     backgroundText: {
       caption: "EbuCehilin Ahireti",
-      title: "Tuğyanın, zulmün, inkarın karşılığı",
+      title: "Tuğyanın\n zulmün\n inkarın \nkarşılığı",
     },
   },
 };

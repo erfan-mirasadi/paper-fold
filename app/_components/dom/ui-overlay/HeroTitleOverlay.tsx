@@ -18,58 +18,36 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 50,
-        pointerEvents: "none",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        opacity,
-        paddingBottom: "15vh",
-      }}
+      className="pointer-events-none fixed inset-0 flex items-center justify-center overflow-hidden z-[50]"
+      style={{ opacity, paddingBottom: "15vh" }}
     >
-      {/* "ALAK" - The Powerhouse */}
-      <AnimatedText
-        text="ALAK"
-        variant="title"
-        noWrap={true}
-        animationType="flyInTop"
-        className={`text-[18vw] md:text-[14vw] leading-[0.75] font-sans font-black tracking-[-0.08em] ${
-          isDarkMode ? "mix-blend-screen" : "mix-blend-multiply"
-        }`}
-        spanClassName={`bg-clip-text text-transparent bg-gradient-to-b ${
-          isDarkMode
-            ? "from-[#ffffff] via-[#f8fafc] to-[#94a3b8]"
-            : "from-[#020617] via-[#0f172a] to-[#475569]"
-        }`}
-        glow={isDarkMode}
-      />
-
-      {/* Subtle Divider Line */}
-      <div 
-        className={`w-[15vw] h-[1px] my-4 md:my-6 transition-colors duration-500 ${
-          isDarkMode ? "bg-white/20" : "bg-black/10"
-        }`}
-      />
-
-      {/* "SURESİ" - The Elegant Echo */}
-      <AnimatedText
-        text="SURESİ"
-        variant="title"
-        noWrap={true}
-        animationType="flyInBottom"
-        className={`text-[6vw] md:text-[4vw] leading-none font-serif font-extralight italic tracking-[0.4em] translate-x-[0.2em] ${
-          isDarkMode ? "text-white/60" : "text-black/50"
-        }`}
-        style={{
-          textShadow: isDarkMode 
-            ? "0 0 20px rgba(255,255,255,0.1)" 
-            : "0 0 20px rgba(0,0,0,0.05)"
-        }}
-      />
+      <div className="relative flex flex-col items-center text-center">
+        <AnimatedText
+          text="Alak"
+          variant="title"
+          animationType="flyInBottom"
+          cinematic={true}
+          style={{
+            textShadow: "none",
+            WebkitMaskImage:
+              "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
+            maskImage:
+              "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
+          }}
+          lineGapClass="-mt-4 md:-mt-8"
+          className={`font-semibold font-[family-name:var(--font-poppins)] leading-[1] select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} text-[15vw] md:text-[12vw]`}
+        />
+        <AnimatedText
+          text="suresi"
+          variant="subtitle"
+          animationType="flyInLeft"
+          cinematic={true}
+          style={{ textShadow: "none" }}
+          className={`font-[family-name:var(--font-dm-serif)] italic leading-[1] select-none w-full justify-center text-5xl md:text-6xl -mt-12 md:-mt-20 mb-4 relative z-10 ${
+            isDarkMode ? "text-white/90" : "text-black/90"
+          }`}
+        />
+      </div>
     </div>
   );
 }
