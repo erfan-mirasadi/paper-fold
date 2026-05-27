@@ -4,7 +4,10 @@ import type Lenis from "lenis";
 import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
 import { FOLD_STORY_STEPS, getOffsetForId } from "../3d-scene/FoldStory";
-import { useElevatedStore, type ElevatedSectionId } from "../../../stores/useElevatedStore";
+import {
+  useElevatedStore,
+  type ElevatedSectionId,
+} from "../../../stores/useElevatedStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
 
@@ -25,7 +28,7 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 export const SCROLL_TIMELINE = {
   intro: { start: 0, end: 26 }, // Ends at 26%
   handoff: { start: 33, end: 50 }, // Starts at 33%, creating a 7% physical pause (maks) for the step!
-  story: { start: 50, end: 100 }, 
+  story: { start: 50, end: 100 },
 };
 
 interface FoldStoreState {

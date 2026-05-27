@@ -24,6 +24,7 @@ const MediaElement = ({ src, isVideo, className = "" }: MediaElementProps) => {
         loop
         muted
         playsInline
+        preload="auto"
         className={`absolute inset-0 w-full h-full object-cover ${className}`}
       />
     );
@@ -108,11 +109,12 @@ export default function AmbientMedia({
             className="absolute inset-0 w-full h-full"
             style={{ willChange: "transform, opacity" }}
           >
-            {/* Optimized Ambient Glow: Single high-performance layer instead of 3. 
-                Massively reduces GPU overhead while maintaining the premium glow effect. */}
-            <div className="absolute inset-0 z-0 scale-[1.4] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
-              <MediaElement src={src} isVideo={isVideo} />
-            </div>
+            {/* Optimized Ambient Glow: Skip heavy blur for videos to prevent massive GPU frame drops. */}
+            {!isVideo && (
+              <div className="absolute inset-0 z-0 scale-[1.4] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
+                <MediaElement src={src} isVideo={isVideo} />
+              </div>
+            )}
 
             {/* Foreground Layer: The Media with the custom mask */}
             <div

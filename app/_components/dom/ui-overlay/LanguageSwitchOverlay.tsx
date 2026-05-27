@@ -154,6 +154,7 @@ export function LanguageSwitchOverlay({
           <motion.button
             type="button"
             aria-label="Language menu"
+            onPointerDown={(e) => e.preventDefault()}
             whileHover={{ scale: 1.015 }}
             whileTap={{ scale: 0.992 }}
             animate={{ width: isOpen ? BUTTON_W_OPEN : BUTTON_W_CLOSED }}
@@ -249,6 +250,7 @@ export function LanguageSwitchOverlay({
                     <motion.button
                       key={language}
                       type="button"
+                      onPointerDown={(e) => e.preventDefault()}
                       onClick={() => {
                         if (
                           activeLanguage !== language &&

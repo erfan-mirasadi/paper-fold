@@ -50,8 +50,8 @@ export function Experience({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // We are "ready" if we are in the intro (no paper needed) OR if the paper is compiled.
-    const isReady = isIntroActive || paperReady;
+    // We MUST wait for the paper to compile even in intro to avoid stutter when scene appears.
+    const isReady = paperReady;
 
     if (isReady && !readyFiredRef.current) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);

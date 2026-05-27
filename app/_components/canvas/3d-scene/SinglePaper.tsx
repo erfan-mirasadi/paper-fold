@@ -151,6 +151,20 @@ export const SinglePaper: React.FC<SinglePaperProps> = ({
     return mesh;
   }, [runtime.PAGE_WIDTH]);
 
+  useEffect(() => {
+    return () => {
+      if (manualSkinnedMesh) {
+        manualSkinnedMesh.geometry.dispose();
+        const mats = manualSkinnedMesh.material as THREE.Material[];
+        if (Array.isArray(mats)) {
+          // Dispose the dynamically created materials (index 4 and 5)
+          mats[4]?.dispose();
+          mats[5]?.dispose();
+        }
+      }
+    };
+  }, [manualSkinnedMesh]);
+
   useFrame((_, delta) => {
     if (!skinnedMeshRef.current || !group.current) return;
     const bones = skinnedMeshRef.current.skeleton.bones;

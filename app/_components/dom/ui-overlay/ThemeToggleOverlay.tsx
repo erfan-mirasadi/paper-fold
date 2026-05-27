@@ -95,6 +95,7 @@ export function ThemeToggleOverlay({
         type="button"
         aria-label={isDarkMode ? "Gunduz moduna gec" : "Gece moduna gec"}
         onClick={handleToggle}
+        onPointerDown={(e) => e.preventDefault()}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         style={{

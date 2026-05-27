@@ -51,12 +51,10 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
 }) => {
   // Base typography styles matching the ORYZO references
   const variantStyles = {
-    title:
-      "text-6xl md:text-8xl font-bold tracking-tighter font-serif",
+    title: "text-6xl md:text-8xl font-bold tracking-tighter font-serif",
     subtitle: "text-3xl md:text-5xl font-semibold tracking-tight font-serif",
     body: "text-lg md:text-xl font-normal leading-relaxed font-sans",
-    caption:
-      "text-sm md:text-base font-medium tracking-widest font-sans",
+    caption: "text-sm md:text-base font-medium tracking-widest font-sans",
   };
 
   // Glow effect styles
@@ -155,23 +153,25 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
       ));
 
       renderElements.push(
-        <span 
-          key={`word-${lineIndex}-${wordIndex}`} 
+        <span
+          key={`word-${lineIndex}-${wordIndex}`}
           className={cn(
             "inline-block whitespace-nowrap",
-            lineIndex > 0 ? lineGapClass : "" // Apply negative margin directly to the word wrapper on subsequent lines
+            lineIndex > 0 ? lineGapClass : "", // Apply negative margin directly to the word wrapper on subsequent lines
           )}
         >
           {wordElements}
-          {wordIndex < words.length - 1 && <span className="inline-block">&nbsp;</span>}
-        </span>
+          {wordIndex < words.length - 1 && (
+            <span className="inline-block">&nbsp;</span>
+          )}
+        </span>,
       );
     });
 
     // Add a line break element if it's not the last line
     if (lineIndex < lines.length - 1) {
       renderElements.push(
-        <span key={`br-${lineIndex}`} className="basis-full h-0" />
+        <span key={`br-${lineIndex}`} className="basis-full h-0" />,
       );
     }
   });

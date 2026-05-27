@@ -142,6 +142,7 @@ export function AllSectionsOverlay({ isDarkMode }: AllSectionsOverlayProps) {
                 : "Show all elevated sections"
             }
             onClick={handleClick}
+            onPointerDown={(e) => e.preventDefault()}
             whileHover={{
               scale: 1.02,
               background: buttonTheme.hoverBackground,
