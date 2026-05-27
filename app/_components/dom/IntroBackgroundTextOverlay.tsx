@@ -37,7 +37,7 @@ export function IntroBackgroundTextOverlay({
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden z-[40]">
+    <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden z-40">
       <AnimatePresence mode="wait">
         {data && (
           <motion.div
@@ -55,7 +55,7 @@ export function IntroBackgroundTextOverlay({
                 animationType="flyInLeft"
                 cinematic={true}
                 style={{ textShadow: "none" }}
-                className={`mb-4 tracking-widest text-lg md:text-xl font-[family-name:var(--font-poppins)] font-medium w-full justify-center ${
+                className={`mb-4 tracking-widest text-lg md:text-xl font-(family-name:--font-poppins) font-medium w-full justify-center ${
                   isDarkMode ? "text-white/50" : "text-black/50"
                 }`}
               />
@@ -74,7 +74,7 @@ export function IntroBackgroundTextOverlay({
                     "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
                 }}
                 lineGapClass="-mt-4 md:-mt-8"
-                className={`font-semibold font-[family-name:var(--font-poppins)] leading-[1] select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} ${data.titleSize ? data.titleSize : "text-[9vw] md:text-[7vw]"}`}
+                className={`font-semibold font-(family-name:--font-poppins) leading-none select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} ${data.titleSize ? data.titleSize : "text-[9vw] md:text-[7vw]"}`}
               />
             )}
             {data.subtitle && (
@@ -84,7 +84,7 @@ export function IntroBackgroundTextOverlay({
                 animationType="flyInLeft"
                 cinematic={true}
                 style={{ textShadow: "none" }}
-                className={`font-[family-name:var(--font-dm-serif)] italic leading-[1] select-none w-full justify-center text-4xl md:text-5xl -mt-2 md:-mt-4 mb-4 ${
+                className={`font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-4xl md:text-5xl -mt-2 md:-mt-4 mb-4 ${
                   isDarkMode ? "text-white/90" : "text-black/90"
                 }`}
               />
@@ -96,7 +96,7 @@ export function IntroBackgroundTextOverlay({
                 animationType="fadeIn"
                 cinematic={true}
                 style={{ textShadow: "none" }}
-                className={`font-[family-name:var(--font-dm-serif)] italic leading-[1] select-none w-full justify-center text-2xl md:text-3xl -mt-2 md:-mt-4 ${
+                className={`font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-2xl md:text-3xl -mt-2 md:-mt-4 ${
                   isDarkMode ? "text-white/90" : "text-black/90"
                 }`}
               />

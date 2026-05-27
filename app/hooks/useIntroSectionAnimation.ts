@@ -48,10 +48,23 @@ interface Transform7 {
   rz: number;
 }
 
-const IDENTITY: Transform7 = { x: 0, y: 0, z: 0, scale: 1, rx: 0, ry: 0, rz: 0 };
+const IDENTITY: Transform7 = {
+  x: 0,
+  y: 0,
+  z: 0,
+  scale: 1,
+  rx: 0,
+  ry: 0,
+  rz: 0,
+};
 
 // ─── Module-level pre-computed results (written once per frame by controller) ─
-const ALL_SECTION_IDS: ElevatedSectionId[] = ["s1", "s2_top", "s2_center", "s2_bottom"];
+const ALL_SECTION_IDS: ElevatedSectionId[] = [
+  "s1",
+  "s2_top",
+  "s2_center",
+  "s2_bottom",
+];
 
 /** Current lerped transform for each section. Read by all useIntroSectionOffset consumers. */
 const _liveTransforms: Record<ElevatedSectionId, Transform7> = {
@@ -62,7 +75,10 @@ const _liveTransforms: Record<ElevatedSectionId, Transform7> = {
 };
 
 /** Group refs registered by consumers — the controller applies transforms to all of them. */
-const _registeredGroups: Record<ElevatedSectionId, Set<React.RefObject<Group | null>>> = {
+const _registeredGroups: Record<
+  ElevatedSectionId,
+  Set<React.RefObject<Group | null>>
+> = {
   s1: new Set(),
   s2_top: new Set(),
   s2_center: new Set(),
@@ -108,7 +124,7 @@ function getTransformTarget(
   let scale = 1;
   let rx = scatterRx * invT;
   let ry = scatterRy * invT;
-  let rz = scatterRz * invT;
+  const rz = scatterRz * invT;
 
   const handoffT = easeInOut(clamp01(introHandoffProgress));
   if (handoffT > 0) {

@@ -44,19 +44,11 @@ const MAIN_OVERLAY_DELAY_MS = 350;
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSceneReady, setIsSceneReady] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
   const [showMainOverlays, setShowMainOverlays] = useState(false);
   const [mountMainOverlays, setMountMainOverlays] = useState(false);
   // Mirror isIntroActive from the Zustand store so overlay rendering re-evaluates
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   useEffect(() => {
     // Mount the Canvas almost immediately using requestAnimationFrame.
@@ -71,14 +63,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (isIntroActive) {
-      setShowMainOverlays(false);
-      return;
-    }
-
+    const delay = isIntroActive ? 0 : MAIN_OVERLAY_DELAY_MS;
     const timeoutId = window.setTimeout(() => {
-      setShowMainOverlays(true);
-    }, MAIN_OVERLAY_DELAY_MS);
+      setShowMainOverlays(!isIntroActive);
+    }, delay);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -129,7 +117,7 @@ export default function Home() {
 
         <IntroBackgroundTextOverlay isDarkMode={isDarkMode} />
 
-        <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none z-[10]">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none z-10">
           <AmbientMedia />
         </div>
 
@@ -160,7 +148,9 @@ export default function Home() {
             {canvasReady && (
               <Canvas
                 style={{ pointerEvents: isIntroActive ? "none" : "auto" }}
-                eventSource={typeof document !== 'undefined' ? document.body : undefined}
+                eventSource={
+                  typeof document !== "undefined" ? document.body : undefined
+                }
                 camera={{
                   position: CAMERA_CONFIG.initialCamera.position,
                   fov: CAMERA_CONFIG.initialCamera.fov,
@@ -204,7 +194,7 @@ export default function Home() {
               <>
                 <HeroTitleOverlay isDarkMode={isDarkMode} />
                 {/* Render the extracted Apple-style border behind the main UI controls */}
-                <div className="fixed inset-0 z-[80] pointer-events-none">
+                <div className="fixed inset-0 z-80 pointer-events-none">
                   <JoinedStepOverlay isDarkMode={isDarkMode} />
                 </div>
               </>

@@ -21,7 +21,7 @@ export default function JoinedStepOverlay({ isDarkMode }: JoinedStepOverlayProps
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.02 }}
           transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 pointer-events-none z-[80] p-4"
+          className="fixed inset-0 pointer-events-none z-80 p-4"
         >
           {/* The Apple-style Glowing Frame (Monochrome Bezel) */}
           {isDarkMode ? (

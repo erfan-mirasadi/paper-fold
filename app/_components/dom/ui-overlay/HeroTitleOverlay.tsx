@@ -18,7 +18,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 flex items-center justify-center overflow-hidden z-[50]"
+      className="pointer-events-none fixed inset-0 flex items-center justify-center overflow-hidden z-50"
       style={{ opacity, paddingBottom: "15vh" }}
     >
       <div className="relative flex flex-col items-center text-center">
@@ -35,7 +35,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
               "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
           }}
           lineGapClass="-mt-4 md:-mt-8"
-          className={`font-semibold font-[family-name:var(--font-poppins)] leading-[1] select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} text-[15vw] md:text-[12vw]`}
+          className={`font-semibold font-(family-name:--font-poppins) leading-none select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} text-[15vw] md:text-[12vw]`}
         />
         <AnimatedText
           text="suresi"
@@ -43,7 +43,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
           animationType="flyInLeft"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-[family-name:var(--font-dm-serif)] italic leading-[1] select-none w-full justify-center text-5xl md:text-6xl -mt-12 md:-mt-20 mb-4 relative z-10 ${
+          className={`font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-5xl md:text-6xl -mt-12 md:-mt-20 mb-4 relative z-10 ${
             isDarkMode ? "text-white/90" : "text-black/90"
           }`}
         />
