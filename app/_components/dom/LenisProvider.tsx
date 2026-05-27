@@ -14,6 +14,8 @@ export function LenisProvider({ children }: { children: ReactNode }) {
       lerp: 0.08,
       smoothWheel: true,
       syncTouch: true,
+      wheelMultiplier: 0.5,
+      touchMultiplier: 0.5,
     });
   });
 
