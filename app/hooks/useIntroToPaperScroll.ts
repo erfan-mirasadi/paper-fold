@@ -85,9 +85,9 @@ export function useIntroToPaperScroll() {
   const syncSceneTargets = useCallback(() => {
     const store = useFoldStore.getState();
     const dockedNow = useDragState.getState().isPaperDocked;
-    const allSections = useElevatedStore.getState().isAllSectionsMode;
+    let allSections = useElevatedStore.getState().isAllSectionsMode;
 
-    const targets = computeTargets(
+    let targets = computeTargets(
       store.introHandoffProgress,
       store.isIntroActive,
       dockedNow,
@@ -100,6 +100,18 @@ export function useIntroToPaperScroll() {
       // First frame after handoff completes -- call restoreAllSections once.
       restoredRef.current = true;
       useElevatedStore.getState().restoreAllSections();
+
+      // CRITICAL: Recompute targets with updated state BEFORE sending to springs.
+      // Without this, paperFocusScale: 0 (from the stale isAllSectionsMode=true)
+      // is sent to the spring, causing the paper to briefly shrink to invisible
+      // before the subscription corrects it — creating the visible "lag" pulse.
+      allSections = useElevatedStore.getState().isAllSectionsMode;
+      targets = computeTargets(
+        store.introHandoffProgress,
+        store.isIntroActive,
+        dockedNow,
+        allSections,
+      );
     }
 
     paperApi.start({
@@ -135,11 +147,32 @@ export function useIntroToPaperScroll() {
   }, [lenis, syncSceneTargets]);
 
   useEffect(() => {
-    const unsubscribeFold = useFoldStore.subscribe(() => syncSceneTargets());
-    const unsubscribeElevated = useElevatedStore.subscribe(() =>
-      syncSceneTargets(),
-    );
-    const unsubscribeDrag = useDragState.subscribe(() => syncSceneTargets());
+    // Gate subscriptions: only call syncSceneTargets when there's actually
+    // intro/handoff/allSections/dock state that could affect the paper position.
+    // After the handoff completes and paper is in its default state, these are no-ops.
+    const guardedSync = () => {
+      const store = useFoldStore.getState();
+      const elevated = useElevatedStore.getState();
+      const drag = useDragState.getState();
+
+      // Still need sync during intro, handoff, allSectionsMode, or paper docked
+      if (
+        store.isIntroActive ||
+        store.introHandoffProgress < 1 ||
+        elevated.isAllSectionsMode ||
+        drag.isPaperDocked
+      ) {
+        syncSceneTargets();
+        return;
+      }
+
+      // After handoff: only react to allSectionsMode or dock state changes
+      syncSceneTargets();
+    };
+
+    const unsubscribeFold = useFoldStore.subscribe(guardedSync);
+    const unsubscribeElevated = useElevatedStore.subscribe(guardedSync);
+    const unsubscribeDrag = useDragState.subscribe(guardedSync);
 
     return () => {
       unsubscribeFold();

@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
@@ -291,6 +291,22 @@ export function ElevatedSectionSurfaces({
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
+  // ALL elevated surfaces stay HIDDEN during the intro→paper transition.
+  // Paper masking handles revealing sections on the paper texture.
+  // Surfaces only become renderable after restore springs have settled (opacity→0).
+  const [postIntroSettled, setPostIntroSettled] = useState(
+    () => !useFoldStore.getState().isIntroActive,
+  );
+  useEffect(() => {
+    if (!isIntroActive) {
+      const t = setTimeout(() => setPostIntroSettled(true), 800);
+      return () => clearTimeout(t);
+    } else {
+      setPostIntroSettled(false);
+    }
+  }, [isIntroActive]);
+  const showSurfaces = postIntroSettled;
+
   const s1Spring = useSectionSurfaceSpring(s1Active);
   const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
   const s2CenterSpring = useSectionSurfaceSpring(s2CenterActive);
@@ -407,7 +423,7 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <group visible={!isIntroActive}>
+          <group visible={showSurfaces}>
             <ElevatedLayer
               x={s1.frameX}
               y={s1.frameY}
@@ -467,7 +483,7 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <group visible={!isIntroActive}>
+          <group visible={showSurfaces}>
             <ElevatedLayer
               x={topConnector.outer.x}
               y={topConnector.outer.y}
@@ -544,7 +560,7 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <group visible={!isIntroActive}>
+          <group visible={showSurfaces}>
             {s2.groups[1].rowConnectors.map((rc, i) => (
               <ElevatedLayer
                 key={`s2-center-rc-${i}`}
@@ -580,7 +596,7 @@ export function ElevatedSectionSurfaces({
               ]}
             />
           )}
-          <group visible={!isIntroActive}>
+          <group visible={showSurfaces}>
             <ElevatedLayer
               x={bottomConnector.outer.x}
               y={bottomConnector.outer.y}

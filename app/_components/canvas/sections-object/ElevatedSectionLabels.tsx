@@ -151,9 +151,23 @@ export function ElevatedSectionLabels({
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
+  // ALL labels hidden during intro→paper transition.
+  const [postIntroSettled, setPostIntroSettled] = useState(
+    () => !useFoldStore.getState().isIntroActive,
+  );
+  useEffect(() => {
+    if (!isIntroActive) {
+      const t = setTimeout(() => setPostIntroSettled(true), 800);
+      return () => clearTimeout(t);
+    } else {
+      setPostIntroSettled(false);
+    }
+  }, [isIntroActive]);
+  const showLabels = postIntroSettled;
+
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
-      <group visible={!isIntroActive}>
+      <group visible={showLabels}>
         <AnimatedElevatedLabel
           sectionId="s1"
           y={SURAH_TRANSFORMS.s1.labelPinY}
@@ -167,7 +181,6 @@ export function ElevatedSectionLabels({
           renderOrder={220}
           depthTest={true}
         />
-
         <AnimatedElevatedLabel
           sectionId="s2_top"
           y={SURAH_TRANSFORMS.s2.topLabelPinY}

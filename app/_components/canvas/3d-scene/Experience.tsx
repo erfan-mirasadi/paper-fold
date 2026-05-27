@@ -20,6 +20,7 @@ import { useFoldStore } from "../orchestrator/ScrollManager";
 import { IntroExperience } from "../intro/IntroExperience";
 import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollController";
 import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
+import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -139,6 +140,10 @@ export function Experience({
         <VersesRenderer />
         {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
+
+      {/* Single centralized controller for all intro section animations.
+          Replaces ~28 individual useFrame callbacks with 1. */}
+      <IntroSectionAnimationController />
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
         <planeGeometry args={[50, 50]} />
