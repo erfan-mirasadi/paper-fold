@@ -43,18 +43,18 @@ function BorderSvg({
   h: number;
   z: number;
 }) {
-  const texture = useTexture("/small-borders-7a.svg", (t) => {
+  const texture = useTexture("/SectionOneFrame.svg", (t) => {
     t.colorSpace = THREE.SRGBColorSpace;
   });
-  const svgW = 2956;
-  const svgH = 976;
+  const svgW = 4200;
+  const svgH = 3000;
 
   // Base scale based on the section's frame
   const baseScale = Math.max(w / svgW, h / svgH) * 1.05;
 
   // Adjustments: decrease width from sides by a lot, increase height a bit
-  const widthMultiplier = 0.79;
-  const heightMultiplier = 1.1;
+  const widthMultiplier = 1.0;
+  const heightMultiplier = 0.65;
 
   const renderW = svgW * baseScale * widthMultiplier;
   const renderH = svgH * baseScale * heightMultiplier;

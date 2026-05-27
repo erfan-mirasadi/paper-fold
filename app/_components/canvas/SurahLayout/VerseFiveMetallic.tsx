@@ -150,7 +150,7 @@ function BorderSvg({
   h: number;
   z: number;
 }) {
-  const texture = useTexture("/Small Borders 13a.svg", (t) => {
+  const texture = useTexture("/VerseFiveFrame.svg", (t) => {
     t.colorSpace = THREE.SRGBColorSpace;
   });
   // ضریب‌های ساده برای تغییر سایز نسبت به خود کپسول:
