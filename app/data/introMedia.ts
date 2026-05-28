@@ -14,8 +14,8 @@ export interface IntroMediaItem {
 
 export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
   s1: {
-    src: "/intro/video-sample.mp4", // Defaulting to this, will adjust if user provides specific path
-    isVideo: true,
+    src: "/intro/hara-cave.png", // Defaulting to this, will adjust if user provides specific path
+    isVideo: false,
     backgroundText: {
       caption: "Muhkem",
       title: "Tebliğ\nirşat vazifesinin \ntarifi tebliği",

@@ -79,6 +79,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   const circlesRef = useRef<(SVGCircleElement | null)[]>([]);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const pingRef = useRef<SVGGElement>(null);
 
   // Determine dark mode context for monochrome styling
   const isDarkMode = textColor.includes("232");
@@ -187,6 +188,15 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
         textRef.current.style.color = isActive ? activeColor : textColor;
       }
 
+      if (pingRef.current) {
+        pingRef.current.style.opacity = isHoverEnabled ? "0.85" : "0";
+        pingRef.current.style.pointerEvents = isHoverEnabled ? "auto" : "none";
+        pingRef.current.style.transform = `translateY(${textTranslateY}px)`;
+        pingRef.current.style.transition = isHoverEnabled
+          ? `opacity 0.3s ease-out, transform ${animDuration} ${animEasing}`
+          : `opacity 0.3s ease-out`;
+      }
+
       for (let i = 0; i < numDots; i++) {
         const circle = circlesRef.current[i];
         if (!circle) continue;
@@ -289,6 +299,36 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
               />
             </linearGradient>
           </defs>
+
+          {/* Pulsing indicator group at the top */}
+          <g
+            ref={pingRef}
+            style={{
+              opacity: 0,
+              transition: "opacity 0.4s ease-out",
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              const store = useFoldStore.getState();
+              const isHoverEnabled =
+                store.introProgress >= 0.99 && store.introHandoffProgress === 0;
+              if (!isHoverEnabled) return;
+              store.setActiveAmbientMediaId(
+                store.activeAmbientMediaId === sectionId ? null : sectionId
+              );
+            }}
+          >
+            <circle
+              cx={6}
+              cy={0}
+              r={4}
+              fill={activeColor}
+              className="animate-ping"
+              style={{ transformOrigin: "6px 0px", animationDuration: "1.5s" }}
+            />
+            <circle cx={6} cy={0} r={3} fill={activeColor} />
+          </g>
 
           <g fill={`url(#${gradientId})`}>
             {Array.from({ length: numDots }).map((_, i) => {
