@@ -28,7 +28,7 @@ export function IntroBackgroundTextOverlay({
     });
   }, []);
 
-  if (!isIntroActive || !isJoinedStep) return null;
+  // We don't return null early, otherwise AnimatePresence cannot play the exit animation!
 
   const effectiveActiveId = activeAmbientMediaId || loopedAmbientMediaId;
   const data = effectiveActiveId
@@ -48,7 +48,7 @@ export function IntroBackgroundTextOverlay({
   return (
     <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden z-40">
       <AnimatePresence mode="wait">
-        {data && (
+        {isIntroActive && isJoinedStep && data && (
           <motion.div
             key={effectiveActiveId}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}

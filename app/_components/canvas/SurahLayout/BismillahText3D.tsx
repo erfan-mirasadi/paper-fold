@@ -13,15 +13,15 @@ const FRONT_CLEARANCE = 0.016;
 const EXTRUSION_LAYERS = 3;
 const EXTRUSION_STEP = 0.00095;
 
-interface BismillahFloatingText3DProps {
+interface BismillahText3DProps {
   surfaceZ: number;
   isDarkMode?: boolean;
 }
 
-export function BismillahFloatingText3D({
+export function BismillahText3D({
   surfaceZ,
   isDarkMode = false,
-}: BismillahFloatingText3DProps) {
+}: BismillahText3DProps) {
   const isElevatedPhase = useElevatedStore((s) => s.phase === "elevated");
 
   const layers = isDarkMode ? 4 : EXTRUSION_LAYERS;

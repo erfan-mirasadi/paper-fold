@@ -128,8 +128,9 @@ export function ScrollManager() {
 
   const syncCurrentOffset = useCallback((lenisInstance: Lenis) => {
     const maxScroll = Math.max(lenisInstance.limit, 0);
-    const rawOffset =
-      maxScroll <= 0 ? 0 : clamp01(lenisInstance.scroll / maxScroll);
+    if (maxScroll <= 0) return; // Prevent temporary DOM/layout shifts from resetting scroll to 0
+
+    const rawOffset = clamp01(lenisInstance.scroll / maxScroll);
 
     // ── Intro intercept ────────────────────────────────────────────
     // Intro band -> camera-only scroll.
@@ -162,15 +163,46 @@ export function ScrollManager() {
   useEffect(() => {
     if (!lenis) return;
 
-    const handleSync = () => syncCurrentOffset(lenis);
+    let lastLimit = Math.max(lenis.limit, 0);
+    let ignoreUntilTime = 0;
+
+    const handleSync = () => {
+      const currentLimit = Math.max(lenis.limit, 0);
+      
+      // If the scrollable area height changes (e.g., window resize, inspect panel),
+      // we must preserve the user's scroll percentage (rawOffset) so they don't
+      // jump into the intro sequence or trigger unintended elevated modes.
+      if (currentLimit > 0 && lastLimit > 0 && Math.abs(currentLimit - lastLimit) > 5) {
+        const lastRawOffset = useFoldStore.getState().rawOffset;
+        lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
+        lastLimit = currentLimit;
+        // Ignore scroll events for a short window to let Lenis settle its internal state
+        ignoreUntilTime = performance.now() + 150;
+        return; 
+      }
+      
+      if (performance.now() < ignoreUntilTime) {
+        return;
+      }
+      
+      lastLimit = currentLimit;
+      syncCurrentOffset(lenis);
+    };
+
+    const handleResize = () => {
+      // Lenis's internal ResizeObserver might take a moment to update lenis.limit.
+      // We trigger a sync shortly after to ensure the new limit is caught and corrected.
+      setTimeout(handleSync, 20);
+      setTimeout(handleSync, 100);
+    };
 
     syncCurrentOffset(lenis);
     lenis.on("scroll", handleSync);
-    window.addEventListener("resize", handleSync);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       lenis.off("scroll", handleSync);
-      window.removeEventListener("resize", handleSync);
+      window.removeEventListener("resize", handleResize);
     };
   }, [lenis, syncCurrentOffset]);
 

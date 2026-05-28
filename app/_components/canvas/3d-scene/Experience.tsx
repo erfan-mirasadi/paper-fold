@@ -181,50 +181,26 @@ export function Experience({
 }
 
 function DynamicControls() {
-  const controlsRef = useRef<any>(null);
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  useEffect(() => {
-    const updateControls = (isActive: boolean) => {
-      const controls = controlsRef.current;
-      if (!controls) return;
+  const enableInteractions = isIntroActive ? INTRO_CAMERA_CONFIG.allowOrbit : false;
 
-      if (isActive) {
-        const allowOrbit = INTRO_CAMERA_CONFIG.allowOrbit;
-        controls.enableRotate = allowOrbit;
-        controls.enableZoom = allowOrbit;
-        controls.enablePan = allowOrbit;
-        controls.minAzimuthAngle = -Infinity;
-        controls.maxAzimuthAngle = Infinity;
-        controls.minPolarAngle = 0;
-        controls.maxPolarAngle = Math.PI;
-      } else {
-        controls.enableRotate = false;
-        controls.enableZoom = false;
-        controls.enablePan = false;
-        controls.minAzimuthAngle = CAMERA_CONFIG.orbitControls.minAzimuthAngle;
-        controls.maxAzimuthAngle = CAMERA_CONFIG.orbitControls.maxAzimuthAngle;
-        controls.minPolarAngle = CAMERA_CONFIG.orbitControls.minPolarAngle;
-        controls.maxPolarAngle = CAMERA_CONFIG.orbitControls.maxPolarAngle;
-      }
-    };
-
-    const unsubscribe = useFoldStore.subscribe((state, prevState) => {
-      if (state.isIntroActive !== prevState.isIntroActive) {
-        updateControls(state.isIntroActive);
-      }
-    });
-
-    // Initial setup
-    updateControls(useFoldStore.getState().isIntroActive);
-
-    return unsubscribe;
-  }, []);
+  const minAzimuthAngle = isIntroActive ? -Infinity : CAMERA_CONFIG.orbitControls.minAzimuthAngle;
+  const maxAzimuthAngle = isIntroActive ? Infinity : CAMERA_CONFIG.orbitControls.maxAzimuthAngle;
+  const minPolarAngle = isIntroActive ? 0 : CAMERA_CONFIG.orbitControls.minPolarAngle;
+  const maxPolarAngle = isIntroActive ? Math.PI : CAMERA_CONFIG.orbitControls.maxPolarAngle;
 
   return (
     <OrbitControls
-      ref={controlsRef}
       enabled={true}
       makeDefault={true}
+      enableRotate={enableInteractions}
+      enableZoom={enableInteractions}
+      enablePan={enableInteractions}
+      minAzimuthAngle={minAzimuthAngle}
+      maxAzimuthAngle={maxAzimuthAngle}
+      minPolarAngle={minPolarAngle}
+      maxPolarAngle={maxPolarAngle}
     />
   );
 }

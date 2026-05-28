@@ -57,12 +57,12 @@ const ANA_LABEL_DEPTH = 0.0035;
 const ANA_LABEL_Z_OFFSET = 0.0025;
 const ANA_LABEL_PIN_OVERLAP = 0.0015;
 
-const DECORATIVE_SVG_SIZE = 295;
-const DECORATIVE_SVG_SCALE = 0.00042;
-const DECORATIVE_SVG_COLOR = "#8B7C74";
-const DECORATIVE_SVG_INSET_X = 0.2;
-const DECORATIVE_SVG_Z_OFFSET = 0.004;
-const DECORATIVE_SVG_BRACKET_ROTATION = (Math.PI * 3) / 4;
+// const DECORATIVE_SVG_SIZE = 295;
+// const DECORATIVE_SVG_SCALE = 0.00042;
+// const DECORATIVE_SVG_COLOR = "#8B7C74";
+// const DECORATIVE_SVG_INSET_X = 0.2;
+// const DECORATIVE_SVG_Z_OFFSET = 0.004;
+// const DECORATIVE_SVG_BRACKET_ROTATION = (Math.PI * 3) / 4;
 
 const CAPSULE_SIDE_EXPAND = 0.025;
 
@@ -95,47 +95,47 @@ function normalizeSurfaceLiftProgress(surfaceLift: number) {
   return Math.max(0, Math.min(1, ratio));
 }
 
-function DecorativeSvg({
-  shapes,
-  x,
-  y,
-  rotationZ,
-  mirrorX = false,
-}: {
-  shapes: THREE.Shape[];
-  x: number;
-  y: number;
-  rotationZ: number;
-  mirrorX?: boolean;
-}) {
-  return (
-    <group
-      position={[x, y, EXTRUDE_DEPTH + DECORATIVE_SVG_Z_OFFSET]}
-      rotation={[0, 0, rotationZ]}
-      scale={[
-        mirrorX ? -DECORATIVE_SVG_SCALE : DECORATIVE_SVG_SCALE,
-        -DECORATIVE_SVG_SCALE,
-        DECORATIVE_SVG_SCALE,
-      ]}
-    >
-      <group position={[-DECORATIVE_SVG_SIZE / 2, -DECORATIVE_SVG_SIZE / 2, 0]}>
-        {shapes.map((shape, index) => (
-          <mesh key={index} renderOrder={105}>
-            <shapeGeometry args={[shape]} />
-            <meshBasicMaterial
-              color={DECORATIVE_SVG_COLOR}
-              transparent
-              opacity={1}
-              toneMapped={false}
-              depthWrite={false}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        ))}
-      </group>
-    </group>
-  );
-}
+// function DecorativeSvg({
+//   shapes,
+//   x,
+//   y,
+//   rotationZ,
+//   mirrorX = false,
+// }: {
+//   shapes: THREE.Shape[];
+//   x: number;
+//   y: number;
+//   rotationZ: number;
+//   mirrorX?: boolean;
+// }) {
+//   return (
+//     <group
+//       position={[x, y, EXTRUDE_DEPTH + DECORATIVE_SVG_Z_OFFSET]}
+//       rotation={[0, 0, rotationZ]}
+//       scale={[
+//         mirrorX ? -DECORATIVE_SVG_SCALE : DECORATIVE_SVG_SCALE,
+//         -DECORATIVE_SVG_SCALE,
+//         DECORATIVE_SVG_SCALE,
+//       ]}
+//     >
+//       <group position={[-DECORATIVE_SVG_SIZE / 2, -DECORATIVE_SVG_SIZE / 2, 0]}>
+//         {shapes.map((shape, index) => (
+//           <mesh key={index} renderOrder={105}>
+//             <shapeGeometry args={[shape]} />
+//             <meshBasicMaterial
+//               color={DECORATIVE_SVG_COLOR}
+//               transparent
+//               opacity={1}
+//               toneMapped={false}
+//               depthWrite={false}
+//               side={THREE.DoubleSide}
+//             />
+//           </mesh>
+//         ))}
+//       </group>
+//     </group>
+//   );
+// }
 
 function BorderSvg({
   x,
@@ -352,12 +352,12 @@ export function VerseFiveMetallic() {
     [],
   );
 
-  const decorativeShapes = useMemo(
-    () => decorativeSvg.paths.flatMap((path) => SVGLoader.createShapes(path)),
-    [decorativeSvg.paths],
-  );
+  // const decorativeShapes = useMemo(
+  //   () => decorativeSvg.paths.flatMap((path) => SVGLoader.createShapes(path)),
+  //   [decorativeSvg.paths],
+  // );
 
-  const decorativeY = -outerH / 2;
+  // const decorativeY = -outerH / 2;
 
   const introMotionRef = useIntroSectionOffset("s1");
 

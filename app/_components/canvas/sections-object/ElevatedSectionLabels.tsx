@@ -157,12 +157,13 @@ export function ElevatedSectionLabels() {
       setPostIntroSettled(false);
     }
   }, [isIntroActive]);
-  const showLabels = postIntroSettled;
+  const showLabels = postIntroSettled && !isIntroActive;
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
-      <group visible={showLabels}>
-        <AnimatedElevatedLabel
+      {showLabels && (
+        <group>
+          <AnimatedElevatedLabel
           sectionId="s1"
           y={SURAH_TRANSFORMS.s1.labelPinY}
           text={surahData.section1.label}
@@ -209,7 +210,8 @@ export function ElevatedSectionLabels() {
           renderOrder={240}
           depthTest={true}
         />
-      </group>
+        </group>
+      )}
     </group>
   );
 }

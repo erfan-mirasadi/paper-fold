@@ -20,7 +20,7 @@ import {
   Vector3,
   Material,
 } from "three";
-import { BismillahFloatingText3D } from "../SurahLayout/BismillahFloatingText3D";
+import { BismillahText3D } from "../SurahLayout/BismillahText3D";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import { PaperMaterial, TextureToggles } from "./PaperMaterial";
 import { useFoldStore } from "../orchestrator/ScrollManager";
@@ -64,7 +64,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const foldAnglesRef = useRef(new Float32Array(FOLD_Y_POSITIONS.length));
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
-  const storyOffset = useFoldStore((s) => s.currentOffset);
   const [showArrows, setShowArrows] = useState(false);
 
   // Audio Setup
@@ -169,7 +168,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   useFrame((_, delta) => {
     if (!skinnedMeshRef.current || !group.current) return;
     const bones = skinnedMeshRef.current.skeleton.bones;
-    const paperProgress = storyOffset;
+    const paperProgress = useFoldStore.getState().currentOffset;
 
     const isAtEnd = paperProgress > 0.85;
     // Use functional update or check against a ref to avoid stale closure issues
@@ -223,7 +222,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
         />
       </primitive>
 
-      <BismillahFloatingText3D
+      <BismillahText3D
         surfaceZ={PAGE_DEPTH / 2}
         isDarkMode={isDarkMode}
       />

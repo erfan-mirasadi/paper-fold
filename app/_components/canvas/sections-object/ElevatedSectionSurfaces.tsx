@@ -301,7 +301,7 @@ export function ElevatedSectionSurfaces() {
       setPostIntroSettled(false);
     }
   }, [isIntroActive]);
-  const showSurfaces = postIntroSettled;
+  const showSurfaces = postIntroSettled && !isIntroActive;
 
   const s1Spring = useSectionSurfaceSpring(s1Active);
   const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
@@ -419,8 +419,9 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          <group visible={showSurfaces}>
-            <ElevatedLayer
+          {showSurfaces && (
+            <group>
+              <ElevatedLayer
               x={s1.frameX}
               y={s1.frameY}
               w={s1.frameW}
@@ -458,7 +459,8 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0015}
               />
             ))}
-          </group>
+            </group>
+          )}
         </DraggableSectionGroup>
       </group>
 
@@ -479,8 +481,9 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          <group visible={showSurfaces}>
-            <ElevatedLayer
+          {showSurfaces && (
+            <group>
+              <ElevatedLayer
               x={topConnector.outer.x}
               y={topConnector.outer.y}
               w={topConnector.outer.w}
@@ -535,7 +538,8 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0025}
               />
             ))}
-          </group>
+            </group>
+          )}
         </DraggableSectionGroup>
       </group>
 
@@ -556,8 +560,9 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          <group visible={showSurfaces}>
-            {s2.groups[1].rowConnectors.map((rc, i) => (
+          {showSurfaces && (
+            <group>
+              {s2.groups[1].rowConnectors.map((rc, i) => (
               <ElevatedLayer
                 key={`s2-center-rc-${i}`}
                 x={rc.x}
@@ -571,7 +576,8 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0025}
               />
             ))}
-          </group>
+            </group>
+          )}
         </DraggableSectionGroup>
       </group>
 
@@ -592,8 +598,9 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          <group visible={showSurfaces}>
-            <ElevatedLayer
+          {showSurfaces && (
+            <group>
+              <ElevatedLayer
               x={bottomConnector.outer.x}
               y={bottomConnector.outer.y}
               w={bottomConnector.outer.w}
@@ -648,7 +655,8 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0025}
               />
             ))}
-          </group>
+            </group>
+          )}
         </DraggableSectionGroup>
       </group>
     </group>

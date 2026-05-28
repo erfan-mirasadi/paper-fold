@@ -6,7 +6,10 @@ import { useMemo } from "react";
 
 export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
-  const introProgress = useFoldStore((s) => s.introProgress);
+  // Cap at 0.2 so Zustand stops triggering re-renders once it's fully faded out!
+  const introProgress = useFoldStore((s) =>
+    s.introProgress > 0.2 ? 0.2 : s.introProgress,
+  );
 
   // "page 1" fade out. introProgress goes 0 to 1 during the intro section.
   // We fade this out quickly so it only appears on the initial page load / first scroll.

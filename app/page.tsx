@@ -155,9 +155,11 @@ export default function Home() {
 
         <IntroBackgroundTextOverlay isDarkMode={isDarkMode} />
 
-        <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none z-10">
-          <AmbientMedia />
-        </div>
+        {isIntroRenderPhase && (
+          <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[45vh] md:h-[50vh] pointer-events-none z-10">
+            <AmbientMedia />
+          </div>
+        )}
 
         {/* Soft static shadow removed in favor of dynamic Canvas drop-shadow */}
 
@@ -255,20 +257,23 @@ export default function Home() {
             />
             {/* Hide standard chrome while intro runs. Delayed by 2 seconds after handoff. */}
             {mountMainOverlays && (
-              <div
-                style={{
-                  opacity: showPostIntroUI ? 1 : 0,
-                  pointerEvents: showPostIntroUI ? "auto" : "none",
-                  transition: "opacity 0.45s ease",
-                  willChange: "opacity",
-                }}
-              >
-                <NavigationOverlay isDarkMode={isDarkMode} />
-                <TitleOverlay isDarkMode={isDarkMode} />
-                <AllSectionsOverlay isDarkMode={isDarkMode} />
-                <LanguageSwitchOverlay isDarkMode={isDarkMode} />
-                <CameraViewPresetOverlay />
-              </div>
+              <AnimatePresence>
+                {showPostIntroUI && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.45, ease: "easeOut" }}
+                    style={{ pointerEvents: "auto", willChange: "opacity" }}
+                  >
+                    <NavigationOverlay isDarkMode={isDarkMode} />
+                    <TitleOverlay isDarkMode={isDarkMode} />
+                    <AllSectionsOverlay isDarkMode={isDarkMode} />
+                    <LanguageSwitchOverlay isDarkMode={isDarkMode} />
+                    <CameraViewPresetOverlay />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             )}
           </motion.div>
         )}
