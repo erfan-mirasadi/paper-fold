@@ -4,13 +4,22 @@
 
 Premium 3D Interactive Quran Reading Experience
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Three.js](https://img.shields.io/badge/Three.js-R3F-000000?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.2-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-r183-000000?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
 </div>
 
-## Core Innovation (First)
+## Core Innovation
+
+### Cinematic WebGL Intro & Seamless Handoff
+
+The project begins with a deeply immersive, scroll-driven cinematic intro. As the user scrolls through the initial viewport pages , the camera dramatically glides across 3D typography and abstract geometries.
+
+- The **ScrollManager** orchestrates a strict timeline (Intro -> Handoff -> Story).
+- At the exact handoff point, the camera seamlessly locks into place, unlocking the interactive 3D paper fold experience.
+- Heavy texture rendering is dynamically downscaled during the intro to maintain buttery-smooth framerates, popping to crisp high-res instantly after the handoff.
 
 ### WebGL Texture Projection on 3D Paper
 
@@ -22,9 +31,7 @@ This project's main technique is dynamic texture projection with WebGL:
   - `normalMap` (crease and surface normal detail)
 - The paper itself is a skinned mesh with many bones, so text and graphics bend with the fold in real time.
 
-In short: texture is not static image mapping, it is a live-rendered scene projected onto a physically deforming page.
-
-## Features (Implemented Now)
+## Features
 
 ### 1) Scroll-Driven 3D Folding (Paper Physics)
 
@@ -33,12 +40,13 @@ In short: texture is not static image mapping, it is a live-rendered scene proje
 - Programmatic fold/unfold navigation between stages.
 - Fold sound effect on stage changes.
 
-### 2) Dynamic and Animated Texture Pipeline
+### 2) Advanced DOM Overlays & UI Layering
 
-- Real-time color texture from Surah layout (`RenderTexture`).
-- Separate normal pass combining paper normal texture and crease bands.
-- Texture visibility timing is synchronized with pop-up and elevate animations.
-- Animated texture refresh is used in interactive cards (`frames={2}` and `frames={Infinity}` where needed).
+A rich ecosystem of HTML overlays sit on top of the WebGL canvas, animated seamlessly with `framer-motion`:
+
+- **Intro Overlays:** `HeroTitleOverlay`, `IntroBackgroundTextOverlay`, `JoinedStepOverlay`, `IntroSectionGuidesOverlay`, and `AmbientMedia` (floating videos/images synchronized to the scroll).
+- **Main UI:** `NavigationOverlay`, `TitleOverlay`, `ThemeToggleOverlay`, `LanguageSwitchOverlay`, `AllSectionsOverlay`, and `CameraViewPresetOverlay`.
+- The WebGL Canvas casts dynamic, real-time drop-shadows onto the DOM elements beneath it using CSS filters based on the 3D alpha channel.
 
 ### 3) 3D Elements Emerging From the Paper
 
@@ -46,90 +54,53 @@ In short: texture is not static image mapping, it is a live-rendered scene proje
 - Verse 5 is rendered as a dedicated metallic 3D extruded model on top of paper.
 - Elevation system lifts verses/sections above the page with animated shadow and tilt.
 
-This is the "model coming out of the paper" behavior in the current implementation.
-
 ### 4) Click Interaction + Camera Focus
 
 - Invisible per-verse and per-section 3D hitboxes for accurate click targeting.
-- Camera state machine with phases:
-  - `idle`
-  - `zooming_in`
-  - `zoomed`
-  - `zooming_out`
-- Smooth zoom-in and return behavior.
-- Edge panning while zoomed.
-- Reset overlay button for returning camera.
+- Camera state machine with phases (`idle`, `zooming_in`, `zoomed`, `zooming_out`).
+- Smooth zoom-in, edge panning, and return behavior.
 
-### 5) Neon Verse Focus Overlay
+### 5) Postprocessing and Atmosphere
 
-- Active verse border is projected from real 3D geometry to screen space every frame.
-- SVG neon draw animation with glow and fade.
-- Overlay follows camera and folded page transform.
-
-### 6) Elevated Sections and Verse Groups
-
-- Multi-select verse elevation store.
-- Section-level lift interactions for major groups.
-- Spring-based lift, tilt, scale, and shadow animation.
-- Elevated labels/surfaces for active sections.
-
-### 7) Popup Verse Controls and 3D Anchoring
-
-- Individual and global popup toggles.
-- Popup UI buttons are anchored to 3D world positions via shared tracker.
-- Scroll-threshold-based popup anchor visibility.
-
-### 8) Postprocessing and Atmosphere
-
-- ACES tone mapping.
-- Brightness/contrast adjustment.
-- Vignette.
+- ACES tone mapping, Vignette, and Brightness/Contrast adjustment.
 - Depth of field (reactive to elevated phase).
-- Triggered glitch effect.
 - Interactive desktop particle field (hover-reactive + animated drift).
+- Volumetric SpotLights casting cinematic beams over the paper.
 
-### 9) Theme and UI Overlay
+## Tech Stack
 
-- Light/dark mode toggle.
-- Navigation overlay for fold/unfold transitions.
+The project relies on a modern, bleeding-edge tech stack:
 
-### 10) Tafsir System Status
-
-- Tafsir 3D tracker and tafsir UI components are implemented.
-- In the current page composition, tafsir UI/scroll tracker is commented out (not currently shown to end user by default).
-
-## Tech Stack (Used in Code)
-
-- Framework: Next.js 16, React 19, TypeScript
-- 3D: Three.js, React Three Fiber, @react-three/drei
-- Animation: @react-spring/three, framer-motion, maath easing
-- State: Zustand
-- Postprocessing: @react-three/postprocessing + postprocessing
-- Styling: CSS (global + inline style-driven overlays)
-
-## Interaction Guide
-
-- Scroll: drives fold progression.
-- Left top nav button: smart fold/unfold jump between story states.
-- Click verse/section: elevate and focus interactions.
-- Popup buttons: open/close verse popup cards.
-- Theme button: toggle light/dark mode.
-- Reset button (when zoomed): return camera.
+- **Framework**: Next.js 16.2.1, React 19.2.4, TypeScript 5
+- **Styling**: TailwindCSS v4, clsx, tailwind-merge
+- **3D Core**: Three.js v0.183.2, @react-three/fiber v9.5.0, @react-three/drei v10.7.7
+- **Animation & Physics**:
+  - Framer Motion v12.38.0 (DOM animations)
+  - @react-spring/three v10.0.3 (3D spring physics)
+  - GSAP v3.14.2 (Complex timeline animations)
+  - @theatre/core & @theatre/r3f v0.7.2 (Cinematic sequencing)
+  - maath v0.10.8 (Math utilities and dampening)
+- **Scroll Orchestration**: Lenis v1.1.13 (Smooth scrolling)
+- **State Management**: Zustand
+- **Postprocessing**: @react-three/postprocessing v3.0.4 + postprocessing v6.39.0
 
 ## Project Structure (High-Level)
 
 ```text
 app/
 	_components/
-		3d-scene/              # camera, paper mesh, scroll manager, effects, particles
-		SurahLayout/           # Quran layout rendered into textures
-		features/
-			camera-zoom/         # verse hitboxes, camera store, neon overlay
-			elevated-verses/     # elevation stores, springs, surfaces, labels
-			pop-up-verses/       # popup manager, 3D cards, metallic verse
-			tafsir/              # tafsir data, tracker, UI
-		shared/                # reusable 3D-to-DOM tracker and visibility hooks
-		ui-overlay/            # navigation and UI overlays
+		canvas/
+			3d-scene/              # Main experience, paper material, lighting
+			intro/                 # Cinematic intro animations, text, and geometries
+			orchestrator/          # ScrollManager, intro/handoff timeline, fold states
+			SurahLayout/           # Quran layout rendered into textures
+			pop-up-verses/         # 3D extrusions and metallic verses
+			sections-object/       # Section hovering, elevation surfaces
+			verses-object/         # Verse hitboxes and neon trackers
+		dom/                     # All HTML overlays
+			ui-overlay/            # Main controls (Theme, Nav, Language, Titles)
+			AmbientMedia.tsx       # Floating videos/images during intro
+			LenisProvider.tsx      # Smooth scroll context
 ```
 
 ## Getting Started
@@ -147,8 +118,3 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-## Notes
-
-- This README documents currently implemented behavior in the codebase.
-- Some installed packages are experimental or currently unused in runtime scenes.
