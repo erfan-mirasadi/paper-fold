@@ -48,6 +48,13 @@ export function Experience({
   const readyFiredRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const isMobile =
+    typeof window !== "undefined" &&
+    (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    ) ||
+      window.innerWidth < 768);
+
   useEffect(() => {
     // We MUST wait for the paper to compile even in intro to avoid stutter when scene appears.
     const isReady = paperReady;
@@ -70,10 +77,10 @@ export function Experience({
 
   // Background Compilation
   useEffect(() => {
-    if (paperReady && useFoldStore.getState().isIntroActive) {
+    if (paperReady && useFoldStore.getState().isIntroActive && !isMobile) {
       gl.compileAsync(scene, camera).catch(() => {});
     }
-  }, [paperReady, gl, scene, camera]);
+  }, [paperReady, gl, scene, camera, isMobile]);
 
   // Ensure the elevated store is in the correct state for the intro.
   // restoreAllSections() is intentionally deferred until introHandoffProgress
@@ -90,17 +97,14 @@ export function Experience({
     return unsub;
   }, []);
 
-  const handleBackgroundClick = useCallback(
-    (e: ThreeEvent<MouseEvent>) => {
-      if (useFoldStore.getState().isIntroActive) return;
-      if (e.delta > 2) return;
-      const { hasDragged } = useDragState.getState();
-      if (hasDragged) return;
-      // Dismiss elevated verse on background click
-      useElevatedStore.getState().dismiss();
-    },
-    [],
-  );
+  const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
+    if (useFoldStore.getState().isIntroActive) return;
+    if (e.delta > 2) return;
+    const { hasDragged } = useDragState.getState();
+    if (hasDragged) return;
+    // Dismiss elevated verse on background click
+    useElevatedStore.getState().dismiss();
+  }, []);
 
   const {
     sceneOffsetX,
@@ -160,7 +164,7 @@ export function Experience({
       <Environment preset="apartment" />
       <ambientLight intensity={1} />
       <SpotLight
-        castShadow
+        castShadow={!isMobile} // Disabled dynamic shadow maps on mobile to prevent extreme GPU overhead
         penumbra={1}
         distance={13}
         angle={0.45}
@@ -170,7 +174,7 @@ export function Experience({
         color="#ffddaa" // Warm, cinematic yellow/orange like your reference image
         position={[1, 0.9, 3]}
         // depthBuffer={new Float32Array(100000000)}
-        volumetric // This is the magic prop that creates the visible light beam!
+        volumetric={!isMobile} // This is the magic prop that creates the visible light beam! Disabled on mobile to prevent crashes.
       />
 
       {!isAllSectionsMode && (
@@ -183,12 +187,22 @@ export function Experience({
 function DynamicControls() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  const enableInteractions = isIntroActive ? INTRO_CAMERA_CONFIG.allowOrbit : false;
+  const enableInteractions = isIntroActive
+    ? INTRO_CAMERA_CONFIG.allowOrbit
+    : false;
 
-  const minAzimuthAngle = isIntroActive ? -Infinity : CAMERA_CONFIG.orbitControls.minAzimuthAngle;
-  const maxAzimuthAngle = isIntroActive ? Infinity : CAMERA_CONFIG.orbitControls.maxAzimuthAngle;
-  const minPolarAngle = isIntroActive ? 0 : CAMERA_CONFIG.orbitControls.minPolarAngle;
-  const maxPolarAngle = isIntroActive ? Math.PI : CAMERA_CONFIG.orbitControls.maxPolarAngle;
+  const minAzimuthAngle = isIntroActive
+    ? -Infinity
+    : CAMERA_CONFIG.orbitControls.minAzimuthAngle;
+  const maxAzimuthAngle = isIntroActive
+    ? Infinity
+    : CAMERA_CONFIG.orbitControls.maxAzimuthAngle;
+  const minPolarAngle = isIntroActive
+    ? 0
+    : CAMERA_CONFIG.orbitControls.minPolarAngle;
+  const maxPolarAngle = isIntroActive
+    ? Math.PI
+    : CAMERA_CONFIG.orbitControls.maxPolarAngle;
 
   return (
     <OrbitControls

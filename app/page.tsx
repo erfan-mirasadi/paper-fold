@@ -45,8 +45,8 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
-  const [showMainOverlays, setShowMainOverlays] = useState(false);
   const [mountMainOverlays, setMountMainOverlays] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Decoupled from immediate Zustand hooks to prevent render cascade at handoff!
   const [showPostIntroUI, setShowPostIntroUI] = useState(
@@ -59,6 +59,13 @@ export default function Home() {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Detect mobile device safely on mount to prevent SSR hydration mismatches
+    const mobileCheck =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      ) || window.innerWidth < 768;
+    setIsMobile(mobileCheck);
+
     // Mount the Canvas almost immediately using requestAnimationFrame.
     // This pushes the heavy initial WebGL blocking to the very start of the load,
     // right before the loader animation is fully visible to the user.
@@ -173,11 +180,12 @@ export default function Home() {
               // Prevent pointer events while hidden or during intro to avoid blocking UI interactions behind canvas
               pointerEvents:
                 isSceneReady && !isIntroRenderPhase ? "auto" : "none",
-              // Dynamically cast a glassy soft shadow based on the 3D canvas alpha channel!
-              // This makes each capsule accurately cast its own shadow onto the footage below.
-              filter: isDarkMode
-                ? "drop-shadow(0 20px 30px rgba(0,0,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
-                : "drop-shadow(0 20px 30px rgba(255,255,255,0.8)) drop-shadow(0 4px 12px rgba(255,255,255,0.5))",
+              // Disabled heavy CSS drop-shadow filters on mobile layout layers to prevent compositor lockups and rendering crashes
+              filter: isMobile
+                ? "none"
+                : isDarkMode
+                  ? "drop-shadow(0 20px 30px rgba(0,0,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
+                  : "drop-shadow(0 20px 30px rgba(255,255,255,0.8)) drop-shadow(0 4px 12px rgba(255,255,255,0.5))",
               // Apple-like buttery smooth ease transition
               transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
             }}
@@ -206,8 +214,9 @@ export default function Home() {
                     position: CAMERA_CONFIG.initialCamera.position,
                     fov: CAMERA_CONFIG.initialCamera.fov,
                   }}
+                  dpr={isMobile ? [1, 1] : [1, 2]}
                   gl={{
-                    antialias: true,
+                    antialias: !isMobile, // Turned off antialiasing on mobile for a massive performance boost on high-DPI screens
                     powerPreference: "high-performance",
                     toneMapping: THREE.NoToneMapping,
                     outputColorSpace: THREE.SRGBColorSpace,
@@ -224,7 +233,8 @@ export default function Home() {
                   />
                   {/* <VerseNeonTracker /> */}
                   <CameraViewController />
-                  <Preload all />
+                  {!isMobile && <Preload all />}{" "}
+                  {/* Bypassed heavy synchronous shader compilation on mobile to avoid memory crashes during layout boot */}
                 </Canvas>
               </div>
             )}
