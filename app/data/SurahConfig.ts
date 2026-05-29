@@ -51,7 +51,7 @@ export interface SectionTwoData {
 
 // --- Page Dimensions ---
 export const BASE_PAGE_WIDTH = 1.54;
-export const PAGE_HEIGHT = 1.76;
+export const PAGE_HEIGHT = 1.78;
 export const SCENE_CENTER_Y_OFFSET = -0.045; // Centralized offset for the entire paper scene
 
 export function createLayoutMath(pageWidth: number) {

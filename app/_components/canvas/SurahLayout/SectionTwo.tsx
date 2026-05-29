@@ -1,8 +1,10 @@
 "use client";
 import { TopLabel, VerseBox } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
-import { HollowConnector } from "./HollowConnector";
+// import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
+import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
 import {
   // S2_OUTER_BORDER,
   // S2_OUTER_BG,
@@ -36,12 +38,49 @@ export function SectionTwo({
   const t = transforms;
   const edgeVerseBorderWidth = t.borderWidth;
 
+  const texture = useTexture("/Group 92.svg", (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+  });
+
   return (
     <group>
       {/* ─── SECTION OUTER FRAME ─────────────────────────────────────────── */}
+      {/* ─── TOP BLOCK BACKGROUND (Section 2) ──────────────────────────── */}
+      <>
+        {/* Yellow solid background */}
+        <mesh
+          position={[
+            t.connectorX + t.connectorW / 2,
+            t.topConnectorY - t.topConnectorH / 2,
+            -0.001,
+          ]}
+          scale={[1.05, 1, 1]}
+        >
+          <planeGeometry args={[t.connectorW, t.topConnectorH]} />
+          <meshBasicMaterial color="#F0E4E5" />
+        </mesh>
 
-      {/* ─── TOP HOLLOW CONNECTOR ────────────────────────────────────────── */}
-      <HollowConnector
+        {/* Stretched main-frame image as background */}
+        <mesh
+          position={[
+            t.connectorX + t.connectorW / 2,
+            t.topConnectorY - t.topConnectorH / 2 + 0.025,
+            0,
+          ]}
+          scale={[1.05, 1.15, 1]}
+        >
+          <planeGeometry args={[t.connectorW, t.topConnectorH]} />
+          <meshBasicMaterial
+            map={texture}
+            transparent
+            depthTest={true}
+            toneMapped={false}
+          />
+        </mesh>
+      </>
+
+      {/* ─── TOP HOLLOW CONNECTOR (Replaced by Image Background) ───────── */}
+      {/* <HollowConnector
         position="top"
         boxX={t.connectorX}
         boxW={t.connectorW}
@@ -49,10 +88,45 @@ export function SectionTwo({
         yBottom={t.topConnectorY - t.topConnectorH}
         height={t.topConnectorH}
         borderWidth={t.borderWidth}
-      />
+      /> */}
 
-      {/* ─── BOTTOM HOLLOW CONNECTOR ─────────────────────────────────────── */}
-      <HollowConnector
+      {/* ─── BOTTOM BLOCK BACKGROUND (Section 4) ───────────────────────── */}
+      <>
+        {/* Yellow solid background */}
+        <mesh
+          position={[
+            t.connectorX + t.connectorW / 2,
+            t.bottomConnectorY - t.bottomConnectorH / 2,
+            -0.001,
+          ]}
+          scale={[1.05, 1, 1]}
+        >
+          <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
+          <meshBasicMaterial color="#F0E4E5" />
+        </mesh>
+
+        {/* Stretched main-frame image as background */}
+        <mesh
+          position={[
+            t.connectorX + t.connectorW / 2,
+            t.bottomConnectorY - t.bottomConnectorH / 2 - 0.025,
+            0,
+          ]}
+          scale={[1.05, -1.15, 1]}
+        >
+          <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
+          <meshBasicMaterial
+            map={texture}
+            transparent
+            depthTest={true}
+            toneMapped={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </>
+
+      {/* ─── BOTTOM HOLLOW CONNECTOR (Replaced by Image Background) ────── */}
+      {/* <HollowConnector
         position="bottom"
         boxX={t.connectorX}
         boxW={t.connectorW}
@@ -60,7 +134,7 @@ export function SectionTwo({
         yBottom={t.bottomConnectorY - t.bottomConnectorH}
         height={t.bottomConnectorH}
         borderWidth={t.borderWidth}
-      />
+      /> */}
 
       {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
       <VerseBox
@@ -124,6 +198,7 @@ export function SectionTwo({
         partialBorder={true}
         bgColor={S2_TOP_LABEL_BG}
         borderColor={S2_TOP_LABEL_BORDER}
+        renderOrder={100}
       />
       <TopLabel
         x={PW / 2}
@@ -134,6 +209,7 @@ export function SectionTwo({
         bottomBorder={true}
         bgColor={S2_TOP_LABEL_BG}
         borderColor={S2_TOP_LABEL_BORDER}
+        renderOrder={100}
       />
     </group>
   );

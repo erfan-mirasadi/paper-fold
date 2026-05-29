@@ -150,14 +150,14 @@ function BorderSvg({
   h: number;
   z: number;
 }) {
-  const texture = useTexture("/VerseFiveFrame.svg", (t) => {
+  const texture = useTexture("/Group 11.svg", (t) => {
     t.colorSpace = THREE.SRGBColorSpace;
   });
   // ضریب‌های ساده برای تغییر سایز نسبت به خود کپسول:
   // 1.0 یعنی دقیقاً هم‌عرض/هم‌ارتفاع کپسول باشه.
   // مثلاً 1.1 یعنی ۱۰ درصد بزرگتر بشه، یا 0.9 یعنی کوچیکتر بشه.
-  const widthScale = 1.01;
-  const heightScale = 1.08;
+  const widthScale = 0.8;
+  const heightScale = 0.93;
 
   const renderW = w * widthScale;
   const renderH = h * heightScale;
