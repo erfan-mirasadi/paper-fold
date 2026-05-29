@@ -7,8 +7,6 @@ import {
   useTexture,
 } from "@react-three/drei";
 import { CanvasText } from "../shared/CanvasText";
-import { useLoader } from "@react-three/fiber";
-import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { VerseBox, RoundedShapeComponent } from "./SharedUI";
 import {
   CAPSULE_BORDER_WIDTH,
@@ -183,7 +181,7 @@ export function VerseFiveMetallic() {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
   const anaAyetLabel = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
-  const decorativeSvg = useLoader(SVGLoader, "/decorative.svg");
+  // const decorativeSvg = useLoader(SVGLoader, "/decorative.svg");
   const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
   const isSectionSurfaceRaised = useElevatedStore((s) =>
     s.activeSectionIds.includes("s1"),

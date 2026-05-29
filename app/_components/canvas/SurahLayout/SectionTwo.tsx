@@ -12,6 +12,8 @@ import {
   CAPSULE_BG_6_19,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
+  SECTION_FRAME_BG_COLOR,
+  S2_FRAME_IMAGE,
 } from "../../../data/theme";
 import type {
   SectionTwoData,
@@ -38,7 +40,7 @@ export function SectionTwo({
   const t = transforms;
   const edgeVerseBorderWidth = t.borderWidth;
 
-  const texture = useTexture("/Group 92.svg", (tex) => {
+  const texture = useTexture(S2_FRAME_IMAGE, (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace;
   });
 
@@ -57,7 +59,7 @@ export function SectionTwo({
           scale={[1.05, 1, 1]}
         >
           <planeGeometry args={[t.connectorW, t.topConnectorH]} />
-          <meshBasicMaterial color="#F0E4E5" />
+          <meshBasicMaterial color={SECTION_FRAME_BG_COLOR} />
         </mesh>
 
         {/* Stretched main-frame image as background */}
@@ -102,7 +104,7 @@ export function SectionTwo({
           scale={[1.05, 1, 1]}
         >
           <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
-          <meshBasicMaterial color="#F0E4E5" />
+          <meshBasicMaterial color={SECTION_FRAME_BG_COLOR} />
         </mesh>
 
         {/* Stretched main-frame image as background */}

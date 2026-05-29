@@ -14,6 +14,9 @@ export const CIRCLE_BORDER = "#8e8e8e";
 // 4. SECTION 1 — UPPER BLOCK PALETTE
 // ----------------------------------------------------------------------------
 export const SECTION_BG_TEXTURE = "/section-bg.jpeg";
+export const SECTION_FRAME_BG_COLOR = "#F0E4E5";
+export const S1_FRAME_IMAGE = "/Group 10.svg";
+export const S2_FRAME_IMAGE = "/Group 92.svg";
 
 export const S1_OUTER_BG = SECTION_BG_TEXTURE;
 export const S1_INNER_BG = "#fbf1d5";
