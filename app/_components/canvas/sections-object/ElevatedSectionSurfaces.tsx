@@ -277,7 +277,9 @@ interface ElevatedSvgFrameProps {
   texturePath: string;
   solidScale?: [number, number, number];
   imageScale?: [number, number, number];
+  solidXOffset?: number;
   solidYOffset?: number;
+  imageXOffset?: number;
   imageYOffset?: number;
   spring: SectionSpring;
   shadow?: boolean;
