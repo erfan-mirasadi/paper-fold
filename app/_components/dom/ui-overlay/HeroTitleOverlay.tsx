@@ -31,7 +31,6 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          lineGapClass="mt-0"
           className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[16vw] md:text-[12vw] ${isDarkMode ? "text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : "text-zinc-900 drop-shadow-sm"}`}
         />
         <AnimatedText
