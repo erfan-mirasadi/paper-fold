@@ -3,8 +3,6 @@ import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import {
-  S1_OUTER_BORDER,
-  S1_OUTER_BG,
   S1_INNER_BG,
   S1_INNER_BORDER,
   S1_ANA_BG,
@@ -14,17 +12,14 @@ import {
   S1_VERSE_NUMBER_TEXT,
   S1_TOP_LABEL_BG,
   S1_TOP_LABEL_BORDER,
-  S1_NEON_GOLD,
   S1_FRAME_IMAGE,
   SECTION_FRAME_BG_COLOR,
 } from "../../../data/theme";
 import {
-  S1_NEON_CONFIG,
   OPPOSITE_VERSE_CONNECTOR,
   type SectionOneData,
   type S1Transforms,
 } from "../../../data/SurahConfig";
-
 interface SectionOneProps {
   data: SectionOneData;
   transforms: S1Transforms;
@@ -33,9 +28,6 @@ interface SectionOneProps {
 }
 
 export function SectionOne({ data, transforms, PW }: SectionOneProps) {
-  const neon = S1_NEON_CONFIG;
-  const frameRadius = 0.02;
-  const topLabelCutoutW = neon.topLabelGapWidth + neon.topLabelGapPadding * 2;
   const hideSectionLabel = false;
   const t = transforms;
 
@@ -49,9 +41,15 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         {/* Yellow solid background */}
         <mesh
           position={[t.frameX + t.frameW / 2, t.frameY - t.frameH / 2, -0.001]}
+          renderOrder={1}
         >
-          <planeGeometry args={[t.frameW * 1.05, t.frameH * 1]} />
-          <meshBasicMaterial color={SECTION_FRAME_BG_COLOR} />
+          <planeGeometry args={[t.frameW * 1.107, t.frameH * 1]} />
+          <meshBasicMaterial
+            color={SECTION_FRAME_BG_COLOR}
+            toneMapped={false}
+            depthTest={false}
+            depthWrite={false}
+          />
         </mesh>
 
         {/* Simple stretched main-frame image as background */}
@@ -61,12 +59,14 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
             t.frameY - t.frameH / 2 + 0.01,
             0,
           ]}
+          renderOrder={2}
         >
           <planeGeometry args={[t.frameW * 1.1, t.frameH * 1.1]} />
           <meshBasicMaterial
             map={texture}
             transparent
-            depthTest={true}
+            depthTest={false}
+            depthWrite={false}
             toneMapped={false}
           />
         </mesh>

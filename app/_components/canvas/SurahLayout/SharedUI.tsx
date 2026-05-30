@@ -283,6 +283,7 @@ interface TopLabelProps {
   bgColor?: string;
   renderOrder?: number;
   depthTest?: boolean;
+  fontSizeOverride?: number;
 }
 
 export function TopLabel({
@@ -298,6 +299,7 @@ export function TopLabel({
   bgColor = WHITE_BASE,
   renderOrder,
   depthTest = false,
+  fontSizeOverride,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
@@ -308,6 +310,10 @@ export function TopLabel({
 
   const groupRef = useRef<THREE.Group>(null);
   const borderThickness = 0.004;
+  
+  const isArabicText = /[\u0600-\u06FF]/.test(text);
+  const fontToUse = isArabicText ? QURAN_FONT : LATIN_LABEL_FONT;
+  const resolvedFontSize = fontSizeOverride ?? (isArabicText ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5 : TEXT_SIZES.TOP_LABEL * topLabelScale);
 
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
@@ -342,8 +348,8 @@ export function TopLabel({
       <group position={[w / 2, -h / 2, 0.002]}>
         <CanvasText
           text={text}
-          font={LATIN_LABEL_FONT}
-          fontSize={TEXT_SIZES.TOP_LABEL * topLabelScale}
+          font={fontToUse}
+          fontSize={resolvedFontSize}
           color={TEXT_LABEL}
           width={w}
           height={h}

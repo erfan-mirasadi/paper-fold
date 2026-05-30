@@ -8,7 +8,7 @@ export const INTRO_SECTION_SCATTER: Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
 > = {
-  s1: [0.92, -0.6, 2.04, 0.7, -0.81, -0.07], // x, y, z, rx, ry, rz
+  s1: [0.92, -0.65, 2.04, 0.7, -0.81, -0.07], // x, y, z, rx, ry, rz
   s2_top: [0, -0.6, -0.4],
   s2_center: [0.06, -0.55, -1.2],
   s2_bottom: [0, -0.63, 0.5],

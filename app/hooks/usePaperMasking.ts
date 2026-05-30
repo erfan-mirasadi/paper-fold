@@ -5,6 +5,7 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../stores/useElevatedStore";
+import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import { ORIGINAL_TEXTURE_TIMING } from "./useFoldAnimation";
 import { ELEVATE_TEXTURE_TIMING } from "./useElevateAnimation";
 import { S1_INNER_BORDER } from "../data/theme";
@@ -221,12 +222,13 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       s2_center: 2,
       s2_bottom: 3,
     };
+    // During the intro, all sections are in activeSectionIds (forceShowAllSections),
+    // but we must NOT hide them on the paper — the paper texture is visible during the intro.
+    // Only hide sections when post-intro elevated mode is active.
+    const introActive = useFoldStore.getState().isIntroActive;
     Object.entries(sectionMap).forEach(([id, idx]) => {
-      uniforms.uSectionVisibility.value[idx] = e.activeSectionIds.includes(
-        id as ElevatedSectionId,
-      )
-        ? 0.0
-        : 1.0;
+      const isElevated = e.activeSectionIds.includes(id as ElevatedSectionId);
+      uniforms.uSectionVisibility.value[idx] = (isElevated && !introActive) ? 0.0 : 1.0;
     });
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
@@ -290,9 +292,12 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           sid as ElevatedSectionId,
         );
         if (now !== prev) {
+          // During intro, never hide section areas on the paper
+          const introNow = useFoldStore.getState().isIntroActive;
+          const shouldBeVisible = !now || introNow;
           updateSection(
             idx,
-            !now,
+            shouldBeVisible,
             now
               ? ELEVATE_TEXTURE_TIMING.hideDelay
               : ELEVATE_TEXTURE_TIMING.showDelay,

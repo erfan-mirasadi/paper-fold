@@ -25,7 +25,6 @@ import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 
-
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
   y: number;
@@ -42,6 +41,7 @@ type AnimatedLabelProps = {
   labelZ?: number;
   renderOrder?: number;
   depthTest?: boolean;
+  fontSizeOverride?: number;
 };
 
 function AnimatedElevatedLabel({
@@ -60,6 +60,7 @@ function AnimatedElevatedLabel({
   labelZ = 0.00035,
   renderOrder,
   depthTest = false,
+  fontSizeOverride,
 }: AnimatedLabelProps) {
   const PAGE_WIDTH = useSurahLayoutRuntime().PAGE_WIDTH;
 
@@ -130,6 +131,7 @@ function AnimatedElevatedLabel({
             bottomBorder={bottomBorder}
             renderOrder={renderOrder}
             depthTest={depthTest}
+            fontSizeOverride={fontSizeOverride}
           />
         </a.group>
       </a.group>
@@ -161,55 +163,64 @@ export function ElevatedSectionLabels() {
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
+      {(isIntroActive || showLabels) && (
+        <group>
+          <AnimatedElevatedLabel
+            sectionId="s1"
+            y={SURAH_TRANSFORMS.s1.labelPinY}
+            text={
+              isIntroActive
+                ? "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+                : surahData.section1.label
+            }
+            fontSizeOverride={isIntroActive ? 0.032 : undefined}
+            bgColor={S1_TOP_LABEL_BG}
+            borderColor={S1_TOP_LABEL_BORDER}
+            delayMs={55}
+            liftHeight={0.14}
+            tension={96}
+            friction={24}
+            renderOrder={220}
+            depthTest={true}
+          />
+        </group>
+      )}
       {showLabels && (
         <group>
           <AnimatedElevatedLabel
-          sectionId="s1"
-          y={SURAH_TRANSFORMS.s1.labelPinY}
-          text={surahData.section1.label}
-          bgColor={S1_TOP_LABEL_BG}
-          borderColor={S1_TOP_LABEL_BORDER}
-          delayMs={55}
-          liftHeight={0.14}
-          tension={96}
-          friction={24}
-          renderOrder={220}
-          depthTest={true}
-        />
-        <AnimatedElevatedLabel
-          sectionId="s2_top"
-          y={SURAH_TRANSFORMS.s2.topLabelPinY}
-          text={surahData.section2.topLabel}
-          bgColor={S2_TOP_LABEL_BG}
-          borderColor={S2_TOP_LABEL_BORDER}
-          partialBorder={true}
-          delayMs={95}
-          liftHeight={0.14}
-          tension={90}
-          friction={23}
-          zBaseOffset={0.0022}
-          labelZ={0.00035}
-          renderOrder={240}
-          depthTest={true}
-        />
+            sectionId="s2_top"
+            y={SURAH_TRANSFORMS.s2.topLabelPinY}
+            text={surahData.section2.topLabel}
+            bgColor={S2_TOP_LABEL_BG}
+            borderColor={S2_TOP_LABEL_BORDER}
+            partialBorder={true}
+            delayMs={95}
+            liftHeight={0.14}
+            tension={90}
+            friction={23}
+            zBaseOffset={0.0022}
+            labelZ={0.00035}
+            renderOrder={240}
+            depthTest={true}
+          />
 
-        <AnimatedElevatedLabel
-          sectionId="s2_bottom"
-          y={SURAH_TRANSFORMS.s2.bottomLabelPinY}
-          text={surahData.section2.bottomLabel}
-          bgColor={S2_TOP_LABEL_BG}
-          borderColor={S2_TOP_LABEL_BORDER}
-          partialBorder={true}
-          bottomBorder={true}
-          delayMs={130}
-          liftHeight={0.14}
-          tension={84}
-          friction={22}
-          zBaseOffset={0.0022}
-          labelZ={0.00035}
-          renderOrder={240}
-          depthTest={true}
-        />
+          <AnimatedElevatedLabel
+            sectionId="s2_bottom"
+            y={SURAH_TRANSFORMS.s2.bottomLabelPinY}
+            text={surahData.section2.bottomLabel}
+            bgColor={S2_TOP_LABEL_BG}
+            borderColor={S2_TOP_LABEL_BORDER}
+            partialBorder={true}
+            bottomBorder={true}
+            delayMs={130}
+            liftHeight={0.14}
+            tension={84}
+            friction={22}
+            zBaseOffset={0.0022}
+            labelZ={0.00035}
+            renderOrder={240}
+            depthTest={true}
+          />
         </group>
       )}
     </group>

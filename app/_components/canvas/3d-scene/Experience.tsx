@@ -34,6 +34,8 @@ export function Experience({
   onReady,
 }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  // Only show up to the point where ambient media ends (rawOffset ~0.34)
+  const showSpotlight = useFoldStore((s) => s.rawOffset < 0.37);
   const { gl, scene, camera } = useThree();
 
   // We track paper readiness
@@ -163,19 +165,21 @@ export function Experience({
       <DynamicControls />
       <Environment preset="apartment" />
       <ambientLight intensity={1} />
-      <SpotLight
-        castShadow={!isMobile} // Disabled dynamic shadow maps on mobile to prevent extreme GPU overhead
-        penumbra={1}
-        distance={13}
-        angle={0.45}
-        attenuation={4} // Controls how the light falls off
-        anglePower={4} // Controls the sharpness of the light cone
-        intensity={1}
-        color="#ffddaa" // Warm, cinematic yellow/orange like your reference image
-        position={[1, 0.9, 3]}
-        // depthBuffer={new Float32Array(100000000)}
-        volumetric={!isMobile} // This is the magic prop that creates the visible light beam! Disabled on mobile to prevent crashes.
-      />
+      {showSpotlight && (
+        <SpotLight
+          castShadow={!isMobile} // Disabled dynamic shadow maps on mobile to prevent extreme GPU overhead
+          penumbra={1}
+          distance={13}
+          angle={0.65}
+          attenuation={7} // Controls how the light falls off
+          anglePower={5} // Controls the sharpness of the light cone
+          intensity={0.001}
+          color="#ffddaa" // Warm, cinematic yellow/orange like your reference image
+          position={[2.5, 3.5, 0]}
+          // depthBuffer={new Float32Array(100000000)}
+          volumetric={!isMobile} // This is the magic prop that creates the visible light beam! Disabled on mobile to prevent crashes.
+        />
+      )}
 
       {!isAllSectionsMode && (
         <directionalLight position={[0, 4.2, -2]} intensity={1} />

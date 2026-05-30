@@ -22,7 +22,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
   return (
     <div
       className="pointer-events-none fixed inset-0 flex items-center justify-center overflow-hidden z-50"
-      style={{ opacity, paddingBottom: "15vh" }}
+      style={{ opacity, paddingBottom: "22vh" }}
     >
       <div className="relative flex flex-col items-center text-center">
         <AnimatedText

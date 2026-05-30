@@ -489,48 +489,52 @@ export function VerseFiveMetallic() {
           </a.group>
 
           {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}
-          <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
-            <group
-              position={[
-                outerW / 2 - labelW / 2,
-                labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
-                EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
-              ]}
-            >
-              <mesh renderOrder={110}>
-                <extrudeGeometry
-                  args={[labelInnerShape, labelExtrudeSettings]}
-                />
-                <meshBasicMaterial
-                  color={S1_ANA_LABEL_BG}
-                  toneMapped={false}
-                  side={THREE.DoubleSide}
-                />
-              </mesh>
-
+          {!isIntroActive && (
+            <a.group position-z={liftZ} scale-x={scale} scale-y={scale}>
               <group
                 position={[
-                  labelW / 2,
-                  -labelH / 2 - 0.002,
-                  ANA_LABEL_DEPTH + 0.002,
+                  outerW / 2 - labelW / 2,
+                  labelH - ANA_LABEL_PIN_OVERLAP - labelDrop,
+                  EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
                 ]}
               >
-                <CanvasText
-                  text={anaAyetLabel}
-                  font={activeLanguage === "ar" ? QURAN_FONT : LATIN_LABEL_FONT}
-                  fontSize={
-                    TEXT_SIZES.ANA_AYET_TAB *
-                    LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet
-                  }
-                  color={S1_ANA_LABEL_TEXT}
-                  textAlign="center"
-                  width={labelW}
-                  height={labelH}
-                  fontWeight="bold"
-                />
+                <mesh renderOrder={110}>
+                  <extrudeGeometry
+                    args={[labelInnerShape, labelExtrudeSettings]}
+                  />
+                  <meshBasicMaterial
+                    color={S1_ANA_LABEL_BG}
+                    toneMapped={false}
+                    side={THREE.DoubleSide}
+                  />
+                </mesh>
+
+                <group
+                  position={[
+                    labelW / 2,
+                    -labelH / 2 - 0.002,
+                    ANA_LABEL_DEPTH + 0.002,
+                  ]}
+                >
+                  <CanvasText
+                    text={anaAyetLabel}
+                    font={
+                      activeLanguage === "ar" ? QURAN_FONT : LATIN_LABEL_FONT
+                    }
+                    fontSize={
+                      TEXT_SIZES.ANA_AYET_TAB *
+                      LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet
+                    }
+                    color={S1_ANA_LABEL_TEXT}
+                    textAlign="center"
+                    width={labelW}
+                    height={labelH}
+                    fontWeight="bold"
+                  />
+                </group>
               </group>
-            </group>
-          </a.group>
+            </a.group>
+          )}
         </group>
       </a.group>
     </group>

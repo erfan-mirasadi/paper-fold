@@ -20,7 +20,6 @@ import type {
   LayoutConfig,
   S2Transforms,
 } from "../../../data/SurahConfig";
-
 interface SectionTwoProps {
   data: SectionTwoData;
   transforms: S2Transforms;
@@ -57,9 +56,15 @@ export function SectionTwo({
             -0.001,
           ]}
           scale={[1.05, 1, 1]}
+          renderOrder={1}
         >
           <planeGeometry args={[t.connectorW, t.topConnectorH]} />
-          <meshBasicMaterial color={SECTION_FRAME_BG_COLOR} />
+          <meshBasicMaterial
+            color={SECTION_FRAME_BG_COLOR}
+            toneMapped={false}
+            depthTest={false}
+            depthWrite={false}
+          />
         </mesh>
 
         {/* Stretched main-frame image as background */}
@@ -70,12 +75,14 @@ export function SectionTwo({
             0,
           ]}
           scale={[1.05, 1.15, 1]}
+          renderOrder={2}
         >
           <planeGeometry args={[t.connectorW, t.topConnectorH]} />
           <meshBasicMaterial
             map={texture}
             transparent
-            depthTest={true}
+            depthTest={false}
+            depthWrite={false}
             toneMapped={false}
           />
         </mesh>
@@ -102,9 +109,15 @@ export function SectionTwo({
             -0.001,
           ]}
           scale={[1.05, 1, 1]}
+          renderOrder={1}
         >
           <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
-          <meshBasicMaterial color={SECTION_FRAME_BG_COLOR} />
+          <meshBasicMaterial
+            color={SECTION_FRAME_BG_COLOR}
+            toneMapped={false}
+            depthTest={false}
+            depthWrite={false}
+          />
         </mesh>
 
         {/* Stretched main-frame image as background */}
@@ -115,14 +128,15 @@ export function SectionTwo({
             0,
           ]}
           scale={[1.05, -1.15, 1]}
+          renderOrder={2}
         >
           <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
           <meshBasicMaterial
             map={texture}
             transparent
-            depthTest={true}
+            depthTest={false}
+            depthWrite={false}
             toneMapped={false}
-            side={THREE.DoubleSide}
           />
         </mesh>
       </>

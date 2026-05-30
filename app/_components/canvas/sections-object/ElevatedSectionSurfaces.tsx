@@ -6,13 +6,15 @@ import { useEffect, useMemo, useState } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
+import {
+  Color,
+  LinearFilter,
+  SRGBColorSpace,
+  Shape,
+  type Texture,
+} from "three";
 
 import {
-  S1_OUTER_BG,
-  S1_OUTER_BORDER,
-  HOLLOW_BORDER_COLOR,
-  HOLLOW_BORDER_INNER,
   HOLLOW_CONNECTOR_INNER_BG_1_3,
   SECTION_BG_TEXTURE,
   S1_INNER_BORDER,
@@ -235,6 +237,71 @@ function ElevatedLayer({
   );
 }
 
+function ScallopedCenteredShape({
+  w,
+  h,
+  radius,
+  position = "top",
+}: {
+  w: number;
+  h: number;
+  radius: number;
+  position?: "top" | "bottom" | "both" | "none";
+}) {
+  const shape = useMemo(() => {
+    const s = new Shape();
+    const halfW = w / 2;
+    const halfH = h / 2;
+
+    if (position === "none") {
+      s.moveTo(-halfW, -halfH);
+      s.lineTo(-halfW, halfH);
+      s.lineTo(halfW, halfH);
+      s.lineTo(halfW, -halfH);
+      s.lineTo(-halfW, -halfH);
+      return s;
+    }
+
+    if (position === "bottom" || position === "both") {
+      s.moveTo(-halfW, -halfH + radius);
+    } else {
+      s.moveTo(-halfW, -halfH);
+    }
+
+    if (position === "top" || position === "both") {
+      s.lineTo(-halfW, halfH - radius);
+      s.absarc(-halfW, halfH, radius, -Math.PI / 2, 0, false);
+    } else {
+      s.lineTo(-halfW, halfH);
+    }
+
+    if (position === "top" || position === "both") {
+      s.lineTo(halfW - radius, halfH);
+      s.absarc(halfW, halfH, radius, Math.PI, Math.PI * 1.5, false);
+    } else {
+      s.lineTo(halfW, halfH);
+    }
+
+    if (position === "bottom" || position === "both") {
+      s.lineTo(halfW, -halfH + radius);
+      s.absarc(halfW, -halfH, radius, Math.PI / 2, Math.PI, false);
+    } else {
+      s.lineTo(halfW, -halfH);
+    }
+
+    if (position === "bottom" || position === "both") {
+      s.lineTo(-halfW + radius, -halfH);
+      s.absarc(-halfW, -halfH, radius, 0, Math.PI / 2, false);
+    } else {
+      s.lineTo(-halfW, -halfH);
+    }
+
+    return s;
+  }, [w, h, radius, position]);
+
+  return <shapeGeometry args={[shape]} />;
+}
+
 // ─── SVG Frame layer for custom section designs ────────────────────────
 interface ElevatedSvgFrameProps {
   centerX: number;
@@ -252,6 +319,7 @@ interface ElevatedSvgFrameProps {
   shadowStrength?: number;
   suppressShadow?: boolean;
   zOffset?: number;
+  scallopPosition?: "top" | "bottom" | "both" | "none";
 }
 
 function ElevatedSvgFrame({
@@ -270,6 +338,7 @@ function ElevatedSvgFrame({
   shadowStrength = 1,
   suppressShadow = false,
   zOffset = 0,
+  scallopPosition = "none",
 }: ElevatedSvgFrameProps) {
   const runtime = useSurahLayoutRuntime();
   const PAGE_WIDTH = runtime.PAGE_WIDTH;
@@ -287,20 +356,23 @@ function ElevatedSvgFrame({
       {shadow && (
         <a.mesh
           position={[VERSE_MIMIC_SHADOW.offsetX, VERSE_MIMIC_SHADOW.offsetY, 0]}
-          position-z={to(spring.liftZ, (lift) => VERSE_MIMIC_SHADOW.insetZ - lift)}
+          position-z={to(
+            spring.liftZ,
+            (lift) => VERSE_MIMIC_SHADOW.insetZ - lift,
+          )}
           scale-x={to(
             spring.liftZ,
             (lift) =>
               1 +
               (lift / SECTION_SURFACE.liftHeight) *
-                (VERSE_MIMIC_SHADOW.scale - 1)
+                (VERSE_MIMIC_SHADOW.scale - 1),
           )}
           scale-y={to(
             spring.liftZ,
             (lift) =>
               1 +
               (lift / SECTION_SURFACE.liftHeight) *
-                (VERSE_MIMIC_SHADOW.scale - 1)
+                (VERSE_MIMIC_SHADOW.scale - 1),
           )}
         >
           <planeGeometry args={[w * solidScale[0], h * solidScale[1]]} />
@@ -316,28 +388,41 @@ function ElevatedSvgFrame({
                 suppressShadow
                   ? 0
                   : Math.max(vis * VERSE_MIMIC_SHADOW.opacityFlat, shadowOp) *
-                    shadowStrength
+                    shadowStrength,
             )}
           />
         </a.mesh>
       )}
 
       {/* Solid background */}
-      <a.mesh position={[0, solidYOffset, -0.001]} scale={solidScale as any}>
-        <planeGeometry args={[w, h]} />
-        <a.meshBasicMaterial color={solidColor} transparent opacity={spring.opacity} />
+      <a.mesh position={[0, solidYOffset, -0.001]}>
+        <ScallopedCenteredShape
+          w={w * solidScale[0]}
+          h={h * solidScale[1]}
+          radius={0.039}
+          position={scallopPosition}
+        />
+        <a.meshBasicMaterial
+          color={solidColor}
+          transparent
+          opacity={spring.opacity as any}
+          toneMapped={false}
+          depthTest={false}
+          depthWrite={false}
+        />
       </a.mesh>
 
       {/* SVG Image */}
       <a.mesh position={[0, imageYOffset, 0]} scale={imageScale as any}>
         <planeGeometry args={[w, h]} />
         <a.meshBasicMaterial
-          map={texture}
+          map={texture as any}
           transparent
-          opacity={spring.opacity}
-          depthTest={true}
+          opacity={spring.opacity as any}
+          depthTest={false}
+          depthWrite={false}
           toneMapped={false}
-          side={texturePath.includes('Group 92') ? 2 : 0} // THREE.DoubleSide = 2, THREE.FrontSide = 0
+          side={2} // THREE.DoubleSide = 2, THREE.FrontSide = 0
         />
       </a.mesh>
     </a.group>
@@ -398,22 +483,6 @@ export function ElevatedSectionSurfaces() {
   );
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
-
-  // ALL elevated surfaces stay HIDDEN during the intro→paper transition.
-  // Paper masking handles revealing sections on the paper texture.
-  // Surfaces only become renderable after restore springs have settled (opacity→0).
-  const [postIntroSettled, setPostIntroSettled] = useState(
-    () => !useFoldStore.getState().isIntroActive,
-  );
-  useEffect(() => {
-    if (!isIntroActive) {
-      const t = setTimeout(() => setPostIntroSettled(true), 800);
-      return () => clearTimeout(t);
-    } else {
-      setPostIntroSettled(false);
-    }
-  }, [isIntroActive]);
-  const showSurfaces = postIntroSettled && !isIntroActive;
 
   const s1Spring = useSectionSurfaceSpring(s1Active);
   const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
@@ -531,25 +600,25 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          {showSurfaces && (
-            <group>
-              <ElevatedSvgFrame
-                centerX={s1.frameX + s1.frameW / 2}
-                centerY={s1.frameY - s1.frameH / 2}
-                w={s1.frameW}
-                h={s1.frameH}
-                solidColor={SECTION_FRAME_BG_COLOR}
-                texturePath={S1_FRAME_IMAGE}
-                solidScale={[1.05, 1, 1]}
-                imageScale={[1.1, 1.1, 1]}
-                solidYOffset={0}
-                imageYOffset={0.01}
-                spring={s1Spring}
-                shadow
-                shadowStrength={0.95}
-                suppressShadow={isIntroActive}
-                zOffset={0.001}
-              />
+          <group>
+            <ElevatedSvgFrame
+              centerX={s1.frameX + s1.frameW / 2}
+              centerY={s1.frameY - s1.frameH / 2}
+              w={s1.frameW}
+              h={s1.frameH}
+              solidColor={SECTION_FRAME_BG_COLOR}
+              texturePath={S1_FRAME_IMAGE}
+              solidScale={[1.06, 0.97, 1]}
+              imageScale={[1.1, 1.1, 1]}
+              solidYOffset={-0.01}
+              imageYOffset={0.01}
+              spring={s1Spring}
+              shadow
+              shadowStrength={0.95}
+              suppressShadow={isIntroActive}
+              zOffset={0.001}
+              scallopPosition="top"
+            />
             {s1.rowConnectors.map((rc, i) => (
               <ElevatedLayer
                 key={`s1-rc-${i}`}
@@ -564,8 +633,7 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0015}
               />
             ))}
-            </group>
-          )}
+          </group>
         </DraggableSectionGroup>
       </group>
 
@@ -586,25 +654,25 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          {showSurfaces && (
-            <group>
-              <ElevatedSvgFrame
-                centerX={s2.connectorX + s2.connectorW / 2}
-                centerY={s2.topConnectorY - s2.topConnectorH / 2}
-                w={s2.connectorW}
-                h={s2.topConnectorH}
-                solidColor={SECTION_FRAME_BG_COLOR}
-                texturePath={S2_FRAME_IMAGE}
-                solidScale={[1.05, 1, 1]}
-                imageScale={[1.05, 1.15, 1]}
-                solidYOffset={0}
-                imageYOffset={0.025}
-                spring={s2TopSpring}
-                shadow
-                shadowStrength={0.8}
-                suppressShadow={isIntroActive}
-                zOffset={0.001}
-              />
+          <group>
+            <ElevatedSvgFrame
+              centerX={s2.connectorX + s2.connectorW / 2}
+              centerY={s2.topConnectorY - s2.topConnectorH / 2}
+              w={s2.connectorW}
+              h={s2.topConnectorH}
+              solidColor={SECTION_FRAME_BG_COLOR}
+              texturePath={S2_FRAME_IMAGE}
+              solidScale={[1.05, 1, 1]}
+              imageScale={[1.05, 1.15, 1]}
+              solidYOffset={0}
+              imageYOffset={0.025}
+              spring={s2TopSpring}
+              shadow
+              shadowStrength={0.8}
+              suppressShadow={isIntroActive}
+              zOffset={0.001}
+              scallopPosition="none"
+            />
             {s2.groups[0].rowConnectors.map((rc, i) => (
               <ElevatedLayer
                 key={`s2-top-rc-${i}`}
@@ -619,8 +687,7 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0025}
               />
             ))}
-            </group>
-          )}
+          </group>
         </DraggableSectionGroup>
       </group>
 
@@ -641,9 +708,8 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          {showSurfaces && (
-            <group>
-              {s2.groups[1].rowConnectors.map((rc, i) => (
+          <group>
+            {s2.groups[1].rowConnectors.map((rc, i) => (
               <ElevatedLayer
                 key={`s2-center-rc-${i}`}
                 x={rc.x}
@@ -657,8 +723,7 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0025}
               />
             ))}
-            </group>
-          )}
+          </group>
         </DraggableSectionGroup>
       </group>
 
@@ -679,25 +744,25 @@ export function ElevatedSectionSurfaces() {
               ]}
             />
           )}
-          {showSurfaces && (
-            <group>
-              <ElevatedSvgFrame
-                centerX={s2.connectorX + s2.connectorW / 2}
-                centerY={s2.bottomConnectorY - s2.bottomConnectorH / 2}
-                w={s2.connectorW}
-                h={s2.bottomConnectorH}
-                solidColor={SECTION_FRAME_BG_COLOR}
-                texturePath={S2_FRAME_IMAGE}
-                solidScale={[1.05, 1, 1]}
-                imageScale={[1.05, -1.15, 1]}
-                solidYOffset={0}
-                imageYOffset={-0.025}
-                spring={s2BottomSpring}
-                shadow
-                shadowStrength={0.8}
-                suppressShadow={isIntroActive}
-                zOffset={0.001}
-              />
+          <group>
+            <ElevatedSvgFrame
+              centerX={s2.connectorX + s2.connectorW / 2}
+              centerY={s2.bottomConnectorY - s2.bottomConnectorH / 2}
+              w={s2.connectorW}
+              h={s2.bottomConnectorH}
+              solidColor={SECTION_FRAME_BG_COLOR}
+              texturePath={S2_FRAME_IMAGE}
+              solidScale={[1.05, 1, 1]}
+              imageScale={[1.05, -1.15, 1]}
+              solidYOffset={0}
+              imageYOffset={-0.025}
+              spring={s2BottomSpring}
+              shadow
+              shadowStrength={0.8}
+              suppressShadow={isIntroActive}
+              zOffset={0.001}
+              scallopPosition="none"
+            />
             {s2.groups[2].rowConnectors.map((rc, i) => (
               <ElevatedLayer
                 key={`s2-bottom-rc-${i}`}
@@ -712,8 +777,7 @@ export function ElevatedSectionSurfaces() {
                 zOffset={0.0025}
               />
             ))}
-            </group>
-          )}
+          </group>
         </DraggableSectionGroup>
       </group>
     </group>

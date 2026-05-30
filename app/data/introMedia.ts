@@ -24,7 +24,7 @@ export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
     },
   },
   s2_top: {
-    src: "/intro/image-sample.jpg",
+    src: "/intro/section-2.png",
     isVideo: false,
     backgroundText: {
       caption: "Ebu Cehilin dünyası",
