@@ -27,6 +27,107 @@ interface SectionOneProps {
   isFolded?: boolean;
 }
 
+import { useMemo } from "react";
+
+export const SCALLOP_RADIUS_X = 0.053;
+export const SCALLOP_RADIUS_Y = 0.03;
+export const S1_SOLID_SCALE_X = 1.065;
+export const S1_SOLID_SCALE_Y = 0.965;
+export const S1_SOLID_Y_OFFSET = -0.005;
+export const S1_IMAGE_SCALE = 1.1;
+export const S1_IMAGE_Y_OFFSET = 0.01;
+
+export function ScallopedCenteredShape({
+  w,
+  h,
+  radius,
+  radiusX = radius,
+  radiusY = radius,
+  position = "top",
+}: {
+  w: number;
+  h: number;
+  radius: number;
+  radiusX?: number;
+  radiusY?: number;
+  position?: "top" | "bottom" | "both" | "none";
+}) {
+  const shape = useMemo(() => {
+    const s = new THREE.Shape();
+    const halfW = w / 2;
+    const halfH = h / 2;
+
+    if (position === "none") {
+      s.moveTo(-halfW, -halfH);
+      s.lineTo(-halfW, halfH);
+      s.lineTo(halfW, halfH);
+      s.lineTo(halfW, -halfH);
+      s.lineTo(-halfW, -halfH);
+      return s;
+    }
+
+    if (position === "bottom" || position === "both") {
+      s.moveTo(-halfW, -halfH + radiusY);
+    } else {
+      s.moveTo(-halfW, -halfH);
+    }
+
+    // Top-Left corner
+    if (position === "top" || position === "both") {
+      s.lineTo(-halfW, halfH - radiusY);
+      s.absellipse(-halfW, halfH, radiusX, radiusY, -Math.PI / 2, 0, false, 0);
+    } else {
+      s.lineTo(-halfW, halfH);
+    }
+
+    // Top-Right corner
+    if (position === "top" || position === "both") {
+      s.lineTo(halfW - radiusX, halfH);
+      s.absellipse(
+        halfW,
+        halfH,
+        radiusX,
+        radiusY,
+        Math.PI,
+        Math.PI * 1.5,
+        false,
+        0,
+      );
+    } else {
+      s.lineTo(halfW, halfH);
+    }
+
+    // Bottom-Right corner
+    if (position === "bottom" || position === "both") {
+      s.lineTo(halfW, -halfH + radiusY);
+      s.absellipse(
+        halfW,
+        -halfH,
+        radiusX,
+        radiusY,
+        Math.PI / 2,
+        Math.PI,
+        false,
+        0,
+      );
+    } else {
+      s.lineTo(halfW, -halfH);
+    }
+
+    // Bottom-Left corner
+    if (position === "bottom" || position === "both") {
+      s.lineTo(-halfW + radiusX, -halfH);
+      s.absellipse(-halfW, -halfH, radiusX, radiusY, 0, Math.PI / 2, false, 0);
+    } else {
+      s.lineTo(-halfW, -halfH);
+    }
+
+    return s;
+  }, [w, h, radius, radiusX, radiusY, position]);
+
+  return <shapeGeometry args={[shape]} />;
+}
+
 export function SectionOne({ data, transforms, PW }: SectionOneProps) {
   const hideSectionLabel = false;
   const t = transforms;
@@ -40,10 +141,21 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
       <>
         {/* Yellow solid background */}
         <mesh
-          position={[t.frameX + t.frameW / 2, t.frameY - t.frameH / 2, -0.001]}
+          position={[
+            t.frameX + t.frameW / 2,
+            t.frameY - t.frameH / 2 + S1_SOLID_Y_OFFSET,
+            -0.001,
+          ]}
           renderOrder={1}
         >
-          <planeGeometry args={[t.frameW * 1.107, t.frameH * 1]} />
+          <ScallopedCenteredShape
+            w={t.frameW * S1_SOLID_SCALE_X}
+            h={t.frameH * S1_SOLID_SCALE_Y}
+            radius={0.039}
+            radiusX={SCALLOP_RADIUS_X}
+            radiusY={SCALLOP_RADIUS_Y}
+            position="top"
+          />
           <meshBasicMaterial
             color={S1_FRAME_BG_COLOR}
             toneMapped={false}
@@ -56,12 +168,14 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         <mesh
           position={[
             t.frameX + t.frameW / 2,
-            t.frameY - t.frameH / 2 + 0.01,
+            t.frameY - t.frameH / 2 + S1_IMAGE_Y_OFFSET,
             0,
           ]}
           renderOrder={2}
         >
-          <planeGeometry args={[t.frameW * 1.1, t.frameH * 1.1]} />
+          <planeGeometry
+            args={[t.frameW * S1_IMAGE_SCALE, t.frameH * S1_IMAGE_SCALE]}
+          />
           <meshBasicMaterial
             map={texture}
             transparent

@@ -4,6 +4,34 @@ import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
+import {
+  ScallopedCenteredShape,
+  SCALLOP_RADIUS_X,
+  SCALLOP_RADIUS_Y,
+  S1_SOLID_SCALE_X,
+  S1_SOLID_SCALE_Y,
+  S1_SOLID_Y_OFFSET,
+  S1_IMAGE_SCALE,
+  S1_IMAGE_Y_OFFSET,
+} from "../SurahLayout/SectionOne";
+import {
+  S2_TOP_SOLID_SCALE_X,
+  S2_TOP_SOLID_SCALE_Y,
+  S2_TOP_SOLID_X_OFFSET,
+  S2_TOP_SOLID_Y_OFFSET,
+  S2_TOP_IMAGE_SCALE_X,
+  S2_TOP_IMAGE_SCALE_Y,
+  S2_TOP_IMAGE_X_OFFSET,
+  S2_TOP_IMAGE_Y_OFFSET,
+  S2_BOTTOM_SOLID_SCALE_X,
+  S2_BOTTOM_SOLID_SCALE_Y,
+  S2_BOTTOM_SOLID_X_OFFSET,
+  S2_BOTTOM_SOLID_Y_OFFSET,
+  S2_BOTTOM_IMAGE_SCALE_X,
+  S2_BOTTOM_IMAGE_SCALE_Y,
+  S2_BOTTOM_IMAGE_X_OFFSET,
+  S2_BOTTOM_IMAGE_Y_OFFSET,
+} from "../SurahLayout/SectionTwo";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import {
@@ -239,71 +267,6 @@ function ElevatedLayer({
   );
 }
 
-function ScallopedCenteredShape({
-  w,
-  h,
-  radius,
-  position = "top",
-}: {
-  w: number;
-  h: number;
-  radius: number;
-  position?: "top" | "bottom" | "both" | "none";
-}) {
-  const shape = useMemo(() => {
-    const s = new Shape();
-    const halfW = w / 2;
-    const halfH = h / 2;
-
-    if (position === "none") {
-      s.moveTo(-halfW, -halfH);
-      s.lineTo(-halfW, halfH);
-      s.lineTo(halfW, halfH);
-      s.lineTo(halfW, -halfH);
-      s.lineTo(-halfW, -halfH);
-      return s;
-    }
-
-    if (position === "bottom" || position === "both") {
-      s.moveTo(-halfW, -halfH + radius);
-    } else {
-      s.moveTo(-halfW, -halfH);
-    }
-
-    if (position === "top" || position === "both") {
-      s.lineTo(-halfW, halfH - radius);
-      s.absarc(-halfW, halfH, radius, -Math.PI / 2, 0, false);
-    } else {
-      s.lineTo(-halfW, halfH);
-    }
-
-    if (position === "top" || position === "both") {
-      s.lineTo(halfW - radius, halfH);
-      s.absarc(halfW, halfH, radius, Math.PI, Math.PI * 1.5, false);
-    } else {
-      s.lineTo(halfW, halfH);
-    }
-
-    if (position === "bottom" || position === "both") {
-      s.lineTo(halfW, -halfH + radius);
-      s.absarc(halfW, -halfH, radius, Math.PI / 2, Math.PI, false);
-    } else {
-      s.lineTo(halfW, -halfH);
-    }
-
-    if (position === "bottom" || position === "both") {
-      s.lineTo(-halfW + radius, -halfH);
-      s.absarc(-halfW, -halfH, radius, 0, Math.PI / 2, false);
-    } else {
-      s.lineTo(-halfW, -halfH);
-    }
-
-    return s;
-  }, [w, h, radius, position]);
-
-  return <shapeGeometry args={[shape]} />;
-}
-
 // ─── SVG Frame layer for custom section designs ────────────────────────
 interface ElevatedSvgFrameProps {
   centerX: number;
@@ -402,6 +365,8 @@ function ElevatedSvgFrame({
           w={w * solidScale[0]}
           h={h * solidScale[1]}
           radius={0.039}
+          radiusX={SCALLOP_RADIUS_X}
+          radiusY={SCALLOP_RADIUS_Y}
           position={scallopPosition}
         />
         <a.meshBasicMaterial
@@ -610,10 +575,10 @@ export function ElevatedSectionSurfaces() {
               h={s1.frameH}
               solidColor={S1_FRAME_BG_COLOR}
               texturePath={S1_FRAME_IMAGE}
-              solidScale={[1.06, 0.97, 1]}
-              imageScale={[1.1, 1.1, 1]}
-              solidYOffset={-0.01}
-              imageYOffset={0.01}
+              solidScale={[S1_SOLID_SCALE_X, S1_SOLID_SCALE_Y, 1]}
+              imageScale={[S1_IMAGE_SCALE, S1_IMAGE_SCALE, 1]}
+              solidYOffset={S1_SOLID_Y_OFFSET}
+              imageYOffset={S1_IMAGE_Y_OFFSET}
               spring={s1Spring}
               shadow
               shadowStrength={0.95}
@@ -664,10 +629,12 @@ export function ElevatedSectionSurfaces() {
               h={s2.topConnectorH}
               solidColor={S2_FRAME_BG_COLOR}
               texturePath={S2_FRAME_IMAGE}
-              solidScale={[1.05, 1, 1]}
-              imageScale={[1.05, 1.15, 1]}
-              solidYOffset={0}
-              imageYOffset={0.025}
+              solidScale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
+              imageScale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
+              solidXOffset={S2_TOP_SOLID_X_OFFSET}
+              solidYOffset={S2_TOP_SOLID_Y_OFFSET}
+              imageXOffset={S2_TOP_IMAGE_X_OFFSET}
+              imageYOffset={S2_TOP_IMAGE_Y_OFFSET}
               spring={s2TopSpring}
               shadow
               shadowStrength={0.8}
@@ -754,10 +721,12 @@ export function ElevatedSectionSurfaces() {
               h={s2.bottomConnectorH}
               solidColor={S2_FRAME_BG_COLOR}
               texturePath={S2_FRAME_IMAGE}
-              solidScale={[1.05, 1, 1]}
-              imageScale={[1.05, -1.15, 1]}
-              solidYOffset={0}
-              imageYOffset={-0.025}
+              solidScale={[S2_BOTTOM_SOLID_SCALE_X, S2_BOTTOM_SOLID_SCALE_Y, 1]}
+              imageScale={[S2_BOTTOM_IMAGE_SCALE_X, S2_BOTTOM_IMAGE_SCALE_Y, 1]}
+              solidXOffset={S2_BOTTOM_SOLID_X_OFFSET}
+              solidYOffset={S2_BOTTOM_SOLID_Y_OFFSET}
+              imageXOffset={S2_BOTTOM_IMAGE_X_OFFSET}
+              imageYOffset={S2_BOTTOM_IMAGE_Y_OFFSET}
               spring={s2BottomSpring}
               shadow
               shadowStrength={0.8}

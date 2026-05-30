@@ -29,6 +29,26 @@ interface SectionTwoProps {
   isFolded?: boolean;
 }
 
+export const S2_TOP_SOLID_SCALE_X = 1.02;
+export const S2_TOP_SOLID_SCALE_Y = 1;
+export const S2_TOP_SOLID_X_OFFSET = 0;
+export const S2_TOP_SOLID_Y_OFFSET = 0.003;
+
+export const S2_TOP_IMAGE_SCALE_X = 1.05;
+export const S2_TOP_IMAGE_SCALE_Y = 1.15;
+export const S2_TOP_IMAGE_X_OFFSET = 0;
+export const S2_TOP_IMAGE_Y_OFFSET = 0.025;
+
+export const S2_BOTTOM_SOLID_SCALE_X = 1.02;
+export const S2_BOTTOM_SOLID_SCALE_Y = 1;
+export const S2_BOTTOM_SOLID_X_OFFSET = 0;
+export const S2_BOTTOM_SOLID_Y_OFFSET = -0.003;
+
+export const S2_BOTTOM_IMAGE_SCALE_X = 1.05;
+export const S2_BOTTOM_IMAGE_SCALE_Y = -1.15;
+export const S2_BOTTOM_IMAGE_X_OFFSET = 0;
+export const S2_BOTTOM_IMAGE_Y_OFFSET = -0.025;
+
 export function SectionTwo({
   data,
   transforms,
@@ -51,11 +71,11 @@ export function SectionTwo({
         {/* Yellow solid background */}
         <mesh
           position={[
-            t.connectorX + t.connectorW / 2,
-            t.topConnectorY - t.topConnectorH / 2,
+            t.connectorX + t.connectorW / 2 + S2_TOP_SOLID_X_OFFSET,
+            t.topConnectorY - t.topConnectorH / 2 + S2_TOP_SOLID_Y_OFFSET,
             -0.001,
           ]}
-          scale={[1.05, 1, 1]}
+          scale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
           renderOrder={1}
         >
           <planeGeometry args={[t.connectorW, t.topConnectorH]} />
@@ -70,11 +90,11 @@ export function SectionTwo({
         {/* Stretched main-frame image as background */}
         <mesh
           position={[
-            t.connectorX + t.connectorW / 2,
-            t.topConnectorY - t.topConnectorH / 2 + 0.025,
+            t.connectorX + t.connectorW / 2 + S2_TOP_IMAGE_X_OFFSET,
+            t.topConnectorY - t.topConnectorH / 2 + S2_TOP_IMAGE_Y_OFFSET,
             0,
           ]}
-          scale={[1.05, 1.15, 1]}
+          scale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
           renderOrder={2}
         >
           <planeGeometry args={[t.connectorW, t.topConnectorH]} />
@@ -104,11 +124,13 @@ export function SectionTwo({
         {/* Yellow solid background */}
         <mesh
           position={[
-            t.connectorX + t.connectorW / 2,
-            t.bottomConnectorY - t.bottomConnectorH / 2,
+            t.connectorX + t.connectorW / 2 + S2_BOTTOM_SOLID_X_OFFSET,
+            t.bottomConnectorY -
+              t.bottomConnectorH / 2 +
+              S2_BOTTOM_SOLID_Y_OFFSET,
             -0.001,
           ]}
-          scale={[1.05, 1, 1]}
+          scale={[S2_BOTTOM_SOLID_SCALE_X, S2_BOTTOM_SOLID_SCALE_Y, 1]}
           renderOrder={1}
         >
           <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
@@ -123,11 +145,13 @@ export function SectionTwo({
         {/* Stretched main-frame image as background */}
         <mesh
           position={[
-            t.connectorX + t.connectorW / 2,
-            t.bottomConnectorY - t.bottomConnectorH / 2 - 0.025,
+            t.connectorX + t.connectorW / 2 + S2_BOTTOM_IMAGE_X_OFFSET,
+            t.bottomConnectorY -
+              t.bottomConnectorH / 2 +
+              S2_BOTTOM_IMAGE_Y_OFFSET,
             0,
           ]}
-          scale={[1.05, -1.15, 1]}
+          scale={[S2_BOTTOM_IMAGE_SCALE_X, S2_BOTTOM_IMAGE_SCALE_Y, 1]}
           renderOrder={2}
         >
           <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
