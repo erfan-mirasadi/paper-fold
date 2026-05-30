@@ -42,6 +42,7 @@ import { PAPER_MATERIAL_CONFIG } from "../3d-scene/PaperMaterial";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
+import { SECTION_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
 
 /**
  * SurahLayout draws section JPEG with meshBasic + toneMapped false, then the page
@@ -61,7 +62,7 @@ type SectionSpring = {
 };
 
 const SECTION_SURFACE = {
-  liftHeight: 0.095,
+  liftHeight: SECTION_ELEVATION_HEIGHT,
   liftDelayMs: 120,
   opacityShowDelayMs: 0,
   opacityHideDelayMs: ELEVATED_RETURN_SYNC_MS,

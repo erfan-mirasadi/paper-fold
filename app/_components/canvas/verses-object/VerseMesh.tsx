@@ -5,7 +5,7 @@ import { a, SpringValue, to } from "@react-spring/three";
 import { RenderTexture, OrthographicCamera } from "@react-three/drei";
 import { VerseBox, RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
-import { ELEVATE_TIMING } from "../../../hooks/useElevateAnimation";
+import { ELEVATE_TIMING, SECTION_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
 
 export interface VerseMeshProps {
   hingeX: number;
@@ -77,7 +77,7 @@ export function VerseMesh({
   };
 
   const normalizeSurfaceLiftProgress = (surfaceLift: number) => {
-    const ratio = surfaceLift / 0.095;
+    const ratio = surfaceLift / SECTION_ELEVATION_HEIGHT;
     return Math.max(0, Math.min(1, ratio));
   };
 

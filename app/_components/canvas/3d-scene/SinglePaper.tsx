@@ -1,7 +1,7 @@
 "use client";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { FOLD_Y_POSITIONS, PAGE_HEIGHT } from "../SurahLayout/index";
-import { FloatingArrows } from "../SurahLayout/FloatingArrows";
+
 import { writeFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
@@ -64,7 +64,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const foldAnglesRef = useRef(new Float32Array(FOLD_Y_POSITIONS.length));
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
-  const [showArrows, setShowArrows] = useState(false);
+
 
   // Audio Setup
   const foldSound = useRef<HTMLAudioElement | null>(null);
@@ -170,12 +170,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     const bones = skinnedMeshRef.current.skeleton.bones;
     const paperProgress = useFoldStore.getState().currentOffset;
 
-    const isAtEnd = paperProgress > 0.85;
-    // Use functional update or check against a ref to avoid stale closure issues
-    setShowArrows((prev) => {
-      if (prev !== isAtEnd) return isAtEnd;
-      return prev;
-    });
+
 
     const maxStageIndex = FOLD_STORY_STEPS.length - 1;
     const currentStage = Math.round(paperProgress * maxStageIndex);
@@ -227,7 +222,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
         isDarkMode={isDarkMode}
       />
 
-      {showArrows && <FloatingArrows />}
+
     </group>
   );
 };

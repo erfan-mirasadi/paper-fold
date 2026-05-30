@@ -24,6 +24,7 @@ import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
+import { LABEL_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
 
 type AnimatedLabelProps = {
   sectionId: ElevatedSectionId;
@@ -177,7 +178,7 @@ export function ElevatedSectionLabels() {
             bgColor={S1_TOP_LABEL_BG}
             borderColor={S1_TOP_LABEL_BORDER}
             delayMs={55}
-            liftHeight={0.14}
+            liftHeight={LABEL_ELEVATION_HEIGHT}
             tension={96}
             friction={24}
             renderOrder={220}
@@ -195,7 +196,7 @@ export function ElevatedSectionLabels() {
             borderColor={S2_TOP_LABEL_BORDER}
             partialBorder={true}
             delayMs={95}
-            liftHeight={0.14}
+            liftHeight={LABEL_ELEVATION_HEIGHT}
             tension={90}
             friction={23}
             zBaseOffset={0.0022}
@@ -213,7 +214,7 @@ export function ElevatedSectionLabels() {
             partialBorder={true}
             bottomBorder={true}
             delayMs={130}
-            liftHeight={0.14}
+            liftHeight={LABEL_ELEVATION_HEIGHT}
             tension={84}
             friction={22}
             zBaseOffset={0.0022}

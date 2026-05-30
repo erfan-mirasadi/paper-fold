@@ -4,6 +4,24 @@ import { Group } from "three";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
 
+// ─── Animation Config ───────────────────────────────────────────────────
+// 1. When does the scale-up start? (Overall scroll percentage from 0 to 100)
+//    - 15 is exactly when Page 2 (ambient media) formally begins.
+//    - Decrease to 12 or 13 to make it start slightly earlier.
+export const SCALE_START_PERCENT = 7;
+
+// 2. How much bigger should they get? (0.35 means 35% bigger)
+export const SCALE_EXTRA_AMOUNT = 0.15;
+
+// 3. How fast does it scale up once it starts? (Higher = faster)
+export const SCALE_UP_SPEED = 2.0;
+
+// 4. How much higher on the screen should they move during Page 2? (Positive = up)
+export const PAGE2_EXTRA_HEIGHT = 0.35;
+
+// 5. How much should they tilt towards the camera during Page 2? (Tweak positive/negative to fix them looking "laid back")
+export const PAGE2_EXTRA_RX = 0.15;
+
 export const INTRO_SECTION_SCATTER: Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
@@ -32,9 +50,9 @@ export const HANDOFF_SECTION_TARGET: Record<
   s1: { x: 0, y: 0, z: 0, scale: 1 },
   // Give all S2 sections the exact same displacement so they move as a unified block
   // and maintain their relative positions.
-  s2_top: { x: 0, y: 0.5, z: -0.3, scale: 0.85 },
-  s2_center: { x: 0, y: 0.8, z: -0.6, scale: 0.85 },
-  s2_bottom: { x: 0, y: 1.3, z: -0.8, scale: 0.85 },
+  s2_top: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
+  s2_center: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
+  s2_bottom: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────
@@ -100,8 +118,13 @@ function getTransformTarget(
   const scatterRy = scatter[4] || 0;
   const scatterRz = scatter[5] || 0;
 
-  const { introProgress, isIntroActive, introHandoffProgress, ambientProgress } =
-    useFoldStore.getState();
+  const {
+    introProgress,
+    isIntroActive,
+    introHandoffProgress,
+    ambientProgress,
+    rawOffset,
+  } = useFoldStore.getState();
 
   // Once fully in the main scene, delay identity return by 1500ms so sections
   // don't flash on-screen mid-transition while the VerseController springs are fading them out.
@@ -126,7 +149,34 @@ function getTransformTarget(
   let ry = scatterRy * invT;
   const rz = scatterRz * invT;
 
-  const handoffT = easeInOut(clamp01(introHandoffProgress));
+  // Mid-transition scale bulge during Page 2 (Ambient Phase)
+  // Get big and stay big, immediately get small at Page 3
+  if (isIntroActive && introHandoffProgress < 1) {
+    let animProgress = 0;
+
+    // 1. Scale UP based on overall scroll percentage
+    const startOffset = SCALE_START_PERCENT / 100;
+    if (rawOffset >= startOffset) {
+      // Calculate how far past the start point we have scrolled
+      const progressSinceStart = rawOffset - startOffset;
+      // Multiply by 20 so it reaches full size in just 5% of scroll (adjusted by speed)
+      const upT = clamp01(progressSinceStart * SCALE_UP_SPEED * 20);
+      animProgress = easeInOut(upT);
+    }
+
+    // 2. Scale DOWN immediately as Page 3 (handoff) starts
+    if (introHandoffProgress > 0) {
+      const downT = clamp01(introHandoffProgress * 3); // Finishes scaling down quickly
+      animProgress *= 1 - easeInOut(downT);
+    }
+
+    scale += animProgress * SCALE_EXTRA_AMOUNT;
+    y += animProgress * PAGE2_EXTRA_HEIGHT;
+    rx += animProgress * PAGE2_EXTRA_RX;
+  }
+
+  const clampedHandoff = clamp01(introHandoffProgress);
+  const handoffT = easeInOut(clampedHandoff);
   if (handoffT > 0) {
     const target = HANDOFF_SECTION_TARGET[sectionId];
     x += target.x * handoffT;
@@ -141,7 +191,9 @@ function getTransformTarget(
       useFoldStore.getState();
     const highlightedId = activeAmbientMediaId || scrollAmbientMediaId;
 
-    const isActive = highlightedId === sectionId || (highlightedId && highlightedId.startsWith(`${sectionId}_step`));
+    const isActive =
+      highlightedId === sectionId ||
+      (highlightedId && highlightedId.startsWith(`${sectionId}_step`));
     if (isActive) {
       z += 0.25; // Elevate towards camera
       y += -0.05 + Math.sin(time * 1.5) * 0.006;

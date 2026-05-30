@@ -5,7 +5,7 @@ import {
   useFoldAnimation,
   useMiddleHorizontalFoldAnimation,
 } from "../../../hooks/useFoldAnimation";
-import { useElevateAnimation } from "../../../hooks/useElevateAnimation";
+import { useElevateAnimation, SECTION_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import {
   dragEngine,
@@ -20,7 +20,7 @@ import { VerseConfig } from "../../../data/surahDataGenerator";
 import { VerseMesh } from "./VerseMesh";
 
 const SECTION_SURFACE_SHADOW_MOTION = {
-  liftHeight: 0.095,
+  liftHeight: SECTION_ELEVATION_HEIGHT,
   liftDelayMs: 120,
   spring: {
     mass: 2.2,

@@ -2,7 +2,7 @@ import { useSpring } from "@react-spring/three";
 
 export const ELEVATE_TIMING = {
   /** How high the verse lifts off the paper surface. */
-  liftHeight: 0.14,
+  liftHeight: 0.25,
   /** Subtle tilt on X axis when elevated (radians). Simulates paper peel. */
   tiltX: 0.08,
   /** Spring mass — higher = heavier, more momentum. */
@@ -16,6 +16,9 @@ export const ELEVATE_TIMING = {
   appearDelayZAndOpacity: 0,
   hideDelayZAndOpacity: 690,
 };
+
+export const SECTION_ELEVATION_HEIGHT = 0.205;
+export const LABEL_ELEVATION_HEIGHT = 0.25;
 
 export const ELEVATE_SHADOW = {
   /** Shadow opacity when verse is flat on paper. */

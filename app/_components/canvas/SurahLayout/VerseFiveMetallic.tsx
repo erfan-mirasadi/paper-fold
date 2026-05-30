@@ -38,6 +38,7 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import {
   ELEVATE_TIMING,
   useElevateAnimation,
+  SECTION_ELEVATION_HEIGHT,
 } from "../../../hooks/useElevateAnimation";
 import { a, to, useSpring } from "@react-spring/three";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
@@ -75,7 +76,7 @@ const METALLIC_SHADOW = {
 };
 
 const SECTION_SURFACE_SHADOW_MOTION = {
-  liftHeight: 0.095,
+  liftHeight: SECTION_ELEVATION_HEIGHT,
   liftDelayMs: 120,
   spring: {
     mass: 2.2,
@@ -90,7 +91,7 @@ function normalizeLiftProgress(lift: number) {
 }
 
 function normalizeSurfaceLiftProgress(surfaceLift: number) {
-  const ratio = surfaceLift / 0.095;
+  const ratio = surfaceLift / SECTION_ELEVATION_HEIGHT;
   return Math.max(0, Math.min(1, ratio));
 }
 
