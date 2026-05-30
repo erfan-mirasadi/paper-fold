@@ -117,7 +117,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
       } = state;
 
       const effectiveActiveId = activeAmbientMediaId || scrollAmbientMediaId;
-      const isActive = effectiveActiveId === sectionId;
+      const isActive = effectiveActiveId === sectionId || (effectiveActiveId && effectiveActiveId.startsWith(`${sectionId}_step`));
       const isAnyActive = effectiveActiveId !== null;
       const focusOpacity = isAnyActive ? (isActive ? 1 : 0.55) : 1;
 

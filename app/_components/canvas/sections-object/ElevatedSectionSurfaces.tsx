@@ -20,7 +20,8 @@ import {
   S1_INNER_BORDER,
   MAROON_THEME,
   GREEN_THEME,
-  SECTION_FRAME_BG_COLOR,
+  S1_FRAME_BG_COLOR,
+  S2_FRAME_BG_COLOR,
   S1_FRAME_IMAGE,
   S2_FRAME_IMAGE,
 } from "../../../data/theme";
@@ -606,7 +607,7 @@ export function ElevatedSectionSurfaces() {
               centerY={s1.frameY - s1.frameH / 2}
               w={s1.frameW}
               h={s1.frameH}
-              solidColor={SECTION_FRAME_BG_COLOR}
+              solidColor={S1_FRAME_BG_COLOR}
               texturePath={S1_FRAME_IMAGE}
               solidScale={[1.06, 0.97, 1]}
               imageScale={[1.1, 1.1, 1]}
@@ -660,7 +661,7 @@ export function ElevatedSectionSurfaces() {
               centerY={s2.topConnectorY - s2.topConnectorH / 2}
               w={s2.connectorW}
               h={s2.topConnectorH}
-              solidColor={SECTION_FRAME_BG_COLOR}
+              solidColor={S2_FRAME_BG_COLOR}
               texturePath={S2_FRAME_IMAGE}
               solidScale={[1.05, 1, 1]}
               imageScale={[1.05, 1.15, 1]}
@@ -750,7 +751,7 @@ export function ElevatedSectionSurfaces() {
               centerY={s2.bottomConnectorY - s2.bottomConnectorH / 2}
               w={s2.connectorW}
               h={s2.bottomConnectorH}
-              solidColor={SECTION_FRAME_BG_COLOR}
+              solidColor={S2_FRAME_BG_COLOR}
               texturePath={S2_FRAME_IMAGE}
               solidScale={[1.05, 1, 1]}
               imageScale={[1.05, -1.15, 1]}

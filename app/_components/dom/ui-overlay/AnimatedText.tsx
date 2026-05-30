@@ -31,8 +31,6 @@ export interface AnimatedTextProps {
   style?: CSSProperties;
   // Custom classes for the word spans
   spanClassName?: string;
-  // Custom class for line break spans to control vertical spacing between lines
-  lineGapClass?: string;
 }
 
 export const AnimatedText: FC<AnimatedTextProps> = ({
@@ -47,7 +45,6 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
   cinematic = false,
   style,
   spanClassName,
-  lineGapClass,
 }) => {
   // Base typography styles matching the ORYZO references
   const variantStyles = {
@@ -155,10 +152,7 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
       renderElements.push(
         <span
           key={`word-${lineIndex}-${wordIndex}`}
-          className={cn(
-            "inline-block whitespace-nowrap",
-            lineIndex > 0 ? lineGapClass : "", // Apply negative margin directly to the word wrapper on subsequent lines
-          )}
+          className="inline-block whitespace-nowrap"
         >
           {wordElements}
           {wordIndex < words.length - 1 && (
@@ -171,7 +165,7 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
     // Add a line break element if it's not the last line
     if (lineIndex < lines.length - 1) {
       renderElements.push(
-        <span key={`br-${lineIndex}`} className="basis-full h-0" />,
+        <br key={`br-${lineIndex}`} />,
       );
     }
   });
@@ -184,8 +178,8 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
       viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
       style={{ ...glowStyles, ...style }}
       className={cn(
-        "flex",
-        noWrap ? "flex-nowrap whitespace-nowrap" : "flex-wrap",
+        "text-center", // Default to text-center since it's most common, can be overridden
+        noWrap ? "whitespace-nowrap" : "",
         variantStyles[variant],
         className,
       )}

@@ -8,6 +8,7 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../../../stores/useElevatedStore";
+import type { IntroMediaId } from "../../../data/introMedia";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
 
@@ -47,11 +48,11 @@ interface FoldStoreState {
   /** 0..1 progress through the ambient media scroll band. */
   ambientProgress: number;
   /** The ID of the currently hovered intro section guide. */
-  activeAmbientMediaId: ElevatedSectionId | null;
+  activeAmbientMediaId: IntroMediaId | null;
   /** The ID of the ambient media currently active due to scroll. */
-  scrollAmbientMediaId: ElevatedSectionId | null;
-  setActiveAmbientMediaId: (id: ElevatedSectionId | null) => void;
-  setScrollAmbientMediaId: (id: ElevatedSectionId | null) => void;
+  scrollAmbientMediaId: IntroMediaId | null;
+  setActiveAmbientMediaId: (id: IntroMediaId | null) => void;
+  setScrollAmbientMediaId: (id: IntroMediaId | null) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   setRawOffset: (offset: number) => void;
@@ -157,9 +158,9 @@ export function ScrollManager() {
     );
     const storyOffset = getStoryOffsetForRaw(rawOffset);
 
-    let scrollAmbientMediaId: ElevatedSectionId | null = null;
+    let scrollAmbientMediaId: IntroMediaId | null = null;
     if (ambientProgress >= 0 && handoffProgress === 0) {
-      const keys: ElevatedSectionId[] = ["s1", "s2_top", "s2_center", "s2_bottom"];
+      const keys: IntroMediaId[] = ["s1", "s1_step2", "s2_top", "s2_center", "s2_bottom"];
       // Distribute the 4 items across the ambient progress (0 to 1)
       let index = Math.floor(ambientProgress * keys.length);
       if (index >= keys.length) index = keys.length - 1;

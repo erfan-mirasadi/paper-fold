@@ -22,7 +22,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
   return (
     <div
       className="pointer-events-none fixed inset-0 flex items-center justify-center overflow-hidden z-50"
-      style={{ opacity, paddingBottom: "22vh" }}
+      style={{ opacity, paddingBottom: "35vh" }}
     >
       <div className="relative flex flex-col items-center text-center">
         <AnimatedText
@@ -30,24 +30,20 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
           variant="title"
           animationType="flyInBottom"
           cinematic={true}
-          style={{
-            textShadow: "none",
-            WebkitMaskImage:
-              "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
-            maskImage:
-              "linear-gradient(to right, black 15%, rgba(0, 0, 0, 0.15) 100%)",
-          }}
-          lineGapClass="-mt-4 md:-mt-8"
-          className={`font-semibold font-(family-name:--font-poppins) leading-none select-none w-full justify-center ${isDarkMode ? "text-white" : "text-black"} text-[15vw] md:text-[12vw]`}
+          style={{ textShadow: "none" }}
+          lineGapClass="mt-0"
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[16vw] md:text-[12vw] ${isDarkMode ? "text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : "text-zinc-900 drop-shadow-sm"}`}
         />
         <AnimatedText
           text="suresi"
           variant="subtitle"
-          animationType="flyInLeft"
+          animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-5xl md:text-6xl -mt-12 md:-mt-20 mb-4 relative z-10 ${
-            isDarkMode ? "text-white/90" : "text-black/90"
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[9vw] md:text-[6vw] -mt-16 md:-mt-28 mb-4 relative z-10 ${
+            isDarkMode
+              ? "text-[#A78BFA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+              : "text-[#7C3AED] drop-shadow-sm"
           }`}
         />
       </div>

@@ -1,5 +1,7 @@
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
 
+export type IntroMediaId = ElevatedSectionId | `${ElevatedSectionId}_step${number}`;
+
 export interface IntroMediaItem {
   src: string;
   isVideo?: boolean;
@@ -12,15 +14,21 @@ export interface IntroMediaItem {
   };
 }
 
-export const INTRO_MEDIA_DATA: Record<ElevatedSectionId, IntroMediaItem> = {
+export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
   s1: {
     src: "/intro/hara-cave.png", // Defaulting to this, will adjust if user provides specific path
     isVideo: false,
     backgroundText: {
       caption: "Muhkem",
       title: "Tebliğ\nirşat vazifesinin \ntarifi tebliği",
-      // Moved the long explanation to body, keeping it semantic for the frontend
-      body: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
+    },
+  },
+  s1_step2: {
+    src: "/intro/hara-cave.png", // Keep same image to avoid crossfade
+    isVideo: false,
+    backgroundText: {
+      caption: "Muhkem",
+      title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
     },
   },
   s2_top: {

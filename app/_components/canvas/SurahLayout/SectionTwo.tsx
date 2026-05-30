@@ -12,7 +12,7 @@ import {
   CAPSULE_BG_6_19,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
-  SECTION_FRAME_BG_COLOR,
+  S2_FRAME_BG_COLOR,
   S2_FRAME_IMAGE,
 } from "../../../data/theme";
 import type {
@@ -60,7 +60,7 @@ export function SectionTwo({
         >
           <planeGeometry args={[t.connectorW, t.topConnectorH]} />
           <meshBasicMaterial
-            color={SECTION_FRAME_BG_COLOR}
+            color={S2_FRAME_BG_COLOR}
             toneMapped={false}
             depthTest={false}
             depthWrite={false}
@@ -113,7 +113,7 @@ export function SectionTwo({
         >
           <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
           <meshBasicMaterial
-            color={SECTION_FRAME_BG_COLOR}
+            color={S2_FRAME_BG_COLOR}
             toneMapped={false}
             depthTest={false}
             depthWrite={false}

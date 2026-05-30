@@ -14,7 +14,8 @@ export const CIRCLE_BORDER = "#8e8e8e";
 // 4. SECTION 1 — UPPER BLOCK PALETTE
 // ----------------------------------------------------------------------------
 export const SECTION_BG_TEXTURE = "/section-bg.jpeg";
-export const SECTION_FRAME_BG_COLOR = "#F0E4E5";
+export const S1_FRAME_BG_COLOR = "#D9C7CA";
+export const S2_FRAME_BG_COLOR = "#F0E4E5";
 export const S1_FRAME_IMAGE = "/Group 10.svg";
 export const S2_FRAME_IMAGE = "/Group 92.svg";
 
@@ -33,7 +34,7 @@ export const CAPSULE_BG_5 = "#DBBD80";
 export const S1_VERSE_5_NUMBER_BG = CAPSULE_BG_5;
 export const S1_VERSE_5_NUMBER_BORDER = "#8B7C74";
 export const S1_VERSE_5_NUMBER_TEXT = "#000000";
-export const S1_VERSE_5_TEXT = "#000000";
+export const S1_VERSE_5_TEXT = "#A30000";
 
 export const S1_ANA_LABEL_BG = "#e2caae";
 export const S1_ANA_LABEL_BORDER = "#96601b";
@@ -99,7 +100,7 @@ export const TEXT_SIZES = {
 export const LANGUAGE_TEXT_SCALE = {
   ar: {
     verseSmall: 1,
-    verseBig: 1,
+    verseBig: 1.05,
     topLabel: 1,
     anaAyet: 1,
   },

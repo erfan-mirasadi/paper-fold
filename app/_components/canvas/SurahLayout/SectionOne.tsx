@@ -13,7 +13,7 @@ import {
   S1_TOP_LABEL_BG,
   S1_TOP_LABEL_BORDER,
   S1_FRAME_IMAGE,
-  SECTION_FRAME_BG_COLOR,
+  S1_FRAME_BG_COLOR,
 } from "../../../data/theme";
 import {
   OPPOSITE_VERSE_CONNECTOR,
@@ -45,7 +45,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         >
           <planeGeometry args={[t.frameW * 1.107, t.frameH * 1]} />
           <meshBasicMaterial
-            color={SECTION_FRAME_BG_COLOR}
+            color={S1_FRAME_BG_COLOR}
             toneMapped={false}
             depthTest={false}
             depthWrite={false}

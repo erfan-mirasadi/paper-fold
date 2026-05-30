@@ -62,7 +62,8 @@ const ANA_LABEL_PIN_OVERLAP = 0.0015;
 // const DECORATIVE_SVG_Z_OFFSET = 0.004;
 // const DECORATIVE_SVG_BRACKET_ROTATION = (Math.PI * 3) / 4;
 
-const CAPSULE_SIDE_EXPAND = 0.025;
+const CAPSULE_SIDE_EXPAND = 0.035;
+const CAPSULE_HEIGHT_EXPAND = 0.01;
 
 const METALLIC_SHADOW = {
   opacityRest: 0,
@@ -212,7 +213,7 @@ export function VerseFiveMetallic() {
   const sectionDrag = dragEngine.sections.s1;
 
   const w = t.w + CAPSULE_SIDE_EXPAND * 2;
-  const h = t.h;
+  const h = t.h + CAPSULE_HEIGHT_EXPAND * 2;
   const radius = VERSE_5_6_19_RADIUS; // Base radius for non-pill verse
 
   const outerW = w + BW * 2;
@@ -226,7 +227,7 @@ export function VerseFiveMetallic() {
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
   const baseX = t.x - PAGE_WIDTH / 2 - BW - CAPSULE_SIDE_EXPAND;
-  const baseY = t.y + BW;
+  const baseY = t.y + BW + CAPSULE_HEIGHT_EXPAND;
 
   const sectionBounds = useMemo(
     () => calculateSectionBounds("s1", SURAH_TRANSFORMS, PAGE_WIDTH),

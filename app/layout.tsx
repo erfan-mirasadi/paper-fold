@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
-import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text } from "next/font/google";
+import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text, Fraunces } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
 
@@ -28,6 +28,13 @@ const dmSerifText = DM_Serif_Text({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-dm-serif",
+});
+
+const fraunces = Fraunces({
+  weight: ["300", "400", "500"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-fraunces",
 });
 
 export const metadata: Metadata = {
@@ -63,7 +70,7 @@ export default function RootLayout({
     <html
       lang="tr"
       suppressHydrationWarning
-      className={`${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} h-full antialiased`}
+      className={`${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="font-sans">
         <GrainOverlay />

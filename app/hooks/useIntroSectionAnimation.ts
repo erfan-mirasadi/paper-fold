@@ -141,7 +141,8 @@ function getTransformTarget(
       useFoldStore.getState();
     const highlightedId = activeAmbientMediaId || scrollAmbientMediaId;
 
-    if (highlightedId === sectionId) {
+    const isActive = highlightedId === sectionId || (highlightedId && highlightedId.startsWith(`${sectionId}_step`));
+    if (isActive) {
       z += 0.25; // Elevate towards camera
       y += -0.05 + Math.sin(time * 1.5) * 0.006;
       scale *= 1.06;
