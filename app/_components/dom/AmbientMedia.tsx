@@ -50,43 +50,23 @@ export default function AmbientMedia({
   isVideo: propIsVideo,
 }: AmbientMediaProps) {
   const activeId = useFoldStore((s) => s.activeAmbientMediaId);
+  const scrollAmbientId = useFoldStore((s) => s.scrollAmbientMediaId);
 
   // Localized discrete state to shield from 60fps scroll renders
-  const [isJoinedStep, setIsJoinedStep] = useState(() => {
+  const [isAmbientPhase, setIsAmbientPhase] = useState(() => {
     const s = useFoldStore.getState();
-    return s.introProgress >= 0.99 && s.introHandoffProgress < 0.05;
+    return s.ambientProgress >= 0 && s.introHandoffProgress === 0 && (s.ambientProgress > 0 || s.introProgress >= 1);
   });
 
   useEffect(() => {
     return useFoldStore.subscribe((state) => {
-      const joined = state.introProgress >= 0.99 && state.introHandoffProgress < 0.05;
-      setIsJoinedStep(joined);
+      const ambient = state.ambientProgress >= 0 && state.introHandoffProgress === 0 && (state.ambientProgress > 0 || state.introProgress >= 1);
+      setIsAmbientPhase(ambient);
     });
   }, []);
 
-  const [loopIndex, setLoopIndex] = useState(0);
-
-  // Loop through media every 4 seconds ONLY when exactly at the joined step
-  useEffect(() => {
-    if (!isJoinedStep) {
-      useFoldStore.getState().setLoopedAmbientMediaId(null);
-      return;
-    }
-
-    // Sync the current looped ID with the store for 3D synchronization
-    useFoldStore.getState().setLoopedAmbientMediaId(mediaKeys[loopIndex]);
-
-    if (activeId) return;
-
-    const interval = setInterval(() => {
-      setLoopIndex((prev) => (prev + 1) % mediaKeys.length);
-    }, 10000); // Increased from 4000 to 10000 to allow time for reading text
-
-    return () => clearInterval(interval);
-  }, [activeId, isJoinedStep, loopIndex]);
-
-  const currentLoopMedia = INTRO_MEDIA_DATA[mediaKeys[loopIndex]];
-  const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentLoopMedia;
+  const currentMedia = scrollAmbientId ? INTRO_MEDIA_DATA[scrollAmbientId] : INTRO_MEDIA_DATA[mediaKeys[0]];
+  const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentMedia;
 
   const src = propSrc || activeMedia?.src;
   const isVideo =
@@ -102,7 +82,7 @@ export default function AmbientMedia({
     maskComposite: "intersect",
   };
 
-  const showMedia = !!src && (isJoinedStep || !!activeId);
+  const showMedia = !!src && (isAmbientPhase || !!activeId);
 
   return (
     <div className="relative w-full h-full flex items-center justify-center p-0">

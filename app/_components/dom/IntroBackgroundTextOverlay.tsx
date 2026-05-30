@@ -12,25 +12,25 @@ export function IntroBackgroundTextOverlay({
   isDarkMode: boolean;
 }) {
   const activeAmbientMediaId = useFoldStore((s) => s.activeAmbientMediaId);
-  const loopedAmbientMediaId = useFoldStore((s) => s.loopedAmbientMediaId);
+  const scrollAmbientMediaId = useFoldStore((s) => s.scrollAmbientMediaId);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   // Localized discrete state to shield from 60fps scroll renders
-  const [isJoinedStep, setIsJoinedStep] = useState(() => {
+  const [isAmbientPhase, setIsAmbientPhase] = useState(() => {
     const s = useFoldStore.getState();
-    return s.introProgress >= 0.99 && s.introHandoffProgress < 0.05;
+    return s.ambientProgress >= 0 && s.introHandoffProgress === 0 && (s.ambientProgress > 0 || s.introProgress >= 1);
   });
 
   useEffect(() => {
     return useFoldStore.subscribe((state) => {
-      const joined = state.introProgress >= 0.99 && state.introHandoffProgress < 0.05;
-      setIsJoinedStep(joined);
+      const ambient = state.ambientProgress >= 0 && state.introHandoffProgress === 0 && (state.ambientProgress > 0 || state.introProgress >= 1);
+      setIsAmbientPhase(ambient);
     });
   }, []);
 
   // We don't return null early, otherwise AnimatePresence cannot play the exit animation!
 
-  const effectiveActiveId = activeAmbientMediaId || loopedAmbientMediaId;
+  const effectiveActiveId = activeAmbientMediaId || scrollAmbientMediaId;
   const data = effectiveActiveId
     ? INTRO_MEDIA_DATA[effectiveActiveId]?.backgroundText
     : null;
@@ -48,13 +48,12 @@ export function IntroBackgroundTextOverlay({
   return (
     <div className="pointer-events-none fixed inset-0 flex items-start justify-end p-12 md:p-24 md:pt-32 overflow-hidden z-40">
       <AnimatePresence mode="wait">
-        {isIntroActive && isJoinedStep && data && (
+        {isIntroActive && isAmbientPhase && data && (
           <motion.div
             key={effectiveActiveId}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.05, y: -20 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }}
+            exit={{ opacity: 0, scale: 1.05, y: -20, transition: { duration: 0.2, ease: "easeOut" } }}
             className="relative flex flex-col items-center w-[65vw] text-center translate-x-16 md:translate-x-20"
           >
             {data.caption && (

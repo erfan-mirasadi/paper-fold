@@ -75,7 +75,7 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
       opacity: 1,
       transition: {
         staggerChildren: cinematic ? staggerDelay * 1.5 : staggerDelay,
-        delayChildren: cinematic ? 0.2 * i : 0.1 * i,
+        delayChildren: cinematic ? 0.05 * i : 0.1 * i,
       },
     }),
   };

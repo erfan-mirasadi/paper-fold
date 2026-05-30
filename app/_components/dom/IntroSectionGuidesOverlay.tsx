@@ -110,12 +110,13 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
       const {
         introProgress,
         introHandoffProgress,
+        ambientProgress,
         isIntroActive,
         activeAmbientMediaId,
-        loopedAmbientMediaId,
+        scrollAmbientMediaId,
       } = state;
 
-      const effectiveActiveId = activeAmbientMediaId || loopedAmbientMediaId;
+      const effectiveActiveId = activeAmbientMediaId || scrollAmbientMediaId;
       const isActive = effectiveActiveId === sectionId;
       const isAnyActive = effectiveActiveId !== null;
       const focusOpacity = isAnyActive ? (isActive ? 1 : 0.55) : 1;
@@ -136,7 +137,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
       const isVisible =
         isIntroActive && introProgress >= myStart && handoffFadeOut < 1;
       const isHoverEnabled =
-        introProgress >= 0.99 && introHandoffProgress === 0;
+        (ambientProgress > 0 || introProgress >= 0.99) && introHandoffProgress === 0;
 
       const effectiveRowProgress = isActive
         ? rowProgress
@@ -312,7 +313,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
               e.stopPropagation();
               const store = useFoldStore.getState();
               const isHoverEnabled =
-                store.introProgress >= 0.99 && store.introHandoffProgress === 0;
+                (store.ambientProgress > 0 || store.introProgress >= 0.99) && store.introHandoffProgress === 0;
               if (!isHoverEnabled) return;
               store.setActiveAmbientMediaId(
                 store.activeAmbientMediaId === sectionId ? null : sectionId
@@ -355,7 +356,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
             const store = useFoldStore.getState();
             // We check hover capability manually because state is not in React
             const isHoverEnabled =
-              store.introProgress >= 0.99 && store.introHandoffProgress === 0;
+              (store.ambientProgress > 0 || store.introProgress >= 0.99) && store.introHandoffProgress === 0;
             if (!isHoverEnabled) return;
             store.setActiveAmbientMediaId(
               store.activeAmbientMediaId === sectionId ? null : sectionId

@@ -26,9 +26,10 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 // Configured in percentages (0 to 100) for easier understanding and maintenance.
 // Adjust these values if you add new pages or change the intro duration.
 export const SCROLL_TIMELINE = {
-  intro: { start: 0, end: 26 }, // Ends at 26%
-  handoff: { start: 33, end: 50 }, // Starts at 33%, creating a 7% physical pause (maks) for the step!
-  story: { start: 50, end: 100 },
+  intro: { start: 0, end: 15 }, // Ends at 15%
+  ambient: { start: 15, end: 50 }, // 35% dedicated to scrolling through ambient media
+  handoff: { start: 50, end: 60 }, // Starts at 50%
+  story: { start: 60, end: 100 },
 };
 
 interface FoldStoreState {
@@ -43,12 +44,14 @@ interface FoldStoreState {
   introProgress: number;
   /** 0..1 progress through the intro-to-base handoff band. */
   introHandoffProgress: number;
+  /** 0..1 progress through the ambient media scroll band. */
+  ambientProgress: number;
   /** The ID of the currently hovered intro section guide. */
   activeAmbientMediaId: ElevatedSectionId | null;
-  /** The ID of the currently auto-looping ambient media. */
-  loopedAmbientMediaId: ElevatedSectionId | null;
+  /** The ID of the ambient media currently active due to scroll. */
+  scrollAmbientMediaId: ElevatedSectionId | null;
   setActiveAmbientMediaId: (id: ElevatedSectionId | null) => void;
-  setLoopedAmbientMediaId: (id: ElevatedSectionId | null) => void;
+  setScrollAmbientMediaId: (id: ElevatedSectionId | null) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   setRawOffset: (offset: number) => void;
@@ -64,11 +67,12 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   isIntroActive: true,
   introProgress: 0,
   introHandoffProgress: 0,
+  ambientProgress: 0,
 
   activeAmbientMediaId: null,
-  loopedAmbientMediaId: null,
+  scrollAmbientMediaId: null,
   setActiveAmbientMediaId: (id) => set({ activeAmbientMediaId: id }),
-  setLoopedAmbientMediaId: (id) => set({ loopedAmbientMediaId: id }),
+  setScrollAmbientMediaId: (id) => set({ scrollAmbientMediaId: id }),
 
   triggerTransition: (id) =>
     set((state) => ({
@@ -141,6 +145,11 @@ export function ScrollManager() {
       SCROLL_TIMELINE.intro.start,
       SCROLL_TIMELINE.intro.end,
     );
+    const ambientProgress = getBandProgress(
+      rawOffset,
+      SCROLL_TIMELINE.ambient.start,
+      SCROLL_TIMELINE.ambient.end,
+    );
     const handoffProgress = getBandProgress(
       rawOffset,
       SCROLL_TIMELINE.handoff.start,
@@ -148,12 +157,25 @@ export function ScrollManager() {
     );
     const storyOffset = getStoryOffsetForRaw(rawOffset);
 
+    let scrollAmbientMediaId: ElevatedSectionId | null = null;
+    if (ambientProgress >= 0 && handoffProgress === 0) {
+      const keys: ElevatedSectionId[] = ["s1", "s2_top", "s2_center", "s2_bottom"];
+      // Distribute the 4 items across the ambient progress (0 to 1)
+      let index = Math.floor(ambientProgress * keys.length);
+      if (index >= keys.length) index = keys.length - 1;
+      if (ambientProgress > 0 || introProgress >= 1) {
+        scrollAmbientMediaId = keys[index];
+      }
+    }
+
     useFoldStore.setState({
       currentOffset: storyOffset,
       rawOffset,
       isIntroActive: introActive,
       introProgress,
       introHandoffProgress: handoffProgress,
+      ambientProgress,
+      scrollAmbientMediaId,
     });
 
     useElevatedStore.getState().syncScrollOffset(storyOffset);

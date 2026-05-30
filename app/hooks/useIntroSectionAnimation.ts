@@ -100,7 +100,7 @@ function getTransformTarget(
   const scatterRy = scatter[4] || 0;
   const scatterRz = scatter[5] || 0;
 
-  const { introProgress, isIntroActive, introHandoffProgress } =
+  const { introProgress, isIntroActive, introHandoffProgress, ambientProgress } =
     useFoldStore.getState();
 
   // Once fully in the main scene, delay identity return by 1500ms so sections
@@ -136,10 +136,10 @@ function getTransformTarget(
   }
 
   // Creative Highlight Effect at the "joined step"
-  if (handoffT === 0 && introProgress >= 0.99) {
-    const { activeAmbientMediaId, loopedAmbientMediaId } =
+  if (handoffT === 0 && (ambientProgress > 0 || introProgress >= 0.99)) {
+    const { activeAmbientMediaId, scrollAmbientMediaId } =
       useFoldStore.getState();
-    const highlightedId = activeAmbientMediaId || loopedAmbientMediaId;
+    const highlightedId = activeAmbientMediaId || scrollAmbientMediaId;
 
     if (highlightedId === sectionId) {
       z += 0.25; // Elevate towards camera

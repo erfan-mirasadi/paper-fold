@@ -38,7 +38,7 @@ const Experience = dynamic(
   { ssr: false },
 );
 
-const SCROLL_PAGES = 5;
+const SCROLL_PAGES = 6;
 const MAIN_OVERLAY_DELAY_MS = 350;
 
 export default function Home() {
