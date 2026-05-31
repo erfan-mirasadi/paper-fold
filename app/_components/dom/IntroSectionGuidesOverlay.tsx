@@ -44,12 +44,6 @@ export function IntroSectionGuidesOverlay({
         overflow: "visible",
       }}
     >
-      <style>{`
-        @keyframes energyBeamFlow {
-          0% { stroke-dashoffset: 280; }
-          100% { stroke-dashoffset: -40; }
-        }
-      `}</style>
       {INTRO_SECTION_GUIDE_ORDER.map((id: ElevatedSectionId) => (
         <IntroGuideHudRow
           key={id}
@@ -89,7 +83,6 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   const textContainerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const pingRef = useRef<SVGGElement>(null);
-  const beamRef = useRef<SVGPathElement>(null);
 
   // Determine dark mode context for monochrome styling
   const isDarkMode = textColor.includes("232");
@@ -112,8 +105,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   const handoffEnd = handoffStart + fadeOutWindow / numSteps;
 
   const unselectedProgress = 1.0; // Draw the full L-shape even when unselected
-  const pathLength = 212; // 100px horizontal + 112px vertical
-  const GUIDE_X_OFFSET = 30; // TWEAK THIS: Increase to move the line further to the right!
+  const GUIDE_X_OFFSET = 40; // TWEAK THIS: Increase to move the line further to the right!
 
   useEffect(() => {
     // Dedicated subscription loop for the actual updates
@@ -180,17 +172,29 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
       if (rootRef.current) {
         const op = isVisible ? "1" : "0";
         const vis = isVisible ? "visible" : "hidden";
-        if (c.rootOp !== op) { rootRef.current.style.opacity = op; c.rootOp = op; }
-        if (c.rootVis !== vis) { rootRef.current.style.visibility = vis; c.rootVis = vis; }
+        if (c.rootOp !== op) {
+          rootRef.current.style.opacity = op;
+          c.rootOp = op;
+        }
+        if (c.rootVis !== vis) {
+          rootRef.current.style.visibility = vis;
+          c.rootVis = vis;
+        }
       }
 
       if (innerRef.current) {
         const op = (1 - handoffFadeOut).toString();
-        if (c.innerOp !== op) { innerRef.current.style.opacity = op; c.innerOp = op; }
+        if (c.innerOp !== op) {
+          innerRef.current.style.opacity = op;
+          c.innerOp = op;
+        }
       }
 
       if (textContainerRef.current) {
-        const baseTextOpacity = Math.min(Math.max((rowProgress - 0.7) / 0.3, 0), 1);
+        const baseTextOpacity = Math.min(
+          Math.max((rowProgress - 0.7) / 0.3, 0),
+          1,
+        );
         const op = (baseTextOpacity * textFocusOpacity).toString();
         const trans = `translate(calc(${targetWidth}px - 50%), 0px)`;
         const transi = isHoverEnabled
@@ -199,11 +203,26 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
         const pe = isHoverEnabled ? "auto" : "none";
         const cur = isHoverEnabled ? "pointer" : "default";
 
-        if (c.textOp !== op) { textContainerRef.current.style.opacity = op; c.textOp = op; }
-        if (c.textTrans !== trans) { textContainerRef.current.style.transform = trans; c.textTrans = trans; }
-        if (c.textTransi !== transi) { textContainerRef.current.style.transition = transi; c.textTransi = transi; }
-        if (c.textPe !== pe) { textContainerRef.current.style.pointerEvents = pe; c.textPe = pe; }
-        if (c.textCur !== cur) { textContainerRef.current.style.cursor = cur; c.textCur = cur; }
+        if (c.textOp !== op) {
+          textContainerRef.current.style.opacity = op;
+          c.textOp = op;
+        }
+        if (c.textTrans !== trans) {
+          textContainerRef.current.style.transform = trans;
+          c.textTrans = trans;
+        }
+        if (c.textTransi !== transi) {
+          textContainerRef.current.style.transition = transi;
+          c.textTransi = transi;
+        }
+        if (c.textPe !== pe) {
+          textContainerRef.current.style.pointerEvents = pe;
+          c.textPe = pe;
+        }
+        if (c.textCur !== cur) {
+          textContainerRef.current.style.cursor = cur;
+          c.textCur = cur;
+        }
       }
 
       if (textRef.current) {
@@ -217,53 +236,106 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
             : "0 4px 15px rgba(255,255,255,1), 0 0 20px rgba(0,0,0,0.2)"
           : "none";
 
-        if (c.textFw !== fw) { textRef.current.style.fontWeight = fw; c.textFw = fw; }
-        if (c.textLs !== ls) { textRef.current.style.letterSpacing = ls; c.textLs = ls; }
-        if (c.textC !== tc) { textRef.current.style.color = tc; c.textC = tc; }
-        if (c.textT !== trans) { textRef.current.style.transform = trans; c.textT = trans; }
-        if (c.textS !== ts) { textRef.current.style.textShadow = ts; c.textS = ts; }
+        if (c.textFw !== fw) {
+          textRef.current.style.fontWeight = fw;
+          c.textFw = fw;
+        }
+        if (c.textLs !== ls) {
+          textRef.current.style.letterSpacing = ls;
+          c.textLs = ls;
+        }
+        if (c.textC !== tc) {
+          textRef.current.style.color = tc;
+          c.textC = tc;
+        }
+        if (c.textT !== trans) {
+          textRef.current.style.transform = trans;
+          c.textT = trans;
+        }
+        if (c.textS !== ts) {
+          textRef.current.style.textShadow = ts;
+          c.textS = ts;
+        }
       }
 
       if (pingRef.current) {
-        const op = isHoverEnabled ? (isActive ? "1" : lineFocusOpacity.toString()) : "0";
+        const op = isHoverEnabled
+          ? isActive
+            ? "1"
+            : lineFocusOpacity.toString()
+          : "0";
         const pe = isHoverEnabled ? "auto" : "none";
         const trans = `translate(${targetWidth}px, 0px)`;
-        const transi = isHoverEnabled ? `opacity 0.5s ease-out, transform 1s ease-out` : `transform 1s ease-out`;
+        const transi = isHoverEnabled
+          ? `opacity 0.5s ease-out, transform 1s ease-out`
+          : `transform 1s ease-out`;
 
-        if (c.pingOp !== op) { pingRef.current.style.opacity = op; c.pingOp = op; }
-        if (c.pingPe !== pe) { pingRef.current.style.pointerEvents = pe; c.pingPe = pe; }
-        if (c.pingTrans !== trans) { pingRef.current.style.transform = trans; c.pingTrans = trans; }
-        if (c.pingTransi !== transi) { pingRef.current.style.transition = transi; c.pingTransi = transi; }
+        if (c.pingOp !== op) {
+          pingRef.current.style.opacity = op;
+          c.pingOp = op;
+        }
+        if (c.pingPe !== pe) {
+          pingRef.current.style.pointerEvents = pe;
+          c.pingPe = pe;
+        }
+        if (c.pingTrans !== trans) {
+          pingRef.current.style.transform = trans;
+          c.pingTrans = trans;
+        }
+        if (c.pingTransi !== transi) {
+          pingRef.current.style.transition = transi;
+          c.pingTransi = transi;
+        }
       }
 
       if (pathRef.current) {
-        const drawProgress = Math.min(Math.max((effectiveRowProgress - 0.2) / 0.6, 0), 1);
+        const drawProgress = Math.min(
+          Math.max((effectiveRowProgress - 0.2) / 0.6, 0),
+          1,
+        );
         const d = `M ${targetWidth} 1 L 0 1 L 0 ${polePx}`;
-        const sda = `${currentPathLength}`;
-        const sdo = `${-currentPathLength * (1 - drawProgress)}`;
+        // Prevent the vertical line from partially un-drawing when targetWidth shrinks
+        // by making the dash array comfortably larger than the max path length.
+        const sda = drawProgress === 1 ? "1000" : `${currentPathLength}`;
+        const sdo =
+          drawProgress === 1
+            ? "0"
+            : `${-currentPathLength * (1 - drawProgress)}`;
         const op = lineFocusOpacity.toString();
         const sw = isActive ? "3.5" : "1.5";
-        const fil = isActive
-          ? `drop-shadow(0 0 4px ${lineStroke}) drop-shadow(0 0 12px ${lineStroke}) drop-shadow(0 0 25px ${lineStroke})`
-          : `drop-shadow(0 0 2px ${lineStroke})`;
+        const fil = "none";
         const transi = isHoverEnabled
           ? `d 1s ease-out, stroke-dashoffset ${animDuration} ${animEasing}, opacity 0.5s ease-out, stroke-width 1s ease-out, filter 1s ease-out`
           : `d 1s ease-out, stroke-width 1s ease-out, filter 1s ease-out`; // Remove scroll-driven props from transition
 
-        if (c.pathD !== d) { pathRef.current.setAttribute("d", d); c.pathD = d; }
-        if (c.pathSda !== sda) { pathRef.current.style.strokeDasharray = sda; c.pathSda = sda; }
-        if (c.pathSdo !== sdo) { pathRef.current.style.strokeDashoffset = sdo; c.pathSdo = sdo; }
-        if (c.pathOp !== op) { pathRef.current.style.opacity = op; c.pathOp = op; }
-        if (c.pathSw !== sw) { pathRef.current.style.strokeWidth = sw; c.pathSw = sw; }
-        if (c.pathFil !== fil) { pathRef.current.style.filter = fil; c.pathFil = fil; }
-        if (c.pathTransi !== transi) { pathRef.current.style.transition = transi; c.pathTransi = transi; }
-      }
-
-      if (beamRef.current) {
-        const d = `M ${targetWidth} 1 L 0 1 L 0 ${polePx}`;
-        const op = isActive ? "1" : "0";
-        if (c.beamD !== d) { beamRef.current.setAttribute("d", d); c.beamD = d; }
-        if (c.beamOp !== op) { beamRef.current.style.opacity = op; c.beamOp = op; }
+        if (c.pathD !== d) {
+          pathRef.current.setAttribute("d", d);
+          c.pathD = d;
+        }
+        if (c.pathSda !== sda) {
+          pathRef.current.style.strokeDasharray = sda;
+          c.pathSda = sda;
+        }
+        if (c.pathSdo !== sdo) {
+          pathRef.current.style.strokeDashoffset = sdo;
+          c.pathSdo = sdo;
+        }
+        if (c.pathOp !== op) {
+          pathRef.current.style.opacity = op;
+          c.pathOp = op;
+        }
+        if (c.pathSw !== sw) {
+          pathRef.current.style.strokeWidth = sw;
+          c.pathSw = sw;
+        }
+        if (c.pathFil !== fil) {
+          pathRef.current.style.filter = fil;
+          c.pathFil = fil;
+        }
+        if (c.pathTransi !== transi) {
+          pathRef.current.style.transition = transi;
+          c.pathTransi = transi;
+        }
       }
     };
 
@@ -283,9 +355,8 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
     handoffStart,
     handoffEnd,
     unselectedProgress,
+    isDarkMode,
   ]);
-
-  const gradientId = `dot-gradient-${sectionId}`;
 
   return (
     <div
@@ -373,24 +444,6 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
             strokeLinecap="round"
             strokeLinejoin="round"
             // Default styles are overridden by the DOM update loop above
-          />
-
-          {/* Flowing Energy Beam Overlay (visible only when active) */}
-          <path
-            ref={beamRef}
-            d={`M 100 1 L 0 1 L 0 ${polePx}`}
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.4)" // Softer core stroke
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              // Added blur(1.5px) to completely soften the edges so it looks like light, not a hard line
-              filter: `blur(1.5px) drop-shadow(0 0 6px rgba(255,255,255,0.8)) drop-shadow(0 0 12px ${lineStroke})`,
-              strokeDasharray: "40 280", // 40px dash length, 280px gap
-              animation: "energyBeamFlow 4.5s linear infinite", // Much slower (was 3s)
-              opacity: 0,
-            }}
           />
 
           {/* Pulsing indicator at the start of the line (near text) temporarily commented out

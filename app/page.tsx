@@ -261,10 +261,6 @@ export default function Home() {
                 </div>
               </>
             )}
-            <ThemeToggleOverlay
-              isDarkMode={isDarkMode}
-              onToggle={handleThemeToggle}
-            />
             {/* Hide standard chrome while intro runs. Delayed by 2 seconds after handoff. */}
             {mountMainOverlays && (
               <AnimatePresence>
@@ -276,6 +272,10 @@ export default function Home() {
                     transition={{ duration: 0.45, ease: "easeOut" }}
                     style={{ pointerEvents: "auto", willChange: "opacity" }}
                   >
+                    <ThemeToggleOverlay
+                      isDarkMode={isDarkMode}
+                      onToggle={handleThemeToggle}
+                    />
                     <NavigationOverlay isDarkMode={isDarkMode} />
                     <TitleOverlay isDarkMode={isDarkMode} />
                     <AllSectionsOverlay isDarkMode={isDarkMode} />
