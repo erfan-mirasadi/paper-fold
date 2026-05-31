@@ -26,7 +26,10 @@ export function IntroSectionGuidesOverlay({
   useEffect(() => {
     // Vanilla subscribe shields the parent from 60fps React re-renders
     return useFoldStore.subscribe((state, prevState) => {
-      if (state.introHandoffProgress > 0 && prevState.introHandoffProgress <= 0) {
+      if (
+        state.introHandoffProgress > 0 &&
+        prevState.introHandoffProgress <= 0
+      ) {
         useFoldStore.getState().setActiveAmbientMediaId(null);
       }
     });
@@ -41,6 +44,12 @@ export function IntroSectionGuidesOverlay({
         overflow: "visible",
       }}
     >
+      <style>{`
+        @keyframes energyBeamFlow {
+          0% { stroke-dashoffset: 280; }
+          100% { stroke-dashoffset: -40; }
+        }
+      `}</style>
       {INTRO_SECTION_GUIDE_ORDER.map((id: ElevatedSectionId) => (
         <IntroGuideHudRow
           key={id}
@@ -73,13 +82,14 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
 }) {
   const id = introGuideMarkerDomId(sectionId);
 
-  // Refs for imperative DOM updates
+  const cache = useRef<Record<string, string>>({});
   const rootRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
-  const circlesRef = useRef<(SVGCircleElement | null)[]>([]);
+  const pathRef = useRef<SVGPathElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const pingRef = useRef<SVGGElement>(null);
+  const beamRef = useRef<SVGPathElement>(null);
 
   // Determine dark mode context for monochrome styling
   const isDarkMode = textColor.includes("232");
@@ -101,8 +111,9 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   const handoffStart = (reversedIndex * fadeOutWindow) / numSteps;
   const handoffEnd = handoffStart + fadeOutWindow / numSteps;
 
-  const numDots = 24;
-  const unselectedProgress = 0.55;
+  const unselectedProgress = 1.0; // Draw the full L-shape even when unselected
+  const pathLength = 212; // 100px horizontal + 112px vertical
+  const GUIDE_X_OFFSET = 30; // TWEAK THIS: Increase to move the line further to the right!
 
   useEffect(() => {
     // Dedicated subscription loop for the actual updates
@@ -117,35 +128,45 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
       } = state;
 
       const effectiveActiveId = activeAmbientMediaId || scrollAmbientMediaId;
-      const isActive = effectiveActiveId === sectionId || (effectiveActiveId && effectiveActiveId.startsWith(`${sectionId}_step`));
+      const isActive =
+        effectiveActiveId === sectionId ||
+        (effectiveActiveId &&
+          effectiveActiveId.startsWith(`${sectionId}_step`));
       const isAnyActive = effectiveActiveId !== null;
-      const focusOpacity = isAnyActive ? (isActive ? 1 : 0.55) : 1;
+      // Lines fade to 40% when another item is selected
+      const lineFocusOpacity = isAnyActive ? (isActive ? 1 : 0.4) : 1;
+      // Text fades much more (to 15%) when another item is selected
+      const textFocusOpacity = isAnyActive ? (isActive ? 1 : 0.15) : 1;
 
       const rowProgress = Math.min(
         Math.max((introProgress - myStart) / (myEnd - myStart), 0),
-        1
+        1,
       );
 
       const handoffFadeOut = Math.min(
         Math.max(
           (introHandoffProgress - handoffStart) / (handoffEnd - handoffStart),
-          0
+          0,
         ),
-        1
+        1,
       );
 
       const isVisible =
         isIntroActive && introProgress >= myStart && handoffFadeOut < 1;
       const isHoverEnabled =
-        (ambientProgress > 0 || introProgress >= 0.99) && introHandoffProgress === 0;
+        (ambientProgress > 0 || introProgress >= 0.99) &&
+        introHandoffProgress === 0;
 
       const effectiveRowProgress = isActive
         ? rowProgress
         : Math.min(rowProgress, unselectedProgress);
 
+      const targetWidth = isActive ? 100 : 40;
+      const currentPathLength = targetWidth + polePx;
+
       const textNorm = Math.max(
         0,
-        Math.min((effectiveRowProgress - 0.1) / 0.8, 1)
+        Math.min((effectiveRowProgress - 0.1) / 0.8, 1),
       );
       const textTranslateY = polePx * (1 - textNorm);
 
@@ -154,73 +175,95 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
         ? "cubic-bezier(0.22, 1, 0.36, 1)"
         : "cubic-bezier(0.16, 1, 0.3, 1)";
 
+      const c = cache.current;
+
       if (rootRef.current) {
-        rootRef.current.style.opacity = isVisible ? "1" : "0";
-        rootRef.current.style.visibility = isVisible ? "visible" : "hidden";
+        const op = isVisible ? "1" : "0";
+        const vis = isVisible ? "visible" : "hidden";
+        if (c.rootOp !== op) { rootRef.current.style.opacity = op; c.rootOp = op; }
+        if (c.rootVis !== vis) { rootRef.current.style.visibility = vis; c.rootVis = vis; }
       }
 
       if (innerRef.current) {
-        innerRef.current.style.opacity = (
-          (1 - handoffFadeOut) *
-          focusOpacity
-        ).toString();
+        const op = (1 - handoffFadeOut).toString();
+        if (c.innerOp !== op) { innerRef.current.style.opacity = op; c.innerOp = op; }
       }
 
       if (textContainerRef.current) {
-        textContainerRef.current.style.opacity = Math.min(
-          Math.max((rowProgress - 0.7) / 0.3, 0),
-          1
-        ).toString();
-        textContainerRef.current.style.transform = `translateY(${textTranslateY}px)`;
-        textContainerRef.current.style.transition = isHoverEnabled
-          ? `opacity 0.3s ease-out, transform ${animDuration} ${animEasing}`
-          : `opacity 0.3s ease-out`;
-        textContainerRef.current.style.pointerEvents = isHoverEnabled
-          ? "auto"
-          : "none";
-        textContainerRef.current.style.cursor = isHoverEnabled
-          ? "pointer"
-          : "default";
+        const baseTextOpacity = Math.min(Math.max((rowProgress - 0.7) / 0.3, 0), 1);
+        const op = (baseTextOpacity * textFocusOpacity).toString();
+        const trans = `translate(calc(${targetWidth}px - 50%), 0px)`;
+        const transi = isHoverEnabled
+          ? `opacity 0.5s ease-out, transform 1s ease-out`
+          : `transform 1s ease-out`; // Remove opacity transition during scroll
+        const pe = isHoverEnabled ? "auto" : "none";
+        const cur = isHoverEnabled ? "pointer" : "default";
+
+        if (c.textOp !== op) { textContainerRef.current.style.opacity = op; c.textOp = op; }
+        if (c.textTrans !== trans) { textContainerRef.current.style.transform = trans; c.textTrans = trans; }
+        if (c.textTransi !== transi) { textContainerRef.current.style.transition = transi; c.textTransi = transi; }
+        if (c.textPe !== pe) { textContainerRef.current.style.pointerEvents = pe; c.textPe = pe; }
+        if (c.textCur !== cur) { textContainerRef.current.style.cursor = cur; c.textCur = cur; }
       }
 
       if (textRef.current) {
-        textRef.current.style.fontWeight = isActive ? "700" : "600";
-        textRef.current.style.letterSpacing = isActive ? "0.04em" : "0.02em";
-        textRef.current.style.color = isActive ? activeColor : textColor;
+        const fw = isActive ? "800" : "600";
+        const ls = isActive ? "0.05em" : "0.02em";
+        const tc = isActive ? activeColor : textColor;
+        const trans = isActive ? "scale(1.1) translateY(-3px)" : "scale(0.85)";
+        const ts = isActive
+          ? isDarkMode
+            ? "0 4px 15px rgba(0,0,0,1), 0 0 20px rgba(255,255,255,0.3)"
+            : "0 4px 15px rgba(255,255,255,1), 0 0 20px rgba(0,0,0,0.2)"
+          : "none";
+
+        if (c.textFw !== fw) { textRef.current.style.fontWeight = fw; c.textFw = fw; }
+        if (c.textLs !== ls) { textRef.current.style.letterSpacing = ls; c.textLs = ls; }
+        if (c.textC !== tc) { textRef.current.style.color = tc; c.textC = tc; }
+        if (c.textT !== trans) { textRef.current.style.transform = trans; c.textT = trans; }
+        if (c.textS !== ts) { textRef.current.style.textShadow = ts; c.textS = ts; }
       }
 
       if (pingRef.current) {
-        pingRef.current.style.opacity = isHoverEnabled ? "0.85" : "0";
-        pingRef.current.style.pointerEvents = isHoverEnabled ? "auto" : "none";
-        pingRef.current.style.transform = `translateY(${textTranslateY}px)`;
-        pingRef.current.style.transition = isHoverEnabled
-          ? `opacity 0.3s ease-out, transform ${animDuration} ${animEasing}`
-          : `opacity 0.3s ease-out`;
+        const op = isHoverEnabled ? (isActive ? "1" : lineFocusOpacity.toString()) : "0";
+        const pe = isHoverEnabled ? "auto" : "none";
+        const trans = `translate(${targetWidth}px, 0px)`;
+        const transi = isHoverEnabled ? `opacity 0.5s ease-out, transform 1s ease-out` : `transform 1s ease-out`;
+
+        if (c.pingOp !== op) { pingRef.current.style.opacity = op; c.pingOp = op; }
+        if (c.pingPe !== pe) { pingRef.current.style.pointerEvents = pe; c.pingPe = pe; }
+        if (c.pingTrans !== trans) { pingRef.current.style.transform = trans; c.pingTrans = trans; }
+        if (c.pingTransi !== transi) { pingRef.current.style.transition = transi; c.pingTransi = transi; }
       }
 
-      for (let i = 0; i < numDots; i++) {
-        const circle = circlesRef.current[i];
-        if (!circle) continue;
+      if (pathRef.current) {
+        const drawProgress = Math.min(Math.max((effectiveRowProgress - 0.2) / 0.6, 0), 1);
+        const d = `M ${targetWidth} 1 L 0 1 L 0 ${polePx}`;
+        const sda = `${currentPathLength}`;
+        const sdo = `${-currentPathLength * (1 - drawProgress)}`;
+        const op = lineFocusOpacity.toString();
+        const sw = isActive ? "3.5" : "1.5";
+        const fil = isActive
+          ? `drop-shadow(0 0 4px ${lineStroke}) drop-shadow(0 0 12px ${lineStroke}) drop-shadow(0 0 25px ${lineStroke})`
+          : `drop-shadow(0 0 2px ${lineStroke})`;
+        const transi = isHoverEnabled
+          ? `d 1s ease-out, stroke-dashoffset ${animDuration} ${animEasing}, opacity 0.5s ease-out, stroke-width 1s ease-out, filter 1s ease-out`
+          : `d 1s ease-out, stroke-width 1s ease-out, filter 1s ease-out`; // Remove scroll-driven props from transition
 
-        const normFromBottom = (numDots - 1 - i) / (numDots - 1);
-        const dotProgress = Math.min(
-          Math.max((effectiveRowProgress - normFromBottom * 0.8) / 0.2, 0),
-          1
-        );
-        const baseRadius = 2.0 - (i * 1.2) / (numDots - 1);
-        const radius = baseRadius * dotProgress;
-        const baseOpacity = 1 - (i * 0.2) / (numDots - 1);
-        const opacity = baseOpacity * dotProgress;
+        if (c.pathD !== d) { pathRef.current.setAttribute("d", d); c.pathD = d; }
+        if (c.pathSda !== sda) { pathRef.current.style.strokeDasharray = sda; c.pathSda = sda; }
+        if (c.pathSdo !== sdo) { pathRef.current.style.strokeDashoffset = sdo; c.pathSdo = sdo; }
+        if (c.pathOp !== op) { pathRef.current.style.opacity = op; c.pathOp = op; }
+        if (c.pathSw !== sw) { pathRef.current.style.strokeWidth = sw; c.pathSw = sw; }
+        if (c.pathFil !== fil) { pathRef.current.style.filter = fil; c.pathFil = fil; }
+        if (c.pathTransi !== transi) { pathRef.current.style.transition = transi; c.pathTransi = transi; }
+      }
 
-        const delay = isHoverEnabled
-          ? isActive
-            ? normFromBottom * 0.4
-            : (1 - normFromBottom) * 0.2
-          : 0;
-
-        circle.setAttribute("r", radius.toString());
-        circle.setAttribute("opacity", opacity.toString());
-        circle.style.transition = `all ${animDuration} ${animEasing} ${delay}s`;
+      if (beamRef.current) {
+        const d = `M ${targetWidth} 1 L 0 1 L 0 ${polePx}`;
+        const op = isActive ? "1" : "0";
+        if (c.beamD !== d) { beamRef.current.setAttribute("d", d); c.beamD = d; }
+        if (c.beamOp !== op) { beamRef.current.style.opacity = op; c.beamOp = op; }
       }
     };
 
@@ -264,44 +307,93 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
         ref={innerRef}
         style={{
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column", // Text above, SVG below
           alignItems: "flex-start",
           padding: "60px",
-          transform: "translate(calc(0% - 60px + 12px), calc(-100% + 60px))",
+          // Anchor the bottom of the L-shape (x=0, y=polePx) to the 3D position
+          // SVG x=0 is at 60px from the left (with 60px padding)
+          // Adding GUIDE_X_OFFSET shifts the whole overlay to the right
+          transform: `translate(calc(0% - 60px + ${GUIDE_X_OFFSET}px), calc(-100% + 60px))`,
           pointerEvents: "none",
           opacity: 0, // Starts hidden, updated by effect
-          transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
+        <div
+          ref={textContainerRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            const store = useFoldStore.getState();
+            const isHoverEnabled =
+              (store.ambientProgress > 0 || store.introProgress >= 0.99) &&
+              store.introHandoffProgress === 0;
+            if (!isHoverEnabled) return;
+            store.setActiveAmbientMediaId(
+              store.activeAmbientMediaId === sectionId ? null : sectionId,
+            );
+          }}
+          style={{
+            opacity: 0,
+            // Slide horizontally based on targetWidth, no vertical sliding
+            transform: `translate(calc(40px - 50%), 0px)`,
+            transition: `opacity 0.5s ease-out, transform 1s ease-out`,
+            pointerEvents: "none",
+            cursor: "default",
+            marginBottom: "10px", // Increased space between text and horizontal line
+          }}
+        >
+          <span
+            ref={textRef}
+            className="text-sm md:text-base font-medium tracking-widest font-sans inline-block whitespace-nowrap"
+            style={{
+              fontSize: "clamp(14px, 1.8vw, 17px)", // Increased font size
+              lineHeight: 1.25,
+              textTransform: "none",
+              transformOrigin: "center bottom",
+              // Much slower transition for the text scaling and color change
+              transition: "all 1.5s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            {caption}
+          </span>
+        </div>
+
         <svg
-          width={12}
-          height={polePx}
+          width={102}
+          height={polePx + 2}
           style={{ overflow: "visible", flexShrink: 0 }}
           aria-hidden
         >
-          <defs>
-            <linearGradient
-              id={gradientId}
-              x1="0"
-              y1="0"
-              x2="0"
-              y2={polePx}
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop
-                offset="0%"
-                stopColor={isDarkMode ? "#ffffff" : "#000000"}
-              />
-              <stop
-                offset="100%"
-                stopColor={
-                  isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"
-                }
-              />
-            </linearGradient>
-          </defs>
+          {/* L-shape path pointing RIGHT */}
+          <path
+            ref={pathRef}
+            d={`M 100 1 L 0 1 L 0 ${polePx}`}
+            fill="none"
+            stroke={lineStroke}
+            strokeWidth="2" // Slightly thinner core for better neon glow
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            // Default styles are overridden by the DOM update loop above
+          />
 
-          {/* Pulsing indicator group at the top */}
+          {/* Flowing Energy Beam Overlay (visible only when active) */}
+          <path
+            ref={beamRef}
+            d={`M 100 1 L 0 1 L 0 ${polePx}`}
+            fill="none"
+            stroke="rgba(255, 255, 255, 0.4)" // Softer core stroke
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{
+              // Added blur(1.5px) to completely soften the edges so it looks like light, not a hard line
+              filter: `blur(1.5px) drop-shadow(0 0 6px rgba(255,255,255,0.8)) drop-shadow(0 0 12px ${lineStroke})`,
+              strokeDasharray: "40 280", // 40px dash length, 280px gap
+              animation: "energyBeamFlow 4.5s linear infinite", // Much slower (was 3s)
+              opacity: 0,
+            }}
+          />
+
+          {/* Pulsing indicator at the start of the line (near text) temporarily commented out
           <g
             ref={pingRef}
             style={{
@@ -313,78 +405,18 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
               e.stopPropagation();
               const store = useFoldStore.getState();
               const isHoverEnabled =
-                (store.ambientProgress > 0 || store.introProgress >= 0.99) && store.introHandoffProgress === 0;
+                (store.ambientProgress > 0 || store.introProgress >= 0.99) &&
+                store.introHandoffProgress === 0;
               if (!isHoverEnabled) return;
               store.setActiveAmbientMediaId(
-                store.activeAmbientMediaId === sectionId ? null : sectionId
+                store.activeAmbientMediaId === sectionId ? null : sectionId,
               );
             }}
           >
-            <circle
-              cx={6}
-              cy={0}
-              r={4}
-              fill={activeColor}
-              className="animate-ping"
-              style={{ transformOrigin: "6px 0px", animationDuration: "1.5s" }}
-            />
-            <circle cx={6} cy={0} r={3} fill={activeColor} />
+            <circle cx={0} cy={1} r={3.5} fill={activeColor} />
           </g>
-
-          <g fill={`url(#${gradientId})`}>
-            {Array.from({ length: numDots }).map((_, i) => {
-              const y = i * (polePx / (numDots - 1));
-              return (
-                <circle
-                  key={i}
-                  ref={(el) => {
-                    circlesRef.current[i] = el;
-                  }}
-                  cx={6}
-                  cy={y}
-                  r={0} // Computed imperatively
-                  opacity={0} // Computed imperatively
-                />
-              );
-            })}
-          </g>
+          */}
         </svg>
-        <div
-          ref={textContainerRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            const store = useFoldStore.getState();
-            // We check hover capability manually because state is not in React
-            const isHoverEnabled =
-              (store.ambientProgress > 0 || store.introProgress >= 0.99) && store.introHandoffProgress === 0;
-            if (!isHoverEnabled) return;
-            store.setActiveAmbientMediaId(
-              store.activeAmbientMediaId === sectionId ? null : sectionId
-            );
-          }}
-          style={{
-            opacity: 0, // Computed imperatively
-            transform: `translateY(0px)`, // Computed imperatively
-            transition: `opacity 0.3s ease-out`,
-            pointerEvents: "none",
-            cursor: "default",
-          }}
-        >
-          <span
-            ref={textRef}
-            className="mr-2 text-sm md:text-base font-medium tracking-widest font-sans inline-block whitespace-nowrap"
-            style={{
-              marginTop: -2,
-              fontSize: "clamp(12px, 1.55vw, 15px)",
-              lineHeight: 1.25,
-              textShadow: "none",
-              textTransform: "none",
-              transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-          >
-            {caption}
-          </span>
-        </div>
       </div>
     </div>
   );

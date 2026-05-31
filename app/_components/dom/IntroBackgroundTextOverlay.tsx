@@ -8,10 +8,10 @@ import { AnimatePresence, motion } from "framer-motion";
 
 // You can adjust these text sizes! The component will automatically pick the right size based on the title's character count.
 export const TITLE_SIZES = {
-  SHORT: "text-[16vw] md:text-[12vw] leading-[0.9]",       // for very short text (<= 15 chars)
-  MEDIUM: "text-[14vw] md:text-[10vw] leading-[0.95]",     // for medium text (16 - 30 chars)
-  LONG: "text-[11vw] md:text-[8.5vw] leading-[1.05]",      // for long text (31 - 50 chars)
-  EXTRA_LONG: "text-[9vw] md:text-[7vw] leading-[1.1]",    // for extremely long text (51+ chars)
+  SHORT: "text-[16vw] md:text-[12vw] leading-[0.9]", // for very short text (<= 15 chars)
+  MEDIUM: "text-[14vw] md:text-[10vw] leading-[0.95]", // for medium text (16 - 30 chars)
+  LONG: "text-[11vw] md:text-[8.5vw] leading-[1.05]", // for long text (31 - 50 chars)
+  EXTRA_LONG: "text-[9vw] md:text-[7vw] leading-[1.1]", // for extremely long text (51+ chars)
 };
 
 function getSmartTitleSizeClass(title: string) {
@@ -20,6 +20,20 @@ function getSmartTitleSizeClass(title: string) {
   if (len <= 30) return TITLE_SIZES.MEDIUM;
   if (len <= 50) return TITLE_SIZES.LONG;
   return TITLE_SIZES.EXTRA_LONG;
+}
+
+// You can adjust the distant black/white shadow position and blur here!
+// x: Negative moves shadow left, Positive moves right
+// y: Negative moves shadow up, Positive moves down
+export const DISTANT_SHADOW = {
+  x: -20, // Base X offset
+  y: 30, // Base Y offset
+  blur: 15, // Blur amount
+  opacity: 0.8, // Opacity (0.0 to 1.0)
+};
+
+function getDistantShadow(scale: number) {
+  return `${DISTANT_SHADOW.x * scale}px ${DISTANT_SHADOW.y * scale}px ${DISTANT_SHADOW.blur}px rgba(0,0,0,${DISTANT_SHADOW.opacity})`;
 }
 
 export function IntroBackgroundTextOverlay({
@@ -88,6 +102,7 @@ export function IntroBackgroundTextOverlay({
               transition: { duration: 0.2, ease: "easeOut" },
             }}
             className="relative flex flex-col items-center w-[55vw] md:w-[45vw] text-center"
+            style={{ willChange: "transform, opacity" }}
           >
             {data.caption && (
               <AnimatedText
@@ -95,12 +110,10 @@ export function IntroBackgroundTextOverlay({
                 variant="caption"
                 animationType="flyInLeft"
                 cinematic={true}
-                style={{ textShadow: "none" }}
-                className={`tracking-widest text-lg md:text-xl font-(family-name:--font-poppins) font-medium w-full justify-center z-10 ${
-                  isDarkMode
-                    ? "text-[#A78BFA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-                    : "text-[#7C3AED] drop-shadow-sm"
-                }`}
+                style={{
+                  textShadow: `-2px 2px 5px rgba(248,249,250,0.18), -8px 8px 18px rgba(0,0,0,0.55), ${getDistantShadow(0.33)}`,
+                }}
+                className="tracking-widest text-lg md:text-xl font-(family-name:--font-poppins) font-medium w-full justify-center z-10 text-[#A78BFA]"
               />
             )}
             {data.title && (
@@ -109,8 +122,10 @@ export function IntroBackgroundTextOverlay({
                 variant="title"
                 animationType="flyInBottom"
                 cinematic={true}
-                style={{ textShadow: "none" }}
-                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} ${isDarkMode ? "text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : "text-zinc-900 drop-shadow-sm"}`}
+                style={{
+                  textShadow: `-8px 8px 12px rgba(167,139,250,0.2), -18px 18px 30px rgba(167,139,250,0.12), -30px 30px 50px rgba(0,0,0,0.45), ${getDistantShadow(1)}`,
+                }}
+                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-[#F8F9FA]`}
               />
             )}
             {data.subtitle && (
@@ -119,12 +134,10 @@ export function IntroBackgroundTextOverlay({
                 variant="subtitle"
                 animationType="flyInBottom"
                 cinematic={true}
-                style={{ textShadow: "none" }}
-                className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[5vw] md:text-[3.5vw] -mt-6 md:-mt-10 mb-4 ${
-                  isDarkMode
-                    ? "text-[#A78BFA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-                    : "text-[#7C3AED] drop-shadow-sm"
-                }`}
+                style={{
+                  textShadow: `-4px 4px 8px rgba(248,249,250,0.18), -12px 12px 24px rgba(0,0,0,0.55), ${getDistantShadow(0.66)}`,
+                }}
+                className="font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[5vw] md:text-[3.5vw] -mt-6 md:-mt-10 mb-4 text-[#A78BFA]"
               />
             )}
             {data.body && (
@@ -133,10 +146,10 @@ export function IntroBackgroundTextOverlay({
                 variant="body"
                 animationType="fadeIn"
                 cinematic={true}
-                style={{ textShadow: "none" }}
-                className={`font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-2xl md:text-3xl -mt-2 md:-mt-4 ${
-                  isDarkMode ? "text-white/90" : "text-black/90"
-                }`}
+                style={{
+                  textShadow: `-3px 3px 7px rgba(167,139,250,0.18), -9px 9px 20px rgba(0,0,0,0.55), ${getDistantShadow(0.5)}`,
+                }}
+                className="font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-2xl md:text-3xl -mt-2 md:-mt-4 text-white/90"
               />
             )}
           </motion.div>

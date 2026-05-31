@@ -143,7 +143,11 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
         <motion.span
           key={`${lineIndex}-${wordIndex}-${charIndex}`}
           variants={childVariants}
-          className={cn("inline-block", spanClassName)}
+          className={cn("inline-block relative", spanClassName)}
+          style={{ 
+            zIndex: 1000 - charIndex,
+            willChange: cinematic ? "transform, filter, opacity" : "transform, opacity",
+          }}
         >
           {char}
         </motion.span>
@@ -152,7 +156,8 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
       renderElements.push(
         <span
           key={`word-${lineIndex}-${wordIndex}`}
-          className="inline-block whitespace-nowrap"
+          className="inline-block whitespace-nowrap relative"
+          style={{ zIndex: 1000 - wordIndex }}
         >
           {wordElements}
           {wordIndex < words.length - 1 && (
