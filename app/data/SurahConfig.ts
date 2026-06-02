@@ -207,8 +207,12 @@ export const OPPOSITE_VERSE_CONNECTOR = {
 
 export const VERSE_TEXT_RIGHT_PADDING = 0.003;
 
-// Single source of truth for all three section label widths.
-export const TOP_LABEL_WIDTH = 0.47;
+// Width for Section 1 label
+export const TOP_LABEL_WIDTH = 0.425;
+
+// Width and vertical offset for Section 2 labels
+export const S2_LABEL_WIDTH = 0.47;
+export const S2_LABEL_Y_OFFSET = 0.004; // Moves labels up by ~1mm
 
 // Section 1 neon border tuning.
 export const SMALL_TEXT_SHIFT = -0.018;

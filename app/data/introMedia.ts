@@ -20,7 +20,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     isVideo: false,
     backgroundText: {
       caption: "Muhkem",
-      title: "Tebliğ\nirşat vazifesinin \ntarifi tebliği",
+      title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
     },
   },
   s1_step2: {
@@ -35,8 +35,8 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "/intro/section-2.png",
     isVideo: false,
     backgroundText: {
-      caption: "Ebu Cehilin dünyası",
-      title: "Tuğyan\n zulüm\ninkar \nistiğna",
+      caption: "Ebu Cehil'in dünyası",
+      title: "Tuğyan\n zulüm\ninkâr \nistiğna",
     },
   },
   s2_center: {
@@ -51,8 +51,8 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "/intro/hero-2.png",
     isVideo: false,
     backgroundText: {
-      caption: "EbuCehilin Ahireti",
-      title: "Tuğyanın\n zulmün\n inkarın \nkarşılığı",
+      caption: "Ebu Cehil'in Ahireti",
+      title: "Tuğyanın\n zulmün\n inkârın \nkarşılığı",
     },
   },
 };

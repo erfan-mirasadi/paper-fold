@@ -20,6 +20,10 @@ import type {
   LayoutConfig,
   S2Transforms,
 } from "../../../data/SurahConfig";
+import {
+  S2_LABEL_WIDTH,
+  S2_LABEL_Y_OFFSET,
+} from "../../../data/SurahConfig";
 interface SectionTwoProps {
   data: SectionTwoData;
   transforms: S2Transforms;
@@ -230,11 +234,18 @@ export function SectionTwo({
       />
 
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
+      {/* 
+        IMPORTANT NOTE ON SYMMETRY:
+        The Top and Bottom labels of Section 2 are perfectly symmetrical (mirrored).
+        Therefore, any vertical offset applied to the top label to push it outward (UP, +) 
+        must be inverted (DOWN, -) for the bottom label. 
+      */}
       <TopLabel
         x={PW / 2}
-        y={t.topLabelPinY}
+        y={t.topLabelPinY + S2_LABEL_Y_OFFSET}
         z={0.004}
         text={data.topLabel}
+        labelWidth={S2_LABEL_WIDTH}
         partialBorder={true}
         bgColor={S2_TOP_LABEL_BG}
         borderColor={S2_TOP_LABEL_BORDER}
@@ -242,9 +253,10 @@ export function SectionTwo({
       />
       <TopLabel
         x={PW / 2}
-        y={t.bottomLabelPinY}
+        y={t.bottomLabelPinY - S2_LABEL_Y_OFFSET}
         z={0.004}
         text={data.bottomLabel}
+        labelWidth={S2_LABEL_WIDTH}
         partialBorder={true}
         bottomBorder={true}
         bgColor={S2_TOP_LABEL_BG}

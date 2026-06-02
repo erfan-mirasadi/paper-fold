@@ -37,7 +37,7 @@ export const S1_VERSE_5_NUMBER_TEXT = "#000000";
 export const S1_VERSE_5_TEXT = "#A30000";
 
 export const S1_ANA_LABEL_BG = "#e2caae";
-export const S1_ANA_LABEL_BORDER = "#96601b";
+export const S1_ANA_LABEL_BORDER = "#a48a38";
 export const S1_ANA_LABEL_TEXT = "#72665F";
 export const S1_NEON_GOLD = "#FFD700";
 // ----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ export const S2_VERSE_NUMBER_TEXT = "#000000";
 // TOP LABEL — Section-specific background & border (Section 2)
 // ----------------------------------------------------------------------------
 export const S2_TOP_LABEL_BG = "#EFE9DC";
-export const S2_TOP_LABEL_BORDER = "#72665F";
+export const S2_TOP_LABEL_BORDER = "#a48a38";
 
 // ----------------------------------------------------------------------------
 // 6. CAPSULE (VERSE BOX) BACKGROUND COLORS

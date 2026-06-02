@@ -107,7 +107,7 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
     topLabel: "Beş ayetlik 1. Açıklama Böl.",
     introVerse: {
       number: 6,
-      text: "Bak şimdi başka bir insan (Ebu Cehil), güneş gibi apaçık olan Risalet-i Muhammediyeyi inkar and taşkınlık ediyor:",
+      text: "Bak şimdi başka bir insan (Ebu Cehil), güneş gibi apaçık olan Risalet-i Muhammediyeyi inkâr ve taşkınlık ediyor:",
     },
     colorGroups: [
       {

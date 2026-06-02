@@ -44,6 +44,7 @@ interface RoundedShapeProps {
   radius: number;
   topOnly?: boolean;
   bottomOnly?: boolean;
+  xMultiplier?: number;
 }
 export function RoundedShapeComponent({
   w,
@@ -51,42 +52,45 @@ export function RoundedShapeComponent({
   radius,
   topOnly = false,
   bottomOnly = false,
+  xMultiplier = 1,
 }: RoundedShapeProps) {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
     const r = Math.min(radius, w / 2, h / 2);
 
+    const rx = Math.min(r * xMultiplier, w / 2);
+
     if (topOnly) {
       const visibleH = h / 2;
-      s.moveTo(r, 0);
-      s.lineTo(w - r, 0);
+      s.moveTo(rx, 0);
+      s.lineTo(w - rx, 0);
       s.quadraticCurveTo(w, 0, w, -r);
       s.lineTo(w, -visibleH);
       s.lineTo(0, -visibleH);
       s.lineTo(0, -r);
-      s.quadraticCurveTo(0, 0, r, 0);
+      s.quadraticCurveTo(0, 0, rx, 0);
     } else if (bottomOnly) {
       const startY = -h / 2;
       s.moveTo(0, startY);
       s.lineTo(w, startY);
       s.lineTo(w, -(h - r));
-      s.quadraticCurveTo(w, -h, w - r, -h);
-      s.lineTo(r, -h);
+      s.quadraticCurveTo(w, -h, w - rx, -h);
+      s.lineTo(rx, -h);
       s.quadraticCurveTo(0, -h, 0, -(h - r));
       s.lineTo(0, startY);
     } else {
-      s.moveTo(r, 0);
-      s.lineTo(w - r, 0);
+      s.moveTo(rx, 0);
+      s.lineTo(w - rx, 0);
       s.quadraticCurveTo(w, 0, w, -r);
       s.lineTo(w, -(h - r));
-      s.quadraticCurveTo(w, -h, w - r, -h);
-      s.lineTo(r, -h);
+      s.quadraticCurveTo(w, -h, w - rx, -h);
+      s.lineTo(rx, -h);
       s.quadraticCurveTo(0, -h, 0, -(h - r));
       s.lineTo(0, -r);
-      s.quadraticCurveTo(0, 0, r, 0);
+      s.quadraticCurveTo(0, 0, rx, 0);
     }
     return s;
-  }, [w, h, radius, topOnly, bottomOnly]);
+  }, [w, h, radius, topOnly, bottomOnly, xMultiplier]);
   return <shapeGeometry args={[shape]} />;
 }
 
@@ -108,6 +112,7 @@ interface UiRectProps {
   emissive?: string;
   emissiveIntensity?: number;
   toneMapped?: boolean;
+  xMultiplier?: number;
 }
 
 interface TexturedMaterialProps {
@@ -193,6 +198,7 @@ export const UiRect = ({
   emissive,
   emissiveIntensity,
   toneMapped,
+  xMultiplier = 1,
 }: UiRectProps) => {
   const finalColor = color;
   const resolvedTransparent =
@@ -212,6 +218,7 @@ export const UiRect = ({
             radius={radius}
             topOnly={topOnly}
             bottomOnly={bottomOnly}
+            xMultiplier={xMultiplier}
           />
           <meshBasicMaterial
             color={SHADOW_BLACK}
@@ -229,6 +236,7 @@ export const UiRect = ({
           radius={radius}
           topOnly={topOnly}
           bottomOnly={bottomOnly}
+          xMultiplier={xMultiplier}
         />
         {isImage ? (
           <TexturedMaterial
@@ -310,10 +318,14 @@ export function TopLabel({
 
   const groupRef = useRef<THREE.Group>(null);
   const borderThickness = 0.004;
-  
+
   const isArabicText = /[\u0600-\u06FF]/.test(text);
   const fontToUse = isArabicText ? QURAN_FONT : LATIN_LABEL_FONT;
-  const resolvedFontSize = fontSizeOverride ?? (isArabicText ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5 : TEXT_SIZES.TOP_LABEL * topLabelScale);
+  const resolvedFontSize =
+    fontSizeOverride ??
+    (isArabicText
+      ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5
+      : TEXT_SIZES.TOP_LABEL * topLabelScale);
 
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
@@ -331,6 +343,7 @@ export function TopLabel({
           bottomOnly={partialBorder && bottomBorder}
           renderOrder={renderOrder}
           depthTest={depthTest}
+          xMultiplier={1.5}
         />
       )}
       <UiRect
@@ -344,6 +357,7 @@ export function TopLabel({
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
         depthTest={depthTest}
+        xMultiplier={1.5}
       />
       <group position={[w / 2, -h / 2, 0.002]}>
         <CanvasText
@@ -373,7 +387,15 @@ interface AnaAyetTabProps {
   renderOrder?: number;
   depthTest?: boolean;
 }
-export function AnaAyetTab({ x, y, w, h, z, renderOrder, depthTest = false }: AnaAyetTabProps) {
+export function AnaAyetTab({
+  x,
+  y,
+  w,
+  h,
+  z,
+  renderOrder,
+  depthTest = false,
+}: AnaAyetTabProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   const anaAyetScale = LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet;
@@ -392,6 +414,7 @@ export function AnaAyetTab({ x, y, w, h, z, renderOrder, depthTest = false }: An
         color={S1_ANA_LABEL_BG}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
         depthTest={depthTest}
+        xMultiplier={1.5}
       />
 
       <group position={[w / 2, -h / 2, 0.002]}>
