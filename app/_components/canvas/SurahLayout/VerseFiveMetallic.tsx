@@ -143,12 +143,14 @@ function BorderSvg({
   w,
   h,
   z,
+  language,
 }: {
   x: number;
   y: number;
   w: number;
   h: number;
   z: number;
+  language: string;
 }) {
   const texture = useTexture("/Group 11.svg", (t) => {
     t.colorSpace = THREE.SRGBColorSpace;
@@ -156,7 +158,8 @@ function BorderSvg({
   // ضریب‌های ساده برای تغییر سایز نسبت به خود کپسول:
   // 1.0 یعنی دقیقاً هم‌عرض/هم‌ارتفاع کپسول باشه.
   // مثلاً 1.1 یعنی ۱۰ درصد بزرگتر بشه، یا 0.9 یعنی کوچیکتر بشه.
-  const widthScale = 0.8;
+  const isArabic = language === "ar";
+  const widthScale = isArabic ? 0.8 : 0.89;
   const heightScale = 0.93;
 
   const renderW = w * widthScale;
@@ -477,17 +480,18 @@ export function VerseFiveMetallic() {
                   mirrorX
                 />
                 --- */}
-
-                {/* New SVG Border */}
-                <BorderSvg
-                  x={0}
-                  y={0}
-                  w={outerW}
-                  h={outerH}
-                  z={EXTRUDE_DEPTH + 0.002}
-                />
               </>
             )}
+
+            {/* New SVG Border */}
+            <BorderSvg
+              x={0}
+              y={0}
+              w={outerW}
+              h={outerH}
+              z={EXTRUDE_DEPTH + 0.002}
+              language={activeLanguage}
+            />
           </a.group>
 
           {/* Keep label out of tilt rotation so it stays mounted on top from all view angles. */}

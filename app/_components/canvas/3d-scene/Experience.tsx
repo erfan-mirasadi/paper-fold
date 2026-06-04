@@ -21,6 +21,7 @@ import { IntroExperience } from "../intro/IntroExperience";
 import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollController";
 import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
+import { SectionZoomCamera } from "../orchestrator/SectionZoomCamera";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -122,6 +123,7 @@ export function Experience({
         fov={CAMERA_CONFIG.initialCamera.fov}
       />
       <IntroCameraScrollController />
+      <SectionZoomCamera />
       <a.group
         rotation-x={-Math.PI / 4}
         position-x={sceneOffsetX}

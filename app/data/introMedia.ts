@@ -16,6 +16,14 @@ export interface IntroMediaItem {
 
 export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
   s1: {
+    src: "",
+    isVideo: false,
+    backgroundText: {
+      title: "insanlara oku",
+      titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
+    },
+  },
+  s1_step2: {
     src: "/intro/hara-cave.png", // Defaulting to this, will adjust if user provides specific path
     isVideo: false,
     backgroundText: {
@@ -23,7 +31,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
     },
   },
-  s1_step2: {
+  s1_step3: {
     src: "/intro/hara-cave.png", // Keep same image to avoid crossfade
     isVideo: false,
     backgroundText: {

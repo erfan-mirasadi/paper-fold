@@ -510,7 +510,9 @@ export const VerseBox = ({
   const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
 
   const safeMargin = 0.0;
-  const centeredSidePadding = centerTextInCapsule ? numberSidePadding : 0;
+  // Increase padding for big verses so text stays clear of decorative border SVG swirls
+  const EXTRA_BIG_VERSE_PADDING = (!isPill && !isArabic) ? 0.07 : 0;
+  const centeredSidePadding = centerTextInCapsule ? numberSidePadding + EXTRA_BIG_VERSE_PADDING : 0;
   const textMaxW =
     (finalW -
       safeMargin * 2 -

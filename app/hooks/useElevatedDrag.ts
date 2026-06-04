@@ -81,11 +81,17 @@ export function useElevatedDrag({
   });
 
   return useMemo<DragBindings>(() => {
-    // Completely disable drag during the intro sequence
-    if (useFoldStore.getState().isIntroActive) return EMPTY_DRAG_BINDINGS;
     if (!enabled) return EMPTY_DRAG_BINDINGS;
 
+    const isDragAllowed = () => {
+      if (useFoldStore.getState().isIntroActive) return false;
+      const elevatedState = useElevatedStore.getState();
+      if (elevatedState.phase === "elevated" && !elevatedState.isAllSectionsMode) return false;
+      return true;
+    };
+
     const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
+      if (!isDragAllowed()) return;
       e.stopPropagation();
       const s = ref.current;
       const normal = _normal
@@ -186,6 +192,7 @@ export function useElevatedDrag({
       onPointerUp,
       onPointerCancel: onPointerUp,
       onPointerOver: (e: ThreeEvent<PointerEvent>) => {
+        if (!isDragAllowed()) return;
         if (ref.current.active) return;
         e.stopPropagation();
         setBodyCursor("grab");

@@ -160,7 +160,7 @@ export function ScrollManager() {
 
     let scrollAmbientMediaId: IntroMediaId | null = null;
     if (ambientProgress >= 0 && handoffProgress === 0) {
-      const keys: IntroMediaId[] = ["s1", "s1_step2", "s2_top", "s2_center", "s2_bottom"];
+      const keys: IntroMediaId[] = ["s1", "s1_step2", "s1_step3", "s2_top", "s2_center", "s2_bottom"];
       // Distribute the 4 items across the ambient progress (0 to 1)
       let index = Math.floor(ambientProgress * keys.length);
       if (index >= keys.length) index = keys.length - 1;
