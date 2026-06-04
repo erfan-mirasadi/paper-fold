@@ -292,6 +292,7 @@ interface TopLabelProps {
   renderOrder?: number;
   depthTest?: boolean;
   fontSizeOverride?: number;
+  shadow?: boolean;
 }
 
 export function TopLabel({
@@ -308,11 +309,13 @@ export function TopLabel({
   renderOrder,
   depthTest = false,
   fontSizeOverride,
+  shadow,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
+  const labelWidthScale = LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1;
 
-  const w = labelWidth;
+  const w = labelWidth * labelWidthScale;
   const h = 0.046;
   const radius = h / 2;
 
@@ -338,7 +341,7 @@ export function TopLabel({
           h={h + borderThickness * 2}
           radius={radius + borderThickness}
           color={borderColor}
-          shadow={!partialBorder}
+          shadow={shadow !== undefined ? shadow : !partialBorder}
           topOnly={partialBorder && !bottomBorder}
           bottomOnly={partialBorder && bottomBorder}
           renderOrder={renderOrder}

@@ -20,10 +20,7 @@ import type {
   LayoutConfig,
   S2Transforms,
 } from "../../../data/SurahConfig";
-import {
-  S2_LABEL_WIDTH,
-  S2_LABEL_Y_OFFSET,
-} from "../../../data/SurahConfig";
+import { S2_LABEL_WIDTH, S2_LABEL_Y_OFFSET } from "../../../data/SurahConfig";
 interface SectionTwoProps {
   data: SectionTwoData;
   transforms: S2Transforms;

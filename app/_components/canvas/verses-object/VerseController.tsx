@@ -276,6 +276,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
           suppressShadow={!isIntroActive}
+          shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
         />
       </a.group>
     </group>

@@ -38,6 +38,7 @@ export interface VerseMeshProps {
   circleBg: string;
   circleTextCol: string;
   suppressShadow?: boolean;
+  shadowRenderOrder?: number;
 }
 
 export function VerseMesh({
@@ -70,6 +71,7 @@ export function VerseMesh({
   circleBg,
   circleTextCol,
   suppressShadow = false,
+  shadowRenderOrder,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
@@ -191,7 +193,7 @@ export function VerseMesh({
       shadow: {
         color: "#000000",
         transparent: true,
-        depthTest: false,
+        depthTest: true,
         depthWrite: false,
         toneMapped: false,
       },
@@ -235,7 +237,7 @@ export function VerseMesh({
             <a.mesh
               position-x={shadowXOffset}
               position-y={shadowYOffset}
-              renderOrder={90}
+              renderOrder={shadowRenderOrder ?? 90}
               position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
                 const surfaceProgress =
                   normalizeSurfaceLiftProgress(surfaceLift);

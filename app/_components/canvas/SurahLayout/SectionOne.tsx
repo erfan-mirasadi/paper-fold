@@ -266,6 +266,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           bgColor={S1_TOP_LABEL_BG}
           borderColor={S1_TOP_LABEL_BORDER}
           renderOrder={100}
+          shadow={false}
         />
       )}
     </group>

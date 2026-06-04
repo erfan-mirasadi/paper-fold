@@ -103,17 +103,20 @@ export const LANGUAGE_TEXT_SCALE = {
     verseBig: 1.05,
     topLabel: 1,
     anaAyet: 1,
+    labelWidth: 1,
   },
   en: {
     verseSmall: 0.67,
     verseBig: 0.5,
     topLabel: 1,
     anaAyet: 1,
+    labelWidth: 1.35,
   },
   tr: {
     verseSmall: 0.67,
     verseBig: 0.49,
     topLabel: 1,
     anaAyet: 1,
+    labelWidth: 1.35,
   },
 } as const;

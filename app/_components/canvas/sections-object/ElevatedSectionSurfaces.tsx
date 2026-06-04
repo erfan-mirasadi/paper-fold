@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import {
   ScallopedCenteredShape,
@@ -34,13 +34,7 @@ import {
 } from "../SurahLayout/SectionTwo";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import {
-  Color,
-  LinearFilter,
-  SRGBColorSpace,
-  Shape,
-  type Texture,
-} from "three";
+import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
 
 import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
@@ -213,6 +207,7 @@ function ElevatedLayer({
     >
       {shadow && (
         <a.mesh
+          renderOrder={-1}
           position={[VERSE_MIMIC_SHADOW.offsetX, VERSE_MIMIC_SHADOW.offsetY, 0]}
           position-z={to(spring.liftZ, (lift) => shadowInsetZ - lift)}
           scale-x={to(
@@ -322,6 +317,7 @@ function ElevatedSvgFrame({
     >
       {shadow && (
         <a.mesh
+          renderOrder={-1}
           position={[VERSE_MIMIC_SHADOW.offsetX, VERSE_MIMIC_SHADOW.offsetY, 0]}
           position-z={to(
             spring.liftZ,
@@ -584,7 +580,7 @@ export function ElevatedSectionSurfaces() {
               spring={s1Spring}
               shadow
               shadowStrength={0.95}
-              suppressShadow={isIntroActive}
+              suppressShadow={false}
               zOffset={0.001}
               scallopPosition="top"
             />
@@ -640,7 +636,7 @@ export function ElevatedSectionSurfaces() {
               spring={s2TopSpring}
               shadow
               shadowStrength={0.8}
-              suppressShadow={isIntroActive}
+              suppressShadow={false}
               zOffset={0.001}
               scallopPosition="none"
             />
@@ -732,7 +728,7 @@ export function ElevatedSectionSurfaces() {
               spring={s2BottomSpring}
               shadow
               shadowStrength={0.8}
-              suppressShadow={isIntroActive}
+              suppressShadow={false}
               zOffset={0.001}
               scallopPosition="none"
             />

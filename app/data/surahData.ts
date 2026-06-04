@@ -81,20 +81,20 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
     label: "Beş ayetlik Ana Bölüm",
     gridVerses: [
       {
-        number: 2,
-        text: "Evet Rabbin insanı, alak'tan, yani bir hücrecikten yarattı.",
-      },
-      {
         number: 1,
         text: "Ya Muhammed, Sana nazil olan şu ayetleri Rabbin namına insanlara oku: (insanı) O yarattı.",
       },
       {
-        number: 4,
-        text: "İnsanlara (Tevrat ve İncildeki bilgileri) kalemle öğretti.",
+        number: 2,
+        text: "Evet Rabbin insanı, alak'tan, yani bir hücrecikten yarattı.",
       },
       {
         number: 3,
         text: "Yine bu ayetleri Rabbin adına oku ki O çok lütufkardır",
+      },
+      {
+        number: 4,
+        text: "İnsanlara (Tevrat ve İncildeki bilgileri) kalemle öğretti.",
       },
     ],
     anaAyet: {
@@ -117,20 +117,20 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
         extraRowGap: 0.01,
         verses: [
           {
-            number: 8,
-            text: "Halbuki sonunda yine yaratan Rabbine dönülecek",
-          },
-          {
             number: 7,
             text: "(Çevresine güvenerek) kendisini Allaha karşı müstağni görüyor.",
           },
           {
-            number: 10,
-            text: "Bir kulu (peygamberi) namaz kılarken engelliyor.",
+            number: 8,
+            text: "Halbuki sonunda yine yaratan Rabbine dönülecek",
           },
           {
             number: 9,
             text: "Gördün mü şu aşırı giderek namaza) engel olanı.",
+          },
+          {
+            number: 10,
+            text: "Bir kulu (peygamberi) namaz kılarken engelliyor.",
           },
         ],
       },
@@ -140,15 +140,15 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 12, text: "Allah'a itaat edin diyorsa ?" },
           { number: 11, text: "Ya O Kul doğru yoldaysa ?" },
-          {
-            number: 14,
-            text: "Allah'ın her şeyi gördüğünü bilmiyor mu yoksa?.",
-          },
+          { number: 12, text: "Allah'a itaat edin diyorsa ?" },
           {
             number: 13,
             text: "Ya öbürü, dini yalanlıyor ve ibadetten yüz çeviriyorsa?",
+          },
+          {
+            number: 14,
+            text: "Allah'ın her şeyi gördüğünü bilmiyor mu yoksa?.",
           },
         ],
       },
@@ -159,20 +159,20 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
         extraRowGap: 0.01,
         verses: [
           {
-            number: 16,
-            text: "O yalancı, o secdesiz alnından tutar cehenneme atarız.",
-          },
-          {
             number: 15,
             text: "Hayır! Eğer vazgeçmezse biz onu alnından tutar sürükleriz.",
           },
           {
-            number: 18,
-            text: "O zaman elbette biz de, çağıracağız zebanileri.",
+            number: 16,
+            text: "O yalancı, o secdesiz alnından tutar cehenneme atarız.",
           },
           {
             number: 17,
             text: "Çağırsın o zaman o (çok güvendiği) çevresini,",
+          },
+          {
+            number: 18,
+            text: "O zaman elbette biz de, çağıracağız zebanileri.",
           },
         ],
       },
@@ -193,20 +193,20 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
     label: "Five-verse Main Section",
     gridVerses: [
       {
-        number: 2,
-        text: "Yes, your Lord created man from an 'alaq, that is, a single cell.",
-      },
-      {
         number: 1,
         text: "(O Muhammad, read these verses revealed to you to people in the name of your Lord: He created",
       },
       {
-        number: 4,
-        text: "He taught people (the knowledge in the Torah and the Gospel) by the pen.",
+        number: 2,
+        text: "Yes, your Lord created man from an 'alaq, that is, a single cell.",
       },
       {
         number: 3,
         text: "Read these verses again in the name of your Lord, for He is most generous.",
+      },
+      {
+        number: 4,
+        text: "He taught people (the knowledge in the Torah and the Gospel) by the pen.",
       },
     ],
     anaAyet: {
@@ -229,20 +229,20 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
         extraRowGap: 0.01,
         verses: [
           {
-            number: 8,
-            text: "However, in the end, there will be a return to the Creator Lord.",
-          },
-          {
             number: 7,
             text: "(Relying on his surroundings) he sees himself as self-sufficient against Allah.",
           },
           {
-            number: 10,
-            text: "He prevents a servant (prophet) while he is praying.",
+            number: 8,
+            text: "However, in the end, there will be a return to the Creator Lord.",
           },
           {
             number: 9,
             text: "Have you seen the one who goes too far and prevents (prayer).",
+          },
+          {
+            number: 10,
+            text: "He prevents a servant (prophet) while he is praying.",
           },
         ],
       },
@@ -252,18 +252,18 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 12, text: "Or if he commands obedience to Allah?" },
           {
             number: 11,
             text: "What if that Servant is on the right path?",
           },
-          {
-            number: 14,
-            text: "Does he not know that Allah sees everything?",
-          },
+          { number: 12, text: "Or if he commands obedience to Allah?" },
           {
             number: 13,
             text: "What if the other denies the religion and turns away from worship?",
+          },
+          {
+            number: 14,
+            text: "Does he not know that Allah sees everything?",
           },
         ],
       },
@@ -274,20 +274,20 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
         extraRowGap: 0.01,
         verses: [
           {
-            number: 16,
-            text: "That lying, prostration-less forelock, We will grab it and throw it into hell.",
-          },
-          {
             number: 15,
             text: "No! If he does not desist, We will grab him by his forelock and drag him.",
           },
           {
-            number: 18,
-            text: "Then We too, will certainly call the guards of hell (Zabaniya).",
+            number: 16,
+            text: "That lying, prostration-less forelock, We will grab it and throw it into hell.",
           },
           {
             number: 17,
             text: "Let him call then upon his (trusted) associates,",
+          },
+          {
+            number: 18,
+            text: "Then We too, will certainly call the guards of hell (Zabaniya).",
           },
         ],
       },
