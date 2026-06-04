@@ -144,23 +144,9 @@ export function CameraViewPresetOverlay() {
           gap: 4px;
           padding: 5px;
           border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.32);
-          background:
-            radial-gradient(
-              160% 140% at 9% -90%,
-              rgba(255, 255, 255, 0.62) 0%,
-              rgba(255, 255, 255, 0.18) 50%,
-              rgba(255, 255, 255, 0.1) 100%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(250, 251, 253, 0.6) 0%,
-              rgba(226, 230, 236, 0.32) 100%
-            );
-          box-shadow:
-            0 8px 18px rgba(19, 22, 29, 0.14),
-            0 1px 0 rgba(255, 255, 255, 0.54) inset,
-            0 -1px 0 rgba(255, 255, 255, 0.24) inset;
+          border: var(--overlay-border);
+          background: var(--overlay-bg);
+          box-shadow: var(--overlay-shadow);
           backdrop-filter: blur(14px) saturate(124%);
           -webkit-backdrop-filter: blur(14px) saturate(124%);
         }
@@ -170,7 +156,7 @@ export function CameraViewPresetOverlay() {
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 9px;
           background: rgba(255, 255, 255, 0.2);
-          color: rgba(26, 30, 37, 0.84);
+          color: var(--overlay-text);
           height: 42px;
           padding: 0 4px;
           cursor: pointer;
@@ -200,15 +186,9 @@ export function CameraViewPresetOverlay() {
 
         .camera-preset-btn.is-active {
           border-color: rgba(255, 255, 255, 0.72);
-          color: #101318;
-          background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(236, 240, 246, 0.84) 100%
-          );
-          box-shadow:
-            0 4px 10px rgba(35, 42, 55, 0.13),
-            0 1px 0 rgba(255, 255, 255, 0.72) inset;
+          color: var(--overlay-text);
+          background: var(--overlay-knob-bg);
+          box-shadow: var(--overlay-knob-shadow);
         }
 
         .camera-preset-icon {

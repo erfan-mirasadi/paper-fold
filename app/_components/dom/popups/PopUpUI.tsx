@@ -2,8 +2,7 @@
 
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 
-export const PopUpUI = ({ isDarkMode }: { isDarkMode?: boolean }) => {
-  void isDarkMode;
+export const PopUpUI = () => {
   const groups = usePopUpStore((state) => state.popUpGroups);
 
   return (

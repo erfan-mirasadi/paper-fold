@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { PAGE_WIDTH, SURAH_DATA } from "../../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../../data/theme";
@@ -10,34 +10,60 @@ import { CanvasText } from "../shared/CanvasText";
 const TOP_EDGE_OFFSET = -0.02;
 const MANUAL_DOWN_SHIFT = -0.0008;
 const FRONT_CLEARANCE = 0.016;
-const EXTRUSION_LAYERS = 3;
-const EXTRUSION_STEP = 0.00095;
 
 interface BismillahText3DProps {
   surfaceZ: number;
-  isDarkMode?: boolean;
 }
 
 export function BismillahText3D({
   surfaceZ,
-  isDarkMode = false,
 }: BismillahText3DProps) {
   const isElevatedPhase = useElevatedStore((s) => s.phase === "elevated");
 
-  const layers = isDarkMode ? 4 : EXTRUSION_LAYERS;
-  const step = isDarkMode ? 0.0006 : EXTRUSION_STEP;
+  const layers = 4;
+  const step = 0.0006;
   const baseRenderOrder = isElevatedPhase ? 70 : 270;
   const frontRenderOrder = isElevatedPhase ? 89 : 290;
 
-  const bismillahColor = isDarkMode ? "#F2F2ED" : "#000000";
+  const materialsRef = useRef<(THREE.Material | null)[]>([]);
+
+  useEffect(() => {
+    const updateTheme = () => {
+      if (typeof document !== "undefined") {
+        const isDark = document.documentElement.classList.contains("dark");
+        const colorStr = isDark ? "#F2F2ED" : "#000000";
+        const color = new THREE.Color(colorStr);
+        materialsRef.current.forEach((mat) => {
+          if (mat && "color" in mat) {
+            (mat as any).color.copy(color);
+          }
+        });
+      }
+    };
+
+    updateTheme();
+
+    window.addEventListener("themeChange", updateTheme);
+
+    const observer = new MutationObserver(updateTheme);
+    if (typeof document !== "undefined") {
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+    }
+
+    return () => {
+      window.removeEventListener("themeChange", updateTheme);
+      observer.disconnect();
+    };
+  }, []);
+
+  const baseCanvasColor = "#FFFFFF";
 
   const depthColors = useMemo(() => {
-    const color = new THREE.Color(bismillahColor);
-
-    return Array.from({ length: layers }, () => {
-      return color.clone().getStyle();
-    });
-  }, [bismillahColor, layers]);
+    return Array.from({ length: layers }, () => baseCanvasColor);
+  }, [layers]);
 
   const bismillahText = SURAH_DATA.bismillah;
   const maxWidth = PAGE_WIDTH * 0.9;
@@ -69,12 +95,15 @@ export function BismillahText3D({
             renderOrder={baseRenderOrder + i}
           >
             <meshStandardMaterial
-              color={color}
+              color="#000000"
               metalness={0.95}
               roughness={0.3}
               envMapIntensity={1.6}
               transparent
               depthTest={true}
+              ref={(m) => {
+                materialsRef.current[i] = m;
+              }}
             />
           </CanvasText>
         );
@@ -84,7 +113,7 @@ export function BismillahText3D({
         text={bismillahText}
         font={QURAN_FONT}
         fontSize={TEXT_SIZES.BISMILLAH}
-        color={bismillahColor}
+        color={baseCanvasColor}
         textAlign="center"
         verticalAlign="bottom"
         width={maxWidth}
@@ -93,7 +122,7 @@ export function BismillahText3D({
         renderOrder={frontRenderOrder}
       >
         <meshPhysicalMaterial
-          color={bismillahColor}
+          color="#000000"
           metalness={1}
           roughness={0.12}
           clearcoat={1}
@@ -101,6 +130,9 @@ export function BismillahText3D({
           envMapIntensity={2}
           transparent
           depthTest={true}
+          ref={(m) => {
+            materialsRef.current[layers] = m;
+          }}
         />
       </CanvasText>
     </group>

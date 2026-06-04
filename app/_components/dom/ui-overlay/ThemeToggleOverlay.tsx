@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 interface ThemeToggleOverlayProps {
-  isDarkMode: boolean;
   onToggle: () => void;
 }
 
@@ -57,24 +56,19 @@ function MoonIcon({ dim = false }: { dim?: boolean }) {
 }
 
 export function ThemeToggleOverlay({
-  isDarkMode,
   onToggle,
 }: ThemeToggleOverlayProps) {
   const [pulseKey, setPulseKey] = useState(0);
-
-  const iconColor = isDarkMode ? "rgba(241, 246, 255, 0.95)" : "#0F1218";
-  const trackBorder = isDarkMode
-    ? "1px solid rgba(255,255,255,0.2)"
-    : "1px solid rgba(255,255,255,0.34)";
-  const trackBackground = isDarkMode
-    ? "radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%)"
-    : "radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%)";
-  const trackShadow = isDarkMode
-    ? "0 12px 30px rgba(4, 7, 12, 0.48), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(255,255,255,0.08) inset"
-    : "0 12px 30px rgba(19,22,29,0.16), 0 2px 0 rgba(255,255,255,0.54) inset, 0 -1px 0 rgba(255,255,255,0.24) inset";
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return true;
+  });
 
   const handleToggle = () => {
     setPulseKey((prev) => prev + 1);
+    setIsDarkMode((prev) => !prev);
     onToggle();
   };
 
@@ -98,27 +92,18 @@ export function ThemeToggleOverlay({
         onPointerDown={(e) => e.preventDefault()}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        className="overlay-btn"
         style={{
-          pointerEvents: "auto",
           position: "relative",
           width: "86px",
           height: "44px",
           borderRadius: "14px",
-          border: trackBorder,
-          background: trackBackground,
-          boxShadow: trackShadow,
-          backdropFilter: "blur(18px) saturate(130%)",
-          WebkitBackdropFilter: "blur(18px) saturate(130%)",
-          cursor: "pointer",
           overflow: "hidden",
           padding: "4px",
           display: "grid",
           gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
           alignItems: "center",
           gap: 0,
-          color: iconColor,
-          outline: "none",
-          userSelect: "none",
         }}
       >
         <motion.span
@@ -130,9 +115,7 @@ export function ThemeToggleOverlay({
             position: "absolute",
             inset: "-16px",
             borderRadius: "999px",
-            background: isDarkMode
-              ? "radial-gradient(circle, rgba(168,194,255,0.22) 0%, rgba(168,194,255,0) 72%)"
-              : "radial-gradient(circle, rgba(255,198,102,0.25) 0%, rgba(255,198,102,0) 72%)",
+            background: "var(--overlay-glow)",
             pointerEvents: "none",
           }}
         />
@@ -174,19 +157,13 @@ export function ThemeToggleOverlay({
             width: "36px",
             height: "36px",
             borderRadius: "11px",
-            border: isDarkMode
-              ? "1px solid rgba(255,255,255,0.18)"
-              : "1px solid rgba(255,255,255,0.68)",
-            background: isDarkMode
-              ? "linear-gradient(180deg, rgba(42,52,67,0.94) 0%, rgba(24,31,44,0.94) 100%)"
-              : "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(236,240,246,0.84) 100%)",
-            boxShadow: isDarkMode
-              ? "0 6px 16px rgba(0,0,0,0.42), 0 1px 0 rgba(255,255,255,0.22) inset"
-              : "0 6px 14px rgba(35,42,55,0.14), 0 1px 0 rgba(255,255,255,0.72) inset",
+            border: "var(--overlay-knob-border)",
+            background: "var(--overlay-knob-bg)",
+            boxShadow: "var(--overlay-knob-shadow)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            color: iconColor,
+            color: "var(--overlay-text)",
             zIndex: 2,
           }}
         >

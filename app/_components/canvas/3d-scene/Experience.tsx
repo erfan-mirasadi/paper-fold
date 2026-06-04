@@ -24,13 +24,11 @@ import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionA
 
 interface ExperienceProps {
   isFolded?: boolean;
-  isDarkMode?: boolean;
   onReady?: () => void;
 }
 
 export function Experience({
   isFolded = false,
-  isDarkMode = false,
   onReady,
 }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
@@ -140,7 +138,6 @@ export function Experience({
         >
           <SinglePaper
             isFolded={isFolded}
-            isDarkMode={isDarkMode}
             onReady={handlePaperReady}
           />
         </a.group>
@@ -160,7 +157,7 @@ export function Experience({
       </mesh>
 
       {/* Imported the dedicated IntroExperience component */}
-      <IntroExperience isDarkMode={isDarkMode} />
+      <IntroExperience />
 
       <DynamicControls />
       <Environment preset="apartment" />

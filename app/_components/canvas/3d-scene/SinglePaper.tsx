@@ -49,14 +49,12 @@ const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // 
 
 interface SinglePaperProps {
   isFolded?: boolean;
-  isDarkMode?: boolean;
   toggles?: TextureToggles;
   onReady?: () => void;
 }
 
 export const SinglePaper: FC<SinglePaperProps> = ({
   isFolded = false,
-  isDarkMode = false,
   toggles = { diffuse: true, normal: true },
   onReady,
 }) => {
@@ -64,7 +62,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
   const foldAnglesRef = useRef(new Float32Array(FOLD_Y_POSITIONS.length));
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
-
 
   // Audio Setup
   const foldSound = useRef<HTMLAudioElement | null>(null);
@@ -170,8 +167,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     const bones = skinnedMeshRef.current.skeleton.bones;
     const paperProgress = useFoldStore.getState().currentOffset;
 
-
-
     const maxStageIndex = FOLD_STORY_STEPS.length - 1;
     const currentStage = Math.round(paperProgress * maxStageIndex);
 
@@ -217,12 +212,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
         />
       </primitive>
 
-      <BismillahText3D
-        surfaceZ={PAGE_DEPTH / 2}
-        isDarkMode={isDarkMode}
-      />
-
-
+      <BismillahText3D surfaceZ={PAGE_DEPTH / 2} />
     </group>
   );
 };

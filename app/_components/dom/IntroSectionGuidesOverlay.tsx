@@ -9,19 +9,11 @@ import {
 import { INTRO_SECTION_GUIDE_UI_TEXT } from "../../data/introSectionGuideCopy";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 
-interface IntroSectionGuidesOverlayProps {
-  isDarkMode?: boolean;
-}
-
-export function IntroSectionGuidesOverlay({
-  isDarkMode = false,
-}: IntroSectionGuidesOverlayProps) {
+export function IntroSectionGuidesOverlay() {
   const polePx = 152;
-  const line = isDarkMode ? "rgba(180,210,255,0.92)" : "rgba(24,62,118,0.85)";
-  const tip = isDarkMode ? "#a8dcff" : "#1a4888";
-  const textColor = isDarkMode
-    ? "rgba(232,243,255,0.94)"
-    : "rgba(17,29,52,0.92)";
+  const line = "rgba(180,210,255,0.92)";
+  const tip = "#a8dcff";
+  const textColor = "rgba(232,243,255,0.94)";
 
   useEffect(() => {
     // Vanilla subscribe shields the parent from 60fps React re-renders
@@ -84,9 +76,8 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   const textRef = useRef<HTMLSpanElement>(null);
   const pingRef = useRef<SVGGElement>(null);
 
-  // Determine dark mode context for monochrome styling
-  const isDarkMode = textColor.includes("232");
-  const activeColor = isDarkMode ? "#ffffff" : "#000000";
+  // Fixed dark mode context for monochrome styling
+  const activeColor = "#ffffff";
 
   // Calculate row-specific progress constraints once
   const index = INTRO_SECTION_GUIDE_ORDER.indexOf(sectionId);
@@ -298,13 +289,11 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
             >
               <stop
                 offset="0%"
-                stopColor={isDarkMode ? "#ffffff" : "#000000"}
+                stopColor="#ffffff"
               />
               <stop
                 offset="100%"
-                stopColor={
-                  isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"
-                }
+                stopColor="rgba(255,255,255,0.15)"
               />
             </linearGradient>
           </defs>

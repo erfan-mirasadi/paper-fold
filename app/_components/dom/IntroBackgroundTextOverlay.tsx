@@ -36,11 +36,7 @@ function getDistantShadow(scale: number) {
   return `${DISTANT_SHADOW.x * scale}px ${DISTANT_SHADOW.y * scale}px ${DISTANT_SHADOW.blur}px rgba(0,0,0,${DISTANT_SHADOW.opacity})`;
 }
 
-export function IntroBackgroundTextOverlay({
-  isDarkMode,
-}: {
-  isDarkMode: boolean;
-}) {
+export function IntroBackgroundTextOverlay() {
   const activeAmbientMediaId = useFoldStore((s) => s.activeAmbientMediaId);
   const scrollAmbientMediaId = useFoldStore((s) => s.scrollAmbientMediaId);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);

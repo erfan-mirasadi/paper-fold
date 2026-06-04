@@ -1,26 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
 
-interface SiteLoadingOverlayProps {
-  isDarkMode?: boolean;
-}
-
-export function SiteLoadingOverlay({
-  isDarkMode = false,
-}: SiteLoadingOverlayProps) {
-  // Keeping your original colors for text, but made the glow a bit more refined
-  const textColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
-  const glow = isDarkMode ? "rgba(210,228,255,0.35)" : "rgba(35,42,55,0.12)";
+export function SiteLoadingOverlay() {
+  const textColor = "rgba(241,246,255,0.96)";
+  const glow = "rgba(210,228,255,0.35)";
 
   // The requested Brown color, fixed for both modes for consistent line look.
   // This is the color from Image 0.
   const fixedBrownStroke = "#3E342B";
 
-  // The Sand color from Image 1 for the subtle fill tone shift
-  const sandFill = "#E5E0D8";
-
-  // Light/Dark mode specific colors for the fill gradient
-  const finalFillColor = isDarkMode ? "#ffffff" : sandFill; // white for contrast, sand for lighmode
 
   return (
     <motion.div
@@ -45,7 +33,7 @@ export function SiteLoadingOverlay({
         zIndex: 1000,
         display: "grid",
         placeItems: "center",
-        background: isDarkMode ? "#000" : "#fff",
+        background: "var(--page-bg)",
         color: textColor,
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         willChange: "opacity, transform, filter",
@@ -63,53 +51,33 @@ export function SiteLoadingOverlay({
         }}
       >
         {/* Soft breathing shadow underneath - more subtle now */}
-        <motion.div
+        <div
+          className="loading-shadow-pulse"
           style={{
             position: "absolute",
             bottom: -30,
             width: "50%",
             height: "12px",
             borderRadius: "50%",
-            background: isDarkMode
-              ? "rgba(255,255,255,0.1)"
-              : "rgba(0,0,0,0.06)",
+            background: "rgba(255,255,255,0.1)",
             filter: "blur(6px)",
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.15, 0.3],
-          }}
-          transition={{
-            duration: 4,
-            ease: "easeInOut",
-            repeat: Infinity,
           }}
         />
 
-        {/* The main SVG with unique, slow, Siri-like multi-axial rotation */}
-        <motion.svg
+        <svg
+          className="loading-svg-rotate"
           width="120"
           height="120"
           viewBox="0 0 200 200"
           xmlns="http://www.w3.org/2000/svg"
           style={{
-            filter: `drop-shadow(0 15px [20,25,20]px ${glow})`, // dynamic drop shadow blur
+            filter: `drop-shadow(0 15px 20px ${glow})`,
             overflow: "visible",
-            marginBottom: "30px", // give space for shadow and complex motion
-          }}
-          animate={{
-            // Slow, complex 3D rotation and a subtle pulsation
-            rotateX: [0, 8, -8, 0],
-            rotateY: [0, 12, -12, 0],
-            scale: [1, 1.015, 1],
-          }}
-          transition={{
-            duration: 7, // very slow, deliberate motion
-            ease: "linear", // linear makes the complex rotation fluid
-            repeat: Infinity,
+            marginBottom: "30px",
           }}
         >
-          <motion.path
+          <path
+            className="loading-path-draw"
             fillRule="evenodd"
             clipRule="evenodd"
             // INSERTED EXACT SVG PATH DATA (RETAINED)
@@ -117,40 +85,8 @@ export function SiteLoadingOverlay({
             strokeWidth="2" // slightly thinner line for elegance
             stroke={fixedBrownStroke} // FIXED BROWN STROKE
             strokeOpacity={0.6} // Reduced opacity for lines as requested
-            initial={{
-              pathLength: 0,
-              fill: "rgba(0,0,0,0)",
-            }}
-            animate={{
-              // Slower, continuous drawing loop
-              pathLength: [0, 1], // draw only
-              fill: [
-                sandFill, // start sand
-                fixedBrownStroke, // morph to brown
-                finalFillColor, // morph to final tonal shift (white or sand)
-                sandFill, // back to sand
-              ],
-            }}
-            transition={{
-              // Slower stroke drawing
-              pathLength: {
-                duration: 5, // much slower (was 2.5s)
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "loop", // loop for continuous draw
-                repeatDelay: 0.5,
-              },
-              // Slower color shift keyframes
-              fill: {
-                duration: 12, // extremely slow (was 1.5s) to make it subtle
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "loop",
-                repeatDelay: 0.5,
-              },
-            }}
           />
-        </motion.svg>
+        </svg>
 
         {/* Professional 3-dot loading indicator */}
         <div
@@ -162,27 +98,17 @@ export function SiteLoadingOverlay({
           }}
         >
           {[0, 1, 2].map((i) => (
-            <motion.div
+            <div
               key={i}
+              className="loading-dot-bounce"
               style={{
                 width: "8px",
                 height: "8px",
                 borderRadius: "50%",
                 background: fixedBrownStroke,
                 opacity: 0.3,
-                boxShadow: isDarkMode
-                  ? "0 0 12px rgba(255,255,255,0.2)"
-                  : `0 0 8px ${glow}`,
-              }}
-              animate={{
-                opacity: [0.3, 0.8, 0.3],
-                scale: [0.85, 1.15, 0.85],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: i * 0.3,
-                ease: "easeInOut",
+                boxShadow: "0 0 12px rgba(255,255,255,0.2)",
+                animationDelay: `${i * 0.3}s`,
               }}
             />
           ))}

@@ -4,7 +4,7 @@ import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import { AnimatedText } from "./AnimatedText";
 import { useMemo } from "react";
 
-export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
+export function HeroTitleOverlay() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
   // Cap at 0.2 so Zustand stops triggering re-renders once it's fully faded out!
   const introProgress = useFoldStore((s) =>
@@ -31,7 +31,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[16vw] md:text-[12vw] ${isDarkMode ? "text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" : "text-zinc-900 drop-shadow-sm"}`}
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[16vw] md:text-[12vw] text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
         />
         <AnimatedText
           text="suresi"
@@ -39,11 +39,7 @@ export function HeroTitleOverlay({ isDarkMode }: { isDarkMode: boolean }) {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[9vw] md:text-[6vw] -mt-16 md:-mt-28 mb-4 relative z-10 ${
-            isDarkMode
-              ? "text-[#A78BFA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-              : "text-[#7C3AED] drop-shadow-sm"
-          }`}
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[9vw] md:text-[6vw] -mt-16 md:-mt-28 mb-4 relative z-10 text-[#A78BFA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
         />
       </div>
     </div>

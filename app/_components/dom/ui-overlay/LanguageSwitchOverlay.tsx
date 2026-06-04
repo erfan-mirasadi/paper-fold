@@ -1,16 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   SURAH_LANGUAGE_ORDER,
   type SurahLanguage,
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
-
-interface LanguageSwitchOverlayProps {
-  isDarkMode: boolean;
-}
+import { OverlayButton } from "./OverlayButton";
 
 const LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
   ar: "AR",
@@ -18,9 +15,7 @@ const LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
   tr: "TR",
 };
 
-export function LanguageSwitchOverlay({
-  isDarkMode,
-}: LanguageSwitchOverlayProps) {
+export function LanguageSwitchOverlay() {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const setLanguage = useSurahLanguageStore((s) => s.setLanguage);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,56 +34,7 @@ export function LanguageSwitchOverlay({
   const panelPad = "clamp(5px, 0.7vw, 6px)";
   const panelRadius = buttonRadius;
   const itemH = "clamp(30px, 3.2vw, 34px)";
-
-  const buttonTheme = useMemo(() => {
-    const border = isDarkMode
-      ? "1px solid rgba(255,255,255,0.2)"
-      : "1px solid rgba(255,255,255,0.34)";
-    const background = isDarkMode
-      ? "radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%)"
-      : "radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%)";
-    const shadow = isDarkMode
-      ? "0 12px 30px rgba(4, 7, 12, 0.48), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(255,255,255,0.08) inset"
-      : "0 12px 30px rgba(19,22,29,0.16), 0 2px 0 rgba(255,255,255,0.54) inset, 0 -1px 0 rgba(255,255,255,0.24) inset";
-    const text = isDarkMode ? "rgba(241, 246, 255, 0.95)" : "#0F1218";
-    const itemHoverBackground = isDarkMode
-      ? "rgba(188, 208, 238, 0.16)"
-      : "rgba(56, 66, 82, 0.1)";
-    const activeBackground = isDarkMode
-      ? "rgba(210, 228, 255, 0.24)"
-      : "rgba(56, 66, 82, 0.16)";
-    const activeBorder = isDarkMode
-      ? "1px solid rgba(255,255,255,0.24)"
-      : "1px solid rgba(255,255,255,0.55)";
-    const activeShadow = isDarkMode
-      ? "0 6px 16px rgba(0,0,0,0.32)"
-      : "0 6px 14px rgba(35,42,55,0.12)";
-    const panelShadow = isDarkMode
-      ? "0 18px 36px rgba(2, 6, 11, 0.52), 0 1px 0 rgba(255,255,255,0.16) inset"
-      : "0 16px 34px rgba(19,22,29,0.18), 0 1px 0 rgba(255,255,255,0.72) inset";
-    const divider = isDarkMode
-      ? "rgba(255,255,255,0.12)"
-      : "rgba(15, 18, 24, 0.10)";
-
-    const transparentBackground = isDarkMode
-      ? "rgba(210, 228, 255, 0)"
-      : "rgba(56, 66, 82, 0)";
-
-    return {
-      border,
-      background,
-      shadow,
-      text,
-      itemHoverBackground,
-      activeBackground,
-      transparentBackground,
-      activeBorder,
-      activeShadow,
-      panelShadow,
-      divider,
-    };
-  }, [isDarkMode]);
-
+  
   const [isTransitionOverlayActive, setIsTransitionOverlayActive] =
     useState(false);
 
@@ -120,7 +66,7 @@ export function LanguageSwitchOverlay({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: isDarkMode ? "#0A0D14" : "#F4F6F9",
+          backgroundColor: "var(--page-bg)",
           opacity: isTransitionOverlayActive ? 1 : 0,
           transition: "opacity 0.15s ease-out", // Sped up the animation drastically
           pointerEvents: "none",
@@ -147,38 +93,25 @@ export function LanguageSwitchOverlay({
           style={{
             pointerEvents: "auto",
             position: "relative",
-            color: buttonTheme.text,
+            color: "var(--overlay-text)",
             width: BUTTON_W_OPEN,
           }}
         >
-          <motion.button
-            type="button"
+          <OverlayButton
             aria-label="Language menu"
             onPointerDown={(e) => e.preventDefault()}
-            whileHover={{ scale: 1.015 }}
-            whileTap={{ scale: 0.992 }}
             animate={{ width: isOpen ? BUTTON_W_OPEN : BUTTON_W_CLOSED }}
             transition={{ type: "spring", stiffness: 330, damping: 30 }}
+            height={buttonH}
+            borderRadius={buttonRadius}
+            gap="5px"
+            padding="0 10px"
+            fontSize={fontSize}
+            fontWeight={700}
             style={{
-              height: buttonH,
-              borderRadius: buttonRadius,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "5px",
-              padding: "0 10px",
-              fontSize,
-              fontWeight: 700,
               letterSpacing: "0.03em",
-              background: buttonTheme.background,
-              border: buttonTheme.border,
-              boxShadow: buttonTheme.shadow,
-              backdropFilter: "blur(18px) saturate(130%)",
-              WebkitBackdropFilter: "blur(18px) saturate(130%)",
-              cursor: "pointer",
-              color: buttonTheme.text,
               userSelect: "none",
-              outline: "none",
+              overflow: "hidden",
             }}
           >
             <span
@@ -208,7 +141,7 @@ export function LanguageSwitchOverlay({
                 <path d="m3.5 6 4.5 4 4.5-4" />
               </svg>
             </motion.span>
-          </motion.button>
+          </OverlayButton>
 
           <AnimatePresence>
             {isOpen && (
@@ -217,6 +150,7 @@ export function LanguageSwitchOverlay({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.985 }}
                 transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                className="overlay-panel"
                 style={{
                   position: "absolute",
                   top: panelTop,
@@ -227,11 +161,6 @@ export function LanguageSwitchOverlay({
                   gap: "4px",
                   padding: panelPad,
                   borderRadius: panelRadius,
-                  border: buttonTheme.border,
-                  background: buttonTheme.background,
-                  boxShadow: buttonTheme.panelShadow,
-                  backdropFilter: "blur(18px) saturate(130%)",
-                  WebkitBackdropFilter: "blur(18px) saturate(130%)",
                   transformOrigin: "top left",
                 }}
               >
@@ -239,7 +168,7 @@ export function LanguageSwitchOverlay({
                   aria-hidden="true"
                   style={{
                     height: 1,
-                    background: buttonTheme.divider,
+                    background: "var(--overlay-divider)",
                     margin: "2px 6px 4px 6px",
                     borderRadius: 999,
                   }}
@@ -271,19 +200,19 @@ export function LanguageSwitchOverlay({
                         }
                       }}
                       whileHover={{
-                        background: buttonTheme.itemHoverBackground,
+                        background: "var(--overlay-item-hover-bg)",
                         scale: 1.012,
                       }}
                       whileTap={{ scale: 0.99 }}
                       style={{
                         height: itemH,
                         borderRadius: "clamp(9px, 1.1vw, 10px)",
-                        border: isActive ? buttonTheme.activeBorder : "none",
+                        border: isActive ? "var(--overlay-active-border)" : "none",
                         background: isActive
-                          ? buttonTheme.activeBackground
-                          : buttonTheme.transparentBackground,
-                        boxShadow: isActive ? buttonTheme.activeShadow : "none",
-                        color: buttonTheme.text,
+                          ? "var(--overlay-active-bg)"
+                          : "var(--overlay-transparent-bg)",
+                        boxShadow: isActive ? "var(--overlay-active-shadow)" : "none",
+                        color: "var(--overlay-text)",
                         cursor: "pointer",
                         fontSize: itemFontSize,
                         fontWeight: 700,

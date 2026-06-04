@@ -5,14 +5,9 @@ import { motion } from "framer-motion";
 import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import { useDragState, resetAllDrags } from "../../../utils/dragEngine";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
+import { OverlayButton } from "./OverlayButton";
 
-interface NavigationOverlayProps {
-  isDarkMode?: boolean;
-}
-
-export function NavigationOverlay({
-  isDarkMode = false,
-}: NavigationOverlayProps) {
+export function NavigationOverlay() {
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
   const hasDragged = useDragState((s) => s.hasDragged);
@@ -37,27 +32,7 @@ export function NavigationOverlay({
   const stackGap = "clamp(8px, 1.2vw, 10px)";
 
   // Keep label/icon color fixed while the glass surface adapts to theme.
-  const accentColor = isDarkMode ? "rgba(241,246,255,0.96)" : "#0F1218";
-  const textColor = accentColor;
-  const glassBackground = isDarkMode
-    ? "radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%)"
-    : "radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%)";
-  const glassBorder = isDarkMode
-    ? "1px solid rgba(255,255,255,0.2)"
-    : "1px solid rgba(255,255,255,0.34)";
-  const glassShadow = isDarkMode
-    ? "0 12px 30px rgba(4, 7, 12, 0.48), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(255,255,255,0.08) inset"
-    : "0 12px 30px rgba(19,22,29,0.16), 0 2px 0 rgba(255,255,255,0.54) inset, 0 -1px 0 rgba(255,255,255,0.24) inset";
-  const glassHoverBackground = isDarkMode
-    ? "radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.3) 0%, rgba(160,174,195,0.16) 45%, rgba(23,29,40,0.82) 100%), linear-gradient(180deg, rgba(33,40,52,0.82) 0%, rgba(15,20,29,0.92) 100%)"
-    : "radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.24) 50%, rgba(255,255,255,0.16) 100%), linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(235,240,247,0.42) 100%)";
-  const glassHoverBorderColor = isDarkMode
-    ? "rgba(255,255,255,0.28)"
-    : "rgba(255,255,255,0.52)";
-  const glassHoverShadow = isDarkMode
-    ? "0 14px 32px rgba(3,5,9,0.5), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(255,255,255,0.1) inset"
-    : "0 12px 28px rgba(35,42,55,0.16), 0 1px 0 rgba(255,255,255,0.72) inset";
-
+  const accentColor = "var(--overlay-text)";
   const iconUnfold = (
     <svg
       width="22"
@@ -172,16 +147,7 @@ export function NavigationOverlay({
           onClick={handleSmartTransition}
           icon={activeIcon}
           label={buttonLabel}
-          isDarkMode={isDarkMode}
           isPending={isTransitioning}
-          accentColor={accentColor}
-          textColor={textColor}
-          glassBg={glassBackground}
-          glassBorder={glassBorder}
-          glassShadow={glassShadow}
-          glassHoverBg={glassHoverBackground}
-          glassHoverBorderColor={glassHoverBorderColor}
-          glassHoverShadow={glassHoverShadow}
           variants={itemVariants}
         />
       )}
@@ -190,16 +156,7 @@ export function NavigationOverlay({
           onClick={resetAllDrags}
           icon={iconUndo}
           label="Sıfırla"
-          isDarkMode={isDarkMode}
           isPending={false}
-          accentColor={accentColor}
-          textColor={textColor}
-          glassBg={glassBackground}
-          glassBorder={glassBorder}
-          glassShadow={glassShadow}
-          glassHoverBg={glassHoverBackground}
-          glassHoverBorderColor={glassHoverBorderColor}
-          glassHoverShadow={glassHoverShadow}
           variants={itemVariants}
         />
       )}
@@ -211,16 +168,7 @@ interface NavButtonProps {
   onClick: () => void;
   icon: ReactNode;
   label?: string;
-  isDarkMode: boolean;
   isPending: boolean;
-  accentColor: string;
-  textColor: string;
-  glassBg: string;
-  glassBorder: string;
-  glassShadow: string;
-  glassHoverBg: string;
-  glassHoverBorderColor: string;
-  glassHoverShadow: string;
   variants: import("framer-motion").Variants;
 }
 
@@ -228,16 +176,7 @@ const NavButton = memo(function NavButton({
   onClick,
   icon,
   label,
-  isDarkMode,
   isPending,
-  accentColor,
-  textColor,
-  glassBg,
-  glassBorder,
-  glassShadow,
-  glassHoverBg,
-  glassHoverBorderColor,
-  glassHoverShadow,
   variants,
 }: NavButtonProps) {
   const btnH = "clamp(40px, 4.4vw, 46px)";
@@ -246,7 +185,6 @@ const NavButton = memo(function NavButton({
   const btnPadY = "clamp(2px, 0.6vw, 3px)";
   const btnRadius = "clamp(10px, 1.35vw, 11px)";
   const labelFont = "clamp(9.5px, 1.2vw, 10.5px)";
-  const iconScale = "clamp(0.92, 1.1vw, 1)";
 
   const handleClick = () => {
     if (isPending) return;
@@ -254,158 +192,36 @@ const NavButton = memo(function NavButton({
   };
 
   return (
-    <motion.button
-      type="button"
+    <OverlayButton
       variants={variants}
-      whileHover={
-        isPending
-          ? undefined
-          : {
-              background: glassHoverBg,
-              borderColor: glassHoverBorderColor,
-              boxShadow: glassHoverShadow,
-            }
-      }
-      whileTap={isPending ? undefined : { scale: 0.98 }}
+      isPending={isPending}
       onClick={handleClick}
-      disabled={isPending}
       aria-busy={isPending}
+      icon={icon}
+      label={label}
+      height={btnH}
+      minWidth={btnMinW}
+      padding={`${btnPadY} ${btnPadX}`}
+      borderRadius={btnRadius}
+      direction="column"
+      gap="2px"
+      fontSize={labelFont}
+      fontWeight={600}
       style={{
         position: "relative",
-        background: glassBg,
-        border: glassBorder,
-        backdropFilter: "blur(18px) saturate(130%)",
-        WebkitBackdropFilter: "blur(18px) saturate(130%)",
-        color: textColor,
         cursor: isPending ? "wait" : "pointer",
-        height: btnH,
-        minWidth: btnMinW,
-        padding: `${btnPadY} ${btnPadX}`,
-        borderRadius: btnRadius,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "2px",
-        fontSize: labelFont,
-        fontWeight: 600,
         letterSpacing: "0.01em",
-        boxShadow: glassShadow,
         overflow: "hidden",
-        outline: "none",
-        transition:
-          "border-color 150ms ease, box-shadow 150ms ease, background 150ms ease",
       }}
     >
-      {/* Reflective activity sweep for pending state */}
-      <motion.div
-        initial={false}
-        animate={
-          isPending
-            ? {
-                x: ["-175%", "175%"],
-                rotate: [-16, -16],
-                opacity: [0, 0.72, 0],
-              }
-            : { x: "-210%", rotate: -16, opacity: 0 }
-        }
-        transition={
-          isPending
-            ? { duration: 0.95, ease: "easeInOut", repeat: Infinity }
-            : { duration: 0.2, ease: "easeOut" }
-        }
-        style={{
-          position: "absolute",
-          top: "-42%",
-          left: "-78%",
-          width: "92%",
-          height: "190%",
-          background: isDarkMode
-            ? "linear-gradient(110deg, rgba(255,255,255,0), rgba(236,245,255,0.48), rgba(255,255,255,0))"
-            : "linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,0.84), rgba(255,255,255,0))",
-          filter: "blur(0.35px)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-
-      <motion.div
-        initial={false}
-        animate={
-          isPending
-            ? {
-                x: ["-185%", "185%"],
-                rotate: [-16, -16],
-                opacity: [0, 0.96, 0],
-              }
-            : { x: "-220%", rotate: -16, opacity: 0 }
-        }
-        transition={
-          isPending
-            ? { duration: 0.95, ease: "easeInOut", repeat: Infinity }
-            : { duration: 0.2, ease: "easeOut" }
-        }
-        style={{
-          position: "absolute",
-          top: "-46%",
-          left: "-80%",
-          width: "34%",
-          height: "198%",
-          background: isDarkMode
-            ? "linear-gradient(110deg, rgba(255,255,255,0), rgba(249,252,255,0.9), rgba(255,255,255,0))"
-            : "linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,1), rgba(255,255,255,0))",
-          filter: "blur(0.2px)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-
-      <motion.div
-        initial={false}
-        animate={isPending ? { opacity: [0.04, 0.15, 0.04] } : { opacity: 0 }}
-        transition={
-          isPending
-            ? { duration: 0.95, ease: "easeInOut", repeat: Infinity }
-            : { duration: 0.2, ease: "easeOut" }
-        }
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: isDarkMode
-            ? "linear-gradient(180deg, rgba(233,244,255,0.22) 0%, rgba(233,244,255,0) 64%)"
-            : "linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 64%)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-
-      <span
-        style={{
-          display: "flex",
-          color: accentColor,
-          filter: isDarkMode
-            ? "drop-shadow(0 0 8px rgba(226, 239, 255, 0.28))"
-            : "none",
-          zIndex: 2,
-          pointerEvents: "none",
-          transform: `scale(${iconScale})`,
-        }}
-      >
-        {icon}
-      </span>
-
-      {label && (
-        <span
-          style={{
-            zIndex: 2,
-            textShadow: isDarkMode
-              ? "0 1px 10px rgba(199, 220, 255, 0.28)"
-              : "none",
-          }}
-        >
-          {label}
-        </span>
+      {isPending && (
+        <div className="sweep-container">
+          <div className="sweep-1" />
+          <div className="sweep-2" />
+          <div className="sweep-3" />
+        </div>
       )}
-    </motion.button>
+
+    </OverlayButton>
   );
 });

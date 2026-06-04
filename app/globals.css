@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --page-bg: #ffffff;
   --background: #ffffff;
   --foreground: #171717;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -17,11 +18,215 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --overlay-bg: radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%);
+  --overlay-border: 1px solid rgba(255,255,255,0.34);
+  --overlay-shadow: 0 12px 30px rgba(19,22,29,0.16), 0 2px 0 rgba(255,255,255,0.54) inset, 0 -1px 0 rgba(255,255,255,0.24) inset;
+  --overlay-text: #0F1218;
+
+  --overlay-hover-bg: radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.24) 50%, rgba(255,255,255,0.16) 100%), linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(235,240,247,0.42) 100%);
+  --overlay-hover-border-color: rgba(255,255,255,0.52);
+  --overlay-hover-shadow: 0 12px 28px rgba(35,42,55,0.16), 0 1px 0 rgba(255,255,255,0.72) inset;
+
+  --overlay-active-bg: rgba(56, 66, 82, 0.16);
+  --overlay-active-border: 1px solid rgba(255,255,255,0.55);
+  --overlay-active-shadow: 0 6px 14px rgba(35,42,55,0.12);
+
+  --overlay-item-hover-bg: rgba(56, 66, 82, 0.1);
+  --overlay-panel-shadow: 0 16px 34px rgba(19,22,29,0.18), 0 1px 0 rgba(255,255,255,0.72) inset;
+  --overlay-divider: rgba(15, 18, 24, 0.10);
+  --overlay-transparent-bg: rgba(56, 66, 82, 0);
+
+  --overlay-glow: radial-gradient(circle, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0) 72%);
+
+  --overlay-knob-bg: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(236,240,246,0.84) 100%);
+  --overlay-knob-border: 1px solid rgba(255,255,255,0.68);
+  --overlay-knob-shadow: 0 6px 14px rgba(35,42,55,0.14), 0 1px 0 rgba(255,255,255,0.72) inset;
+
+  --sweep-1-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,0.84), rgba(255,255,255,0));
+  --sweep-2-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,1), rgba(255,255,255,0));
+  --sweep-3-bg: linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 64%);
+}
+
+.dark {
+  --page-bg: #000000;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  
+  --overlay-bg: radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%);
+  --overlay-border: 1px solid rgba(255,255,255,0.2);
+  --overlay-shadow: 0 12px 30px rgba(4, 7, 12, 0.48), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(255,255,255,0.08) inset;
+  --overlay-text: rgba(241, 246, 255, 0.95);
+
+  --overlay-hover-bg: radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.3) 0%, rgba(160,174,195,0.16) 45%, rgba(23,29,40,0.82) 100%), linear-gradient(180deg, rgba(33,40,52,0.82) 0%, rgba(15,20,29,0.92) 100%);
+  --overlay-hover-border-color: rgba(255,255,255,0.28);
+  --overlay-hover-shadow: 0 14px 32px rgba(3,5,9,0.5), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(255,255,255,0.1) inset;
+
+  --overlay-active-bg: rgba(210, 228, 255, 0.24);
+  --overlay-active-border: 1px solid rgba(255,255,255,0.24);
+  --overlay-active-shadow: 0 6px 16px rgba(0,0,0,0.32);
+
+  --overlay-item-hover-bg: rgba(188, 208, 238, 0.16);
+  --overlay-panel-shadow: 0 18px 36px rgba(2, 6, 11, 0.52), 0 1px 0 rgba(255,255,255,0.16) inset;
+  --overlay-divider: rgba(255,255,255,0.12);
+  --overlay-transparent-bg: rgba(210, 228, 255, 0);
+
+  --overlay-glow: radial-gradient(circle, rgba(168,194,255,0.22) 0%, rgba(168,194,255,0) 72%);
+
+  --overlay-knob-bg: linear-gradient(180deg, rgba(42,52,67,0.94) 0%, rgba(24,31,44,0.94) 100%);
+  --overlay-knob-border: 1px solid rgba(255,255,255,0.18);
+  --overlay-knob-shadow: 0 6px 16px rgba(0,0,0,0.42), 0 1px 0 rgba(255,255,255,0.22) inset;
+
+  --sweep-1-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(236,245,255,0.48), rgba(255,255,255,0));
+  --sweep-2-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(249,252,255,0.9), rgba(255,255,255,0));
+  --sweep-3-bg: linear-gradient(180deg, rgba(233,244,255,0.22) 0%, rgba(233,244,255,0) 64%);
+}
+
+.overlay-btn {
+  background: var(--overlay-bg);
+  border: var(--overlay-border);
+  box-shadow: var(--overlay-shadow);
+  color: var(--overlay-text);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  outline: none;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.overlay-btn:not(:disabled):hover {
+  background: var(--overlay-hover-bg);
+  border-color: var(--overlay-hover-border-color);
+  box-shadow: var(--overlay-hover-shadow);
+}
+
+.overlay-btn.active {
+  background: var(--overlay-active-bg);
+  border: var(--overlay-active-border);
+  box-shadow: var(--overlay-active-shadow);
+}
+
+.overlay-btn:disabled {
+  cursor: wait;
+}
+
+.overlay-panel {
+  background: var(--overlay-bg);
+  border: var(--overlay-border);
+  box-shadow: var(--overlay-panel-shadow);
+  color: var(--overlay-text);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+/* Sweep animations */
+@keyframes sweep-1 {
+  0% { transform: translateX(-175%) rotate(-16deg); opacity: 0; }
+  50% { opacity: 0.72; }
+  100% { transform: translateX(175%) rotate(-16deg); opacity: 0; }
+}
+
+@keyframes sweep-2 {
+  0% { transform: translateX(-185%) rotate(-16deg); opacity: 0; }
+  50% { opacity: 0.96; }
+  100% { transform: translateX(185%) rotate(-16deg); opacity: 0; }
+}
+
+@keyframes sweep-3 {
+  0% { opacity: 0.04; }
+  50% { opacity: 0.15; }
+  100% { opacity: 0.04; }
+}
+
+.sweep-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.sweep-1 {
+  position: absolute;
+  top: -42%;
+  left: -78%;
+  width: 92%;
+  height: 190%;
+  background: var(--sweep-1-bg);
+  filter: blur(0.35px);
+  z-index: 1;
+  animation: sweep-1 0.95s ease-in-out infinite;
+}
+
+.sweep-2 {
+  position: absolute;
+  top: -46%;
+  left: -80%;
+  width: 34%;
+  height: 198%;
+  background: var(--sweep-2-bg);
+  filter: blur(0.2px);
+  z-index: 1;
+  animation: sweep-2 0.95s ease-in-out infinite;
+}
+
+.sweep-3 {
+  position: absolute;
+  inset: 0;
+  background: var(--sweep-3-bg);
+  z-index: 1;
+  animation: sweep-3 0.95s ease-in-out infinite;
+}
+
+/* SiteLoadingOverlay animations */
+@keyframes shadow-pulse {
+  0% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.2); opacity: 0.15; }
+  100% { transform: scale(1); opacity: 0.3; }
+}
+
+.loading-shadow-pulse {
+  animation: shadow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes svg-rotate {
+  0% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
+  25% { transform: rotateX(8deg) rotateY(12deg) scale(1.015); }
+  50% { transform: rotateX(-8deg) rotateY(-12deg) scale(1); }
+  75% { transform: rotateX(0deg) rotateY(0deg) scale(1.015); }
+  100% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
+}
+
+.loading-svg-rotate {
+  animation: svg-rotate 7s linear infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes path-draw {
+  0% { stroke-dasharray: 0, 1000; stroke-dashoffset: 0; fill: #E5E0D8; }
+  25% { fill: #3E342B; }
+  50% { stroke-dasharray: 1000, 0; fill: #ffffff; }
+  75% { fill: #E5E0D8; }
+  100% { stroke-dasharray: 1000, 0; fill: #E5E0D8; }
+}
+
+.loading-path-draw {
+  /* Using approximate path length for stroke-dasharray */
+  stroke-dasharray: 1500;
+  stroke-dashoffset: 1500;
+  animation: path-draw 10s ease-in-out infinite;
+}
+
+@keyframes dot-bounce {
+  0% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+  100% { opacity: 0.3; transform: scale(0.85); }
+}
+
+.loading-dot-bounce {
+  animation: dot-bounce 2s ease-in-out infinite;
 }
 
 body {
@@ -101,4 +306,16 @@ html::-webkit-scrollbar {
   height: 0 !important;
   display: none !important;
   background: transparent !important;
+}
+
+.canvas-wrapper {
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+html.dark .canvas-wrapper {
+  filter: drop-shadow(0 20px 30px rgba(255,255,255,0.45)) drop-shadow(0 4px 12px rgba(255,255,255,0.3));
+}
+
+.canvas-wrapper.is-mobile {
+  filter: none;
 }

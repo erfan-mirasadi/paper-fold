@@ -5,13 +5,7 @@ import { useEffect, useRef } from "react";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import * as THREE from "three";
 
-interface IntroExperienceProps {
-  isDarkMode?: boolean;
-}
-
-export function IntroExperience({
-  isDarkMode,
-}: IntroExperienceProps) {
+export function IntroExperience() {
   const groupRef = useRef<THREE.Group>(null);
 
   useEffect(() => {

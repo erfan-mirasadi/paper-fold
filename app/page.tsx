@@ -39,10 +39,8 @@ const Experience = dynamic(
 );
 
 const SCROLL_PAGES = 6;
-const MAIN_OVERLAY_DELAY_MS = 350;
 
 export default function Home() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
   const [mountMainOverlays, setMountMainOverlays] = useState(false);
@@ -130,11 +128,16 @@ export default function Home() {
     };
   }, [isSceneReady]);
 
-  const bgColor = isDarkMode ? "#000000" : "#ffffff";
-
   const handleThemeToggle = () => {
-    setIsDarkMode((prev) => !prev);
-    // setGlitchKey((prev) => prev + 1);
+    if (typeof document !== "undefined") {
+      const isDark = document.documentElement.classList.contains("dark");
+      if (isDark) {
+        document.documentElement.classList.remove("dark");
+      } else {
+        document.documentElement.classList.add("dark");
+      }
+      window.dispatchEvent(new Event("themeChange"));
+    }
   };
 
   const handleSceneReady = useCallback(() => {
@@ -147,7 +150,7 @@ export default function Home() {
         style={{
           width: "100vw",
           minHeight: "100dvh",
-          backgroundColor: bgColor,
+          backgroundColor: "var(--page-bg)",
           transition: "background-color 0.5s ease",
           position: "relative", // Ensure relative positioning for absolute children
         }}
@@ -160,7 +163,7 @@ export default function Home() {
           }}
         />
 
-        <IntroBackgroundTextOverlay isDarkMode={isDarkMode} />
+        <IntroBackgroundTextOverlay />
 
         {isIntroRenderPhase && (
           <div className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 h-[65vh] md:h-[65vh] pointer-events-none z-10">
@@ -172,6 +175,7 @@ export default function Home() {
 
         <Suspense fallback={null}>
           <div
+            className={`canvas-wrapper ${isMobile ? "is-mobile" : ""}`}
             style={{
               position: "fixed",
               inset: 0,
@@ -180,19 +184,14 @@ export default function Home() {
               // Prevent pointer events while hidden or during intro to avoid blocking UI interactions behind canvas
               pointerEvents:
                 isSceneReady && !isIntroRenderPhase ? "auto" : "none",
-              // Disabled heavy CSS drop-shadow filters on mobile layout layers to prevent compositor lockups and rendering crashes
-              filter: isMobile
-                ? "none"
-                : isDarkMode
-                  ? "drop-shadow(0 20px 30px rgba(0,0,0,0.8)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))"
-                  : "drop-shadow(0 20px 30px rgba(255,255,255,0.8)) drop-shadow(0 4px 12px rgba(255,255,255,0.5))",
               // Apple-like buttery smooth ease transition
-              transition: "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)",
+              transition:
+                "opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.5s ease",
             }}
           >
             {/* Render Intro Guides INSIDE the Canvas wrapper but BEFORE Canvas, so they share the filter and aren't shadowed, but get occluded by 3D pixels */}
             {isSceneReady && isIntroRenderPhase && (
-              <IntroSectionGuidesOverlay isDarkMode={isDarkMode} />
+              <IntroSectionGuidesOverlay />
             )}
             {canvasReady && (
               <div
@@ -223,12 +222,11 @@ export default function Home() {
                   }}
                   frameloop="always"
                 >
-                  {/* <color attach="background" args={[bgColor]} /> Removed to allow transparent background for background text */}
+                  {/* <color attach="background" args={["var(--page-bg)"]} /> Removed to allow transparent background for background text */}
                   {/* <Effects glitchTrigger={glitchKey} /> */}
                   <ScrollManager />
                   <PopUpHoverScrollController />
                   <Experience
-                    isDarkMode={isDarkMode}
                     onReady={handleSceneReady}
                   />
                   {/* <VerseNeonTracker /> */}
@@ -241,9 +239,7 @@ export default function Home() {
           </div>
         </Suspense>
         <AnimatePresence>
-          {!isSceneReady && (
-            <SiteLoadingOverlay key="site-loader" isDarkMode={isDarkMode} />
-          )}
+          {!isSceneReady && <SiteLoadingOverlay key="site-loader" />}
         </AnimatePresence>
         {isSceneReady && (
           <motion.div
@@ -254,10 +250,10 @@ export default function Home() {
           >
             {isIntroRenderPhase && (
               <>
-                <HeroTitleOverlay isDarkMode={isDarkMode} />
+                <HeroTitleOverlay />
                 {/* Render the extracted Apple-style border behind the main UI controls */}
                 <div className="fixed inset-0 z-80 pointer-events-none">
-                  <JoinedStepOverlay isDarkMode={isDarkMode} />
+                  <JoinedStepOverlay />
                 </div>
               </>
             )}
@@ -273,13 +269,12 @@ export default function Home() {
                     style={{ pointerEvents: "auto", willChange: "opacity" }}
                   >
                     <ThemeToggleOverlay
-                      isDarkMode={isDarkMode}
                       onToggle={handleThemeToggle}
                     />
-                    <NavigationOverlay isDarkMode={isDarkMode} />
-                    <TitleOverlay isDarkMode={isDarkMode} />
-                    <AllSectionsOverlay isDarkMode={isDarkMode} />
-                    <LanguageSwitchOverlay isDarkMode={isDarkMode} />
+                    <NavigationOverlay />
+                    <TitleOverlay />
+                    <AllSectionsOverlay />
+                    <LanguageSwitchOverlay />
                     <CameraViewPresetOverlay />
                   </motion.div>
                 )}
