@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useState, useEffect } from "react";
+
 import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import {
   ELEVATED_SCROLL_UNLOCK_THRESHOLD,
@@ -58,16 +58,9 @@ function RestoreIcon() {
 }
 
 export function AllSectionsOverlay() {
-  const [isPastThreshold, setIsPastThreshold] = useState(
-    () => useFoldStore.getState().currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD
+  const isPastThreshold = useFoldStore(
+    (s) => s.currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD
   );
-
-  useEffect(() => {
-    return useFoldStore.subscribe((state) => {
-      const past = state.currentOffset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD;
-      setIsPastThreshold((prev) => (prev !== past ? past : prev));
-    });
-  }, []);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const showAllSections = useElevatedStore((s) => s.showAllSections);
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
@@ -119,25 +112,7 @@ export function AllSectionsOverlay() {
             height={buttonH}
             borderRadius={radius}
             icon={isAllSectionsMode ? <RestoreIcon /> : <StackIcon />}
-          >
-            <motion.span
-              aria-hidden="true"
-              animate={{
-                opacity: isAllSectionsMode ? [0.14, 0.3, 0.14] : 0.16,
-              }}
-              transition={{
-                duration: 1.4,
-                ease: "easeInOut",
-                repeat: isAllSectionsMode ? Infinity : 0,
-              }}
-              style={{
-                position: "absolute",
-                inset: "-18px",
-                background: "var(--overlay-glow)",
-                pointerEvents: "none",
-              }}
-            />
-          </OverlayButton>
+          />
         </motion.div>
       )}
     </AnimatePresence>

@@ -19,33 +19,33 @@
 }
 
 :root {
-  --overlay-bg: radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.1) 100%), linear-gradient(180deg, rgba(250,251,253,0.6) 0%, rgba(226,230,236,0.32) 100%);
-  --overlay-border: 1px solid rgba(255,255,255,0.34);
-  --overlay-shadow: 0 12px 30px rgba(19,22,29,0.16), 0 2px 0 rgba(255,255,255,0.54) inset, 0 -1px 0 rgba(255,255,255,0.24) inset;
+  --overlay-bg: rgba(255, 255, 255, 0.65);
+  --overlay-border: 1px solid rgba(255, 255, 255, 0.4);
+  --overlay-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
   --overlay-text: #0F1218;
 
-  --overlay-hover-bg: radial-gradient(160% 140% at 9% -90%, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.24) 50%, rgba(255,255,255,0.16) 100%), linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(235,240,247,0.42) 100%);
-  --overlay-hover-border-color: rgba(255,255,255,0.52);
-  --overlay-hover-shadow: 0 12px 28px rgba(35,42,55,0.16), 0 1px 0 rgba(255,255,255,0.72) inset;
+  --overlay-hover-bg: rgba(255, 255, 255, 0.85);
+  --overlay-hover-border-color: rgba(255, 255, 255, 0.6);
+  --overlay-hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
 
-  --overlay-active-bg: rgba(56, 66, 82, 0.16);
-  --overlay-active-border: 1px solid rgba(255,255,255,0.55);
-  --overlay-active-shadow: 0 6px 14px rgba(35,42,55,0.12);
+  --overlay-active-bg: rgba(230, 235, 242, 0.7);
+  --overlay-active-border: 1px solid rgba(255, 255, 255, 0.5);
+  --overlay-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   --overlay-item-hover-bg: rgba(56, 66, 82, 0.1);
-  --overlay-panel-shadow: 0 16px 34px rgba(19,22,29,0.18), 0 1px 0 rgba(255,255,255,0.72) inset;
+  --overlay-panel-shadow: 0 8px 24px rgba(19, 22, 29, 0.12), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
   --overlay-divider: rgba(15, 18, 24, 0.10);
   --overlay-transparent-bg: rgba(56, 66, 82, 0);
 
-  --overlay-glow: radial-gradient(circle, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0) 72%);
+  --overlay-glow: transparent;
 
-  --overlay-knob-bg: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(236,240,246,0.84) 100%);
-  --overlay-knob-border: 1px solid rgba(255,255,255,0.68);
-  --overlay-knob-shadow: 0 6px 14px rgba(35,42,55,0.14), 0 1px 0 rgba(255,255,255,0.72) inset;
+  --overlay-knob-bg: #ffffff;
+  --overlay-knob-border: 1px solid rgba(0,0,0,0.05);
+  --overlay-knob-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-  --sweep-1-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,0.84), rgba(255,255,255,0));
-  --sweep-2-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,1), rgba(255,255,255,0));
-  --sweep-3-bg: linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0) 64%);
+  --sweep-1-bg: transparent;
+  --sweep-2-bg: transparent;
+  --sweep-3-bg: transparent;
 }
 
 .dark {
@@ -53,33 +53,33 @@
   --background: #0a0a0a;
   --foreground: #ededed;
   
-  --overlay-bg: radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.2) 0%, rgba(132,144,162,0.1) 45%, rgba(18,22,28,0.7) 100%), linear-gradient(180deg, rgba(20,24,32,0.74) 0%, rgba(9,12,18,0.84) 100%);
-  --overlay-border: 1px solid rgba(255,255,255,0.2);
-  --overlay-shadow: 0 12px 30px rgba(4, 7, 12, 0.48), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(255,255,255,0.08) inset;
+  --overlay-bg: rgba(20, 24, 32, 0.65);
+  --overlay-border: 1px solid rgba(255, 255, 255, 0.1);
+  --overlay-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
   --overlay-text: rgba(241, 246, 255, 0.95);
 
-  --overlay-hover-bg: radial-gradient(150% 130% at 12% -90%, rgba(255,255,255,0.3) 0%, rgba(160,174,195,0.16) 45%, rgba(23,29,40,0.82) 100%), linear-gradient(180deg, rgba(33,40,52,0.82) 0%, rgba(15,20,29,0.92) 100%);
-  --overlay-hover-border-color: rgba(255,255,255,0.28);
-  --overlay-hover-shadow: 0 14px 32px rgba(3,5,9,0.5), 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(255,255,255,0.1) inset;
+  --overlay-hover-bg: rgba(30, 36, 48, 0.75);
+  --overlay-hover-border-color: rgba(255, 255, 255, 0.15);
+  --overlay-hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
 
-  --overlay-active-bg: rgba(210, 228, 255, 0.24);
-  --overlay-active-border: 1px solid rgba(255,255,255,0.24);
-  --overlay-active-shadow: 0 6px 16px rgba(0,0,0,0.32);
+  --overlay-active-bg: rgba(40, 48, 64, 0.7);
+  --overlay-active-border: 1px solid rgba(255, 255, 255, 0.2);
+  --overlay-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 
-  --overlay-item-hover-bg: rgba(188, 208, 238, 0.16);
-  --overlay-panel-shadow: 0 18px 36px rgba(2, 6, 11, 0.52), 0 1px 0 rgba(255,255,255,0.16) inset;
-  --overlay-divider: rgba(255,255,255,0.12);
+  --overlay-item-hover-bg: rgba(255, 255, 255, 0.1);
+  --overlay-panel-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  --overlay-divider: rgba(255, 255, 255, 0.12);
   --overlay-transparent-bg: rgba(210, 228, 255, 0);
 
-  --overlay-glow: radial-gradient(circle, rgba(168,194,255,0.22) 0%, rgba(168,194,255,0) 72%);
+  --overlay-glow: transparent;
 
-  --overlay-knob-bg: linear-gradient(180deg, rgba(42,52,67,0.94) 0%, rgba(24,31,44,0.94) 100%);
-  --overlay-knob-border: 1px solid rgba(255,255,255,0.18);
-  --overlay-knob-shadow: 0 6px 16px rgba(0,0,0,0.42), 0 1px 0 rgba(255,255,255,0.22) inset;
+  --overlay-knob-bg: rgba(42, 52, 67, 0.94);
+  --overlay-knob-border: 1px solid rgba(255, 255, 255, 0.1);
+  --overlay-knob-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 
-  --sweep-1-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(236,245,255,0.48), rgba(255,255,255,0));
-  --sweep-2-bg: linear-gradient(110deg, rgba(255,255,255,0), rgba(249,252,255,0.9), rgba(255,255,255,0));
-  --sweep-3-bg: linear-gradient(180deg, rgba(233,244,255,0.22) 0%, rgba(233,244,255,0) 64%);
+  --sweep-1-bg: transparent;
+  --sweep-2-bg: transparent;
+  --sweep-3-bg: transparent;
 }
 
 .overlay-btn {
@@ -87,9 +87,9 @@
   border: var(--overlay-border);
   box-shadow: var(--overlay-shadow);
   color: var(--overlay-text);
-  backdrop-filter: blur(18px) saturate(130%);
-  -webkit-backdrop-filter: blur(18px) saturate(130%);
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   outline: none;
   cursor: pointer;
   pointer-events: auto;
@@ -100,6 +100,11 @@
   background: var(--overlay-hover-bg);
   border-color: var(--overlay-hover-border-color);
   box-shadow: var(--overlay-hover-shadow);
+  transform: scale(1.02);
+}
+
+.overlay-btn:not(:disabled):active {
+  transform: scale(0.96);
 }
 
 .overlay-btn.active {
@@ -117,8 +122,8 @@
   border: var(--overlay-border);
   box-shadow: var(--overlay-panel-shadow);
   color: var(--overlay-text);
-  backdrop-filter: blur(18px) saturate(130%);
-  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Sweep animations */

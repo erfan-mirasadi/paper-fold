@@ -48,11 +48,7 @@ export const OverlayButton = forwardRef<HTMLButtonElement, OverlayButtonProps>(
         ref={ref}
         type="button"
         disabled={isPending}
-        whileTap={
-          isPending
-            ? undefined
-            : { scale: 0.98, ...(typeof props.whileTap === "object" ? props.whileTap : {}) }
-        }
+
         style={{
           display: "flex",
           flexDirection: direction,

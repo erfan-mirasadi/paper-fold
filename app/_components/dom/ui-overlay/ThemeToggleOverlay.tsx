@@ -58,7 +58,6 @@ function MoonIcon({ dim = false }: { dim?: boolean }) {
 export function ThemeToggleOverlay({
   onToggle,
 }: ThemeToggleOverlayProps) {
-  const [pulseKey, setPulseKey] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof document !== 'undefined') {
       return document.documentElement.classList.contains('dark');
@@ -67,7 +66,6 @@ export function ThemeToggleOverlay({
   });
 
   const handleToggle = () => {
-    setPulseKey((prev) => prev + 1);
     setIsDarkMode((prev) => !prev);
     onToggle();
   };
@@ -106,19 +104,7 @@ export function ThemeToggleOverlay({
           gap: 0,
         }}
       >
-        <motion.span
-          key={pulseKey}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: [0, 0.28, 0], scale: [0.7, 1.08, 1.35] }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          style={{
-            position: "absolute",
-            inset: "-16px",
-            borderRadius: "999px",
-            background: "var(--overlay-glow)",
-            pointerEvents: "none",
-          }}
-        />
+
 
         <span
           aria-hidden="true"

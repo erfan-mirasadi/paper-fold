@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, memo, ReactNode } from "react";
+import { memo, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import { useDragState, resetAllDrags } from "../../../utils/dragEngine";
@@ -14,17 +14,7 @@ export function NavigationOverlay() {
   const isPaperDocked = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
 
-  // Replace 60fps reactive scroll hook with a discrete state that only updates when crossing 0.5
-  const [isEndStage, setIsEndStage] = useState(
-    () => useFoldStore.getState().currentOffset < 0.5
-  );
-
-  useEffect(() => {
-    return useFoldStore.subscribe((state) => {
-      const currentIsEnd = state.currentOffset < 0.5;
-      setIsEndStage((prev) => (prev !== currentIsEnd ? currentIsEnd : prev));
-    });
-  }, []);
+  const isEndStage = useFoldStore((s) => s.currentOffset < 0.5);
 
   // Fluid placement/size: match other overlays on the right
   const rightOffset = "clamp(170px, 24vw, 240px)";
@@ -214,14 +204,6 @@ const NavButton = memo(function NavButton({
         overflow: "hidden",
       }}
     >
-      {isPending && (
-        <div className="sweep-container">
-          <div className="sweep-1" />
-          <div className="sweep-2" />
-          <div className="sweep-3" />
-        </div>
-      )}
-
     </OverlayButton>
   );
 });

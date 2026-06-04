@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   SURAH_LANGUAGE_ORDER,
   type SurahLanguage,
@@ -34,45 +34,8 @@ export function LanguageSwitchOverlay() {
   const panelPad = "clamp(5px, 0.7vw, 6px)";
   const panelRadius = buttonRadius;
   const itemH = "clamp(30px, 3.2vw, 34px)";
-  
-  const [isTransitionOverlayActive, setIsTransitionOverlayActive] =
-    useState(false);
-
-  // We use this to track the target language so we know when it has successfully committed
-  const [targetLanguage, setTargetLanguage] = useState<SurahLanguage | null>(
-    null,
-  );
-
-  // Watch for the activeLanguage to catch up to the targetLanguage
-  // This means React has finished suspending and committed the new UI!
-  useEffect(() => {
-    if (targetLanguage && activeLanguage === targetLanguage) {
-      // The new language is now in the DOM.
-      // Give RenderTexture just a tiny bit of time (e.g. 150ms) to render its 4 frames, then reveal!
-      const t = setTimeout(() => {
-        setIsTransitionOverlayActive(false);
-        setTargetLanguage(null);
-      }, 150);
-      return () => clearTimeout(t);
-    }
-  }, [activeLanguage, targetLanguage]);
-
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "var(--page-bg)",
-          opacity: isTransitionOverlayActive ? 1 : 0,
-          transition: "opacity 0.15s ease-out", // Sped up the animation drastically
-          pointerEvents: "none",
-          zIndex: 90, // Below the buttons, but above the canvas
-        }}
-      />
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -181,21 +144,10 @@ export function LanguageSwitchOverlay() {
                       type="button"
                       onPointerDown={(e) => e.preventDefault()}
                       onClick={() => {
-                        if (
-                          activeLanguage !== language &&
-                          targetLanguage === null
-                        ) {
-                          // 1. Mark target and start ultra-fast fade to solid background
-                          setTargetLanguage(language);
-                          setIsTransitionOverlayActive(true);
-
-                          // 2. Just 150ms later (when screen is covered), trigger the language switch
-                          setTimeout(() => {
-                            startTransition(() => {
-                              setLanguage(language);
-                            });
-                          }, 150);
-
+                        if (activeLanguage !== language) {
+                          startTransition(() => {
+                            setLanguage(language);
+                          });
                           setIsOpen(false);
                         }
                       }}
