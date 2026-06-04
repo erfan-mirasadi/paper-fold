@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
 import { SURAH_DATA } from "../../../data/SurahConfig";
+import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import {
@@ -53,8 +54,12 @@ function buildHitboxes(
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
   const s1 = SURAH_TRANSFORMS.s1;
-  SURAH_DATA.section1.gridVerses.forEach((v) => {
-    const vt = s1.verses[v.number];
+  SURAH_DATA.section1.gridVerses.forEach((v, i) => {
+    const isLTR = SURAH_DATA.section1.gridVerses[0].number === 1;
+    const lookupNumber = isLTR
+      ? SURAH_DATA_ARABIC.section1.gridVerses[i].number
+      : v.number;
+    const vt = s1.verses[lookupNumber];
     if (!vt) return;
     hitboxes.push({
       key: `verse-${v.number}`,
@@ -108,8 +113,11 @@ function buildHitboxes(
 
   SURAH_DATA.section2.colorGroups.forEach((group, gIdx) => {
     const gTransform = s2.groups[gIdx];
-    group.verses.forEach((v) => {
-      const vt = gTransform.verses[v.number];
+    group.verses.forEach((v, i) => {
+      const arabicVerseNumber = SURAH_DATA_ARABIC.section2.colorGroups[gIdx].verses[i].number;
+      const isLTR = arabicVerseNumber !== v.number;
+      const lookupNumber = isLTR ? arabicVerseNumber : v.number;
+      const vt = gTransform.verses[lookupNumber];
       if (!vt) return;
       hitboxes.push({
         key: `verse-${v.number}`,

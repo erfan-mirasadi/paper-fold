@@ -22,7 +22,7 @@ export function HeroTitleOverlay() {
   return (
     <div
       className="pointer-events-none fixed inset-0 flex items-center justify-center overflow-hidden z-50"
-      style={{ opacity, paddingBottom: "35vh" }}
+      style={{ opacity, paddingBottom: "30vh" }}
     >
       <div className="relative flex flex-col items-center text-center">
         <AnimatedText
@@ -31,7 +31,7 @@ export function HeroTitleOverlay() {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[16vw] md:text-[12vw] text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[19vw] md:text-[14vw] text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
         />
         <AnimatedText
           text="suresi"
@@ -39,7 +39,7 @@ export function HeroTitleOverlay() {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[9vw] md:text-[6vw] -mt-16 md:-mt-28 mb-4 relative z-10 text-[#A78BFA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[11vw] md:text-[8vw] -mt-[9vw] md:-mt-[8vw] mb-4 relative z-10 text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
         />
       </div>
     </div>

@@ -10,6 +10,7 @@ import {
 } from "../../../data/theme";
 import type { ColorGroup, GroupTransforms } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
+import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 
 interface VerseGroupProps {
   group: ColorGroup;
@@ -17,7 +18,7 @@ interface VerseGroupProps {
   groupIndex?: number;
 }
 
-export function VerseGroup({ group, groupTransform }: VerseGroupProps) {
+export function VerseGroup({ group, groupTransform, groupIndex }: VerseGroupProps) {
   const gt = groupTransform;
   const borderColor = gt.isCenter ? GREEN_THEME : MAROON_THEME;
 
@@ -57,8 +58,16 @@ export function VerseGroup({ group, groupTransform }: VerseGroupProps) {
       })}
 
       {/* 2×2 verse grid — position comes from the engine, no math here */}
-      {group.verses.map((v) => {
-        const vt = gt.verses[v.number];
+      {group.verses.map((v, i) => {
+        let lookupNumber = v.number;
+        if (groupIndex !== undefined) {
+          const arabicVerseNumber = SURAH_DATA_ARABIC.section2.colorGroups[groupIndex].verses[i].number;
+          const isLTR = arabicVerseNumber !== v.number;
+          if (isLTR) {
+            lookupNumber = arabicVerseNumber;
+          }
+        }
+        const vt = gt.verses[lookupNumber];
         if (!vt) return null;
 
         // Verses 11–14 always get their dedicated capsule color

@@ -28,6 +28,7 @@ interface SectionOneProps {
 }
 
 import { useMemo } from "react";
+import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 
 export const SCALLOP_RADIUS_X = 0.053;
 export const SCALLOP_RADIUS_Y = 0.03;
@@ -208,8 +209,12 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
       })}
 
       {/* 2×2 verse grid — positions come from the engine, no math here */}
-      {data.gridVerses.map((v) => {
-        const vt = t.verses[v.number];
+      {data.gridVerses.map((v, i) => {
+        const isLTR = data.gridVerses[0].number === 1;
+        const lookupNumber = isLTR
+          ? SURAH_DATA_ARABIC.section1.gridVerses[i].number
+          : v.number;
+        const vt = t.verses[lookupNumber];
 
         return (
           <VerseBox

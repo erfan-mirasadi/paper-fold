@@ -41,7 +41,11 @@ export function buildVerseConfigs(
   // Section 1 (Verses 1 to 4)
   surahData.section1.gridVerses.forEach((v, i) => {
     const isRightCol = i % 2 !== 0;
-    const t = SURAH_TRANSFORMS.s1.verses[v.number];
+    const isLTR = surahData.section1.gridVerses[0].number === 1;
+    const lookupNumber = isLTR 
+      ? SURAH_DATA_BY_LANGUAGE["ar"].section1.gridVerses[i].number
+      : v.number;
+    const t = SURAH_TRANSFORMS.s1.verses[lookupNumber];
     if (!t) return;
 
     const worldX = t.x - PAGE_WIDTH / 2;
@@ -86,7 +90,10 @@ export function buildVerseConfigs(
   surahData.section2.colorGroups.forEach((group, gIdx) => {
     group.verses.forEach((v, i) => {
       const isRightCol = i % 2 !== 0;
-      const t = SURAH_TRANSFORMS.s2.groups[gIdx].verses[v.number];
+      const arabicVerseNumber = SURAH_DATA_BY_LANGUAGE["ar"].section2.colorGroups[gIdx].verses[i].number;
+      const isLTR = arabicVerseNumber !== v.number;
+      const lookupNumber = isLTR ? arabicVerseNumber : v.number;
+      const t = SURAH_TRANSFORMS.s2.groups[gIdx].verses[lookupNumber];
       if (!t) return;
 
       const vNum = v.number;

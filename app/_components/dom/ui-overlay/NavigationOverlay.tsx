@@ -110,7 +110,7 @@ export function NavigationOverlay() {
 
   const nextStageId: "end" | "pre-start" = isEndStage ? "end" : "pre-start";
   const activeIcon = nextStageId === "end" ? iconUnfold : iconFold;
-  const buttonLabel = nextStageId === "end" ? "Aç" : "Kapat";
+  const buttonLabel = nextStageId === "end" ? "Aç" : "Katla";
 
   const handleSmartTransition = () => {
     if (isTransitioning) return;
@@ -203,7 +203,6 @@ const NavButton = memo(function NavButton({
         letterSpacing: "0.01em",
         overflow: "hidden",
       }}
-    >
-    </OverlayButton>
+    ></OverlayButton>
   );
 });
