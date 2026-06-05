@@ -21,7 +21,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "",
     isVideo: false,
     backgroundText: {
-      title: "insanlara oku",
+      title: "İnsanlara Oku!",
       titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
     },
   },

@@ -95,14 +95,14 @@ export function SiteLoadingOverlay() {
             justifyContent: "center",
             marginTop: "24px",
             fontFamily: "'Cinzel', 'Playfair Display', 'Georgia', serif",
-            textTransform: "uppercase",
-            fontSize: "18px",
+            textTransform: "lowercase",
+            fontSize: "14px",
             fontWeight: 500,
             letterSpacing: "0.4em",
             color: fixedBrownStroke,
           }}
         >
-          {"quranpatern.com".split("").map((char, i) => (
+          {"quranpatterns.com".split("").map((char, i) => (
             <motion.span
               key={i}
               style={{ display: "inline-block" }}

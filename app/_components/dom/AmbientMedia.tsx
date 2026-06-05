@@ -1,4 +1,4 @@
-import React, { useState, useEffect, CSSProperties } from "react";
+import { CSSProperties } from "react";
 import Image from "next/image";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 import { INTRO_MEDIA_DATA } from "../../data/introMedia";
@@ -16,7 +16,12 @@ interface MediaElementProps {
   style?: CSSProperties;
 }
 
-const MediaElement = ({ src, isVideo, className = "", style }: MediaElementProps) => {
+const MediaElement = ({
+  src,
+  isVideo,
+  className = "",
+  style,
+}: MediaElementProps) => {
   if (isVideo) {
     return (
       <video
@@ -56,27 +61,41 @@ export default function AmbientMedia({
   const scrollAmbientId = useFoldStore((s) => s.scrollAmbientMediaId);
 
   // Direct Zustand selector prevents 60fps tearing while ensuring synchronous React updates
-  const isAmbientPhase = useFoldStore((state) => 
-    state.ambientProgress >= 0 && 
-    state.introHandoffProgress === 0 && 
-    (state.ambientProgress > 0 || state.introProgress >= 1)
+  const isAmbientPhase = useFoldStore(
+    (state) =>
+      state.ambientProgress >= 0 &&
+      state.introHandoffProgress === 0 &&
+      (state.ambientProgress > 0 || state.introProgress >= 1),
   );
 
-  const currentMedia = scrollAmbientId ? INTRO_MEDIA_DATA[scrollAmbientId] : INTRO_MEDIA_DATA[mediaKeys[0]];
+  const currentMedia = scrollAmbientId
+    ? INTRO_MEDIA_DATA[scrollAmbientId]
+    : INTRO_MEDIA_DATA[mediaKeys[0]];
   const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentMedia;
 
   const src = propSrc || activeMedia?.src;
   const isVideo =
     propIsVideo !== undefined ? propIsVideo : (activeMedia?.isVideo ?? true);
 
-  // Mask that fades smoothly on all edges: Top, Bottom, Left, and Right.
-  const maskStyle: CSSProperties = {
+  // Split masks to avoid mask-composite: intersect (known Chrome/Safari subpixel rendering bug
+  // that leaves a 1px white line artifact where the two gradients intersect).
+  // Horizontal fade goes on the container, vertical fade goes on the media element directly.
+  const horizontalMask: CSSProperties = {
     WebkitMaskImage:
-      "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)",
-    WebkitMaskComposite: "source-in",
+      "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%)",
     maskImage:
-      "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 35%, black 65%, transparent 100%)",
-    maskComposite: "intersect",
+      "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%)",
+    WebkitMaskRepeat: "no-repeat",
+    maskRepeat: "no-repeat",
+  };
+
+  const verticalMask: CSSProperties = {
+    WebkitMaskImage:
+      "linear-gradient(to bottom, transparent 0px, transparent 10px, black 35%, black 65%, transparent calc(100% - 10px), transparent 100%)",
+    maskImage:
+      "linear-gradient(to bottom, transparent 0px, transparent 10px, black 35%, black 65%, transparent calc(100% - 10px), transparent 100%)",
+    WebkitMaskRepeat: "no-repeat",
+    maskRepeat: "no-repeat",
   };
 
   const showMedia = !!src && (isAmbientPhase || !!activeId);
@@ -99,9 +118,12 @@ export default function AmbientMedia({
               <MediaElement src={src} isVideo={isVideo} />
             </div>
 
-            {/* Foreground Layer: The Media with the custom mask */}
-            <div className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-100 origin-center">
-              <MediaElement src={src} isVideo={isVideo} style={maskStyle} />
+            {/* Foreground Layer: horizontal mask on container, vertical mask on media */}
+            <div
+              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-100 origin-center"
+              style={horizontalMask}
+            >
+              <MediaElement src={src} isVideo={isVideo} style={verticalMask} />
             </div>
           </motion.div>
         )}

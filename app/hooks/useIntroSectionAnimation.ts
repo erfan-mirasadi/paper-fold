@@ -22,14 +22,36 @@ export const PAGE2_EXTRA_HEIGHT = 0.35;
 // 5. How much should they tilt towards the camera during Page 2? (Tweak positive/negative to fix them looking "laid back")
 export const PAGE2_EXTRA_RX = 0.15;
 
+/** Convert degrees to radians — keeps scatter config human-readable. */
+const deg = (d: number): number => (d * Math.PI) / 180;
+
+// ─── Scatter: [x, y, z, rx°, ry°, rz°] ─────────────────────────────────
+// Rotations are NOW in DEGREES — use the deg() helper when reading them.
+// Positive rx = tilt top away from camera ("lean back")
+// Positive ry = rotate right edge towards camera
+// Positive rz = counter-clockwise twist
 export const INTRO_SECTION_SCATTER: Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
 > = {
-  s1: [0.92, -0.65, 2.04, 0.7, -0.81, -0.07], // x, y, z, rx, ry, rz
+  //              x      y      z      rx(°)   ry(°)    rz(°)
+  s1: [0.9, -0.65, 2.04, deg(6), deg(-47), deg(-29)],
   s2_top: [0, -0.6, -0.4],
   s2_center: [0.06, -0.55, -1.2],
   s2_bottom: [0, -0.63, 0.5],
+};
+
+// ─── Idle breathing for s1 while scattered ──────────────────────────────
+// Gives the floating section a living, gentle sway.
+const S1_IDLE = {
+  yAmp: 0.012, // how much it bobs up/down
+  yFreq: 0.8, // bob speed (Hz-ish)
+  rxAmp: deg(1.5), // subtle forward/back tilt oscillation
+  rxFreq: 0.6,
+  ryAmp: deg(2), // gentle left/right rotation
+  ryFreq: 0.45,
+  rzAmp: deg(0.8), // tiny twist
+  rzFreq: 0.35,
 };
 
 const easeInOut = (t: number): number => {
@@ -147,7 +169,16 @@ function getTransformTarget(
   let scale = 1;
   let rx = scatterRx * invT;
   let ry = scatterRy * invT;
-  const rz = scatterRz * invT;
+  let rz = scatterRz * invT;
+
+  // ── s1 idle breathing while scattered ──
+  if (sectionId === "s1" && invT > 0.01) {
+    const breathe = invT; // fade breathing out as section converges
+    y += Math.sin(time * S1_IDLE.yFreq) * S1_IDLE.yAmp * breathe;
+    rx += Math.sin(time * S1_IDLE.rxFreq) * S1_IDLE.rxAmp * breathe;
+    ry += Math.sin(time * S1_IDLE.ryFreq) * S1_IDLE.ryAmp * breathe;
+    rz += Math.sin(time * S1_IDLE.rzFreq) * S1_IDLE.rzAmp * breathe;
+  }
 
   // Mid-transition scale bulge during Page 2 (Ambient Phase)
   // Get big and stay big, immediately get small at Page 3
