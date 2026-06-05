@@ -18,10 +18,11 @@ export function IntroSectionGuidesOverlay() {
   useEffect(() => {
     // Vanilla subscribe shields the parent from 60fps React re-renders
     return useFoldStore.subscribe((state, prevState) => {
-      if (
-        state.introHandoffProgress > 0 &&
-        prevState.introHandoffProgress <= 0
-      ) {
+      // Clear hover state if we enter the handoff phase, OR if the user scrolls significantly
+      const enteredHandoff = state.introHandoffProgress > 0 && prevState.introHandoffProgress <= 0;
+      const userScrolled = state.activeAmbientMediaId !== null && Math.abs(state.rawOffset - prevState.rawOffset) > 0.001;
+
+      if (enteredHandoff || userScrolled) {
         useFoldStore.getState().setActiveAmbientMediaId(null);
       }
     });
