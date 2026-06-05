@@ -36,9 +36,9 @@ export const S1_VERSE_5_NUMBER_BORDER = "#8B7C74";
 export const S1_VERSE_5_NUMBER_TEXT = "#000000";
 export const S1_VERSE_5_TEXT = "#A30000";
 
-export const S1_ANA_LABEL_BG = "#e2caae";
-export const S1_ANA_LABEL_BORDER = "#a48a38";
-export const S1_ANA_LABEL_TEXT = "#72665F";
+export const S1_ANA_LABEL_BG = "#EFE9DC"; // Same as S1_TOP_LABEL_BG
+export const S1_ANA_LABEL_BORDER = "#a48a38"; // Golden
+export const S1_ANA_LABEL_TEXT = "#5e544a"; // Slightly lighter than TEXT_LABEL (#4a423a)
 export const S1_NEON_GOLD = "#FFD700";
 // ----------------------------------------------------------------------------
 // TOP LABEL — Section-specific background & border (Section 1)
@@ -89,7 +89,7 @@ export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
 export const TEXT_SIZES = {
   BISMILLAH: 0.066,
   TOP_LABEL: 0.027,
-  ANA_AYET_TAB: 0.023,
+  ANA_AYET_TAB: 0.027, // Increased from 0.023 to match TOP_LABEL size
   VERSE_NUMBER: 0.028,
   VERSE_TEXT_SMALL: 0.038,
   VERSE_TEXT_BIG: 0.071,

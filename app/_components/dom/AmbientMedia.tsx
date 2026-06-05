@@ -13,9 +13,10 @@ interface MediaElementProps {
   src: string;
   isVideo: boolean;
   className?: string;
+  style?: CSSProperties;
 }
 
-const MediaElement = ({ src, isVideo, className = "" }: MediaElementProps) => {
+const MediaElement = ({ src, isVideo, className = "", style }: MediaElementProps) => {
   if (isVideo) {
     return (
       <video
@@ -26,6 +27,7 @@ const MediaElement = ({ src, isVideo, className = "" }: MediaElementProps) => {
         playsInline
         preload="auto"
         className={`absolute inset-0 w-full h-full object-cover ${className}`}
+        style={style}
       />
     );
   }
@@ -37,6 +39,7 @@ const MediaElement = ({ src, isVideo, className = "" }: MediaElementProps) => {
       className={`object-cover ${className}`}
       priority
       sizes="(max-width: 768px) 350px, 600px"
+      style={style}
     />
   );
 };
@@ -97,19 +100,14 @@ export default function AmbientMedia({
             className="absolute inset-0 w-full h-full"
             style={{ willChange: "transform, opacity" }}
           >
-            {/* Optimized Ambient Glow: Skip heavy blur for videos to prevent massive GPU frame drops. */}
-            {!isVideo && (
-              <div className="absolute inset-0 z-0 scale-[1.4] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
-                <MediaElement src={src} isVideo={isVideo} />
-              </div>
-            )}
+            {/* Optimized Ambient Glow: enabled for both image and video to look exactly the same */}
+            <div className="absolute inset-0 z-0 scale-[1.4] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
+              <MediaElement src={src} isVideo={isVideo} />
+            </div>
 
             {/* Foreground Layer: The Media with the custom mask */}
-            <div
-              className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-100 origin-center"
-              style={maskStyle}
-            >
-              <MediaElement src={src} isVideo={isVideo} />
+            <div className="absolute inset-0 z-10 w-full h-full overflow-hidden transform-gpu scale-100 origin-center">
+              <MediaElement src={src} isVideo={isVideo} style={maskStyle} />
             </div>
           </motion.div>
         )}

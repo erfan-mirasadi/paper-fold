@@ -258,6 +258,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         w={t.anaAyetTabW}
         h={t.anaAyetTabH}
         z={0.005}
+        borderWidth={t.anaAyetTabBorderWidth}
         renderOrder={100}
       />
 

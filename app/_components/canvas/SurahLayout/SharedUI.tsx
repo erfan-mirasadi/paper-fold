@@ -18,6 +18,9 @@ import {
   TEXT_SIZES,
   S2_VERSE_NUMBER_TEXT,
   LANGUAGE_TEXT_SCALE,
+  S1_TOP_LABEL_BORDER,
+  S1_TOP_LABEL_BG,
+  S1_ANA_LABEL_BORDER,
 } from "../../../data/theme";
 export * from "../../../data/theme";
 import {
@@ -387,6 +390,7 @@ interface AnaAyetTabProps {
   w: number;
   h: number;
   z: number;
+  borderWidth?: number;
   renderOrder?: number;
   depthTest?: boolean;
 }
@@ -396,6 +400,7 @@ export function AnaAyetTab({
   w,
   h,
   z,
+  borderWidth,
   renderOrder,
   depthTest = false,
 }: AnaAyetTabProps) {
@@ -404,9 +409,23 @@ export function AnaAyetTab({
   const anaAyetScale = LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet;
 
   const radius = h / 2;
+  const borderThickness = borderWidth ?? 0.004;
 
   return (
     <group position={[x - w / 2, y + h / 2, z]}>
+      <UiRect
+        x={-borderThickness}
+        y={borderThickness}
+        z={0}
+        w={w + borderThickness * 2}
+        h={h + borderThickness * 2}
+        radius={radius + borderThickness}
+        color={S1_ANA_LABEL_BORDER}
+        shadow={false}
+        renderOrder={renderOrder}
+        depthTest={depthTest}
+        xMultiplier={1.5}
+      />
       <UiRect
         x={0}
         y={0}

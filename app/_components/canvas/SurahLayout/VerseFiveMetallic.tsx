@@ -6,8 +6,7 @@ import {
   OrthographicCamera,
   useTexture,
 } from "@react-three/drei";
-import { CanvasText } from "../shared/CanvasText";
-import { VerseBox, RoundedShapeComponent } from "./SharedUI";
+import { VerseBox, RoundedShapeComponent, AnaAyetTab } from "./SharedUI";
 import {
   CAPSULE_BORDER_WIDTH,
   VERSE_5_6_19_RADIUS,
@@ -329,29 +328,8 @@ export function VerseFiveMetallic() {
     return s;
   }, [outerW, outerH, outerRadius]);
 
-  const labelInnerShape = useMemo(() => {
-    const s = new THREE.Shape();
-    const r = labelRadius;
-
-    s.moveTo(r, 0);
-    s.lineTo(labelW - r, 0);
-    s.quadraticCurveTo(labelW, 0, labelW, -r);
-    s.lineTo(labelW, -(labelH - r));
-    s.quadraticCurveTo(labelW, -labelH, labelW - r, -labelH);
-    s.lineTo(r, -labelH);
-    s.quadraticCurveTo(0, -labelH, 0, -(labelH - r));
-    s.lineTo(0, -r);
-    s.quadraticCurveTo(0, 0, r, 0);
-    return s;
-  }, [labelW, labelH, labelRadius]);
-
   const extrudeSettings = useMemo(
     () => ({ depth: EXTRUDE_DEPTH, bevelEnabled: false }),
-    [],
-  );
-
-  const labelExtrudeSettings = useMemo(
-    () => ({ depth: ANA_LABEL_DEPTH, bevelEnabled: false }),
     [],
   );
 
@@ -504,40 +482,15 @@ export function VerseFiveMetallic() {
                   EXTRUDE_DEPTH + ANA_LABEL_Z_OFFSET,
                 ]}
               >
-                <mesh renderOrder={110}>
-                  <extrudeGeometry
-                    args={[labelInnerShape, labelExtrudeSettings]}
-                  />
-                  <meshBasicMaterial
-                    color={S1_ANA_LABEL_BG}
-                    toneMapped={false}
-                    side={THREE.DoubleSide}
-                  />
-                </mesh>
-
-                <group
-                  position={[
-                    labelW / 2,
-                    -labelH / 2 - 0.002,
-                    ANA_LABEL_DEPTH + 0.002,
-                  ]}
-                >
-                  <CanvasText
-                    text={anaAyetLabel}
-                    font={
-                      activeLanguage === "ar" ? QURAN_FONT : LATIN_LABEL_FONT
-                    }
-                    fontSize={
-                      TEXT_SIZES.ANA_AYET_TAB *
-                      LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet
-                    }
-                    color={S1_ANA_LABEL_TEXT}
-                    textAlign="center"
-                    width={labelW}
-                    height={labelH}
-                    fontWeight="bold"
-                  />
-                </group>
+                <AnaAyetTab
+                  x={labelW / 2}
+                  y={-labelH / 2}
+                  w={labelW}
+                  h={labelH}
+                  z={0}
+                  borderWidth={SURAH_TRANSFORMS.s1.anaAyetTabBorderWidth}
+                  renderOrder={110}
+                />
               </group>
             </a.group>
           )}

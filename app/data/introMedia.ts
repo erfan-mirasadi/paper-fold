@@ -1,6 +1,8 @@
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
 
-export type IntroMediaId = ElevatedSectionId | `${ElevatedSectionId}_step${number}`;
+export type IntroMediaId =
+  | ElevatedSectionId
+  | `${ElevatedSectionId}_step${number}`;
 
 export interface IntroMediaItem {
   src: string;
@@ -24,16 +26,16 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s1_step2: {
-    src: "/intro/hara-cave.png", // Defaulting to this, will adjust if user provides specific path
-    isVideo: false,
+    src: "/intro/section-1.mov", // Defaulting to this, will adjust if user provides specific path
+    isVideo: true,
     backgroundText: {
       caption: "Muhkem",
       title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
     },
   },
   s1_step3: {
-    src: "/intro/hara-cave.png", // Keep same image to avoid crossfade
-    isVideo: false,
+    src: "/intro/section-1.mov", // Keep same image to avoid crossfade
+    isVideo: true,
     backgroundText: {
       caption: "Muhkem",
       title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
@@ -48,7 +50,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s2_center: {
-    src: "/intro/sand-texture.jpg",
+    src: "/intro/section-3.png",
     isVideo: false,
     backgroundText: {
       // Missing caption or body from the client is fine, the component will handle it gracefully
@@ -56,7 +58,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s2_bottom: {
-    src: "/intro/hero-2.png",
+    src: "/intro/section-4.png",
     isVideo: false,
     backgroundText: {
       caption: "Ebu Cehil'in Ahireti",
