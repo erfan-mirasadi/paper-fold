@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 import { INTRO_MEDIA_DATA } from "../../data/introMedia";
 import { AnimatedText } from "./ui-overlay/AnimatedText";
@@ -41,25 +40,13 @@ export function IntroBackgroundTextOverlay() {
   const scrollAmbientMediaId = useFoldStore((s) => s.scrollAmbientMediaId);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  // Localized discrete state to shield from 60fps scroll renders
-  const [isAmbientPhase, setIsAmbientPhase] = useState(() => {
-    const s = useFoldStore.getState();
-    return (
-      s.ambientProgress >= 0 &&
-      s.introHandoffProgress === 0 &&
-      (s.ambientProgress > 0 || s.introProgress >= 1)
-    );
-  });
-
-  useEffect(() => {
-    return useFoldStore.subscribe((state) => {
-      const ambient =
-        state.ambientProgress >= 0 &&
-        state.introHandoffProgress === 0 &&
-        (state.ambientProgress > 0 || state.introProgress >= 1);
-      setIsAmbientPhase(ambient);
-    });
-  }, []);
+  // Direct Zustand selector prevents 60fps tearing while ensuring synchronous React updates
+  const isAmbientPhase = useFoldStore(
+    (state) =>
+      state.ambientProgress >= 0 &&
+      state.introHandoffProgress === 0 &&
+      (state.ambientProgress > 0 || state.introProgress >= 1),
+  );
 
   // We don't return null early, otherwise AnimatePresence cannot play the exit animation!
 
@@ -80,7 +67,7 @@ export function IntroBackgroundTextOverlay() {
 
   return (
     <div className="pointer-events-none fixed inset-0 flex items-center justify-end pr-6 md:pr-16 lg:pr-24 overflow-hidden z-40">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {isIntroActive && isAmbientPhase && data && (
           <motion.div
             key={effectiveActiveId}

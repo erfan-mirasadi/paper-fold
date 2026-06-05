@@ -55,18 +55,12 @@ export default function AmbientMedia({
   const activeId = useFoldStore((s) => s.activeAmbientMediaId);
   const scrollAmbientId = useFoldStore((s) => s.scrollAmbientMediaId);
 
-  // Localized discrete state to shield from 60fps scroll renders
-  const [isAmbientPhase, setIsAmbientPhase] = useState(() => {
-    const s = useFoldStore.getState();
-    return s.ambientProgress >= 0 && s.introHandoffProgress === 0 && (s.ambientProgress > 0 || s.introProgress >= 1);
-  });
-
-  useEffect(() => {
-    return useFoldStore.subscribe((state) => {
-      const ambient = state.ambientProgress >= 0 && state.introHandoffProgress === 0 && (state.ambientProgress > 0 || state.introProgress >= 1);
-      setIsAmbientPhase(ambient);
-    });
-  }, []);
+  // Direct Zustand selector prevents 60fps tearing while ensuring synchronous React updates
+  const isAmbientPhase = useFoldStore((state) => 
+    state.ambientProgress >= 0 && 
+    state.introHandoffProgress === 0 && 
+    (state.ambientProgress > 0 || state.introProgress >= 1)
+  );
 
   const currentMedia = scrollAmbientId ? INTRO_MEDIA_DATA[scrollAmbientId] : INTRO_MEDIA_DATA[mediaKeys[0]];
   const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentMedia;

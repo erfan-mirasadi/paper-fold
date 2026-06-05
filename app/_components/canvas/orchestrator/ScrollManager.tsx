@@ -55,6 +55,7 @@ interface FoldStoreState {
   setScrollAmbientMediaId: (id: IntroMediaId | null) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
+  setRawOffset: (offset: number) => void;
   resetTransition: () => void;
   isInstantSkip: boolean;
   setInstantSkip: (v: boolean) => void;
