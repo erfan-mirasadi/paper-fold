@@ -2,7 +2,7 @@
 
 import { a, to, useSpring, type SpringValue } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import {
   ScallopedCenteredShape,
@@ -78,7 +78,7 @@ const TEXTURE_FILL_TINT = new Color(PAPER_MATERIAL_CONFIG.color).multiplyScalar(
 
 type SectionSpring = {
   liftZ: SpringValue<number>;
-  opacity: SpringValue<number>;
+  opacity: any;
   shadowOpacity: SpringValue<number>;
   shadowVisibility: SpringValue<number>;
 };
@@ -106,7 +106,18 @@ const VERSE_MIMIC_SHADOW = {
   opacityFlat: 0.28,
 };
 
-function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
+function useSectionSurfaceSpring(
+  isActive: boolean,
+  sectionId: ElevatedSectionId,
+): SectionSpring {
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const [prevIntroActive, setPrevIntroActive] = useState(isIntroActive);
+  const justLeftIntro = !isIntroActive && prevIntroActive;
+
+  if (isIntroActive !== prevIntroActive) {
+    setPrevIntroActive(isIntroActive);
+  }
+
   const { liftZ } = useSpring({
     liftZ: isActive ? SECTION_SURFACE.liftHeight : 0,
     from: { liftZ: 0 },
@@ -119,8 +130,10 @@ function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
     from: { opacity: 0 },
     delay: isActive
       ? SECTION_SURFACE.opacityShowDelayMs
-      : SECTION_SURFACE.opacityHideDelayMs,
-    immediate: isActive,
+      : isIntroActive || sectionId === "s1" || !justLeftIntro
+        ? SECTION_SURFACE.opacityHideDelayMs
+        : 0,
+    immediate: isActive || (justLeftIntro && sectionId !== "s1"), // Snap to 0 instantly ONLY when leaving the intro!
     config: isActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -141,6 +154,37 @@ function useSectionSurfaceSpring(isActive: boolean): SectionSpring {
   });
 
   return { liftZ, opacity, shadowOpacity, shadowVisibility };
+}
+
+export function useHandoffOpacity(
+  baseOpacity: SpringValue<number>,
+  sectionId: ElevatedSectionId | null,
+) {
+  const [{ handoffOpacity }, api] = useSpring(() => ({ handoffOpacity: 1 }));
+  const prevIntroActiveRef = useRef(true);
+
+  useEffect(() => {
+    // Sync opacity directly to the store without triggering React re-renders
+    return useFoldStore.subscribe((state) => {
+      const targetOpacity =
+        state.isIntroActive && sectionId && sectionId !== "s1"
+          ? 1 - state.introHandoffProgress
+          : 1;
+
+      const justEnteredIntro =
+        state.isIntroActive && !prevIntroActiveRef.current;
+      prevIntroActiveRef.current = state.isIntroActive;
+
+      api.start({
+        handoffOpacity: targetOpacity,
+        immediate: !state.isIntroActive || justEnteredIntro, // Snap back if intro ends, AND snap to 0 if we just re-entered it
+        config: { mass: 0.5, tension: 400, friction: 30 }, // Very responsive spring to match scroll
+      });
+    });
+  }, [api, sectionId]);
+
+  // Multiply the base opacity (from Elevated toggles) by the handoff opacity
+  return to([baseOpacity, handoffOpacity], (base, handoff) => base * handoff);
 }
 
 // ─── Pure visual layer, no drag logic ──────────────────────────────────
@@ -244,18 +288,23 @@ function ElevatedLayer({
         </a.mesh>
       )}
 
-      <a.mesh material-opacity={spring.opacity}>
+      <a.mesh>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         {usesTextureFill ? (
-          <meshBasicMaterial
-            map={fittedSectionBgTexture}
-            color={TEXTURE_FILL_TINT}
+          <a.meshBasicMaterial
+            map={fittedSectionBgTexture as any}
+            color={TEXTURE_FILL_TINT as any}
             transparent
-            opacity={1}
+            opacity={spring.opacity as any}
             toneMapped={false}
           />
         ) : (
-          <meshBasicMaterial color={color} transparent opacity={1} toneMapped />
+          <a.meshBasicMaterial
+            color={color}
+            transparent
+            opacity={spring.opacity as any}
+            toneMapped
+          />
         )}
       </a.mesh>
     </a.group>
@@ -449,10 +498,33 @@ export function ElevatedSectionSurfaces() {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  const s1Spring = useSectionSurfaceSpring(s1Active);
-  const s2TopSpring = useSectionSurfaceSpring(s2TopActive);
-  const s2CenterSpring = useSectionSurfaceSpring(s2CenterActive);
-  const s2BottomSpring = useSectionSurfaceSpring(s2BottomActive);
+  const s1BaseSpring = useSectionSurfaceSpring(s1Active, "s1");
+  const s2TopBaseSpring = useSectionSurfaceSpring(s2TopActive, "s2_top");
+  const s2CenterBaseSpring = useSectionSurfaceSpring(
+    s2CenterActive,
+    "s2_center",
+  );
+  const s2BottomBaseSpring = useSectionSurfaceSpring(
+    s2BottomActive,
+    "s2_bottom",
+  );
+
+  const s1Spring = {
+    ...s1BaseSpring,
+    opacity: useHandoffOpacity(s1BaseSpring.opacity, "s1"),
+  };
+  const s2TopSpring = {
+    ...s2TopBaseSpring,
+    opacity: useHandoffOpacity(s2TopBaseSpring.opacity, "s2_top"),
+  };
+  const s2CenterSpring = {
+    ...s2CenterBaseSpring,
+    opacity: useHandoffOpacity(s2CenterBaseSpring.opacity, "s2_center"),
+  };
+  const s2BottomSpring = {
+    ...s2BottomBaseSpring,
+    opacity: useHandoffOpacity(s2BottomBaseSpring.opacity, "s2_bottom"),
+  };
 
   const s1 = SURAH_TRANSFORMS.s1;
   const s2 = SURAH_TRANSFORMS.s2;

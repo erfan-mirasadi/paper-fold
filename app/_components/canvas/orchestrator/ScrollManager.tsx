@@ -33,6 +33,23 @@ export const SCROLL_TIMELINE = {
   story: { start: 60, end: 100 },
 };
 
+// ============================================================================
+// 🔒 LOCK CONFIGURATION
+// You can adjust exactly where the lock happens, and how hard it is to break!
+// ============================================================================
+export const LOCK_CONFIG = {
+  // At what percentage of the total scroll should the lock engage? (0 to 1)
+  // 0.60 = Paper has just landed but is still folded up.
+  // 0.70 = Paper has fully unfolded and is perfectly flat (single paper).
+  lockPositionPercentage: 0.6,
+
+  // How much trackpad effort is required to break the lock and scroll up?
+  effortRequired: 1500,
+
+  // How many pixels near the lock point will the lock "grab" the user?
+  grabRangePixels: 10,
+};
+
 interface FoldStoreState {
   targetStageId: string | null;
   transitionToken: number;
@@ -47,12 +64,15 @@ interface FoldStoreState {
   introHandoffProgress: number;
   /** 0..1 progress through the ambient media scroll band. */
   ambientProgress: number;
+  /** 0..1 progress of breaking through the barrier. */
+  barrierProgress: number;
   /** The ID of the currently hovered intro section guide. */
   activeAmbientMediaId: IntroMediaId | null;
   /** The ID of the ambient media currently active due to scroll. */
   scrollAmbientMediaId: IntroMediaId | null;
   setActiveAmbientMediaId: (id: IntroMediaId | null) => void;
   setScrollAmbientMediaId: (id: IntroMediaId | null) => void;
+  setBarrierProgress: (p: number) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
   setRawOffset: (offset: number) => void;
@@ -71,11 +91,13 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   introProgress: 0,
   introHandoffProgress: 0,
   ambientProgress: 0,
+  barrierProgress: 0,
 
   activeAmbientMediaId: null,
   scrollAmbientMediaId: null,
   setActiveAmbientMediaId: (id) => set({ activeAmbientMediaId: id }),
   setScrollAmbientMediaId: (id) => set({ scrollAmbientMediaId: id }),
+  setBarrierProgress: (p: number) => set({ barrierProgress: p }),
 
   triggerTransition: (id) =>
     set((state) => ({
@@ -123,6 +145,11 @@ export function ScrollManager() {
   const activeRunIdRef = useRef(0);
   const frameIdRef = useRef<number | null>(null);
   const timeoutIdRef = useRef<number | null>(null);
+
+  // --- BARRIER STATE REFS ---
+  const isScrollUpLockedRef = useRef(true);
+  const wheelEffortRef = useRef(0);
+  const isAnimatingUpRef = useRef(false);
 
   const clearPendingWork = () => {
     if (frameIdRef.current !== null) {
@@ -172,7 +199,7 @@ export function ScrollManager() {
         "s2_center",
         "s2_bottom",
       ];
-      // Distribute the 4 items across the ambient progress (0 to 1)
+      // Distribute the items across the ambient progress (0 to 1)
       let index = Math.floor(ambientProgress * keys.length);
       if (index >= keys.length) index = keys.length - 1;
       if (ambientProgress > 0 || introProgress >= 1) {
@@ -221,6 +248,23 @@ export function ScrollManager() {
 
       if (performance.now() < ignoreUntilTime) {
         return;
+      }
+
+      // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
+      if (typeof (lenis as any).targetScroll === "number") {
+        const targetScroll = (lenis as any).targetScroll;
+        const lockScroll = Math.floor(
+          LOCK_CONFIG.lockPositionPercentage * currentLimit,
+        );
+
+        if (
+          lenis.scroll >= lockScroll - LOCK_CONFIG.grabRangePixels &&
+          targetScroll < lockScroll
+        ) {
+          if (isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
+            lenis.scrollTo(lockScroll, { immediate: false });
+          }
+        }
       }
 
       lastLimit = currentLimit;
@@ -281,15 +325,132 @@ export function ScrollManager() {
       }
     };
 
-    // We block wheel and touchmove to stop scrolling, but keep pointer events for dragging
-    window.addEventListener("wheel", preventDefault, { passive: false });
-    window.addEventListener("touchmove", preventDefault, { passive: false });
-    window.addEventListener("keydown", handleKey);
+    // --- NEW BARRIER LOGIC ---
+    const handleBarrierInteraction = (deltaY: number, e: Event) => {
+      if (shouldLockScroll) return; // Elevated mode has full lock
+
+      const currentLimit = Math.max(lenis.limit, 0);
+      const lockScroll = Math.floor(
+        LOCK_CONFIG.lockPositionPercentage * currentLimit,
+      );
+
+      // Arm the lock if we are at or below the lock point
+      if (lenis.scroll >= lockScroll - SCROLL_SNAP_EPSILON_PX) {
+        if (!isScrollUpLockedRef.current) {
+          isScrollUpLockedRef.current = true;
+          if (wheelEffortRef.current > 0) {
+            wheelEffortRef.current = 0;
+            useFoldStore.getState().setBarrierProgress(0);
+          }
+        }
+      } else {
+        // Disarm if we are truly above it
+        if (lenis.scroll < lockScroll - LOCK_CONFIG.grabRangePixels * 2) {
+          isScrollUpLockedRef.current = false;
+          isAnimatingUpRef.current = false; // <-- Fixes the "only happens once" bug
+        }
+      }
+
+      // We only want to block wheel events if they are AT the boundary.
+      const isAtBoundary =
+        lenis.scroll <= lockScroll + LOCK_CONFIG.grabRangePixels &&
+        lenis.scroll >= lockScroll - LOCK_CONFIG.grabRangePixels;
+
+      if (isScrollUpLockedRef.current && isAtBoundary) {
+        if (deltaY < 0) {
+          // Prevent Lenis from scrolling past the barrier
+          e.preventDefault();
+          e.stopPropagation(); // <-- Stop Lenis from receiving this event
+
+          wheelEffortRef.current += Math.abs(deltaY);
+          const progress = Math.min(
+            wheelEffortRef.current / LOCK_CONFIG.effortRequired,
+            1,
+          );
+          useFoldStore.getState().setBarrierProgress(progress);
+
+          if (wheelEffortRef.current > LOCK_CONFIG.effortRequired) {
+            // Break the barrier!
+            isScrollUpLockedRef.current = false;
+            isAnimatingUpRef.current = true;
+            wheelEffortRef.current = 0;
+            useFoldStore.getState().setBarrierProgress(0);
+
+            // Give a feeling of release by smoothly gliding back into the intro
+            const handoffStartScroll =
+              (SCROLL_TIMELINE.handoff.start / 100) * currentLimit;
+            lenis.scrollTo(handoffStartScroll, {
+              duration: 3.5, // Much slower and longer
+              easing: easeInOutCubic, // Starts very slow, preventing any "sudden" jump feeling
+            });
+          }
+        } else {
+          // Scrolling down into the story, ease off effort
+          if (wheelEffortRef.current > 0) {
+            wheelEffortRef.current = Math.max(
+              0,
+              wheelEffortRef.current - deltaY,
+            );
+            const progress = Math.min(
+              wheelEffortRef.current / LOCK_CONFIG.effortRequired,
+              1,
+            );
+            useFoldStore.getState().setBarrierProgress(progress);
+          }
+        }
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      if (shouldLockScroll) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      handleBarrierInteraction(e.deltaY, e);
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (shouldLockScroll) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      touchStartY = touchY;
+      handleBarrierInteraction(deltaY * 2, e); // touch delta needs multiplier
+    };
+
+    // We use capture: true to ensure we intercept the event BEFORE Lenis does
+    window.addEventListener("wheel", handleWheel, {
+      passive: false,
+      capture: true,
+    });
+    window.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+      capture: true,
+    });
+    window.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+      capture: true,
+    });
+    window.addEventListener("keydown", handleKey, { capture: true });
 
     return () => {
-      window.removeEventListener("wheel", preventDefault);
-      window.removeEventListener("touchmove", preventDefault);
-      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("wheel", handleWheel, { capture: true });
+      window.removeEventListener("touchstart", handleTouchStart, {
+        capture: true,
+      });
+      window.removeEventListener("touchmove", handleTouchMove, {
+        capture: true,
+      });
+      window.removeEventListener("keydown", handleKey, { capture: true });
     };
   }, [lenis, isAllSectionsMode, isIntroActive]);
 

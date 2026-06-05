@@ -16,6 +16,7 @@ import { calculateSectionBounds } from "../../../utils/boundsHelper";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
+import { useHandoffOpacity } from "../sections-object/ElevatedSectionSurfaces";
 import { VerseConfig } from "../../../data/surahDataGenerator";
 import { VerseMesh } from "./VerseMesh";
 
@@ -110,13 +111,15 @@ export function VerseController({ config }: { config: VerseConfig }) {
 
   const verticalFold = useFoldAnimation(isOpen);
 
+  const sectionId = getVerseSectionId(config.id);
+
   const {
     liftZ,
     tiltX,
     scale,
     shadowOpacity: elevateShadowOpacity,
     opacity: elevateOpacity,
-  } = useElevateAnimation(isElevated);
+  } = useElevateAnimation(isElevated, sectionId);
 
   const { surfaceLiftZ } = useSpring({
     surfaceLiftZ: isSectionSurfaceRaised
@@ -148,7 +151,10 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const foldProgress = foldVisibility.foldProgress;
   const shadowGlobalOpacity = foldVisibility.shadowGlobalOpacity;
   const zOffset = foldVisibility.zOffset;
-  const opacity = foldVisibility.opacity;
+
+  // Fade out both the fold opacity and elevate opacity during the handoff phase
+  const opacity = useHandoffOpacity(foldVisibility.opacity, sectionId);
+  const handoffElevateOpacity = useHandoffOpacity(elevateOpacity, sectionId);
 
   const rotLeft = verticalFold.rotLeft;
   const rotRight = verticalFold.rotRight;
@@ -165,7 +171,6 @@ export function VerseController({ config }: { config: VerseConfig }) {
       ? middleGapHalf
       : 0;
 
-  const sectionId = getVerseSectionId(config.id);
   const leadVerseId = VERSE_PAIR_LEAD[config.id] ?? config.id;
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
@@ -265,7 +270,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           horizontalPivotOffsetY={horizontalPivotOffsetY}
           scale={scale}
           elevateShadowOpacity={elevateShadowOpacity}
-          elevateOpacity={elevateOpacity}
+          elevateOpacity={handoffElevateOpacity}
           isPill={config.isPill !== false}
           backfaceColor={backfaceColor}
           verse={config.verse}

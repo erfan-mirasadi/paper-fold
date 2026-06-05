@@ -197,7 +197,7 @@ export function VerseFiveMetallic() {
     tiltX,
     scale,
     shadowOpacity: elevateShadowOpacity,
-  } = useElevateAnimation(isElevated);
+  } = useElevateAnimation(isElevated, "s1");
 
   const { surfaceLiftZ } = useSpring({
     surfaceLiftZ: isSectionSurfaceRaised

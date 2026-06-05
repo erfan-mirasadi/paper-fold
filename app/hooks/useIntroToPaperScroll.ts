@@ -22,6 +22,7 @@ const computeTargets = (
   introNowActive: boolean,
   dockedNow: boolean,
   allSections: boolean,
+  barrierProgress: number,
 ) => {
   if (introNowActive || handoff < 1) {
     // Delay paper animation to the second half of the handoff so intro sections
@@ -44,7 +45,7 @@ const computeTargets = (
   const showAllSections = allSections;
   const docked = dockedNow && !showAllSections;
 
-  return {
+  const baseTargets = {
     isHandoff: false,
     paperFocusY: showAllSections ? PAPER_FOCUS_Y : 0,
     paperFocusZ: showAllSections ? PAPER_FOCUS_Z : 0,
@@ -54,30 +55,43 @@ const computeTargets = (
     sceneScale: docked ? PAPER_DOCK_SCALE : 1,
     sceneConfig: SCENE_SPRING,
   };
+
+  return baseTargets;
 };
 
 export function useIntroToPaperScroll() {
   const lenis = useLenis();
 
-  const initialTargets = computeTargets(
-    useFoldStore.getState().introHandoffProgress,
-    useFoldStore.getState().isIntroActive,
-    useDragState.getState().isPaperDocked,
-    useElevatedStore.getState().isAllSectionsMode,
-  );
+  const [sceneSpring, sceneApi] = useSpring(() => {
+    const t = computeTargets(
+      useFoldStore.getState().introHandoffProgress,
+      useFoldStore.getState().isIntroActive,
+      useDragState.getState().isPaperDocked,
+      useElevatedStore.getState().isAllSectionsMode,
+      useFoldStore.getState().barrierProgress,
+    );
+    return {
+      sceneOffsetX: t.sceneOffsetX,
+      sceneScale: t.sceneScale,
+      config: t.sceneConfig,
+    };
+  });
 
-  const [sceneSpring, sceneApi] = useSpring(() => ({
-    sceneOffsetX: initialTargets.sceneOffsetX,
-    sceneScale: initialTargets.sceneScale,
-    config: initialTargets.sceneConfig,
-  }));
-
-  const [paperSpring, paperApi] = useSpring(() => ({
-    paperFocusY: initialTargets.paperFocusY,
-    paperFocusZ: initialTargets.paperFocusZ,
-    paperFocusScale: initialTargets.paperFocusScale,
-    config: initialTargets.paperConfig,
-  }));
+  const [paperSpring, paperApi] = useSpring(() => {
+    const t = computeTargets(
+      useFoldStore.getState().introHandoffProgress,
+      useFoldStore.getState().isIntroActive,
+      useDragState.getState().isPaperDocked,
+      useElevatedStore.getState().isAllSectionsMode,
+      useFoldStore.getState().barrierProgress,
+    );
+    return {
+      paperFocusY: t.paperFocusY,
+      paperFocusZ: t.paperFocusZ,
+      paperFocusScale: t.paperFocusScale,
+      config: t.paperConfig,
+    };
+  });
 
   // Ref so syncSceneTargets always reads the latest "has restored" state.
   const restoredRef = useRef(false);
@@ -92,6 +106,7 @@ export function useIntroToPaperScroll() {
       store.isIntroActive,
       dockedNow,
       allSections,
+      store.barrierProgress,
     );
 
     if (targets.isHandoff) {
@@ -111,6 +126,7 @@ export function useIntroToPaperScroll() {
         store.isIntroActive,
         dockedNow,
         allSections,
+        store.barrierProgress,
       );
     }
 
@@ -134,7 +150,7 @@ export function useIntroToPaperScroll() {
     if (!lenis) return;
     const handleSync = () => {
       const store = useFoldStore.getState();
-      if (!store.isIntroActive && store.introHandoffProgress >= 1) return;
+      if (!store.isIntroActive && store.introHandoffProgress >= 1 && store.barrierProgress === 0) return;
       syncSceneTargets();
     };
 
@@ -160,7 +176,8 @@ export function useIntroToPaperScroll() {
         store.isIntroActive ||
         store.introHandoffProgress < 1 ||
         elevated.isAllSectionsMode ||
-        drag.isPaperDocked
+        drag.isPaperDocked ||
+        store.barrierProgress > 0
       ) {
         syncSceneTargets();
         return;

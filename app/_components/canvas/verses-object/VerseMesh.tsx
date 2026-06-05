@@ -18,7 +18,7 @@ export interface VerseMeshProps {
   foldProgress: SpringValue<number>;
   shadowGlobalOpacity: SpringValue<number>;
   zOffset: SpringValue<number>;
-  opacity: SpringValue<number>;
+  opacity: any;
   liftZ: SpringValue<number>;
   surfaceLiftZ: SpringValue<number>;
   tiltX: SpringValue<number>;
@@ -27,7 +27,7 @@ export interface VerseMeshProps {
   horizontalPivotOffsetY: number;
   scale: SpringValue<number>;
   elevateShadowOpacity: SpringValue<number>;
-  elevateOpacity: SpringValue<number>;
+  elevateOpacity: any;
   isPill?: boolean;
   backfaceColor: string;
   verse: string;

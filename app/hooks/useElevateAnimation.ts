@@ -1,4 +1,6 @@
 import { useSpring } from "@react-spring/three";
+import { useState } from "react";
+import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 
 export const ELEVATE_TIMING = {
   /** How high the verse lifts off the paper surface. */
@@ -52,7 +54,20 @@ export const ELEVATE_CAMERA = {
   focusOffset: 4.0,
 };
 
-export function useElevateAnimation(isElevated: boolean) {
+import { ElevatedSectionId } from "../stores/useElevatedStore";
+
+export function useElevateAnimation(
+  isElevated: boolean,
+  sectionId: ElevatedSectionId | null,
+) {
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const [prevIntroActive, setPrevIntroActive] = useState(isIntroActive);
+  const justLeftIntro = !isIntroActive && prevIntroActive;
+
+  if (isIntroActive !== prevIntroActive) {
+    setPrevIntroActive(isIntroActive);
+  }
+
   const springConfig = {
     mass: ELEVATE_TIMING.springMass,
     tension: ELEVATE_TIMING.springTension,
@@ -80,9 +95,11 @@ export function useElevateAnimation(isElevated: boolean) {
     config: springConfig,
     delay: isElevated
       ? ELEVATE_TIMING.appearDelayZAndOpacity
-      : ELEVATE_TIMING.hideDelayZAndOpacity,
+      : isIntroActive || sectionId === "s1" || !justLeftIntro
+        ? ELEVATE_TIMING.hideDelayZAndOpacity
+        : 0,
     /** Avoid stacking with Troika text fade-in inside RenderTexture (double dim). */
-    immediate: isElevated,
+    immediate: isElevated || (justLeftIntro && sectionId !== "s1"),
   });
 
   const { shadowOpacity } = useSpring({
