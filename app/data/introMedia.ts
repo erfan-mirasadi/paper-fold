@@ -42,8 +42,8 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s2_top: {
-    src: "/intro/section-2.png",
-    isVideo: false,
+    src: "/intro/section-2.mov",
+    isVideo: true,
     backgroundText: {
       caption: "Ebu Cehil'in dünyası",
       title: "Tuğyan\n zulüm\ninkâr \nistiğna",

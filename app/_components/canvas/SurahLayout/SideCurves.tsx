@@ -203,6 +203,8 @@ export const SideCurves = ({
   const groups = usePopUpStore((state) => state.popUpGroups);
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
 
+  const isAllSectionsMode = useElevatedStore((state) => state.isAllSectionsMode);
+
   // Hide curves whenever any inner popup group (not 1–2 or 3–4) is open.
   const hideFromPopUps = groups.some(
     (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
@@ -210,9 +212,10 @@ export const SideCurves = ({
 
   // Also hide curves during section-level elevation for Section 2 hollow blocks.
   const hideFromSectionElevate =
-    activeSectionIds.includes("s2_top") ||
-    activeSectionIds.includes("s2_center") ||
-    activeSectionIds.includes("s2_bottom");
+    !isAllSectionsMode &&
+    (activeSectionIds.includes("s2_top") ||
+      activeSectionIds.includes("s2_center") ||
+      activeSectionIds.includes("s2_bottom"));
 
   const shouldHide = hideFromPopUps || hideFromSectionElevate;
 
