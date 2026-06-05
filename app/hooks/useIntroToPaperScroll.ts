@@ -119,14 +119,14 @@ export function useIntroToPaperScroll() {
       paperFocusZ: targets.paperFocusZ,
       paperFocusScale: targets.paperFocusScale,
       config: targets.paperConfig,
-      immediate: false,
+      immediate: store.isInstantSkip,
     });
 
     sceneApi.start({
       sceneOffsetX: targets.sceneOffsetX,
       sceneScale: targets.sceneScale,
       config: targets.sceneConfig,
-      immediate: false,
+      immediate: store.isInstantSkip,
     });
   }, [paperApi, sceneApi]);
 

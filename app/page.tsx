@@ -28,6 +28,7 @@ import AmbientMedia from "./_components/dom/AmbientMedia";
 import JoinedStepOverlay from "./_components/dom/JoinedStepOverlay";
 import { IntroBackgroundTextOverlay } from "./_components/dom/IntroBackgroundTextOverlay";
 import { HeroTitleOverlay } from "./_components/dom/ui-overlay/HeroTitleOverlay";
+import { SkipIntroButton } from "./_components/dom/ui-overlay/SkipIntroButton";
 import { LenisProvider } from "./_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "./data/cameraConfig";
 const Experience = dynamic(
@@ -86,12 +87,14 @@ export default function Home() {
           canvasWrapperRef.current.style.pointerEvents = "auto";
         }
 
+        const waitTime = state.isInstantSkip ? 0 : 2000;
+
         // Wait 2 SECONDS before running the heavy UI mount cascade
         timeoutId = window.setTimeout(() => {
           setShowPostIntroUI(true);
           setIsIntroRenderPhase(false);
           timeoutId = null;
-        }, 2000);
+        }, waitTime);
       }
 
       if (state.isIntroActive && !prevState.isIntroActive) {
@@ -251,12 +254,12 @@ export default function Home() {
             {isIntroRenderPhase && (
               <>
                 <HeroTitleOverlay />
-                {/* Render the extracted Apple-style border behind the main UI controls */}
                 <div className="fixed inset-0 z-80 pointer-events-none">
                   <JoinedStepOverlay />
                 </div>
               </>
             )}
+            <SkipIntroButton />
             {/* Hide standard chrome while intro runs. Delayed by 2 seconds after handoff. */}
             {mountMainOverlays && (
               <AnimatePresence>

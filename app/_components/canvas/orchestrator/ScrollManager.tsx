@@ -55,8 +55,9 @@ interface FoldStoreState {
   setScrollAmbientMediaId: (id: IntroMediaId | null) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
-  setRawOffset: (offset: number) => void;
   resetTransition: () => void;
+  isInstantSkip: boolean;
+  setInstantSkip: (v: boolean) => void;
 }
 
 export const useFoldStore = create<FoldStoreState>((set) => ({
@@ -84,6 +85,8 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   setCurrentOffset: (offset) => set({ currentOffset: clamp01(offset) }),
   setRawOffset: (offset) => set({ rawOffset: clamp01(offset) }),
   resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
+  isInstantSkip: false,
+  setInstantSkip: (v) => set({ isInstantSkip: v }),
 }));
 
 const getBandProgress = (
@@ -160,7 +163,14 @@ export function ScrollManager() {
 
     let scrollAmbientMediaId: IntroMediaId | null = null;
     if (ambientProgress >= 0 && handoffProgress === 0) {
-      const keys: IntroMediaId[] = ["s1", "s1_step2", "s1_step3", "s2_top", "s2_center", "s2_bottom"];
+      const keys: IntroMediaId[] = [
+        "s1",
+        "s1_step2",
+        "s1_step3",
+        "s2_top",
+        "s2_center",
+        "s2_bottom",
+      ];
       // Distribute the 4 items across the ambient progress (0 to 1)
       let index = Math.floor(ambientProgress * keys.length);
       if (index >= keys.length) index = keys.length - 1;
@@ -191,23 +201,27 @@ export function ScrollManager() {
 
     const handleSync = () => {
       const currentLimit = Math.max(lenis.limit, 0);
-      
+
       // If the scrollable area height changes (e.g., window resize, inspect panel),
       // we must preserve the user's scroll percentage (rawOffset) so they don't
       // jump into the intro sequence or trigger unintended elevated modes.
-      if (currentLimit > 0 && lastLimit > 0 && Math.abs(currentLimit - lastLimit) > 5) {
+      if (
+        currentLimit > 0 &&
+        lastLimit > 0 &&
+        Math.abs(currentLimit - lastLimit) > 5
+      ) {
         const lastRawOffset = useFoldStore.getState().rawOffset;
         lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
         lastLimit = currentLimit;
         // Ignore scroll events for a short window to let Lenis settle its internal state
         ignoreUntilTime = performance.now() + 150;
-        return; 
+        return;
       }
-      
+
       if (performance.now() < ignoreUntilTime) {
         return;
       }
-      
+
       lastLimit = currentLimit;
       syncCurrentOffset(lenis);
     };
