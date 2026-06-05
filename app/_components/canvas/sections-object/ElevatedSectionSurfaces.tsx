@@ -111,43 +111,48 @@ function useSectionSurfaceSpring(
   sectionId: ElevatedSectionId,
 ): SectionSpring {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const isFoldedMainPaper = useFoldStore(
+    (s) => !s.isIntroActive && s.currentOffset < 0.98,
+  );
   const [prevIntroActive, setPrevIntroActive] = useState(isIntroActive);
   const justLeftIntro = !isIntroActive && prevIntroActive;
+
+  const actuallyActive = isActive && !isFoldedMainPaper;
 
   if (isIntroActive !== prevIntroActive) {
     setPrevIntroActive(isIntroActive);
   }
 
   const { liftZ } = useSpring({
-    liftZ: isActive ? SECTION_SURFACE.liftHeight : 0,
+    liftZ: actuallyActive ? SECTION_SURFACE.liftHeight : 0,
     from: { liftZ: 0 },
-    delay: isActive ? SECTION_SURFACE.liftDelayMs : 0,
+    delay: actuallyActive ? SECTION_SURFACE.liftDelayMs : 0,
     config: SECTION_SURFACE.spring,
   });
 
   const { opacity } = useSpring({
-    opacity: isActive ? 1 : 0,
+    opacity: actuallyActive ? 1 : 0,
     from: { opacity: 0 },
-    delay: isActive
+    delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
       : isIntroActive || sectionId === "s1" || !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
-    immediate: isActive || (justLeftIntro && sectionId !== "s1"), // Snap to 0 instantly ONLY when leaving the intro!
-    config: isActive
+    immediate: actuallyActive || (justLeftIntro && sectionId !== "s1"), // Snap to 0 instantly ONLY when leaving the intro!
+    config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
   });
 
   const { shadowOpacity } = useSpring({
-    shadowOpacity: isActive ? SECTION_SURFACE.shadowOpacity : 0,
+    shadowOpacity: actuallyActive ? SECTION_SURFACE.shadowOpacity : 0,
     from: { shadowOpacity: 0 },
     delay: 0,
     config: SECTION_SURFACE.spring,
   });
 
   const { shadowVisibility } = useSpring({
-    shadowVisibility: isActive ? 1 : 0,
+    shadowVisibility: actuallyActive ? 1 : 0,
     from: { shadowVisibility: 0 },
     delay: 0,
     config: SECTION_SURFACE.spring,

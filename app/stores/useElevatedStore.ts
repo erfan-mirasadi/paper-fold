@@ -86,11 +86,9 @@ interface ElevatedStoreState {
 }
 
 function getUnlockedElevatedVerses(offset: number): number[] {
-  if (offset >= ELEVATED_SCROLL_UNLOCK_THRESHOLD) return ALL_ELEVATED_VERSE_IDS;
-  if (offset >= 0.75) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  if (offset >= 0.5) return [1, 2, 3, 4, 5, 6, 7, 8];
-  if (offset >= 0.25) return [1, 2, 3, 4, 5, 6];
-  return [1, 2, 3, 4, 5];
+  // Return all verses immediately so they can be clicked for zooming
+  // even when the paper is folded.
+  return ALL_ELEVATED_VERSE_IDS;
 }
 
 export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({

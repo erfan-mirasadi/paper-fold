@@ -68,38 +68,45 @@ function AnimatedElevatedLabel({
   const isActive = useElevatedStore((s) =>
     s.activeSectionIds.includes(sectionId),
   );
-  const [isMounted, setIsMounted] = useState(isActive);
+
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const isFoldedMainPaper = useFoldStore(
+    (s) => !s.isIntroActive && s.currentOffset < 0.98,
+  );
+  const actuallyActive = isActive && !isFoldedMainPaper;
+
+  const [isMounted, setIsMounted] = useState(actuallyActive);
 
   useEffect(() => {
     const timer = window.setTimeout(
       () => {
-        setIsMounted(isActive);
+        setIsMounted(actuallyActive);
       },
-      isActive ? 0 : ELEVATED_RETURN_SYNC_MS,
+      actuallyActive ? 0 : ELEVATED_RETURN_SYNC_MS,
     );
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [isActive]);
+  }, [actuallyActive]);
 
   const { liftZ } = useSpring({
     from: { liftZ: 0 },
     to: {
-      liftZ: isActive ? liftHeight : 0,
+      liftZ: actuallyActive ? liftHeight : 0,
     },
     config: {
       mass: 2.0,
       tension,
       friction,
     },
-    delay: isActive ? delayMs : 0,
+    delay: actuallyActive ? delayMs : 0,
   });
 
   // Drag: label drags the entire section
   const sectionDrag = dragEngine.sections[sectionId];
   const dragBind = useElevatedDrag({
-    enabled: isActive && !useFoldStore.getState().isIntroActive,
+    enabled: actuallyActive && !isIntroActive,
     springX: sectionDrag.x,
     springY: sectionDrag.y,
     dragSectionId: sectionId,

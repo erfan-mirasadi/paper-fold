@@ -41,6 +41,9 @@ export function PopUpHoverSensors({
   setHoveredGroupId,
 }: PopUpHoverSensorsProps) {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const isFoldedMainPaper = useFoldStore(
+    (s) => !s.isIntroActive && s.currentOffset < 0.98,
+  );
 
   useEffect(() => {
     return () => {
@@ -48,7 +51,7 @@ export function PopUpHoverSensors({
     };
   }, []);
 
-  if (isIntroActive) return null;
+  if (isIntroActive || isFoldedMainPaper) return null;
 
   return (
     <>

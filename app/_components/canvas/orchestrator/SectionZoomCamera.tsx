@@ -26,10 +26,12 @@ export function SectionZoomCamera() {
   useFrame((state) => {
     // 1. Only run zoom logic when in paper mode
     const isIntroActive = useFoldStore.getState().isIntroActive;
-    if (isIntroActive) return;
-
-    const { phase, isAllSectionsMode, activeSectionId } =
+    const { phase, isAllSectionsMode, activeSectionId, activeVerseIds } =
       useElevatedStore.getState();
+
+    // 1. If we are in intro and NOT elevated, do nothing here so IntroCameraScrollController can handle it.
+    if (isIntroActive && phase === "idle") return;
+
     const camera = state.camera;
     const controls = state.controls as any;
 
@@ -43,9 +45,19 @@ export function SectionZoomCamera() {
     let targetFov = defFov;
     let lookAtY = defTY;
 
+    // Infer section if we only clicked a verse and activeSectionId is null
+    let targetSectionId = activeSectionId;
+    if (!targetSectionId && activeVerseIds.length > 0) {
+      const vid = activeVerseIds[0];
+      if (vid <= 5) targetSectionId = "s1";
+      else if (vid <= 10) targetSectionId = "s2_top";
+      else if (vid <= 14) targetSectionId = "s2_center";
+      else targetSectionId = "s2_bottom";
+    }
+
     // 3. If a section is active and we are NOT in all sections mode, zoom to it
-    if (phase === "elevated" && !isAllSectionsMode && activeSectionId) {
-      const zoomCoords = SECTION_ZOOM_TARGETS[activeSectionId];
+    if (phase === "elevated" && !isAllSectionsMode && targetSectionId) {
+      const zoomCoords = SECTION_ZOOM_TARGETS[targetSectionId];
       if (zoomCoords) {
         targetCamY = zoomCoords.y;
         targetFov = zoomCoords.fov;

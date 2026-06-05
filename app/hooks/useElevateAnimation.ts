@@ -61,8 +61,13 @@ export function useElevateAnimation(
   sectionId: ElevatedSectionId | null,
 ) {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const isFoldedMainPaper = useFoldStore(
+    (s) => !s.isIntroActive && s.currentOffset < 0.98,
+  );
   const [prevIntroActive, setPrevIntroActive] = useState(isIntroActive);
   const justLeftIntro = !isIntroActive && prevIntroActive;
+
+  const actuallyElevated = isElevated && !isFoldedMainPaper;
 
   if (isIntroActive !== prevIntroActive) {
     setPrevIntroActive(isIntroActive);
@@ -75,9 +80,9 @@ export function useElevateAnimation(
   };
 
   const { liftZ, tiltX, scale } = useSpring({
-    liftZ: isElevated ? ELEVATE_TIMING.liftHeight : 0,
-    tiltX: isElevated ? ELEVATE_TIMING.tiltX : 0,
-    scale: isElevated ? ELEVATE_TIMING.liftScale : 1,
+    liftZ: actuallyElevated ? ELEVATE_TIMING.liftHeight : 0,
+    tiltX: actuallyElevated ? ELEVATE_TIMING.tiltX : 0,
+    scale: actuallyElevated ? ELEVATE_TIMING.liftScale : 1,
     from: {
       liftZ: 0,
       tiltX: 0,
@@ -88,22 +93,22 @@ export function useElevateAnimation(
   });
 
   const { opacity } = useSpring({
-    opacity: isElevated ? 1 : 0,
+    opacity: actuallyElevated ? 1 : 0,
     from: {
       opacity: 0,
     },
     config: springConfig,
-    delay: isElevated
+    delay: actuallyElevated
       ? ELEVATE_TIMING.appearDelayZAndOpacity
       : isIntroActive || sectionId === "s1" || !justLeftIntro
         ? ELEVATE_TIMING.hideDelayZAndOpacity
         : 0,
     /** Avoid stacking with Troika text fade-in inside RenderTexture (double dim). */
-    immediate: isElevated || (justLeftIntro && sectionId !== "s1"),
+    immediate: actuallyElevated || (justLeftIntro && sectionId !== "s1"),
   });
 
   const { shadowOpacity } = useSpring({
-    shadowOpacity: isElevated
+    shadowOpacity: actuallyElevated
       ? ELEVATE_SHADOW.opacityLifted
       : ELEVATE_SHADOW.opacityRest,
     from: { shadowOpacity: ELEVATE_SHADOW.opacityRest },

@@ -183,9 +183,13 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const s = usePopUpStore.getState();
         const e = useElevatedStore.getState();
 
+        const isIntroActiveNow = useFoldStore.getState().isIntroActive;
+        const currentOffsetNow = useFoldStore.getState().currentOffset;
+        const isFoldedMainPaperNow = !isIntroActiveNow && currentOffsetNow < 0.98;
+
         const g = s.popUpGroups.find((group) => group.verseIds.includes(id));
         const isHidden =
-          e.activeVerseIds.includes(id) ||
+          (!isFoldedMainPaperNow && e.activeVerseIds.includes(id)) ||
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(s, id);
 
@@ -205,9 +209,12 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
     const s = usePopUpStore.getState();
     const e = useElevatedStore.getState();
+    const isIntroActive = useFoldStore.getState().isIntroActive;
+    const currentOffset = useFoldStore.getState().currentOffset;
+    const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;
 
     for (let i = 1; i <= 19; i++) {
-      let hidden = e.activeVerseIds.includes(i);
+      let hidden = !isFoldedMainPaper && e.activeVerseIds.includes(i);
       if (!hidden) {
         const g = s.popUpGroups.find((group) => group.verseIds.includes(i));
         if (g?.isOpen) hidden = true;
@@ -222,13 +229,10 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       s2_center: 2,
       s2_bottom: 3,
     };
-    // During the intro, all sections are in activeSectionIds (forceShowAllSections),
-    // but we must NOT hide them on the paper — the paper texture is visible during the intro.
-    // Only hide sections when post-intro elevated mode is active.
-    const introActive = useFoldStore.getState().isIntroActive;
+    
     Object.entries(sectionMap).forEach(([id, idx]) => {
       const isElevated = e.activeSectionIds.includes(id as ElevatedSectionId);
-      uniforms.uSectionVisibility.value[idx] = (isElevated && !introActive) ? 0.0 : 1.0;
+      uniforms.uSectionVisibility.value[idx] = (isElevated && !isIntroActive && !isFoldedMainPaper) ? 0.0 : 1.0;
     });
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
@@ -248,10 +252,15 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = state.popUpGroups.find((group) =>
           group.verseIds.includes(id),
         );
+        
+        const isIntroActiveNow = useFoldStore.getState().isIntroActive;
+        const currentOffsetNow = useFoldStore.getState().currentOffset;
+        const isFoldedMainPaperNow = !isIntroActiveNow && currentOffsetNow < 0.98;
+
         const shouldBeHidden =
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(state, id) ||
-          useElevatedStore.getState().activeVerseIds.includes(id);
+          (!isFoldedMainPaperNow && useElevatedStore.getState().activeVerseIds.includes(id));
 
         const delay = shouldBeHidden
           ? ORIGINAL_TEXTURE_TIMING.hideDelay
@@ -274,8 +283,13 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = usePopUpStore
           .getState()
           .popUpGroups.find((group) => group.verseIds.includes(id));
+        
+        const isIntroActive = useFoldStore.getState().isIntroActive;
+        const currentOffset = useFoldStore.getState().currentOffset;
+        const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;
+
         const shouldBeHidden =
-          state.activeVerseIds.includes(id) ||
+          (!isFoldedMainPaper && state.activeVerseIds.includes(id)) ||
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(usePopUpStore.getState(), id);
 
@@ -292,9 +306,10 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           sid as ElevatedSectionId,
         );
         if (now !== prev) {
-          // During intro, never hide section areas on the paper
           const introNow = useFoldStore.getState().isIntroActive;
-          const shouldBeVisible = !now || introNow;
+          const currentOffset = useFoldStore.getState().currentOffset;
+          const isFoldedMainPaper = !introNow && currentOffset < 0.98;
+          const shouldBeVisible = !now || introNow || isFoldedMainPaper;
           updateSection(
             idx,
             shouldBeVisible,
