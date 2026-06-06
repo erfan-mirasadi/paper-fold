@@ -34,8 +34,8 @@ export const INTRO_SECTION_SCATTER: Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
 > = {
-  //              x      y      z      rx(°)   ry(°)    rz(°)
-  s1: [0.9, -0.65, 2.04, deg(6), deg(-47), deg(-29)],
+  //     x      y      z      rx(°)   ry(°)    rz(°)
+  s1: [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
   s2_top: [0, -0.6, -0.4],
   s2_center: [0.06, -0.55, -1.2],
   s2_bottom: [0, -0.63, 0.5],
@@ -44,14 +44,14 @@ export const INTRO_SECTION_SCATTER: Record<
 // ─── Idle breathing for s1 while scattered ──────────────────────────────
 // Gives the floating section a living, gentle sway.
 const S1_IDLE = {
-  yAmp: 0.012, // how much it bobs up/down
+  yAmp: 0.012, // 0.012, // how much it bobs up/down
   yFreq: 0.8, // bob speed (Hz-ish)
-  rxAmp: deg(1.5), // subtle forward/back tilt oscillation
+  rxAmp: 0.012, // deg(1.5), // subtle forward/back tilt oscillation
   rxFreq: 0.6,
-  ryAmp: deg(2), // gentle left/right rotation
+  ryAmp: 0.012, // deg(2), // gentle left/right rotation
   ryFreq: 0.45,
-  rzAmp: deg(0.8), // tiny twist
-  rzFreq: 0.35,
+  zAmp: 0.012, // forward/back bob
+  zFreq: 0.35,
 };
 
 const easeInOut = (t: number): number => {
@@ -177,7 +177,7 @@ function getTransformTarget(
     y += Math.sin(time * S1_IDLE.yFreq) * S1_IDLE.yAmp * breathe;
     rx += Math.sin(time * S1_IDLE.rxFreq) * S1_IDLE.rxAmp * breathe;
     ry += Math.sin(time * S1_IDLE.ryFreq) * S1_IDLE.ryAmp * breathe;
-    rz += Math.sin(time * S1_IDLE.rzFreq) * S1_IDLE.rzAmp * breathe;
+    z += Math.sin(time * S1_IDLE.zFreq) * S1_IDLE.zAmp * breathe;
   }
 
   // Mid-transition scale bulge during Page 2 (Ambient Phase)
@@ -226,10 +226,10 @@ function getTransformTarget(
       highlightedId === sectionId ||
       (highlightedId && highlightedId.startsWith(`${sectionId}_step`));
     if (isActive) {
-      z += 0.25; // Elevate towards camera
-      y += -0.05 + Math.sin(time * 1.5) * 0.006;
+      z += 0.25 + Math.sin(time * 1.5) * 0.03; // Added Z-axis floating animation
+      y += -0.05 + Math.sin(time * 1.5) * 0.006; // Reverted to original
       scale *= 1.06;
-      rx -= -0.07 + Math.sin(time * 1.2) * 0.004;
+      rx -= -0.07 + Math.sin(time * 1.2) * 0.004; // Reverted to original
       ry -= 0;
     }
   }
