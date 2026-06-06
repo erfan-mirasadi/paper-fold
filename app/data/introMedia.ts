@@ -26,7 +26,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s1_step2: {
-    src: "/intro/section-1.mov", // Defaulting to this, will adjust if user provides specific path
+    src: "/intro/section-1.mp4", // Defaulting to this, will adjust if user provides specific path
     isVideo: true,
     backgroundText: {
       caption: "Muhkem",
@@ -34,7 +34,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s1_step3: {
-    src: "/intro/section-1.mov", // Keep same image to avoid crossfade
+    src: "/intro/section-1.mp4", // Keep same image to avoid crossfade
     isVideo: true,
     backgroundText: {
       caption: "Muhkem",
@@ -42,7 +42,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s2_top: {
-    src: "/intro/section-2.mov",
+    src: "/intro/section-2.mp4",
     isVideo: true,
     backgroundText: {
       caption: "Ebu Cehil'in dünyası",
@@ -50,16 +50,16 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     },
   },
   s2_center: {
-    src: "/intro/section-3.png",
-    isVideo: false,
+    src: "/intro/section-3.mp4",
+    isVideo: true,
     backgroundText: {
       // Missing caption or body from the client is fine, the component will handle it gracefully
       title: "Dışarıdan bakanlara\n hitap",
     },
   },
   s2_bottom: {
-    src: "/intro/section-4.png",
-    isVideo: false,
+    src: "/intro/section-4.mp4",
+    isVideo: true,
     backgroundText: {
       caption: "Ebu Cehil'in Ahireti",
       title: "Tuğyanın\n zulmün\n inkârın \nkarşılığı",
