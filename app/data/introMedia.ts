@@ -21,7 +21,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "",
     isVideo: false,
     backgroundText: {
-      title: "İnsanlara Oku!",
+      title: "İnsanlara oku!",
       titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
     },
   },
@@ -29,7 +29,8 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "",
     isVideo: false,
     backgroundText: {
-      title: "Alak suresi, insanlığın ufkunda doğan İlahi bir güneş gibi\nMuhammed Aleyhisselama peygamberlik tacının giydirildiğini\nbütün cihana ilan etmiş ve müjdelemiştir.",
+      title:
+        "Alak suresi, insanlığın ufkunda doğan İlahi bir güneş gibi\nMuhammed aleyhisselama peygamberlik tacının giydirildiğini\nbütün cihana ilan etmiş ve müjdelemiştir",
       titleSize: "text-[5.5vw] md:text-[3.5vw] leading-[1.2]",
     },
   },
@@ -53,7 +54,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "/intro/section-2.mp4",
     isVideo: true,
     backgroundText: {
-      caption: "Ebu Cehil'in dünyası",
+      caption: "Ebu cehil'in dünyası",
       title: "Tuğyan\n zulüm\ninkâr \nistiğna",
     },
   },
@@ -69,7 +70,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
     src: "/intro/section-4.mp4",
     isVideo: true,
     backgroundText: {
-      caption: "Ebu Cehil'in Ahireti",
+      caption: "Ebu cehil'in ahireti",
       title: "Tuğyanın\n zulmün\n inkârın \nkarşılığı",
     },
   },

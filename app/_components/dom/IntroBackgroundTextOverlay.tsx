@@ -53,15 +53,7 @@ export function IntroBackgroundTextOverlay() {
     ? INTRO_MEDIA_DATA[effectiveActiveId]?.backgroundText
     : null;
 
-  const toSentenceCase = (str: string) => {
-    if (!str) return "";
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  };
 
-  const toLowerCase = (str: string) => {
-    if (!str) return "";
-    return str.toLowerCase();
-  };
 
   return (
     <div className="pointer-events-none fixed inset-0 flex items-center justify-end pr-6 md:pr-16 lg:pr-24 pb-24 md:pb-40 overflow-hidden z-40">
@@ -87,7 +79,7 @@ export function IntroBackgroundTextOverlay() {
           >
             {data.caption && (
               <AnimatedText
-                text={toSentenceCase(data.caption)}
+                text={data.caption}
                 variant="caption"
                 animationType="flyInLeft"
                 cinematic={true}
@@ -99,7 +91,7 @@ export function IntroBackgroundTextOverlay() {
             )}
             {data.title && (
               <AnimatedText
-                text={toSentenceCase(data.title)}
+                text={data.title}
                 variant="title"
                 animationType="flyInBottom"
                 cinematic={true}
@@ -111,7 +103,7 @@ export function IntroBackgroundTextOverlay() {
             )}
             {data.subtitle && (
               <AnimatedText
-                text={toLowerCase(data.subtitle) + "."}
+                text={data.subtitle}
                 variant="subtitle"
                 animationType="flyInBottom"
                 cinematic={true}
@@ -123,7 +115,7 @@ export function IntroBackgroundTextOverlay() {
             )}
             {data.body && (
               <AnimatedText
-                text={toLowerCase(data.body)}
+                text={data.body}
                 variant="body"
                 animationType="fadeIn"
                 cinematic={true}
