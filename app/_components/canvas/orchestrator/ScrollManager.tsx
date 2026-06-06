@@ -47,7 +47,8 @@ export const LOCK_CONFIG = {
   effortRequired: 2500,
 
   // How many pixels near the lock point will the lock "grab" the user?
-  grabRangePixels: 10,
+  // We use a larger grab range to catch very fast trackpad swipes that might slip past.
+  grabRangePixels: 50,
 };
 
 interface FoldStoreState {
@@ -257,12 +258,11 @@ export function ScrollManager() {
           LOCK_CONFIG.lockPositionPercentage * currentLimit,
         );
 
-        if (
-          lenis.scroll >= lockScroll - LOCK_CONFIG.grabRangePixels &&
-          targetScroll < lockScroll
-        ) {
-          if (isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
-            lenis.scrollTo(lockScroll, { immediate: false });
+        if (isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
+          if (targetScroll < lockScroll) {
+            // HARD CLAMP: Don't let momentum carry them past the lock.
+            // We use immediate: true so they feel a solid wall instead of a bouncy glide.
+            lenis.scrollTo(lockScroll, { immediate: true });
           }
         }
       }
@@ -352,8 +352,10 @@ export function ScrollManager() {
       }
 
       // We only want to block wheel events if they are AT the boundary.
+      // We require them to visually hit the wall (within 2px) to start pushing against it.
+      // We also check a larger area above the wall (grabRangePixels) just in case they slipped past.
       const isAtBoundary =
-        lenis.scroll <= lockScroll + LOCK_CONFIG.grabRangePixels &&
+        lenis.scroll <= lockScroll + 2 &&
         lenis.scroll >= lockScroll - LOCK_CONFIG.grabRangePixels;
 
       if (isScrollUpLockedRef.current && isAtBoundary) {
