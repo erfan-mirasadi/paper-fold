@@ -4,6 +4,29 @@ import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 import { INTRO_MEDIA_DATA } from "../../data/introMedia";
 import { motion, AnimatePresence } from "framer-motion";
 
+// You can easily adjust the position and size of the white halos (for light mode readability) here!
+// x: Horizontal position (0% is far left, 100% is far right)
+// y: Vertical position (0% is top, 100% is bottom)
+// width & height: How wide and tall the blur/halo spreads out
+export const LIGHT_MODE_HALO = {
+  // Halo behind the guide lines (Left side)
+  left: {
+    width: "65%",
+    height: "60%",
+    x: "10%",
+    y: "20%",
+    opacity: 0.9,
+  },
+  // Halo behind the main text (Right side)
+  right: {
+    width: "40%",
+    height: "100%",
+    x: "72%",
+    y: "0%",
+    opacity: 4,
+  },
+};
+
 interface AmbientMediaProps {
   src?: string;
   isVideo?: boolean;
@@ -113,8 +136,8 @@ export default function AmbientMedia({
             className="absolute inset-0 w-full h-full"
             style={{ willChange: "transform, opacity" }}
           >
-            {/* Optimized Ambient Glow: enabled for both image and video to look exactly the same */}
-            <div className="absolute inset-0 z-0 scale-[1.4] opacity-60 blur-[80px] saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
+            {/* Optimized Ambient Glow: increased intensity for light mode to boost the white halo */}
+            <div className="absolute inset-0 z-0 scale-[1.6] in-[.dark]:scale-[1.4] opacity-100 in-[.dark]:opacity-60 blur-[100px] in-[.dark]:blur-[80px] saturate-200 in-[.dark]:saturate-150 pointer-events-none mix-blend-screen transform-gpu origin-center">
               <MediaElement src={src} isVideo={isVideo} />
             </div>
 
@@ -124,6 +147,15 @@ export default function AmbientMedia({
               style={horizontalMask}
             >
               <MediaElement src={src} isVideo={isVideo} style={verticalMask} />
+
+              {/* Light mode readability wash: ensures text on the right and guides on the left are always readable on dark images */}
+              <div
+                className="absolute inset-0 block in-[.dark]:hidden pointer-events-none z-20"
+                style={{
+                  background: `radial-gradient(${LIGHT_MODE_HALO.left.width} ${LIGHT_MODE_HALO.left.height} at ${LIGHT_MODE_HALO.left.x} ${LIGHT_MODE_HALO.left.y}, rgba(255,255,255,${LIGHT_MODE_HALO.left.opacity}) 0%, rgba(255,255,255,0) 100%), radial-gradient(${LIGHT_MODE_HALO.right.width} ${LIGHT_MODE_HALO.right.height} at ${LIGHT_MODE_HALO.right.x} ${LIGHT_MODE_HALO.right.y}, rgba(255,255,255,${LIGHT_MODE_HALO.right.opacity}) 0%, rgba(255,255,255,0) 100%)`,
+                  ...verticalMask,
+                }}
+              />
             </div>
           </motion.div>
         )}
