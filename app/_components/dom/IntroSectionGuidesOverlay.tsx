@@ -33,7 +33,7 @@ export function IntroSectionGuidesOverlay() {
 
   return (
     <div
-      className="pointer-events-none"
+      className="pointer-events-none mix-blend-difference"
       style={{
         position: "fixed",
         inset: 0,
@@ -190,11 +190,11 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
         textRef.current.style.fontWeight = isActive ? "700" : "600";
         textRef.current.style.letterSpacing = isActive ? "0.04em" : "0.02em";
         if (isActive) {
-          textRef.current.classList.add("text-black", "in-[.dark]:text-white");
-          textRef.current.classList.remove("text-black/60", "in-[.dark]:text-[rgba(232,243,255,0.94)]");
+          textRef.current.classList.add("text-white");
+          textRef.current.classList.remove("text-white/60");
         } else {
-          textRef.current.classList.add("text-black/60", "in-[.dark]:text-[rgba(232,243,255,0.94)]");
-          textRef.current.classList.remove("text-black", "in-[.dark]:text-white");
+          textRef.current.classList.add("text-white/60");
+          textRef.current.classList.remove("text-white");
         }
       }
 
@@ -299,11 +299,11 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
             >
               <stop
                 offset="0%"
-                className="[stop-color:#000000] in-[.dark]:[stop-color:#ffffff]"
+                className="[stop-color:#ffffff]"
               />
               <stop
                 offset="100%"
-                className="[stop-color:rgba(0,0,0,0.15)] in-[.dark]:[stop-color:rgba(255,255,255,0.15)]"
+                className="[stop-color:rgba(255,255,255,0.15)]"
               />
             </linearGradient>
           </defs>
@@ -332,14 +332,14 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
               cx={6}
               cy={0}
               r={4}
-              className="animate-ping fill-black in-[.dark]:fill-white"
+              className="animate-ping fill-white"
               style={{ transformOrigin: "6px 0px", animationDuration: "1.5s" }}
             />
             <circle
               cx={6}
               cy={0}
               r={3}
-              className="fill-black in-[.dark]:fill-white"
+              className="fill-white"
             />
           </g>
 
@@ -392,7 +392,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
               top: -12,
               fontSize: "clamp(12px, 1.55vw, 15px)",
               lineHeight: 1.25,
-              textShadow: "none",
+              textShadow: "0px 0px 10px rgba(0, 0, 0, 0.8)",
               textTransform: "none",
               transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
             }}

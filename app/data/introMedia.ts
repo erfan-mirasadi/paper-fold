@@ -25,6 +25,14 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
     },
   },
+  s1_step1: {
+    src: "",
+    isVideo: false,
+    backgroundText: {
+      title: "Alak suresi, insanlığın ufkunda doğan İlahi bir güneş gibi\nMuhammed Aleyhisselama peygamberlik tacının giydirildiğini\nbütün cihana ilan etmiş ve müjdelemiştir.",
+      titleSize: "text-[5.5vw] md:text-[3.5vw] leading-[1.2]",
+    },
+  },
   s1_step2: {
     src: "/intro/section-1.mp4", // Defaulting to this, will adjust if user provides specific path
     isVideo: true,

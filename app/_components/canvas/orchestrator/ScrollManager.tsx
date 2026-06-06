@@ -198,6 +198,7 @@ export function ScrollManager() {
     if (ambientProgress >= 0 && handoffProgress === 0) {
       const keys: IntroMediaId[] = [
         "s1",
+        "s1_step1",
         "s1_step2",
         "s1_step3",
         "s2_top",
