@@ -44,7 +44,7 @@ export const LOCK_CONFIG = {
   lockPositionPercentage: 0.6,
 
   // How much trackpad effort is required to break the lock and scroll up?
-  effortRequired: 1500,
+  effortRequired: 2500,
 
   // How many pixels near the lock point will the lock "grab" the user?
   grabRangePixels: 10,

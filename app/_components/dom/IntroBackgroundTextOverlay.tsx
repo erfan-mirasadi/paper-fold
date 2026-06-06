@@ -7,18 +7,16 @@ import { AnimatePresence, motion } from "framer-motion";
 
 // You can adjust these text sizes! The component will automatically pick the right size based on the title's character count.
 export const TITLE_SIZES = {
-  SHORT: "text-[16vw] md:text-[12vw] leading-[0.9]", // for very short text (<= 15 chars)
-  MEDIUM: "text-[14vw] md:text-[10vw] leading-[0.95]", // for medium text (16 - 30 chars)
-  LONG: "text-[11vw] md:text-[8.5vw] leading-[1.05]", // for long text (31 - 50 chars)
-  EXTRA_LONG: "text-[9vw] md:text-[7vw] leading-[1.1]", // for extremely long text (51+ chars)
+  SHORT: "text-[12vw] md:text-[9vw] leading-[0.9]", // for very short text (<= 15 chars)
+  MEDIUM: "text-[10vw] md:text-[7vw] leading-[0.95]", // for medium text (16 - 30 chars)
+  LONG: "text-[8vw] md:text-[6vw] leading-[1.05]", // for long text (31 - 50 chars)
+  EXTRA_LONG: "text-[6.5vw] md:text-[5vw] leading-[1.1]", // for extremely long text (51+ chars)
 };
 
 function getSmartTitleSizeClass(title: string) {
   const len = title.length;
   if (len <= 15) return TITLE_SIZES.SHORT;
   if (len <= 30) return TITLE_SIZES.MEDIUM;
-  if (len <= 50) return TITLE_SIZES.LONG;
-  return TITLE_SIZES.EXTRA_LONG;
 }
 
 // You can adjust the distant black/white shadow position and blur here!
@@ -66,7 +64,7 @@ export function IntroBackgroundTextOverlay() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 flex items-center justify-end pr-6 md:pr-16 lg:pr-24 overflow-hidden z-40">
+    <div className="pointer-events-none fixed inset-0 flex items-center justify-end pr-6 md:pr-16 lg:pr-24 pb-24 md:pb-40 overflow-hidden z-40">
       <AnimatePresence mode="popLayout">
         {isIntroActive && isAmbientPhase && data && (
           <motion.div
@@ -81,7 +79,7 @@ export function IntroBackgroundTextOverlay() {
             exit={{
               opacity: 0,
               scale: 1.05,
-              y: -20,
+              y: 0,
               transition: { duration: 0.2, ease: "easeOut" },
             }}
             className="relative flex flex-col items-center w-[55vw] md:w-[45vw] text-center"
@@ -96,7 +94,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-2px 2px 5px rgba(248,249,250,0.18), -8px 8px 18px rgba(0,0,0,0.55), ${getDistantShadow(0.33)}`,
                 }}
-                className="tracking-widest text-lg md:text-xl font-(family-name:--font-poppins) font-medium w-full justify-center z-10 text-[#A78BFA]"
+                className="tracking-widest text-base md:text-lg font-(family-name:--font-poppins) font-medium w-full justify-center z-10 text-[#A78BFA]"
               />
             )}
             {data.title && (
@@ -108,7 +106,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-8px 8px 12px rgba(167,139,250,0.2), -18px 18px 30px rgba(167,139,250,0.12), -30px 30px 50px rgba(0,0,0,0.45), ${getDistantShadow(1)}`,
                 }}
-                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-[#F8F9FA]`}
+                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-black dark:text-[#F8F9FA]`}
               />
             )}
             {data.subtitle && (
@@ -120,7 +118,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-4px 4px 8px rgba(248,249,250,0.18), -12px 12px 24px rgba(0,0,0,0.55), ${getDistantShadow(0.66)}`,
                 }}
-                className="font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[5vw] md:text-[3.5vw] -mt-6 md:-mt-10 mb-4 text-[#A78BFA]"
+                className="font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[3.5vw] md:text-[2.5vw] -mt-6 md:-mt-10 mb-4 text-black dark:text-[#A78BFA]"
               />
             )}
             {data.body && (
@@ -132,7 +130,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-3px 3px 7px rgba(167,139,250,0.18), -9px 9px 20px rgba(0,0,0,0.55), ${getDistantShadow(0.5)}`,
                 }}
-                className="font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-2xl md:text-3xl -mt-2 md:-mt-4 text-white/90"
+                className="font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-lg md:text-xl -mt-2 md:-mt-4 text-black dark:text-white/90"
               />
             )}
           </motion.div>

@@ -31,7 +31,7 @@ export function HeroTitleOverlay() {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[19vw] md:text-[14vw] text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[19vw] md:text-[14vw] hero-title-text`}
         />
         <AnimatedText
           text="suresi"
@@ -39,7 +39,7 @@ export function HeroTitleOverlay() {
           animationType="flyInBottom"
           cinematic={true}
           style={{ textShadow: "none" }}
-          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[11vw] md:text-[8vw] -mt-[9vw] md:-mt-[8vw] mb-4 relative z-10 text-[#F8F9FA] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`}
+          className={`font-light font-(family-name:--font-fraunces) tracking-tight leading-[0.9] select-none w-full justify-center text-[11vw] md:text-[8vw] -mt-[9vw] md:-mt-[8vw] mb-4 relative z-10 hero-title-text`}
         />
       </div>
     </div>
