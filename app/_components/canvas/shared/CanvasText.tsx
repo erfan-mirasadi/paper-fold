@@ -143,9 +143,10 @@ export function CanvasText({
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
-    // Lowered anisotropy to 4 to save GPU resources
-    // 16 is overkill and drops FPS significantly
-    tex.anisotropy = 4;
+    tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 1;
 
     return tex;
   }, [
