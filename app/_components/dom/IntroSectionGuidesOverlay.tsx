@@ -10,7 +10,7 @@ import { INTRO_SECTION_GUIDE_UI_TEXT } from "../../data/introSectionGuideCopy";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 
 export function IntroSectionGuidesOverlay() {
-  const polePx = 152;
+  const polePx = 165;
   const line = "rgba(180,210,255,0.92)";
   const tip = "#a8dcff";
   const textColor = "rgba(232,243,255,0.94)";
@@ -19,8 +19,11 @@ export function IntroSectionGuidesOverlay() {
     // Vanilla subscribe shields the parent from 60fps React re-renders
     return useFoldStore.subscribe((state, prevState) => {
       // Clear hover state if we enter the handoff phase, OR if the user scrolls significantly
-      const enteredHandoff = state.introHandoffProgress > 0 && prevState.introHandoffProgress <= 0;
-      const userScrolled = state.activeAmbientMediaId !== null && Math.abs(state.rawOffset - prevState.rawOffset) > 0.001;
+      const enteredHandoff =
+        state.introHandoffProgress > 0 && prevState.introHandoffProgress <= 0;
+      const userScrolled =
+        state.activeAmbientMediaId !== null &&
+        Math.abs(state.rawOffset - prevState.rawOffset) > 0.001;
 
       if (enteredHandoff || userScrolled) {
         useFoldStore.getState().setActiveAmbientMediaId(null);
@@ -98,7 +101,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
 
   const numDots = 22;
   const unselectedProgress = 0.55;
-  const GUIDE_X_OFFSET = 35; // TWEAK THIS: Increase to move the dots further to the right!
+  const GUIDE_X_OFFSET = 65; // TWEAK THIS: Increase to move the dots further to the right!
 
   useEffect(() => {
     // Dedicated subscription loop for the actual updates
@@ -186,7 +189,13 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
       if (textRef.current) {
         textRef.current.style.fontWeight = isActive ? "700" : "600";
         textRef.current.style.letterSpacing = isActive ? "0.04em" : "0.02em";
-        textRef.current.style.color = isActive ? activeColor : textColor;
+        if (isActive) {
+          textRef.current.classList.add("text-black", "in-[.dark]:text-white");
+          textRef.current.classList.remove("text-black/60", "in-[.dark]:text-[rgba(232,243,255,0.94)]");
+        } else {
+          textRef.current.classList.add("text-black/60", "in-[.dark]:text-[rgba(232,243,255,0.94)]");
+          textRef.current.classList.remove("text-black", "in-[.dark]:text-white");
+        }
       }
 
       if (pingRef.current) {
@@ -290,11 +299,11 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
             >
               <stop
                 offset="0%"
-                stopColor="#ffffff"
+                className="[stop-color:#000000] in-[.dark]:[stop-color:#ffffff]"
               />
               <stop
                 offset="100%"
-                stopColor="rgba(255,255,255,0.15)"
+                className="[stop-color:rgba(0,0,0,0.15)] in-[.dark]:[stop-color:rgba(255,255,255,0.15)]"
               />
             </linearGradient>
           </defs>
@@ -323,11 +332,15 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
               cx={6}
               cy={0}
               r={4}
-              fill={activeColor}
-              className="animate-ping"
+              className="animate-ping fill-black in-[.dark]:fill-white"
               style={{ transformOrigin: "6px 0px", animationDuration: "1.5s" }}
             />
-            <circle cx={6} cy={0} r={3} fill={activeColor} />
+            <circle
+              cx={6}
+              cy={0}
+              r={3}
+              className="fill-black in-[.dark]:fill-white"
+            />
           </g>
 
           <g fill={`url(#${gradientId})`}>

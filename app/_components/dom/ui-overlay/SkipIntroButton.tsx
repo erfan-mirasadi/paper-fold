@@ -31,20 +31,17 @@ export function SkipIntroButton() {
     }, 350);
   };
 
-  // 0.15 represents the end of the intro band (page 1) in ScrollManager's SCROLL_TIMELINE
-  const isPage1 = rawOffset < 0.15;
-
   return (
     <>
       <AnimatePresence>
-        {isIntroActive && !isSkipping && isPage1 && (
+        {isIntroActive && !isSkipping && (
           <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             onClick={handleSkip}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] text-white/50 hover:text-white transition-colors duration-500 tracking-[0.25em] uppercase text-xs font-light px-8 py-4 cursor-pointer pointer-events-auto"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] text-black/50 hover:text-black in-[.dark]:text-white/50 in-[.dark]:hover:text-white transition-colors duration-500 tracking-[0.25em] uppercase text-xs font-light px-8 py-4 cursor-pointer pointer-events-auto"
             style={{
               WebkitTapHighlightColor: "transparent",
             }}

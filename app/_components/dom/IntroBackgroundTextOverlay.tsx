@@ -106,7 +106,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-8px 8px 12px rgba(167,139,250,0.2), -18px 18px 30px rgba(167,139,250,0.12), -30px 30px 50px rgba(0,0,0,0.45), ${getDistantShadow(1)}`,
                 }}
-                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-black dark:text-[#F8F9FA]`}
+                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-black in-[.dark]:text-[#F8F9FA]`}
               />
             )}
             {data.subtitle && (
@@ -118,7 +118,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-4px 4px 8px rgba(248,249,250,0.18), -12px 12px 24px rgba(0,0,0,0.55), ${getDistantShadow(0.66)}`,
                 }}
-                className="font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[3.5vw] md:text-[2.5vw] -mt-6 md:-mt-10 mb-4 text-black dark:text-[#A78BFA]"
+                className="font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[3.5vw] md:text-[2.5vw] -mt-6 md:-mt-10 mb-4 text-black in-[.dark]:text-[#A78BFA]"
               />
             )}
             {data.body && (
@@ -130,7 +130,7 @@ export function IntroBackgroundTextOverlay() {
                 style={{
                   textShadow: `-3px 3px 7px rgba(167,139,250,0.18), -9px 9px 20px rgba(0,0,0,0.55), ${getDistantShadow(0.5)}`,
                 }}
-                className="font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-lg md:text-xl -mt-2 md:-mt-4 text-black dark:text-white/90"
+                className="font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-lg md:text-xl -mt-2 md:-mt-4 text-black in-[.dark]:text-white/90"
               />
             )}
           </motion.div>

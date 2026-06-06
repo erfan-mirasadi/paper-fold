@@ -64,6 +64,13 @@ export function PopUpHoverScrollController() {
       return;
     }
 
+    // IMPORTANT: Only call lenis.start() if no other system needs scroll locked.
+    // ScrollManager's elevated-mode lock (isAllSectionsMode && !isIntroActive)
+    // also calls lenis.stop(). If we blindly call start() here, we'd override
+    // that lock — causing a race condition where the screen unlocks unexpectedly
+    // on some devices.
+    // Since we already return early above when isAllSectionsMode is true,
+    // reaching this point means it's safe to start.
     lenis.start();
   }, [lenis, hoveredGroupId, isIntroActive, isAllSectionsMode]);
 

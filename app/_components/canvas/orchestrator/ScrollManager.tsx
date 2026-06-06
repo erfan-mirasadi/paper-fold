@@ -44,7 +44,7 @@ export const LOCK_CONFIG = {
   lockPositionPercentage: 0.6,
 
   // How much trackpad effort is required to break the lock and scroll up?
-  effortRequired: 2500,
+  effortRequired: 3000,
 
   // How many pixels near the lock point will the lock "grab" the user?
   // We use a larger grab range to catch very fast trackpad swipes that might slip past.
@@ -148,7 +148,11 @@ export function ScrollManager() {
   const timeoutIdRef = useRef<number | null>(null);
 
   // --- BARRIER STATE REFS ---
-  const isScrollUpLockedRef = useRef(true);
+  // Start unlocked — the lock only arms after the user scrolls past the lock
+  // point for the first time (going down).  Starting as `true` caused an
+  // instant dead-lock on small-screen devices where the lock point is close
+  // to the top of the page.
+  const isScrollUpLockedRef = useRef(false);
   const wheelEffortRef = useRef(0);
   const isAnimatingUpRef = useRef(false);
 
@@ -333,22 +337,29 @@ export function ScrollManager() {
       const lockScroll = Math.floor(
         LOCK_CONFIG.lockPositionPercentage * currentLimit,
       );
+      
+      // Disarm point is exactly halfway between the lock (0.6) and the
+      // target intro scroll position (0.5). Using a fixed pixel offset
+      // caused the disarm to fail on smaller screens.
+      const disarmScroll = Math.floor(
+        ((LOCK_CONFIG.lockPositionPercentage + (SCROLL_TIMELINE.handoff.start / 100)) / 2) * currentLimit,
+      );
 
-      // Arm the lock if we are at or below the lock point
+      // Arm the lock if we are at or below the lock point.
+      // IMPORTANT: Never re-arm while the break-through animation is still
+      // playing — otherwise the user gets trapped again mid-flight.
       if (lenis.scroll >= lockScroll - SCROLL_SNAP_EPSILON_PX) {
-        if (!isScrollUpLockedRef.current) {
+        if (!isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
           isScrollUpLockedRef.current = true;
           if (wheelEffortRef.current > 0) {
             wheelEffortRef.current = 0;
             useFoldStore.getState().setBarrierProgress(0);
           }
         }
-      } else {
+      } else if (lenis.scroll < disarmScroll) {
         // Disarm if we are truly above it
-        if (lenis.scroll < lockScroll - LOCK_CONFIG.grabRangePixels * 2) {
-          isScrollUpLockedRef.current = false;
-          isAnimatingUpRef.current = false; // <-- Fixes the "only happens once" bug
-        }
+        isScrollUpLockedRef.current = false;
+        isAnimatingUpRef.current = false; // Reset the animation flag safely
       }
 
       // We only want to block wheel events if they are AT the boundary.
@@ -384,6 +395,12 @@ export function ScrollManager() {
             lenis.scrollTo(handoffStartScroll, {
               duration: 3.5, // Much slower and longer
               easing: easeInOutCubic, // Starts very slow, preventing any "sudden" jump feeling
+              onComplete: () => {
+                // Reset the animation flag once Lenis has finished gliding.
+                // This is far more reliable than checking scroll position,
+                // which can be affected by layout shifts or device quirks.
+                isAnimatingUpRef.current = false;
+              },
             });
           }
         } else {

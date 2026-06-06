@@ -259,6 +259,11 @@ export default function Home() {
                 </div>
               </>
             )}
+            {/* Theme Toggle is always visible on the screen */}
+            <div style={{ pointerEvents: "auto" }}>
+              <ThemeToggleOverlay onToggle={handleThemeToggle} />
+            </div>
+
             <SkipIntroButton />
             {/* Hide standard chrome while intro runs. Delayed by 2 seconds after handoff. */}
             {mountMainOverlays && (
@@ -271,9 +276,6 @@ export default function Home() {
                     transition={{ duration: 0.45, ease: "easeOut" }}
                     style={{ pointerEvents: "auto", willChange: "opacity" }}
                   >
-                    <ThemeToggleOverlay
-                      onToggle={handleThemeToggle}
-                    />
                     <NavigationOverlay />
                     <TitleOverlay />
                     <AllSectionsOverlay />
