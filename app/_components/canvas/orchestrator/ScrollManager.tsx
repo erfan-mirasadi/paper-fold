@@ -231,28 +231,42 @@ export function ScrollManager() {
 
     let lastLimit = Math.max(lenis.limit, 0);
     let ignoreUntilTime = 0;
+    let lastWindowWidth = window.innerWidth;
 
     const handleSync = () => {
+      if (performance.now() < ignoreUntilTime) {
+        return;
+      }
+
       const currentLimit = Math.max(lenis.limit, 0);
 
-      // If the scrollable area height changes (e.g., window resize, inspect panel),
-      // we must preserve the user's scroll percentage (rawOffset) so they don't
-      // jump into the intro sequence or trigger unintended elevated modes.
+      // Mobile address bar hide/show causes `limit` (height) to change.
+      // If we blindly enforce `rawOffset` on every height change, we actively fight
+      // the user's scroll and lock them in place on mobile devices!
+      // We only want to preserve `rawOffset` on significant window resizes (like device rotation or width changes).
       if (
         currentLimit > 0 &&
         lastLimit > 0 &&
         Math.abs(currentLimit - lastLimit) > 5
       ) {
-        const lastRawOffset = useFoldStore.getState().rawOffset;
-        lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
-        lastLimit = currentLimit;
-        // Ignore scroll events for a short window to let Lenis settle its internal state
-        ignoreUntilTime = performance.now() + 150;
-        return;
-      }
+        const widthChanged = window.innerWidth !== lastWindowWidth;
+        // If height changed MASSIVELY (e.g. > 20% limit change, unlikely from address bar)
+        const heightChangedMassively =
+          Math.abs(currentLimit - lastLimit) > currentLimit * 0.2;
 
-      if (performance.now() < ignoreUntilTime) {
-        return;
+        if (widthChanged || heightChangedMassively) {
+          const lastRawOffset = useFoldStore.getState().rawOffset;
+          
+          // IMPORTANT: Update state guards BEFORE calling scrollTo to prevent infinite recursion!
+          lastLimit = currentLimit;
+          lastWindowWidth = window.innerWidth;
+          ignoreUntilTime = performance.now() + 150;
+          
+          lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
+          return;
+        }
+        
+        lastLimit = currentLimit;
       }
 
       // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
@@ -332,6 +346,15 @@ export function ScrollManager() {
     // --- NEW BARRIER LOGIC ---
     const handleBarrierInteraction = (deltaY: number, e: Event) => {
       if (shouldLockScroll) return; // Elevated mode has full lock
+
+      // If the user actively scrolls DOWN while the release animation is playing,
+      // they are taking back manual control and interrupting the animation.
+      // We must reset the animation flag so the lock doesn't get stuck in an unarmed state.
+      // NOTE: We only do this for deltaY > 0 (scrolling down). If we use Math.abs(deltaY),
+      // the trackpad momentum from breaking the lock instantly cancels the animation!
+      if (deltaY > 0 && isAnimatingUpRef.current) {
+        isAnimatingUpRef.current = false;
+      }
 
       const currentLimit = Math.max(lenis.limit, 0);
       const lockScroll = Math.floor(
