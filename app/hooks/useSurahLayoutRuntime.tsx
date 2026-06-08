@@ -12,6 +12,7 @@ import {
   createFoldYPositions,
   createLayoutMath,
   SCENE_CENTER_Y_OFFSET,
+  ALAK_LAYOUT_CONFIG,
 } from "../data/SurahConfig";
 
 export function getPageWidthForLanguage(language: SurahLanguage) {
@@ -26,9 +27,9 @@ export function useSurahLayoutRuntime() {
     [activeLanguage],
   );
 
-  const layout = useMemo(() => createLayoutMath(pageWidth), [pageWidth]);
+  const layout = useMemo(() => createLayoutMath(ALAK_LAYOUT_CONFIG, pageWidth), [pageWidth]);
   const transforms = useMemo(
-    () => buildSurahTransforms(layout, layout.START_X),
+    () => buildSurahTransforms(layout, layout.START_X, ALAK_LAYOUT_CONFIG),
     [layout],
   );
   const foldYPositions = useMemo(() => createFoldYPositions(layout), [layout]);
