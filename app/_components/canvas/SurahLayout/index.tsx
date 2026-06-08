@@ -21,7 +21,6 @@ export {
   layoutMath,
   SURAH_TRANSFORMS,
 } from "../../../data/SurahConfig";
-export { FOLD_Y_POSITIONS } from "../../../data/SurahConfig";
 export { SurahLayout, SurahLayout as PaperContent };
 
 const ImageContent: React.FC<{

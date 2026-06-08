@@ -1,11 +1,11 @@
 "use client";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { FOLD_Y_POSITIONS, PAGE_HEIGHT } from "../SurahLayout/index";
+import { PAGE_HEIGHT } from "../SurahLayout/index";
 
-import { writeFoldAnglesForScroll, FOLD_STORY_STEPS } from "./FoldStory";
+import { writeFoldAnglesForScroll } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
-import { useEffect, useMemo, useRef, useState, FC } from "react";
+import { useEffect, useMemo, useRef, FC } from "react";
 import {
   Bone,
   BoxGeometry,
@@ -31,10 +31,6 @@ export const PAGE_DEPTH = 0.003;
 const PAGE_SEGMENTS = 80;
 const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
-export const foldBonePositions: readonly number[] = FOLD_Y_POSITIONS.map((y) =>
-  Math.min(Math.max(Math.abs(y) / SEGMENT_HEIGHT, 0), PAGE_SEGMENTS),
-);
-
 const paperBaseColor = new Color(PAGE_BG_COLOR);
 const paperBackColor = new Color("#ffffff");
 const staticSideL = new MeshStandardMaterial({ color: paperBaseColor }); // side L
@@ -58,10 +54,26 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   toggles = { diffuse: true, normal: true },
   onReady,
 }) => {
+  const runtime = useSurahLayoutRuntime();
+
   const group = useRef<Group>(null);
   const skinnedMeshRef = useRef<SkinnedMesh>(null);
-  const foldAnglesRef = useRef(new Float32Array(FOLD_Y_POSITIONS.length));
+
+  const foldAnglesRef = useRef<Float32Array | null>(null);
+  if (
+    !foldAnglesRef.current ||
+    foldAnglesRef.current.length !== runtime.FOLD_Y_POSITIONS.length
+  ) {
+    foldAnglesRef.current = new Float32Array(runtime.FOLD_Y_POSITIONS.length);
+  }
+
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
+
+  const foldBonePositions = useMemo(() => {
+    return runtime.FOLD_Y_POSITIONS.map((y) =>
+      Math.min(Math.max(Math.abs(y) / SEGMENT_HEIGHT, 0), PAGE_SEGMENTS),
+    );
+  }, [runtime.FOLD_Y_POSITIONS]);
 
   // Audio Setup
   const foldSound = useRef<HTMLAudioElement | null>(null);
@@ -83,8 +95,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
       window.removeEventListener("keydown", onInteract);
     };
   }, []);
-
-  const runtime = useSurahLayoutRuntime();
 
   const manualSkinnedMesh = useMemo(() => {
     const pageGeometry = new BoxGeometry(
@@ -163,11 +173,12 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   }, [manualSkinnedMesh]);
 
   useFrame((_, delta) => {
-    if (!skinnedMeshRef.current || !group.current) return;
+    if (!skinnedMeshRef.current || !group.current || !foldAnglesRef.current)
+      return;
     const bones = skinnedMeshRef.current.skeleton.bones;
     const paperProgress = useFoldStore.getState().currentOffset;
 
-    const maxStageIndex = FOLD_STORY_STEPS.length - 1;
+    const maxStageIndex = runtime.foldSteps.length - 1;
     const currentStage = Math.round(paperProgress * maxStageIndex);
 
     if (currentStage !== lastActiveStage.current) {
@@ -180,7 +191,11 @@ export const SinglePaper: FC<SinglePaperProps> = ({
 
     const targetFoldAngles = foldAnglesRef.current;
     const foldContributions = foldContributionsRef.current;
-    writeFoldAnglesForScroll(paperProgress, targetFoldAngles);
+    writeFoldAnglesForScroll(
+      paperProgress,
+      runtime.foldSteps,
+      targetFoldAngles,
+    );
     foldContributions.fill(0, 0, bones.length);
 
     for (let foldIdx = 0; foldIdx < targetFoldAngles.length; foldIdx++) {

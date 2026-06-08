@@ -9,7 +9,6 @@ import {
   BASE_PAGE_WIDTH,
   PAGE_HEIGHT,
   buildSurahTransforms,
-  createFoldYPositions,
   createLayoutMath,
   SCENE_CENTER_Y_OFFSET,
   ALAK_LAYOUT_CONFIG,
@@ -32,7 +31,11 @@ export function useSurahLayoutRuntime() {
     () => buildSurahTransforms(layout, layout.START_X, ALAK_LAYOUT_CONFIG),
     [layout],
   );
-  const foldYPositions = useMemo(() => createFoldYPositions(layout), [layout]);
+  const foldYPositions = useMemo(
+    () => ALAK_LAYOUT_CONFIG.animations.computeFoldYPositions(layout),
+    [layout],
+  );
+  const foldSteps = ALAK_LAYOUT_CONFIG.animations.foldSteps;
 
   const SCENE_CENTER_Y = PAGE_HEIGHT / 2 + SCENE_CENTER_Y_OFFSET;
 
@@ -46,5 +49,6 @@ export function useSurahLayoutRuntime() {
     layoutMath: layout,
     SURAH_TRANSFORMS: transforms,
     FOLD_Y_POSITIONS: foldYPositions,
+    foldSteps,
   };
 }

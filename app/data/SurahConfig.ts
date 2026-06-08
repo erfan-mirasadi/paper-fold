@@ -218,6 +218,85 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       ],
     } as VerticalGroupsSectionConfig,
   ],
+  animations: {
+    computeFoldYPositions: (lm) => [
+      lm.s2Top + 0.09 / 2, // 0.09 is gapBetweenS1andS2
+      lm.v6Y - lm.bigBoxH - lm.groupGap / 2,
+      lm.g1Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+      lm.g1Y - lm.groupH - (lm.groupGap + 0.033) / 2,
+      lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+      lm.g2Y - lm.groupH - (lm.groupGap + 0.033) / 2,
+      lm.g3Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+      lm.g3Y - lm.groupH - lm.groupGap / 2,
+    ],
+    foldSteps: [
+      {
+        id: "pre-start",
+        folds: [
+          { direction: 1, angleFactor: 0.93 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: +1, angleFactor: -1 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: -1 },
+        ],
+      },
+      {
+        id: "start",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: +1, angleFactor: -1 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: -1 },
+        ],
+      },
+      {
+        id: "outer-open",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: -1 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "inner-open",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: -1, angleFactor: 1 },
+          { direction: -1, angleFactor: -1 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "end",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+        ],
+      },
+    ],
+  },
 };
 
 // ----------------------------------------------------------------------------
@@ -350,22 +429,7 @@ export const PADDING = layoutMath.PADDING;
 export const CONTENT_W = layoutMath.CONTENT_W;
 export const START_X = layoutMath.START_X;
 
-export function createFoldYPositions(
-  lm: LayoutConfig,
-): readonly [number, number, number, number, number, number, number, number] {
-  return [
-    lm.s2Top + ALAK_LAYOUT_CONFIG.params.gapBetweenS1andS2 / 2,
-    lm.v6Y - lm.bigBoxH - lm.groupGap / 2,
-    lm.g1Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-    lm.g1Y - lm.groupH - (lm.groupGap + 0.033) / 2,
-    lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-    lm.g2Y - lm.groupH - (lm.groupGap + 0.033) / 2,
-    lm.g3Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-    lm.g3Y - lm.groupH - lm.groupGap / 2,
-  ] as const;
-}
-
-export const FOLD_Y_POSITIONS = createFoldYPositions(layoutMath);
+// createFoldYPositions and FOLD_Y_POSITIONS were removed and moved to ALAK_LAYOUT_CONFIG.animations.computeFoldYPositions
 
 // ============================================================================
 // LAYOUT ENGINE

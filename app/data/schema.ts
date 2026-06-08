@@ -105,6 +105,21 @@ export interface SurahAssets {
   metallicVerseBorderSvg?: string;
 }
 
+export interface FoldState {
+  direction: -1 | 0 | 1;
+  angleFactor: number;
+}
+
+export interface FoldStoryStep {
+  id: string;
+  folds: FoldState[];
+}
+
+export interface SurahAnimations {
+  foldSteps: readonly FoldStoryStep[];
+  computeFoldYPositions: (layoutMath: any) => readonly number[];
+}
+
 export interface SurahLayoutConfig<TParams = any> {
   id: string;
   features: SurahFeatures;
@@ -114,6 +129,7 @@ export interface SurahLayoutConfig<TParams = any> {
   assets?: SurahAssets;
   params: TParams;
   sections: SectionConfig[];
+  animations: SurahAnimations;
 }
 
 // ----------------------------------------------------------------------------

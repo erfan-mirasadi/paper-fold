@@ -1,134 +1,26 @@
 import { MathUtils } from "three";
+import { FoldState, FoldStoryStep } from "../../../data/schema";
 
 const FOLDED_ANGLE = Math.PI - 0.04;
-
-export interface FoldState {
-  direction: -1 | 0 | 1;
-  angleFactor: number;
-}
-
-export interface FoldStoryStep {
-  id: string;
-  folds: [
-    FoldState,
-    FoldState,
-    FoldState,
-    FoldState,
-    FoldState,
-    FoldState,
-    FoldState,
-    FoldState,
-  ];
-}
-
-export const FOLD_STORY_STEPS: readonly FoldStoryStep[] = [
-  {
-    id: "pre-start",
-    folds: [
-      { direction: 1, angleFactor: 0.93 }, // 0) between 5 and 6 (New)
-      { direction: -1, angleFactor: 0 }, // 1) below 6
-      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-      { direction: +1, angleFactor: -1 }, // 4) between 11/12 and 13/14
-      { direction: -1, angleFactor: 0 }, // 5) above 15/16
-      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
-      { direction: -1, angleFactor: -1 }, // 7) above 19
-    ],
-  },
-  {
-    id: "start",
-    folds: [
-      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
-      { direction: -1, angleFactor: 0 }, // 1) below 6
-      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-      { direction: +1, angleFactor: -1 }, // 4) between 11/12 and 13/14
-      { direction: -1, angleFactor: 0 }, // 5) above 15/16
-      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
-      { direction: -1, angleFactor: -1 }, // 7) above 19
-    ],
-  },
-  {
-    id: "outer-open",
-    folds: [
-      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
-      { direction: -1, angleFactor: 0 }, // 1) below 6
-      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-      { direction: 1, angleFactor: -1 }, // 4) between 11/12 and 13/14
-      { direction: -1, angleFactor: 0 }, // 5) above 15/16
-      { direction: 1, angleFactor: 1 }, // 6) between 16/15 and 18/17
-      { direction: -1, angleFactor: 0 }, // 7) above 19
-    ],
-  },
-  {
-    id: "inner-open",
-    folds: [
-      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
-      { direction: -1, angleFactor: 0 }, // 1) below 6
-      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-      { direction: -1, angleFactor: 1 }, // 4) between 11/12 and 13/14
-      { direction: -1, angleFactor: -1 }, // 5) above 15/16
-      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
-      { direction: -1, angleFactor: 0 }, // 7) above 19
-    ],
-  },
-  // {
-  //   id: "custom-step-1",
-  //   folds: [
-  //{ direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
-  //     { direction: -1, angleFactor: 0 }, // 1) below 6
-  //     { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-  //     { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-  //     { direction: 1, angleFactor: -1 }, // 4) between 11/12 and 13/14
-  //     { direction: -1, angleFactor: 0 }, // 5) above 15/16
-  //     { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
-  //     { direction: -1, angleFactor: 0 }, // 7) above 19
-  //   ],
-  // },
-  // {
-  //   id: "custom-step-2",
-  //   folds: [
-  //{ direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
-  //     { direction: -1, angleFactor: 0 }, // 1) below 6
-  //     { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-  //     { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-  //     { direction: -1, angleFactor: 1 }, // 4) between 11/12 and 13/14
-  //     { direction: -1, angleFactor: -1 }, // 5) above 15/16
-  //     { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
-  //     { direction: -1, angleFactor: 0 }, // 7) above 19
-  //   ],
-  // },
-  {
-    id: "end",
-    folds: [
-      { direction: 1, angleFactor: 0 }, // 0) between 5 and 6 (New)
-      { direction: -1, angleFactor: 0 }, // 1) below 6
-      { direction: 1, angleFactor: 0 }, // 2) between 8/7 and 10/9
-      { direction: -1, angleFactor: 0 }, // 3) between group 1 and group 2
-      { direction: 1, angleFactor: 0 }, // 4) between 11/12 and 13/14
-      { direction: -1, angleFactor: 0 }, // 5) above 15/16
-      { direction: 1, angleFactor: 0 }, // 6) between 16/15 and 18/17
-      { direction: -1, angleFactor: 0 }, // 7) above 19
-    ],
-  },
-] as const;
 
 const foldStateToAngle = (state: FoldState) =>
   state.direction * state.angleFactor * FOLDED_ANGLE;
 
-export const getFoldAnglesForScroll = (offset: number): number[] => {
-  const angles = new Array<number>(FOLD_STORY_STEPS[0].folds.length);
-  writeFoldAnglesForScroll(offset, angles);
+export const getFoldAnglesForScroll = (
+  offset: number,
+  foldSteps: readonly FoldStoryStep[],
+): number[] => {
+  const angles = new Array<number>(foldSteps[0].folds.length);
+  writeFoldAnglesForScroll(offset, foldSteps, angles);
   return angles;
 };
 
 export const writeFoldAnglesForScroll = (
   offset: number,
+  foldSteps: readonly FoldStoryStep[],
   target: { [index: number]: number; length: number },
 ) => {
-  const maxStageIndex = FOLD_STORY_STEPS.length - 1;
+  const maxStageIndex = foldSteps.length - 1;
   const clampedOffset = MathUtils.clamp(offset, 0, 1);
   const rawStage = clampedOffset * maxStageIndex;
   const fromIndex = Math.min(Math.floor(rawStage), maxStageIndex);
@@ -148,11 +40,11 @@ export const writeFoldAnglesForScroll = (
 
   for (
     let foldIndex = 0;
-    foldIndex < FOLD_STORY_STEPS[fromIndex].folds.length;
+    foldIndex < foldSteps[fromIndex].folds.length;
     foldIndex++
   ) {
-    const fromFold = FOLD_STORY_STEPS[fromIndex].folds[foldIndex];
-    const toFold = FOLD_STORY_STEPS[toIndex].folds[foldIndex];
+    const fromFold = foldSteps[fromIndex].folds[foldIndex];
+    const toFold = foldSteps[toIndex].folds[foldIndex];
     const fromAngle = foldStateToAngle(fromFold);
     const toAngle = foldStateToAngle(toFold);
 
@@ -160,8 +52,11 @@ export const writeFoldAnglesForScroll = (
   }
 };
 
-export const getOffsetForId = (id: string): number => {
-  const index = FOLD_STORY_STEPS.findIndex((step) => step.id === id);
+export const getOffsetForId = (
+  id: string,
+  foldSteps: readonly FoldStoryStep[],
+): number => {
+  const index = foldSteps.findIndex((step) => step.id === id);
   if (index === -1) return 0;
-  return index / (FOLD_STORY_STEPS.length - 1);
+  return index / (foldSteps.length - 1);
 };

@@ -7,7 +7,6 @@ import {
 } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import {
-  FOLD_Y_POSITIONS,
   SurahLayout as PaperContent,
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -25,6 +24,7 @@ import {
   Vector2,
 } from "three";
 import { usePaperMasking } from "../../../hooks/usePaperMasking";
+import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
   LATIN_VERSE_FONT,
@@ -113,6 +113,7 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
   onReady,
 }) => {
   const { gl, size } = useThree();
+  const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
   const normalScale = toggles.normal
@@ -310,7 +311,7 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
             />
           </mesh>
 
-          {FOLD_Y_POSITIONS.map((y, i) => (
+          {runtime.FOLD_Y_POSITIONS.map((y: number, i: number) => (
             <mesh
               key={i}
               position={[PAGE_WIDTH / 2, y, i * 0.01]}

@@ -3,7 +3,7 @@
 import type Lenis from "lenis";
 import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
-import { FOLD_STORY_STEPS, getOffsetForId } from "../3d-scene/FoldStory";
+import { getOffsetForId } from "../3d-scene/FoldStory";
 import {
   useElevatedStore,
   type ElevatedSectionId,
@@ -11,6 +11,7 @@ import {
 import type { IntroMediaId } from "../../../data/introMedia";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
+import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 
 const STEP_SCROLL_DURATION_MS = 820;
 const STEP_PAUSE_MS = 450;
@@ -139,6 +140,7 @@ const getRawOffsetForStory = (storyOffset: number): number => {
 };
 
 export function ScrollManager() {
+  const runtime = useSurahLayoutRuntime();
   const lenis = useLenis();
   const targetStageId = useFoldStore((s) => s.targetStageId);
   const transitionToken = useFoldStore((s) => s.transitionToken);
@@ -500,7 +502,7 @@ export function ScrollManager() {
   useEffect(() => {
     if (!targetStageId || !lenis) return;
 
-    const targetIndex = FOLD_STORY_STEPS.findIndex(
+    const targetIndex = runtime.foldSteps.findIndex(
       (step) => step.id === targetStageId,
     );
 
@@ -509,8 +511,8 @@ export function ScrollManager() {
       return;
     }
 
-    const maxStageIndex = FOLD_STORY_STEPS.length - 1;
-    const targetOffset = getOffsetForId(targetStageId);
+    const maxStageIndex = runtime.foldSteps.length - 1;
+    const targetOffset = getOffsetForId(targetStageId, runtime.foldSteps);
     const thisRunId = activeRunIdRef.current + 1;
     activeRunIdRef.current = thisRunId;
 
