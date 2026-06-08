@@ -22,6 +22,7 @@ import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollCo
 import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
 import { SectionZoomCamera } from "../orchestrator/SectionZoomCamera";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -33,8 +34,9 @@ export function Experience({
   onReady,
 }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const hasIntro = ALAK_LAYOUT_CONFIG.features.hasIntro;
   // Only show up to the point where ambient media ends (rawOffset ~0.34)
-  const showSpotlight = useFoldStore((s) => s.rawOffset < 0.37);
+  const showSpotlight = useFoldStore((s) => hasIntro && s.rawOffset < 0.37);
   const { gl, scene, camera } = useThree();
 
   // We track paper readiness
@@ -122,7 +124,7 @@ export function Experience({
         position={CAMERA_CONFIG.initialCamera.position}
         fov={CAMERA_CONFIG.initialCamera.fov}
       />
-      <IntroCameraScrollController />
+      {hasIntro && <IntroCameraScrollController />}
       <SectionZoomCamera />
       <a.group
         rotation-x={-Math.PI / 4}
@@ -151,7 +153,7 @@ export function Experience({
 
       {/* Single centralized controller for all intro section animations.
           Replaces ~28 individual useFrame callbacks with 1. */}
-      <IntroSectionAnimationController />
+      {hasIntro && <IntroSectionAnimationController />}
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
         <planeGeometry args={[50, 50]} />
@@ -159,7 +161,7 @@ export function Experience({
       </mesh>
 
       {/* Imported the dedicated IntroExperience component */}
-      <IntroExperience />
+      {hasIntro && <IntroExperience />}
 
       <DynamicControls />
       <Environment preset="apartment" />

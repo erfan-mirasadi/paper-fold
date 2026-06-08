@@ -39,7 +39,7 @@ const Experience = dynamic(
   { ssr: false },
 );
 
-const SCROLL_PAGES = 6;
+import { useSurahLayoutRuntime } from "./hooks/useSurahLayoutRuntime";
 
 export default function Home() {
   const [isSceneReady, setIsSceneReady] = useState(false);
@@ -54,6 +54,8 @@ export default function Home() {
   const [isIntroRenderPhase, setIsIntroRenderPhase] = useState(
     () => useFoldStore.getState().isIntroActive,
   );
+
+  const runtime = useSurahLayoutRuntime();
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -161,7 +163,7 @@ export default function Home() {
         <div
           aria-hidden="true"
           style={{
-            height: `${SCROLL_PAGES * 100}vh`,
+            height: `${runtime.scrollPages * 100}vh`,
             pointerEvents: "none",
           }}
         />

@@ -36,6 +36,7 @@ export function useSurahLayoutRuntime() {
     [layout],
   );
   const foldSteps = ALAK_LAYOUT_CONFIG.animations.foldSteps;
+  const scrollPages = ALAK_LAYOUT_CONFIG.dimensions.scrollPages;
 
   const SCENE_CENTER_Y = PAGE_HEIGHT / 2 + SCENE_CENTER_Y_OFFSET;
 
@@ -50,5 +51,6 @@ export function useSurahLayoutRuntime() {
     SURAH_TRANSFORMS: transforms,
     FOLD_Y_POSITIONS: foldYPositions,
     foldSteps,
+    scrollPages,
   };
 }

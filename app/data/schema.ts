@@ -20,6 +20,7 @@ export interface LayoutDimensions {
   paperHeight: number;
   sceneCenterYOffset: number;
   padding: number;
+  scrollPages: number;
 }
 
 export interface ThemeColors {

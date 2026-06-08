@@ -87,6 +87,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     paperHeight: 1.78,
     sceneCenterYOffset: -0.045,
     padding: 0.29,
+    scrollPages: 6,
   },
   specialVerses: {
     metallicVerseId: 5,
@@ -445,7 +446,7 @@ export function buildSurahTransforms(
   config: SurahLayoutConfig<AlakLayoutParams>,
 ): SurahTransforms {
   const sections: SectionTransforms[] = [];
-  
+
   // Build transforms for each section dynamically based on its type
   config.sections.forEach((section) => {
     if (section.type === "gridWithAnaAyet") {
@@ -482,12 +483,15 @@ export function buildSurahTransforms(
             y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
             z: 0.0015,
             w:
-              rightV.x + rightV.w - leftV.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+              rightV.x +
+              rightV.w -
+              leftV.x +
+              OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
             h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
           });
         }
       }
-      
+
       sections.push({
         frameX: startX,
         frameY: lm.s1Top,

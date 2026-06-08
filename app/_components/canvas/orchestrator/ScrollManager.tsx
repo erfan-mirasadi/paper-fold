@@ -12,6 +12,7 @@ import type { IntroMediaId } from "../../../data/introMedia";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 
 const STEP_SCROLL_DURATION_MS = 820;
 const STEP_PAUSE_MS = 450;
@@ -89,10 +90,10 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   isTransitioning: false,
   currentOffset: 0,
   rawOffset: 0,
-  isIntroActive: true,
-  introProgress: 0,
-  introHandoffProgress: 0,
-  ambientProgress: 0,
+  isIntroActive: ALAK_LAYOUT_CONFIG.features.hasIntro,
+  introProgress: ALAK_LAYOUT_CONFIG.features.hasIntro ? 0 : 1,
+  introHandoffProgress: ALAK_LAYOUT_CONFIG.features.hasIntro ? 0 : 1,
+  ambientProgress: ALAK_LAYOUT_CONFIG.features.hasIntro ? 0 : 1,
   barrierProgress: 0,
 
   activeAmbientMediaId: null,
@@ -178,23 +179,24 @@ export function ScrollManager() {
     // ── Intro intercept ────────────────────────────────────────────
     // Intro band -> camera-only scroll.
     // Handoff band -> smooth camera blend to base before story begins.
-    const introActive = rawOffset < SCROLL_TIMELINE.story.start / 100;
-    const introProgress = getBandProgress(
+    const hasIntro = ALAK_LAYOUT_CONFIG.features.hasIntro;
+    const introActive = hasIntro ? rawOffset < SCROLL_TIMELINE.story.start / 100 : false;
+    const introProgress = hasIntro ? getBandProgress(
       rawOffset,
       SCROLL_TIMELINE.intro.start,
       SCROLL_TIMELINE.intro.end,
-    );
-    const ambientProgress = getBandProgress(
+    ) : 1;
+    const ambientProgress = hasIntro ? getBandProgress(
       rawOffset,
       SCROLL_TIMELINE.ambient.start,
       SCROLL_TIMELINE.ambient.end,
-    );
-    const handoffProgress = getBandProgress(
+    ) : 1;
+    const handoffProgress = hasIntro ? getBandProgress(
       rawOffset,
       SCROLL_TIMELINE.handoff.start,
       SCROLL_TIMELINE.handoff.end,
-    );
-    const storyOffset = getStoryOffsetForRaw(rawOffset);
+    ) : 1;
+    const storyOffset = hasIntro ? getStoryOffsetForRaw(rawOffset) : rawOffset;
 
     let scrollAmbientMediaId: IntroMediaId | null = null;
     if (ambientProgress >= 0 && handoffProgress === 0) {
@@ -273,7 +275,7 @@ export function ScrollManager() {
       }
 
       // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
-      if (typeof (lenis as any).targetScroll === "number") {
+      if (typeof (lenis as any).targetScroll === "number" && ALAK_LAYOUT_CONFIG.features.hasIntro) {
         const targetScroll = (lenis as any).targetScroll;
         const lockScroll = Math.floor(
           LOCK_CONFIG.lockPositionPercentage * currentLimit,
@@ -349,6 +351,7 @@ export function ScrollManager() {
     // --- NEW BARRIER LOGIC ---
     const handleBarrierInteraction = (deltaY: number, e: Event) => {
       if (shouldLockScroll) return; // Elevated mode has full lock
+      if (!ALAK_LAYOUT_CONFIG.features.hasIntro) return; // No barrier if no intro
 
       // If the user actively scrolls DOWN while the release animation is playing,
       // they are taking back manual control and interrupting the animation.
