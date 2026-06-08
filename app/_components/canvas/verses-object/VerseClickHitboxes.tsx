@@ -1,10 +1,11 @@
 "use client";
 import { useMemo } from "react";
-
+import { SectionTransforms } from "../../../data/schema";
 import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
-import { SURAH_DATA } from "../../../data/SurahConfig";
 import { SURAH_DATA_ARABIC } from "../../../data/surahData";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { GridSectionConfig, VerticalGroupsSectionConfig } from "../../../data/schema";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import {
@@ -29,16 +30,9 @@ interface VerseHitbox {
   h: number;
   kind: "verse" | "section";
   verseId?: number;
-  sectionId?: ElevatedSectionId;
+  sectionId?: string;
   verseIds?: number[];
 }
-
-const SECTION_VERSE_IDS: Record<ElevatedSectionId, number[]> = {
-  s1: [1, 2, 3, 4, 5],
-  s2_top: [6, 7, 8, 9, 10],
-  s2_bottom: [15, 16, 17, 18, 19],
-  s2_center: [11, 12, 13, 14],
-};
 
 const LABEL_HITBOX = {
   width: 0.43,
@@ -51,198 +45,226 @@ function buildHitboxes(
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;
   const zSection = zFront - 0.0008;
+
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  const s1 = SURAH_TRANSFORMS.s1;
-  SURAH_DATA.section1.gridVerses.forEach((v, i) => {
-    const isLTR = SURAH_DATA.section1.gridVerses[0].number === 1;
-    const lookupNumber = isLTR
-      ? SURAH_DATA_ARABIC.section1.gridVerses[i].number
-      : v.number;
-    const vt = s1.verses[lookupNumber];
-    if (!vt) return;
-    hitboxes.push({
-      key: `verse-${v.number}`,
-      cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
-      cy: vt.y - vt.h / 2,
-      cz: zFront,
-      w: vt.w,
-      h: vt.h,
-      kind: "verse",
-      verseId: v.number,
-    });
-  });
-
-  const anaAyet = s1.anaAyet;
-  hitboxes.push({
-    key: `verse-${SURAH_DATA.section1.anaAyet.number}`,
-    cx: anaAyet.x + anaAyet.w / 2 - PAGE_WIDTH / 2,
-    cy: anaAyet.y - anaAyet.h / 2,
-    cz: zFront,
-    w: anaAyet.w,
-    h: anaAyet.h,
-    kind: "verse",
-    verseId: SURAH_DATA.section1.anaAyet.number,
-  });
-
-  // Section 1 label hitbox -> elevate verses 1..5 together.
-  hitboxes.push({
-    key: "section-s1-label",
-    cx: PAGE_WIDTH / 2 - PAGE_WIDTH / 2,
-    cy: s1.labelPinY,
-    cz: zFront,
-    w: LABEL_HITBOX.width,
-    h: LABEL_HITBOX.height,
-    kind: "section",
-    sectionId: "s1",
-    verseIds: SECTION_VERSE_IDS.s1,
-  });
-
-  const s2 = SURAH_TRANSFORMS.s2;
-  const intro = s2.introVerse;
-  hitboxes.push({
-    key: `verse-${SURAH_DATA.section2.introVerse.number}`,
-    cx: intro.x + intro.w / 2 - PAGE_WIDTH / 2,
-    cy: intro.y - intro.h / 2,
-    cz: zFront,
-    w: intro.w,
-    h: intro.h,
-    kind: "verse",
-    verseId: SURAH_DATA.section2.introVerse.number,
-  });
-
-  SURAH_DATA.section2.colorGroups.forEach((group, gIdx) => {
-    const gTransform = s2.groups[gIdx];
-    group.verses.forEach((v, i) => {
-      const arabicVerseNumber = SURAH_DATA_ARABIC.section2.colorGroups[gIdx].verses[i].number;
-      const isLTR = arabicVerseNumber !== v.number;
-      const lookupNumber = isLTR ? arabicVerseNumber : v.number;
-      const vt = gTransform.verses[lookupNumber];
-      if (!vt) return;
-      hitboxes.push({
-        key: `verse-${v.number}`,
-        cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
-        cy: vt.y - vt.h / 2,
-        cz: zFront,
-        w: vt.w,
-        h: vt.h,
-        kind: "verse",
-        verseId: v.number,
+  ALAK_LAYOUT_CONFIG.sections.forEach((sectionConfig, idx) => {
+    const sTransform = SURAH_TRANSFORMS.sections[idx] as Required<SectionTransforms>;
+    
+    if (sectionConfig.type === "gridWithAnaAyet") {
+      const gConfig = sectionConfig as GridSectionConfig;
+      
+      // Add verses hitboxes
+      gConfig.verses.forEach((vId) => {
+        const vt = sTransform.verses[vId];
+        if (!vt) return;
+        hitboxes.push({
+          key: `verse-${vId}`,
+          cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+          cy: vt.y - vt.h / 2,
+          cz: zFront,
+          w: vt.w,
+          h: vt.h,
+          kind: "verse",
+          verseId: vId,
+        });
       });
-    });
+
+      // AnaAyet hitbox
+      const anaAyet = sTransform.anaAyet;
+      hitboxes.push({
+        key: `verse-${gConfig.anaAyet}`,
+        cx: anaAyet.x + anaAyet.w / 2 - PAGE_WIDTH / 2,
+        cy: anaAyet.y - anaAyet.h / 2,
+        cz: zFront,
+        w: anaAyet.w,
+        h: anaAyet.h,
+        kind: "verse",
+        verseId: gConfig.anaAyet,
+      });
+
+      // Section label hitbox
+      hitboxes.push({
+        key: `section-${gConfig.id}-label`,
+        cx: 0,
+        cy: sTransform.labelPinY,
+        cz: zFront,
+        w: LABEL_HITBOX.width,
+        h: LABEL_HITBOX.height,
+        kind: "section",
+        sectionId: gConfig.id,
+        verseIds: [...gConfig.verses, gConfig.anaAyet],
+      });
+
+    } else if (sectionConfig.type === "verticalGroups") {
+      const vConfig = sectionConfig as VerticalGroupsSectionConfig;
+
+      // Intro
+      if (vConfig.introVerse && sTransform.introVerse) {
+        const intro = sTransform.introVerse;
+        hitboxes.push({
+          key: `verse-${vConfig.introVerse}`,
+          cx: intro.x + intro.w / 2 - PAGE_WIDTH / 2,
+          cy: intro.y - intro.h / 2,
+          cz: zFront,
+          w: intro.w,
+          h: intro.h,
+          kind: "verse",
+          verseId: vConfig.introVerse,
+        });
+      }
+
+      // Outro
+      if (vConfig.outroVerse && sTransform.outroVerse) {
+        const outro = sTransform.outroVerse;
+        hitboxes.push({
+          key: `verse-${vConfig.outroVerse}`,
+          cx: outro.x + outro.w / 2 - PAGE_WIDTH / 2,
+          cy: outro.y - outro.h / 2,
+          cz: zFront,
+          w: outro.w,
+          h: outro.h,
+          kind: "verse",
+          verseId: vConfig.outroVerse,
+        });
+      }
+
+      // Groups
+      vConfig.groups.forEach((group, gIdx) => {
+        const gTransform = sTransform.groups[gIdx];
+        group.verseIds.forEach((vId) => {
+          const vt = gTransform.verses[vId];
+          if (!vt) return;
+          hitboxes.push({
+            key: `verse-${vId}`,
+            cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+            cy: vt.y - vt.h / 2,
+            cz: zFront,
+            w: vt.w,
+            h: vt.h,
+            kind: "verse",
+            verseId: vId,
+          });
+        });
+      });
+
+      const topId = `${vConfig.id}_top`;
+      const centerId = `${vConfig.id}_center`;
+      const bottomId = `${vConfig.id}_bottom`;
+
+      const topVerseIds: number[] = [];
+      if (vConfig.introVerse) topVerseIds.push(vConfig.introVerse);
+      if (vConfig.groups[0]) topVerseIds.push(...vConfig.groups[0].verseIds);
+
+      const centerVerseIds = vConfig.groups[1] ? [...vConfig.groups[1].verseIds] : [];
+
+      const bottomVerseIds: number[] = [];
+      if (vConfig.groups[2]) bottomVerseIds.push(...vConfig.groups[2].verseIds);
+      if (vConfig.outroVerse) bottomVerseIds.push(vConfig.outroVerse);
+
+      // Top label
+      hitboxes.push({
+        key: `section-${topId}-label`,
+        cx: 0,
+        cy: sTransform.topLabelPinY,
+        cz: zFront,
+        w: LABEL_HITBOX.width,
+        h: LABEL_HITBOX.height,
+        kind: "section",
+        sectionId: topId,
+        verseIds: topVerseIds,
+      });
+
+      // Top hollow
+      hitboxes.push({
+        key: `section-${topId}-hollow`,
+        cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+        cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
+        cz: zSection,
+        w: sTransform.connectorW,
+        h: sTransform.topConnectorH,
+        kind: "section",
+        sectionId: topId,
+        verseIds: topVerseIds,
+      });
+
+      // Bottom label
+      hitboxes.push({
+        key: `section-${bottomId}-label`,
+        cx: 0,
+        cy: sTransform.bottomLabelPinY,
+        cz: zFront,
+        w: LABEL_HITBOX.width,
+        h: LABEL_HITBOX.height,
+        kind: "section",
+        sectionId: bottomId,
+        verseIds: bottomVerseIds,
+      });
+
+      // Bottom hollow
+      hitboxes.push({
+        key: `section-${bottomId}-hollow`,
+        cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+        cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
+        cz: zSection,
+        w: sTransform.connectorW,
+        h: sTransform.bottomConnectorH,
+        kind: "section",
+        sectionId: bottomId,
+        verseIds: bottomVerseIds,
+      });
+
+      // Center hollow
+      const middleGroup = sTransform.groups[1];
+      if (middleGroup) {
+        hitboxes.push({
+          key: `section-${centerId}-hollow`,
+          cx: middleGroup.frameX + middleGroup.frameW / 2 - PAGE_WIDTH / 2,
+          cy: middleGroup.frameY - middleGroup.frameH / 2,
+          cz: zSection,
+          w: middleGroup.frameW,
+          h: middleGroup.frameH,
+          kind: "section",
+          sectionId: centerId,
+          verseIds: centerVerseIds,
+        });
+
+        const middleTop = middleGroup.frameY + 0.01;
+        const middleBottom = middleGroup.frameY - middleGroup.frameH - 0.01;
+        const middleHeight = middleTop - middleBottom;
+        const middleCenterY = (middleTop + middleBottom) / 2;
+
+        const curveZoneW = 0.31;
+        const leftCurveX = sTransform.baseX - 0.33;
+        const rightCurveX = sTransform.baseX + sTransform.innerW + 0.02;
+
+        hitboxes.push(
+          {
+            key: `section-${centerId}-curves-left`,
+            cx: leftCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
+            cy: middleCenterY,
+            cz: zFront,
+            w: curveZoneW,
+            h: middleHeight,
+            kind: "section",
+            sectionId: centerId,
+            verseIds: centerVerseIds,
+          },
+          {
+            key: `section-${centerId}-curves-right`,
+            cx: rightCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
+            cy: middleCenterY,
+            cz: zFront,
+            w: curveZoneW,
+            h: middleHeight,
+            kind: "section",
+            sectionId: centerId,
+            verseIds: centerVerseIds,
+          },
+        );
+      }
+    }
   });
-
-  const outro = s2.outroVerse;
-  hitboxes.push({
-    key: `verse-${SURAH_DATA.section2.outroVerse.number}`,
-    cx: outro.x + outro.w / 2 - PAGE_WIDTH / 2,
-    cy: outro.y - outro.h / 2,
-    cz: zFront,
-    w: outro.w,
-    h: outro.h,
-    kind: "verse",
-    verseId: SURAH_DATA.section2.outroVerse.number,
-  });
-
-  // Section 2 labels -> elevate top and bottom 5-verse sections.
-  hitboxes.push({
-    key: "section-s2-top-label",
-    cx: PAGE_WIDTH / 2 - PAGE_WIDTH / 2,
-    cy: s2.topLabelPinY,
-    cz: zFront,
-    w: LABEL_HITBOX.width,
-    h: LABEL_HITBOX.height,
-    kind: "section",
-    sectionId: "s2_top",
-    verseIds: SECTION_VERSE_IDS.s2_top,
-  });
-
-  // Direct top hollow area click target (behind verse hitboxes).
-  hitboxes.push({
-    key: "section-s2-top-hollow",
-    cx: s2.connectorX + s2.connectorW / 2 - PAGE_WIDTH / 2,
-    cy: s2.topConnectorY - s2.topConnectorH / 2,
-    cz: zSection,
-    w: s2.connectorW,
-    h: s2.topConnectorH,
-    kind: "section",
-    sectionId: "s2_top",
-    verseIds: SECTION_VERSE_IDS.s2_top,
-  });
-
-  hitboxes.push({
-    key: "section-s2-bottom-label",
-    cx: PAGE_WIDTH / 2 - PAGE_WIDTH / 2,
-    cy: s2.bottomLabelPinY,
-    cz: zFront,
-    w: LABEL_HITBOX.width,
-    h: LABEL_HITBOX.height,
-    kind: "section",
-    sectionId: "s2_bottom",
-    verseIds: SECTION_VERSE_IDS.s2_bottom,
-  });
-
-  // Direct bottom hollow area click target (behind verse hitboxes).
-  hitboxes.push({
-    key: "section-s2-bottom-hollow",
-    cx: s2.connectorX + s2.connectorW / 2 - PAGE_WIDTH / 2,
-    cy: s2.bottomConnectorY - s2.bottomConnectorH / 2,
-    cz: zSection,
-    w: s2.connectorW,
-    h: s2.bottomConnectorH,
-    kind: "section",
-    sectionId: "s2_bottom",
-    verseIds: SECTION_VERSE_IDS.s2_bottom,
-  });
-
-  // Middle curves (left + right) -> elevate verses 11..14 together.
-  const middleGroup = s2.groups[1];
-  const middleTop = middleGroup.frameY + 0.01;
-  const middleBottom = middleGroup.frameY - middleGroup.frameH - 0.01;
-  const middleHeight = middleTop - middleBottom;
-  const middleCenterY = (middleTop + middleBottom) / 2;
-
-  // Direct center hollow click target (behind verse hitboxes).
-  hitboxes.push({
-    key: "section-s2-center-hollow",
-    cx: middleGroup.frameX + middleGroup.frameW / 2 - PAGE_WIDTH / 2,
-    cy: middleGroup.frameY - middleGroup.frameH / 2,
-    cz: zSection,
-    w: middleGroup.frameW,
-    h: middleGroup.frameH,
-    kind: "section",
-    sectionId: "s2_center",
-    verseIds: SECTION_VERSE_IDS.s2_center,
-  });
-
-  const curveZoneW = 0.31;
-  const leftCurveX = s2.baseX - 0.33;
-  const rightCurveX = s2.baseX + s2.innerW + 0.02;
-
-  hitboxes.push(
-    {
-      key: "section-s2-center-curves-left",
-      cx: leftCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
-      cy: middleCenterY,
-      cz: zFront,
-      w: curveZoneW,
-      h: middleHeight,
-      kind: "section",
-      sectionId: "s2_center",
-      verseIds: SECTION_VERSE_IDS.s2_center,
-    },
-    {
-      key: "section-s2-center-curves-right",
-      cx: rightCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
-      cy: middleCenterY,
-      cz: zFront,
-      w: curveZoneW,
-      h: middleHeight,
-      kind: "section",
-      sectionId: "s2_center",
-      verseIds: SECTION_VERSE_IDS.s2_center,
-    },
-  );
 
   return hitboxes;
 }
@@ -281,10 +303,7 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
   }
 
   if (kind === "section" && Array.isArray(verseIds) && verseIds.length > 0) {
-    const validSectionId =
-      typeof sectionId === "string" && sectionId in SECTION_VERSE_IDS
-        ? (sectionId as ElevatedSectionId)
-        : undefined;
+    const validSectionId = typeof sectionId === "string" ? sectionId : undefined;
 
     const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
     const isDragged = validSectionId

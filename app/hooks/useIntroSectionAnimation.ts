@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
+import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
 
 // ─── Animation Config ───────────────────────────────────────────────────
 // 1. When does the scale-up start? (Overall scroll percentage from 0 to 100)
@@ -25,6 +26,12 @@ export const PAGE2_EXTRA_RX = 0.15;
 /** Convert degrees to radians — keeps scatter config human-readable. */
 const deg = (d: number): number => (d * Math.PI) / 180;
 
+const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
+const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
+const S2_TOP_ID = `${S2_ID}_top`;
+const S2_CENTER_ID = `${S2_ID}_center`;
+const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
 // ─── Scatter: [x, y, z, rx°, ry°, rz°] ─────────────────────────────────
 // Rotations are NOW in DEGREES — use the deg() helper when reading them.
 // Positive rx = tilt top away from camera ("lean back")
@@ -35,10 +42,10 @@ export const INTRO_SECTION_SCATTER: Record<
   [number, number, number, number?, number?, number?]
 > = {
   //     x      y      z      rx(°)   ry(°)    rz(°)
-  s1: [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
-  s2_top: [0, -0.6, -0.4],
-  s2_center: [0.06, -0.55, -1.2],
-  s2_bottom: [0, -0.63, 0.5],
+  [S1_ID]: [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
+  [S2_TOP_ID]: [0, -0.6, -0.4],
+  [S2_CENTER_ID]: [0.06, -0.55, -1.2],
+  [S2_BOTTOM_ID]: [0, -0.63, 0.5],
 };
 
 // ─── Idle breathing for s1 while scattered ──────────────────────────────
@@ -69,12 +76,12 @@ export const HANDOFF_SECTION_TARGET: Record<
   ElevatedSectionId,
   { x: number; y: number; z: number; scale: number }
 > = {
-  s1: { x: 0, y: 0, z: 0, scale: 1 },
+  [S1_ID]: { x: 0, y: 0, z: 0, scale: 1 },
   // Give all S2 sections the exact same displacement so they move as a unified block
   // and maintain their relative positions.
-  s2_top: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
-  s2_center: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
-  s2_bottom: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
+  [S2_TOP_ID]: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
+  [S2_CENTER_ID]: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
+  [S2_BOTTOM_ID]: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────
@@ -100,18 +107,18 @@ const IDENTITY: Transform7 = {
 
 // ─── Module-level pre-computed results (written once per frame by controller) ─
 const ALL_SECTION_IDS: ElevatedSectionId[] = [
-  "s1",
-  "s2_top",
-  "s2_center",
-  "s2_bottom",
+  S1_ID,
+  S2_TOP_ID,
+  S2_CENTER_ID,
+  S2_BOTTOM_ID,
 ];
 
 /** Current lerped transform for each section. Read by all useIntroSectionOffset consumers. */
 const _liveTransforms: Record<ElevatedSectionId, Transform7> = {
-  s1: { ...IDENTITY },
-  s2_top: { ...IDENTITY },
-  s2_center: { ...IDENTITY },
-  s2_bottom: { ...IDENTITY },
+  [S1_ID]: { ...IDENTITY },
+  [S2_TOP_ID]: { ...IDENTITY },
+  [S2_CENTER_ID]: { ...IDENTITY },
+  [S2_BOTTOM_ID]: { ...IDENTITY },
 };
 
 /** Group refs registered by consumers — the controller applies transforms to all of them. */
@@ -119,10 +126,10 @@ const _registeredGroups: Record<
   ElevatedSectionId,
   Set<RefObject<Group | null>>
 > = {
-  s1: new Set(),
-  s2_top: new Set(),
-  s2_center: new Set(),
-  s2_bottom: new Set(),
+  [S1_ID]: new Set(),
+  [S2_TOP_ID]: new Set(),
+  [S2_CENTER_ID]: new Set(),
+  [S2_BOTTOM_ID]: new Set(),
 };
 
 let _identityReadyAt = 0;
@@ -133,6 +140,7 @@ function getTransformTarget(
   time: number,
 ): Transform7 {
   const scatter = INTRO_SECTION_SCATTER[sectionId];
+  if (!scatter) return IDENTITY;
   const scatterX = scatter[0];
   const scatterY = scatter[1];
   const scatterZ = scatter[2];
@@ -172,7 +180,7 @@ function getTransformTarget(
   let rz = scatterRz * invT;
 
   // ── s1 idle breathing while scattered ──
-  if (sectionId === "s1" && invT > 0.01) {
+  if (sectionId === S1_ID && invT > 0.01) {
     const breathe = invT; // fade breathing out as section converges
     y += Math.sin(time * S1_IDLE.yFreq) * S1_IDLE.yAmp * breathe;
     rx += Math.sin(time * S1_IDLE.rxFreq) * S1_IDLE.rxAmp * breathe;
@@ -210,10 +218,12 @@ function getTransformTarget(
   const handoffT = easeInOut(clampedHandoff);
   if (handoffT > 0) {
     const target = HANDOFF_SECTION_TARGET[sectionId];
-    x += target.x * handoffT;
-    y += target.y * handoffT;
-    z += target.z * handoffT;
-    scale -= (1 - target.scale) * handoffT;
+    if (target) {
+      x += target.x * handoffT;
+      y += target.y * handoffT;
+      z += target.z * handoffT;
+      scale -= (1 - target.scale) * handoffT;
+    }
   }
 
   // Creative Highlight Effect at the "joined step"
@@ -305,16 +315,18 @@ export function IntroSectionAnimationController() {
 
       // Apply to all registered groups for this section
       const groups = _registeredGroups[sid];
-      groups.forEach((ref) => {
-        const g = ref.current;
-        if (g) {
-          g.position.x = live.x;
-          g.position.y = live.y;
-          g.position.z = live.z;
-          g.scale.setScalar(live.scale);
-          g.rotation.set(live.rx, live.ry, live.rz);
-        }
-      });
+      if (groups) {
+        groups.forEach((ref) => {
+          const g = ref.current;
+          if (g) {
+            g.position.x = live.x;
+            g.position.y = live.y;
+            g.position.z = live.z;
+            g.scale.setScalar(live.scale);
+            g.rotation.set(live.rx, live.ry, live.rz);
+          }
+        });
+      }
     }
 
     // Mark settled once all sections are at identity and handoff is complete.
@@ -340,8 +352,16 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
   useEffect(() => {
     if (!sectionId) return;
 
+    if (!_registeredGroups[sectionId]) {
+      _registeredGroups[sectionId] = new Set();
+    }
+    
     // Register this group ref so the controller can write transforms to it
     _registeredGroups[sectionId].add(groupRef);
+
+    if (!_liveTransforms[sectionId]) {
+      _liveTransforms[sectionId] = { ...IDENTITY };
+    }
 
     // Apply initial transform immediately (don't wait for first frame)
     const live = _liveTransforms[sectionId];
@@ -353,7 +373,7 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
     }
 
     return () => {
-      _registeredGroups[sectionId].delete(groupRef);
+      _registeredGroups[sectionId]?.delete(groupRef);
     };
   }, [sectionId]);
 

@@ -56,14 +56,22 @@ import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 
-type ShadowSurfaceSectionId = "s1" | "s2_top" | "s2_bottom";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+
+const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
+const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
+const S2_TOP_ID = `${S2_ID}_top`;
+const S2_CENTER_ID = `${S2_ID}_center`;
+const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
+type ShadowSurfaceSectionId = string;
 
 function getShadowSurfaceSectionId(
   verseId: number,
 ): ShadowSurfaceSectionId | null {
-  if (verseId >= 1 && verseId <= 5) return "s1";
-  if (verseId >= 6 && verseId <= 10) return "s2_top";
-  if (verseId >= 15 && verseId <= 19) return "s2_bottom";
+  if (verseId >= 1 && verseId <= 5) return S1_ID;
+  if (verseId >= 6 && verseId <= 10) return S2_TOP_ID;
+  if (verseId >= 15 && verseId <= 19) return S2_BOTTOM_ID;
   return null;
 }
 
@@ -91,7 +99,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     state.activeVerseIds.includes(config.id),
   );
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const isCenterSectionRaised = activeSectionIds.includes("s2_center");
+  const isCenterSectionRaised = activeSectionIds.includes(S2_CENTER_ID);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id);
@@ -176,7 +184,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
   const useSectionGroupDrag =
-    isCenterSectionRaised && sectionId === "s2_center" && sectionDrag !== null;
+    isCenterSectionRaised && sectionId === S2_CENTER_ID && sectionDrag !== null;
 
   const isVerseSeparated = useDragState((s) =>
     s.draggedVerseIds.includes(leadVerseId),
@@ -186,7 +194,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
 
   const sectionBounds = useMemo(() => {
-    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === "s2_center")
+    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === S2_CENTER_ID)
       return undefined;
     return calculateSectionBounds(
       sectionId,
@@ -204,7 +212,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     springY:
       useSectionGroupDrag && sectionDrag ? sectionDrag.y : leadVerseDrag.y,
     dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
-    dragSectionId: useSectionGroupDrag ? "s2_center" : undefined,
+    dragSectionId: useSectionGroupDrag ? S2_CENTER_ID : undefined,
     sectionBounds,
     sectionSpringX: sectionDrag?.x,
     sectionSpringY: sectionDrag?.y,

@@ -18,7 +18,6 @@ import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import {
   ELEVATED_RETURN_SYNC_MS,
   useElevatedStore,
-  type ElevatedSectionId,
 } from "../../../stores/useElevatedStore";
 import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
@@ -27,7 +26,7 @@ import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { LABEL_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
 
 type AnimatedLabelProps = {
-  sectionId: ElevatedSectionId;
+  sectionId: string;
   y: number;
   text: string;
   bgColor: string;
@@ -147,6 +146,9 @@ function AnimatedElevatedLabel({
   );
 }
 
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { GridSectionConfig, VerticalGroupsSectionConfig } from "../../../data/schema";
+
 export function ElevatedSectionLabels() {
   const runtime = useSurahLayoutRuntime();
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
@@ -169,68 +171,104 @@ export function ElevatedSectionLabels() {
   }, [isIntroActive]);
   const showLabels = postIntroSettled && !isIntroActive;
 
+  const getLabelText = (key: string | undefined) => {
+    switch (key) {
+      case "section1Label":
+        return surahData.section1.label;
+      case "section2TopLabel":
+        return surahData.section2.topLabel;
+      case "section2BottomLabel":
+        return surahData.section2.bottomLabel;
+      default:
+        return "";
+    }
+  };
+
+  const labelsToRender: Array<AnimatedLabelProps & { key: string; showInIntro: boolean }> = [];
+
+  ALAK_LAYOUT_CONFIG.sections.forEach((section, idx) => {
+    const sTransform = SURAH_TRANSFORMS.sections[idx]!;
+    if (section.type === "gridWithAnaAyet") {
+      const gConfig = section as GridSectionConfig;
+      labelsToRender.push({
+        key: gConfig.id,
+        sectionId: gConfig.id,
+        y: sTransform.labelPinY!,
+        text: isIntroActive
+          ? "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+          : getLabelText(gConfig.labelKey),
+        fontSizeOverride: isIntroActive ? 0.032 : undefined,
+        bgColor: S1_TOP_LABEL_BG,
+        borderColor: S1_TOP_LABEL_BORDER,
+        delayMs: 55,
+        liftHeight: LABEL_ELEVATION_HEIGHT,
+        tension: 96,
+        friction: 24,
+        renderOrder: 220,
+        depthTest: true,
+        showInIntro: true,
+      });
+    } else if (section.type === "verticalGroups") {
+      const vConfig = section as VerticalGroupsSectionConfig;
+      labelsToRender.push({
+        key: `${vConfig.id}_top`,
+        sectionId: `${vConfig.id}_top`,
+        y: sTransform.topLabelPinY!,
+        text: getLabelText(vConfig.topLabelKey),
+        bgColor: S2_TOP_LABEL_BG,
+        borderColor: S2_TOP_LABEL_BORDER,
+        partialBorder: true,
+        delayMs: 95,
+        liftHeight: LABEL_ELEVATION_HEIGHT,
+        tension: 90,
+        friction: 23,
+        zBaseOffset: 0.0022,
+        labelZ: 0.00035,
+        renderOrder: 240,
+        depthTest: true,
+        showInIntro: false,
+      });
+
+      labelsToRender.push({
+        key: `${vConfig.id}_bottom`,
+        sectionId: `${vConfig.id}_bottom`,
+        y: sTransform.bottomLabelPinY!,
+        text: getLabelText(vConfig.bottomLabelKey),
+        bgColor: S2_TOP_LABEL_BG,
+        borderColor: S2_TOP_LABEL_BORDER,
+        partialBorder: true,
+        bottomBorder: true,
+        delayMs: 130,
+        liftHeight: LABEL_ELEVATION_HEIGHT,
+        tension: 84,
+        friction: 22,
+        zBaseOffset: 0.0022,
+        labelZ: 0.00035,
+        renderOrder: 240,
+        depthTest: true,
+        showInIntro: false,
+      });
+    }
+  });
+
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
-      {(isIntroActive || showLabels) && (
-        <group>
-          <AnimatedElevatedLabel
-            sectionId="s1"
-            y={SURAH_TRANSFORMS.s1.labelPinY}
-            text={
-              isIntroActive
-                ? "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
-                : surahData.section1.label
-            }
-            fontSizeOverride={isIntroActive ? 0.032 : undefined}
-            bgColor={S1_TOP_LABEL_BG}
-            borderColor={S1_TOP_LABEL_BORDER}
-            delayMs={55}
-            liftHeight={LABEL_ELEVATION_HEIGHT}
-            tension={96}
-            friction={24}
-            renderOrder={220}
-            depthTest={true}
-          />
-        </group>
-      )}
-      {showLabels && (
-        <group>
-          <AnimatedElevatedLabel
-            sectionId="s2_top"
-            y={SURAH_TRANSFORMS.s2.topLabelPinY}
-            text={surahData.section2.topLabel}
-            bgColor={S2_TOP_LABEL_BG}
-            borderColor={S2_TOP_LABEL_BORDER}
-            partialBorder={true}
-            delayMs={95}
-            liftHeight={LABEL_ELEVATION_HEIGHT}
-            tension={90}
-            friction={23}
-            zBaseOffset={0.0022}
-            labelZ={0.00035}
-            renderOrder={240}
-            depthTest={true}
-          />
+      {labelsToRender.map((labelConfig) => {
+        const { key, showInIntro, ...props } = labelConfig;
+        const shouldShow = showInIntro
+          ? isIntroActive || showLabels
+          : showLabels;
 
-          <AnimatedElevatedLabel
-            sectionId="s2_bottom"
-            y={SURAH_TRANSFORMS.s2.bottomLabelPinY}
-            text={surahData.section2.bottomLabel}
-            bgColor={S2_TOP_LABEL_BG}
-            borderColor={S2_TOP_LABEL_BORDER}
-            partialBorder={true}
-            bottomBorder={true}
-            delayMs={130}
-            liftHeight={LABEL_ELEVATION_HEIGHT}
-            tension={84}
-            friction={22}
-            zBaseOffset={0.0022}
-            labelZ={0.00035}
-            renderOrder={240}
-            depthTest={true}
-          />
-        </group>
-      )}
+        if (!shouldShow) return null;
+
+        return (
+          <group key={key}>
+            <AnimatedElevatedLabel
+              {...props}
+            />
+          </group>
+        );
+      })}
     </group>
   );
 }

@@ -18,17 +18,18 @@ import {
 import {
   OPPOSITE_VERSE_CONNECTOR,
   type SectionOneData,
-  type S1Transforms,
 } from "../../../data/SurahConfig";
+import { SectionTransforms } from "../../../data/schema";
+import { S1_NEON_CONFIG } from "../../../data/SurahConfig";
+import { useMemo } from "react";
+import { SURAH_DATA_ARABIC } from "../../../data/surahData";
+
 interface SectionOneProps {
   data: SectionOneData;
-  transforms: S1Transforms;
+  transforms: SectionTransforms;
   PW: number;
   isFolded?: boolean;
 }
-
-import { useMemo } from "react";
-import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 
 export const SCALLOP_RADIUS_X = 0.053;
 export const SCALLOP_RADIUS_Y = 0.03;
@@ -131,7 +132,7 @@ export function ScallopedCenteredShape({
 
 export function SectionOne({ data, transforms, PW }: SectionOneProps) {
   const hideSectionLabel = false;
-  const t = transforms;
+  const t = transforms as Required<SectionTransforms>;
 
   const texture = useTexture(S1_FRAME_IMAGE, (t) => {
     t.colorSpace = THREE.SRGBColorSpace;

@@ -8,8 +8,9 @@ import {
   MAROON_THEME,
   GREEN_THEME,
 } from "../../../data/theme";
-import type { ColorGroup, GroupTransforms } from "../../../data/SurahConfig";
+import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
+import type { GroupTransforms, RowConnectorTransform } from "../../../data/schema";
 import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 
 interface VerseGroupProps {
@@ -37,7 +38,7 @@ export function VerseGroup({ group, groupTransform, groupIndex }: VerseGroupProp
       /> */}
 
       {/* Row Connectors for opposite verses */}
-      {gt.rowConnectors.map((rc, i) => {
+      {gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
         const leftV = group.verses[i * 2];
         const rightV = group.verses[i * 2 + 1];
 

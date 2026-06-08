@@ -10,6 +10,7 @@ import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import { useMemo } from "react";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 
 export function VersesRenderer() {
   const runtime = useSurahLayoutRuntime();
@@ -37,8 +38,13 @@ export function VersesRenderer() {
         setHoveredGroupId={setHoveredGroupId}
       />
 
-      {/* Static Metallic Verse 5 */}
-      <VerseFiveMetallic />
+      {/* Dynamic Metallic Verse */}
+      {ALAK_LAYOUT_CONFIG.specialVerses?.metallicVerseId && ALAK_LAYOUT_CONFIG.assets?.metallicVerseBorderSvg && (
+        <VerseFiveMetallic
+          verseId={ALAK_LAYOUT_CONFIG.specialVerses.metallicVerseId}
+          assetUrl={ALAK_LAYOUT_CONFIG.assets.metallicVerseBorderSvg}
+        />
+      )}
     </group>
   );
 }

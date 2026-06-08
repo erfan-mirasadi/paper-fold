@@ -1,25 +1,44 @@
 import { create } from "zustand";
+import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
+import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
+
 export type ElevatedPhase = "idle" | "elevated";
-export type ElevatedSectionId = "s1" | "s2_top" | "s2_bottom" | "s2_center";
+export type ElevatedSectionId = string;
 
 /** Elevated interactions unlock only after user scroll reaches this offset. */
 export const ELEVATED_SCROLL_UNLOCK_THRESHOLD = 0.9;
 /** Delay used to sync base section reappearance with elevated return animation. */
 export const ELEVATED_RETURN_SYNC_MS = 480;
 
-const SECTION_VERSE_IDS: Record<ElevatedSectionId, number[]> = {
-  s1: [1, 2, 3, 4, 5],
-  s2_top: [6, 7, 8, 9, 10],
-  s2_bottom: [15, 16, 17, 18, 19],
-  s2_center: [11, 12, 13, 14],
-};
+const SECTION_VERSE_IDS: Record<string, number[]> = {};
+const SECTION_PRIORITY: string[] = [];
 
-const SECTION_PRIORITY: ElevatedSectionId[] = [
-  "s1",
-  "s2_top",
-  "s2_center",
-  "s2_bottom",
-];
+ALAK_LAYOUT_CONFIG.sections.forEach((section) => {
+  if (section.type === "gridWithAnaAyet") {
+    const s1 = section as GridSectionConfig;
+    const id = s1.id;
+    SECTION_PRIORITY.push(id);
+    SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
+  } else if (section.type === "verticalGroups") {
+    const s2 = section as VerticalGroupsSectionConfig;
+    const topId = `${s2.id}_top`;
+    const centerId = `${s2.id}_center`;
+    const bottomId = `${s2.id}_bottom`;
+    
+    SECTION_PRIORITY.push(topId, centerId, bottomId);
+    
+    SECTION_VERSE_IDS[topId] = [];
+    if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
+    if (s2.groups[0]) SECTION_VERSE_IDS[topId].push(...s2.groups[0].verseIds);
+
+    SECTION_VERSE_IDS[centerId] = [];
+    if (s2.groups[1]) SECTION_VERSE_IDS[centerId].push(...s2.groups[1].verseIds);
+
+    SECTION_VERSE_IDS[bottomId] = [];
+    if (s2.groups[2]) SECTION_VERSE_IDS[bottomId].push(...s2.groups[2].verseIds);
+    if (s2.outroVerse) SECTION_VERSE_IDS[bottomId].push(s2.outroVerse);
+  }
+});
 
 const ALL_ELEVATED_VERSE_IDS = SECTION_PRIORITY.flatMap(
   (sectionId) => SECTION_VERSE_IDS[sectionId],

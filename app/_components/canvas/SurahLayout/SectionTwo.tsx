@@ -18,12 +18,12 @@ import {
 import type {
   SectionTwoData,
   LayoutConfig,
-  S2Transforms,
 } from "../../../data/SurahConfig";
+import { SectionTransforms } from "../../../data/schema";
 import { S2_LABEL_WIDTH, S2_LABEL_Y_OFFSET } from "../../../data/SurahConfig";
 interface SectionTwoProps {
   data: SectionTwoData;
-  transforms: S2Transforms;
+  transforms: SectionTransforms;
   layout: LayoutConfig;
   startX: number;
   PW: number;
@@ -57,7 +57,7 @@ export function SectionTwo({
   startX,
   PW,
 }: SectionTwoProps) {
-  const t = transforms;
+  const t = transforms as Required<SectionTransforms>;
   const edgeVerseBorderWidth = t.borderWidth;
 
   const texture = useTexture(S2_FRAME_IMAGE, (tex) => {

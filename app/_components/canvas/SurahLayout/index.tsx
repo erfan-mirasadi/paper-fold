@@ -1,9 +1,8 @@
 "use client";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-// import { Boarder } from "./Boarder";
-import { SectionOne } from "./SectionOne";
-import { SectionTwo } from "./SectionTwo";
+import { SurahSection } from "./SurahSection";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 import {
   SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
@@ -81,23 +80,24 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
 
       {/* Outer decorative card border */}
       {/* <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} /> */}
-      {/* Upper section — receives pre-computed S1Transforms, does zero math */}
-      <SectionOne
-        data={surahData.section1}
-        transforms={runtime.SURAH_TRANSFORMS.s1}
-        PW={runtime.PW}
-        isFolded={isFolded}
-      />
-
-      {/* Lower section — receives pre-computed S2Transforms, does zero math */}
-      <SectionTwo
-        data={surahData.section2}
-        transforms={runtime.SURAH_TRANSFORMS.s2}
-        layout={runtime.layoutMath}
-        startX={runtime.START_X}
-        PW={runtime.PW}
-        isFolded={isFolded}
-      />
+      
+      {/* Render sections dynamically */}
+      {ALAK_LAYOUT_CONFIG.sections.map((sectionConfig, idx) => {
+        const transforms = runtime.SURAH_TRANSFORMS.sections[idx];
+        if (!transforms) return null;
+        return (
+          <SurahSection
+            key={sectionConfig.id}
+            sectionConfig={sectionConfig}
+            transforms={transforms}
+            surahData={surahData}
+            layoutMath={runtime.layoutMath}
+            startX={runtime.START_X}
+            PW={runtime.PW}
+            isFolded={isFolded}
+          />
+        );
+      })}
     </>
   );
 }

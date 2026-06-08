@@ -42,6 +42,10 @@ export interface ThemeColors {
   maroonTheme: string;
   greenTheme: string;
   s1InnerBorder: string;
+  s2IntroOutroBg: string;
+  s2Group1Bg: string;
+  s2Group2Bg: string;
+  s2Group3Bg: string;
 }
 
 export interface LayoutStyling {
@@ -67,6 +71,7 @@ export interface VerseBlockConfig {
   isCenter?: boolean;
   extraRowGap?: number;
   isMetallic?: boolean;
+  bgThemeKey?: keyof ThemeColors;
 }
 
 export interface GridSectionConfig {
@@ -75,6 +80,7 @@ export interface GridSectionConfig {
   labelKey?: string;
   verses: number[]; 
   anaAyet: number;
+  bgThemeKey?: keyof ThemeColors;
 }
 
 export interface VerticalGroupsSectionConfig {
@@ -84,6 +90,7 @@ export interface VerticalGroupsSectionConfig {
   bottomLabelKey?: string;
   introVerse?: number;
   outroVerse?: number;
+  introOutroBgThemeKey?: keyof ThemeColors;
   groups: VerseBlockConfig[];
 }
 
@@ -91,6 +98,11 @@ export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
 
 export interface SpecialVerses {
   metallicVerseId?: number;
+  middleFoldVerses?: { left: number[]; right: number[] };
+}
+
+export interface SurahAssets {
+  metallicVerseBorderSvg?: string;
 }
 
 export interface SurahLayoutConfig<TParams = any> {
@@ -99,6 +111,72 @@ export interface SurahLayoutConfig<TParams = any> {
   dimensions: LayoutDimensions;
   styling: LayoutStyling;
   specialVerses: SpecialVerses;
+  assets?: SurahAssets;
   params: TParams;
   sections: SectionConfig[];
+}
+
+// ----------------------------------------------------------------------------
+// LAYOUT ENGINE TYPES
+// ----------------------------------------------------------------------------
+
+export interface ElementTransform {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+  h: number;
+}
+
+export interface RowConnectorTransform {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+  h: number;
+}
+
+export interface GroupTransforms {
+  frameX: number;
+  frameY: number;
+  frameW: number;
+  frameH: number;
+  isPushedIn: boolean;
+  isCenter: boolean;
+  verses: Record<number, ElementTransform>;
+  rowConnectors: RowConnectorTransform[];
+}
+
+export interface SectionTransforms {
+  frameX: number;
+  frameY?: number;
+  frameW: number;
+  frameH?: number;
+  shiftedTop?: number;
+  shiftedBot?: number;
+  shiftedH?: number;
+  connectorX?: number;
+  connectorW?: number;
+  topConnectorY?: number;
+  topConnectorH?: number;
+  bottomConnectorY?: number;
+  bottomConnectorH?: number;
+  borderWidth: number;
+  verses?: Record<number, ElementTransform>;
+  rowConnectors?: RowConnectorTransform[];
+  anaAyet?: ElementTransform;
+  anaAyetTabX?: number;
+  anaAyetTabY?: number;
+  anaAyetTabW?: number;
+  anaAyetTabH?: number;
+  anaAyetTabBorderWidth?: number;
+  anaAyetLabelDrop?: number;
+  labelPinY?: number;
+  introVerse?: ElementTransform;
+  outroVerse?: ElementTransform;
+  groups?: GroupTransforms[];
+  innerW?: number;
+  baseX?: number;
+  topLabelPinY?: number;
+  bottomLabelPinY?: number;
 }

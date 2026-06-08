@@ -1,23 +1,38 @@
 import { SpringValue } from "@react-spring/three";
 import { create } from "zustand";
 import { type ElevatedSectionId } from "../stores/useElevatedStore";
+import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
+import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
 
 export const DRAG_SPRING_CONFIG = { mass: 1.5, tension: 350, friction: 35 };
 
 const createSpring = () => new SpringValue(0, { config: DRAG_SPRING_CONFIG });
 
+const dynamicSections: Record<string, { x: SpringValue<number>; y: SpringValue<number> }> = {};
+let maxVerseId = 0;
+
+ALAK_LAYOUT_CONFIG.sections.forEach((sec) => {
+  if (sec.type === "gridWithAnaAyet") {
+    dynamicSections[sec.id] = { x: createSpring(), y: createSpring() };
+    const g = sec as GridSectionConfig;
+    maxVerseId = Math.max(maxVerseId, ...g.verses, g.anaAyet);
+  } else if (sec.type === "verticalGroups") {
+    dynamicSections[`${sec.id}_top`] = { x: createSpring(), y: createSpring() };
+    dynamicSections[`${sec.id}_center`] = { x: createSpring(), y: createSpring() };
+    dynamicSections[`${sec.id}_bottom`] = { x: createSpring(), y: createSpring() };
+    const v = sec as VerticalGroupsSectionConfig;
+    if (v.introVerse) maxVerseId = Math.max(maxVerseId, v.introVerse);
+    if (v.outroVerse) maxVerseId = Math.max(maxVerseId, v.outroVerse);
+    v.groups.forEach(g => {
+      maxVerseId = Math.max(maxVerseId, ...g.verseIds);
+    });
+  }
+});
+
 export const dragEngine = {
-  sections: {
-    s1: { x: createSpring(), y: createSpring() },
-    s2_top: { x: createSpring(), y: createSpring() },
-    s2_bottom: { x: createSpring(), y: createSpring() },
-    s2_center: { x: createSpring(), y: createSpring() },
-  } as Record<
-    ElevatedSectionId,
-    { x: SpringValue<number>; y: SpringValue<number> }
-  >,
+  sections: dynamicSections,
   verses: Object.fromEntries(
-    Array.from({ length: 19 }, (_, i) => [
+    Array.from({ length: maxVerseId }, (_, i) => [
       i + 1,
       { x: createSpring(), y: createSpring() },
     ]),
@@ -167,9 +182,16 @@ export function resetAllDrags() {
 
 /** Helper to resolve verse -> section map */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
-  if (verseId >= 1 && verseId <= 5) return "s1";
-  if (verseId >= 6 && verseId <= 10) return "s2_top";
-  if (verseId >= 11 && verseId <= 14) return "s2_center";
-  if (verseId >= 15 && verseId <= 19) return "s2_bottom";
+  for (const sec of ALAK_LAYOUT_CONFIG.sections) {
+    if (sec.type === "gridWithAnaAyet") {
+      const g = sec as GridSectionConfig;
+      if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;
+    } else if (sec.type === "verticalGroups") {
+      const v = sec as VerticalGroupsSectionConfig;
+      if (v.introVerse === verseId || (v.groups[0] && v.groups[0].verseIds.includes(verseId))) return `${v.id}_top`;
+      if (v.groups[1] && v.groups[1].verseIds.includes(verseId)) return `${v.id}_center`;
+      if (v.outroVerse === verseId || (v.groups[2] && v.groups[2].verseIds.includes(verseId))) return `${v.id}_bottom`;
+    }
+  }
   return null;
 }

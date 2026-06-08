@@ -5,6 +5,13 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
 import { Vector3 } from "three";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+
+const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
+const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
+const S2_TOP_ID = `${S2_ID}_top`;
+const S2_CENTER_ID = `${S2_ID}_center`;
+const S2_BOTTOM_ID = `${S2_ID}_bottom`;
 
 const SECTION_ZOOM_TARGETS: Record<
   string,
@@ -13,10 +20,10 @@ const SECTION_ZOOM_TARGETS: Record<
   // y: بالا و پایین رفتن دوربین
   // fov: زوم لنز دوربین (مقدار پیش‌فرض 50 است. عدد کمتر = زوم بیشتر)
   // tilt: زاویه دید بالا/پایین (عدد منفی = نگاه به سمت پایین، صفر = نگاه مستقیم)
-  s1: { y: 2, fov: 20, tilt: -1.3 },
-  s2_top: { y: 1.4, fov: 25, tilt: -1.3 },
-  s2_center: { y: 1, fov: 30, tilt: -1.5 },
-  s2_bottom: { y: 0.7, fov: 35, tilt: -1.5 },
+  [S1_ID]: { y: 2, fov: 20, tilt: -1.3 },
+  [S2_TOP_ID]: { y: 1.4, fov: 25, tilt: -1.3 },
+  [S2_CENTER_ID]: { y: 1, fov: 30, tilt: -1.5 },
+  [S2_BOTTOM_ID]: { y: 0.7, fov: 35, tilt: -1.5 },
 };
 
 const _camPos = new Vector3();
@@ -49,10 +56,10 @@ export function SectionZoomCamera() {
     let targetSectionId = activeSectionId;
     if (!targetSectionId && activeVerseIds.length > 0) {
       const vid = activeVerseIds[0];
-      if (vid <= 5) targetSectionId = "s1";
-      else if (vid <= 10) targetSectionId = "s2_top";
-      else if (vid <= 14) targetSectionId = "s2_center";
-      else targetSectionId = "s2_bottom";
+      if (vid <= 5) targetSectionId = S1_ID;
+      else if (vid <= 10) targetSectionId = S2_TOP_ID;
+      else if (vid <= 14) targetSectionId = S2_CENTER_ID;
+      else targetSectionId = S2_BOTTOM_ID;
     }
 
     // 3. If a section is active and we are NOT in all sections mode, zoom to it

@@ -45,6 +45,7 @@ import { calculateSectionBounds } from "../../../utils/boundsHelper";
 import { dragEngine, useDragState } from "../../../utils/dragEngine";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 
 // --- ADJUSTABLE PARAMETERS ---
 const ZERO_OFFSET = { x: 0, y: 0 };
@@ -143,6 +144,7 @@ function BorderSvg({
   h,
   z,
   language,
+  assetUrl,
 }: {
   x: number;
   y: number;
@@ -150,8 +152,9 @@ function BorderSvg({
   h: number;
   z: number;
   language: string;
+  assetUrl: string;
 }) {
-  const texture = useTexture("/Group 11.svg", (t) => {
+  const texture = useTexture(assetUrl, (t) => {
     t.colorSpace = THREE.SRGBColorSpace;
   });
   // ضریب‌های ساده برای تغییر سایز نسبت به خود کپسول:
@@ -179,16 +182,23 @@ function BorderSvg({
   );
 }
 
-export function VerseFiveMetallic() {
+export interface VerseFiveMetallicProps {
+  verseId: number;
+  assetUrl: string;
+}
+
+export function VerseFiveMetallic({ verseId, assetUrl }: VerseFiveMetallicProps) {
   const runtime = useSurahLayoutRuntime();
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
   const anaAyetLabel = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   // const decorativeSvg = useLoader(SVGLoader, "/decorative.svg");
-  const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(5));
+  const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
+
+  const isElevated = useElevatedStore((s) => s.activeVerseIds.includes(verseId));
   const isSectionSurfaceRaised = useElevatedStore((s) =>
-    s.activeSectionIds.includes("s1"),
+    s.activeSectionIds.includes(S1_ID),
   );
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
@@ -197,7 +207,7 @@ export function VerseFiveMetallic() {
     tiltX,
     scale,
     shadowOpacity: elevateShadowOpacity,
-  } = useElevateAnimation(isElevated, "s1");
+  } = useElevateAnimation(isElevated, S1_ID);
 
   const { surfaceLiftZ } = useSpring({
     surfaceLiftZ: isSectionSurfaceRaised
@@ -210,10 +220,11 @@ export function VerseFiveMetallic() {
     config: SECTION_SURFACE_SHADOW_MOTION.spring,
   });
 
-  const t = SURAH_TRANSFORMS.s1.anaAyet;
+  const sectionTransforms = SURAH_TRANSFORMS.sections[0]!;
+  const t = sectionTransforms.anaAyet!;
   const data = surahData.section1.anaAyet;
-  const verseDrag = dragEngine.verses[5];
-  const sectionDrag = dragEngine.sections.s1;
+  const verseDrag = dragEngine.verses[verseId];
+  const sectionDrag = dragEngine.sections[S1_ID];
 
   const w = t.w + CAPSULE_SIDE_EXPAND * 2;
   const h = t.h + CAPSULE_HEIGHT_EXPAND * 2;
@@ -223,9 +234,9 @@ export function VerseFiveMetallic() {
   const outerH = h + BW * 2;
   const outerRadius = radius + BW / 2; // Adjusted to look natural
 
-  const labelW = SURAH_TRANSFORMS.s1.anaAyetTabW;
-  const labelH = SURAH_TRANSFORMS.s1.anaAyetTabH;
-  const labelDrop = SURAH_TRANSFORMS.s1.anaAyetLabelDrop;
+  const labelW = sectionTransforms.anaAyetTabW!;
+  const labelH = sectionTransforms.anaAyetTabH!;
+  const labelDrop = sectionTransforms.anaAyetLabelDrop!;
   const labelRadius = labelH / 2;
 
   const zBasePosition = PAGE_DEPTH / 2 + Z_OFFSET;
@@ -233,8 +244,8 @@ export function VerseFiveMetallic() {
   const baseY = t.y + BW + CAPSULE_HEIGHT_EXPAND;
 
   const sectionBounds = useMemo(
-    () => calculateSectionBounds("s1", SURAH_TRANSFORMS, PAGE_WIDTH),
-    [SURAH_TRANSFORMS, PAGE_WIDTH],
+    () => calculateSectionBounds(S1_ID, SURAH_TRANSFORMS, PAGE_WIDTH),
+    [SURAH_TRANSFORMS, PAGE_WIDTH, S1_ID],
   );
 
   const dragBind = useElevatedDrag({
@@ -243,15 +254,15 @@ export function VerseFiveMetallic() {
       !useFoldStore.getState().isIntroActive,
     springX: verseDrag.x,
     springY: verseDrag.y,
-    dragVerseId: 5,
+    dragVerseId: verseId,
     sectionBounds,
     sectionSpringX: sectionDrag.x,
     sectionSpringY: sectionDrag.y,
   });
 
-  const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(5));
+  const isVerseSeparated = useDragState((s) => s.draggedVerseIds.includes(verseId));
   const separationOffset = useDragState(
-    (s) => s.separatedVerseOffsets[5] || ZERO_OFFSET,
+    (s) => s.separatedVerseOffsets[verseId] || ZERO_OFFSET,
   );
 
   const dragX = to(
@@ -340,7 +351,7 @@ export function VerseFiveMetallic() {
 
   // const decorativeY = -outerH / 2;
 
-  const introMotionRef = useIntroSectionOffset("s1");
+  const introMotionRef = useIntroSectionOffset(S1_ID);
 
   return (
     <group ref={introMotionRef}>
@@ -469,6 +480,7 @@ export function VerseFiveMetallic() {
               h={outerH}
               z={EXTRUDE_DEPTH + 0.002}
               language={activeLanguage}
+              assetUrl={assetUrl}
             />
           </a.group>
 
@@ -488,7 +500,7 @@ export function VerseFiveMetallic() {
                   w={labelW}
                   h={labelH}
                   z={0}
-                  borderWidth={SURAH_TRANSFORMS.s1.anaAyetTabBorderWidth}
+                  borderWidth={sectionTransforms.anaAyetTabBorderWidth!}
                   renderOrder={110}
                 />
               </group>

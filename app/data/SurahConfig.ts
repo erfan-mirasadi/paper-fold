@@ -1,9 +1,14 @@
-import { SURAH_TEXT_ARABIC as SURAH_TEXT } from "./surahText";
 import {
   SurahLayoutConfig,
   SectionConfig,
   GridSectionConfig,
   VerticalGroupsSectionConfig,
+} from "./schema";
+import type {
+  ElementTransform,
+  GroupTransforms,
+  RowConnectorTransform,
+  SectionTransforms,
 } from "./schema";
 import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
 
@@ -85,6 +90,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
   specialVerses: {
     metallicVerseId: 5,
+    middleFoldVerses: { left: [12, 14], right: [11, 13] },
+  },
+  assets: {
+    metallicVerseBorderSvg: "/Group 11.svg",
   },
   styling: {
     colors: {
@@ -107,6 +116,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       maroonTheme: "#800000",
       greenTheme: "#008000",
       s1InnerBorder: "#cccccc",
+      s2IntroOutroBg: "#C4963B",
+      s2Group1Bg: "#7c8cb0",
+      s2Group2Bg: "#5E7367",
+      s2Group3Bg: "#7c8cb0",
     },
     capsuleBorderWidth: 0.0039,
     circleBorderWidth: 0.0035,
@@ -170,6 +183,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       labelKey: "section1Label",
       verses: [2, 1, 4, 3],
       anaAyet: 5,
+      bgThemeKey: "s1InnerBorder",
     } as GridSectionConfig,
     {
       id: "section2",
@@ -178,24 +192,28 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       bottomLabelKey: "section2BottomLabel",
       introVerse: 6,
       outroVerse: 19,
+      introOutroBgThemeKey: "s2IntroOutroBg",
       groups: [
         {
           verseIds: [8, 7, 10, 9],
           isPushedIn: false,
           isCenter: false,
           extraRowGap: 0,
+          bgThemeKey: "s2Group1Bg",
         },
         {
           verseIds: [12, 11, 14, 13],
           isPushedIn: true,
           isCenter: true,
           extraRowGap: 0,
+          bgThemeKey: "s2Group2Bg",
         },
         {
           verseIds: [16, 15, 18, 17],
           isPushedIn: false,
           isCenter: false,
           extraRowGap: 0,
+          bgThemeKey: "s2Group3Bg",
         },
       ],
     } as VerticalGroupsSectionConfig,
@@ -353,75 +371,8 @@ export const FOLD_Y_POSITIONS = createFoldYPositions(layoutMath);
 // LAYOUT ENGINE
 // ============================================================================
 
-export interface ElementTransform {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-  h: number;
-}
-export interface RowConnectorTransform {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-  h: number;
-}
-
-export interface GroupTransforms {
-  frameX: number;
-  frameY: number;
-  frameW: number;
-  frameH: number;
-  isPushedIn: boolean;
-  isCenter: boolean;
-  verses: Record<number, ElementTransform>;
-  rowConnectors: RowConnectorTransform[];
-}
-
-export interface S1Transforms {
-  frameX: number;
-  frameY: number;
-  frameW: number;
-  frameH: number;
-  verses: Record<number, ElementTransform>;
-  rowConnectors: RowConnectorTransform[];
-  anaAyet: ElementTransform;
-  anaAyetTabX: number;
-  anaAyetTabY: number;
-  anaAyetTabW: number;
-  anaAyetTabH: number;
-  anaAyetTabBorderWidth: number;
-  anaAyetLabelDrop: number;
-  borderWidth: number;
-  labelPinY: number;
-}
-
-export interface S2Transforms {
-  frameX: number;
-  frameW: number;
-  shiftedTop: number;
-  shiftedBot: number;
-  shiftedH: number;
-  connectorX: number;
-  connectorW: number;
-  topConnectorY: number;
-  topConnectorH: number;
-  bottomConnectorY: number;
-  bottomConnectorH: number;
-  borderWidth: number;
-  introVerse: ElementTransform;
-  outroVerse: ElementTransform;
-  groups: GroupTransforms[];
-  innerW: number;
-  baseX: number;
-  topLabelPinY: number;
-  bottomLabelPinY: number;
-}
-
 export interface SurahTransforms {
-  s1: S1Transforms;
-  s2: S2Transforms;
+  sections: SectionTransforms[];
 }
 
 export function buildSurahTransforms(
@@ -429,186 +380,192 @@ export function buildSurahTransforms(
   startX: number,
   config: SurahLayoutConfig<AlakLayoutParams>,
 ): SurahTransforms {
-  const s1Config = config.sections[0] as GridSectionConfig;
-  const s2Config = config.sections[1] as VerticalGroupsSectionConfig;
+  const sections: SectionTransforms[] = [];
+  
+  // Build transforms for each section dynamically based on its type
+  config.sections.forEach((section) => {
+    if (section.type === "gridWithAnaAyet") {
+      const s1Config = section as GridSectionConfig;
+      const s1BaseX = startX + lm.s1Pad;
+      const ANA_AYET_Y_OFFSET = -0.01;
+      const anaAyetY =
+        lm.s1Top -
+        lm.s1Pad -
+        (lm.smallBoxH * 2 + lm.gap) -
+        lm.s1AnaGap +
+        ANA_AYET_Y_OFFSET;
 
-  // ── SECTION 1 ──────────────────────────────────────────────────────────────
-  const s1BaseX = startX + lm.s1Pad;
-  const ANA_AYET_Y_OFFSET = -0.01;
-  const anaAyetY =
-    lm.s1Top -
-    lm.s1Pad -
-    (lm.smallBoxH * 2 + lm.gap) -
-    lm.s1AnaGap +
-    ANA_AYET_Y_OFFSET;
+      const s1Verses: Record<number, ElementTransform> = {};
+      s1Config.verses.forEach((verseId, i) => {
+        const isRightCol = i % 2 !== 0;
+        const isBottomRow = i >= 2;
+        s1Verses[verseId] = {
+          x: s1BaseX + (isRightCol ? lm.innerHalfW + lm.gap : 0),
+          y: lm.s1Top - lm.s1Pad - (isBottomRow ? lm.smallBoxH + lm.gap : 0),
+          z: 0.002,
+          w: lm.innerHalfW,
+          h: lm.smallBoxH,
+        };
+      });
 
-  const s1Verses: Record<number, ElementTransform> = {};
-  s1Config.verses.forEach((verseId, i) => {
-    const isRightCol = i % 2 !== 0;
-    const isBottomRow = i >= 2;
-    s1Verses[verseId] = {
-      x: s1BaseX + (isRightCol ? lm.innerHalfW + lm.gap : 0),
-      y: lm.s1Top - lm.s1Pad - (isBottomRow ? lm.smallBoxH + lm.gap : 0),
-      z: 0.002,
-      w: lm.innerHalfW,
-      h: lm.smallBoxH,
-    };
-  });
+      const s1Connectors: RowConnectorTransform[] = [];
+      for (let r = 0; r < 2; r++) {
+        const leftV = s1Verses[s1Config.verses[r * 2]];
+        const rightV = s1Verses[s1Config.verses[r * 2 + 1]];
+        if (leftV && rightV) {
+          s1Connectors.push({
+            x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+            y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+            z: 0.0015,
+            w:
+              rightV.x + rightV.w - leftV.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+            h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+          });
+        }
+      }
+      
+      sections.push({
+        frameX: startX,
+        frameY: lm.s1Top,
+        frameW: lm.sectionW,
+        frameH: lm.s1H,
+        verses: s1Verses,
+        rowConnectors: s1Connectors,
+        anaAyet: {
+          x: s1BaseX,
+          y: anaAyetY,
+          z: 0.002,
+          w: lm.innerW,
+          h: lm.anaAyetH,
+        },
+        anaAyetTabX: s1BaseX + lm.innerW / 2,
+        anaAyetTabY: anaAyetY,
+        anaAyetTabW: lm.anaAyetTabW,
+        anaAyetTabH: lm.anaAyetTabH,
+        anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
+        anaAyetLabelDrop: lm.anaAyetLabelDrop,
+        borderWidth: lm.s1BorderWidth,
+        labelPinY: lm.s1Top,
+      });
+    } else if (section.type === "verticalGroups") {
+      const s2Config = section as VerticalGroupsSectionConfig;
+      const s2InnerW = lm.sectionW - lm.s2PadLeftRight * 2;
+      const s2BaseX = startX + lm.s2PadLeftRight;
 
-  const s1Connectors: RowConnectorTransform[] = [];
-  for (let r = 0; r < 2; r++) {
-    const leftV = s1Verses[s1Config.verses[r * 2]];
-    const rightV = s1Verses[s1Config.verses[r * 2 + 1]];
-    if (leftV && rightV) {
-      s1Connectors.push({
-        x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
-        y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
-        z: 0.0015,
-        w:
-          rightV.x + rightV.w - leftV.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
-        h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+      const S2_MIRROR_SHIFT = 0.015;
+      const shiftedTop = lm.s2Top - S2_MIRROR_SHIFT;
+      const shiftedBot = lm.s2Top - lm.s2H + S2_MIRROR_SHIFT;
+      const shiftedH = lm.s2H - 2 * S2_MIRROR_SHIFT;
+
+      const bw = lm.sgBorderWidth;
+      const connX = s2BaseX - lm.sgPad;
+      const connW = s2InnerW + lm.sgPad * 2;
+
+      const tBox_Y = shiftedTop;
+      const outerSectionH = tBox_Y - (lm.g1Y - lm.groupH - lm.boxExtOffset);
+      const tBox_H = outerSectionH;
+      const bBox_Y = lm.g3Y + lm.boxExtOffset;
+      const bBox_H = outerSectionH;
+
+      const groupYPositions = [lm.g1Y, lm.g2Y, lm.g3Y];
+
+      const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
+        const groupY = groupYPositions[gIdx];
+        const isPushedIn = group.isPushedIn ?? false;
+        const gInnerW = isPushedIn ? s2InnerW - lm.g2Shrink * 2 : s2InnerW;
+        const gBaseX = isPushedIn ? s2BaseX + lm.g2Shrink : s2BaseX;
+        const gHalfW = isPushedIn
+          ? (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2
+          : lm.groupInnerHalfW;
+        const extraRowGap = group.extraRowGap ?? 0;
+
+        const verses: Record<number, ElementTransform> = {};
+        group.verseIds.forEach((verseId, i) => {
+          const isRightCol = i % 2 !== 0;
+          const isSecondRow = i >= 2;
+          const rowOffset = isSecondRow
+            ? lm.smallBoxH2 + lm.s2Gap + extraRowGap
+            : 0;
+          verses[verseId] = {
+            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
+            y: groupY - lm.groupPad - rowOffset,
+            z: 0.003,
+            w: gHalfW,
+            h: lm.smallBoxH2,
+          };
+        });
+
+        const rowConnectors: RowConnectorTransform[] = [];
+        for (let r = 0; r < 2; r++) {
+          const leftV = verses[group.verseIds[r * 2]];
+          const rightV = verses[group.verseIds[r * 2 + 1]];
+          if (leftV && rightV) {
+            rowConnectors.push({
+              x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+              y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+              z: 0.0025,
+              w:
+                rightV.x +
+                rightV.w -
+                leftV.x +
+                OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+              h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+            });
+          }
+        }
+
+        return {
+          frameX: gBaseX,
+          frameY: groupY,
+          frameW: gInnerW,
+          frameH: lm.groupH,
+          isPushedIn,
+          isCenter: group.isCenter ?? false,
+          verses,
+          rowConnectors,
+        };
+      });
+
+      sections.push({
+        frameX: startX,
+        frameW: lm.sectionW,
+        shiftedTop,
+        shiftedBot,
+        shiftedH,
+        connectorX: connX,
+        connectorW: connW,
+        topConnectorY: tBox_Y,
+        topConnectorH: tBox_H,
+        bottomConnectorY: bBox_Y,
+        bottomConnectorH: bBox_H,
+        borderWidth: bw,
+        introVerse: {
+          x: s2BaseX,
+          y: lm.v6Y,
+          z: 0.003,
+          w: s2InnerW,
+          h: lm.bigBoxH,
+        },
+        outroVerse: {
+          x: s2BaseX,
+          y: lm.v19Y,
+          z: 0.003,
+          w: s2InnerW,
+          h: lm.bigBoxH,
+        },
+        groups,
+        innerW: s2InnerW,
+        baseX: s2BaseX,
+        topLabelPinY: shiftedTop,
+        bottomLabelPinY: shiftedBot,
       });
     }
-  }
-
-  // ── SECTION 2 ──────────────────────────────────────────────────────────────
-  const s2InnerW = lm.sectionW - lm.s2PadLeftRight * 2;
-  const s2BaseX = startX + lm.s2PadLeftRight;
-
-  const S2_MIRROR_SHIFT = 0.015;
-  const shiftedTop = lm.s2Top - S2_MIRROR_SHIFT;
-  const shiftedBot = lm.s2Top - lm.s2H + S2_MIRROR_SHIFT;
-  const shiftedH = lm.s2H - 2 * S2_MIRROR_SHIFT;
-
-  const bw = lm.sgBorderWidth;
-  const connX = s2BaseX - lm.sgPad;
-  const connW = s2InnerW + lm.sgPad * 2;
-
-  const tBox_Y = shiftedTop;
-  const outerSectionH = tBox_Y - (lm.g1Y - lm.groupH - lm.boxExtOffset);
-  const tBox_H = outerSectionH;
-  const bBox_Y = lm.g3Y + lm.boxExtOffset;
-  const bBox_H = outerSectionH;
-
-  const groupYPositions = [lm.g1Y, lm.g2Y, lm.g3Y];
-
-  const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
-    const groupY = groupYPositions[gIdx];
-    const isPushedIn = group.isPushedIn ?? false;
-    const gInnerW = isPushedIn ? s2InnerW - lm.g2Shrink * 2 : s2InnerW;
-    const gBaseX = isPushedIn ? s2BaseX + lm.g2Shrink : s2BaseX;
-    const gHalfW = isPushedIn
-      ? (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2
-      : lm.groupInnerHalfW;
-    const extraRowGap = group.extraRowGap ?? 0;
-
-    const verses: Record<number, ElementTransform> = {};
-    group.verseIds.forEach((verseId, i) => {
-      const isRightCol = i % 2 !== 0;
-      const isSecondRow = i >= 2;
-      const rowOffset = isSecondRow
-        ? lm.smallBoxH2 + lm.s2Gap + extraRowGap
-        : 0;
-      verses[verseId] = {
-        x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
-        y: groupY - lm.groupPad - rowOffset,
-        z: 0.003,
-        w: gHalfW,
-        h: lm.smallBoxH2,
-      };
-    });
-
-    const rowConnectors: RowConnectorTransform[] = [];
-    for (let r = 0; r < 2; r++) {
-      const leftV = verses[group.verseIds[r * 2]];
-      const rightV = verses[group.verseIds[r * 2 + 1]];
-      if (leftV && rightV) {
-        rowConnectors.push({
-          x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
-          y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
-          z: 0.0025,
-          w:
-            rightV.x +
-            rightV.w -
-            leftV.x +
-            OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
-          h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
-        });
-      }
-    }
-
-    return {
-      frameX: gBaseX,
-      frameY: groupY,
-      frameW: gInnerW,
-      frameH: lm.groupH,
-      isPushedIn,
-      isCenter: group.isCenter ?? false,
-      verses,
-      rowConnectors,
-    };
   });
 
-  return {
-    s1: {
-      frameX: startX,
-      frameY: lm.s1Top,
-      frameW: lm.sectionW,
-      frameH: lm.s1H,
-      verses: s1Verses,
-      rowConnectors: s1Connectors,
-      anaAyet: {
-        x: s1BaseX,
-        y: anaAyetY,
-        z: 0.002,
-        w: lm.innerW,
-        h: lm.anaAyetH,
-      },
-      anaAyetTabX: s1BaseX + lm.innerW / 2,
-      anaAyetTabY: anaAyetY,
-      anaAyetTabW: lm.anaAyetTabW,
-      anaAyetTabH: lm.anaAyetTabH,
-      anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
-      anaAyetLabelDrop: lm.anaAyetLabelDrop,
-      borderWidth: lm.s1BorderWidth,
-      labelPinY: lm.s1Top,
-    },
-    s2: {
-      frameX: startX,
-      frameW: lm.sectionW,
-      shiftedTop,
-      shiftedBot,
-      shiftedH,
-      connectorX: connX,
-      connectorW: connW,
-      topConnectorY: tBox_Y,
-      topConnectorH: tBox_H,
-      bottomConnectorY: bBox_Y,
-      bottomConnectorH: bBox_H,
-      borderWidth: bw,
-      introVerse: {
-        x: s2BaseX,
-        y: lm.v6Y,
-        z: 0.003,
-        w: s2InnerW,
-        h: lm.bigBoxH,
-      },
-      outroVerse: {
-        x: s2BaseX,
-        y: lm.v19Y,
-        z: 0.003,
-        w: s2InnerW,
-        h: lm.bigBoxH,
-      },
-      groups,
-      innerW: s2InnerW,
-      baseX: s2BaseX,
-      topLabelPinY: shiftedTop,
-      bottomLabelPinY: shiftedBot,
-    },
-  };
+  return { sections };
 }
 
+// Output is just { sections } now
 export const SURAH_TRANSFORMS = buildSurahTransforms(
   layoutMath,
   START_X,
