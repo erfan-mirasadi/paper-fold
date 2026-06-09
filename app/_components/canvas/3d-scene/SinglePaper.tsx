@@ -43,6 +43,44 @@ const staticSideR = new MeshStandardMaterial({
 const staticTopCap = new MeshStandardMaterial({ color: paperBaseColor }); // top cap
 const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // bottom cap
 
+function createPaperGeometry(pageWidth: number) {
+  const pageGeometry = new BoxGeometry(
+    pageWidth,
+    PAGE_HEIGHT,
+    PAGE_DEPTH,
+    2,
+    PAGE_SEGMENTS,
+  );
+
+  pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
+
+  const position = pageGeometry.attributes.position;
+  const vertex = new Vector3();
+  const skinIndexes: number[] = [];
+  const skinWeights: number[] = [];
+
+  for (let i = 0; i < position.count; i++) {
+    vertex.fromBufferAttribute(position, i);
+    const distFromTop = -vertex.y;
+    let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
+    skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
+    const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
+    skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
+    skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
+  }
+
+  pageGeometry.setAttribute(
+    "skinIndex",
+    new Uint16BufferAttribute(skinIndexes, 4),
+  );
+  pageGeometry.setAttribute(
+    "skinWeight",
+    new Float32BufferAttribute(skinWeights, 4),
+  );
+
+  return pageGeometry;
+}
+
 interface SinglePaperProps {
   isFolded?: boolean;
   toggles?: TextureToggles;
@@ -97,39 +135,8 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   }, []);
 
   const manualSkinnedMesh = useMemo(() => {
-    const pageGeometry = new BoxGeometry(
-      runtime.PAGE_WIDTH,
-      PAGE_HEIGHT,
-      PAGE_DEPTH,
-      2,
-      PAGE_SEGMENTS,
-    );
-
-    pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
-
-    const position = pageGeometry.attributes.position;
-    const vertex = new Vector3();
-    const skinIndexes: number[] = [];
-    const skinWeights: number[] = [];
-
-    for (let i = 0; i < position.count; i++) {
-      vertex.fromBufferAttribute(position, i);
-      const distFromTop = -vertex.y;
-      let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
-      skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
-      const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
-      skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
-      skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
-    }
-
-    pageGeometry.setAttribute(
-      "skinIndex",
-      new Uint16BufferAttribute(skinIndexes, 4),
-    );
-    pageGeometry.setAttribute(
-      "skinWeight",
-      new Float32BufferAttribute(skinWeights, 4),
-    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const pageGeometry = createPaperGeometry(runtime.PAGE_WIDTH);
 
     const bones: Bone[] = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
@@ -156,6 +163,20 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
     return mesh;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!skinnedMeshRef.current) return;
+    const mesh = skinnedMeshRef.current;
+    const oldGeometry = mesh.geometry;
+    
+    // Imperatively create and swap geometry
+    const newGeometry = createPaperGeometry(runtime.PAGE_WIDTH);
+    mesh.geometry = newGeometry;
+    
+    // Safely dispose the old one
+    oldGeometry.dispose();
   }, [runtime.PAGE_WIDTH]);
 
   useEffect(() => {

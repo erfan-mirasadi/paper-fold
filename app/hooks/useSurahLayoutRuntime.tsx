@@ -38,7 +38,7 @@ export function useSurahLayoutRuntime() {
 
   const SCENE_CENTER_Y = activeConfig.dimensions.paperHeight / 2 + activeConfig.dimensions.sceneCenterYOffset;
 
-  return {
+  return useMemo(() => ({
     activeLanguage,
     PAGE_WIDTH: pageWidth,
     PAGE_HEIGHT: activeConfig.dimensions.paperHeight,
@@ -51,5 +51,15 @@ export function useSurahLayoutRuntime() {
     foldSteps,
     scrollPages,
     config: activeConfig,
-  };
+  }), [
+    activeLanguage,
+    pageWidth,
+    activeConfig,
+    SCENE_CENTER_Y,
+    layout,
+    transforms,
+    foldYPositions,
+    foldSteps,
+    scrollPages
+  ]);
 }
