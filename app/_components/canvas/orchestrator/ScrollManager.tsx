@@ -6,7 +6,6 @@ import { create } from "zustand";
 import { getOffsetForId } from "../3d-scene/FoldStory";
 import {
   useElevatedStore,
-  type ElevatedSectionId,
 } from "../../../stores/useElevatedStore";
 import type { IntroMediaId } from "../../../data/introMedia";
 import { usePopUpStore } from "../../../stores/usePopUpStore";

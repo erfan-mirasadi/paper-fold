@@ -205,7 +205,7 @@ export default function Home() {
               >
                 <Canvas
                   style={{ pointerEvents: "inherit" }}
-                  eventSource={canvasWrapperRef}
+                  eventSource={canvasWrapperRef as any}
                   camera={{
                     position: CAMERA_CONFIG.initialCamera.position,
                     fov: CAMERA_CONFIG.initialCamera.fov,
