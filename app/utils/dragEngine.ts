@@ -1,7 +1,7 @@
 import { SpringValue } from "@react-spring/three";
 import { create } from "zustand";
 import { type ElevatedSectionId } from "../stores/useElevatedStore";
-import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
+import { getActiveStoryConfig } from "../stores/useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
 
 export const DRAG_SPRING_CONFIG = { mass: 1.5, tension: 350, friction: 35 };
@@ -11,7 +11,7 @@ const createSpring = () => new SpringValue(0, { config: DRAG_SPRING_CONFIG });
 const dynamicSections: Record<string, { x: SpringValue<number>; y: SpringValue<number> }> = {};
 let maxVerseId = 0;
 
-ALAK_LAYOUT_CONFIG.sections.forEach((sec) => {
+getActiveStoryConfig().sections.forEach((sec) => {
   if (sec.type === "gridWithAnaAyet") {
     dynamicSections[sec.id] = { x: createSpring(), y: createSpring() };
     const g = sec as GridSectionConfig;
@@ -182,7 +182,7 @@ export function resetAllDrags() {
 
 /** Helper to resolve verse -> section map */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
-  for (const sec of ALAK_LAYOUT_CONFIG.sections) {
+  for (const sec of getActiveStoryConfig().sections) {
     if (sec.type === "gridWithAnaAyet") {
       const g = sec as GridSectionConfig;
       if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;

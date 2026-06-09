@@ -146,10 +146,11 @@ function AnimatedElevatedLabel({
   );
 }
 
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig } from "../../../data/schema";
 
 export function ElevatedSectionLabels() {
+  const config = useStoryStore((state) => state.activeConfig);
   const runtime = useSurahLayoutRuntime();
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
 
@@ -186,7 +187,7 @@ export function ElevatedSectionLabels() {
 
   const labelsToRender: Array<AnimatedLabelProps & { key: string; showInIntro: boolean }> = [];
 
-  ALAK_LAYOUT_CONFIG.sections.forEach((section, idx) => {
+  config.sections.forEach((section, idx) => {
     const sTransform = SURAH_TRANSFORMS.sections[idx]!;
     if (section.type === "gridWithAnaAyet") {
       const gConfig = section as GridSectionConfig;

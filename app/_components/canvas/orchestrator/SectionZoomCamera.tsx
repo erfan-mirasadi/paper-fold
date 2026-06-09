@@ -4,50 +4,55 @@ import { useFrame } from "@react-three/fiber";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig, CameraTargetConfig } from "../../../data/schema";
 
-// Build a dynamic map of sectionId -> CameraTargetConfig
-const zoomTargets: Record<string, CameraTargetConfig> = {};
-
-ALAK_LAYOUT_CONFIG.sections.forEach((section) => {
-  if (section.type === "gridWithAnaAyet") {
-    const s1 = section as GridSectionConfig;
-    if (s1.cameraTarget) {
-      zoomTargets[s1.id] = s1.cameraTarget;
-    }
-  } else if (section.type === "verticalGroups") {
-    const s2 = section as VerticalGroupsSectionConfig;
-    if (s2.subCameraTargets) {
-      if (s2.subCameraTargets.top) zoomTargets[`${s2.id}_top`] = s2.subCameraTargets.top;
-      if (s2.subCameraTargets.center) zoomTargets[`${s2.id}_center`] = s2.subCameraTargets.center;
-      if (s2.subCameraTargets.bottom) zoomTargets[`${s2.id}_bottom`] = s2.subCameraTargets.bottom;
-    }
-    if (s2.cameraTarget) {
-      zoomTargets[s2.id] = s2.cameraTarget;
-    }
-  }
-});
-
-// Helper to infer section ID from verse ID
-function getSectionIdForVerse(vid: number): string | null {
-  for (const section of ALAK_LAYOUT_CONFIG.sections) {
-    if (section.type === "gridWithAnaAyet") {
-      const s1 = section as GridSectionConfig;
-      if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
-    } else if (section.type === "verticalGroups") {
-      const s2 = section as VerticalGroupsSectionConfig;
-      if (s2.introVerse === vid) return `${s2.id}_top`;
-      if (s2.outroVerse === vid) return `${s2.id}_bottom`;
-      if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
-      if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
-      if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
-    }
-  }
-  return null;
-}
+import { useMemo } from "react";
 
 export function SectionZoomCamera() {
+  const config = useStoryStore(state => state.activeConfig);
+
+  const { zoomTargets, getSectionIdForVerse } = useMemo(() => {
+    const zoomTargets: Record<string, CameraTargetConfig> = {};
+
+    config.sections.forEach((section) => {
+      if (section.type === "gridWithAnaAyet") {
+        const s1 = section as GridSectionConfig;
+        if (s1.cameraTarget) {
+          zoomTargets[s1.id] = s1.cameraTarget;
+        }
+      } else if (section.type === "verticalGroups") {
+        const s2 = section as VerticalGroupsSectionConfig;
+        if (s2.subCameraTargets) {
+          if (s2.subCameraTargets.top) zoomTargets[`${s2.id}_top`] = s2.subCameraTargets.top;
+          if (s2.subCameraTargets.center) zoomTargets[`${s2.id}_center`] = s2.subCameraTargets.center;
+          if (s2.subCameraTargets.bottom) zoomTargets[`${s2.id}_bottom`] = s2.subCameraTargets.bottom;
+        }
+        if (s2.cameraTarget) {
+          zoomTargets[s2.id] = s2.cameraTarget;
+        }
+      }
+    });
+
+    const getSectionIdForVerse = (vid: number): string | null => {
+      for (const section of config.sections) {
+        if (section.type === "gridWithAnaAyet") {
+          const s1 = section as GridSectionConfig;
+          if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
+        } else if (section.type === "verticalGroups") {
+          const s2 = section as VerticalGroupsSectionConfig;
+          if (s2.introVerse === vid) return `${s2.id}_top`;
+          if (s2.outroVerse === vid) return `${s2.id}_bottom`;
+          if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
+          if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
+          if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
+        }
+      }
+      return null;
+    };
+
+    return { zoomTargets, getSectionIdForVerse };
+  }, [config.sections]);
   useFrame((state) => {
     // 1. Only run zoom logic when in paper mode
     const isIntroActive = useFoldStore.getState().isIntroActive;

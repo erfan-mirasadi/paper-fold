@@ -1,6 +1,6 @@
 import { SurahTransforms } from "../data/SurahConfig";
 import { SectionTransforms, RowConnectorTransform } from "../data/schema";
-import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
+import { getActiveStoryConfig } from "../stores/useStoryStore";
 
 export type SectionBounds = {
   minX: number;
@@ -19,8 +19,8 @@ export function calculateSectionBounds(
   const s1 = transforms.sections[0] as Required<SectionTransforms>;
   const s2 = transforms.sections[1] as Required<SectionTransforms>;
 
-  const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
-  const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
+  const S1_ID = getActiveStoryConfig().sections[0].id;
+  const S2_ID = getActiveStoryConfig().sections[1].id;
   const S2_TOP_ID = `${S2_ID}_top`;
   const S2_CENTER_ID = `${S2_ID}_center`;
   const S2_BOTTOM_ID = `${S2_ID}_bottom`;

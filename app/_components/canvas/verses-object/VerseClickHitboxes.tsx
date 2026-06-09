@@ -4,8 +4,8 @@ import { SectionTransforms } from "../../../data/schema";
 import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
 import { SURAH_DATA_ARABIC } from "../../../data/surahData";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
-import { GridSectionConfig, VerticalGroupsSectionConfig } from "../../../data/schema";
+import { useStoryStore } from "../../../stores/useStoryStore";
+import { GridSectionConfig, VerticalGroupsSectionConfig, SurahLayoutConfig } from "../../../data/schema";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import {
@@ -41,6 +41,7 @@ const LABEL_HITBOX = {
 
 function buildHitboxes(
   runtime: ReturnType<typeof useSurahLayoutRuntime>,
+  config: SurahLayoutConfig<any>
 ): VerseHitbox[] {
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;
@@ -48,7 +49,7 @@ function buildHitboxes(
 
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  ALAK_LAYOUT_CONFIG.sections.forEach((sectionConfig, idx) => {
+  config.sections.forEach((sectionConfig, idx) => {
     const sTransform = SURAH_TRANSFORMS.sections[idx] as Required<SectionTransforms>;
     
     if (sectionConfig.type === "gridWithAnaAyet") {
@@ -318,7 +319,8 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
 
 export function VerseClickHitboxes() {
   const runtime = useSurahLayoutRuntime();
-  const hitboxes = useMemo(() => buildHitboxes(runtime), [runtime]);
+  const config = useStoryStore(state => state.activeConfig);
+  const hitboxes = useMemo(() => buildHitboxes(runtime, config), [runtime, config]);
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>

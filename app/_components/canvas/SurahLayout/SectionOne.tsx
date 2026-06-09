@@ -18,7 +18,7 @@ import {
   type SectionOneData,
 } from "../../../data/SurahConfig";
 import { SectionTransforms, GridSectionConfig } from "../../../data/schema";
-import { S1_NEON_CONFIG, ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 import { useMemo } from "react";
 
@@ -174,8 +174,8 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
     t.colorSpace = THREE.SRGBColorSpace;
   });
 
-  // Resolve the config for this section (always the first gridWithAnaAyet section).
-  const s1Config = ALAK_LAYOUT_CONFIG.sections[0] as GridSectionConfig;
+  const config = useStoryStore(state => state.activeConfig);
+  const s1Config = config.sections[0] as GridSectionConfig;
 
   // Build a verse-number → text map from the prop data.
   // Keyed by canonical Arabic verse number — works for any active language.
@@ -279,7 +279,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         if (!rawT) return null;
 
         // Override-driven sizing, colors, and decorators
-        const override = ALAK_LAYOUT_CONFIG.verseOverrides?.[vId];
+        const override = config.verseOverrides?.[vId];
         const expandW = override?.expandW ?? 0;
         const expandH = override?.expandH ?? 0;
 

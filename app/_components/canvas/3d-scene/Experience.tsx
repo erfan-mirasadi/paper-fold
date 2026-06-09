@@ -22,7 +22,7 @@ import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollCo
 import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
 import { SectionZoomCamera } from "../orchestrator/SectionZoomCamera";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -34,7 +34,8 @@ export function Experience({
   onReady,
 }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
-  const hasIntro = ALAK_LAYOUT_CONFIG.features.hasIntro;
+  const config = useStoryStore((state) => state.activeConfig);
+  const hasIntro = config.features.hasIntro;
   // Only show up to the point where ambient media ends (rawOffset ~0.34)
   const showSpotlight = useFoldStore((s) => hasIntro && s.rawOffset < 0.37);
   const { gl, scene, camera } = useThree();
@@ -192,8 +193,10 @@ export function Experience({
 function DynamicControls() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
+  const config = useStoryStore((state) => state.activeConfig);
+
   const enableInteractions = isIntroActive
-    ? (ALAK_LAYOUT_CONFIG.animations.introCamera?.allowOrbit ?? false)
+    ? (config.animations.introCamera?.allowOrbit ?? false)
     : false;
 
   const minAzimuthAngle = isIntroActive

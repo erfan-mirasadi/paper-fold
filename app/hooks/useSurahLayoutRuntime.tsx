@@ -11,8 +11,8 @@ import {
   buildSurahTransforms,
   createLayoutMath,
   SCENE_CENTER_Y_OFFSET,
-  ALAK_LAYOUT_CONFIG,
 } from "../data/SurahConfig";
+import { useStoryStore } from "../stores/useStoryStore";
 
 export function getPageWidthForLanguage(language: SurahLanguage) {
   return BASE_PAGE_WIDTH + (language === "en" || language === "tr" ? 0.3 : 0);
@@ -20,23 +20,24 @@ export function getPageWidthForLanguage(language: SurahLanguage) {
 
 export function useSurahLayoutRuntime() {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const activeConfig = useStoryStore((s) => s.activeConfig);
 
   const pageWidth = useMemo(
     () => getPageWidthForLanguage(activeLanguage),
     [activeLanguage],
   );
 
-  const layout = useMemo(() => createLayoutMath(ALAK_LAYOUT_CONFIG, pageWidth), [pageWidth]);
+  const layout = useMemo(() => createLayoutMath(activeConfig, pageWidth), [activeConfig, pageWidth]);
   const transforms = useMemo(
-    () => buildSurahTransforms(layout, layout.START_X, ALAK_LAYOUT_CONFIG),
-    [layout],
+    () => buildSurahTransforms(layout, layout.START_X, activeConfig),
+    [layout, activeConfig],
   );
   const foldYPositions = useMemo(
-    () => ALAK_LAYOUT_CONFIG.animations.computeFoldYPositions(layout),
-    [layout],
+    () => activeConfig.animations.computeFoldYPositions(layout),
+    [layout, activeConfig],
   );
-  const foldSteps = ALAK_LAYOUT_CONFIG.animations.foldSteps;
-  const scrollPages = ALAK_LAYOUT_CONFIG.dimensions.scrollPages;
+  const foldSteps = activeConfig.animations.foldSteps;
+  const scrollPages = activeConfig.dimensions.scrollPages;
 
   const SCENE_CENTER_Y = PAGE_HEIGHT / 2 + SCENE_CENTER_Y_OFFSET;
 
@@ -52,6 +53,6 @@ export function useSurahLayoutRuntime() {
     FOLD_Y_POSITIONS: foldYPositions,
     foldSteps,
     scrollPages,
-    config: ALAK_LAYOUT_CONFIG,
+    config: activeConfig,
   };
 }

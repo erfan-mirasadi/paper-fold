@@ -13,7 +13,7 @@ import {
 } from "./theme";
 import { SURAH_DATA_BY_LANGUAGE } from "../hooks/useSurahLanguageStore";
 import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
-import { ALAK_LAYOUT_CONFIG } from "./SurahConfig";
+
 import { GridSectionConfig, VerticalGroupsSectionConfig } from "./schema";
 
 export interface VerseConfig {
@@ -51,7 +51,7 @@ export function buildVerseConfigs(
   const configs: VerseConfig[] = [];
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  ALAK_LAYOUT_CONFIG.sections.forEach((sectionConfig, sectionIdx) => {
+  runtime.config.sections.forEach((sectionConfig, sectionIdx) => {
     const transforms = SURAH_TRANSFORMS.sections[sectionIdx];
     if (!transforms) return;
 
@@ -90,7 +90,7 @@ export function buildVerseConfigs(
         if (!rawTransform) continue;
 
         // --- Override-driven properties (all optional, default to section values) ---
-        const override = ALAK_LAYOUT_CONFIG.verseOverrides?.[vId];
+        const override = runtime.config.verseOverrides?.[vId];
         const expandW = override?.expandW ?? 0;
         const expandH = override?.expandH ?? 0;
         const expandedW = rawTransform.w + expandW * 2;

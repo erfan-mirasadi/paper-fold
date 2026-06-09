@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
+import { getActiveStoryConfig } from "./useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
 
 export type ElevatedPhase = "idle" | "elevated";
@@ -13,7 +13,7 @@ export const ELEVATED_RETURN_SYNC_MS = 480;
 const SECTION_VERSE_IDS: Record<string, number[]> = {};
 const SECTION_PRIORITY: string[] = [];
 
-ALAK_LAYOUT_CONFIG.sections.forEach((section) => {
+getActiveStoryConfig().sections.forEach((section) => {
   if (section.type === "gridWithAnaAyet") {
     const s1 = section as GridSectionConfig;
     const id = s1.id;
@@ -171,7 +171,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     } = get();
     if (!unlockedVerseIds.includes(verseId)) return;
 
-    const pairs: Record<number, number> = ALAK_LAYOUT_CONFIG.specialVerses?.versePairings || {};
+    const pairs: Record<number, number> = getActiveStoryConfig().specialVerses?.versePairings || {};
 
     const partnerId = pairs[verseId];
     const affectedIds =

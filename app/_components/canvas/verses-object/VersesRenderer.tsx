@@ -9,7 +9,7 @@ import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import { useMemo } from "react";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+
 
 export function VersesRenderer() {
   const runtime = useSurahLayoutRuntime();

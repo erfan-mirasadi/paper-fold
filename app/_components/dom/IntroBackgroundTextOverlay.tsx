@@ -1,7 +1,7 @@
 "use client";
 
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
-import { ALAK_LAYOUT_CONFIG } from "../../data/SurahConfig";
+import { useStoryStore } from "../../stores/useStoryStore";
 import { AnimatedText } from "./ui-overlay/AnimatedText";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -48,9 +48,10 @@ export function IntroBackgroundTextOverlay() {
 
   // We don't return null early, otherwise AnimatePresence cannot play the exit animation!
 
+  const config = useStoryStore((state) => state.activeConfig);
   const effectiveActiveId = activeAmbientMediaId || scrollAmbientMediaId;
-  const data = effectiveActiveId && ALAK_LAYOUT_CONFIG.introMedia
-    ? ALAK_LAYOUT_CONFIG.introMedia[effectiveActiveId]?.backgroundText
+  const data = effectiveActiveId && config.introMedia
+    ? config.introMedia[effectiveActiveId]?.backgroundText
     : null;
 
 

@@ -9,7 +9,7 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { getActiveStoryConfig } from "../../../stores/useStoryStore";
 
 const STEP_SCROLL_DURATION_MS = 820;
 const STEP_PAUSE_MS = 450;
@@ -61,10 +61,10 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   isTransitioning: false,
   currentOffset: 0,
   rawOffset: 0,
-  isIntroActive: ALAK_LAYOUT_CONFIG.features.hasIntro,
-  introProgress: ALAK_LAYOUT_CONFIG.features.hasIntro ? 0 : 1,
-  introHandoffProgress: ALAK_LAYOUT_CONFIG.features.hasIntro ? 0 : 1,
-  ambientProgress: ALAK_LAYOUT_CONFIG.features.hasIntro ? 0 : 1,
+  isIntroActive: getActiveStoryConfig().features.hasIntro,
+  introProgress: getActiveStoryConfig().features.hasIntro ? 0 : 1,
+  introHandoffProgress: getActiveStoryConfig().features.hasIntro ? 0 : 1,
+  ambientProgress: getActiveStoryConfig().features.hasIntro ? 0 : 1,
   barrierProgress: 0,
 
   activeAmbientMediaId: null,
@@ -257,7 +257,7 @@ export function ScrollManager() {
       // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
       if (
         typeof (lenis as any).targetScroll === "number" &&
-        ALAK_LAYOUT_CONFIG.features.hasIntro
+        runtime.config.features.hasIntro
       ) {
         const targetScroll = (lenis as any).targetScroll;
         const lockScroll = Math.floor(
@@ -334,7 +334,7 @@ export function ScrollManager() {
     // --- NEW BARRIER LOGIC ---
     const handleBarrierInteraction = (deltaY: number, e: Event) => {
       if (shouldLockScroll) return; // Elevated mode has full lock
-      if (!ALAK_LAYOUT_CONFIG.features.hasIntro) return; // No barrier if no intro
+      if (!runtime.config.features.hasIntro) return; // No barrier if no intro
 
       // If the user actively scrolls DOWN while the release animation is playing,
       // they are taking back manual control and interrupting the animation.
@@ -586,7 +586,7 @@ export function ScrollManager() {
       }
 
       let fromTop = lenis.scroll;
-      const storyStart = ALAK_LAYOUT_CONFIG.features.hasIntro
+      const storyStart = runtime.config.features.hasIntro
         ? SCROLL_TIMELINE.story.start / 100
         : 0;
       const baseStageSize = Math.max(1 - storyStart, 0.00001) / maxStageIndex;

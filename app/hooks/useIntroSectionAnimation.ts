@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
-import { ALAK_LAYOUT_CONFIG } from "../data/SurahConfig";
+import { getActiveStoryConfig } from "../stores/useStoryStore";
 
 // ─── Animation Config ───────────────────────────────────────────────────
 // 1. When does the scale-up start? (Overall scroll percentage from 0 to 100)
@@ -26,8 +26,8 @@ export const PAGE2_EXTRA_RX = 0.15;
 /** Convert degrees to radians — keeps scatter config human-readable. */
 const deg = (d: number): number => (d * Math.PI) / 180;
 
-const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
-const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
+const S1_ID = getActiveStoryConfig().sections[0].id;
+const S2_ID = getActiveStoryConfig().sections[1].id;
 const S2_TOP_ID = `${S2_ID}_top`;
 const S2_CENTER_ID = `${S2_ID}_center`;
 const S2_BOTTOM_ID = `${S2_ID}_bottom`;

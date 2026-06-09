@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
-import { ALAK_LAYOUT_CONFIG } from "../../data/SurahConfig";
+import { useStoryStore } from "../../stores/useStoryStore";
 import { motion, AnimatePresence } from "framer-motion";
 
 // You can easily adjust the position and size of the white halos (for light mode readability) here!
@@ -72,7 +72,7 @@ const MediaElement = ({
   );
 };
 
-const mediaKeys = ALAK_LAYOUT_CONFIG.introMedia ? Object.keys(ALAK_LAYOUT_CONFIG.introMedia) : [];
+
 
 export default function AmbientMedia({
   src: propSrc,
@@ -89,7 +89,9 @@ export default function AmbientMedia({
       (state.ambientProgress > 0 || state.introProgress >= 1),
   );
 
-  const introMedia = ALAK_LAYOUT_CONFIG.introMedia || {};
+  const config = useStoryStore((state) => state.activeConfig);
+  const introMedia = config.introMedia || {};
+  const mediaKeys = config.introMedia ? Object.keys(config.introMedia) : [];
   const currentMedia = scrollAmbientId
     ? introMedia[scrollAmbientId]
     : introMedia[mediaKeys[0]];

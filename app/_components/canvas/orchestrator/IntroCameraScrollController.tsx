@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useCameraStore } from "../../../stores/useCameraStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 type OrbitControlsLike = {
   target?: {
@@ -24,6 +24,7 @@ const easeInOutCubic = (t: number): number => {
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
 export function IntroCameraScrollController() {
+  const config = useStoryStore(state => state.activeConfig);
   useFrame((state) => {
     if (useCameraStore.getState().phase !== "idle") return;
 
@@ -32,7 +33,7 @@ export function IntroCameraScrollController() {
 
     if (!isIntroActive) return;
 
-    const { introCamera } = ALAK_LAYOUT_CONFIG.animations;
+    const { introCamera } = config.animations;
     if (!introCamera) return;
 
     const controls = state.controls as OrbitControlsLike | undefined;

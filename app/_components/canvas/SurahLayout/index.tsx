@@ -2,7 +2,7 @@
 import { OrthographicCamera, useTexture } from "@react-three/drei";
 import { SurahSection } from "./SurahSection";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import {
   SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
@@ -59,6 +59,8 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
 
   const activeBg = PAGE_BG_COLOR;
 
+  const config = useStoryStore((state) => state.activeConfig);
+
   return (
     <>
       {/* Full-page background plane */}
@@ -81,7 +83,7 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
       {/* <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} /> */}
       
       {/* Render sections dynamically */}
-      {ALAK_LAYOUT_CONFIG.sections.map((sectionConfig, idx) => {
+      {config.sections.map((sectionConfig, idx) => {
         const transforms = runtime.SURAH_TRANSFORMS.sections[idx];
         if (!transforms) return null;
         return (

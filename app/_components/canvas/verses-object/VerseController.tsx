@@ -60,19 +60,20 @@ import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
-
-const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
-const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
-const S2_TOP_ID = `${S2_ID}_top`;
-const S2_CENTER_ID = `${S2_ID}_center`;
-const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+import { useStoryStore } from "../../../stores/useStoryStore";
+import { SurahLayoutConfig } from "../../../data/schema";
 
 type ShadowSurfaceSectionId = string;
 
 function getShadowSurfaceSectionId(
   verseId: number,
+  storyConfig: SurahLayoutConfig<any>
 ): ShadowSurfaceSectionId | null {
+  const S1_ID = storyConfig.sections[0].id;
+  const S2_ID = storyConfig.sections[1].id;
+  const S2_TOP_ID = `${S2_ID}_top`;
+  const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
   if (verseId >= 1 && verseId <= 5) return S1_ID;
   if (verseId >= 6 && verseId <= 10) return S2_TOP_ID;
   if (verseId >= 15 && verseId <= 19) return S2_BOTTOM_ID;
@@ -80,6 +81,11 @@ function getShadowSurfaceSectionId(
 }
 
 export function VerseController({ config }: { config: VerseConfig }) {
+  const activeStoryConfig = useStoryStore((state) => state.activeConfig);
+  const S1_ID = activeStoryConfig.sections[0].id;
+  const S2_ID = activeStoryConfig.sections[1].id;
+  const S2_CENTER_ID = `${S2_ID}_center`;
+  
   const runtime = useSurahLayoutRuntime();
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
@@ -106,7 +112,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const isCenterSectionRaised = activeSectionIds.includes(S2_CENTER_ID);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id);
+  const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id, activeStoryConfig);
   const isSectionSurfaceRaised =
     shadowSurfaceSectionId !== null &&
     activeSectionIds.includes(shadowSurfaceSectionId);

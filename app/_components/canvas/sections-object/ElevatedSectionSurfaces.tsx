@@ -62,7 +62,7 @@ import {
   type SectionBounds,
 } from "../../../utils/boundsHelper";
 import { PAPER_MATERIAL_CONFIG } from "../3d-scene/PaperMaterial";
-import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
@@ -137,10 +137,10 @@ function useSectionSurfaceSpring(
     from: { opacity: 0 },
     delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
-      : isIntroActive || sectionId === ALAK_LAYOUT_CONFIG.sections[0].id || !justLeftIntro
+      : isIntroActive || sectionId === useStoryStore.getState().activeConfig.sections[0].id || !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
-    immediate: actuallyActive || (justLeftIntro && sectionId !== ALAK_LAYOUT_CONFIG.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
+    immediate: actuallyActive || (justLeftIntro && sectionId !== useStoryStore.getState().activeConfig.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
     config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -174,7 +174,7 @@ export function useHandoffOpacity(
     // Sync opacity directly to the store without triggering React re-renders
     return useFoldStore.subscribe((state) => {
       const targetOpacity =
-        state.isIntroActive && sectionId && sectionId !== ALAK_LAYOUT_CONFIG.sections[0].id
+        state.isIntroActive && sectionId && sectionId !== useStoryStore.getState().activeConfig.sections[0].id
           ? 1 - state.introHandoffProgress
           : 1;
 
@@ -492,8 +492,9 @@ export function ElevatedSectionSurfaces() {
     texture.colorSpace = SRGBColorSpace;
   });
 
-  const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
-  const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
+  const config = useStoryStore(state => state.activeConfig);
+  const S1_ID = config.sections[0].id;
+  const S2_ID = config.sections[1].id;
   const S2_TOP_ID = `${S2_ID}_top`;
   const S2_CENTER_ID = `${S2_ID}_center`;
   const S2_BOTTOM_ID = `${S2_ID}_bottom`;

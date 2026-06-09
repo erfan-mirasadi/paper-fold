@@ -6,7 +6,8 @@ import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import { ORIGINAL_TEXTURE_TIMING } from "./useFoldAnimation";
 import { ELEVATE_TEXTURE_TIMING } from "./useElevateAnimation";
 import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
-import { ALAK_LAYOUT_CONFIG, VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
+import { VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
+import { getActiveStoryConfig, useStoryStore } from "../stores/useStoryStore";
 import {
   SectionTransforms,
   GroupTransforms,
@@ -30,7 +31,7 @@ const isMiddleHorizontalFoldedForVerse = (
   state: { middleHorizontalFolded: "left" | "right" | null },
   verseId: number,
 ) => {
-  const folds = ALAK_LAYOUT_CONFIG.specialVerses?.middleFoldVerses;
+  const folds = getActiveStoryConfig().specialVerses?.middleFoldVerses;
   if (!folds) return false;
 
   if (state.middleHorizontalFolded === "left") {
@@ -47,7 +48,7 @@ let _maxVerseId = 0;
 let _totalSections = 0;
 const verseColorKeys = new Array<keyof ThemeColors | undefined>(200);
 
-ALAK_LAYOUT_CONFIG.sections.forEach((sec) => {
+getActiveStoryConfig().sections.forEach((sec) => {
   if (sec.type === "gridWithAnaAyet") {
     _totalSections += 1;
     const g = sec as GridSectionConfig;
@@ -79,6 +80,7 @@ const TOTAL_SECTIONS = _totalSections;
 export function usePaperMasking(paperTextureDiffuse: Texture) {
   const { PAGE_WIDTH, PAGE_HEIGHT, SURAH_TRANSFORMS, FOLD_Y_POSITIONS } =
     useSurahLayoutRuntime();
+  const activeConfig = useStoryStore((state) => state.activeConfig);
 
   const { verseRects, verseRadii, sectionRects, verseBgColors } =
     useMemo(() => {
@@ -102,7 +104,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       const exp = MASK_CONFIG.sectionExpand;
       let secIdx = 0;
 
-      ALAK_LAYOUT_CONFIG.sections.forEach((sec, idx) => {
+      activeConfig.sections.forEach((sec, idx) => {
         const sTransform = SURAH_TRANSFORMS.sections[
           idx
         ] as Required<SectionTransforms>;
@@ -111,7 +113,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           // Apply any expand override so the shader cutout matches the actual VerseBox size.
           // Verses without an override fall back to their raw transform.
           g.verses.forEach((vId) => {
-            const ov = ALAK_LAYOUT_CONFIG.verseOverrides?.[vId];
+            const ov = activeConfig.verseOverrides?.[vId];
             const expandW = ov?.expandW ?? 0;
             const expandH = ov?.expandH ?? 0;
             const rawT = sTransform.verses[vId];
@@ -128,7 +130,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           });
 
           // anaAyet: always apply its expand override
-          const anaOv = ALAK_LAYOUT_CONFIG.verseOverrides?.[g.anaAyet];
+          const anaOv = activeConfig.verseOverrides?.[g.anaAyet];
           const anaExpandW = anaOv?.expandW ?? 0;
           const anaExpandH = anaOv?.expandH ?? 0;
           const anaRawT = sTransform.anaAyet;
@@ -200,16 +202,16 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         // Verse-level bg override takes priority over the section-level bgThemeKey.
         // This ensures verses like Verse 5 (anaAyet) get their specific color punched
         // into the paper texture instead of inheriting the section default.
-        const overrideBg = ALAK_LAYOUT_CONFIG.verseOverrides?.[i]?.bg;
+        const overrideBg = activeConfig.verseOverrides?.[i]?.bg;
         if (overrideBg) {
           setCol(i, overrideBg);
           continue;
         }
         const key = verseColorKeys[i];
-        if (key && ALAK_LAYOUT_CONFIG.styling.colors[key]) {
+        if (key && activeConfig.styling.colors[key]) {
           // Type casting is needed because color values could technically be any config property,
           // but we ensure ThemeColors are strictly strings
-          const colorHex = ALAK_LAYOUT_CONFIG.styling.colors[key] as string;
+          const colorHex = activeConfig.styling.colors[key] as string;
           setCol(i, colorHex);
         }
       }
@@ -220,7 +222,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         sectionRects: sRects,
         verseBgColors: bgColors,
       };
-    }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS]);
+    }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS, activeConfig]);
 
   const uniforms = useMemo(
     () => ({
@@ -316,7 +318,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
     const sectionMap: Record<string, number> = {};
     let sIdx = 0;
-    ALAK_LAYOUT_CONFIG.sections.forEach((sec) => {
+    activeConfig.sections.forEach((sec) => {
       if (sec.type === "gridWithAnaAyet") {
         sectionMap[sec.id] = sIdx++;
       } else if (sec.type === "verticalGroups") {
@@ -343,7 +345,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
       if (state.middleHorizontalFolded !== prevState.middleHorizontalFolded) {
         const middleFoldVerses =
-          ALAK_LAYOUT_CONFIG.specialVerses?.middleFoldVerses;
+          activeConfig.specialVerses?.middleFoldVerses;
         if (middleFoldVerses) {
           [...middleFoldVerses.left, ...middleFoldVerses.right].forEach((id) =>
             idsToCheck.add(id),
