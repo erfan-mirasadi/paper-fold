@@ -127,6 +127,7 @@ const getBandProgress = (
 };
 
 const getStoryOffsetForRaw = (rawOffset: number): number => {
+  if (!ALAK_LAYOUT_CONFIG.features.hasIntro) return rawOffset;
   return getBandProgress(
     rawOffset,
     SCROLL_TIMELINE.story.start,
@@ -135,6 +136,7 @@ const getStoryOffsetForRaw = (rawOffset: number): number => {
 };
 
 const getRawOffsetForStory = (storyOffset: number): number => {
+  if (!ALAK_LAYOUT_CONFIG.features.hasIntro) return clamp01(storyOffset);
   const start = SCROLL_TIMELINE.story.start / 100;
   const end = SCROLL_TIMELINE.story.end / 100;
   return start + clamp01(storyOffset) * (end - start);
@@ -196,7 +198,8 @@ export function ScrollManager() {
       SCROLL_TIMELINE.handoff.start,
       SCROLL_TIMELINE.handoff.end,
     ) : 1;
-    const storyOffset = hasIntro ? getStoryOffsetForRaw(rawOffset) : rawOffset;
+    // getStoryOffsetForRaw already handles hasIntro internally
+    const storyOffset = getStoryOffsetForRaw(rawOffset);
 
     let scrollAmbientMediaId: IntroMediaId | null = null;
     if (ambientProgress >= 0 && handoffProgress === 0) {
@@ -599,7 +602,9 @@ export function ScrollManager() {
       }
 
       let fromTop = lenis.scroll;
-      const storyStart = SCROLL_TIMELINE.story.start / 100;
+      const storyStart = ALAK_LAYOUT_CONFIG.features.hasIntro
+        ? SCROLL_TIMELINE.story.start / 100
+        : 0;
       const baseStageSize = Math.max(1 - storyStart, 0.00001) / maxStageIndex;
 
       for (let i = 0; i < stageOffsets.length; i++) {
