@@ -17,7 +17,7 @@ export interface IntroMediaItem {
 }
 
 export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
-  s1: {
+  section1: {
     src: "",
     isVideo: false,
     backgroundText: {
@@ -25,7 +25,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
     },
   },
-  s1_step1: {
+  section1_step1: {
     src: "",
     isVideo: false,
     backgroundText: {
@@ -34,7 +34,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       titleSize: "text-[5.5vw] md:text-[3.5vw] leading-[1.2]",
     },
   },
-  s1_step2: {
+  section1_step2: {
     src: "/intro/section-1.mp4", // Defaulting to this, will adjust if user provides specific path
     isVideo: true,
     backgroundText: {
@@ -42,7 +42,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
     },
   },
-  s1_step3: {
+  section1_step3: {
     src: "/intro/section-1.mp4", // Keep same image to avoid crossfade
     isVideo: true,
     backgroundText: {
@@ -50,7 +50,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
     },
   },
-  s2_top: {
+  section2_top: {
     src: "/intro/section-2.mp4",
     isVideo: true,
     backgroundText: {
@@ -58,7 +58,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       title: "Tuğyan\n zulüm\ninkâr \nistiğna",
     },
   },
-  s2_center: {
+  section2_center: {
     src: "/intro/section-3.mp4",
     isVideo: true,
     backgroundText: {
@@ -66,7 +66,7 @@ export const INTRO_MEDIA_DATA: Record<IntroMediaId, IntroMediaItem> = {
       title: "Dışarıdan bakanlara\n hitap",
     },
   },
-  s2_bottom: {
+  section2_bottom: {
     src: "/intro/section-4.mp4",
     isVideo: true,
     backgroundText: {

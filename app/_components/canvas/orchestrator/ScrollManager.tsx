@@ -4,9 +4,7 @@ import type Lenis from "lenis";
 import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
 import { getOffsetForId } from "../3d-scene/FoldStory";
-import {
-  useElevatedStore,
-} from "../../../stores/useElevatedStore";
+import { useElevatedStore } from "../../../stores/useElevatedStore";
 import type { IntroMediaId } from "../../../data/introMedia";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
@@ -24,33 +22,7 @@ const easeInOutCubic = (t: number): number => {
 
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
-// Master Scroll Timeline Configuration
-// Configured in percentages (0 to 100) for easier understanding and maintenance.
-// Adjust these values if you add new pages or change the intro duration.
-export const SCROLL_TIMELINE = {
-  intro: { start: 0, end: 15 }, // Ends at 15%
-  ambient: { start: 15, end: 50 }, // 35% dedicated to scrolling through ambient media
-  handoff: { start: 50, end: 60 }, // Starts at 50%
-  story: { start: 60, end: 100 },
-};
-
-// ============================================================================
-// 🔒 LOCK CONFIGURATION
-// You can adjust exactly where the lock happens, and how hard it is to break!
-// ============================================================================
-export const LOCK_CONFIG = {
-  // At what percentage of the total scroll should the lock engage? (0 to 1)
-  // 0.60 = Paper has just landed but is still folded up.
-  // 0.70 = Paper has fully unfolded and is perfectly flat (single paper).
-  lockPositionPercentage: 0.6,
-
-  // How much trackpad effort is required to break the lock and scroll up?
-  effortRequired: 3000,
-
-  // How many pixels near the lock point will the lock "grab" the user?
-  // We use a larger grab range to catch very fast trackpad swipes that might slip past.
-  grabRangePixels: 50,
-};
+// Configuration is now read dynamically from ALAK_LAYOUT_CONFIG (or active Surah config) via runtime.
 
 interface FoldStoreState {
   targetStageId: string | null;
@@ -125,24 +97,26 @@ const getBandProgress = (
   return clamp01((rawOffset - start) / (end - start));
 };
 
-const getStoryOffsetForRaw = (rawOffset: number): number => {
-  if (!ALAK_LAYOUT_CONFIG.features.hasIntro) return rawOffset;
+const getStoryOffsetForRaw = (rawOffset: number, config: any): number => {
+  if (!config.features.hasIntro) return rawOffset;
   return getBandProgress(
     rawOffset,
-    SCROLL_TIMELINE.story.start,
-    SCROLL_TIMELINE.story.end,
+    config.animations.scrollTimeline!.story.start,
+    config.animations.scrollTimeline!.story.end,
   );
 };
 
-const getRawOffsetForStory = (storyOffset: number): number => {
-  if (!ALAK_LAYOUT_CONFIG.features.hasIntro) return clamp01(storyOffset);
-  const start = SCROLL_TIMELINE.story.start / 100;
-  const end = SCROLL_TIMELINE.story.end / 100;
+const getRawOffsetForStory = (storyOffset: number, config: any): number => {
+  if (!config.features.hasIntro) return clamp01(storyOffset);
+  const start = config.animations.scrollTimeline!.story.start / 100;
+  const end = config.animations.scrollTimeline!.story.end / 100;
   return start + clamp01(storyOffset) * (end - start);
 };
 
 export function ScrollManager() {
   const runtime = useSurahLayoutRuntime();
+  const SCROLL_TIMELINE = runtime.config.animations.scrollTimeline!;
+  const LOCK_CONFIG = runtime.config.animations.scrollLock!;
   const lenis = useLenis();
   const targetStageId = useFoldStore((s) => s.targetStageId);
   const transitionToken = useFoldStore((s) => s.transitionToken);
@@ -171,67 +145,71 @@ export function ScrollManager() {
     }
   };
 
-  const syncCurrentOffset = useCallback((lenisInstance: Lenis) => {
-    const maxScroll = Math.max(lenisInstance.limit, 0);
-    if (maxScroll <= 0) return; // Prevent temporary DOM/layout shifts from resetting scroll to 0
+  const syncCurrentOffset = useCallback(
+    (lenisInstance: Lenis) => {
+      const maxScroll = Math.max(lenisInstance.limit, 0);
+      if (maxScroll <= 0) return; // Prevent temporary DOM/layout shifts from resetting scroll to 0
 
-    const rawOffset = clamp01(lenisInstance.scroll / maxScroll);
+      const rawOffset = clamp01(lenisInstance.scroll / maxScroll);
 
-    // ── Intro intercept ────────────────────────────────────────────
-    // Intro band -> camera-only scroll.
-    // Handoff band -> smooth camera blend to base before story begins.
-    const hasIntro = ALAK_LAYOUT_CONFIG.features.hasIntro;
-    const introActive = hasIntro ? rawOffset < SCROLL_TIMELINE.story.start / 100 : false;
-    const introProgress = hasIntro ? getBandProgress(
-      rawOffset,
-      SCROLL_TIMELINE.intro.start,
-      SCROLL_TIMELINE.intro.end,
-    ) : 1;
-    const ambientProgress = hasIntro ? getBandProgress(
-      rawOffset,
-      SCROLL_TIMELINE.ambient.start,
-      SCROLL_TIMELINE.ambient.end,
-    ) : 1;
-    const handoffProgress = hasIntro ? getBandProgress(
-      rawOffset,
-      SCROLL_TIMELINE.handoff.start,
-      SCROLL_TIMELINE.handoff.end,
-    ) : 1;
-    // getStoryOffsetForRaw already handles hasIntro internally
-    const storyOffset = getStoryOffsetForRaw(rawOffset);
+      // ── Intro intercept ────────────────────────────────────────────
+      // Intro band -> camera-only scroll.
+      // Handoff band -> smooth camera blend to base before story begins.
+      const hasIntro = runtime.config.features.hasIntro;
+      const introActive = hasIntro
+        ? rawOffset < SCROLL_TIMELINE.story.start / 100
+        : false;
+      const introProgress = hasIntro
+        ? getBandProgress(
+            rawOffset,
+            SCROLL_TIMELINE.intro.start,
+            SCROLL_TIMELINE.intro.end,
+          )
+        : 1;
+      const ambientProgress = hasIntro
+        ? getBandProgress(
+            rawOffset,
+            SCROLL_TIMELINE.ambient.start,
+            SCROLL_TIMELINE.ambient.end,
+          )
+        : 1;
+      const handoffProgress = hasIntro
+        ? getBandProgress(
+            rawOffset,
+            SCROLL_TIMELINE.handoff.start,
+            SCROLL_TIMELINE.handoff.end,
+          )
+        : 1;
+      // getStoryOffsetForRaw already handles hasIntro internally
+      const storyOffset = getStoryOffsetForRaw(rawOffset, runtime.config);
 
-    let scrollAmbientMediaId: IntroMediaId | null = null;
-    if (ambientProgress >= 0 && handoffProgress === 0) {
-      const keys: IntroMediaId[] = [
-        "s1",
-        "s1_step1",
-        "s1_step2",
-        "s1_step3",
-        "s2_top",
-        "s2_center",
-        "s2_bottom",
-      ];
-      // Distribute the items across the ambient progress (0 to 1)
-      let index = Math.floor(ambientProgress * keys.length);
-      if (index >= keys.length) index = keys.length - 1;
-      if (ambientProgress > 0 || introProgress >= 1) {
-        scrollAmbientMediaId = keys[index];
+      let scrollAmbientMediaId: IntroMediaId | null = null;
+      if (ambientProgress >= 0 && handoffProgress === 0) {
+        const keys = runtime.config.animations
+          .ambientMediaKeys as IntroMediaId[];
+        // Distribute the items across the ambient progress (0 to 1)
+        let index = Math.floor(ambientProgress * keys.length);
+        if (index >= keys.length) index = keys.length - 1;
+        if (ambientProgress > 0 || introProgress >= 1) {
+          scrollAmbientMediaId = keys[index];
+        }
       }
-    }
 
-    useFoldStore.setState({
-      currentOffset: storyOffset,
-      rawOffset,
-      isIntroActive: introActive,
-      introProgress,
-      introHandoffProgress: handoffProgress,
-      ambientProgress,
-      scrollAmbientMediaId,
-    });
+      useFoldStore.setState({
+        currentOffset: storyOffset,
+        rawOffset,
+        isIntroActive: introActive,
+        introProgress,
+        introHandoffProgress: handoffProgress,
+        ambientProgress,
+        scrollAmbientMediaId,
+      });
 
-    useElevatedStore.getState().syncScrollOffset(storyOffset);
-    usePopUpStore.getState().syncScrollOffset(storyOffset);
-  }, []);
+      useElevatedStore.getState().syncScrollOffset(storyOffset);
+      usePopUpStore.getState().syncScrollOffset(storyOffset);
+    },
+    [runtime.config, SCROLL_TIMELINE],
+  );
 
   useEffect(() => {
     if (!lenis) return;
@@ -263,21 +241,24 @@ export function ScrollManager() {
 
         if (widthChanged || heightChangedMassively) {
           const lastRawOffset = useFoldStore.getState().rawOffset;
-          
+
           // IMPORTANT: Update state guards BEFORE calling scrollTo to prevent infinite recursion!
           lastLimit = currentLimit;
           lastWindowWidth = window.innerWidth;
           ignoreUntilTime = performance.now() + 150;
-          
+
           lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
           return;
         }
-        
+
         lastLimit = currentLimit;
       }
 
       // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
-      if (typeof (lenis as any).targetScroll === "number" && ALAK_LAYOUT_CONFIG.features.hasIntro) {
+      if (
+        typeof (lenis as any).targetScroll === "number" &&
+        ALAK_LAYOUT_CONFIG.features.hasIntro
+      ) {
         const targetScroll = (lenis as any).targetScroll;
         const lockScroll = Math.floor(
           LOCK_CONFIG.lockPositionPercentage * currentLimit,
@@ -311,7 +292,7 @@ export function ScrollManager() {
       lenis.off("scroll", handleSync);
       window.removeEventListener("resize", handleResize);
     };
-  }, [lenis, syncCurrentOffset]);
+  }, [lenis, syncCurrentOffset, LOCK_CONFIG]);
 
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
@@ -368,12 +349,15 @@ export function ScrollManager() {
       const lockScroll = Math.floor(
         LOCK_CONFIG.lockPositionPercentage * currentLimit,
       );
-      
+
       // Disarm point is exactly halfway between the lock (0.6) and the
       // target intro scroll position (0.5). Using a fixed pixel offset
       // caused the disarm to fail on smaller screens.
       const disarmScroll = Math.floor(
-        ((LOCK_CONFIG.lockPositionPercentage + (SCROLL_TIMELINE.handoff.start / 100)) / 2) * currentLimit,
+        ((LOCK_CONFIG.lockPositionPercentage +
+          SCROLL_TIMELINE.handoff.start / 100) /
+          2) *
+          currentLimit,
       );
 
       // Arm the lock if we are at or below the lock point.
@@ -502,7 +486,7 @@ export function ScrollManager() {
       });
       window.removeEventListener("keydown", handleKey, { capture: true });
     };
-  }, [lenis, isAllSectionsMode, isIntroActive]);
+  }, [lenis, isAllSectionsMode, isIntroActive, syncCurrentOffset, LOCK_CONFIG, SCROLL_TIMELINE]);
 
   useEffect(() => {
     if (!targetStageId || !lenis) return;
@@ -578,6 +562,7 @@ export function ScrollManager() {
 
       const currentOffset = getStoryOffsetForRaw(
         clamp01(lenis.scroll / maxScroll),
+        runtime.config,
       );
       const currentStage = currentOffset * maxStageIndex;
       const direction = targetIndex >= currentStage ? 1 : -1;
@@ -609,7 +594,8 @@ export function ScrollManager() {
       for (let i = 0; i < stageOffsets.length; i++) {
         if (activeRunIdRef.current !== thisRunId) return;
 
-        const toTop = getRawOffsetForStory(stageOffsets[i]) * maxScroll;
+        const toTop =
+          getRawOffsetForStory(stageOffsets[i], runtime.config) * maxScroll;
         const segmentOffsetSize = Math.abs((toTop - fromTop) / maxScroll);
         const durationScale = Math.max(segmentOffsetSize / baseStageSize, 0.45);
         const segmentDuration = STEP_SCROLL_DURATION_MS * durationScale;
@@ -625,9 +611,12 @@ export function ScrollManager() {
         }
       }
 
-      lenis.scrollTo(getRawOffsetForStory(targetOffset) * maxScroll, {
-        immediate: true,
-      });
+      lenis.scrollTo(
+        getRawOffsetForStory(targetOffset, runtime.config) * maxScroll,
+        {
+          immediate: true,
+        },
+      );
       setCurrentOffset(targetOffset);
 
       if (activeRunIdRef.current === thisRunId) {
@@ -643,7 +632,7 @@ export function ScrollManager() {
       }
       clearPendingWork();
     };
-  }, [targetStageId, transitionToken, lenis, setCurrentOffset]);
+  }, [targetStageId, transitionToken, lenis, setCurrentOffset, runtime, SCROLL_TIMELINE]);
 
   useEffect(
     () => () => {

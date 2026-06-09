@@ -171,26 +171,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     } = get();
     if (!unlockedVerseIds.includes(verseId)) return;
 
-    // Define pairings: [1,2], [3,4], [7,8], [9,10], [11,12], [13,14], [15,16], [17,18]
-    // Independent: 5, 6, 19
-    const pairs: Record<number, number> = {
-      1: 2,
-      2: 1,
-      3: 4,
-      4: 3,
-      7: 8,
-      8: 7,
-      9: 10,
-      10: 9,
-      11: 12,
-      12: 11,
-      13: 14,
-      14: 13,
-      15: 16,
-      16: 15,
-      17: 18,
-      18: 17,
-    };
+    const pairs: Record<number, number> = ALAK_LAYOUT_CONFIG.specialVerses?.versePairings || {};
 
     const partnerId = pairs[verseId];
     const affectedIds =

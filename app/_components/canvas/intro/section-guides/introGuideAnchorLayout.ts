@@ -42,10 +42,10 @@ export function introGuideCenterAnchorSceneLocal(
 }
 
 export const INTRO_SECTION_GUIDE_ORDER: ElevatedSectionId[] = [
-  "s1",
-  "s2_top",
-  "s2_center",
-  "s2_bottom",
+  "section1",
+  "section2_top",
+  "section2_center",
+  "section2_bottom",
 ];
 
 /** DOM id for `IntroSectionGuidesOverlay` rows (must match overlay markup). */

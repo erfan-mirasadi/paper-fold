@@ -97,6 +97,16 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
   specialVerses: {
     middleFoldVerses: { left: [12, 14], right: [11, 13] },
+    versePairings: {
+      1: 2, 2: 1,
+      3: 4, 4: 3,
+      7: 8, 8: 7,
+      9: 10, 10: 9,
+      11: 12, 12: 11,
+      13: 14, 14: 13,
+      15: 16, 16: 15,
+      17: 18, 18: 17,
+    },
   },
   assets: {},
   verseOverrides: {
@@ -203,6 +213,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       verses: [2, 1, 4, 3],
       anaAyet: 5,
       bgThemeKey: "s1InnerBorder",
+      cameraTarget: { y: 2, fov: 20, tilt: -1.3 },
     } as GridSectionConfig,
     {
       id: "section2",
@@ -235,9 +246,34 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           bgThemeKey: "s2Group3Bg",
         },
       ],
+      subCameraTargets: {
+        top: { y: 1.4, fov: 25, tilt: -1.3 },
+        center: { y: 1, fov: 30, tilt: -1.5 },
+        bottom: { y: 0.7, fov: 35, tilt: -1.5 },
+      },
     } as VerticalGroupsSectionConfig,
   ],
   animations: {
+    scrollTimeline: {
+      intro: { start: 0, end: 15 },
+      ambient: { start: 15, end: 50 },
+      handoff: { start: 50, end: 60 },
+      story: { start: 60, end: 100 },
+    },
+    scrollLock: {
+      lockPositionPercentage: 0.6,
+      effortRequired: 3000,
+      grabRangePixels: 50,
+    },
+    ambientMediaKeys: [
+      "section1",
+      "section1_step1",
+      "section1_step2",
+      "section1_step3",
+      "section2_top",
+      "section2_center",
+      "section2_bottom",
+    ],
     computeFoldYPositions: (lm) => [
       lm.s2Top + 0.09 / 2, // 0.09 is gapBetweenS1andS2
       lm.v6Y - lm.bigBoxH - lm.groupGap / 2,

@@ -52,5 +52,6 @@ export function useSurahLayoutRuntime() {
     FOLD_Y_POSITIONS: foldYPositions,
     foldSteps,
     scrollPages,
+    config: ALAK_LAYOUT_CONFIG,
   };
 }

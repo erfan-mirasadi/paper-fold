@@ -5,25 +5,47 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
+import { GridSectionConfig, VerticalGroupsSectionConfig, CameraTargetConfig } from "../../../data/schema";
 
-const S1_ID = ALAK_LAYOUT_CONFIG.sections[0].id;
-const S2_ID = ALAK_LAYOUT_CONFIG.sections[1].id;
-const S2_TOP_ID = `${S2_ID}_top`;
-const S2_CENTER_ID = `${S2_ID}_center`;
-const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+// Build a dynamic map of sectionId -> CameraTargetConfig
+const zoomTargets: Record<string, CameraTargetConfig> = {};
 
-const SECTION_ZOOM_TARGETS: Record<
-  string,
-  { y: number; fov: number; tilt: number }
-> = {
-  // y: بالا و پایین رفتن دوربین
-  // fov: زوم لنز دوربین (مقدار پیش‌فرض 50 است. عدد کمتر = زوم بیشتر)
-  // tilt: زاویه دید بالا/پایین (عدد منفی = نگاه به سمت پایین، صفر = نگاه مستقیم)
-  [S1_ID]: { y: 2, fov: 20, tilt: -1.3 },
-  [S2_TOP_ID]: { y: 1.4, fov: 25, tilt: -1.3 },
-  [S2_CENTER_ID]: { y: 1, fov: 30, tilt: -1.5 },
-  [S2_BOTTOM_ID]: { y: 0.7, fov: 35, tilt: -1.5 },
-};
+ALAK_LAYOUT_CONFIG.sections.forEach((section) => {
+  if (section.type === "gridWithAnaAyet") {
+    const s1 = section as GridSectionConfig;
+    if (s1.cameraTarget) {
+      zoomTargets[s1.id] = s1.cameraTarget;
+    }
+  } else if (section.type === "verticalGroups") {
+    const s2 = section as VerticalGroupsSectionConfig;
+    if (s2.subCameraTargets) {
+      if (s2.subCameraTargets.top) zoomTargets[`${s2.id}_top`] = s2.subCameraTargets.top;
+      if (s2.subCameraTargets.center) zoomTargets[`${s2.id}_center`] = s2.subCameraTargets.center;
+      if (s2.subCameraTargets.bottom) zoomTargets[`${s2.id}_bottom`] = s2.subCameraTargets.bottom;
+    }
+    if (s2.cameraTarget) {
+      zoomTargets[s2.id] = s2.cameraTarget;
+    }
+  }
+});
+
+// Helper to infer section ID from verse ID
+function getSectionIdForVerse(vid: number): string | null {
+  for (const section of ALAK_LAYOUT_CONFIG.sections) {
+    if (section.type === "gridWithAnaAyet") {
+      const s1 = section as GridSectionConfig;
+      if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
+    } else if (section.type === "verticalGroups") {
+      const s2 = section as VerticalGroupsSectionConfig;
+      if (s2.introVerse === vid) return `${s2.id}_top`;
+      if (s2.outroVerse === vid) return `${s2.id}_bottom`;
+      if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
+      if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
+      if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
+    }
+  }
+  return null;
+}
 
 export function SectionZoomCamera() {
   useFrame((state) => {
@@ -51,16 +73,12 @@ export function SectionZoomCamera() {
     // Infer section if we only clicked a verse and activeSectionId is null
     let targetSectionId = activeSectionId;
     if (!targetSectionId && activeVerseIds.length > 0) {
-      const vid = activeVerseIds[0];
-      if (vid <= 5) targetSectionId = S1_ID;
-      else if (vid <= 10) targetSectionId = S2_TOP_ID;
-      else if (vid <= 14) targetSectionId = S2_CENTER_ID;
-      else targetSectionId = S2_BOTTOM_ID;
+      targetSectionId = getSectionIdForVerse(activeVerseIds[0]);
     }
 
     // 3. If a section is active and we are NOT in all sections mode, zoom to it
     if (phase === "elevated" && !isAllSectionsMode && targetSectionId) {
-      const zoomCoords = SECTION_ZOOM_TARGETS[targetSectionId];
+      const zoomCoords = zoomTargets[targetSectionId];
       if (zoomCoords) {
         targetCamY = zoomCoords.y;
         targetFov = zoomCoords.fov;

@@ -85,6 +85,12 @@ export interface VerseBlockConfig {
   bgThemeKey?: keyof ThemeColors;
 }
 
+export interface CameraTargetConfig {
+  y: number;
+  fov: number;
+  tilt: number;
+}
+
 export interface GridSectionConfig {
   id: string;
   type: "gridWithAnaAyet";
@@ -92,6 +98,7 @@ export interface GridSectionConfig {
   verses: number[];
   anaAyet: number;
   bgThemeKey?: keyof ThemeColors;
+  cameraTarget?: CameraTargetConfig;
 }
 
 export interface VerticalGroupsSectionConfig {
@@ -103,12 +110,19 @@ export interface VerticalGroupsSectionConfig {
   outroVerse?: number;
   introOutroBgThemeKey?: keyof ThemeColors;
   groups: VerseBlockConfig[];
+  cameraTarget?: CameraTargetConfig;
+  subCameraTargets?: {
+    top?: CameraTargetConfig;
+    center?: CameraTargetConfig;
+    bottom?: CameraTargetConfig;
+  };
 }
 
 export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
 
 export interface SpecialVerses {
   middleFoldVerses?: { left: number[]; right: number[] };
+  versePairings?: Record<number, number>;
 }
 
 export interface VerseOverrideConfig {
@@ -147,9 +161,25 @@ export interface FoldStoryStep {
   folds: FoldState[];
 }
 
+export interface ScrollTimelineConfig {
+  intro: { start: number; end: number };
+  ambient: { start: number; end: number };
+  handoff: { start: number; end: number };
+  story: { start: number; end: number };
+}
+
+export interface ScrollLockConfig {
+  lockPositionPercentage: number;
+  effortRequired: number;
+  grabRangePixels: number;
+}
+
 export interface SurahAnimations {
   foldSteps: readonly FoldStoryStep[];
   computeFoldYPositions: (layoutMath: any) => readonly number[];
+  scrollTimeline?: ScrollTimelineConfig;
+  scrollLock?: ScrollLockConfig;
+  ambientMediaKeys?: string[];
 }
 
 export interface SurahLayoutConfig<TParams = any> {
