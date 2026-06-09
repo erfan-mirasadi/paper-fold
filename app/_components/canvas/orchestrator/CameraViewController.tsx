@@ -5,7 +5,6 @@ import { MathUtils, Spherical, Vector3 } from "three";
 import { useCameraStore } from "../../../stores/useCameraStore";
 import {
   CAMERA_VIEW_AZIMUTH_OFFSETS,
-  CAMERA_VIEW_POLAR_OFFSETS,
   useCameraViewStore,
 } from "../../../stores/useCameraViewStore";
 
@@ -128,40 +127,22 @@ export function CameraViewController() {
       maxAzimuth,
     );
 
-    const minPolar = Number.isFinite(controls.minPolarAngle)
-      ? (controls.minPolarAngle as number)
-      : 0;
-    const maxPolar = Number.isFinite(controls.maxPolarAngle)
-      ? (controls.maxPolarAngle as number)
-      : Math.PI;
-
-    const targetPolar = MathUtils.clamp(
-      _initialPolar + CAMERA_VIEW_POLAR_OFFSETS[requestedView],
-      minPolar,
-      maxPolar,
-    );
-
     const diff = shortestDelta(currentTheta, targetTheta);
-    const polarDiff = targetPolar - currentPolar;
 
-    if (
-      Math.abs(diff) <= SNAP_EPSILON &&
-      Math.abs(polarDiff) <= SNAP_POLAR_EPSILON
-    ) {
-      setOrbitAngles(controls, state.camera, targetTheta, targetPolar);
+    if (Math.abs(diff) <= SNAP_EPSILON) {
+      setOrbitAngles(controls, state.camera, targetTheta, currentPolar);
       cameraViewStore.clearRequest();
       return;
     }
 
     const ease = 1 - Math.exp(-ROTATE_RESPONSE * Math.max(delta, 0.001));
     const easedTheta = diff * ease;
-    const easedPolar = polarDiff * ease;
 
     setOrbitAngles(
       controls,
       state.camera,
       currentTheta + easedTheta,
-      currentPolar + easedPolar,
+      currentPolar,
     );
   });
 

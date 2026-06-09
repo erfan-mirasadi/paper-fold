@@ -3,7 +3,6 @@
 import { useFrame } from "@react-three/fiber";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
-import { Vector3 } from "three";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 
@@ -26,9 +25,6 @@ const SECTION_ZOOM_TARGETS: Record<
   [S2_BOTTOM_ID]: { y: 0.7, fov: 35, tilt: -1.5 },
 };
 
-const _camPos = new Vector3();
-const _lookTarget = new Vector3();
-
 export function SectionZoomCamera() {
   useFrame((state) => {
     // 1. Only run zoom logic when in paper mode
@@ -43,8 +39,8 @@ export function SectionZoomCamera() {
     const controls = state.controls as any;
 
     // 2. Base camera position and target from config
-    const [defX, defY, defZ] = CAMERA_CONFIG.initialCamera.position;
-    const [defTX, defTY, defTZ] = CAMERA_CONFIG.initialCamera.target;
+    const [, defY] = CAMERA_CONFIG.initialCamera.position;
+    const [, defTY] = CAMERA_CONFIG.initialCamera.target;
 
     const defFov = CAMERA_CONFIG.initialCamera.fov;
 
@@ -75,10 +71,9 @@ export function SectionZoomCamera() {
     }
 
     // 4. Smoothly interpolate camera position and target
-    _camPos.set(defX, targetCamY, defZ); // Z is locked to default!
-    _lookTarget.set(defTX, lookAtY, defTZ);
-
-    camera.position.lerp(_camPos, 0.05);
+    // IMPORTANT: We only control Y-height and FOV.
+    // X and Z are owned by OrbitControls (azimuth rotation) — do NOT lerp them.
+    camera.position.y += (targetCamY - camera.position.y) * 0.05;
 
     const currentFov = (camera as any).fov;
     if (currentFov !== undefined) {
@@ -87,10 +82,13 @@ export function SectionZoomCamera() {
     }
 
     if (controls?.target) {
-      controls.target.lerp(_lookTarget, 0.05);
-      controls.update();
+      controls.target.y += (lookAtY - controls.target.y) * 0.05;
+      // Do NOT call controls.update() here — CameraViewController owns the
+      // camera orientation each frame. Calling controls.update() here would
+      // fight its azimuth positioning and cause jitter/resets.
     } else {
-      camera.lookAt(_lookTarget);
+      // Fallback: directly tilt the camera to face the lookAtY
+      camera.lookAt(camera.position.x, lookAtY, camera.position.z);
     }
   });
 
