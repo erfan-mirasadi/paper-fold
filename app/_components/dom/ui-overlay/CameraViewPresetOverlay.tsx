@@ -113,7 +113,12 @@ export function CameraViewPresetOverlay() {
               disabled={isLocked}
               aria-pressed={isActive}
               aria-label={`Kamera gorunum: ${item.label}`}
-              onClick={() => requestView(item.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                requestView(item.id);
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
               className={`camera-preset-btn ${isActive ? "is-active" : ""} ${isCenter ? "is-center" : ""}`}
             >
               <span className="camera-preset-icon" aria-hidden="true">

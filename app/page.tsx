@@ -7,12 +7,6 @@ import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useState, useRef } from "react";
 import * as THREE from "three";
 import { PopUpHoverScrollController } from "./_components/canvas/pop-up-verses/PopUpHoverScrollController";
-// VerseNeonOverlay is currently fully commented out (not a module).
-// import {
-//   VerseNeonTracker,
-//   VerseNeonHTMLOverlay,
-// } from "./_components/canvas/camera-zoom/VerseNeonOverlay";
-// import Effects from "./_components/canvas/3d-scene/Effects";
 import { ScrollManager } from "./_components/canvas/orchestrator/ScrollManager";
 import { useFoldStore } from "./_components/canvas/orchestrator/ScrollManager";
 import { NavigationOverlay } from "./_components/dom/ui-overlay/NavigationOverlay";
@@ -211,9 +205,7 @@ export default function Home() {
               >
                 <Canvas
                   style={{ pointerEvents: "inherit" }}
-                  eventSource={
-                    typeof document !== "undefined" ? document.body : undefined
-                  }
+                  eventSource={canvasWrapperRef}
                   camera={{
                     position: CAMERA_CONFIG.initialCamera.position,
                     fov: CAMERA_CONFIG.initialCamera.fov,
@@ -227,14 +219,9 @@ export default function Home() {
                   }}
                   frameloop="always"
                 >
-                  {/* <color attach="background" args={["var(--page-bg)"]} /> Removed to allow transparent background for background text */}
-                  {/* <Effects glitchTrigger={glitchKey} /> */}
                   <ScrollManager />
                   <PopUpHoverScrollController />
-                  <Experience
-                    onReady={handleSceneReady}
-                  />
-                  {/* <VerseNeonTracker /> */}
+                  <Experience onReady={handleSceneReady} />
                   <CameraViewController />
                   {!isMobile && <Preload all />}{" "}
                   {/* Bypassed heavy synchronous shader compilation on mobile to avoid memory crashes during layout boot */}
