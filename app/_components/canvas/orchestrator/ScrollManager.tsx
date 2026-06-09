@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
 import { getOffsetForId } from "../3d-scene/FoldStory";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
-import type { IntroMediaId } from "../../../data/introMedia";
+
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useLenis } from "../../dom/LenisProvider";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
@@ -41,11 +41,11 @@ interface FoldStoreState {
   /** 0..1 progress of breaking through the barrier. */
   barrierProgress: number;
   /** The ID of the currently hovered intro section guide. */
-  activeAmbientMediaId: IntroMediaId | null;
+  activeAmbientMediaId: string | null;
   /** The ID of the ambient media currently active due to scroll. */
-  scrollAmbientMediaId: IntroMediaId | null;
-  setActiveAmbientMediaId: (id: IntroMediaId | null) => void;
-  setScrollAmbientMediaId: (id: IntroMediaId | null) => void;
+  scrollAmbientMediaId: string | null;
+  setActiveAmbientMediaId: (id: string | null) => void;
+  setScrollAmbientMediaId: (id: string | null) => void;
   setBarrierProgress: (p: number) => void;
   triggerTransition: (id: string) => void;
   setCurrentOffset: (offset: number) => void;
@@ -183,10 +183,10 @@ export function ScrollManager() {
       // getStoryOffsetForRaw already handles hasIntro internally
       const storyOffset = getStoryOffsetForRaw(rawOffset, runtime.config);
 
-      let scrollAmbientMediaId: IntroMediaId | null = null;
+      let scrollAmbientMediaId: string | null = null;
       if (ambientProgress >= 0 && handoffProgress === 0) {
         const keys = runtime.config.animations
-          .ambientMediaKeys as IntroMediaId[];
+          .ambientMediaKeys as string[];
         // Distribute the items across the ambient progress (0 to 1)
         let index = Math.floor(ambientProgress * keys.length);
         if (index >= keys.length) index = keys.length - 1;

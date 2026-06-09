@@ -14,7 +14,7 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../sections-object/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../sections-object/ElevatedSectionLabels";
 import { useDragState } from "../../../utils/dragEngine";
-import { CAMERA_CONFIG, INTRO_CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { VerseClickHitboxes } from "../verses-object/VerseClickHitboxes";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { IntroExperience } from "../intro/IntroExperience";
@@ -193,7 +193,7 @@ function DynamicControls() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   const enableInteractions = isIntroActive
-    ? INTRO_CAMERA_CONFIG.allowOrbit
+    ? (ALAK_LAYOUT_CONFIG.animations.introCamera?.allowOrbit ?? false)
     : false;
 
   const minAzimuthAngle = isIntroActive

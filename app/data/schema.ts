@@ -174,12 +174,34 @@ export interface ScrollLockConfig {
   grabRangePixels: number;
 }
 
+export interface IntroMediaItem {
+  src: string;
+  isVideo?: boolean;
+  backgroundText?: {
+    caption?: string;
+    title?: string;
+    subtitle?: string;
+    body?: string;
+    titleSize?: string;
+  };
+}
+
+export interface IntroCameraConfig {
+  introPosition: [number, number, number];
+  introTarget: [number, number, number];
+  scrollOffset: [number, number, number];
+  targetFollow: number;
+  allowOrbit: boolean;
+  handoffDurationMs: number;
+}
+
 export interface SurahAnimations {
   foldSteps: readonly FoldStoryStep[];
   computeFoldYPositions: (layoutMath: any) => readonly number[];
   scrollTimeline?: ScrollTimelineConfig;
   scrollLock?: ScrollLockConfig;
   ambientMediaKeys?: string[];
+  introCamera?: IntroCameraConfig;
 }
 
 export interface SurahLayoutConfig<TParams = any> {
@@ -193,6 +215,8 @@ export interface SurahLayoutConfig<TParams = any> {
   params: TParams;
   sections: SectionConfig[];
   animations: SurahAnimations;
+  introMedia?: Record<string, IntroMediaItem>;
+  introGuides?: Record<string, string>;
 }
 
 // ----------------------------------------------------------------------------

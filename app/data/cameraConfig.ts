@@ -91,19 +91,3 @@ export const CAMERA_CONFIG = {
   },
 };
 
-// Intro-only camera tuning. Keep basePosition aligned with CAMERA_CONFIG.initialCamera
-// if you want zero handoff jump after the intro.
-export const INTRO_CAMERA_CONFIG = {
-  // Intro camera base pose (separate from the main camera).
-  // Lowered Y so camera sits closer to the page during intro — change Y here.
-  introPosition: [-1.221, 0.343, 2.756] as Vec3,
-  introTarget: [0.492, 0.176, 1.237] as Vec3,
-  // Max offset applied at the very top of the intro scroll band.
-  scrollOffset: [0.5, 1.5, 0] as Vec3,
-  // 1 = target follows camera offset; 0 = target stays fixed.
-  targetFollow: 1,
-  // Set true only if you want OrbitControls during intro.
-  allowOrbit: false,
-  // Handoff duration when intro ends (ms).
-  handoffDurationMs: 800,
-};

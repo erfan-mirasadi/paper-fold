@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
-import { INTRO_MEDIA_DATA } from "../../data/introMedia";
+import { ALAK_LAYOUT_CONFIG } from "../../data/SurahConfig";
 import { motion, AnimatePresence } from "framer-motion";
 
 // You can easily adjust the position and size of the white halos (for light mode readability) here!
@@ -72,9 +72,7 @@ const MediaElement = ({
   );
 };
 
-const mediaKeys = Object.keys(INTRO_MEDIA_DATA) as Array<
-  keyof typeof INTRO_MEDIA_DATA
->;
+const mediaKeys = ALAK_LAYOUT_CONFIG.introMedia ? Object.keys(ALAK_LAYOUT_CONFIG.introMedia) : [];
 
 export default function AmbientMedia({
   src: propSrc,
@@ -91,10 +89,11 @@ export default function AmbientMedia({
       (state.ambientProgress > 0 || state.introProgress >= 1),
   );
 
+  const introMedia = ALAK_LAYOUT_CONFIG.introMedia || {};
   const currentMedia = scrollAmbientId
-    ? INTRO_MEDIA_DATA[scrollAmbientId]
-    : INTRO_MEDIA_DATA[mediaKeys[0]];
-  const activeMedia = activeId ? INTRO_MEDIA_DATA[activeId] : currentMedia;
+    ? introMedia[scrollAmbientId]
+    : introMedia[mediaKeys[0]];
+  const activeMedia = activeId ? introMedia[activeId] : currentMedia;
 
   const src = propSrc || activeMedia?.src;
   const isVideo =

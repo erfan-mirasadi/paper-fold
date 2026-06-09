@@ -108,6 +108,70 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       17: 18, 18: 17,
     },
   },
+  introMedia: {
+    section1: {
+      src: "",
+      isVideo: false,
+      backgroundText: {
+        title: "İnsanlara oku!",
+        titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
+      },
+    },
+    section1_step1: {
+      src: "",
+      isVideo: false,
+      backgroundText: {
+        title:
+          "Alak suresi, insanlığın ufkunda doğan İlahi bir güneş gibi\nMuhammed aleyhisselama peygamberlik tacının giydirildiğini\nbütün cihana ilan etmiş ve müjdelemiştir",
+        titleSize: "text-[5.5vw] md:text-[3.5vw] leading-[1.2]",
+      },
+    },
+    section1_step2: {
+      src: "/intro/section-1.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Muhkem",
+        title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
+      },
+    },
+    section1_step3: {
+      src: "/intro/section-1.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Muhkem",
+        title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
+      },
+    },
+    section2_top: {
+      src: "/intro/section-2.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Ebu cehil'in dünyası",
+        title: "Tuğyan\n zulüm\ninkâr \nistiğna",
+      },
+    },
+    section2_center: {
+      src: "/intro/section-3.mp4",
+      isVideo: true,
+      backgroundText: {
+        title: "Dışarıdan bakanlara\n hitap",
+      },
+    },
+    section2_bottom: {
+      src: "/intro/section-4.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Ebu cehil'in ahireti",
+        title: "Tuğyanın\n zulmün\n inkârın \nkarşılığı",
+      },
+    },
+  },
+  introGuides: {
+    section1: "Ana bölüm",
+    section2_top: "1. Açıklama bölümü",
+    section2_center: "Orta bölüm",
+    section2_bottom: "2. Açıklama bölümü",
+  },
   assets: {},
   verseOverrides: {
     5: {
@@ -254,6 +318,14 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     } as VerticalGroupsSectionConfig,
   ],
   animations: {
+    introCamera: {
+      introPosition: [-1.221, 0.343, 2.756],
+      introTarget: [0.492, 0.176, 1.237],
+      scrollOffset: [0.5, 1.5, 0],
+      targetFollow: 1,
+      allowOrbit: false,
+      handoffDurationMs: 800,
+    },
     scrollTimeline: {
       intro: { start: 0, end: 15 },
       ambient: { start: 15, end: 50 },

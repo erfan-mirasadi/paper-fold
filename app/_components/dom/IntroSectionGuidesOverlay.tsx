@@ -6,7 +6,7 @@ import {
   INTRO_SECTION_GUIDE_ORDER,
   introGuideMarkerDomId,
 } from "../canvas/intro/section-guides/introGuideAnchorLayout";
-import { INTRO_SECTION_GUIDE_UI_TEXT } from "../../data/introSectionGuideCopy";
+import { ALAK_LAYOUT_CONFIG } from "../../data/SurahConfig";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 
 export function IntroSectionGuidesOverlay() {
@@ -44,7 +44,7 @@ export function IntroSectionGuidesOverlay() {
         <IntroGuideHudRow
           key={id}
           sectionId={id}
-          caption={INTRO_SECTION_GUIDE_UI_TEXT[id]}
+          caption={ALAK_LAYOUT_CONFIG.introGuides?.[id] || ""}
           polePx={polePx}
           lineStroke={line}
           tipFill={tip}

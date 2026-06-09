@@ -3,7 +3,8 @@
 import { useFrame } from "@react-three/fiber";
 import { useCameraStore } from "../../../stores/useCameraStore";
 import { useFoldStore } from "./ScrollManager";
-import { CAMERA_CONFIG, INTRO_CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { ALAK_LAYOUT_CONFIG } from "../../../data/SurahConfig";
 
 type OrbitControlsLike = {
   target?: {
@@ -31,17 +32,20 @@ export function IntroCameraScrollController() {
 
     if (!isIntroActive) return;
 
+    const { introCamera } = ALAK_LAYOUT_CONFIG.animations;
+    if (!introCamera) return;
+
     const controls = state.controls as OrbitControlsLike | undefined;
     const offsetScale = 1 - introProgress;
-    const [introX, introY, introZ] = INTRO_CAMERA_CONFIG.introPosition;
-    const [introTX, introTY, introTZ] = INTRO_CAMERA_CONFIG.introTarget;
-    const [offX, offY, offZ] = INTRO_CAMERA_CONFIG.scrollOffset;
+    const [introX, introY, introZ] = introCamera.introPosition;
+    const [introTX, introTY, introTZ] = introCamera.introTarget;
+    const [offX, offY, offZ] = introCamera.scrollOffset;
 
     const introCamX = introX + offX * offsetScale;
     const introCamY = introY + offY * offsetScale;
     const introCamZ = introZ + offZ * offsetScale;
 
-    const follow = INTRO_CAMERA_CONFIG.targetFollow;
+    const follow = introCamera.targetFollow;
     const introLookX = introTX + offX * offsetScale * follow;
     const introLookY = introTY + offY * offsetScale * follow;
     const introLookZ = introTZ + offZ * offsetScale * follow;
