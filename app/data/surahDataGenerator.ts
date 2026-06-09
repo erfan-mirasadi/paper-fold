@@ -11,7 +11,7 @@ import {
   BLUE_THEME,
   CAPSULE_BG_6_19,
 } from "./theme";
-import { SURAH_DATA_BY_LANGUAGE } from "../hooks/useSurahLanguageStore";
+import { SurahDataShape } from "./surahData";
 import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
 
 import { GridSectionConfig, VerticalGroupsSectionConfig } from "./schema";
@@ -45,7 +45,8 @@ export interface VerseConfig {
 }
 
 export function buildVerseConfigs(
-  surahData: (typeof SURAH_DATA_BY_LANGUAGE)["ar"],
+  surahData: SurahDataShape,
+  arabicData: SurahDataShape,
   runtime: ReturnType<typeof useSurahLayoutRuntime>,
 ): VerseConfig[] {
   const configs: VerseConfig[] = [];
@@ -186,7 +187,7 @@ export function buildVerseConfigs(
         group.verses.forEach((v, i) => {
           const isRightCol = i % 2 !== 0;
           const arabicVerseNumber =
-            SURAH_DATA_BY_LANGUAGE["ar"].section2.colorGroups[gIdx].verses[i]
+            arabicData.section2.colorGroups[gIdx].verses[i]
               .number;
           const isLTR = arabicVerseNumber !== v.number;
           const lookupNumber = isLTR ? arabicVerseNumber : v.number;

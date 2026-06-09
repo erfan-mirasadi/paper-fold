@@ -4,7 +4,6 @@ import { SurahSection } from "./SurahSection";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import {
-  SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
 import {
@@ -44,7 +43,8 @@ interface SurahLayoutProps {
 
 function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const activeTextData = useStoryStore((s) => s.activeTextData);
+  const surahData = activeTextData[activeLanguage];
   const runtime = useSurahLayoutRuntime();
 
   if (imageUrl) {

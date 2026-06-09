@@ -24,8 +24,8 @@ const easeInOutCubic = (t: number): number => {
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
 export function IntroCameraScrollController() {
-  const config = useStoryStore(state => state.activeConfig);
   useFrame((state) => {
+    const config = useStoryStore.getState().activeConfig;
     if (useCameraStore.getState().phase !== "idle") return;
 
     const { isIntroActive, introProgress, introHandoffProgress } =

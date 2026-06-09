@@ -53,6 +53,7 @@ interface FoldStoreState {
   resetTransition: () => void;
   isInstantSkip: boolean;
   setInstantSkip: (v: boolean) => void;
+  resetForStory: (config: any) => void;
 }
 
 export const useFoldStore = create<FoldStoreState>((set) => ({
@@ -84,6 +85,17 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
   isInstantSkip: false,
   setInstantSkip: (v) => set({ isInstantSkip: v }),
+  resetForStory: (config) => set({
+    isIntroActive: config.features.hasIntro,
+    introProgress: config.features.hasIntro ? 0 : 1,
+    introHandoffProgress: config.features.hasIntro ? 0 : 1,
+    ambientProgress: config.features.hasIntro ? 0 : 1,
+    barrierProgress: 0,
+    currentOffset: 0,
+    rawOffset: 0,
+    targetStageId: null,
+    isTransitioning: false,
+  }),
 }));
 
 const getBandProgress = (
@@ -133,6 +145,15 @@ export function ScrollManager() {
   const isScrollUpLockedRef = useRef(false);
   const wheelEffortRef = useRef(0);
   const isAnimatingUpRef = useRef(false);
+
+  useEffect(() => {
+    // Reset fold store state when config changes (e.g. story switch)
+    useFoldStore.getState().resetForStory(runtime.config);
+    // Also scroll to top seamlessly
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    }
+  }, [runtime.config, lenis]);
 
   const clearPendingWork = () => {
     if (frameIdRef.current !== null) {

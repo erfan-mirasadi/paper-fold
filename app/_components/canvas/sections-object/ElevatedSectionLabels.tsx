@@ -5,9 +5,9 @@ import { a, to, useSpring } from "@react-spring/three";
 import { TopLabel } from "../SurahLayout/SharedUI";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import {
-  SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import {
   S1_TOP_LABEL_BG,
   S1_TOP_LABEL_BORDER,
@@ -146,7 +146,6 @@ function AnimatedElevatedLabel({
   );
 }
 
-import { useStoryStore } from "../../../stores/useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig } from "../../../data/schema";
 
 export function ElevatedSectionLabels() {
@@ -155,7 +154,8 @@ export function ElevatedSectionLabels() {
   const SURAH_TRANSFORMS = runtime.SURAH_TRANSFORMS;
 
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const activeTextData = useStoryStore((s) => s.activeTextData);
+  const surahData = activeTextData[activeLanguage];
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   // ALL labels hidden during intro→paper transition.
