@@ -19,6 +19,7 @@ import {
 } from "../../../data/SurahConfig";
 import { SectionTransforms, GridSectionConfig } from "../../../data/schema";
 import { useStoryStore } from "../../../stores/useStoryStore";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 import { useMemo } from "react";
 
@@ -174,7 +175,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
     t.colorSpace = THREE.SRGBColorSpace;
   });
 
-  const config = useStoryStore(state => state.activeConfig);
+  const config = useStoryStore((state) => state.activeConfig);
   const s1Config = config.sections[0] as GridSectionConfig;
 
   // Build a verse-number → text map from the prop data.
@@ -271,15 +272,32 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
       })}
 
       {/* ── Unified verse loop: grid verses + anaAyet, all driven by config overrides ── */}
-      {allVerseIds.map((vId) => {
-        // Resolve the base layout transform.
-        // Grid verses: t.verses[vId]; anaAyet: t.anaAyet
+      {allVerseIds.map((vId, i) => {
         const isAnaAyet = vId === s1Config.anaAyet;
-        const rawT = isAnaAyet ? t.anaAyet : t.verses?.[vId];
+
+        let lookupNumber = vId;
+        let actualVerseId = vId;
+
+        // If not anaAyet, swap the layout positions for LTR languages
+        if (!isAnaAyet && i < 4) {
+          // We use SurahConfig's hardcoded grid order [2, 1, 4, 3] which gives the exact Arabic layout IDs in order
+          const arabicVerseNumber = s1Config.verses[i];
+          const currentLanguageVerseNumber = data.gridVerses[i]?.number;
+          if (
+            currentLanguageVerseNumber !== undefined &&
+            currentLanguageVerseNumber !== arabicVerseNumber
+          ) {
+            lookupNumber = arabicVerseNumber;
+            actualVerseId = currentLanguageVerseNumber;
+          }
+        }
+
+        // Resolve the base layout transform using lookupNumber
+        const rawT = isAnaAyet ? t.anaAyet : t.verses?.[lookupNumber];
         if (!rawT) return null;
 
-        // Override-driven sizing, colors, and decorators
-        const override = config.verseOverrides?.[vId];
+        // Override-driven sizing, colors, and decorators using actualVerseId
+        const override = config.verseOverrides?.[actualVerseId];
         const expandW = override?.expandW ?? 0;
         const expandH = override?.expandH ?? 0;
 
@@ -316,15 +334,15 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         const labelDrop = t.anaAyetLabelDrop ?? 0.015;
 
         return (
-          <group key={vId}>
+          <group key={actualVerseId}>
             <VerseBox
               x={expandedX}
               y={expandedY}
               z={rawT.z}
               w={w}
               h={h}
-              verse={verseTextMap[vId] ?? ""}
-              number={vId}
+              verse={verseTextMap[actualVerseId] ?? ""}
+              number={actualVerseId}
               bg={bg}
               border={border}
               circleBorderCol={circleBorderCol}
@@ -335,18 +353,26 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
             />
 
             {/* Generic SVG decorative frame — rendered for any verse with customFrameSvg */}
-            {svgUrl && (
-              <SvgFrameOverlay
-                x={expandedX - BW + shrinkX}
-                y={expandedY + BW}
-                z={rawT.z + 0.003}
-                w={outerW}
-                h={outerH}
-                svgUrl={svgUrl}
-                renderW={outerW * SVG_WIDTH_SCALE}
-                renderH={outerH * SVG_HEIGHT_SCALE}
-              />
-            )}
+            {svgUrl && (() => {
+              const activeLanguage = useSurahLanguageStore.getState().activeLanguage;
+              const isArabic = activeLanguage === "ar";
+              
+              // Scale up the SVG frame slightly for non-Arabic if override provides a scale
+              const frameScaleMult = (!isArabic && override?.frameScaleLTR) ? override.frameScaleLTR : 1.0;
+              
+              return (
+                <SvgFrameOverlay
+                  x={expandedX - BW + shrinkX}
+                  y={expandedY + BW}
+                  z={rawT.z + 0.003}
+                  w={outerW}
+                  h={outerH}
+                  svgUrl={svgUrl}
+                  renderW={outerW * SVG_WIDTH_SCALE * frameScaleMult}
+                  renderH={outerH * SVG_HEIGHT_SCALE * frameScaleMult}
+                />
+              );
+            })()}
 
             {/* Generic AnaAyetTab — rendered for any verse with hasAnaAyetTab: true */}
             {hasTab && (

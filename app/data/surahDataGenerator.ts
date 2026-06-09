@@ -34,6 +34,7 @@ export interface VerseConfig {
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
+  frameScaleLTR?: number;
   anaAyetTab?: {
     x: number;
     y: number;
@@ -71,8 +72,6 @@ export function buildVerseConfigs(
       }
 
       // Unified entry list: grid verses (with column index) + optional anaAyet.
-      // Iterating config IDs directly avoids any LTR/RTL lookup — transforms are
-      // always keyed by Arabic verse number.
       const verseEntries: Array<{ vId: number; gridIdx?: number }> = [
         ...gridConfig.verses.map((vId, i) => ({ vId, gridIdx: i })),
         ...(gridConfig.anaAyet !== undefined
@@ -83,15 +82,27 @@ export function buildVerseConfigs(
       for (const { vId, gridIdx } of verseEntries) {
         const isGridVerse = gridIdx !== undefined;
 
-        // Resolve the layout transform for this verse.
+        // Swapping layout lookup for LTR grid verses
+        let lookupNumber = vId;
+        let actualVerseId = vId;
+        if (isGridVerse) {
+          const arabicVerseNumber = gridConfig.verses[gridIdx];
+          const currentLanguageVerseNumber = surahData.section1.gridVerses[gridIdx]?.number;
+          if (currentLanguageVerseNumber !== undefined && currentLanguageVerseNumber !== arabicVerseNumber) {
+            lookupNumber = arabicVerseNumber;
+            actualVerseId = currentLanguageVerseNumber;
+          }
+        }
+
+        // Resolve the layout transform for this verse using lookupNumber.
         // Grid verses live in transforms.verses; the anaAyet has its own slot.
         const rawTransform = isGridVerse
-          ? transforms.verses?.[vId]
+          ? transforms.verses?.[lookupNumber]
           : transforms.anaAyet;
         if (!rawTransform) continue;
 
         // --- Override-driven properties (all optional, default to section values) ---
-        const override = runtime.config.verseOverrides?.[vId];
+        const override = runtime.config.verseOverrides?.[actualVerseId];
         const expandW = override?.expandW ?? 0;
         const expandH = override?.expandH ?? 0;
         const expandedW = rawTransform.w + expandW * 2;
@@ -141,9 +152,9 @@ export function buildVerseConfigs(
             : undefined;
 
         configs.push({
-          id: vId,
-          verse: verseTextMap[vId] ?? "",
-          number: vId,
+          id: actualVerseId,
+          verse: verseTextMap[actualVerseId] ?? "",
+          number: actualVerseId,
           y: rawTransform.y + expandH,
           w: expandedW,
           h: expandedH,
@@ -158,6 +169,7 @@ export function buildVerseConfigs(
           isPill,
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
+          frameScaleLTR: override?.frameScaleLTR,
           anaAyetTab,
         });
       }

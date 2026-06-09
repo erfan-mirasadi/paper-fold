@@ -178,6 +178,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       customFrameSvg: "/Group 11.svg",
       expandW: 0.035,
       expandH: 0.01,
+      frameScaleLTR: 1.1,
       isPill: false,
       bg: "#E5CFA4", // CAPSULE_BG_6_19 — drives paper masking AND SectionOne render
       border: "#E5CFA4",

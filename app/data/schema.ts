@@ -129,6 +129,8 @@ export interface VerseOverrideConfig {
   customFrameSvg?: string;
   expandW?: number;
   expandH?: number;
+  /** Custom scale for the SVG frame when rendering in left-to-right languages */
+  frameScaleLTR?: number;
   /** When false, the verse renders as a rounded rectangle instead of a pill */
   isPill?: boolean;
   /** Direct hex color for the verse box background (also used by paper masking) */

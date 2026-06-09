@@ -17,6 +17,7 @@ import {
   ELEVATE_TIMING,
   SECTION_ELEVATION_HEIGHT,
 } from "../../../hooks/useElevateAnimation";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 export interface VerseMeshProps {
   hingeX: number;
@@ -52,6 +53,7 @@ export interface VerseMeshProps {
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
   customFrameSvg?: string;
+  frameScaleLTR?: number;
   anaAyetTab?: {
     x: number;
     y: number;
@@ -68,23 +70,29 @@ function BorderSvg({
   assetUrl,
   opacity,
   elevateOpacity,
+  frameScaleLTR,
 }: {
   w: number;
   h: number;
   assetUrl: string;
   opacity: any;
   elevateOpacity: SpringValue<number>;
+  frameScaleLTR?: number;
 }) {
   const texture = useTexture(assetUrl, (t: any) => {
     t.colorSpace = THREE.SRGBColorSpace;
   });
 
-  const isArabic = true;
-  const widthScale = isArabic ? 0.8 : 0.89;
+  const activeLanguage = useSurahLanguageStore.getState().activeLanguage;
+  const isArabic = activeLanguage === "ar";
+  
+  const widthScale = 0.8;
   const heightScale = 0.93;
+  
+  const frameScaleMult = (!isArabic && frameScaleLTR) ? frameScaleLTR : 1.0;
 
-  const renderW = w * widthScale;
-  const renderH = h * heightScale;
+  const renderW = w * widthScale * frameScaleMult;
+  const renderH = h * heightScale * frameScaleMult;
 
   return (
     <mesh position={[w / 2, -h / 2, 0.01]} renderOrder={102}>
@@ -134,6 +142,7 @@ export function VerseMesh({
   suppressShadow = false,
   shadowRenderOrder,
   customFrameSvg,
+  frameScaleLTR,
   anaAyetTab,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
@@ -340,6 +349,7 @@ export function VerseMesh({
                       assetUrl={customFrameSvg}
                       opacity={opacity}
                       elevateOpacity={elevateOpacity}
+                      frameScaleLTR={frameScaleLTR}
                     />
                   )}
 

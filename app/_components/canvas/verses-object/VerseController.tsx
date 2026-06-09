@@ -303,6 +303,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
           customFrameSvg={config.customFrameSvg}
+          frameScaleLTR={config.frameScaleLTR}
           anaAyetTab={config.anaAyetTab}
         />
       </a.group>
