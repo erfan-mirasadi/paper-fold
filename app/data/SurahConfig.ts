@@ -11,6 +11,12 @@ import type {
   SectionTransforms,
 } from "./schema";
 import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
+import {
+  S1_VERSE_NUMBER_BG,
+  S1_VERSE_NUMBER_BORDER,
+  S1_VERSE_NUMBER_TEXT,
+  S1_VERSE_5_TEXT,
+} from "./theme";
 
 export interface Verse {
   number: number;
@@ -90,11 +96,23 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     scrollPages: 6,
   },
   specialVerses: {
-    metallicVerseId: 5,
     middleFoldVerses: { left: [12, 14], right: [11, 13] },
   },
-  assets: {
-    metallicVerseBorderSvg: "/Group 11.svg",
+  assets: {},
+  verseOverrides: {
+    5: {
+      customFrameSvg: "/Group 11.svg",
+      expandW: 0.035,
+      expandH: 0.01,
+      isPill: false,
+      bg: "#E5CFA4", // CAPSULE_BG_6_19 — drives paper masking AND SectionOne render
+      border: "#E5CFA4",
+      circleBorderCol: S1_VERSE_NUMBER_BORDER,
+      circleBg: "#E5CFA4",
+      circleTextCol: S1_VERSE_NUMBER_TEXT,
+      textColor: S1_VERSE_5_TEXT,
+      hasAnaAyetTab: true,
+    },
   },
   styling: {
     colors: {
@@ -507,7 +525,7 @@ export function buildSurahTransforms(
           h: lm.anaAyetH,
         },
         anaAyetTabX: s1BaseX + lm.innerW / 2,
-        anaAyetTabY: anaAyetY,
+        anaAyetTabY: anaAyetY + 0.015,
         anaAyetTabW: lm.anaAyetTabW,
         anaAyetTabH: lm.anaAyetTabH,
         anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,

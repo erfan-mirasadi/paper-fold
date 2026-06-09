@@ -1,4 +1,3 @@
-import { VerseFiveMetallic } from "../SurahLayout/VerseFiveMetallic";
 import { PopUpHoverSensors } from "../pop-up-verses/PopUpHoverSensors";
 import { VerseController } from "./VerseController";
 import { buildVerseConfigs } from "../../../data/surahDataGenerator";
@@ -38,13 +37,6 @@ export function VersesRenderer() {
         setHoveredGroupId={setHoveredGroupId}
       />
 
-      {/* Dynamic Metallic Verse */}
-      {ALAK_LAYOUT_CONFIG.specialVerses?.metallicVerseId && ALAK_LAYOUT_CONFIG.assets?.metallicVerseBorderSvg && (
-        <VerseFiveMetallic
-          verseId={ALAK_LAYOUT_CONFIG.specialVerses.metallicVerseId}
-          assetUrl={ALAK_LAYOUT_CONFIG.assets.metallicVerseBorderSvg}
-        />
-      )}
     </group>
   );
 }

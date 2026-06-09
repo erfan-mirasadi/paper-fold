@@ -68,10 +68,20 @@ export interface LayoutStyling {
 
 export interface VerseBlockConfig {
   verseIds: number[];
+  isPill?: boolean;
+  isSectionIntroOutro?: boolean;
+  customFrameSvg?: string;
+  anaAyetTab?: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    borderWidth: number;
+    labelDrop?: number;
+  };
   isPushedIn?: boolean;
   isCenter?: boolean;
   extraRowGap?: number;
-  isMetallic?: boolean;
   bgThemeKey?: keyof ThemeColors;
 }
 
@@ -79,7 +89,7 @@ export interface GridSectionConfig {
   id: string;
   type: "gridWithAnaAyet";
   labelKey?: string;
-  verses: number[]; 
+  verses: number[];
   anaAyet: number;
   bgThemeKey?: keyof ThemeColors;
 }
@@ -98,8 +108,29 @@ export interface VerticalGroupsSectionConfig {
 export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
 
 export interface SpecialVerses {
-  metallicVerseId?: number;
   middleFoldVerses?: { left: number[]; right: number[] };
+}
+
+export interface VerseOverrideConfig {
+  customFrameSvg?: string;
+  expandW?: number;
+  expandH?: number;
+  /** When false, the verse renders as a rounded rectangle instead of a pill */
+  isPill?: boolean;
+  /** Direct hex color for the verse box background (also used by paper masking) */
+  bg?: string;
+  /** Direct hex color for the verse border / circle decorations */
+  border?: string;
+  /** Explicit hex color for the verse number circle border */
+  circleBorderCol?: string;
+  /** Explicit hex color for the verse number circle background */
+  circleBg?: string;
+  /** Explicit hex color for the verse number text */
+  circleTextCol?: string;
+  /** Explicit hex color for the Arabic and Latin verse text */
+  textColor?: string;
+  /** When true, an AnaAyetTab label is rendered above this verse in section and mesh views */
+  hasAnaAyetTab?: boolean;
 }
 
 export interface SurahAssets {
@@ -128,6 +159,7 @@ export interface SurahLayoutConfig<TParams = any> {
   styling: LayoutStyling;
   specialVerses: SpecialVerses;
   assets?: SurahAssets;
+  verseOverrides?: Record<number, VerseOverrideConfig>;
   params: TParams;
   sections: SectionConfig[];
   animations: SurahAnimations;

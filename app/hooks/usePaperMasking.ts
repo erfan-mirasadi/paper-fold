@@ -1,15 +1,20 @@
 import { useMemo, useEffect, useCallback } from "react";
 import { Color, type Texture } from "three";
 import { usePopUpStore } from "../stores/usePopUpStore";
-import {
-  useElevatedStore,
-} from "../stores/useElevatedStore";
+import { useElevatedStore } from "../stores/useElevatedStore";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import { ORIGINAL_TEXTURE_TIMING } from "./useFoldAnimation";
 import { ELEVATE_TEXTURE_TIMING } from "./useElevateAnimation";
 import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
 import { ALAK_LAYOUT_CONFIG, VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
-import { SectionTransforms, GroupTransforms, ElementTransform, GridSectionConfig, VerticalGroupsSectionConfig, ThemeColors } from "../data/schema";
+import {
+  SectionTransforms,
+  GroupTransforms,
+  ElementTransform,
+  GridSectionConfig,
+  VerticalGroupsSectionConfig,
+  ThemeColors,
+} from "../data/schema";
 
 export const MASK_CONFIG = {
   sectionExpand: 0.013,
@@ -42,12 +47,12 @@ let _maxVerseId = 0;
 let _totalSections = 0;
 const verseColorKeys = new Array<keyof ThemeColors | undefined>(200);
 
-ALAK_LAYOUT_CONFIG.sections.forEach(sec => {
+ALAK_LAYOUT_CONFIG.sections.forEach((sec) => {
   if (sec.type === "gridWithAnaAyet") {
     _totalSections += 1;
     const g = sec as GridSectionConfig;
     _maxVerseId = Math.max(_maxVerseId, ...g.verses, g.anaAyet);
-    g.verses.forEach(v => verseColorKeys[v] = g.bgThemeKey);
+    g.verses.forEach((v) => (verseColorKeys[v] = g.bgThemeKey));
     verseColorKeys[g.anaAyet] = g.bgThemeKey;
   } else if (sec.type === "verticalGroups") {
     _totalSections += 3;
@@ -60,9 +65,9 @@ ALAK_LAYOUT_CONFIG.sections.forEach(sec => {
       _maxVerseId = Math.max(_maxVerseId, v.outroVerse);
       verseColorKeys[v.outroVerse] = v.introOutroBgThemeKey;
     }
-    v.groups.forEach(g => {
+    v.groups.forEach((g) => {
       _maxVerseId = Math.max(_maxVerseId, ...g.verseIds);
-      g.verseIds.forEach(vId => verseColorKeys[vId] = g.bgThemeKey);
+      g.verseIds.forEach((vId) => (verseColorKeys[vId] = g.bgThemeKey));
     });
   }
 });
@@ -98,11 +103,45 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       let secIdx = 0;
 
       ALAK_LAYOUT_CONFIG.sections.forEach((sec, idx) => {
-        const sTransform = SURAH_TRANSFORMS.sections[idx] as Required<SectionTransforms>;
+        const sTransform = SURAH_TRANSFORMS.sections[
+          idx
+        ] as Required<SectionTransforms>;
         if (sec.type === "gridWithAnaAyet") {
           const g = sec as GridSectionConfig;
-          g.verses.forEach(v => setVerseRect(v, sTransform.verses[v], true));
-          setVerseRect(g.anaAyet, sTransform.anaAyet, false);
+          // Apply any expand override so the shader cutout matches the actual VerseBox size.
+          // Verses without an override fall back to their raw transform.
+          g.verses.forEach((vId) => {
+            const ov = ALAK_LAYOUT_CONFIG.verseOverrides?.[vId];
+            const expandW = ov?.expandW ?? 0;
+            const expandH = ov?.expandH ?? 0;
+            const rawT = sTransform.verses[vId];
+            setVerseRect(
+              vId,
+              {
+                x: rawT.x - expandW,
+                y: rawT.y + expandH,
+                w: rawT.w + expandW * 2,
+                h: rawT.h + expandH * 2,
+              },
+              ov?.isPill ?? true,
+            );
+          });
+
+          // anaAyet: always apply its expand override
+          const anaOv = ALAK_LAYOUT_CONFIG.verseOverrides?.[g.anaAyet];
+          const anaExpandW = anaOv?.expandW ?? 0;
+          const anaExpandH = anaOv?.expandH ?? 0;
+          const anaRawT = sTransform.anaAyet;
+          setVerseRect(
+            g.anaAyet,
+            {
+              x: anaRawT.x - anaExpandW,
+              y: anaRawT.y + anaExpandH,
+              w: anaRawT.w + anaExpandW * 2,
+              h: anaRawT.h + anaExpandH * 2,
+            },
+            anaOv?.isPill ?? false,
+          );
 
           sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
           sRects[secIdx * 4 + 1] = sTransform.frameY + PAD / 2 + exp;
@@ -111,32 +150,39 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           secIdx++;
         } else if (sec.type === "verticalGroups") {
           const v = sec as VerticalGroupsSectionConfig;
-          if (v.introVerse) setVerseRect(v.introVerse, sTransform.introVerse, false);
-          if (v.outroVerse) setVerseRect(v.outroVerse, sTransform.outroVerse, false);
+          if (v.introVerse)
+            setVerseRect(v.introVerse, sTransform.introVerse, false);
+          if (v.outroVerse)
+            setVerseRect(v.outroVerse, sTransform.outroVerse, false);
           v.groups.forEach((gConf, gIdx) => {
             const gTrans = sTransform.groups[gIdx];
-            gConf.verseIds.forEach(vId => setVerseRect(vId, gTrans.verses[vId], true));
+            gConf.verseIds.forEach((vId) =>
+              setVerseRect(vId, gTrans.verses[vId], true),
+            );
           });
 
           // s2_top
           sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
           sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
           sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] = sTransform.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] =
+            sTransform.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
           secIdx++;
 
           // s2_center
           sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
           sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
           sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] = FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] =
+            FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
           secIdx++;
 
           // s2_bottom
           sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
           sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
           sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] = FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] =
+            FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
           secIdx++;
         }
       });
@@ -151,6 +197,14 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       };
 
       for (let i = 1; i <= MAX_VERSE_ID; i++) {
+        // Verse-level bg override takes priority over the section-level bgThemeKey.
+        // This ensures verses like Verse 5 (anaAyet) get their specific color punched
+        // into the paper texture instead of inheriting the section default.
+        const overrideBg = ALAK_LAYOUT_CONFIG.verseOverrides?.[i]?.bg;
+        if (overrideBg) {
+          setCol(i, overrideBg);
+          continue;
+        }
         const key = verseColorKeys[i];
         if (key && ALAK_LAYOUT_CONFIG.styling.colors[key]) {
           // Type casting is needed because color values could technically be any config property,
@@ -221,7 +275,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
         const isIntroActiveNow = useFoldStore.getState().isIntroActive;
         const currentOffsetNow = useFoldStore.getState().currentOffset;
-        const isFoldedMainPaperNow = !isIntroActiveNow && currentOffsetNow < 0.98;
+        const isFoldedMainPaperNow =
+          !isIntroActiveNow && currentOffsetNow < 0.98;
 
         const g = s.popUpGroups.find((group) => group.verseIds.includes(id));
         const isHidden =
@@ -261,7 +316,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
     const sectionMap: Record<string, number> = {};
     let sIdx = 0;
-    ALAK_LAYOUT_CONFIG.sections.forEach(sec => {
+    ALAK_LAYOUT_CONFIG.sections.forEach((sec) => {
       if (sec.type === "gridWithAnaAyet") {
         sectionMap[sec.id] = sIdx++;
       } else if (sec.type === "verticalGroups") {
@@ -270,10 +325,11 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         sectionMap[`${sec.id}_bottom`] = sIdx++;
       }
     });
-    
+
     Object.entries(sectionMap).forEach(([id, idx]) => {
       const isElevated = e.activeSectionIds.includes(id);
-      uniforms.uSectionVisibility.value[idx] = (isElevated && !isIntroActive && !isFoldedMainPaper) ? 0.0 : 1.0;
+      uniforms.uSectionVisibility.value[idx] =
+        isElevated && !isIntroActive && !isFoldedMainPaper ? 0.0 : 1.0;
     });
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
@@ -286,9 +342,12 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       });
 
       if (state.middleHorizontalFolded !== prevState.middleHorizontalFolded) {
-        const middleFoldVerses = ALAK_LAYOUT_CONFIG.specialVerses?.middleFoldVerses;
+        const middleFoldVerses =
+          ALAK_LAYOUT_CONFIG.specialVerses?.middleFoldVerses;
         if (middleFoldVerses) {
-           [...middleFoldVerses.left, ...middleFoldVerses.right].forEach((id) => idsToCheck.add(id));
+          [...middleFoldVerses.left, ...middleFoldVerses.right].forEach((id) =>
+            idsToCheck.add(id),
+          );
         }
       }
 
@@ -296,15 +355,17 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = state.popUpGroups.find((group) =>
           group.verseIds.includes(id),
         );
-        
+
         const isIntroActiveNow = useFoldStore.getState().isIntroActive;
         const currentOffsetNow = useFoldStore.getState().currentOffset;
-        const isFoldedMainPaperNow = !isIntroActiveNow && currentOffsetNow < 0.98;
+        const isFoldedMainPaperNow =
+          !isIntroActiveNow && currentOffsetNow < 0.98;
 
         const shouldBeHidden =
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(state, id) ||
-          (!isFoldedMainPaperNow && useElevatedStore.getState().activeVerseIds.includes(id));
+          (!isFoldedMainPaperNow &&
+            useElevatedStore.getState().activeVerseIds.includes(id));
 
         const delay = shouldBeHidden
           ? ORIGINAL_TEXTURE_TIMING.hideDelay
@@ -327,7 +388,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = usePopUpStore
           .getState()
           .popUpGroups.find((group) => group.verseIds.includes(id));
-        
+
         const isIntroActive = useFoldStore.getState().isIntroActive;
         const currentOffset = useFoldStore.getState().currentOffset;
         const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;

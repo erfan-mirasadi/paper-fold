@@ -1,11 +1,15 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSpring, a, to } from "@react-spring/three";
+import { useSpring, a, to, SpringValue } from "@react-spring/three";
 import {
   useFoldAnimation,
   useMiddleHorizontalFoldAnimation,
 } from "../../../hooks/useFoldAnimation";
-import { useElevateAnimation, SECTION_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
+import {
+  useElevateAnimation,
+  SECTION_ELEVATION_HEIGHT,
+} from "../../../hooks/useElevateAnimation";
+
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import {
   dragEngine,
@@ -161,7 +165,8 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const zOffset = foldVisibility.zOffset;
 
   // Fade out both the fold opacity and elevate opacity during the handoff phase
-  const opacity = useHandoffOpacity(foldVisibility.opacity, sectionId);
+  const baseOpacity = foldVisibility.opacity;
+  const opacity = useHandoffOpacity(baseOpacity, sectionId);
   const handoffElevateOpacity = useHandoffOpacity(elevateOpacity, sectionId);
 
   const rotLeft = verticalFold.rotLeft;
@@ -288,8 +293,11 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBorderCol={config.circleBorderCol}
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
+          textColor={config.textColor}
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
+          customFrameSvg={config.customFrameSvg}
+          anaAyetTab={config.anaAyetTab}
         />
       </a.group>
     </group>
