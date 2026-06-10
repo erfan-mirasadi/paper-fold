@@ -478,6 +478,7 @@ interface VerseBoxProps {
   /** 0 avoids capturing invisible text inside finite-frame RenderTextures. */
   verseTextEnterDurationMs?: number;
   textOffsetY?: number;
+  textScaleOverride?: number;
 }
 export const VerseBox = ({
   x,
@@ -498,11 +499,12 @@ export const VerseBox = ({
   bgOpacity = 1,
   textColor,
   textOffsetY = 0,
+  textScaleOverride,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
-  const textScale = isPill ? langScale.verseSmall : langScale.verseBig;
+  const textScale = textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
   const showVerseNumber = true;
   const textLineHeight = isArabic ? 1.2 : 1.06;

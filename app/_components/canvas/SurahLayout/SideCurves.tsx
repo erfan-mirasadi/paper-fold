@@ -1,7 +1,7 @@
 "use client";
 
 import { Line } from "@react-three/drei";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect, Fragment } from "react";
 import * as THREE from "three";
 import {
   BLUE_THEME,
@@ -102,6 +102,8 @@ function computeBrackets(
   const g0 = groups[0];
   const gLast = groups[groups.length - 1];
 
+
+
   const brackets: BracketSpec[] = [];
 
   if (hasIntroOutro) {
@@ -179,35 +181,30 @@ function computeBrackets(
     }
   } else {
     // ── Generic topology: 1 outer + 1 inner center ────────────────────────
-    //
-    // Outer bracket:
-    //   top = g0.frameY                 (top of first group)
-    //   bot = gLast.frameY - gLast.frameH  (bottom of last group)
-    //   inner top / bot = just inside the outer edges (groupPad inset)
-    //
-    // Inner center bracket:
-    //   wraps only the center group using its own frameY / frameH.
+    
+    // Outer bracket dynamically wraps all rows of the first and last group.
+    const outerTop = g0.frameY - groupPad;
+    const outerBot = gLast.frameY - gLast.frameH + groupPad; // Assumes groupPadBottom is equal to groupPad
 
-    const outerTop = g0.frameY;
-    const outerBot = gLast.frameY - gLast.frameH;
     brackets.push({
       outerYTop: outerTop,
       outerYBot: outerBot,
-      innerYTop: outerTop - groupPad,
-      innerYBot: outerBot + groupPad,
+      innerYTop: outerTop - smallBoxH2, // Bracket tip thickness matches verse height
+      innerYBot: outerBot + smallBoxH2,
       nestLevel: 0,
       isCenter: false,
       ...OUTER_BRACKET_COLORS[0],
     });
 
     if (centerGroup) {
-      const cTop = centerGroup.frameY;
-      const cBot = centerGroup.frameY - centerGroup.frameH;
+      const cTop = centerGroup.frameY - groupPad;
+      const cBot = centerGroup.frameY - centerGroup.frameH + groupPad;
+
       brackets.push({
         outerYTop: cTop,
         outerYBot: cBot,
-        innerYTop: cTop - groupPad,
-        innerYBot: cBot + groupPad,
+        innerYTop: cTop - smallBoxH2,
+        innerYBot: cBot + smallBoxH2,
         nestLevel: 1,
         isCenter: true,
         ...CENTER_BRACKET_COLOR,
@@ -482,7 +479,7 @@ export const SideCurves = ({
         const botDelta  = idx === 0 ? borderDelta : 0;
 
         return (
-          <>
+          <Fragment key={idx}>
             {/* LEFT side */}
             <CurvePair
               key={`L-${idx}`}
@@ -513,7 +510,7 @@ export const SideCurves = ({
               fillColor={b.fillColor}
               shouldHide={shouldHide}
             />
-          </>
+          </Fragment>
         );
       })}
     </group>

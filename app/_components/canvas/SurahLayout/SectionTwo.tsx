@@ -206,6 +206,7 @@ export function SectionTwo({
           group={group}
           groupTransform={t.groups[index]}
           groupIndex={index}
+          layout={layout}
         />
       ))}
 

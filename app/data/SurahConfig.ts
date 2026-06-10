@@ -79,6 +79,8 @@ export interface AlakLayoutParams {
   boxExtOffset: number;
   extraRowGap: number;
   labelHitboxWidth: number;
+  verseTextScale?: number;
+  groupRows?: number[];
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -480,6 +482,15 @@ export function createLayoutMath(
   // the centering formula (hasS1 === false branch) depends on s2H.
   const groupH = p.groupPad + p.groupPadBottom + (p.smallBoxH2 * 2 + p.s2Gap);
 
+  const getGroupH = (rows: number) => {
+    return p.groupPad + p.groupPadBottom + (rows * p.smallBoxH2 + Math.max(0, rows - 1) * p.s2Gap);
+  };
+
+  const g0H = getGroupH(p.groupRows?.[0] ?? 2);
+  const g1H = getGroupH(p.groupRows?.[1] ?? 2);
+  const g2H = getGroupH(p.groupRows?.[2] ?? 2);
+  const totalGroupsH = g0H + g1H + g2H;
+
   // When hasIntro is false there are no intro/outro verse boxes, so the two
   // bigBoxH slots and their two flanking groupGaps are collapsed to zero.
   // When hasIntro is true the formula is mathematically identical to before.
@@ -489,11 +500,11 @@ export function createLayoutMath(
     ? p.s2VerticalPad * 2 +
       p.bigBoxH * 2 +
       p.groupGap * 4 +
-      groupH * 3 +
+      totalGroupsH +
       p.middleExtraGap * 2
     : p.s2VerticalPad * 2 +
       p.groupGap * 2 +          // the 2 gaps *between* the 3 groups
-      groupH * 3 +
+      totalGroupsH +
       p.middleExtraGap * 2;
 
   // Detect whether a gridWithAnaAyet (Section 1) is part of this config.
@@ -517,13 +528,13 @@ export function createLayoutMath(
     ? v6Y - p.bigBoxH - p.groupGap          // Alak: identical to original
     : v6Y;                                   // Ayat al-Kursi: groups slide up
 
-  const baseG2Y = baseG1Y - groupH - (p.groupGap + p.middleExtraGap);
-  const baseG3Y = baseG2Y - groupH - (p.groupGap + p.middleExtraGap);
+  const baseG2Y = baseG1Y - g0H - (p.groupGap + p.middleExtraGap);
+  const baseG3Y = baseG2Y - g1H - (p.groupGap + p.middleExtraGap);
   // v19Y position is always computed (keeps type consistent) but only rendered
   // when hasIntro is true.
   const baseV19Y = hasIntroOutro
-    ? baseG3Y - groupH - p.groupGap
-    : baseG3Y - groupH;                      // not rendered; safe sentinel
+    ? baseG3Y - g2H - p.groupGap
+    : baseG3Y - g2H;                      // not rendered; safe sentinel
 
   return {
     PAGE_WIDTH,
@@ -566,8 +577,8 @@ export function createLayoutMath(
     baseG1Y,
     baseG3Y,
 
-    groupInnerW: CONTENT_W - 0.07 - p.groupPad * 2,
-    groupInnerHalfW: (CONTENT_W - 0.07 - p.groupPad * 2 - p.s2Gap) / 2,
+    groupInnerW: CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2,
+    groupInnerHalfW: (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
 
     s2PadLeftRight: p.s2PadLeftRight,
     g2Shrink: p.g2Shrink,
@@ -580,12 +591,14 @@ export function createLayoutMath(
     sgBorderWidth: p.sgBorderWidth,
     boxExtOffset: p.boxExtOffset,
     extraRowGap: p.extraRowGap,
+    verseTextScale: p.verseTextScale ?? undefined,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
     // fields are non-number. We use an explicit return type instead.
     hasIntroOutro,                              // boolean
     groupYPositions: [baseG1Y, baseG2Y, baseG3Y] as [number, number, number],
+    groupHeights: [g0H, g1H, g2H] as [number, number, number],
   };
 }
 
@@ -749,7 +762,7 @@ export function buildSurahTransforms(
           frameX: gBaseX,
           frameY: groupY,
           frameW: gInnerW,
-          frameH: lm.groupH,
+          frameH: lm.groupHeights[gIdx] ?? lm.groupH,
           isPushedIn,
           isCenter: group.isCenter ?? false,
           verses,

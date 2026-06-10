@@ -236,6 +236,17 @@ export interface ElementTransform {
   h: number;
 }
 
+export interface BracketSpec {
+  outerYTop: number;
+  outerYBot: number;
+  innerYTop: number;
+  innerYBot: number;
+  nestLevel: number;
+  isCenter: boolean;
+  color: string;
+  fillColor: string;
+}
+
 export interface RowConnectorTransform {
   x: number;
   y: number;
@@ -287,4 +298,5 @@ export interface SectionTransforms {
   baseX?: number;
   topLabelPinY?: number;
   bottomLabelPinY?: number;
+  brackets?: BracketSpec[];
 }

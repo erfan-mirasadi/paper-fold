@@ -17,9 +17,10 @@ interface VerseGroupProps {
   group: ColorGroup;
   groupTransform: GroupTransforms;
   groupIndex?: number;
+  layout?: any; // To receive verseTextScale
 }
 
-export function VerseGroup({ group, groupTransform, groupIndex }: VerseGroupProps) {
+export function VerseGroup({ group, groupTransform, groupIndex, layout }: VerseGroupProps) {
   const gt = groupTransform;
   const borderColor = gt.isCenter ? GREEN_THEME : MAROON_THEME;
 
@@ -126,6 +127,7 @@ export function VerseGroup({ group, groupTransform, groupIndex }: VerseGroupProp
             circleBg={finalBg}
             circleTextCol={borderColor}
             isPill={true}
+            textScaleOverride={layout?.verseTextScale}
           />
         );
       })}
