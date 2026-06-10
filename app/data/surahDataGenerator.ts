@@ -176,11 +176,12 @@ export function buildVerseConfigs(
     } else if (sectionConfig.type === "verticalGroups") {
       const vConfig = sectionConfig as VerticalGroupsSectionConfig;
       const introT = transforms.introVerse;
-      if (introT) {
+      const introVerseData = surahData.section2?.introVerse;
+      if (introT && introVerseData?.number) {
         configs.push({
-          id: surahData.section2.introVerse.number,
-          verse: surahData.section2.introVerse.text,
-          number: surahData.section2.introVerse.number,
+          id: introVerseData.number,
+          verse: introVerseData.text || "",
+          number: introVerseData.number,
           y: introT.y,
           w: introT.w,
           h: introT.h,
@@ -195,12 +196,12 @@ export function buildVerseConfigs(
         });
       }
 
-      surahData.section2.colorGroups.forEach((group, gIdx) => {
-        group.verses.forEach((v, i) => {
+      surahData.section2?.colorGroups?.forEach((group, gIdx) => {
+        group.verses?.forEach((v, i) => {
           const isRightCol = i % 2 !== 0;
-          const arabicVerseNumber =
-            arabicData.section2.colorGroups[gIdx].verses[i]
-              .number;
+          const arabicGroup = arabicData.section2?.colorGroups?.[gIdx];
+          const arabicVerseNumber = arabicGroup?.verses?.[i]?.number;
+          if (arabicVerseNumber === undefined) return;
           const isLTR = arabicVerseNumber !== v.number;
           const lookupNumber = isLTR ? arabicVerseNumber : v.number;
           const t = transforms.groups![gIdx].verses[lookupNumber];
@@ -240,11 +241,12 @@ export function buildVerseConfigs(
       });
 
       const outroT = transforms.outroVerse;
-      if (outroT) {
+      const outroVerseData = surahData.section2?.outroVerse;
+      if (outroT && outroVerseData?.number) {
         configs.push({
-          id: surahData.section2.outroVerse.number,
-          verse: surahData.section2.outroVerse.text,
-          number: surahData.section2.outroVerse.number,
+          id: outroVerseData.number,
+          verse: outroVerseData.text || "",
+          number: outroVerseData.number,
           y: outroT.y,
           w: outroT.w,
           h: outroT.h,

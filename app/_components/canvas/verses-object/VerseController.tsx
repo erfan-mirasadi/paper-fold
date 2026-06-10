@@ -69,8 +69,10 @@ function getShadowSurfaceSectionId(
   verseId: number,
   storyConfig: SurahLayoutConfig<any>
 ): ShadowSurfaceSectionId | null {
-  const S1_ID = storyConfig.sections[0].id;
-  const S2_ID = storyConfig.sections[1].id;
+  const S1_ID = storyConfig.sections[0]?.id;
+  const S2_ID = storyConfig.sections[1]?.id;
+  // If there is no section 2, no shadow surface mapping is possible.
+  if (!S1_ID || !S2_ID) return null;
   const S2_TOP_ID = `${S2_ID}_top`;
   const S2_BOTTOM_ID = `${S2_ID}_bottom`;
 
@@ -82,8 +84,8 @@ function getShadowSurfaceSectionId(
 
 export function VerseController({ config }: { config: VerseConfig }) {
   const activeStoryConfig = useStoryStore((state) => state.activeConfig);
-  const S1_ID = activeStoryConfig.sections[0].id;
-  const S2_ID = activeStoryConfig.sections[1].id;
+  const S1_ID = activeStoryConfig.sections[0]?.id ?? "section1";
+  const S2_ID = activeStoryConfig.sections[1]?.id ?? "__no_s2__";
   const S2_CENTER_ID = `${S2_ID}_center`;
   
   const runtime = useSurahLayoutRuntime();

@@ -493,8 +493,8 @@ export function ElevatedSectionSurfaces() {
   });
 
   const config = useStoryStore(state => state.activeConfig);
-  const S1_ID = config.sections[0].id;
-  const S2_ID = config.sections[1].id;
+  const S1_ID = config.sections[0]?.id ?? "section1";
+  const S2_ID = config.sections[1]?.id ?? "__no_s2__";
   const S2_TOP_ID = `${S2_ID}_top`;
   const S2_CENTER_ID = `${S2_ID}_center`;
   const S2_BOTTOM_ID = `${S2_ID}_bottom`;

@@ -146,10 +146,14 @@ export function Experience({
             onReady={handlePaperReady}
           />
         </a.group>
-        <ElevatedSectionSurfaces />
-        <ElevatedSectionLabels />
+        {config.features.hasElevatedSections && (
+          <>
+            <ElevatedSectionSurfaces />
+            <ElevatedSectionLabels />
+            {!isAllSectionsMode && <VerseClickHitboxes />}
+          </>
+        )}
         <VersesRenderer />
-        {!isAllSectionsMode && <VerseClickHitboxes />}
       </a.group>
 
       {/* Single centralized controller for all intro section animations.

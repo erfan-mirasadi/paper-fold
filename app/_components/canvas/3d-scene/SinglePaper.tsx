@@ -1,6 +1,5 @@
 "use client";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { PAGE_HEIGHT } from "../SurahLayout/index";
 
 import { writeFoldAnglesForScroll } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
@@ -29,7 +28,6 @@ const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;
 
 const PAGE_SEGMENTS = 80;
-const SEGMENT_HEIGHT = PAGE_HEIGHT / PAGE_SEGMENTS;
 
 const paperBaseColor = new Color(PAGE_BG_COLOR);
 const paperBackColor = new Color("#ffffff");
@@ -43,16 +41,16 @@ const staticSideR = new MeshStandardMaterial({
 const staticTopCap = new MeshStandardMaterial({ color: paperBaseColor }); // top cap
 const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // bottom cap
 
-function createPaperGeometry(pageWidth: number) {
+function createPaperGeometry(pageWidth: number, pageHeight: number) {
   const pageGeometry = new BoxGeometry(
     pageWidth,
-    PAGE_HEIGHT,
+    pageHeight,
     PAGE_DEPTH,
     2,
     PAGE_SEGMENTS,
   );
 
-  pageGeometry.translate(0, -PAGE_HEIGHT / 2, 0);
+  pageGeometry.translate(0, -pageHeight / 2, 0);
 
   const position = pageGeometry.attributes.position;
   const vertex = new Vector3();
@@ -62,9 +60,10 @@ function createPaperGeometry(pageWidth: number) {
   for (let i = 0; i < position.count; i++) {
     vertex.fromBufferAttribute(position, i);
     const distFromTop = -vertex.y;
-    let skinIndex = Math.floor(distFromTop / SEGMENT_HEIGHT);
+    const segmentHeight = pageHeight / PAGE_SEGMENTS;
+    let skinIndex = Math.floor(distFromTop / segmentHeight);
     skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
-    const skinWeight = (distFromTop % SEGMENT_HEIGHT) / SEGMENT_HEIGHT;
+    const skinWeight = (distFromTop % segmentHeight) / segmentHeight;
     skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
     skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
   }
@@ -108,10 +107,11 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
 
   const foldBonePositions = useMemo(() => {
+    const segmentHeight = runtime.PAGE_HEIGHT / PAGE_SEGMENTS;
     return runtime.FOLD_Y_POSITIONS.map((y) =>
-      Math.min(Math.max(Math.abs(y) / SEGMENT_HEIGHT, 0), PAGE_SEGMENTS),
+      Math.min(Math.max(Math.abs(y) / segmentHeight, 0), PAGE_SEGMENTS),
     );
-  }, [runtime.FOLD_Y_POSITIONS]);
+  }, [runtime.FOLD_Y_POSITIONS, runtime.PAGE_HEIGHT]);
 
   // Audio Setup
   const foldSound = useRef<HTMLAudioElement | null>(null);
@@ -135,14 +135,14 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   }, []);
 
   const manualSkinnedMesh = useMemo(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const pageGeometry = createPaperGeometry(runtime.PAGE_WIDTH);
+    const segmentHeight = runtime.PAGE_HEIGHT / PAGE_SEGMENTS;
+    const pageGeometry = createPaperGeometry(runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT);
 
     const bones: Bone[] = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
       const bone = new Bone();
       bones.push(bone);
-      bone.position.y = i === 0 ? 0 : -SEGMENT_HEIGHT;
+      bone.position.y = i === 0 ? 0 : -segmentHeight;
       if (i > 0) bones[i - 1].add(bone);
     }
     const skeleton = new Skeleton(bones);
@@ -163,21 +163,9 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
     return mesh;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]);
 
-  useEffect(() => {
-    if (!skinnedMeshRef.current) return;
-    const mesh = skinnedMeshRef.current;
-    const oldGeometry = mesh.geometry;
-    
-    // Imperatively create and swap geometry
-    const newGeometry = createPaperGeometry(runtime.PAGE_WIDTH);
-    mesh.geometry = newGeometry;
-    
-    // Safely dispose the old one
-    oldGeometry.dispose();
-  }, [runtime.PAGE_WIDTH]);
+
 
   useEffect(() => {
     return () => {

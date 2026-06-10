@@ -17,13 +17,26 @@ export function calculateSectionBounds(
   pageWidth: number,
 ): SectionBounds {
   const s1 = transforms.sections[0] as Required<SectionTransforms>;
-  const s2 = transforms.sections[1] as Required<SectionTransforms>;
+  const s2 = transforms.sections[1] as Required<SectionTransforms> | undefined;
 
-  const S1_ID = getActiveStoryConfig().sections[0].id;
-  const S2_ID = getActiveStoryConfig().sections[1].id;
+  const S1_ID = getActiveStoryConfig().sections[0]?.id ?? "section1";
+  const S2_ID = getActiveStoryConfig().sections[1]?.id ?? "__no_s2__";
   const S2_TOP_ID = `${S2_ID}_top`;
   const S2_CENTER_ID = `${S2_ID}_center`;
   const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
+  // Guard: if section 2 does not exist, fall straight to default (full-screen bounds).
+  if (!s2) {
+    if (sectionId === S1_ID) {
+      return {
+        minX: s1.frameX - pageWidth / 2 - BOUNDS_PAD,
+        maxX: s1.frameX - pageWidth / 2 + s1.frameW + BOUNDS_PAD,
+        maxY: s1.frameY + BOUNDS_PAD,
+        minY: s1.frameY - s1.frameH - BOUNDS_PAD,
+      };
+    }
+    return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
+  }
 
   switch (sectionId) {
     case S1_ID:

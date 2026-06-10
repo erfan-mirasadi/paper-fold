@@ -26,27 +26,47 @@ export const PAGE2_EXTRA_RX = 0.15;
 /** Convert degrees to radians — keeps scatter config human-readable. */
 const deg = (d: number): number => (d * Math.PI) / 180;
 
-const S1_ID = getActiveStoryConfig().sections[0].id;
-const S2_ID = getActiveStoryConfig().sections[1].id;
-const S2_TOP_ID = `${S2_ID}_top`;
-const S2_CENTER_ID = `${S2_ID}_center`;
-const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+// ─── Lazy ID accessors ────────────────────────────────────────────────────
+// Section IDs are read lazily (at call-time) so module evaluation never
+// crashes when the active config has fewer than 2 sections (e.g. Ayat al-Kursi).
+const getS1Id = (): string => getActiveStoryConfig().sections[0]?.id ?? "section1";
+const getS2Id = (): string => getActiveStoryConfig().sections[1]?.id ?? "section2";
+const getS2TopId    = (): string => `${getS2Id()}_top`;
+const getS2CenterId = (): string => `${getS2Id()}_center`;
+const getS2BotId    = (): string => `${getS2Id()}_bottom`;
+
+/** Returns the four canonical ElevatedSectionIds for the current config. */
+function getSessionIds(): ElevatedSectionId[] {
+  return [getS1Id(), getS2TopId(), getS2CenterId(), getS2BotId()] as ElevatedSectionId[];
+}
 
 // ─── Scatter: [x, y, z, rx°, ry°, rz°] ─────────────────────────────────
-// Rotations are NOW in DEGREES — use the deg() helper when reading them.
+// Built lazily per-call so keys always match the current config's section ids.
 // Positive rx = tilt top away from camera ("lean back")
 // Positive ry = rotate right edge towards camera
 // Positive rz = counter-clockwise twist
-export const INTRO_SECTION_SCATTER: Record<
+function getIntroSectionScatter(): Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
-> = {
-  //     x      y      z      rx(°)   ry(°)    rz(°)
-  [S1_ID]: [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
-  [S2_TOP_ID]: [0, -0.6, -0.4],
-  [S2_CENTER_ID]: [0.06, -0.55, -1.2],
-  [S2_BOTTOM_ID]: [0, -0.63, 0.5],
-};
+> {
+  const s1 = getS1Id();
+  const s2t = getS2TopId();
+  const s2c = getS2CenterId();
+  const s2b = getS2BotId();
+  return {
+    //     x      y      z      rx(°)    ry(°)    rz(°)
+    [s1]:  [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
+    [s2t]: [0, -0.6, -0.4],
+    [s2c]: [0.06, -0.55, -1.2],
+    [s2b]: [0, -0.63, 0.5],
+  } as Record<ElevatedSectionId, [number, number, number, number?, number?, number?]>;
+}
+
+/** Public export kept for backwards compat — reads lazily. */
+export const INTRO_SECTION_SCATTER = new Proxy(
+  {} as Record<ElevatedSectionId, [number, number, number, number?, number?, number?]>,
+  { get: (_t, key) => getIntroSectionScatter()[key as ElevatedSectionId] },
+);
 
 // ─── Idle breathing for s1 while scattered ──────────────────────────────
 // Gives the floating section a living, gentle sway.
@@ -72,17 +92,26 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
  *  While true the single controller useFrame skips all work. */
 let _isSettled = false;
 
-export const HANDOFF_SECTION_TARGET: Record<
+function getHandoffSectionTarget(): Record<
   ElevatedSectionId,
   { x: number; y: number; z: number; scale: number }
-> = {
-  [S1_ID]: { x: 0, y: 0, z: 0, scale: 1 },
-  // Give all S2 sections the exact same displacement so they move as a unified block
-  // and maintain their relative positions.
-  [S2_TOP_ID]: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
-  [S2_CENTER_ID]: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
-  [S2_BOTTOM_ID]: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
-};
+> {
+  const s1 = getS1Id();
+  const s2t = getS2TopId();
+  const s2c = getS2CenterId();
+  const s2b = getS2BotId();
+  return {
+    [s1]:  { x: 0, y: 0, z: 0, scale: 1 },
+    [s2t]: { x: 0, y: 0.5, z: -0.5,  scale: 0.85 },
+    [s2c]: { x: 0, y: 0.8, z: -1.0,  scale: 0.85 },
+    [s2b]: { x: 0, y: 1.3, z: -1.5,  scale: 0.85 },
+  } as Record<ElevatedSectionId, { x: number; y: number; z: number; scale: number }>;
+}
+
+export const HANDOFF_SECTION_TARGET = new Proxy(
+  {} as Record<ElevatedSectionId, { x: number; y: number; z: number; scale: number }>,
+  { get: (_t, key) => getHandoffSectionTarget()[key as ElevatedSectionId] },
+);
 
 // ─── Types ───────────────────────────────────────────────────────────────
 interface Transform7 {
@@ -105,32 +134,20 @@ const IDENTITY: Transform7 = {
   rz: 0,
 };
 
-// ─── Module-level pre-computed results (written once per frame by controller) ─
-const ALL_SECTION_IDS: ElevatedSectionId[] = [
-  S1_ID,
-  S2_TOP_ID,
-  S2_CENTER_ID,
-  S2_BOTTOM_ID,
-];
-
+// ─── Module-level mutable stores (keyed by section id, populated lazily) ──
 /** Current lerped transform for each section. Read by all useIntroSectionOffset consumers. */
-const _liveTransforms: Record<ElevatedSectionId, Transform7> = {
-  [S1_ID]: { ...IDENTITY },
-  [S2_TOP_ID]: { ...IDENTITY },
-  [S2_CENTER_ID]: { ...IDENTITY },
-  [S2_BOTTOM_ID]: { ...IDENTITY },
-};
+const _liveTransforms: Record<string, Transform7> = {};
 
 /** Group refs registered by consumers — the controller applies transforms to all of them. */
-const _registeredGroups: Record<
-  ElevatedSectionId,
-  Set<RefObject<Group | null>>
-> = {
-  [S1_ID]: new Set(),
-  [S2_TOP_ID]: new Set(),
-  [S2_CENTER_ID]: new Set(),
-  [S2_BOTTOM_ID]: new Set(),
-};
+const _registeredGroups: Record<string, Set<RefObject<Group | null>>> = {};
+
+/** Ensure entries exist for all current session section ids. */
+function ensureSessionEntries() {
+  for (const sid of getSessionIds()) {
+    if (!_liveTransforms[sid]) _liveTransforms[sid] = { ...IDENTITY };
+    if (!_registeredGroups[sid]) _registeredGroups[sid] = new Set();
+  }
+}
 
 let _identityReadyAt = 0;
 
@@ -139,7 +156,7 @@ function getTransformTarget(
   sectionId: ElevatedSectionId,
   time: number,
 ): Transform7 {
-  const scatter = INTRO_SECTION_SCATTER[sectionId];
+  const scatter = getIntroSectionScatter()[sectionId];
   if (!scatter) return IDENTITY;
   const scatterX = scatter[0];
   const scatterY = scatter[1];
@@ -180,7 +197,7 @@ function getTransformTarget(
   let rz = scatterRz * invT;
 
   // ── s1 idle breathing while scattered ──
-  if (sectionId === S1_ID && invT > 0.01) {
+  if (sectionId === getS1Id() && invT > 0.01) {
     const breathe = invT; // fade breathing out as section converges
     y += Math.sin(time * S1_IDLE.yFreq) * S1_IDLE.yAmp * breathe;
     rx += Math.sin(time * S1_IDLE.rxFreq) * S1_IDLE.rxAmp * breathe;
@@ -217,7 +234,7 @@ function getTransformTarget(
   const clampedHandoff = clamp01(introHandoffProgress);
   const handoffT = easeInOut(clampedHandoff);
   if (handoffT > 0) {
-    const target = HANDOFF_SECTION_TARGET[sectionId];
+    const target = getHandoffSectionTarget()[sectionId];
     if (target) {
       x += target.x * handoffT;
       y += target.y * handoffT;
@@ -255,6 +272,10 @@ function getTransformTarget(
  */
 export function IntroSectionAnimationController() {
   useFrame((state, delta) => {
+    // Skip all intro animation work for Surahs that have no intro.
+    const hasIntro = getActiveStoryConfig().features.hasIntro;
+    if (!hasIntro) return;
+
     // Early exit: once settled, skip all work permanently until intro restarts.
     if (_isSettled) {
       // Check if intro reactivated (user scrolled back up)
@@ -266,6 +287,8 @@ export function IntroSectionAnimationController() {
       }
     }
 
+    ensureSessionEntries();
+
     const time = state.clock.elapsedTime;
     // Softer (narm-tar) lerp for a premium transition feel
     const factor = Math.min(delta * 4.5, 1);
@@ -275,8 +298,9 @@ export function IntroSectionAnimationController() {
     // slow lerp so the crossfade starts with positions exactly matching paper.
     const shouldSnap = !isIntroActive && introHandoffProgress >= 1;
 
-    for (let i = 0; i < ALL_SECTION_IDS.length; i++) {
-      const sid = ALL_SECTION_IDS[i];
+    const currentIds = getSessionIds();
+    for (let i = 0; i < currentIds.length; i++) {
+      const sid = currentIds[i];
       const target = getTransformTarget(sid, time);
       const live = _liveTransforms[sid];
 

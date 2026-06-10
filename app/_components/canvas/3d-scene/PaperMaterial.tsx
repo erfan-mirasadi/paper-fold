@@ -8,9 +8,6 @@ import {
 import { useThree } from "@react-three/fiber";
 import {
   SurahLayout as PaperContent,
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-  layoutMath,
 } from "../SurahLayout/index";
 import {
   ClampToEdgeWrapping,
@@ -248,15 +245,15 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
         <OrthographicCamera
           makeDefault
           left={0}
-          right={PAGE_WIDTH}
+          right={runtime.PAGE_WIDTH}
           top={0}
-          bottom={-PAGE_HEIGHT}
+          bottom={-runtime.PAGE_HEIGHT}
           position={[0, 0, 5]}
         />
 
         {toggles.diffuse && (
-          <mesh position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, -10]}>
-            <planeGeometry args={[PAGE_WIDTH, PAGE_HEIGHT]} />
+          <mesh position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, -10]}>
+            <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />
             <meshBasicMaterial
               map={paperTextureDiffuse}
               toneMapped={false}
@@ -267,8 +264,8 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
 
         {fontsReady && <PaperContent isFolded={isFolded} />}
 
-        <mesh position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, 2]}>
-          <planeGeometry args={[PAGE_WIDTH, PAGE_HEIGHT]} />
+        <mesh position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, 2]}>
+          <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />
           <meshBasicMaterial
             map={frameTexture}
             transparent={true}
@@ -291,17 +288,17 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
           <OrthographicCamera
             makeDefault
             left={0}
-            right={PAGE_WIDTH}
+            right={runtime.PAGE_WIDTH}
             top={0}
-            bottom={-PAGE_HEIGHT}
+            bottom={-runtime.PAGE_HEIGHT}
             position={[0, 0, 5]}
           />
 
           <mesh
-            position={[PAGE_WIDTH / 2, -PAGE_HEIGHT / 2, -1]}
+            position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, -1]}
             renderOrder={0}
           >
-            <planeGeometry args={[PAGE_WIDTH, PAGE_HEIGHT]} />
+            <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />
             <meshBasicMaterial
               map={paperTextureNormal}
               transparent={true}
@@ -314,10 +311,10 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
           {runtime.FOLD_Y_POSITIONS.map((y: number, i: number) => (
             <mesh
               key={i}
-              position={[PAGE_WIDTH / 2, y, i * 0.01]}
+              position={[runtime.PAGE_WIDTH / 2, y, i * 0.01]}
               renderOrder={10}
             >
-              <planeGeometry args={[PAGE_WIDTH, CREASE_BAND_HEIGHT]} />
+              <planeGeometry args={[runtime.PAGE_WIDTH, CREASE_BAND_HEIGHT]} />
               <meshBasicMaterial
                 map={creaseNormalMap}
                 transparent={true}
@@ -330,8 +327,8 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
 
           <mesh
             position={[
-              PAGE_WIDTH / 2,
-              (layoutMath.g1Y + (layoutMath.g3Y - layoutMath.groupH)) / 2,
+              runtime.PAGE_WIDTH / 2,
+              (runtime.layoutMath.g1Y + (runtime.layoutMath.g3Y - runtime.layoutMath.groupH)) / 2,
               0.62,
             ]}
             rotation={[0, 0, Math.PI / 2]}
@@ -339,7 +336,7 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
           >
             <planeGeometry
               args={[
-                layoutMath.g1Y - (layoutMath.g3Y - layoutMath.groupH),
+                runtime.layoutMath.g1Y - (runtime.layoutMath.g3Y - runtime.layoutMath.groupH),
                 CREASE_BAND_HEIGHT,
               ]}
             />
@@ -354,10 +351,10 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
 
           <mesh
             position={[
-              PAGE_WIDTH / 2,
-              layoutMath.s1Top -
-                layoutMath.s1Pad -
-                (layoutMath.smallBoxH + layoutMath.gap / 2),
+              runtime.PAGE_WIDTH / 2,
+              runtime.layoutMath.s1Top -
+                runtime.layoutMath.s1Pad -
+                (runtime.layoutMath.smallBoxH + runtime.layoutMath.gap / 2),
               0.62,
             ]}
             rotation={[0, 0, Math.PI / 2]}
@@ -365,7 +362,7 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
           >
             <planeGeometry
               args={[
-                layoutMath.smallBoxH * 2 + layoutMath.gap,
+                runtime.layoutMath.smallBoxH * 2 + runtime.layoutMath.gap,
                 CREASE_BAND_HEIGHT,
               ]}
             />

@@ -13,13 +13,6 @@ import {
   // QURAN_FONT,
 } from "../../../data/theme";
 
-export {
-  PAGE_WIDTH,
-  PAGE_HEIGHT,
-  PW,
-  layoutMath,
-  SURAH_TRANSFORMS,
-} from "../../../data/SurahConfig";
 export { SurahLayout, SurahLayout as PaperContent };
 
 const ImageContent: React.FC<{
