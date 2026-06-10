@@ -34,7 +34,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   dimensions: {
-    paperWidth: 2.0,
+    paperWidth: 2.104,
     paperHeight: 0.9,
     sceneCenterYOffset: 0.0,
     padding: 0.26,
@@ -130,9 +130,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupGap: 0.025,
     groupPad: 0.012,
     groupPadBottom: 0.012,
-    s2Gap: 0.016,
+    s2Gap: 0.12, // the huge horizontal gap you asked for!
+    s2VerticalRowGap: 0.046, // the vertical gap between rows in the same group!
     smallBoxH2: 0.085, // height of each individual verse capsule
-    middleExtraGap: 0.022,
+    middleExtraGap: 0.007,
     s2PadLeftRight: 0.028,
     g2Shrink: 0.0,
     outerShrink: 0.05,

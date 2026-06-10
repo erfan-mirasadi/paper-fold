@@ -84,6 +84,7 @@ export interface AlakLayoutParams {
   outerCurveXOffset?: number;
   centerCurveXOffset?: number;
   outerShrink?: number;
+  s2VerticalRowGap?: number;
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -483,11 +484,18 @@ export function createLayoutMath(
   // --- Section 2 ---
   // groupH, hasIntroOutro, and s2H must be computed BEFORE s2Top because
   // the centering formula (hasS1 === false branch) depends on s2H.
-  const groupH = p.groupPad + p.groupPadBottom + (p.smallBoxH2 * 2 + p.s2Gap);
 
-  const getGroupH = (rows: number) => {
-    return p.groupPad + p.groupPadBottom + (rows * p.smallBoxH2 + Math.max(0, rows - 1) * p.s2Gap);
+  const getGroupH = (rows: number, extraGap: number = 0) => {
+    const s2VertGap = p.s2VerticalRowGap ?? p.s2Gap;
+    return (
+      p.groupPad +
+      p.groupPadBottom +
+      (rows * p.smallBoxH2 + Math.max(0, rows - 1) * s2VertGap) +
+      extraGap
+    );
   };
+
+  const groupH = getGroupH(2);
 
   const g0H = getGroupH(p.groupRows?.[0] ?? 2);
   const g1H = getGroupH(p.groupRows?.[1] ?? 2);
@@ -584,6 +592,7 @@ export function createLayoutMath(
     groupInnerHalfW: (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
 
     s2PadLeftRight: p.s2PadLeftRight,
+    s2VerticalRowGap: p.s2VerticalRowGap ?? p.s2Gap,
     g2Shrink: p.g2Shrink,
     outerShrink: p.outerShrink ?? 0,
     s1BorderWidth: p.s1BorderWidth,
@@ -734,7 +743,7 @@ export function buildSurahTransforms(
           const isRightCol = i % 2 !== 0;
           const isSecondRow = i >= 2;
           const rowOffset = isSecondRow
-            ? lm.smallBoxH2 + lm.s2Gap + extraRowGap
+            ? lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap
             : 0;
           verses[verseId] = {
             x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
