@@ -421,18 +421,8 @@ export const SideCurves = ({
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
 
   // ── Reference edges (flush with the section box sides) ───────────────────
-  const startX_L = startX + s2Pad - 0.005;
-  const startX_R = startX + sectionW - s2Pad + 0.005;
-
-  // ── Standard bracket tips ────────────────────────────────────────────────
-  const tipX_L = startX_L + CURVE_INWARD_OFFSET;
-  const tipX_R = startX_R - CURVE_INWARD_OFFSET;
-
-  // ── Deep-penetration tips for the center bracket ─────────────────────────
-  const deepTipX_L = startX_L + CURVE_DEEP_OFFSET_OUTER;
-  const deepTipX_R = startX_R - CURVE_DEEP_OFFSET_OUTER;
-  const deepInnerTipX_L = startX_L + CURVE_DEEP_OFFSET_INNER;
-  const deepInnerTipX_R = startX_R - CURVE_DEEP_OFFSET_INNER;
+  const baseStartX_L = startX + s2Pad - 0.005;
+  const baseStartX_R = startX + sectionW - s2Pad + 0.005;
 
   // ── Compute brackets from group topology ─────────────────────────────────
   const brackets = useMemo(
@@ -461,6 +451,20 @@ export const SideCurves = ({
         // nestLevel 0 (outermost) → totalLevels bow steps away from edge.
         // nestLevel N → (totalLevels - N) bow steps.
         const bowMultiplier = totalLevels - b.nestLevel;
+
+        const shiftX = b.isCenter ? -(layout.centerCurveXOffset || 0) : (layout.outerCurveXOffset || 0);
+        const startX_L = baseStartX_L + shiftX;
+        const startX_R = baseStartX_R - shiftX;
+
+        // Standard bracket tips
+        const tipX_L = startX_L + CURVE_INWARD_OFFSET;
+        const tipX_R = startX_R - CURVE_INWARD_OFFSET;
+
+        // Deep-penetration tips for the center bracket
+        const deepTipX_L = startX_L + CURVE_DEEP_OFFSET_OUTER;
+        const deepTipX_R = startX_R - CURVE_DEEP_OFFSET_OUTER;
+        const deepInnerTipX_L = startX_L + CURVE_DEEP_OFFSET_INNER;
+        const deepInnerTipX_R = startX_R - CURVE_DEEP_OFFSET_INNER;
 
         const outerControl_L = startX_L - CURVE_GAP * bowMultiplier;
         const outerControl_R = startX_R + CURVE_GAP * bowMultiplier;

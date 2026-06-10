@@ -81,6 +81,9 @@ export interface AlakLayoutParams {
   labelHitboxWidth: number;
   verseTextScale?: number;
   groupRows?: number[];
+  outerCurveXOffset?: number;
+  centerCurveXOffset?: number;
+  outerShrink?: number;
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -582,6 +585,7 @@ export function createLayoutMath(
 
     s2PadLeftRight: p.s2PadLeftRight,
     g2Shrink: p.g2Shrink,
+    outerShrink: p.outerShrink ?? 0,
     s1BorderWidth: p.s1BorderWidth,
     anaAyetTabW: p.anaAyetTabW,
     anaAyetTabH: p.anaAyetTabH,
@@ -592,6 +596,8 @@ export function createLayoutMath(
     boxExtOffset: p.boxExtOffset,
     extraRowGap: p.extraRowGap,
     verseTextScale: p.verseTextScale ?? undefined,
+    outerCurveXOffset: p.outerCurveXOffset ?? 0,
+    centerCurveXOffset: p.centerCurveXOffset ?? 0,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
@@ -716,11 +722,11 @@ export function buildSurahTransforms(
       const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
         const groupY = groupYPositions[gIdx];
         const isPushedIn = group.isPushedIn ?? false;
-        const gInnerW = isPushedIn ? s2InnerW - lm.g2Shrink * 2 : s2InnerW;
-        const gBaseX = isPushedIn ? s2BaseX + lm.g2Shrink : s2BaseX;
-        const gHalfW = isPushedIn
-          ? (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2
-          : lm.groupInnerHalfW;
+        const shrinkAmount = isPushedIn ? lm.g2Shrink : lm.outerShrink;
+        const gInnerW = s2InnerW - shrinkAmount * 2;
+        const gBaseX = s2BaseX + shrinkAmount;
+
+        const gHalfW = (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2;
         const extraRowGap = group.extraRowGap ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
