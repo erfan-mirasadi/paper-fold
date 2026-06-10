@@ -8,35 +8,49 @@ export const DRAG_SPRING_CONFIG = { mass: 1.5, tension: 350, friction: 35 };
 
 const createSpring = () => new SpringValue(0, { config: DRAG_SPRING_CONFIG });
 
-const dynamicSections: Record<string, { x: SpringValue<number>; y: SpringValue<number> }> = {};
-let maxVerseId = 0;
+const dynamicSectionsTarget: Record<string, { x: SpringValue<number>; y: SpringValue<number> }> = {};
+const dynamicVersesTarget: Record<number, { x: SpringValue<number>; y: SpringValue<number> }> = {};
 
-getActiveStoryConfig().sections.forEach((sec) => {
-  if (sec.type === "gridWithAnaAyet") {
-    dynamicSections[sec.id] = { x: createSpring(), y: createSpring() };
-    const g = sec as GridSectionConfig;
-    maxVerseId = Math.max(maxVerseId, ...g.verses, g.anaAyet);
-  } else if (sec.type === "verticalGroups") {
-    dynamicSections[`${sec.id}_top`] = { x: createSpring(), y: createSpring() };
-    dynamicSections[`${sec.id}_center`] = { x: createSpring(), y: createSpring() };
-    dynamicSections[`${sec.id}_bottom`] = { x: createSpring(), y: createSpring() };
-    const v = sec as VerticalGroupsSectionConfig;
-    if (v.introVerse) maxVerseId = Math.max(maxVerseId, v.introVerse);
-    if (v.outroVerse) maxVerseId = Math.max(maxVerseId, v.outroVerse);
-    v.groups.forEach(g => {
-      maxVerseId = Math.max(maxVerseId, ...g.verseIds);
-    });
+const dynamicSections = new Proxy(dynamicSectionsTarget, {
+  get(target, prop: string) {
+    if (typeof prop === "symbol" || prop === "toJSON" || prop === "constructor") return target[prop as any];
+    if (prop === "length" || prop === "name") return target[prop as any];
+    
+    // Some react or internal checks might ask for weird string props, be careful.
+    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+      return target[prop];
+    }
+
+    // Generate on demand
+    target[prop] = { x: createSpring(), y: createSpring() };
+    return target[prop];
+  }
+});
+
+const dynamicVerses = new Proxy(dynamicVersesTarget, {
+  get(target, prop: string) {
+    if (typeof prop === "symbol" || prop === "toJSON" || prop === "constructor") return target[prop as any];
+    const num = Number(prop);
+    if (isNaN(num)) {
+      return target[prop as any];
+    }
+    
+    if (target[num]) {
+      return target[num];
+    }
+
+    // Generate on demand
+    target[num] = { x: createSpring(), y: createSpring() };
+    return target[num];
   }
 });
 
 export const dragEngine = {
   sections: dynamicSections,
-  verses: Object.fromEntries(
-    Array.from({ length: maxVerseId }, (_, i) => [
-      i + 1,
-      { x: createSpring(), y: createSpring() },
-    ]),
-  ) as Record<number, { x: SpringValue<number>; y: SpringValue<number> }>,
+  verses: dynamicVerses,
+  // We expose the raw targets if we ever need to iterate over all instantiated springs safely
+  _sectionsTarget: dynamicSectionsTarget,
+  _versesTarget: dynamicVersesTarget,
 };
 
 const draggedVerseIds = new Set<number>();
@@ -167,11 +181,11 @@ export function unmarkSectionDragged(sectionId: ElevatedSectionId) {
 }
 
 export function resetAllDrags() {
-  Object.values(dragEngine.sections).forEach((s) => {
+  Object.values(dragEngine._sectionsTarget).forEach((s) => {
     s.x.start(0);
     s.y.start(0);
   });
-  Object.values(dragEngine.verses).forEach((v) => {
+  Object.values(dragEngine._versesTarget).forEach((v) => {
     v.x.start(0);
     v.y.start(0);
   });

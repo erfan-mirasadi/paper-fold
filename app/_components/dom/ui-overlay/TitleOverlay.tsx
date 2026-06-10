@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import { useStoryStore } from "@/app/stores/useStoryStore";
+import { useRouter } from "next/navigation";
 
 export function TitleOverlay() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const title = activeConfig.title || "";
+  const router = useRouter();
 
   const insetX = "clamp(14px, 2.2vw, 24px)";
   const insetY = "clamp(12px, 2vw, 16px)";
@@ -20,12 +22,14 @@ export function TitleOverlay() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", stiffness: 170, damping: 22 }}
       className="overlay-panel"
+      onClick={() => router.push("/")}
       style={{
         position: "fixed",
         top: insetY,
         left: insetX,
         zIndex: 100,
         pointerEvents: "auto",
+        cursor: "pointer",
         height: buttonH,
         padding: `0 ${paddingX}`,
         borderRadius: radius,

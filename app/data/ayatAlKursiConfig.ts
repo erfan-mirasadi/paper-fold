@@ -23,7 +23,7 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
 export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "ayatalkursi",
-  title: "AYETEL KÜRSİ",
+  title: "Bakara 255",
   heroTitle: "Ayetel",
   heroSubtitle: "kürsî",
 
@@ -157,8 +157,11 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   sections: [
     {
-      id: "section1",
+      id: "section2",
       type: "verticalGroups",
+      backgroundTexture: "/ayatalKursi/frame-section.svg",
+      backgroundScaleX: 1,
+      backgroundScaleY: 1.1,
       // No topLabelKey / bottomLabelKey / introVerse / outroVerse — clean slate.
       groups: [
         // ── Top group: 2 verses side-by-side (NOT pushed in) ─────────────

@@ -116,6 +116,9 @@ export interface VerticalGroupsSectionConfig {
     center?: CameraTargetConfig;
     bottom?: CameraTargetConfig;
   };
+  backgroundTexture?: string;
+  backgroundScaleX?: number;
+  backgroundScaleY?: number;
 }
 
 export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;

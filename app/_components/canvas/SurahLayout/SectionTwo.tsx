@@ -179,6 +179,15 @@ export function SectionTwo({
         </>
       )}
 
+      {/* ─── DYNAMIC BACKGROUND (from config) ────────────────────────────── */}
+      {layout.s2BackgroundTexture && (
+        <DynamicBackground
+          url={layout.s2BackgroundTexture}
+          layout={layout}
+          startX={startX}
+        />
+      )}
+
       {/* ─── INTRO VERSE (verse 6 for Alak) ─────────────────────────────── */}
       {hasIntroVerse && (
         <VerseBox
@@ -274,5 +283,41 @@ export function SectionTwo({
         />
       )}
     </group>
+  );
+}
+
+// ─── HELPER COMPONENT FOR DYNAMIC BACKGROUND ───────────────────────────────
+function DynamicBackground({
+  url,
+  layout,
+  startX,
+}: {
+  url: string;
+  layout: LayoutConfig;
+  startX: number;
+}) {
+  const tex = useTexture(url, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+
+  return (
+    <mesh
+      position={[startX + layout.sectionW / 2, layout.s2Top - layout.s2H / 2, -0.001]}
+      scale={[
+        (layout as any).s2BackgroundScaleX ?? 1,
+        (layout as any).s2BackgroundScaleY ?? 1,
+        1,
+      ]}
+      renderOrder={1}
+    >
+      <planeGeometry args={[layout.sectionW, layout.s2H]} />
+      <meshBasicMaterial
+        map={tex}
+        transparent
+        depthTest={false}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
   );
 }

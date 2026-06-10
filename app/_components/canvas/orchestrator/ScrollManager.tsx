@@ -238,64 +238,71 @@ export function ScrollManager() {
     let lastLimit = Math.max(lenis.limit, 0);
     let ignoreUntilTime = 0;
     let lastWindowWidth = window.innerWidth;
+    let isSyncing = false;
 
     const handleSync = () => {
+      if (isSyncing) return;
       if (performance.now() < ignoreUntilTime) {
         return;
       }
 
-      const currentLimit = Math.max(lenis.limit, 0);
+      isSyncing = true;
+      try {
+        const currentLimit = Math.max(lenis.limit, 0);
 
-      // Mobile address bar hide/show causes `limit` (height) to change.
-      // If we blindly enforce `rawOffset` on every height change, we actively fight
-      // the user's scroll and lock them in place on mobile devices!
-      // We only want to preserve `rawOffset` on significant window resizes (like device rotation or width changes).
-      if (
-        currentLimit > 0 &&
-        lastLimit > 0 &&
-        Math.abs(currentLimit - lastLimit) > 5
-      ) {
-        const widthChanged = window.innerWidth !== lastWindowWidth;
-        // If height changed MASSIVELY (e.g. > 20% limit change, unlikely from address bar)
-        const heightChangedMassively =
-          Math.abs(currentLimit - lastLimit) > currentLimit * 0.2;
+        // Mobile address bar hide/show causes `limit` (height) to change.
+        // If we blindly enforce `rawOffset` on every height change, we actively fight
+        // the user's scroll and lock them in place on mobile devices!
+        // We only want to preserve `rawOffset` on significant window resizes (like device rotation or width changes).
+        if (
+          currentLimit > 0 &&
+          lastLimit > 0 &&
+          Math.abs(currentLimit - lastLimit) > 5
+        ) {
+          const widthChanged = window.innerWidth !== lastWindowWidth;
+          // If height changed MASSIVELY (e.g. > 20% limit change, unlikely from address bar)
+          const heightChangedMassively =
+            Math.abs(currentLimit - lastLimit) > currentLimit * 0.2;
 
-        if (widthChanged || heightChangedMassively) {
-          const lastRawOffset = useFoldStore.getState().rawOffset;
+          if (widthChanged || heightChangedMassively) {
+            const lastRawOffset = useFoldStore.getState().rawOffset;
 
-          // IMPORTANT: Update state guards BEFORE calling scrollTo to prevent infinite recursion!
+            // IMPORTANT: Update state guards BEFORE calling scrollTo to prevent infinite recursion!
+            lastLimit = currentLimit;
+            lastWindowWidth = window.innerWidth;
+            ignoreUntilTime = performance.now() + 150;
+
+            lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
+            return;
+          }
+
           lastLimit = currentLimit;
-          lastWindowWidth = window.innerWidth;
-          ignoreUntilTime = performance.now() + 150;
+        }
 
-          lenis.scrollTo(lastRawOffset * currentLimit, { immediate: true });
-          return;
+        // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
+        if (
+          typeof (lenis as any).targetScroll === "number" &&
+          runtime.config.features.hasIntro
+        ) {
+          const targetScroll = (lenis as any).targetScroll;
+          const lockScroll = Math.floor(
+            LOCK_CONFIG.lockPositionPercentage * currentLimit,
+          );
+
+          if (isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
+            if (targetScroll < lockScroll) {
+              // HARD CLAMP: Don't let momentum carry them past the lock.
+              // We use immediate: true so they feel a solid wall instead of a bouncy glide.
+              lenis.scrollTo(lockScroll, { immediate: true });
+            }
+          }
         }
 
         lastLimit = currentLimit;
+        syncCurrentOffset(lenis);
+      } finally {
+        isSyncing = false;
       }
-
-      // Trackpad Inertia Clamp: If Lenis is trying to glide past the lock, stop it!
-      if (
-        typeof (lenis as any).targetScroll === "number" &&
-        runtime.config.features.hasIntro
-      ) {
-        const targetScroll = (lenis as any).targetScroll;
-        const lockScroll = Math.floor(
-          LOCK_CONFIG.lockPositionPercentage * currentLimit,
-        );
-
-        if (isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
-          if (targetScroll < lockScroll) {
-            // HARD CLAMP: Don't let momentum carry them past the lock.
-            // We use immediate: true so they feel a solid wall instead of a bouncy glide.
-            lenis.scrollTo(lockScroll, { immediate: true });
-          }
-        }
-      }
-
-      lastLimit = currentLimit;
-      syncCurrentOffset(lenis);
     };
 
     const handleResize = () => {

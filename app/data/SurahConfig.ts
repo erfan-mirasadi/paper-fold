@@ -580,6 +580,10 @@ export function createLayoutMath(
     groupH,
     s2H,
 
+    s2BackgroundTexture: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundTexture,
+    s2BackgroundScaleX: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleX,
+    s2BackgroundScaleY: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleY,
+
     v6Y,
     g1Y: baseG1Y,
     g2Y: baseG2Y,
