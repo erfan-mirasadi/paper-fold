@@ -188,8 +188,8 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // The returned array must have length === foldSteps[n].folds.length === 1.
     // -----------------------------------------------------------------------
     computeFoldYPositions: (lm) => [
-      // Crease between group 1 (top) and group 2 (middle-pushed-in)
-      lm.g1Y - lm.groupH - lm.groupGap / 2,
+      // Crease exactly in the middle of the page height
+      -lm.PAGE_HEIGHT / 2,
     ],
 
     foldSteps: [
@@ -203,12 +203,12 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         id: "start",
         folds: [{ direction: 1, angleFactor: 0 }],
       },
-      // Open outward (the top half lifts away)
+      // Stay flat
       {
         id: "open",
-        folds: [{ direction: -1, angleFactor: 1 }],
+        folds: [{ direction: 1, angleFactor: 0 }],
       },
-      // Back to flat
+      // Stay flat
       {
         id: "end",
         folds: [{ direction: 1, angleFactor: 0 }],
