@@ -22,9 +22,21 @@ export interface SurahCardData {
 
 // Accent palette — cycles by card index
 const ACCENTS = [
-  { bg: "rgba(196,150,59,0.08)",  border: "rgba(196,150,59,0.3)",  dot: "#C4963B" },
-  { bg: "rgba(94,115,103,0.08)",  border: "rgba(94,115,103,0.3)",  dot: "#5E7367" },
-  { bg: "rgba(124,140,176,0.08)", border: "rgba(124,140,176,0.3)", dot: "#7c8cb0" },
+  {
+    bg: "rgba(196,150,59,0.08)",
+    border: "rgba(196,150,59,0.3)",
+    dot: "#C4963B",
+  },
+  {
+    bg: "rgba(94,115,103,0.08)",
+    border: "rgba(94,115,103,0.3)",
+    dot: "#5E7367",
+  },
+  {
+    bg: "rgba(124,140,176,0.08)",
+    border: "rgba(124,140,176,0.3)",
+    dot: "#7c8cb0",
+  },
 ];
 
 interface SurahCardProps {
@@ -161,7 +173,7 @@ export function SurahCard({ surah, index }: SurahCardProps) {
           transition: "gap 0.25s ease",
         }}
       >
-        <span>Open visualization</span>
+        <span>Open</span>
         <svg
           width="14"
           height="14"

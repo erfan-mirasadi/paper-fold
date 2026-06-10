@@ -1,5 +1,7 @@
 "use client";
 import { VerseBox, UiRect } from "./SharedUI";
+import * as THREE from "three";
+import { useTexture } from "@react-three/drei";
 import {
   CAPSULE_BG_7_8_17_18,
   CAPSULE_BG_9_10_15_16,
@@ -10,7 +12,10 @@ import {
 } from "../../../data/theme";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
-import type { GroupTransforms, RowConnectorTransform } from "../../../data/schema";
+import type {
+  GroupTransforms,
+  RowConnectorTransform,
+} from "../../../data/schema";
 import { useStoryStore } from "../../../stores/useStoryStore";
 
 interface VerseGroupProps {
@@ -20,9 +25,19 @@ interface VerseGroupProps {
   layout?: any; // To receive verseTextScale
 }
 
-export function VerseGroup({ group, groupTransform, groupIndex, layout }: VerseGroupProps) {
+export function VerseGroup({
+  group,
+  groupTransform,
+  groupIndex,
+  layout,
+}: VerseGroupProps) {
   const gt = groupTransform;
   const borderColor = gt.isCenter ? GREEN_THEME : MAROON_THEME;
+  const config = useStoryStore((state) => state.activeConfig);
+  const centerFlowerSvg =
+    config.id === "ayatalkursi"
+      ? "/ayatalKursi/Flower.svg"
+      : config.assets?.centerFlowerSvg;
 
   return (
     <group>
@@ -46,16 +61,25 @@ export function VerseGroup({ group, groupTransform, groupIndex, layout }: VerseG
         if (!leftV || !rightV) return null;
 
         return (
-          <UiRect
-            key={`connector-${i}`}
-            x={rc.x}
-            y={rc.y}
-            z={rc.z}
-            w={rc.w}
-            h={rc.h}
-            radius={OPPOSITE_VERSE_CONNECTOR.radius}
-            color={borderColor}
-          />
+          <group key={`connector-${i}`}>
+            <UiRect
+              x={rc.x}
+              y={rc.y}
+              z={rc.z}
+              w={rc.w}
+              h={rc.h}
+              radius={OPPOSITE_VERSE_CONNECTOR.radius}
+              color={borderColor}
+            />
+            {centerFlowerSvg && (
+              <CenterFlower
+                x={rc.x + rc.w / 2}
+                y={rc.y - rc.h / 2}
+                z={rc.z + 0.01}
+                svgUrl={centerFlowerSvg}
+              />
+            )}
+          </group>
         );
       })}
 
@@ -87,7 +111,10 @@ export function VerseGroup({ group, groupTransform, groupIndex, layout }: VerseG
           // Only override if the Arabic data gives a *different* number (i.e.
           // the current language displays verses in a different position than
           // the Arabic RTL order and the transform was keyed by the Arabic id).
-          if (arabicVerseNumber !== undefined && arabicVerseNumber !== v.number) {
+          if (
+            arabicVerseNumber !== undefined &&
+            arabicVerseNumber !== v.number
+          ) {
             lookupNumber = arabicVerseNumber;
           }
         }
@@ -109,7 +136,8 @@ export function VerseGroup({ group, groupTransform, groupIndex, layout }: VerseG
               ? CAPSULE_BG_7_8_17_18
               : [9, 10, 15, 16].includes(v.number)
                 ? CAPSULE_BG_9_10_15_16
-                : (group.verseBg ?? (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_8_17_18));
+                : (group.verseBg ??
+                  (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_8_17_18));
 
         return (
           <VerseBox
@@ -131,6 +159,36 @@ export function VerseGroup({ group, groupTransform, groupIndex, layout }: VerseG
           />
         );
       })}
+    </group>
+  );
+}
+
+function CenterFlower({
+  x,
+  y,
+  z,
+  svgUrl,
+}: {
+  x: number;
+  y: number;
+  z: number;
+  svgUrl: string;
+}) {
+  const texture = useTexture(svgUrl, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+  return (
+    <group position={[x, y, z]} renderOrder={100}>
+      <mesh>
+        <planeGeometry args={[0.1, 0.075]} />
+        <meshBasicMaterial
+          map={texture}
+          transparent
+          depthTest={false}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
     </group>
   );
 }

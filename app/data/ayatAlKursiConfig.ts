@@ -57,7 +57,9 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 
-  assets: {},
+  assets: {
+    centerFlowerSvg: "/ayatalKursi/Flower.svg",
+  },
   verseOverrides: {},
 
   styling: {

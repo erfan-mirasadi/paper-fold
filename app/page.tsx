@@ -10,9 +10,9 @@ import { getAllSurahs } from "./data/surahDatabase";
 import { SurahCard, type SurahCardData } from "./_components/dom/SurahCard";
 
 export const metadata: Metadata = {
-  title: "Quran Fold — Interactive 3D Visualizations",
+  title: "Quran Patterns",
   description:
-    "Explore the Quran through immersive 3D folded-paper visualizations. Each Surah is a layered journey into meaning, structure, and beauty.",
+    "Explore the Quran through immersive 3D visualizations. Each Surah is a layered journey into meaning, structure, and beauty.",
 };
 
 export default function MenuPage() {
@@ -74,23 +74,8 @@ export default function MenuPage() {
             margin: 0,
           }}
         >
-          Quran Fold
+          Quran Patterns
         </h1>
-
-        <p
-          style={{
-            fontFamily: "var(--font-manrope), sans-serif",
-            fontSize: "clamp(0.8rem, 2vw, 0.95rem)",
-            fontWeight: 400,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "var(--overlay-text)",
-            opacity: 0.45,
-            marginTop: "0.85rem",
-          }}
-        >
-          Interactive 3D Visualizations
-        </p>
       </header>
 
       {/* ── Surah card grid ── */}

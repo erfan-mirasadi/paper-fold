@@ -154,6 +154,7 @@ export interface VerseOverrideConfig {
 
 export interface SurahAssets {
   metallicVerseBorderSvg?: string;
+  centerFlowerSvg?: string;
 }
 
 export interface FoldState {
