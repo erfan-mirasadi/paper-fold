@@ -83,6 +83,9 @@ export interface AlakLayoutParams {
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "alak",
+  title: "ALAK SURESİ",
+  heroTitle: "Alak",
+  heroSubtitle: "suresi",
   features: {
     hasIntro: true,
     hasElevatedSections: true,
@@ -473,22 +476,54 @@ export function createLayoutMath(
   const s1H = p.s1Pad * 2 + (p.smallBoxH * 2 + p.gap) + p.s1AnaGap + p.anaAyetH;
 
   // --- Section 2 ---
-  const s2Top = p.s1Top - s1H - p.gapBetweenS1andS2;
+  // groupH, hasIntroOutro, and s2H must be computed BEFORE s2Top because
+  // the centering formula (hasS1 === false branch) depends on s2H.
   const groupH = p.groupPad + p.groupPadBottom + (p.smallBoxH2 * 2 + p.s2Gap);
 
-  const s2H =
-    p.s2VerticalPad * 2 +
-    p.bigBoxH * 2 +
-    p.groupGap * 4 +
-    groupH * 3 +
-    p.middleExtraGap * 2;
+  // When hasIntro is false there are no intro/outro verse boxes, so the two
+  // bigBoxH slots and their two flanking groupGaps are collapsed to zero.
+  // When hasIntro is true the formula is mathematically identical to before.
+  const hasIntroOutro = config.features.hasIntro;
+
+  const s2H = hasIntroOutro
+    ? p.s2VerticalPad * 2 +
+      p.bigBoxH * 2 +
+      p.groupGap * 4 +
+      groupH * 3 +
+      p.middleExtraGap * 2
+    : p.s2VerticalPad * 2 +
+      p.groupGap * 2 +          // the 2 gaps *between* the 3 groups
+      groupH * 3 +
+      p.middleExtraGap * 2;
+
+  // Detect whether a gridWithAnaAyet (Section 1) is part of this config.
+  // If not, we center s2 on the paper rather than chaining from s1Top.
+  const hasS1 = config.sections.some((s) => s.type === "gridWithAnaAyet");
+
+  // s2Top: the Y coordinate of the top of the vertical-groups block.
+  //   hasS1 === true  → Alak path (identical to original formula)
+  //   hasS1 === false → center the block vertically on the paper
+  const s2Top = hasS1
+    ? p.s1Top - s1H - p.gapBetweenS1andS2   // Alak: unchanged
+    // Ayat al-Kursi: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
+    // Shift up by s2H/2 so the block straddles that center symmetrically.
+    : -(config.dimensions.paperHeight / 2) + (s2H / 2) + config.dimensions.sceneCenterYOffset;
 
   // --- Element Y Positions ---
+  // v6Y marks the intro-verse top; when there is no intro verse the groups
+  // start immediately after s2VerticalPad (same anchor, no bigBoxH shift).
   const v6Y = s2Top - p.s2VerticalPad;
-  const baseG1Y = v6Y - p.bigBoxH - p.groupGap;
+  const baseG1Y = hasIntroOutro
+    ? v6Y - p.bigBoxH - p.groupGap          // Alak: identical to original
+    : v6Y;                                   // Ayat al-Kursi: groups slide up
+
   const baseG2Y = baseG1Y - groupH - (p.groupGap + p.middleExtraGap);
   const baseG3Y = baseG2Y - groupH - (p.groupGap + p.middleExtraGap);
-  const baseV19Y = baseG3Y - groupH - p.groupGap;
+  // v19Y position is always computed (keeps type consistent) but only rendered
+  // when hasIntro is true.
+  const baseV19Y = hasIntroOutro
+    ? baseG3Y - groupH - p.groupGap
+    : baseG3Y - groupH;                      // not rendered; safe sentinel
 
   return {
     PAGE_WIDTH,
@@ -545,7 +580,13 @@ export function createLayoutMath(
     sgBorderWidth: p.sgBorderWidth,
     boxExtOffset: p.boxExtOffset,
     extraRowGap: p.extraRowGap,
-  } satisfies Record<string, number>;
+
+    // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
+    // NOTE: satisfies Record<string, number> is removed because these new
+    // fields are non-number. We use an explicit return type instead.
+    hasIntroOutro,                              // boolean
+    groupYPositions: [baseG1Y, baseG2Y, baseG3Y] as [number, number, number],
+  };
 }
 
 export const layoutMath = createLayoutMath(ALAK_LAYOUT_CONFIG, BASE_PAGE_WIDTH);
@@ -656,13 +697,8 @@ export function buildSurahTransforms(
       const connX = s2BaseX - lm.sgPad;
       const connW = s2InnerW + lm.sgPad * 2;
 
-      const tBox_Y = shiftedTop;
-      const outerSectionH = tBox_Y - (lm.g1Y - lm.groupH - lm.boxExtOffset);
-      const tBox_H = outerSectionH;
-      const bBox_Y = lm.g3Y + lm.boxExtOffset;
-      const bBox_H = outerSectionH;
-
-      const groupYPositions = [lm.g1Y, lm.g2Y, lm.g3Y];
+      // ── Group Y positions come from the layout math engine ────────────────
+      const groupYPositions = lm.groupYPositions;
 
       const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
         const groupY = groupYPositions[gIdx];
@@ -721,7 +757,8 @@ export function buildSurahTransforms(
         };
       });
 
-      sections.push({
+      // ── Base section transform (always present) ───────────────────────────
+      const sectionTransform: SectionTransforms = {
         frameX: startX,
         frameW: lm.sectionW,
         shiftedTop,
@@ -729,31 +766,43 @@ export function buildSurahTransforms(
         shiftedH,
         connectorX: connX,
         connectorW: connW,
-        topConnectorY: tBox_Y,
-        topConnectorH: tBox_H,
-        bottomConnectorY: bBox_Y,
-        bottomConnectorH: bBox_H,
         borderWidth: bw,
-        introVerse: {
-          x: s2BaseX,
-          y: lm.v6Y,
-          z: 0.003,
-          w: s2InnerW,
-          h: lm.bigBoxH,
-        },
-        outroVerse: {
-          x: s2BaseX,
-          y: lm.v19Y,
-          z: 0.003,
-          w: s2InnerW,
-          h: lm.bigBoxH,
-        },
         groups,
         innerW: s2InnerW,
         baseX: s2BaseX,
         topLabelPinY: shiftedTop,
         bottomLabelPinY: shiftedBot,
-      });
+      };
+
+      // ── Intro/outro verse boxes and frame connectors — ONLY when hasIntro ─
+      if (config.features.hasIntro) {
+        const tBox_Y = shiftedTop;
+        const outerSectionH = tBox_Y - (lm.g1Y - lm.groupH - lm.boxExtOffset);
+        const tBox_H = outerSectionH;
+        const bBox_Y = lm.g3Y + lm.boxExtOffset;
+        const bBox_H = outerSectionH;
+
+        sectionTransform.topConnectorY    = tBox_Y;
+        sectionTransform.topConnectorH    = tBox_H;
+        sectionTransform.bottomConnectorY = bBox_Y;
+        sectionTransform.bottomConnectorH = bBox_H;
+        sectionTransform.introVerse = {
+          x: s2BaseX,
+          y: lm.v6Y,
+          z: 0.003,
+          w: s2InnerW,
+          h: lm.bigBoxH,
+        };
+        sectionTransform.outroVerse = {
+          x: s2BaseX,
+          y: lm.v19Y,
+          z: 0.003,
+          w: s2InnerW,
+          h: lm.bigBoxH,
+        };
+      }
+
+      sections.push(sectionTransform);
     }
   });
 

@@ -1,8 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useStoryStore } from "@/app/stores/useStoryStore";
 
 export function TitleOverlay() {
+  const activeConfig = useStoryStore((s) => s.activeConfig);
+  const title = activeConfig.title || "";
+
   const insetX = "clamp(14px, 2.2vw, 24px)";
   const insetY = "clamp(12px, 2vw, 16px)";
   const buttonH = "clamp(38px, 4.2vw, 44px)";
@@ -36,7 +40,7 @@ export function TitleOverlay() {
         overflow: "hidden",
       }}
     >
-      ALAK SURESİ
+      {title}
     </motion.div>
   );
 }

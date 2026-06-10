@@ -23,6 +23,9 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
 export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "ayatalkursi",
+  title: "AYETEL KÜRSİ",
+  heroTitle: "Ayetel",
+  heroSubtitle: "kürsî",
 
   features: {
     hasIntro: false,

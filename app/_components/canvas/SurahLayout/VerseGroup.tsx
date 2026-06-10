@@ -11,7 +11,7 @@ import {
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type { GroupTransforms, RowConnectorTransform } from "../../../data/schema";
-import { SURAH_DATA_ARABIC } from "../../../data/surahData";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 interface VerseGroupProps {
   group: ColorGroup;
@@ -60,18 +60,47 @@ export function VerseGroup({ group, groupTransform, groupIndex }: VerseGroupProp
 
       {/* 2×2 verse grid — position comes from the engine, no math here */}
       {group.verses.map((v, i) => {
+        // ── Foolproof transform lookup ─────────────────────────────────────────
+        // The gt.verses dictionary is keyed by the *Arabic* verse IDs (the ids
+        // used in config.sections[*].groups[*].verseIds).  When rendering a
+        // non-Arabic language, v.number is still the same verse ID (only the
+        // text changes), but in some LTR display orderings the index i inside the
+        // group may correspond to a different Arabic verse than v.number would
+        // imply.  We resolve this by consulting the active Arabic text data for
+        // the current surah, not the hardcoded Alak SURAH_DATA_ARABIC constant.
         let lookupNumber = v.number;
+
         if (groupIndex !== undefined) {
-          const arabicVerseNumber = SURAH_DATA_ARABIC.section2.colorGroups[groupIndex].verses[i].number;
-          const isLTR = arabicVerseNumber !== v.number;
-          if (isLTR) {
+          // useStoryStore.getState() is the zustand static accessor — safe inside
+          // a render function; not a hook call.
+          const activeTextData = useStoryStore.getState().activeTextData;
+          const arabicData = activeTextData?.["ar"];
+
+          // The verticalGroups section always stores its colorGroups under
+          // section2 in SurahDataShape — true for both Alak and Ayat al-Kursi.
+          const arabicGroups = arabicData?.section2?.colorGroups;
+
+          const arabicVerseNumber =
+            arabicGroups?.[groupIndex]?.verses?.[i]?.number;
+
+          // Only override if the Arabic data gives a *different* number (i.e.
+          // the current language displays verses in a different position than
+          // the Arabic RTL order and the transform was keyed by the Arabic id).
+          if (arabicVerseNumber !== undefined && arabicVerseNumber !== v.number) {
             lookupNumber = arabicVerseNumber;
           }
         }
-        const vt = gt.verses[lookupNumber];
-        if (!vt) return null;
 
-        // Verses 11–14 always get their dedicated capsule color
+        // Primary lookup by resolved number; fallback to v.number in case the
+        // Arabic data and the display data happen to have the same ordering
+        // (which is normal for Arabic mode — both resolve to the same key).
+        const vt = gt.verses[lookupNumber] ?? gt.verses[v.number];
+        if (!vt) return null; // Transform genuinely absent — skip silently.
+
+        // ── Verse background color ─────────────────────────────────────────────
+        // Alak-specific verse ranges get dedicated capsule colors.
+        // All other surahs fall through to the group-level verseBg fallback
+        // (color sync is a separate, future step).
         const finalBg =
           v.number >= 11 && v.number <= 14
             ? CAPSULE_BG_12_14

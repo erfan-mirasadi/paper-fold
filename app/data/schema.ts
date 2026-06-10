@@ -208,6 +208,9 @@ export interface SurahAnimations {
 
 export interface SurahLayoutConfig<TParams = any> {
   id: string;
+  title: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   features: SurahFeatures;
   dimensions: LayoutDimensions;
   styling: LayoutStyling;
