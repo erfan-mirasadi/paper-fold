@@ -34,25 +34,11 @@ const SECTION_SURFACE_SHADOW_MOTION = {
   },
 } as const;
 
-/** Static verse-pair mapping: paired verses share a single drag lead. */
-const VERSE_PAIR_LEAD: Record<number, number> = {
-  1: 1,
-  2: 1,
-  3: 3,
-  4: 3,
-  7: 7,
-  8: 7,
-  9: 9,
-  10: 9,
-  11: 11,
-  12: 11,
-  13: 13,
-  14: 13,
-  15: 15,
-  16: 15,
-  17: 17,
-  18: 17,
-};
+/** Dynamic verse pair lead: the smaller ID of the two paired verses. */
+function getLeadVerseId(configId: number, pairings: Record<number, number> | undefined) {
+  const pairedVerseId = pairings?.[configId];
+  return pairedVerseId ? Math.min(configId, pairedVerseId) : configId;
+}
 
 const ZERO_OFFSET = { x: 0, y: 0 };
 
@@ -192,7 +178,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
       ? middleGapHalf
       : 0;
 
-  const leadVerseId = VERSE_PAIR_LEAD[config.id] ?? config.id;
+  const leadVerseId = getLeadVerseId(config.id, activeStoryConfig.specialVerses?.versePairings);
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
@@ -302,6 +288,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
           textColor={config.textColor}
+          textScaleOverride={runtime.layoutMath.verseTextScale}
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
           customFrameSvg={config.customFrameSvg}

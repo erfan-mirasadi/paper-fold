@@ -207,16 +207,24 @@ export function buildVerseConfigs(
           const t = transforms.groups![gIdx].verses[lookupNumber];
           if (!t) return;
 
-          const vNum = v.number;
-          let bg = gIdx === 1 ? CAPSULE_BG_12_14 : CAPSULE_BG_7_8_17_18;
-          if (vNum === 9 || vNum === 10 || vNum === 15 || vNum === 16) {
-            bg = CAPSULE_BG_9_10_15_16;
-          }
-          if (vNum === 7 || vNum === 8 || vNum === 17 || vNum === 18) {
-            bg = CAPSULE_BG_7_8_17_18;
-          }
+          const override = runtime.config.verseOverrides?.[lookupNumber] ?? runtime.config.verseOverrides?.[v.number];
 
-          const border = gIdx === 1 ? GREEN_THEME : MAROON_THEME;
+          const isCenterGroup = gIdx === 1;
+          const groupFallbackBorder = isCenterGroup 
+            ? runtime.config.styling.colors.greenTheme 
+            : runtime.config.styling.colors.maroonTheme;
+
+          const finalBg =
+            override?.bg ??
+            (isCenterGroup
+              ? runtime.config.styling.colors.greenTheme
+              : runtime.config.styling.colors.maroonTheme);
+
+          const finalBorder = override?.border ?? groupFallbackBorder;
+          const finalCircleBg = override?.circleBg ?? finalBg;
+          const finalCircleBorderCol = override?.circleBorderCol ?? finalBorder;
+          const finalCircleTextCol = override?.circleTextCol ?? runtime.config.styling.colors.verseNumberText;
+          const finalTextColor = override?.textColor;
 
           const worldX = t.x - PAGE_WIDTH / 2;
           const direction = isRightCol ? "right" : "left";
@@ -231,11 +239,12 @@ export function buildVerseConfigs(
             h: t.h,
             hingeX,
             direction,
-            bg,
-            border,
-            circleBorderCol: border,
-            circleBg: bg,
-            circleTextCol: border,
+            bg: finalBg,
+            border: finalBorder,
+            circleBorderCol: finalCircleBorderCol,
+            circleBg: finalCircleBg,
+            circleTextCol: finalCircleTextCol,
+            textColor: finalTextColor,
           });
         });
       });

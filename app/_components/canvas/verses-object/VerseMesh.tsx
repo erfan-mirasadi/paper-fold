@@ -47,9 +47,9 @@ export interface VerseMeshProps {
   bg: string;
   border: string;
   circleBorderCol: string;
-  circleBg: string;
   circleTextCol: string;
   textColor?: string;
+  textScaleOverride?: number;
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
   customFrameSvg?: string;
@@ -139,6 +139,7 @@ export function VerseMesh({
   circleBg,
   circleTextCol,
   textColor,
+  textScaleOverride,
   suppressShadow = false,
   shadowRenderOrder,
   customFrameSvg,
@@ -394,6 +395,7 @@ export function VerseMesh({
                             circleBg={circleBg}
                             circleTextCol={circleTextCol}
                             textColor={textColor}
+                            textScaleOverride={textScaleOverride}
                             isPill={isPill}
                             shadow={false}
                             verseTextEnterDurationMs={0}

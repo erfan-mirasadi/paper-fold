@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import type { PopUpGroup } from "../../../stores/usePopUpStore";
 import { useFoldStore } from "../orchestrator/ScrollManager";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 type HoverSensorVerseConfig = {
   id: number;
@@ -44,6 +45,7 @@ export function PopUpHoverSensors({
   const isFoldedMainPaper = useFoldStore(
     (s) => !s.isIntroActive && s.currentOffset < 0.98,
   );
+  const activeConfigId = useStoryStore((s) => s.activeConfig.id);
 
   useEffect(() => {
     return () => {
@@ -56,6 +58,8 @@ export function PopUpHoverSensors({
   return (
     <>
       {groups.map((group) => {
+        if (group.id === "g_5_6" && activeConfigId === "alak") return null;
+
         const versesInGroup = versesConfig.filter((config) =>
           group.verseIds.includes(config.id),
         );
