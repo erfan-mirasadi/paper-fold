@@ -220,14 +220,14 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     8: {
       bg: CAPSULE_BG_7_8_17_18,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     // ── Group 1 inner rows (9, 10) ────────────────────────────────────────
     9: {
@@ -235,14 +235,14 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     10: {
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     // ── Group 2 center (11, 12, 13, 14) ──────────────────────────────────
     11: {
@@ -250,28 +250,28 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       border: GREEN_THEME,
       circleBorderCol: GREEN_THEME,
       circleBg: CAPSULE_BG_12_14,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: GREEN_THEME,
     },
     12: {
       bg: CAPSULE_BG_12_14,
       border: GREEN_THEME,
       circleBorderCol: GREEN_THEME,
       circleBg: CAPSULE_BG_12_14,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: GREEN_THEME,
     },
     13: {
       bg: CAPSULE_BG_12_14,
       border: GREEN_THEME,
       circleBorderCol: GREEN_THEME,
       circleBg: CAPSULE_BG_12_14,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: GREEN_THEME,
     },
     14: {
       bg: CAPSULE_BG_12_14,
       border: GREEN_THEME,
       circleBorderCol: GREEN_THEME,
       circleBg: CAPSULE_BG_12_14,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: GREEN_THEME,
     },
     // ── Group 3 inner rows (15, 16) ───────────────────────────────────────
     15: {
@@ -279,14 +279,14 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     16: {
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     // ── Group 3 outer rows (17, 18) ───────────────────────────────────────
     17: {
@@ -294,14 +294,14 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     18: {
       bg: CAPSULE_BG_7_8_17_18,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
       circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: S2_VERSE_NUMBER_TEXT,
+      circleTextCol: MAROON_THEME,
     },
     // ── Section 2 outro verse (19) ────────────────────────────────────────
     19: {
