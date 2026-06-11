@@ -47,6 +47,7 @@ export interface VerseMeshProps {
   bg: string;
   border: string;
   circleBorderCol: string;
+  circleBg?: string;
   circleTextCol: string;
   textColor?: string;
   textScaleOverride?: number;

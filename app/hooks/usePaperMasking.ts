@@ -16,6 +16,7 @@ import {
   VerticalGroupsSectionConfig,
   ThemeColors,
 } from "../data/schema";
+import { S1_INNER_BG, S1_INNER_BORDER } from "../data/theme";
 
 export const MASK_CONFIG = {
   sectionExpand: 0.013,
@@ -47,14 +48,19 @@ const isMiddleHorizontalFoldedForVerse = (
 let _maxVerseId = 0;
 let _totalSections = 0;
 const verseColorKeys = new Array<keyof ThemeColors | undefined>(200);
+const verseIsSection1 = new Array<boolean>(200).fill(false);
 
 getActiveStoryConfig().sections.forEach((sec) => {
   if (sec.type === "gridWithAnaAyet") {
     _totalSections += 1;
     const g = sec as GridSectionConfig;
     _maxVerseId = Math.max(_maxVerseId, ...g.verses, g.anaAyet);
-    g.verses.forEach((v) => (verseColorKeys[v] = g.bgThemeKey));
+    g.verses.forEach((v) => {
+      verseColorKeys[v] = g.bgThemeKey;
+      verseIsSection1[v] = true;
+    });
     verseColorKeys[g.anaAyet] = g.bgThemeKey;
+    verseIsSection1[g.anaAyet] = true;
   } else if (sec.type === "verticalGroups") {
     _totalSections += 3;
     const v = sec as VerticalGroupsSectionConfig;
@@ -86,6 +92,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     useMemo(() => {
       const vRects = new Float32Array(VERSE_ARR_SIZE * 4);
       const vRadii = new Float32Array(VERSE_ARR_SIZE);
+      const verseIsPill = new Array<boolean>(VERSE_ARR_SIZE).fill(true);
       const sRects = new Float32Array(TOTAL_SECTIONS * 4);
 
       const setVerseRect = (
@@ -98,6 +105,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         vRects[num * 4 + 2] = t.w;
         vRects[num * 4 + 3] = t.h;
         vRadii[num] = isPill ? t.h / 2.0 : VERSE_5_6_19_RADIUS;
+        verseIsPill[num] = isPill;
       };
 
       const PAD = 0.02;
@@ -199,19 +207,29 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       };
 
       for (let i = 1; i <= MAX_VERSE_ID; i++) {
-        // Verse-level bg override takes priority over the section-level bgThemeKey.
-        // This ensures verses like Verse 5 (anaAyet) get their specific color punched
-        // into the paper texture instead of inheriting the section default.
-        const overrideBg = activeConfig.verseOverrides?.[i]?.bg;
-        if (overrideBg) {
-          setCol(i, overrideBg);
-          continue;
+        const ov = activeConfig.verseOverrides?.[i];
+        const isPill = verseIsPill[i];
+        
+        let colorHex: string | undefined;
+        
+        if (isPill) {
+          colorHex = ov?.border;
+        } else {
+          colorHex = ov?.bg;
         }
-        const key = verseColorKeys[i];
-        if (key && activeConfig.styling.colors[key]) {
-          // Type casting is needed because color values could technically be any config property,
-          // but we ensure ThemeColors are strictly strings
-          const colorHex = activeConfig.styling.colors[key] as string;
+
+        if (!colorHex) {
+          if (verseIsSection1[i]) {
+            colorHex = isPill ? S1_INNER_BORDER : S1_INNER_BG;
+          } else {
+            const key = verseColorKeys[i];
+            if (key && activeConfig.styling.colors[key]) {
+              colorHex = activeConfig.styling.colors[key] as string;
+            }
+          }
+        }
+        
+        if (colorHex) {
           setCol(i, colorHex);
         }
       }
