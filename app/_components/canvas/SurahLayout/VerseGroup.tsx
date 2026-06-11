@@ -1,7 +1,5 @@
 "use client";
 import { VerseBox, UiRect } from "./SharedUI";
-import * as THREE from "three";
-import { useTexture } from "@react-three/drei";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
@@ -25,10 +23,6 @@ export function VerseGroup({
 }: VerseGroupProps) {
   const gt = groupTransform;
   const config = useStoryStore((state) => state.activeConfig);
-  const centerFlowerSvg =
-    config.id === "ayatalkursi"
-      ? "/ayatalKursi/Flower.svg"
-      : config.assets?.centerFlowerSvg;
 
   // ── Group-level fallback border color from config.styling.colors ──────────
   // isCenter groups use the green theme key; outer groups use the maroon theme key.
@@ -69,14 +63,6 @@ export function VerseGroup({
               color={rowBorderColor}
               renderOrder={3}
             />
-            {centerFlowerSvg && (
-              <CenterFlower
-                x={rc.x + rc.w / 2}
-                y={rc.y - rc.h / 2}
-                z={rc.z + 0.01}
-                svgUrl={centerFlowerSvg}
-              />
-            )}
           </group>
         );
       })}
@@ -165,32 +151,3 @@ export function VerseGroup({
   );
 }
 
-function CenterFlower({
-  x,
-  y,
-  z,
-  svgUrl,
-}: {
-  x: number;
-  y: number;
-  z: number;
-  svgUrl: string;
-}) {
-  const texture = useTexture(svgUrl, (t) => {
-    t.colorSpace = THREE.SRGBColorSpace;
-  });
-  return (
-    <group position={[x, y, z]}>
-      <mesh renderOrder={100}>
-        <planeGeometry args={[0.1, 0.075]} />
-        <meshBasicMaterial
-          map={texture}
-          transparent
-          depthTest={false}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </mesh>
-    </group>
-  );
-}

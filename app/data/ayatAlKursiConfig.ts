@@ -63,18 +63,55 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 
-  assets: {
-    centerFlowerSvg: "/ayatalKursi/Flower.svg",
-  },
   verseOverrides: {
-    1: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
-    2: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
-    3: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
-    4: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
-    5: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
-    6: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
-    7: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
-    8: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
+    1: {
+      border: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBg: OUTER_GROUP_BG,
+      circleTextCol: OUTER_GROUP_BORDER,
+    },
+    2: {
+      border: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBg: OUTER_GROUP_BG,
+      circleTextCol: OUTER_GROUP_BORDER,
+    },
+    3: {
+      border: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBg: CENTER_GROUP_BG,
+      circleTextCol: CENTER_GROUP_BORDER,
+    },
+    4: {
+      border: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBg: CENTER_GROUP_BG,
+      circleTextCol: CENTER_GROUP_BORDER,
+    },
+    5: {
+      border: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBg: CENTER_GROUP_BG,
+      circleTextCol: CENTER_GROUP_BORDER,
+    },
+    6: {
+      border: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBg: CENTER_GROUP_BG,
+      circleTextCol: CENTER_GROUP_BORDER,
+    },
+    7: {
+      border: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBg: OUTER_GROUP_BG,
+      circleTextCol: OUTER_GROUP_BORDER,
+    },
+    8: {
+      border: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBg: OUTER_GROUP_BG,
+      circleTextCol: OUTER_GROUP_BORDER,
+    },
   },
 
   styling: {
@@ -222,36 +259,35 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   ],
 
   animations: {
-    // -----------------------------------------------------------------------
-    // ONE fold in the middle of the paper (between the top group and the
-    // pushed-in middle group).
-    // The returned array must have length === foldSteps[n].folds.length === 1.
-    // -----------------------------------------------------------------------
-    computeFoldYPositions: (lm) => [
-      // Crease exactly in the middle of the page height
-      -lm.PAGE_HEIGHT / 2,
-    ],
+    computeFoldYPositions: (lm) => {
+      // Position 1: between Group 0 and Group 1
+      const fold1 = (lm.g1Y - lm.groupHeights[0] + lm.g2Y) / 2;
+      // Position 2: between row 1 and row 2 of Group 1
+      const fold2 =
+        lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2VerticalRowGap / 2;
+      // Position 3: between Group 1 and Group 2
+      const fold3 = (lm.g2Y - lm.groupHeights[1] + lm.g3Y) / 2;
+
+      return [fold1, fold2, fold3];
+    },
 
     foldSteps: [
       // Fully folded (paper closed in on itself)
       {
         id: "pre-start",
-        folds: [{ direction: 1, angleFactor: 0.9 }],
+        folds: [
+          { direction: 1, angleFactor: 0.93 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 0, angleFactor: 0.93 },
+        ],
       },
-      // Flat / fully open
-      {
-        id: "start",
-        folds: [{ direction: 1, angleFactor: 0 }],
-      },
-      // Stay flat
-      {
-        id: "open",
-        folds: [{ direction: 1, angleFactor: 0 }],
-      },
-      // Stay flat
       {
         id: "end",
-        folds: [{ direction: 1, angleFactor: 0 }],
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+        ],
       },
     ] as const,
 
