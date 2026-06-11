@@ -1,5 +1,5 @@
 "use client";
-import { TopLabel, VerseBox } from "./SharedUI";
+import { TopLabel, VerseBox, UiRect } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 // import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
@@ -13,10 +13,7 @@ import {
   S2_FRAME_BG_COLOR,
   S2_FRAME_IMAGE,
 } from "../../../data/theme";
-import type {
-  SectionTwoData,
-  LayoutConfig,
-} from "../../../data/SurahConfig";
+import type { SectionTwoData, LayoutConfig } from "../../../data/SurahConfig";
 import { SectionTransforms } from "../../../data/schema";
 import { S2_LABEL_WIDTH, S2_LABEL_Y_OFFSET } from "../../../data/SurahConfig";
 import { useStoryStore } from "../../../stores/useStoryStore";
@@ -67,10 +64,12 @@ export function SectionTwo({
   const introOverride = config.verseOverrides?.[introVerseNum];
   const outroOverride = config.verseOverrides?.[outroVerseNum];
   // Fallback: s2IntroOutroBg for background, maroonTheme for border.
-  const introBg     = introOverride?.bg           ?? config.styling.colors.s2IntroOutroBg;
-  const introBorder = introOverride?.border        ?? config.styling.colors.maroonTheme;
-  const outroBg     = outroOverride?.bg            ?? config.styling.colors.s2IntroOutroBg;
-  const outroBorder = outroOverride?.border        ?? config.styling.colors.maroonTheme;
+  const introBg = introOverride?.bg ?? config.styling.colors.s2IntroOutroBg;
+  const introBorder =
+    introOverride?.border ?? config.styling.colors.maroonTheme;
+  const outroBg = outroOverride?.bg ?? config.styling.colors.s2IntroOutroBg;
+  const outroBorder =
+    outroOverride?.border ?? config.styling.colors.maroonTheme;
 
   // useTexture must always be called (React hook rules), but the mesh that
   // uses it is only mounted when hasFrames is true — no wasted render cost.
@@ -199,6 +198,47 @@ export function SectionTwo({
         />
       )}
 
+      {/* ─── AYAT AL KURSI PAPER COLORED BACKGROUNDS ───────────── */}
+      {config.styling.colors.sectionBackgrounds && (
+        <group position={[startX, 0, -0.0005]}>
+          {groups.map((gt, i) => {
+            const bgColors = config.styling.colors.sectionBackgrounds;
+            const color = bgColors![i] || bgColors![0]; // fallback
+
+            const isFirst = i === 0;
+            const isLast = i === groups.length - 1;
+            const gtBottom = gt.frameY - gt.frameH;
+
+            const padYOuter = 0.02; // Reduced from 0.05 to prevent sticking out vertically
+
+            const yTop = isFirst
+              ? gt.frameY + padYOuter
+              : (groups[i - 1].frameY - groups[i - 1].frameH + gt.frameY) / 2;
+
+            const yBot = isLast
+              ? gtBottom - padYOuter
+              : (gtBottom + groups[i + 1].frameY) / 2;
+
+            const padX = 0.035; // reduced from 0.08 to make it wider on both sides
+            const w = layout.sectionW - padX * 2;
+            const h = yTop - yBot;
+
+            return (
+              <UiRect
+                key={`sec-bg-${i}`}
+                x={padX}
+                y={yTop}
+                w={w}
+                h={h}
+                radius={0.06}
+                color={color}
+                depthTest={false}
+              />
+            );
+          })}
+        </group>
+      )}
+
       {/* ─── INTRO VERSE (verse 6 for Alak) ─────────────────────────────── */}
       {hasIntroVerse && (
         <VerseBox
@@ -313,7 +353,11 @@ function DynamicBackground({
 
   return (
     <mesh
-      position={[startX + layout.sectionW / 2, layout.s2Top - layout.s2H / 2, -0.001]}
+      position={[
+        startX + layout.sectionW / 2,
+        layout.s2Top - layout.s2H / 2,
+        -0.001,
+      ]}
       scale={[
         (layout as any).s2BackgroundScaleX ?? 1,
         (layout as any).s2BackgroundScaleY ?? 1,

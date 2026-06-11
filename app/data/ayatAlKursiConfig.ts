@@ -102,6 +102,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group1Bg: OUTER_GROUP_BG, // yellow  — top group
       s2Group2Bg: CENTER_GROUP_BG, // light blue/grey — middle (pushed-in)
       s2Group3Bg: OUTER_GROUP_BG, // yellow — bottom group (symmetrical)
+
+      // The background rectangles for the paper, echoing the hand-drawn sections
+      sectionBackgrounds: ["#DCE8DC", "#EDD8DF", "#DCE8DC"],
+
       curveColors: [
         { color: OUTER_GROUP_BORDER, fillColor: OUTER_GROUP_BG }, // Outer curves (top/bottom)
         { color: CENTER_GROUP_BORDER, fillColor: CENTER_GROUP_BG }, // Center curves (middle)

@@ -54,6 +54,12 @@ export interface ThemeColors {
    * Provide one entry per bracket (outer brackets first, center last).
    */
   curveColors?: Array<{ color: string; fillColor: string }>;
+  
+  /**
+   * Optional background colors for vertical sections (like Ayat Al Kursi).
+   * Usually an array mapping to groups: e.g. [topColor, middleColor, bottomColor].
+   */
+  sectionBackgrounds?: string[];
 }
 
 export interface LayoutStyling {
