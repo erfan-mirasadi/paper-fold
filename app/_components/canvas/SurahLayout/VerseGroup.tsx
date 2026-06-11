@@ -70,6 +70,7 @@ export function VerseGroup({
               h={rc.h}
               radius={OPPOSITE_VERSE_CONNECTOR.radius}
               color={borderColor}
+              renderOrder={3}
             />
             {centerFlowerSvg && (
               <CenterFlower
@@ -178,8 +179,8 @@ function CenterFlower({
     t.colorSpace = THREE.SRGBColorSpace;
   });
   return (
-    <group position={[x, y, z]} renderOrder={100}>
-      <mesh>
+    <group position={[x, y, z]}>
+      <mesh renderOrder={100}>
         <planeGeometry args={[0.1, 0.075]} />
         <meshBasicMaterial
           map={texture}

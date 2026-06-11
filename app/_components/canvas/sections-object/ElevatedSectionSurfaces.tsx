@@ -210,6 +210,7 @@ interface ElevatedLayerProps {
   sectionBgTexture?: Texture | null;
   /** When true the shadow is fully suppressed (e.g. during intro flight). */
   suppressShadow?: boolean;
+  renderOrder?: number;
 }
 
 function ElevatedLayer({
@@ -226,6 +227,7 @@ function ElevatedLayer({
   shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
   sectionBgTexture = null,
   suppressShadow = false,
+  renderOrder,
 }: ElevatedLayerProps) {
   const runtime = useSurahLayoutRuntime();
   const PAGE_WIDTH = runtime.PAGE_WIDTH;
@@ -295,7 +297,7 @@ function ElevatedLayer({
         </a.mesh>
       )}
 
-      <a.mesh>
+      <a.mesh renderOrder={renderOrder}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         {usesTextureFill ? (
           <a.meshBasicMaterial
@@ -682,6 +684,7 @@ export function ElevatedSectionSurfaces() {
                 sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
                 spring={s1Spring}
                 zOffset={0.0015}
+                renderOrder={3}
               />
             ))}
           </group>
@@ -738,6 +741,7 @@ export function ElevatedSectionSurfaces() {
                 sectionBgTexture={getTextureForColor(MAROON_THEME)}
                 spring={s2TopSpring}
                 zOffset={0.0025}
+                renderOrder={3}
               />
             ))}
           </group>
@@ -774,6 +778,7 @@ export function ElevatedSectionSurfaces() {
                 sectionBgTexture={getTextureForColor(GREEN_THEME)}
                 spring={s2CenterSpring}
                 zOffset={0.0025}
+                renderOrder={3}
               />
             ))}
           </group>
@@ -830,6 +835,7 @@ export function ElevatedSectionSurfaces() {
                 sectionBgTexture={getTextureForColor(MAROON_THEME)}
                 spring={s2BottomSpring}
                 zOffset={0.0025}
+                renderOrder={3}
               />
             ))}
           </group>

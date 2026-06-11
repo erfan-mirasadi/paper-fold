@@ -267,6 +267,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
             h={rc.h}
             radius={OPPOSITE_VERSE_CONNECTOR.radius}
             color={S1_INNER_BORDER}
+            renderOrder={3}
           />
         );
       })}
