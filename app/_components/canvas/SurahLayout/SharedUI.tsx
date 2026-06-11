@@ -39,6 +39,7 @@ import {
 } from "../../../hooks/useSurahLanguageStore";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { CanvasText } from "../shared/CanvasText";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 // ROUNDED SHAPE GEOMETRY
 interface RoundedShapeProps {
@@ -506,7 +507,9 @@ export const VerseBox = ({
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
   const textScale = textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
-  const showVerseNumber = true;
+  
+  const activeStoryConfig = useStoryStore((s) => s.activeConfig);
+  const showVerseNumber = !(activeStoryConfig?.features?.hideVerseNumbers ?? false);
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;
 

@@ -13,6 +13,7 @@ export interface SurahFeatures {
   hasIntro: boolean;
   hasElevatedSections: boolean;
   hasPopUps: boolean;
+  hideVerseNumbers?: boolean;
 }
 
 export interface LayoutDimensions {

@@ -36,6 +36,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     hasIntro: false,
     hasElevatedSections: false,
     hasPopUps: false,
+    hideVerseNumbers: true,
   },
 
   dimensions: {
