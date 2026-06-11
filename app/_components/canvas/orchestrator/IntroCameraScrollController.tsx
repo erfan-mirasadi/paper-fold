@@ -5,6 +5,7 @@ import { useCameraStore } from "../../../stores/useCameraStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { useStoryStore } from "../../../stores/useStoryStore";
+import { Vector3, type Spherical } from "three";
 
 type OrbitControlsLike = {
   target?: {
@@ -12,8 +13,15 @@ type OrbitControlsLike = {
     y: number;
     z: number;
     set: (x: number, y: number, z: number) => void;
+    copy: (v: Vector3) => void;
   };
   update?: () => void;
+  _sphericalDelta?: { set: (x: number, y: number, z: number) => void };
+  sphericalDelta?: { set: (x: number, y: number, z: number) => void };
+  _panOffset?: { set: (x: number, y: number, z: number) => void };
+  panOffset?: { set: (x: number, y: number, z: number) => void };
+  _scale?: number;
+  scale?: number;
 };
 
 const easeInOutCubic = (t: number): number => {
@@ -23,13 +31,44 @@ const easeInOutCubic = (t: number): number => {
 
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
 
+/** Flush OrbitControls internal deltas so the manual camera snap sticks. */
+function flushOrbitControls(controls: OrbitControlsLike | undefined) {
+  if (!controls) return;
+  if (controls._sphericalDelta?.set) controls._sphericalDelta.set(0, 0, 0);
+  if (controls.sphericalDelta?.set) controls.sphericalDelta.set(0, 0, 0);
+  if (controls._panOffset?.set) controls._panOffset.set(0, 0, 0);
+  if (controls.panOffset?.set) controls.panOffset.set(0, 0, 0);
+  if (typeof controls._scale === "number") controls._scale = 1;
+  if (typeof controls.scale === "number") controls.scale = 1;
+  controls.update?.();
+}
+
 export function IntroCameraScrollController() {
   useFrame((state) => {
     const config = useStoryStore.getState().activeConfig;
     if (useCameraStore.getState().phase !== "idle") return;
 
-    const { isIntroActive, introProgress, introHandoffProgress } =
+    const { isIntroActive, introProgress, introHandoffProgress, isInstantSkip } =
       useFoldStore.getState();
+
+    // When intro was instant-skipped, the handoff animation never played,
+    // so the camera is frozen in its intro position.
+    // Snap it to the base (story) position every frame until isInstantSkip clears.
+    if (!isIntroActive && isInstantSkip) {
+      const { introCamera } = config.animations;
+      if (introCamera) {
+        const controls = state.controls as OrbitControlsLike | undefined;
+        const [baseX, baseY, baseZ] = CAMERA_CONFIG.initialCamera.position;
+        const [baseTX, baseTY, baseTZ] = CAMERA_CONFIG.initialCamera.target;
+        state.camera.position.set(baseX, baseY, baseZ);
+        state.camera.lookAt(baseTX, baseTY, baseTZ);
+        if (controls?.target?.set) {
+          controls.target.set(baseTX, baseTY, baseTZ);
+          flushOrbitControls(controls);
+        }
+      }
+      return;
+    }
 
     if (!isIntroActive) return;
 
