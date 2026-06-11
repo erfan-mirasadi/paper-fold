@@ -2,14 +2,6 @@
 import { VerseBox, UiRect } from "./SharedUI";
 import * as THREE from "three";
 import { useTexture } from "@react-three/drei";
-import {
-  CAPSULE_BG_7_8_17_18,
-  CAPSULE_BG_9_10_15_16,
-  CAPSULE_BG_12_14,
-  WHITE_VERSE_BG,
-  MAROON_THEME,
-  GREEN_THEME,
-} from "../../../data/theme";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
@@ -32,33 +24,38 @@ export function VerseGroup({
   layout,
 }: VerseGroupProps) {
   const gt = groupTransform;
-  const borderColor = gt.isCenter ? GREEN_THEME : MAROON_THEME;
   const config = useStoryStore((state) => state.activeConfig);
   const centerFlowerSvg =
     config.id === "ayatalkursi"
       ? "/ayatalKursi/Flower.svg"
       : config.assets?.centerFlowerSvg;
 
+  // ── Group-level fallback border color from config.styling.colors ──────────
+  // isCenter groups use the green theme key; outer groups use the maroon theme key.
+  const groupFallbackBorder = gt.isCenter
+    ? config.styling.colors.greenTheme
+    : config.styling.colors.maroonTheme;
+
+  // ── Row connector color — derived from the first verse in the group ────────
+  // We use the border from the first verse's override if available; otherwise
+  // the group-level fallback. This keeps the connector stripe in sync with
+  // the verse capsule colours automatically.
+  const firstVerseOverride = config.verseOverrides?.[group.verses?.[0]?.number ?? -1];
+  const borderColor = firstVerseOverride?.border ?? groupFallbackBorder;
+
   return (
     <group>
-      {/* Group bounding box — color/shadow driven by isCenter flag */}
-      {/* <UiRect
-        x={gt.frameX}
-        y={gt.frameY}
-        z={0.0025}
-        w={gt.frameW}
-        h={gt.frameH}
-        radius={0.015}
-        color={gt.isCenter ? GREEN_THEME : HOLLOW_BORDER_COLOR}
-        shadow={gt.isCenter}
-      /> */}
-
       {/* Row Connectors for opposite verses */}
       {gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
         const leftV = group.verses[i * 2];
         const rightV = group.verses[i * 2 + 1];
 
         if (!leftV || !rightV) return null;
+
+        // Per-row connector color — derive from the left verse in this row so
+        // each row pair tracks its own hue when overrides differ per row.
+        const rowLeftOverride = config.verseOverrides?.[leftV.number];
+        const rowBorderColor = rowLeftOverride?.border ?? groupFallbackBorder;
 
         return (
           <group key={`connector-${i}`}>
@@ -69,7 +66,7 @@ export function VerseGroup({
               w={rc.w}
               h={rc.h}
               radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={borderColor}
+              color={rowBorderColor}
               renderOrder={3}
             />
             {centerFlowerSvg && (
@@ -126,19 +123,23 @@ export function VerseGroup({
         const vt = gt.verses[lookupNumber] ?? gt.verses[v.number];
         if (!vt) return null; // Transform genuinely absent — skip silently.
 
-        // ── Verse background color ─────────────────────────────────────────────
-        // Alak-specific verse ranges get dedicated capsule colors.
-        // All other surahs fall through to the group-level verseBg fallback
-        // (color sync is a separate, future step).
+        // ── Color resolution — 100% config-driven ─────────────────────────────
+        // 1. Check verseOverrides for this specific verse number (Arabic ID).
+        // 2. Fallback: group.verseBg (SectionTwoData level, rarely set).
+        // 3. Final fallback: group-level theme key from styling.colors.
+        const override = config.verseOverrides?.[lookupNumber] ?? config.verseOverrides?.[v.number];
+
         const finalBg =
-          v.number >= 11 && v.number <= 14
-            ? CAPSULE_BG_12_14
-            : [7, 8, 17, 18].includes(v.number)
-              ? CAPSULE_BG_7_8_17_18
-              : [9, 10, 15, 16].includes(v.number)
-                ? CAPSULE_BG_9_10_15_16
-                : (group.verseBg ??
-                  (gt.isCenter ? WHITE_VERSE_BG : CAPSULE_BG_7_8_17_18));
+          override?.bg ??
+          group.verseBg ??
+          (gt.isCenter
+            ? config.styling.colors.greenTheme   // centre group bg fallback
+            : config.styling.colors.maroonTheme); // outer group bg fallback
+
+        const finalBorder   = override?.border          ?? groupFallbackBorder;
+        const finalCircleBg = override?.circleBg         ?? finalBg;
+        const finalCircleBorder = override?.circleBorderCol ?? finalBorder;
+        const finalCircleText   = override?.circleTextCol   ?? config.styling.colors.verseNumberText;
 
         return (
           <VerseBox
@@ -151,10 +152,10 @@ export function VerseGroup({
             verse={v.text}
             number={v.number}
             bg={finalBg}
-            border={borderColor}
-            circleBorderCol={borderColor}
-            circleBg={finalBg}
-            circleTextCol={borderColor}
+            border={finalBorder}
+            circleBorderCol={finalCircleBorder}
+            circleBg={finalCircleBg}
+            circleTextCol={finalCircleText}
             isPill={true}
             textScaleOverride={layout?.verseTextScale}
           />

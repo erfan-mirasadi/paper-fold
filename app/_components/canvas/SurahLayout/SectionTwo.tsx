@@ -8,8 +8,6 @@ import * as THREE from "three";
 import {
   // S2_OUTER_BORDER,
   // S2_OUTER_BG,
-  BLUE_THEME,
-  CAPSULE_BG_6_19,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
   S2_FRAME_BG_COLOR,
@@ -21,6 +19,7 @@ import type {
 } from "../../../data/SurahConfig";
 import { SectionTransforms } from "../../../data/schema";
 import { S2_LABEL_WIDTH, S2_LABEL_Y_OFFSET } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 interface SectionTwoProps {
   data: SectionTwoData;
@@ -60,6 +59,18 @@ export function SectionTwo({
 }: SectionTwoProps) {
   const t = transforms as Required<SectionTransforms>;
   const edgeVerseBorderWidth = t.borderWidth;
+
+  // ── Config-driven intro/outro verse colours ──────────────────────────────
+  const config = useStoryStore((state) => state.activeConfig);
+  const introVerseNum = data.introVerse?.number ?? 6;
+  const outroVerseNum = data.outroVerse?.number ?? 19;
+  const introOverride = config.verseOverrides?.[introVerseNum];
+  const outroOverride = config.verseOverrides?.[outroVerseNum];
+  // Fallback: s2IntroOutroBg for background, maroonTheme for border.
+  const introBg     = introOverride?.bg           ?? config.styling.colors.s2IntroOutroBg;
+  const introBorder = introOverride?.border        ?? config.styling.colors.maroonTheme;
+  const outroBg     = outroOverride?.bg            ?? config.styling.colors.s2IntroOutroBg;
+  const outroBorder = outroOverride?.border        ?? config.styling.colors.maroonTheme;
 
   // useTexture must always be called (React hook rules), but the mesh that
   // uses it is only mounted when hasFrames is true — no wasted render cost.
@@ -198,11 +209,11 @@ export function SectionTwo({
           h={transforms.introVerse!.h}
           verse={data.introVerse.text}
           number={data.introVerse.number}
-          bg={CAPSULE_BG_6_19}
-          border={BLUE_THEME}
-          circleBorderCol={BLUE_THEME}
-          circleBg={CAPSULE_BG_6_19}
-          circleTextCol={BLUE_THEME}
+          bg={introBg}
+          border={introBorder}
+          circleBorderCol={introOverride?.circleBorderCol ?? introBorder}
+          circleBg={introOverride?.circleBg ?? introBg}
+          circleTextCol={introOverride?.circleTextCol ?? introBorder}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
         />
@@ -229,11 +240,11 @@ export function SectionTwo({
           h={transforms.outroVerse!.h}
           verse={data.outroVerse.text}
           number={data.outroVerse.number}
-          bg={CAPSULE_BG_6_19}
-          border={BLUE_THEME}
-          circleBorderCol={BLUE_THEME}
-          circleBg={CAPSULE_BG_6_19}
-          circleTextCol={BLUE_THEME}
+          bg={outroBg}
+          border={outroBorder}
+          circleBorderCol={outroOverride?.circleBorderCol ?? outroBorder}
+          circleBg={outroOverride?.circleBg ?? outroBg}
+          circleTextCol={outroOverride?.circleTextCol ?? outroBorder}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
         />

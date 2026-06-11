@@ -16,6 +16,14 @@ import {
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
   S1_VERSE_5_TEXT,
+  BLUE_THEME,
+  MAROON_THEME,
+  GREEN_THEME,
+  CAPSULE_BG_6_19,
+  CAPSULE_BG_7_8_17_18,
+  CAPSULE_BG_9_10_15_16,
+  CAPSULE_BG_12_14,
+  S2_VERSE_NUMBER_TEXT,
 } from "./theme";
 
 export interface Verse {
@@ -183,19 +191,125 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
   assets: {},
   verseOverrides: {
+    // ── Section 1 verse 5 ─────────────────────────────────────────────────
     5: {
       customFrameSvg: "/Group 11.svg",
       expandW: 0.035,
       expandH: 0.01,
       frameScaleLTR: 1.1,
       isPill: false,
-      bg: "#E5CFA4", // CAPSULE_BG_6_19 — drives paper masking AND SectionOne render
-      border: "#E5CFA4",
+      bg: CAPSULE_BG_6_19,
+      border: CAPSULE_BG_6_19,
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
-      circleBg: "#E5CFA4",
+      circleBg: CAPSULE_BG_6_19,
       circleTextCol: S1_VERSE_NUMBER_TEXT,
       textColor: S1_VERSE_5_TEXT,
       hasAnaAyetTab: true,
+    },
+    // ── Section 2 intro verse (6) ─────────────────────────────────────────
+    6: {
+      bg: CAPSULE_BG_6_19,
+      border: BLUE_THEME,
+      circleBorderCol: BLUE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: BLUE_THEME,
+    },
+    // ── Group 1 outer rows (7, 8) ─────────────────────────────────────────
+    7: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    8: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    // ── Group 1 inner rows (9, 10) ────────────────────────────────────────
+    9: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    10: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    // ── Group 2 center (11, 12, 13, 14) ──────────────────────────────────
+    11: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    12: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    13: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    14: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    // ── Group 3 inner rows (15, 16) ───────────────────────────────────────
+    15: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    16: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    // ── Group 3 outer rows (17, 18) ───────────────────────────────────────
+    17: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    18: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: S2_VERSE_NUMBER_TEXT,
+    },
+    // ── Section 2 outro verse (19) ────────────────────────────────────────
+    19: {
+      bg: CAPSULE_BG_6_19,
+      border: BLUE_THEME,
+      circleBorderCol: BLUE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: BLUE_THEME,
     },
   },
   styling: {
@@ -216,13 +330,24 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       innerCard: "#eeeeee",
       sectionBgTexture: "#fcfcfc",
       hollowConnectorInnerBg: "#e3e3e3",
-      maroonTheme: "#800000",
-      greenTheme: "#008000",
+      maroonTheme: MAROON_THEME,
+      greenTheme: GREEN_THEME,
       s1InnerBorder: "#cccccc",
-      s2IntroOutroBg: "#C4963B",
-      s2Group1Bg: "#7c8cb0",
-      s2Group2Bg: "#5E7367",
-      s2Group3Bg: "#7c8cb0",
+      s2IntroOutroBg: BLUE_THEME,
+      s2Group1Bg: MAROON_THEME,
+      s2Group2Bg: GREEN_THEME,
+      s2Group3Bg: MAROON_THEME,
+      /**
+       * Bracket color sequence for SideCurves, outermost → center.
+       * Index 0–2 = outer brackets (blue → maroon → maroon).
+       * Index 3   = center bracket (green).
+       */
+      curveColors: [
+        { color: BLUE_THEME,   fillColor: CAPSULE_BG_6_19 },
+        { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
+        { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
+        { color: GREEN_THEME,  fillColor: CAPSULE_BG_12_14 },
+      ],
     },
     capsuleBorderWidth: 0.0039,
     circleBorderWidth: 0.0035,

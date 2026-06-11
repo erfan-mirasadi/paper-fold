@@ -47,6 +47,13 @@ export interface ThemeColors {
   s2Group1Bg: string;
   s2Group2Bg: string;
   s2Group3Bg: string;
+  /**
+   * Color sequence for the side brackets in SideCurves, outermost → innermost.
+   * Each entry is { color, fillColor } for the bracket line and its fill mesh.
+   * The last entry is always the center (inner) bracket.
+   * Provide one entry per bracket (outer brackets first, center last).
+   */
+  curveColors?: Array<{ color: string; fillColor: string }>;
 }
 
 export interface LayoutStyling {

@@ -12,6 +12,7 @@ import {
   CAPSULE_BG_12_14,
   CAPSULE_BG_6_19,
 } from "../../../data/theme";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
@@ -49,17 +50,15 @@ interface BracketSpec {
   fillColor: string;
 }
 
-// ── Color sequence for outer (non-center) brackets, outermost → innermost ────
-// Alak uses 3 non-center brackets: blue → maroon → maroon.
-// Any new layout with fewer outer brackets simply uses the first N colors.
-const OUTER_BRACKET_COLORS: Array<{ color: string; fillColor: string }> = [
+// ── Static fallbacks — used when the config provides no curveColors ───────────
+// These replicate the previous Alak hardcoded values and keep other surahs
+// visually correct even before they define their own curveColors.
+const FALLBACK_OUTER_COLORS: Array<{ color: string; fillColor: string }> = [
   { color: BLUE_THEME,   fillColor: CAPSULE_BG_6_19 },
   { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
   { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
 ];
-
-// ── The center bracket always uses the green theme ────────────────────────────
-const CENTER_BRACKET_COLOR = { color: GREEN_THEME, fillColor: CAPSULE_BG_12_14 };
+const FALLBACK_CENTER_COLOR = { color: GREEN_THEME, fillColor: CAPSULE_BG_12_14 };
 
 // =============================================================================
 // computeBrackets — Generic topological bracket generator
@@ -89,6 +88,8 @@ function computeBrackets(
   groups: GroupTransforms[],
   layout: LayoutConfig,
   hasIntroOutro: boolean,
+  outerColors: Array<{ color: string; fillColor: string }> = FALLBACK_OUTER_COLORS,
+  centerColor: { color: string; fillColor: string } = FALLBACK_CENTER_COLOR,
 ): BracketSpec[] {
   if (groups.length === 0) return [];
 
@@ -106,22 +107,22 @@ function computeBrackets(
 
   const brackets: BracketSpec[] = [];
 
-  if (hasIntroOutro) {
+    if (hasIntroOutro) {
     // ── Alak topology: exactly 3 outer brackets + 1 inner center ─────────
     //
-    // Bracket 0 (blue) — outermost:
+    // Bracket 0 (index 0 from curveColors) — outermost:
     //   top  = intro-verse top  = v6Y
     //   bot  = outro-verse bot  = v19Y - bigBoxH
     //   inner top = v6Y - bigBoxH      (bottom edge of intro verse)
     //   inner bot = v19Y               (top edge of outro verse)
     //
-    // Bracket 1 (maroon):
+    // Bracket 1 (index 1):
     //   top  = g1Y - groupPad                            (top of row 1, group 1)
     //   bot  = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2 (bottom of row 2, group 3)
     //   inner top = top - smallBoxH2
     //   inner bot = bot + smallBoxH2
     //
-    // Bracket 2 (maroon):
+    // Bracket 2 (index 2):
     //   top  = g1Y - groupPad - smallBoxH2 - s2Gap      (top of row 2, group 1)
     //   bot  = g3Y - groupPad - smallBoxH2              (top of row 1, group 3)
     //   inner top = top - smallBoxH2
@@ -138,7 +139,7 @@ function computeBrackets(
       innerYBot: v19Y,
       nestLevel: 0,
       isCenter: false,
-      ...OUTER_BRACKET_COLORS[0],
+      ...(outerColors[0] ?? FALLBACK_OUTER_COLORS[0]),
     });
 
     const outerTop1 = g1Y - groupPad;
@@ -150,7 +151,7 @@ function computeBrackets(
       innerYBot: outerBot1 + smallBoxH2,
       nestLevel: 1,
       isCenter: false,
-      ...OUTER_BRACKET_COLORS[1],
+      ...(outerColors[1] ?? FALLBACK_OUTER_COLORS[1]),
     });
 
     const outerTop2 = g1Y - groupPad - smallBoxH2 - s2Gap;
@@ -162,10 +163,10 @@ function computeBrackets(
       innerYBot: outerBot2 + smallBoxH2,
       nestLevel: 2,
       isCenter: false,
-      ...OUTER_BRACKET_COLORS[2],
+      ...(outerColors[2] ?? FALLBACK_OUTER_COLORS[2]),
     });
 
-    // Inner center bracket (green) — tightly wraps the center group
+    // Inner center bracket — tightly wraps the center group
     if (centerGroup) {
       const cTop = centerGroup.frameY - groupPad;
       const cBot = centerGroup.frameY - groupPad - smallBoxH2 - s2Gap - smallBoxH2;
@@ -176,7 +177,7 @@ function computeBrackets(
         innerYBot: cBot + smallBoxH2,
         nestLevel: 3,
         isCenter: true,
-        ...CENTER_BRACKET_COLOR,
+        ...centerColor,
       });
     }
   } else {
@@ -193,7 +194,7 @@ function computeBrackets(
       innerYBot: outerBot + smallBoxH2,
       nestLevel: 0,
       isCenter: false,
-      ...OUTER_BRACKET_COLORS[0],
+      ...(outerColors[0] ?? FALLBACK_OUTER_COLORS[0]),
     });
 
     if (centerGroup) {
@@ -207,7 +208,7 @@ function computeBrackets(
         innerYBot: cBot + smallBoxH2,
         nestLevel: 1,
         isCenter: true,
-        ...CENTER_BRACKET_COLOR,
+        ...centerColor,
       });
     }
   }
@@ -401,6 +402,20 @@ export const SideCurves = ({
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isAllSectionsMode = useElevatedStore((state) => state.isAllSectionsMode);
 
+  // Read curve colors from the active config — dynamic, no Alak hardcoding.
+  const configColors = useStoryStore((state) => state.activeConfig.styling.colors);
+  const configCurveColors = configColors.curveColors;
+
+  // ── Resolve outer vs center colors from config (or fall back) ────────────
+  // curveColors layout: [outer0, outer1, ..., outerN, center]
+  // The center bracket is the last entry; all earlier ones are outer brackets.
+  const outerColors: Array<{ color: string; fillColor: string }> = configCurveColors
+    ? configCurveColors.slice(0, -1)          // all but last = outer
+    : FALLBACK_OUTER_COLORS;
+  const centerColor: { color: string; fillColor: string } = configCurveColors
+    ? (configCurveColors[configCurveColors.length - 1] ?? FALLBACK_CENTER_COLOR)
+    : FALLBACK_CENTER_COLOR;
+
   // Hide curves whenever any inner popup group (not 1–2 or 3–4) is open.
   const hideFromPopUps = popUpGroups.some(
     (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
@@ -426,9 +441,9 @@ export const SideCurves = ({
 
   // ── Compute brackets from group topology ─────────────────────────────────
   const brackets = useMemo(
-    () => computeBrackets(groups, layout, hasIntroOutro),
+    () => computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [groups, layout, hasIntroOutro],
+    [groups, layout, hasIntroOutro, outerColors, centerColor],
   );
 
   // ── Build control and tip X arrays dynamically ───────────────────────────

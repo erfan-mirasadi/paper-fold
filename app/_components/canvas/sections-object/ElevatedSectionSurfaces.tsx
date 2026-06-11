@@ -41,8 +41,6 @@ import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
   SECTION_BG_TEXTURE,
   S1_INNER_BORDER,
-  MAROON_THEME,
-  GREEN_THEME,
   S1_FRAME_BG_COLOR,
   S2_FRAME_BG_COLOR,
   S1_FRAME_IMAGE,
@@ -737,8 +735,8 @@ export function ElevatedSectionSurfaces() {
                 w={rc.w}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={MAROON_THEME}
-                sectionBgTexture={getTextureForColor(MAROON_THEME)}
+                color={config.styling.colors.s2Group1Bg}
+                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group1Bg)}
                 spring={s2TopSpring}
                 zOffset={0.0025}
                 renderOrder={3}
@@ -774,8 +772,8 @@ export function ElevatedSectionSurfaces() {
                 w={rc.w}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={GREEN_THEME}
-                sectionBgTexture={getTextureForColor(GREEN_THEME)}
+                color={config.styling.colors.s2Group2Bg}
+                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group2Bg)}
                 spring={s2CenterSpring}
                 zOffset={0.0025}
                 renderOrder={3}
@@ -831,8 +829,8 @@ export function ElevatedSectionSurfaces() {
                 w={rc.w}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={MAROON_THEME}
-                sectionBgTexture={getTextureForColor(MAROON_THEME)}
+                color={config.styling.colors.s2Group3Bg}
+                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group3Bg)}
                 spring={s2BottomSpring}
                 zOffset={0.0025}
                 renderOrder={3}
