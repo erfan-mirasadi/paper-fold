@@ -1,7 +1,40 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export function SiteLoadingOverlay() {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Block all scroll-related events at the window level (capture phase)
+  // so Lenis never receives them while this overlay is visible.
+  // Lenis listens on `window` so we must intercept there too, not just on the element.
+  useEffect(() => {
+    const block = (e: Event) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+
+    const blockKeys = (e: KeyboardEvent) => {
+      const scrollKeys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Home", "End"];
+      if (scrollKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    };
+
+    window.addEventListener("wheel", block, { passive: false, capture: true });
+    window.addEventListener("touchmove", block, { passive: false, capture: true });
+    window.addEventListener("touchstart", block, { passive: false, capture: true });
+    window.addEventListener("keydown", blockKeys, { passive: false, capture: true });
+
+    return () => {
+      window.removeEventListener("wheel", block, { capture: true });
+      window.removeEventListener("touchmove", block, { capture: true });
+      window.removeEventListener("touchstart", block, { capture: true });
+      window.removeEventListener("keydown", blockKeys, { capture: true });
+    };
+  }, []);
+
   const textColor = "rgba(241,246,255,0.96)";
   const glow = "rgba(210,228,255,0.35)";
 
@@ -12,6 +45,7 @@ export function SiteLoadingOverlay() {
 
   return (
     <motion.div
+      ref={overlayRef}
       key="loading-overlay"
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
@@ -37,6 +71,9 @@ export function SiteLoadingOverlay() {
         color: textColor,
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         willChange: "opacity, transform, filter",
+        // Make sure pointer events are active so our event listeners fire
+        pointerEvents: "all",
+        touchAction: "none",
       }}
     >
       <div

@@ -31,7 +31,7 @@ import JoinedStepOverlay from "@/app/_components/dom/JoinedStepOverlay";
 import { IntroBackgroundTextOverlay } from "@/app/_components/dom/IntroBackgroundTextOverlay";
 import { HeroTitleOverlay } from "@/app/_components/dom/ui-overlay/HeroTitleOverlay";
 import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButton";
-import { LenisProvider } from "@/app/_components/dom/LenisProvider";
+import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 
@@ -149,6 +149,70 @@ export default function SurahViewer() {
 
   return (
     <LenisProvider>
+      <SurahViewerInner
+        isSceneReady={isSceneReady}
+        canvasReady={canvasReady}
+        isMobile={isMobile}
+        showPostIntroUI={showPostIntroUI}
+        isIntroRenderPhase={isIntroRenderPhase}
+        mountMainOverlays={mountMainOverlays}
+        scrollPages={scrollPages}
+        canvasWrapperRef={canvasWrapperRef}
+        handleThemeToggle={handleThemeToggle}
+        handleSceneReady={handleSceneReady}
+      />
+    </LenisProvider>
+  );
+}
+
+interface InnerProps {
+  isSceneReady: boolean;
+  canvasReady: boolean;
+  isMobile: boolean;
+  showPostIntroUI: boolean;
+  isIntroRenderPhase: boolean;
+  mountMainOverlays: boolean;
+  scrollPages: number;
+  canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
+  handleThemeToggle: () => void;
+  handleSceneReady: () => void;
+}
+
+function SurahViewerInner({
+  isSceneReady,
+  canvasReady,
+  isMobile,
+  showPostIntroUI,
+  isIntroRenderPhase,
+  mountMainOverlays,
+  scrollPages,
+  canvasWrapperRef,
+  handleThemeToggle,
+  handleSceneReady,
+}: InnerProps) {
+  const lenis = useLenis();
+
+  // ── Lock scroll during loading so user cannot scroll before scene is ready ──
+  // Part 1: Immediately lock native scroll on mount (before Lenis is ready)
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  // Part 2: Mirror to Lenis when it becomes available, and unlock when ready
+  useEffect(() => {
+    if (!lenis) return;
+    if (!isSceneReady) {
+      lenis.stop();
+    } else {
+      lenis.start();
+      document.body.style.overflow = "";
+    }
+  }, [lenis, isSceneReady]);
+
+  return (
       <main
         style={{
           width: "100vw",
@@ -277,6 +341,5 @@ export default function SurahViewer() {
           </motion.div>
         )}
       </main>
-    </LenisProvider>
   );
 }
