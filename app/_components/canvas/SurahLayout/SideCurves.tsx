@@ -362,11 +362,11 @@ const CurvePair = ({
           renderOrder={5}
         />
       </group>
-      <mesh renderOrder={4}>
+      <mesh renderOrder={4} visible={activeFillColor !== "transparent" && activeFillColor !== "none"}>
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
           ref={fillMaterialRef}
-          color={activeFillColor}
+          color={activeFillColor !== "transparent" && activeFillColor !== "none" ? activeFillColor : "#ffffff"}
           transparent
           opacity={0.999}
           depthTest={false}

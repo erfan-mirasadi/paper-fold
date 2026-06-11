@@ -21,6 +21,11 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 // LAYOUT CONFIG
 // ---------------------------------------------------------------------------
 
+const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (Top and Bottom groups)
+const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
+const CENTER_GROUP_BG = "#CBE2EE"; // Blue/Grey (Middle group)
+const CENTER_GROUP_BORDER = "#7A9CAD"; // Lighter slate blue border
+
 export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "ayatalkursi",
   title: "Bakara 255",
@@ -60,11 +65,20 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   assets: {
     centerFlowerSvg: "/ayatalKursi/Flower.svg",
   },
-  verseOverrides: {},
+  verseOverrides: {
+    1: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
+    2: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
+    3: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
+    4: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
+    5: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
+    6: { border: CENTER_GROUP_BORDER, circleBorderCol: CENTER_GROUP_BORDER, circleBg: CENTER_GROUP_BG, circleTextCol: CENTER_GROUP_BORDER },
+    7: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
+    8: { border: OUTER_GROUP_BORDER, circleBorderCol: OUTER_GROUP_BORDER, circleBg: OUTER_GROUP_BG, circleTextCol: OUTER_GROUP_BORDER },
+  },
 
   styling: {
     colors: {
-      paperBase: "#E9E3CD",
+      paperBase: "#FAF7F2", // Lighter, creamy paper color for the background fill
       shadow: "#000000",
       backface: "#EDE8D6",
       textDark: "#333333",
@@ -80,15 +94,18 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       innerCard: "#eeeeee",
       sectionBgTexture: "#fcfcfc",
       hollowConnectorInnerBg: "#e3e3e3",
-      maroonTheme: "#7c8cb0",
-      greenTheme: "#5E7367",
+      maroonTheme: OUTER_GROUP_BG, // Yellow (Top and Bottom groups, since they are symmetrical)
+      greenTheme: CENTER_GROUP_BG, // Blue/Grey (Middle group)
       // The three group background colours echo the hand-drawn image:
-      //   top/bottom groups → warm yellow, middle group → soft pink
       s1InnerBorder: "#cccccc",
       s2IntroOutroBg: "#C4963B", // unused (no intro/outro verse)
-      s2Group1Bg: "#C9B882", // warm gold  — top group
-      s2Group2Bg: "#C78E8E", // dusty rose — middle (pushed-in)
-      s2Group3Bg: "#82B8A6", // sage green — bottom group
+      s2Group1Bg: OUTER_GROUP_BG, // yellow  — top group
+      s2Group2Bg: CENTER_GROUP_BG, // light blue/grey — middle (pushed-in)
+      s2Group3Bg: OUTER_GROUP_BG, // yellow — bottom group (symmetrical)
+      curveColors: [
+        { color: OUTER_GROUP_BORDER, fillColor: OUTER_GROUP_BG }, // Outer curves (top/bottom)
+        { color: CENTER_GROUP_BORDER, fillColor: CENTER_GROUP_BG }, // Center curves (middle)
+      ],
     },
     capsuleBorderWidth: 0.0039,
     circleBorderWidth: 0.0035,
