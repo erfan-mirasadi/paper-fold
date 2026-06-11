@@ -41,11 +41,19 @@ export function SectionZoomCamera() {
           if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
         } else if (section.type === "verticalGroups") {
           const s2 = section as VerticalGroupsSectionConfig;
-          if (s2.introVerse === vid) return `${s2.id}_top`;
-          if (s2.outroVerse === vid) return `${s2.id}_bottom`;
-          if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
-          if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
-          if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
+          if (s2.subCameraTargets) {
+            if (s2.introVerse === vid) return `${s2.id}_top`;
+            if (s2.outroVerse === vid) return `${s2.id}_bottom`;
+            if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
+            if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
+            if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
+          } else {
+            if (s2.introVerse === vid) return s2.id;
+            if (s2.outroVerse === vid) return s2.id;
+            for (const group of s2.groups || []) {
+              if (group.verseIds.includes(vid)) return s2.id;
+            }
+          }
         }
       }
       return null;

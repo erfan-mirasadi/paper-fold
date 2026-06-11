@@ -150,9 +150,9 @@ export function Experience({
           <>
             <ElevatedSectionSurfaces />
             <ElevatedSectionLabels />
-            {!isAllSectionsMode && <VerseClickHitboxes />}
           </>
         )}
+        {!isAllSectionsMode && <VerseClickHitboxes />}
         <VersesRenderer />
       </a.group>
 

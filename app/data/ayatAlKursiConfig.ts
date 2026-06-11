@@ -220,9 +220,9 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     {
       id: "section2",
       type: "verticalGroups",
-      backgroundTexture: "/ayatalKursi/frame-section.svg",
-      backgroundScaleX: 1,
-      backgroundScaleY: 1.1,
+      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
+      backgroundScaleX: 1.15,
+      backgroundScaleY: 1.25,
       // No topLabelKey / bottomLabelKey / introVerse / outroVerse — clean slate.
       groups: [
         // ── Top group: 2 verses side-by-side (NOT pushed in) ─────────────
@@ -250,11 +250,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           bgThemeKey: "s2Group3Bg",
         },
       ],
-      subCameraTargets: {
-        top: { y: 0.5, fov: 28, tilt: -1.2 },
-        center: { y: 0.0, fov: 32, tilt: -1.4 },
-        bottom: { y: -0.4, fov: 28, tilt: -1.2 },
-      },
+      cameraTarget: { y: 1.2, fov: 30, tilt: -1.2 },
     } as VerticalGroupsSectionConfig,
   ],
 
@@ -276,9 +272,9 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       {
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 0.93 },
+          { direction: 1, angleFactor: 0.4 },
           { direction: -1, angleFactor: 1 },
-          { direction: 0, angleFactor: 0.93 },
+          { direction: 1, angleFactor: 0.6 },
         ],
       },
       {
