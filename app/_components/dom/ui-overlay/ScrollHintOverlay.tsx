@@ -49,7 +49,7 @@ export const ScrollHintOverlay: React.FC = () => {
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center pointer-events-none"
         >
           <motion.span
-            className="tracking-[0.25em] text-[10px] font-medium uppercase mb-3 opacity-60"
+            className="mb-3 opacity-60 font-light font-(family-name:--font-fraunces) tracking-tight text-lg"
             style={{ 
               color: "var(--foreground)",
               textShadow: "0px 2px 10px rgba(0,0,0,0.15)"
@@ -57,7 +57,7 @@ export const ScrollHintOverlay: React.FC = () => {
             animate={{ opacity: [0.3, 0.8, 0.3] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           >
-            Aşağı Kaydır
+            Aşağı kaydır
           </motion.span>
 
           {/* Elegant animated line pointing down */}

@@ -51,10 +51,10 @@ export function SkipIntroButton() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             onClick={handleSkip}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] tracking-[0.25em] uppercase text-xs font-semibold px-8 py-4 text-[var(--foreground)]"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 text-[var(--foreground)] font-light font-(family-name:--font-fraunces) tracking-tight text-lg"
             style={{ WebkitTapHighlightColor: "transparent" }}
           >
-            Girişi Geç
+            Girişi geç
           </OverlayButton>
         )}
       </AnimatePresence>
