@@ -20,6 +20,7 @@ import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManage
 import { NavigationOverlay } from "@/app/_components/dom/ui-overlay/NavigationOverlay";
 import { TitleOverlay } from "@/app/_components/dom/ui-overlay/TitleOverlay";
 import { ThemeToggleOverlay } from "@/app/_components/dom/ui-overlay/ThemeToggleOverlay";
+import { HomeButtonOverlay } from "@/app/_components/dom/ui-overlay/HomeButtonOverlay";
 import { LanguageSwitchOverlay } from "@/app/_components/dom/ui-overlay/LanguageSwitchOverlay";
 import { AllSectionsOverlay } from "@/app/_components/dom/ui-overlay/AllSectionsOverlay";
 import { SiteLoadingOverlay } from "@/app/_components/dom/ui-overlay/SiteLoadingOverlay";
@@ -314,7 +315,8 @@ function SurahViewerInner({
               </>
             )}
 
-            <div className="fixed top-[clamp(16px,2vw,24px)] right-[clamp(16px,2vw,24px)] z-[100] flex flex-row-reverse md:flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none">
+            <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-[100] flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none">
+              <HomeButtonOverlay />
               <ThemeToggleOverlay onToggle={handleThemeToggle} />
               {mountMainOverlays && (
                 <AnimatePresence>
@@ -324,7 +326,7 @@ function SurahViewerInner({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.45, ease: "easeOut" }}
-                      className="flex flex-row-reverse md:flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none"
+                      className="flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none"
                     >
                       <LanguageSwitchOverlay />
                       <NavigationOverlay />

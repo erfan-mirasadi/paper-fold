@@ -22,14 +22,12 @@ export function TitleOverlay() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", stiffness: 170, damping: 22 }}
       className="overlay-panel"
-      onClick={() => router.push("/")}
       style={{
         position: "fixed",
         top: insetY,
         left: insetX,
         zIndex: 100,
         pointerEvents: "auto",
-        cursor: "pointer",
         height: buttonH,
         padding: `0 ${paddingX}`,
         borderRadius: radius,
