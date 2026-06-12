@@ -5,6 +5,7 @@ import {
   type CameraViewPreset,
   useCameraViewStore,
 } from "../../../stores/useCameraViewStore";
+import { OverlayButton } from "./OverlayButton";
 
 interface ViewItem {
   id: CameraViewPreset;
@@ -17,8 +18,6 @@ const VIEW_ITEMS: ViewItem[] = [
   { id: "right", label: "Sag" },
 ];
 
-// Global scale knob for the whole preset overlay (buttons + icons + labels).
-const CAMERA_PRESET_SCALE = 1.2;
 const PAPER_BORDER_STROKE = 1.05;
 
 function QuranTextMarks() {
@@ -47,7 +46,6 @@ function PaperIcon({
     <svg viewBox="0 0 28 20" width="18" height="14" aria-hidden="true">
       <g transform={mirror ? "translate(28 0) scale(-1 1)" : undefined}>
         <g transform={`translate(14 10) rotate(${angle}) translate(-14 -10)`}>
-          {/* rotate around center */}
           <rect
             x="9"
             y="1.5"
@@ -96,154 +94,33 @@ export function CameraViewPresetOverlay() {
   const isLocked = zoomPhase !== "idle";
 
   return (
-    <div className="camera-presets-root">
-      <div
-        className="camera-presets-shell"
-        role="group"
-        aria-label="Kamera gorunum secimi"
-      >
-        {VIEW_ITEMS.map((item) => {
-          const isActive = selectedView === item.id;
-          const isCenter = item.id === "default";
+    <div className="fixed left-[calc(var(--safe-left)+8px)] md:left-[calc(var(--safe-left)+10px)] bottom-[calc(var(--safe-bottom)+8px)] md:bottom-[calc(var(--safe-bottom)+10px)] z-[999993] pointer-events-none select-none origin-bottom-left scale-[1.116] md:scale-[1.2] flex flex-row items-center gap-2">
+      {VIEW_ITEMS.map((item) => {
+        const isActive = selectedView === item.id;
+        const isCenter = item.id === "default";
 
-          return (
-            <button
-              key={item.id}
-              type="button"
-              disabled={isLocked}
-              aria-pressed={isActive}
-              aria-label={`Kamera gorunum: ${item.label}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                requestView(item.id);
-              }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e) => e.stopPropagation()}
-              className={`camera-preset-btn ${isActive ? "is-active" : ""} ${isCenter ? "is-center" : ""}`}
-            >
-              <span className="camera-preset-icon" aria-hidden="true">
-                <PaperViewIcon preset={item.id} />
-              </span>
-              <span className="camera-preset-label">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <style jsx>{`
-        .camera-presets-root {
-          position: fixed;
-          left: calc(var(--safe-left) + 10px);
-          bottom: calc(var(--safe-bottom) + 10px);
-          z-index: 999993;
-          pointer-events: none;
-          user-select: none;
-          transform: scale(${CAMERA_PRESET_SCALE});
-          transform-origin: left bottom;
-        }
-
-        .camera-presets-shell {
-          pointer-events: auto;
-          display: grid;
-          grid-template-columns: repeat(3, minmax(66px, 1fr));
-          gap: 4px;
-          padding: 5px;
-          border-radius: 12px;
-          border: var(--overlay-border);
-          background: var(--overlay-bg);
-          box-shadow: var(--overlay-shadow);
-          backdrop-filter: blur(14px) saturate(124%);
-          -webkit-backdrop-filter: blur(14px) saturate(124%);
-        }
-
-        .camera-preset-btn {
-          position: relative;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 9px;
-          background: rgba(255, 255, 255, 0.2);
-          color: var(--overlay-text);
-          height: 42px;
-          padding: 0 4px;
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 2px;
-          font-family:
-            "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-          letter-spacing: 0.01em;
-          transition:
-            border-color 150ms ease,
-            box-shadow 150ms ease,
-            background 150ms ease;
-        }
-
-        .camera-preset-btn:disabled {
-          opacity: 0.55;
-          cursor: not-allowed;
-        }
-
-        .camera-preset-btn:not(:disabled):hover {
-          border-color: rgba(255, 255, 255, 0.52);
-          background: rgba(255, 255, 255, 0.28);
-        }
-
-        .camera-preset-btn.is-active {
-          border-color: rgba(255, 255, 255, 0.72);
-          color: var(--overlay-text);
-          background: var(--overlay-knob-bg);
-          box-shadow: var(--overlay-knob-shadow);
-        }
-
-        .camera-preset-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          line-height: 1;
-          opacity: 0.93;
-        }
-
-        .camera-preset-btn.is-center .camera-preset-icon {
-          transform: translateY(1px);
-        }
-
-        .camera-preset-label {
-          font-size: 9px;
-          font-weight: 600;
-          line-height: 1;
-          white-space: nowrap;
-        }
-
-        @media (max-width: 760px) {
-          .camera-presets-root {
-            left: calc(var(--safe-left) + 8px);
-            bottom: calc(var(--safe-bottom) + 8px);
-            transform: scale(${CAMERA_PRESET_SCALE * 0.93});
-          }
-
-          .camera-presets-shell {
-            grid-template-columns: repeat(3, minmax(56px, 1fr));
-            padding: 4px;
-            gap: 4px;
-            border-radius: 11px;
-          }
-
-          .camera-preset-btn {
-            height: 35px;
-            padding: 0 3px;
-            border-radius: 8px;
-          }
-
-          .camera-preset-icon {
-            transform: scale(0.88);
-          }
-
-          .camera-preset-label {
-            font-size: 8.5px;
-          }
-        }
-      `}</style>
+        return (
+          <OverlayButton
+            key={item.id}
+            disabled={isLocked}
+            isActive={isActive}
+            aria-pressed={isActive}
+            aria-label={`Kamera gorunum: ${item.label}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              requestView(item.id);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+            className={`flex flex-col items-center justify-center p-2 w-12 h-12 text-[var(--foreground)] ${isCenter ? "[&>span:first-child]:translate-y-[1px]" : ""}`}
+          >
+            <span className="inline-flex items-center justify-center leading-none scale-[0.88] md:scale-100" aria-hidden="true">
+              <PaperViewIcon preset={item.id} />
+            </span>
+            <span className="text-[8px] md:text-[9px] font-semibold leading-none whitespace-nowrap mt-1 uppercase tracking-wider">{item.label}</span>
+          </OverlayButton>
+        );
+      })}
     </div>
   );
 }

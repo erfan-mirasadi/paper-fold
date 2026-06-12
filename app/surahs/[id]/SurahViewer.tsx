@@ -314,8 +314,25 @@ function SurahViewerInner({
               </>
             )}
 
-            <div style={{ pointerEvents: "auto" }}>
+            <div className="fixed top-[clamp(16px,2vw,24px)] right-[clamp(16px,2vw,24px)] z-[100] flex flex-row-reverse md:flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none">
               <ThemeToggleOverlay onToggle={handleThemeToggle} />
+              {mountMainOverlays && (
+                <AnimatePresence>
+                  {showPostIntroUI && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
+                      className="flex flex-row-reverse md:flex-col items-center md:items-end gap-2 md:gap-3 pointer-events-none"
+                    >
+                      <LanguageSwitchOverlay />
+                      <NavigationOverlay />
+                      <AllSectionsOverlay />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
             </div>
 
             <SkipIntroButton />
@@ -330,10 +347,7 @@ function SurahViewerInner({
                     transition={{ duration: 0.45, ease: "easeOut" }}
                     style={{ pointerEvents: "auto", willChange: "opacity" }}
                   >
-                    <NavigationOverlay />
                     <TitleOverlay />
-                    <AllSectionsOverlay />
-                    <LanguageSwitchOverlay />
                     <CameraViewPresetOverlay />
                     <ScrollHintOverlay />
                   </motion.div>
