@@ -173,7 +173,7 @@ const NavButton = memo(function NavButton({
         {icon}
       </span>
       {label && (
-        <span className="text-[10px] font-semibold tracking-wider pointer-events-none uppercase text-[var(--foreground)]">
+        <span className="text-[10px] font-semibold tracking-wider pointer-events-none uppercase text-foreground">
           {label}
         </span>
       )}

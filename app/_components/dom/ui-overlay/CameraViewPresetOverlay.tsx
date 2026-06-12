@@ -45,7 +45,7 @@ export function CameraViewPresetOverlay() {
 
   return (
     <div
-      className="fixed left-[calc(var(--safe-left)+16px)] md:left-[calc(var(--safe-left)+24px)] bottom-[calc(var(--safe-bottom)+24px)] md:bottom-[calc(var(--safe-bottom)+32px)] z-[999993] w-[240px] h-[60px] text-[var(--foreground)]"
+      className="fixed left-[calc(var(--safe-left)+16px)] md:left-[calc(var(--safe-left)+24px)] bottom-[calc(var(--safe-bottom)+24px)] md:bottom-[calc(var(--safe-bottom)+32px)] z-999993 w-[240px] h-[60px] text-foreground"
       onPointerEnter={() => !isLocked && setIsHovered(true)}
       onPointerLeave={() => setIsHovered(false)}
       style={{ opacity: isLocked ? 0.4 : 1, transition: "opacity 0.3s" }}
@@ -77,7 +77,7 @@ export function CameraViewPresetOverlay() {
         dragElastic={0.1}
         dragMomentum={false}
         onDragEnd={handleDragEnd}
-        className="absolute top-0 left-1/2 -ml-[8px] w-4 h-4 rounded-full bg-[var(--foreground)] cursor-grab active:cursor-grabbing pointer-events-auto"
+        className="absolute top-0 left-1/2 -ml-[8px] w-4 h-4 rounded-full bg-foreground cursor-grab active:cursor-grabbing pointer-events-auto"
         whileHover={{ scale: 1.25 }}
         whileTap={{ scale: 0.9 }}
       />

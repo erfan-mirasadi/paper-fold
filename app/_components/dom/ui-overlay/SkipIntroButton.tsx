@@ -51,7 +51,7 @@ export function SkipIntroButton() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             onClick={handleSkip}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 text-[var(--foreground)] font-light font-(family-name:--font-fraunces) tracking-tight text-lg"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-100 px-8 py-4 text-foreground font-light font-(family-name:--font-fraunces) tracking-tight text-lg"
             style={{ WebkitTapHighlightColor: "transparent" }}
           >
             Girişi geç
@@ -66,7 +66,7 @@ export function SkipIntroButton() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="fixed inset-0 bg-[var(--page-bg)] z-[9999] pointer-events-none"
+            className="fixed inset-0 bg-(--page-bg) z-9999 pointer-events-none"
           />
         )}
       </AnimatePresence>

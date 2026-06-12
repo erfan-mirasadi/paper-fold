@@ -22,7 +22,7 @@ export function TitleOverlay() {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", stiffness: 170, damping: 22 }}
-      className="fixed z-[100] pointer-events-auto"
+      className="fixed z-100 pointer-events-auto"
       style={{
         top: insetY,
         left: insetX,

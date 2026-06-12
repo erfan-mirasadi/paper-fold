@@ -48,7 +48,7 @@ export function LanguageSwitchOverlay() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 -z-10 bg-black/10 backdrop-blur-[3px] dark:bg-black/30 dark:backdrop-blur-[4px]"
+            className="fixed inset-0 -z-10 bg-black/10 backdrop-blur-[3px] dark:bg-black/30 dark:backdrop-blur-sm"
             style={{ pointerEvents: "auto" }}
           />
         )}
@@ -63,7 +63,7 @@ export function LanguageSwitchOverlay() {
         <OverlayButton
           onClick={nextLanguage}
           aria-label="Dil degistir"
-          className="w-14 h-14 flex items-center justify-center text-[11px] font-bold tracking-widest uppercase text-[var(--foreground)]"
+          className="w-14 h-14 flex items-center justify-center text-[11px] font-bold tracking-widest uppercase text-foreground"
         >
           <AnimatePresence mode="wait">
             {isLoading ? (

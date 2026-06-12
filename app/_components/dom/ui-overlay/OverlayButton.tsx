@@ -64,7 +64,7 @@ export const OverlayButton = forwardRef<HTMLButtonElement, OverlayButtonProps>(
         {...props}
       >
         {/* Layer 1: Dimmed Base */}
-        <div className="opacity-30 transition-opacity duration-300 flex flex-col items-center justify-center w-full h-full">
+        <div className="opacity-100 dark:opacity-40 transition-opacity duration-300 flex flex-col items-center justify-center w-full h-full">
           {children}
         </div>
 
