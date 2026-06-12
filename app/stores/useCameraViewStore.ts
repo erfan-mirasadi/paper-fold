@@ -20,13 +20,17 @@ export const CAMERA_VIEW_POLAR_OFFSETS: Readonly<
 interface CameraViewState {
   requestedView: CameraViewPreset | null;
   selectedView: CameraViewPreset;
+  continuousOffset: number | null;
   requestView: (view: CameraViewPreset) => void;
+  setContinuousOffset: (offset: number | null) => void;
   clearRequest: () => void;
 }
 
 export const useCameraViewStore = create<CameraViewState>((set) => ({
   requestedView: null,
   selectedView: "default",
-  requestView: (view) => set({ requestedView: view, selectedView: view }),
-  clearRequest: () => set({ requestedView: null }),
+  continuousOffset: null,
+  requestView: (view) => set({ requestedView: view, selectedView: view, continuousOffset: null }),
+  setContinuousOffset: (offset) => set({ continuousOffset: offset, requestedView: null }),
+  clearRequest: () => set({ requestedView: null, continuousOffset: null }),
 }));

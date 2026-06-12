@@ -109,7 +109,8 @@ export function CameraViewController() {
     }
 
     const requestedView = cameraViewStore.requestedView;
-    if (!requestedView) return;
+    const continuousOffset = cameraViewStore.continuousOffset;
+    if (!requestedView && continuousOffset === null) return;
 
     const currentTheta = readAzimuth(state.camera.position, controls);
     const currentPolar = readPolar(state.camera.position, controls);
@@ -121,17 +122,37 @@ export function CameraViewController() {
       ? (controls.maxAzimuthAngle as number)
       : Infinity;
 
-    const targetTheta = MathUtils.clamp(
-      _initialAzimuth + CAMERA_VIEW_AZIMUTH_OFFSETS[requestedView],
-      minAzimuth,
-      maxAzimuth,
-    );
+    let targetTheta;
+    if (continuousOffset !== null) {
+      const maxRight = CAMERA_VIEW_AZIMUTH_OFFSETS["right"];
+      const maxLeft = CAMERA_VIEW_AZIMUTH_OFFSETS["left"];
+      const offset =
+        continuousOffset > 0
+          ? continuousOffset * maxRight
+          : continuousOffset * Math.abs(maxLeft);
+
+      targetTheta = MathUtils.clamp(
+        _initialAzimuth + offset,
+        minAzimuth,
+        maxAzimuth,
+      );
+    } else if (requestedView) {
+      targetTheta = MathUtils.clamp(
+        _initialAzimuth + CAMERA_VIEW_AZIMUTH_OFFSETS[requestedView],
+        minAzimuth,
+        maxAzimuth,
+      );
+    } else {
+      return;
+    }
 
     const diff = shortestDelta(currentTheta, targetTheta);
 
     if (Math.abs(diff) <= SNAP_EPSILON) {
       setOrbitAngles(controls, state.camera, targetTheta, currentPolar);
-      cameraViewStore.clearRequest();
+      if (requestedView) {
+        cameraViewStore.clearRequest();
+      }
       return;
     }
 
