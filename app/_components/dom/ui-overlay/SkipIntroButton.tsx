@@ -51,10 +51,33 @@ export function SkipIntroButton() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             onClick={handleSkip}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-100 px-8 py-4 text-foreground font-light font-(family-name:--font-fraunces) tracking-tight text-lg"
+            className="fixed bottom-12 left-1/2 -translate-x-1/2 z-100 group"
             style={{ WebkitTapHighlightColor: "transparent" }}
           >
-            Girişi geç
+            <div className="relative flex items-center justify-center px-12 py-3 rounded-full">
+              {/* Glassy Halo Effect (Blurred thick border) */}
+              <div 
+                className="absolute inset-[-1px] rounded-full border-[3px] border-foreground/20 blur-[3px] transition-all duration-500 group-hover:border-foreground/40 group-hover:blur-[4px]"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent, black 25%, black 75%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 25%, black 75%, transparent)',
+                }}
+              />
+
+              {/* Crisp Faded Border */}
+              <div 
+                className="absolute inset-0 rounded-full border border-foreground/40 transition-colors duration-500 group-hover:border-foreground/70"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent, black 20%, black 80%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 20%, black 80%, transparent)',
+                }}
+              />
+
+              {/* High Contrast Text */}
+              <span className="relative z-10 text-foreground font-medium font-(family-name:--font-fraunces) tracking-widest text-base drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_0_10px_rgba(0,0,0,0.8)] transition-transform duration-300 group-hover:scale-105">
+                Girişi geç
+              </span>
+            </div>
           </OverlayButton>
         )}
       </AnimatePresence>
