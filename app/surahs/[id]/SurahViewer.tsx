@@ -319,6 +319,7 @@ function SurahViewerInner({
           <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-100 flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none">
             <HomeButtonOverlay />
             <ThemeToggleOverlay onToggle={handleThemeToggle} />
+            <LanguageSwitchOverlay />
             {mountMainOverlays && (
               <AnimatePresence>
                 {showPostIntroUI && (
@@ -329,7 +330,6 @@ function SurahViewerInner({
                     transition={{ duration: 0.45, ease: "easeOut" }}
                     className="flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none"
                   >
-                    <LanguageSwitchOverlay />
                     <NavigationOverlay />
                     <AllSectionsOverlay />
                   </motion.div>

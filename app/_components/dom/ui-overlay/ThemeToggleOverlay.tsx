@@ -55,7 +55,18 @@ export function ThemeToggleOverlay({ onToggle }: ThemeToggleOverlayProps) {
   }, []);
 
   const handleToggle = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      if (typeof document !== "undefined") {
+        if (next) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+        window.dispatchEvent(new Event("themeChange"));
+      }
+      return next;
+    });
     if (onToggle) onToggle();
   };
 

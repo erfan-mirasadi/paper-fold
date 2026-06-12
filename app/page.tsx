@@ -8,6 +8,8 @@
 import type { Metadata } from "next";
 import { getAllSurahs } from "./data/surahDatabase";
 import { SurahCard, type SurahCardData } from "./_components/dom/SurahCard";
+import { ThemeToggleOverlay } from "./_components/dom/ui-overlay/ThemeToggleOverlay";
+import { LanguageSwitchOverlay } from "./_components/dom/ui-overlay/LanguageSwitchOverlay";
 
 export const metadata: Metadata = {
   title: "Quran Patterns",
@@ -33,6 +35,11 @@ export default function MenuPage() {
         overflow: "hidden",
       }}
     >
+      <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-[100] flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none">
+        <ThemeToggleOverlay />
+        <LanguageSwitchOverlay />
+      </div>
+
       {/* ── Ambient background glow ── */}
       <div
         aria-hidden="true"
@@ -49,7 +56,7 @@ export default function MenuPage() {
       <header
         style={{ textAlign: "center", marginBottom: "3.5rem", zIndex: 1 }}
       >
-        <p
+        {/* <p
           style={{
             fontFamily: "var(--font-cormorant), serif",
             fontSize: "clamp(1.1rem, 3vw, 1.5rem)",
@@ -61,7 +68,7 @@ export default function MenuPage() {
           aria-hidden="true"
         >
           ﷽
-        </p>
+        </p> */}
 
         <h1
           style={{
