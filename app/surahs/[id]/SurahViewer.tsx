@@ -31,6 +31,7 @@ import JoinedStepOverlay from "@/app/_components/dom/JoinedStepOverlay";
 import { IntroBackgroundTextOverlay } from "@/app/_components/dom/IntroBackgroundTextOverlay";
 import { HeroTitleOverlay } from "@/app/_components/dom/ui-overlay/HeroTitleOverlay";
 import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButton";
+import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOverlay";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
@@ -334,6 +335,7 @@ function SurahViewerInner({
                     <AllSectionsOverlay />
                     <LanguageSwitchOverlay />
                     <CameraViewPresetOverlay />
+                    <ScrollHintOverlay />
                   </motion.div>
                 )}
               </AnimatePresence>
