@@ -118,16 +118,28 @@ export function SectionZoomCamera() {
     // 4. Smoothly interpolate camera position and target
     // IMPORTANT: We only control Y-height and FOV.
     // X and Z are owned by OrbitControls (azimuth rotation) — do NOT lerp them.
-    camera.position.y += (targetCamY - camera.position.y) * 0.05;
+    const lerpFactor = 0.025; // Lower = smoother/slower zoom
+    const threshold = 0.001;
+
+    const yDiff = targetCamY - camera.position.y;
+    if (Math.abs(yDiff) > threshold) {
+      camera.position.y += yDiff * lerpFactor;
+    }
 
     const currentFov = (camera as any).fov;
     if (currentFov !== undefined) {
-      (camera as any).fov += (targetFov - currentFov) * 0.05;
-      camera.updateProjectionMatrix();
+      const fovDiff = targetFov - currentFov;
+      if (Math.abs(fovDiff) > threshold) {
+        (camera as any).fov += fovDiff * lerpFactor;
+        camera.updateProjectionMatrix();
+      }
     }
 
     if (controls?.target) {
-      controls.target.y += (lookAtY - controls.target.y) * 0.05;
+      const targetYDiff = lookAtY - controls.target.y;
+      if (Math.abs(targetYDiff) > threshold) {
+        controls.target.y += targetYDiff * lerpFactor;
+      }
       // Do NOT call controls.update() here — CameraViewController owns the
       // camera orientation each frame. Calling controls.update() here would
       // fight its azimuth positioning and cause jitter/resets.
