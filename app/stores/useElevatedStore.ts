@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { getActiveStoryConfig } from "./useStoryStore";
-import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
+import { GridSectionConfig, VerticalGroupsSectionConfig, SurahLayoutConfig } from "../data/schema";
 
 export type ElevatedPhase = "idle" | "elevated";
 export type ElevatedSectionId = string;
