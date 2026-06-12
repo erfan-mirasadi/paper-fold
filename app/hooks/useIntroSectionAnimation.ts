@@ -29,15 +29,22 @@ const deg = (d: number): number => (d * Math.PI) / 180;
 // ─── Lazy ID accessors ────────────────────────────────────────────────────
 // Section IDs are read lazily (at call-time) so module evaluation never
 // crashes when the active config has fewer than 2 sections (e.g. Ayat al-Kursi).
-const getS1Id = (): string => getActiveStoryConfig().sections[0]?.id ?? "section1";
-const getS2Id = (): string => getActiveStoryConfig().sections[1]?.id ?? "section2";
-const getS2TopId    = (): string => `${getS2Id()}_top`;
+const getS1Id = (): string =>
+  getActiveStoryConfig().sections[0]?.id ?? "section1";
+const getS2Id = (): string =>
+  getActiveStoryConfig().sections[1]?.id ?? "section2";
+const getS2TopId = (): string => `${getS2Id()}_top`;
 const getS2CenterId = (): string => `${getS2Id()}_center`;
-const getS2BotId    = (): string => `${getS2Id()}_bottom`;
+const getS2BotId = (): string => `${getS2Id()}_bottom`;
 
 /** Returns the four canonical ElevatedSectionIds for the current config. */
 function getSessionIds(): ElevatedSectionId[] {
-  return [getS1Id(), getS2TopId(), getS2CenterId(), getS2BotId()] as ElevatedSectionId[];
+  return [
+    getS1Id(),
+    getS2TopId(),
+    getS2CenterId(),
+    getS2BotId(),
+  ] as ElevatedSectionId[];
 }
 
 // ─── Scatter: [x, y, z, rx°, ry°, rz°] ─────────────────────────────────
@@ -55,16 +62,22 @@ function getIntroSectionScatter(): Record<
   const s2b = getS2BotId();
   return {
     //     x      y      z      rx(°)    ry(°)    rz(°)
-    [s1]:  [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
+    [s1]: [0.82, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
     [s2t]: [0, -0.6, -0.4],
     [s2c]: [0.06, -0.55, -1.2],
     [s2b]: [0, -0.63, 0.5],
-  } as Record<ElevatedSectionId, [number, number, number, number?, number?, number?]>;
+  } as Record<
+    ElevatedSectionId,
+    [number, number, number, number?, number?, number?]
+  >;
 }
 
 /** Public export kept for backwards compat — reads lazily. */
 export const INTRO_SECTION_SCATTER = new Proxy(
-  {} as Record<ElevatedSectionId, [number, number, number, number?, number?, number?]>,
+  {} as Record<
+    ElevatedSectionId,
+    [number, number, number, number?, number?, number?]
+  >,
   { get: (_t, key) => getIntroSectionScatter()[key as ElevatedSectionId] },
 );
 
@@ -101,15 +114,21 @@ function getHandoffSectionTarget(): Record<
   const s2c = getS2CenterId();
   const s2b = getS2BotId();
   return {
-    [s1]:  { x: 0, y: 0, z: 0, scale: 1 },
-    [s2t]: { x: 0, y: 0.5, z: -0.5,  scale: 0.85 },
-    [s2c]: { x: 0, y: 0.8, z: -1.0,  scale: 0.85 },
-    [s2b]: { x: 0, y: 1.3, z: -1.5,  scale: 0.85 },
-  } as Record<ElevatedSectionId, { x: number; y: number; z: number; scale: number }>;
+    [s1]: { x: 0, y: 0, z: 0, scale: 1 },
+    [s2t]: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
+    [s2c]: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
+    [s2b]: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
+  } as Record<
+    ElevatedSectionId,
+    { x: number; y: number; z: number; scale: number }
+  >;
 }
 
 export const HANDOFF_SECTION_TARGET = new Proxy(
-  {} as Record<ElevatedSectionId, { x: number; y: number; z: number; scale: number }>,
+  {} as Record<
+    ElevatedSectionId,
+    { x: number; y: number; z: number; scale: number }
+  >,
   { get: (_t, key) => getHandoffSectionTarget()[key as ElevatedSectionId] },
 );
 
@@ -379,7 +398,7 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
     if (!_registeredGroups[sectionId]) {
       _registeredGroups[sectionId] = new Set();
     }
-    
+
     // Register this group ref so the controller can write transforms to it
     _registeredGroups[sectionId].add(groupRef);
 
