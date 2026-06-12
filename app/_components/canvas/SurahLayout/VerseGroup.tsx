@@ -7,6 +7,7 @@ import type {
   RowConnectorTransform,
 } from "../../../data/schema";
 import { useStoryStore } from "../../../stores/useStoryStore";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 interface VerseGroupProps {
   group: ColorGroup;
@@ -23,6 +24,12 @@ export function VerseGroup({
 }: VerseGroupProps) {
   const gt = groupTransform;
   const config = useStoryStore((state) => state.activeConfig);
+  const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
+
+  let finalVerseTextScale = layout?.verseTextScale;
+  if (config.id === "ayatalkursi" && activeLanguage !== "ar") {
+    finalVerseTextScale = undefined;
+  }
 
   // ── Group-level fallback border color from config.styling.colors ──────────
   // isCenter groups use the green theme key; outer groups use the maroon theme key.
@@ -143,7 +150,7 @@ export function VerseGroup({
             circleBg={finalCircleBg}
             circleTextCol={finalCircleText}
             isPill={true}
-            textScaleOverride={layout?.verseTextScale}
+            textScaleOverride={finalVerseTextScale}
           />
         );
       })}

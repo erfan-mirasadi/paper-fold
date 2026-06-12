@@ -406,8 +406,8 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "" },
-          { number: 1, text: "" },
+          { number: 2, text: "Neither drowsiness overtakes Him nor sleep." },
+          { number: 1, text: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence." },
         ],
       },
       {
@@ -415,10 +415,10 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "" },
-          { number: 3, text: "" },
-          { number: 6, text: "" },
-          { number: 5, text: "" },
+          { number: 4, text: "Who is it that can intercede with Him except by His permission?" },
+          { number: 3, text: "To Him belongs whatever is in the heavens and whatever is on the earth." },
+          { number: 6, text: "and they encompass not a thing of His knowledge except for what He wills." },
+          { number: 5, text: "He knows what is [presently] before them and what will be after them," },
         ],
       },
       {
@@ -426,8 +426,8 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "" },
-          { number: 7, text: "" },
+          { number: 8, text: "and their preservation tires Him not. And He is the Most High, the Most Great." },
+          { number: 7, text: "His Kursi extends over the heavens and the earth," },
         ],
       },
     ],
@@ -456,8 +456,8 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "" },
-          { number: 1, text: "" },
+          { number: 2, text: "O'nu ne bir uyuklama tutabilir, ne de bir uyku." },
+          { number: 1, text: "Allah, kendisinden başka hiçbir ilâh bulunmayandır. Diridir, kayyumdur." },
         ],
       },
       {
@@ -465,10 +465,10 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "" },
-          { number: 3, text: "" },
-          { number: 6, text: "" },
-          { number: 5, text: "" },
+          { number: 4, text: "İzni olmaksızın O'nun katında şefaatte bulunacak kimdir?" },
+          { number: 3, text: "Göklerdeki her şey, yerdeki her şey O'nundur." },
+          { number: 6, text: "Onlar O'nun ilminden, kendisinin dilediği kadarından başka bir şey kavrayamazlar." },
+          { number: 5, text: "O, kullarının önlerindekileri ve arkalarındakileri bilir." },
         ],
       },
       {
@@ -476,8 +476,8 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "" },
-          { number: 7, text: "" },
+          { number: 8, text: "Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, yücedir, büyüktür." },
+          { number: 7, text: "O'nun kürsüsü bütün gökleri ve yeri kaplayıp kuşatmıştır." },
         ],
       },
     ],

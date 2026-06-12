@@ -23,6 +23,7 @@ import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { useHandoffOpacity } from "../sections-object/ElevatedSectionSurfaces";
 import { VerseConfig } from "../../../data/surahDataGenerator";
 import { VerseMesh } from "./VerseMesh";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 const SECTION_SURFACE_SHADOW_MOTION = {
   liftHeight: SECTION_ELEVATION_HEIGHT,
@@ -75,6 +76,12 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const S2_CENTER_ID = `${S2_ID}_center`;
   
   const runtime = useSurahLayoutRuntime();
+  const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
+  
+  let finalVerseTextScale = runtime.layoutMath.verseTextScale;
+  if (activeStoryConfig.id === "ayatalkursi" && activeLanguage !== "ar") {
+    finalVerseTextScale = undefined; // Drop scaling for translations so it uses smaller defaults
+  }
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
@@ -288,7 +295,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
           textColor={config.textColor}
-          textScaleOverride={runtime.layoutMath.verseTextScale}
+          textScaleOverride={finalVerseTextScale}
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
           customFrameSvg={config.customFrameSvg}
