@@ -44,44 +44,10 @@ const isMiddleHorizontalFoldedForVerse = (
   return false;
 };
 
-// Calculate MAX_VERSE_ID and TOTAL_SECTIONS dynamically at module load
-let _maxVerseId = 0;
-let _totalSections = 0;
-const verseColorKeys = new Array<keyof ThemeColors | undefined>(200);
-const verseIsSection1 = new Array<boolean>(200).fill(false);
-
-getActiveStoryConfig().sections.forEach((sec) => {
-  if (sec.type === "gridWithAnaAyet") {
-    _totalSections += 1;
-    const g = sec as GridSectionConfig;
-    _maxVerseId = Math.max(_maxVerseId, ...g.verses, g.anaAyet);
-    g.verses.forEach((v) => {
-      verseColorKeys[v] = g.bgThemeKey;
-      verseIsSection1[v] = true;
-    });
-    verseColorKeys[g.anaAyet] = g.bgThemeKey;
-    verseIsSection1[g.anaAyet] = true;
-  } else if (sec.type === "verticalGroups") {
-    _totalSections += 3;
-    const v = sec as VerticalGroupsSectionConfig;
-    if (v.introVerse) {
-      _maxVerseId = Math.max(_maxVerseId, v.introVerse);
-      verseColorKeys[v.introVerse] = v.introOutroBgThemeKey;
-    }
-    if (v.outroVerse) {
-      _maxVerseId = Math.max(_maxVerseId, v.outroVerse);
-      verseColorKeys[v.outroVerse] = v.introOutroBgThemeKey;
-    }
-    v.groups.forEach((g) => {
-      _maxVerseId = Math.max(_maxVerseId, ...g.verseIds);
-      g.verseIds.forEach((vId) => (verseColorKeys[vId] = g.bgThemeKey));
-    });
-  }
-});
-
-const MAX_VERSE_ID = _maxVerseId;
+// Maximum bounds for shader arrays to support any surah without recompiling
+const MAX_VERSE_ID = 100;
 const VERSE_ARR_SIZE = MAX_VERSE_ID + 1;
-const TOTAL_SECTIONS = _totalSections;
+const TOTAL_SECTIONS = 10;
 
 export function usePaperMasking(paperTextureDiffuse: Texture) {
   const { PAGE_WIDTH, PAGE_HEIGHT, SURAH_TRANSFORMS, FOLD_Y_POSITIONS } =
@@ -194,6 +160,28 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           sRects[secIdx * 4 + 3] =
             FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
           secIdx++;
+        }
+      });
+
+      const verseColorKeys = new Array<keyof ThemeColors | undefined>(VERSE_ARR_SIZE);
+      const verseIsSection1 = new Array<boolean>(VERSE_ARR_SIZE).fill(false);
+
+      activeConfig.sections.forEach((sec) => {
+        if (sec.type === "gridWithAnaAyet") {
+          const g = sec as GridSectionConfig;
+          g.verses.forEach((v) => {
+            verseColorKeys[v] = g.bgThemeKey;
+            verseIsSection1[v] = true;
+          });
+          verseColorKeys[g.anaAyet] = g.bgThemeKey;
+          verseIsSection1[g.anaAyet] = true;
+        } else if (sec.type === "verticalGroups") {
+          const v = sec as VerticalGroupsSectionConfig;
+          if (v.introVerse) verseColorKeys[v.introVerse] = v.introOutroBgThemeKey;
+          if (v.outroVerse) verseColorKeys[v.outroVerse] = v.introOutroBgThemeKey;
+          v.groups.forEach((g) => {
+            g.verseIds.forEach((vId) => (verseColorKeys[vId] = g.bgThemeKey));
+          });
         }
       });
 
@@ -323,6 +311,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     const isIntroActive = useFoldStore.getState().isIntroActive;
     const currentOffset = useFoldStore.getState().currentOffset;
     const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;
+
+    uniforms.uVerseVisibility.value.fill(1.0);
+    uniforms.uSectionVisibility.value.fill(1.0);
 
     for (let i = 1; i <= MAX_VERSE_ID; i++) {
       let hidden = !isFoldedMainPaper && e.activeVerseIds.includes(i);

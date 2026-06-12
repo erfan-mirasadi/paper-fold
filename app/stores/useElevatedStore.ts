@@ -10,39 +10,59 @@ export const ELEVATED_SCROLL_UNLOCK_THRESHOLD = 0.9;
 /** Delay used to sync base section reappearance with elevated return animation. */
 export const ELEVATED_RETURN_SYNC_MS = 480;
 
-const SECTION_VERSE_IDS: Record<string, number[]> = {};
-const SECTION_PRIORITY: string[] = [];
+let SECTION_VERSE_IDS: Record<string, number[]> = {};
+let SECTION_PRIORITY: string[] = [];
+let ALL_ELEVATED_VERSE_IDS: number[] = [];
 
-getActiveStoryConfig().sections.forEach((section) => {
-  if (section.type === "gridWithAnaAyet") {
-    const s1 = section as GridSectionConfig;
-    const id = s1.id;
-    SECTION_PRIORITY.push(id);
-    SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
-  } else if (section.type === "verticalGroups") {
-    const s2 = section as VerticalGroupsSectionConfig;
-    const topId = `${s2.id}_top`;
-    const centerId = `${s2.id}_center`;
-    const bottomId = `${s2.id}_bottom`;
-    
-    SECTION_PRIORITY.push(topId, centerId, bottomId);
-    
-    SECTION_VERSE_IDS[topId] = [];
-    if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
-    if (s2.groups[0]) SECTION_VERSE_IDS[topId].push(...s2.groups[0].verseIds);
+export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
+  SECTION_VERSE_IDS = {};
+  SECTION_PRIORITY = [];
 
-    SECTION_VERSE_IDS[centerId] = [];
-    if (s2.groups[1]) SECTION_VERSE_IDS[centerId].push(...s2.groups[1].verseIds);
+  config.sections.forEach((section: any) => {
+    if (section.type === "gridWithAnaAyet") {
+      const s1 = section as GridSectionConfig;
+      const id = s1.id;
+      SECTION_PRIORITY.push(id);
+      SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
+    } else if (section.type === "verticalGroups") {
+      const s2 = section as VerticalGroupsSectionConfig;
+      const topId = `${s2.id}_top`;
+      const centerId = `${s2.id}_center`;
+      const bottomId = `${s2.id}_bottom`;
+      
+      SECTION_PRIORITY.push(topId, centerId, bottomId);
+      
+      SECTION_VERSE_IDS[topId] = [];
+      if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
+      if (s2.groups[0]) SECTION_VERSE_IDS[topId].push(...s2.groups[0].verseIds);
 
-    SECTION_VERSE_IDS[bottomId] = [];
-    if (s2.groups[2]) SECTION_VERSE_IDS[bottomId].push(...s2.groups[2].verseIds);
-    if (s2.outroVerse) SECTION_VERSE_IDS[bottomId].push(s2.outroVerse);
+      SECTION_VERSE_IDS[centerId] = [];
+      if (s2.groups[1]) SECTION_VERSE_IDS[centerId].push(...s2.groups[1].verseIds);
+
+      SECTION_VERSE_IDS[bottomId] = [];
+      if (s2.groups[2]) SECTION_VERSE_IDS[bottomId].push(...s2.groups[2].verseIds);
+      if (s2.outroVerse) SECTION_VERSE_IDS[bottomId].push(s2.outroVerse);
+    }
+  });
+
+  ALL_ELEVATED_VERSE_IDS = SECTION_PRIORITY.flatMap(
+    (sectionId) => SECTION_VERSE_IDS[sectionId],
+  );
+
+  // Reset store if it's already created
+  if (useElevatedStore) {
+    useElevatedStore.setState({
+      activeVerseId: null,
+      activeVerseIds: [],
+      activeSectionId: null,
+      activeSectionIds: [],
+      isAllSectionsMode: false,
+      hasEverElevated: false,
+      phase: "idle",
+      unlockedVerseIds: ALL_ELEVATED_VERSE_IDS,
+    });
   }
-});
-
-const ALL_ELEVATED_VERSE_IDS = SECTION_PRIORITY.flatMap(
-  (sectionId) => SECTION_VERSE_IDS[sectionId],
-);
+}
 
 function normalizeVerseIds(verseIds: number[]): number[] {
   return Array.from(new Set(verseIds)).sort((a, b) => a - b);
@@ -306,3 +326,6 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     });
   },
 }));
+
+// Initial setup
+initElevatedStoreForStory(getActiveStoryConfig());

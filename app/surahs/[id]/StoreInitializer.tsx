@@ -21,6 +21,11 @@ import { useRef } from "react";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { getSurahData } from "@/app/data/surahDatabase";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
+import { initElevatedStoreForStory } from "@/app/stores/useElevatedStore";
+import { useCameraStore } from "@/app/stores/useCameraStore";
+import { useCameraViewStore } from "@/app/stores/useCameraViewStore";
+import { useTafsirStore } from "@/app/stores/useTafsirStore";
+import { usePopUpStore } from "@/app/stores/usePopUpStore";
 
 interface StoreInitializerProps {
   /** The Surah route id — the ONLY prop that crosses the RSC boundary. */
@@ -41,6 +46,12 @@ export function StoreInitializer({ id }: StoreInitializerProps): null {
       // which would cause "Cannot update a component while rendering" warnings.
       useStoryStore.getState().setActiveStory(entry.config, entry.textData);
       useFoldStore.getState().resetForStory(entry.config);
+      initElevatedStoreForStory(entry.config);
+
+      useCameraStore.setState({ activeVerseId: null, cameraTarget: null, phase: "idle" });
+      useCameraViewStore.setState({ requestedView: null, selectedView: "default", continuousOffset: null });
+      useTafsirStore.setState({ tafsirActiveId: null, tafsirAnchorPos: { x: -9999, y: -9999 } });
+      usePopUpStore.getState().reset();
     }
 
     initialized.current = true;

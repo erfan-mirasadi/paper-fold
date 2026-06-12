@@ -41,6 +41,7 @@ interface PopUpStoreState {
   ) => void;
   handleHoverScroll: (direction: "down" | "up") => void;
   syncScrollOffset: (offset: number) => void;
+  reset: () => void;
 }
 
 export function getUnlockedPopUpGroups(offset: number): string[] {
@@ -254,5 +255,15 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
           ? state.hoveredMiddleColumn
           : null,
       };
+    }),
+
+  reset: () =>
+    set({
+      popUpGroups: INITIAL_POPUP_GROUPS,
+      popUpAllOpen: false,
+      unlockedGroupIds: getUnlockedPopUpGroups(0),
+      middleHorizontalFolded: null,
+      hoveredGroupId: null,
+      hoveredMiddleColumn: null,
     }),
 }));

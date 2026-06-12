@@ -23,13 +23,27 @@ export function SectionZoomCamera() {
         }
       } else if (section.type === "verticalGroups") {
         const s2 = section as VerticalGroupsSectionConfig;
+        const defaultTarget = s2.cameraTarget;
+        
         if (s2.subCameraTargets) {
-          if (s2.subCameraTargets.top) zoomTargets[`${s2.id}_top`] = s2.subCameraTargets.top;
-          if (s2.subCameraTargets.center) zoomTargets[`${s2.id}_center`] = s2.subCameraTargets.center;
-          if (s2.subCameraTargets.bottom) zoomTargets[`${s2.id}_bottom`] = s2.subCameraTargets.bottom;
+          if (s2.subCameraTargets.top || defaultTarget) {
+            zoomTargets[`${s2.id}_top`] = (s2.subCameraTargets.top ?? defaultTarget)!;
+          }
+          if (s2.subCameraTargets.center || defaultTarget) {
+            zoomTargets[`${s2.id}_center`] = (s2.subCameraTargets.center ?? defaultTarget)!;
+          }
+          if (s2.subCameraTargets.bottom || defaultTarget) {
+            zoomTargets[`${s2.id}_bottom`] = (s2.subCameraTargets.bottom ?? defaultTarget)!;
+          }
+        } else if (defaultTarget) {
+          // Fallback to section's main camera target if no sub targets are defined
+          zoomTargets[`${s2.id}_top`] = defaultTarget;
+          zoomTargets[`${s2.id}_center`] = defaultTarget;
+          zoomTargets[`${s2.id}_bottom`] = defaultTarget;
         }
-        if (s2.cameraTarget) {
-          zoomTargets[s2.id] = s2.cameraTarget;
+        
+        if (defaultTarget) {
+          zoomTargets[s2.id] = defaultTarget;
         }
       }
     });

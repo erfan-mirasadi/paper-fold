@@ -149,9 +149,10 @@ export function ScrollManager() {
   useEffect(() => {
     // Reset fold store state when config changes (e.g. story switch)
     useFoldStore.getState().resetForStory(runtime.config);
-    // Also scroll to top seamlessly
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
+      // Force store to 0 immediately so we don't render 1 frame with the old scroll position.
+      useFoldStore.setState({ currentOffset: 0, rawOffset: 0 });
     }
   }, [runtime.config, lenis]);
 
