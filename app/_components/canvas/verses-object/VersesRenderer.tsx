@@ -1,23 +1,25 @@
-import { VerseFiveMetallic } from "../SurahLayout/VerseFiveMetallic";
 import { PopUpHoverSensors } from "../pop-up-verses/PopUpHoverSensors";
 import { VerseController } from "./VerseController";
 import { buildVerseConfigs } from "../../../data/surahDataGenerator";
 import {
-  SURAH_DATA_BY_LANGUAGE,
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import { useMemo } from "react";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 
+
 export function VersesRenderer() {
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const surahData = SURAH_DATA_BY_LANGUAGE[activeLanguage];
+  const activeTextData = useStoryStore((s) => s.activeTextData);
+  const surahData = activeTextData[activeLanguage];
+  const arabicData = activeTextData["ar"];
   const verseConfigs = useMemo(
-    () => buildVerseConfigs(surahData, runtime),
-    [surahData, runtime],
+    () => buildVerseConfigs(surahData, arabicData, runtime),
+    [surahData, arabicData, runtime],
   );
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
@@ -37,8 +39,6 @@ export function VersesRenderer() {
         setHoveredGroupId={setHoveredGroupId}
       />
 
-      {/* Static Metallic Verse 5 */}
-      <VerseFiveMetallic />
     </group>
   );
 }

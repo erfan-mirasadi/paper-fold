@@ -14,7 +14,7 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../sections-object/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../sections-object/ElevatedSectionLabels";
 import { useDragState } from "../../../utils/dragEngine";
-import { CAMERA_CONFIG, INTRO_CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { VerseClickHitboxes } from "../verses-object/VerseClickHitboxes";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { IntroExperience } from "../intro/IntroExperience";
@@ -22,6 +22,7 @@ import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollCo
 import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
 import { SectionZoomCamera } from "../orchestrator/SectionZoomCamera";
+import { useStoryStore } from "../../../stores/useStoryStore";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -33,8 +34,10 @@ export function Experience({
   onReady,
 }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const config = useStoryStore((state) => state.activeConfig);
+  const hasIntro = config.features.hasIntro;
   // Only show up to the point where ambient media ends (rawOffset ~0.34)
-  const showSpotlight = useFoldStore((s) => s.rawOffset < 0.37);
+  const showSpotlight = useFoldStore((s) => hasIntro && s.rawOffset < 0.37);
   const { gl, scene, camera } = useThree();
 
   // We track paper readiness
@@ -122,7 +125,7 @@ export function Experience({
         position={CAMERA_CONFIG.initialCamera.position}
         fov={CAMERA_CONFIG.initialCamera.fov}
       />
-      <IntroCameraScrollController />
+      {hasIntro && <IntroCameraScrollController />}
       <SectionZoomCamera />
       <a.group
         rotation-x={-Math.PI / 4}
@@ -143,15 +146,19 @@ export function Experience({
             onReady={handlePaperReady}
           />
         </a.group>
-        <ElevatedSectionSurfaces />
-        <ElevatedSectionLabels />
-        <VersesRenderer />
+        {config.features.hasElevatedSections && (
+          <>
+            <ElevatedSectionSurfaces />
+            <ElevatedSectionLabels />
+          </>
+        )}
         {!isAllSectionsMode && <VerseClickHitboxes />}
+        <VersesRenderer />
       </a.group>
 
       {/* Single centralized controller for all intro section animations.
           Replaces ~28 individual useFrame callbacks with 1. */}
-      <IntroSectionAnimationController />
+      {hasIntro && <IntroSectionAnimationController />}
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
         <planeGeometry args={[50, 50]} />
@@ -159,7 +166,7 @@ export function Experience({
       </mesh>
 
       {/* Imported the dedicated IntroExperience component */}
-      <IntroExperience />
+      {hasIntro && <IntroExperience />}
 
       <DynamicControls />
       <Environment preset="apartment" />
@@ -190,8 +197,10 @@ export function Experience({
 function DynamicControls() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
+  const config = useStoryStore((state) => state.activeConfig);
+
   const enableInteractions = isIntroActive
-    ? INTRO_CAMERA_CONFIG.allowOrbit
+    ? (config.animations.introCamera?.allowOrbit ?? false)
     : false;
 
   const minAzimuthAngle = isIntroActive

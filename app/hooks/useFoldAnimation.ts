@@ -39,7 +39,7 @@ export const SHADOW_CONFIG = {
   shrinkY: 0.2,
   elevateScaleX: 1.14,
   elevateScaleY: 1.1,
-  elevateOpacityFalloff: 1.7,
+  elevateOpacityFalloff: 3.5,
 
   opacityFlat: 0.6,
   opacityFolded: 0.05,

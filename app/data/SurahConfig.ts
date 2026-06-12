@@ -1,4 +1,30 @@
+import {
+  SurahLayoutConfig,
+  SectionConfig,
+  GridSectionConfig,
+  VerticalGroupsSectionConfig,
+} from "./schema";
+import type {
+  ElementTransform,
+  GroupTransforms,
+  RowConnectorTransform,
+  SectionTransforms,
+} from "./schema";
 import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
+import {
+  S1_VERSE_NUMBER_BG,
+  S1_VERSE_NUMBER_BORDER,
+  S1_VERSE_NUMBER_TEXT,
+  S1_VERSE_5_TEXT,
+  BLUE_THEME,
+  MAROON_THEME,
+  GREEN_THEME,
+  CAPSULE_BG_6_19,
+  CAPSULE_BG_7_8_17_18,
+  CAPSULE_BG_9_10_15_16,
+  CAPSULE_BG_12_14,
+  S2_VERSE_NUMBER_TEXT,
+} from "./theme";
 
 export interface Verse {
   number: number;
@@ -7,25 +33,9 @@ export interface Verse {
 
 export interface ColorGroup {
   verses: Verse[];
-  /**
-   * Optional override for the verse background color.
-   * If omitted, the component's default theme color will be used.
-   */
   verseBg?: string;
-  /**
-   * When true, the parent group box will be visually indented/shrunk on
-   * the X axis by `g2Shrink` on both sides. Used for the chiastic middle block.
-   */
   isPushedIn?: boolean;
-  /**
-   * When true, the group border will use the accent color (GREEN_THEME)
-   * and a drop shadow will be applied. Marks the semantically central group.
-   */
   isCenter?: boolean;
-  /**
-   * Per-row extra vertical gap applied when rendering the second row of verses.
-   * Useful when grouped verses have taller content.
-   */
   extraRowGap?: number;
 }
 
@@ -43,426 +53,760 @@ export interface SectionTwoData {
   bottomLabel: string;
 }
 
+export { SURAH_DATA };
+
 // ----------------------------------------------------------------------------
-// SECTION: LAYOUT MATH ENGINE
-// All dimensional constants are computed here and exported as `layoutMath`.
-// Components receive `layoutMath` as a prop and never perform layout math themselves.
+// ALAK CONFIGURATION (Fully Config-Driven)
 // ----------------------------------------------------------------------------
 
-// --- Page Dimensions ---
-export const BASE_PAGE_WIDTH = 1.54;
-export const PAGE_HEIGHT = 1.78;
-export const SCENE_CENTER_Y_OFFSET = -0.045; // Centralized offset for the entire paper scene
+export interface AlakLayoutParams {
+  s1Top: number;
+  s1Pad: number;
+  gap: number;
+  s1AnaGap: number;
+  smallBoxH: number;
+  anaAyetH: number;
+  gapBetweenS1andS2: number;
+  s2VerticalPad: number;
+  bigBoxH: number;
+  groupGap: number;
+  groupPad: number;
+  groupPadBottom: number;
+  s2Gap: number;
+  smallBoxH2: number;
+  middleExtraGap: number;
+  s2PadLeftRight: number;
+  g2Shrink: number;
+  s1BorderWidth: number;
+  anaAyetTabW: number;
+  anaAyetTabH: number;
+  anaAyetTabBorderWidth: number;
+  anaAyetLabelDrop: number;
+  sgPad: number;
+  sgBorderWidth: number;
+  boxExtOffset: number;
+  extraRowGap: number;
+  labelHitboxWidth: number;
+  verseTextScale?: number;
+  groupRows?: number[];
+  outerCurveXOffset?: number;
+  centerCurveXOffset?: number;
+  outerShrink?: number;
+  s2VerticalRowGap?: number;
+}
 
-export function createLayoutMath(pageWidth: number) {
-  const PAGE_WIDTH = pageWidth;
-  const PW = PAGE_WIDTH;
-  const PADDING = 0.29;
-  const CONTENT_W = PW - PADDING * 2;
-  const START_X = PADDING;
-
-  // --- Section 1 (Top Block) ---
-  const s1Top = -0.06;
-  const s1Pad = 0.045;
-  const gap = 0.02;
-  const s1AnaGap = 0.05;
-  const smallBoxH = 0.07;
-  const anaAyetH = 0.132;
-  const s1H = s1Pad * 2 + (smallBoxH * 2 + gap) + s1AnaGap + anaAyetH;
-
-  // --- Section 2 (Main Lower Block) ---
-  const gapBetweenS1andS2 = 0.09;
-  const s2Top = s1Top - s1H - gapBetweenS1andS2;
-
-  // Symmetric padding for top and bottom sections (verses 6-10 and 15-19)
-  const s2VerticalPad = 0.054;
-  const s2PadTop = s2VerticalPad;
-  const s2PadBottom = s2VerticalPad;
-  const bigBoxH = 0.125;
-  const groupGap = 0.035;
-  const groupPad = 0.012;
-  const groupPadBottom = 0.012;
-  const s2Gap = 0.02;
-  const smallBoxH2 = 0.075;
-  const groupH = groupPad + groupPadBottom + (smallBoxH2 * 2 + s2Gap);
-  const middleExtraGap = 0.03;
-
-  const s2H =
-    s2PadTop +
-    s2PadBottom +
-    bigBoxH * 2 +
-    groupGap * 4 +
-    groupH * 3 +
-    middleExtraGap * 2;
-
-  // --- Element Y Positions ---
-  const v6Y = s2Top - s2PadTop;
-  const baseG1Y = v6Y - bigBoxH - groupGap;
-  const baseG2Y = baseG1Y - groupH - (groupGap + middleExtraGap);
-  const baseG3Y = baseG2Y - groupH - (groupGap + middleExtraGap);
-  const baseV19Y = baseG3Y - groupH - groupGap;
-
-  const g1Y = baseG1Y;
-  const g2Y = baseG2Y;
-  const g3Y = baseG3Y;
-  const v19Y = baseV19Y;
-
-  // ----------------------------------------------------------------------------
-  // EXPORTED LAYOUT OBJECT
-  // Passed as `layout` prop down to SectionOne, SectionTwo, and SideCurves.
-  // ----------------------------------------------------------------------------
-  return {
-    PAGE_WIDTH,
-    PAGE_HEIGHT,
-    PW,
-    PADDING,
-    CONTENT_W,
-    START_X,
-    // Section 1
-    sectionW: CONTENT_W,
-    innerW: CONTENT_W - s1Pad * 2,
-    innerHalfW: (CONTENT_W - s1Pad * 2 - gap) / 2,
-    s1Top,
-    s1Pad,
-    gap,
-    s1AnaGap,
-    smallBoxH,
-    anaAyetH,
-    s1H,
-
-    // Section 2
-    s2Top,
-    s2Pad: s2PadTop,
-    s2PadTop,
-    s2PadBottom,
-    bigBoxH,
-    groupGap,
-    groupPad,
-    s2Gap,
-    smallBoxH2,
-    groupH,
-    s2H,
-
-    // Absolute Y placements
-    v6Y,
-    g1Y,
-    g2Y,
-    g3Y,
-    v19Y,
-    baseG1Y,
-    baseG3Y,
-
-    // Group inner widths
-    groupInnerW: CONTENT_W - 0.07 - groupPad * 2,
-    groupInnerHalfW: (CONTENT_W - 0.07 - groupPad * 2 - s2Gap) / 2,
-
-    // Spacing & decoration offsets
+export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
+  id: "alak",
+  title: "ALAK SURESİ",
+  heroTitle: "Alak",
+  heroSubtitle: "suresi",
+  features: {
+    hasIntro: true,
+    hasElevatedSections: true,
+    hasPopUps: true,
+  },
+  dimensions: {
+    paperWidth: 1.54,
+    paperHeight: 1.78,
+    sceneCenterYOffset: -0.045,
+    padding: 0.29,
+    scrollPages: 6,
+  },
+  specialVerses: {
+    middleFoldVerses: { left: [12, 14], right: [11, 13] },
+    versePairings: {
+      1: 2, 2: 1,
+      3: 4, 4: 3,
+      7: 8, 8: 7,
+      9: 10, 10: 9,
+      11: 12, 12: 11,
+      13: 14, 14: 13,
+      15: 16, 16: 15,
+      17: 18, 18: 17,
+    },
+  },
+  introMedia: {
+    section1: {
+      src: "",
+      isVideo: false,
+      backgroundText: {
+        title: "İnsanlara oku!",
+        titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
+      },
+    },
+    section1_step1: {
+      src: "",
+      isVideo: false,
+      backgroundText: {
+        title:
+          "Alak suresi, insanlığın ufkunda doğan İlahi bir güneş gibi\nMuhammed aleyhisselama peygamberlik tacının giydirildiğini\nbütün cihana ilan etmiş ve müjdelemiştir",
+        titleSize: "text-[5.5vw] md:text-[3.5vw] leading-[1.2]",
+      },
+    },
+    section1_step2: {
+      src: "/intro/section-1.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Muhkem",
+        title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
+      },
+    },
+    section1_step3: {
+      src: "/intro/section-1.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Muhkem",
+        title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
+      },
+    },
+    section2_top: {
+      src: "/intro/section-2.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Ebu cehil'in dünyası",
+        title: "Tuğyan\n zulüm\ninkâr \nistiğna",
+      },
+    },
+    section2_center: {
+      src: "/intro/section-3.mp4",
+      isVideo: true,
+      backgroundText: {
+        title: "Dışarıdan bakanlara\n hitap",
+      },
+    },
+    section2_bottom: {
+      src: "/intro/section-4.mp4",
+      isVideo: true,
+      backgroundText: {
+        caption: "Ebu cehil'in ahireti",
+        title: "Tuğyanın\n zulmün\n inkârın \nkarşılığı",
+      },
+    },
+  },
+  introGuides: {
+    section1: "Ana bölüm",
+    section2_top: "1. Açıklama bölümü",
+    section2_center: "Orta bölüm",
+    section2_bottom: "2. Açıklama bölümü",
+  },
+  assets: {},
+  verseOverrides: {
+    // ── Section 1 verse 5 ─────────────────────────────────────────────────
+    5: {
+      customFrameSvg: "/Group 11.svg",
+      expandW: 0.035,
+      expandH: 0.01,
+      frameScaleLTR: 1.1,
+      isPill: false,
+      bg: CAPSULE_BG_6_19,
+      border: CAPSULE_BG_6_19,
+      circleBorderCol: S1_VERSE_NUMBER_BORDER,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: S1_VERSE_NUMBER_TEXT,
+      textColor: S1_VERSE_5_TEXT,
+      hasAnaAyetTab: true,
+    },
+    // ── Section 2 intro verse (6) ─────────────────────────────────────────
+    6: {
+      bg: CAPSULE_BG_6_19,
+      border: BLUE_THEME,
+      circleBorderCol: BLUE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: BLUE_THEME,
+    },
+    // ── Group 1 outer rows (7, 8) ─────────────────────────────────────────
+    7: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: MAROON_THEME,
+    },
+    8: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: MAROON_THEME,
+    },
+    // ── Group 1 inner rows (9, 10) ────────────────────────────────────────
+    9: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: MAROON_THEME,
+    },
+    10: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: MAROON_THEME,
+    },
+    // ── Group 2 center (11, 12, 13, 14) ──────────────────────────────────
+    11: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
+    },
+    12: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
+    },
+    13: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
+    },
+    14: {
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
+    },
+    // ── Group 3 inner rows (15, 16) ───────────────────────────────────────
+    15: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: MAROON_THEME,
+    },
+    16: {
+      bg: CAPSULE_BG_9_10_15_16,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: MAROON_THEME,
+    },
+    // ── Group 3 outer rows (17, 18) ───────────────────────────────────────
+    17: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: MAROON_THEME,
+    },
+    18: {
+      bg: CAPSULE_BG_7_8_17_18,
+      border: MAROON_THEME,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_7_8_17_18,
+      circleTextCol: MAROON_THEME,
+    },
+    // ── Section 2 outro verse (19) ────────────────────────────────────────
+    19: {
+      bg: CAPSULE_BG_6_19,
+      border: BLUE_THEME,
+      circleBorderCol: BLUE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: BLUE_THEME,
+    },
+  },
+  styling: {
+    colors: {
+      paperBase: "#E4DFCA",
+      shadow: "#000000",
+      backface: "#e8e4d8",
+      textDark: "#333333", // Assuming some dark hex
+      textLabel: "#555555", // Assuming some label hex
+      circleBorder: "#bbbbbb",
+      verseNumberText: "#222222",
+      s1AnaLabelBg: "#ffffff",
+      s1AnaLabelText: "#000000",
+      s1AnaLabelBorder: "#dddddd",
+      s2FrameBg: "#f4f4f4",
+      boarderFrame: "#ffffff",
+      boarderHalo: "#ADADAD",
+      innerCard: "#eeeeee",
+      sectionBgTexture: "#fcfcfc",
+      hollowConnectorInnerBg: "#e3e3e3",
+      maroonTheme: MAROON_THEME,
+      greenTheme: GREEN_THEME,
+      s1InnerBorder: "#cccccc",
+      s2IntroOutroBg: BLUE_THEME,
+      s2Group1Bg: MAROON_THEME,
+      s2Group2Bg: GREEN_THEME,
+      s2Group3Bg: MAROON_THEME,
+      /**
+       * Bracket color sequence for SideCurves, outermost → center.
+       * Index 0–2 = outer brackets (blue → maroon → maroon).
+       * Index 3   = center bracket (green).
+       */
+      curveColors: [
+        { color: BLUE_THEME,   fillColor: CAPSULE_BG_6_19 },
+        { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
+        { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
+        { color: GREEN_THEME,  fillColor: CAPSULE_BG_12_14 },
+      ],
+    },
+    capsuleBorderWidth: 0.0039,
+    circleBorderWidth: 0.0035,
+    verseRadius: 0.04,
+    oppositeVerseConnectorRadius: 0.05,
+    elevatedSectionRadii: {
+      base: 0.039,
+      scallopX: 0.015, // SCALLOP_RADIUS_X
+      scallopY: 0.015, // SCALLOP_RADIUS_Y
+      outer: 0.025,
+      innerA: 0.023,
+      innerB: 0.022,
+    },
+    s1NeonConfig: {
+      haloPad: 0.014,
+      haloZ: -0.001,
+      haloOpacity: 0.36,
+      haloEmissiveIntensity: 4.2,
+      outerHaloPad: 0.026,
+      outerHaloOpacity: 0.16,
+      outerHaloEmissiveIntensity: 2.4,
+      topLabelGapWidth: 0.425,
+      topLabelGapPadding: 0.01,
+      topLabelGapHeight: 0.058,
+      topLabelGapYOffset: 0.022,
+    },
+  },
+  params: {
+    s1Top: -0.06,
+    s1Pad: 0.045,
+    gap: 0.02,
+    s1AnaGap: 0.05,
+    smallBoxH: 0.07,
+    anaAyetH: 0.132,
+    gapBetweenS1andS2: 0.09,
+    s2VerticalPad: 0.054,
+    bigBoxH: 0.125,
+    groupGap: 0.035,
+    groupPad: 0.012,
+    groupPadBottom: 0.012,
+    s2Gap: 0.02,
+    smallBoxH2: 0.075,
+    middleExtraGap: 0.03,
     s2PadLeftRight: 0.035,
     g2Shrink: 0.01,
     s1BorderWidth: 0,
     anaAyetTabW: 0.2,
     anaAyetTabH: 0.032,
     anaAyetTabBorderWidth: 0.0035,
-    // Positive values move only the Ana Ayet label downward.
-    anaAyetLabelDrop: 0.015, // Increased to move the label further down independently!
+    anaAyetLabelDrop: 0.015,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
     boxExtOffset: 0.02,
     extraRowGap: 0.01,
-  } satisfies Record<string, number>;
+    labelHitboxWidth: 0.43,
+  },
+  sections: [
+    {
+      id: "section1",
+      type: "gridWithAnaAyet",
+      labelKey: "section1Label",
+      verses: [2, 1, 4, 3],
+      anaAyet: 5,
+      bgThemeKey: "s1InnerBorder",
+      cameraTarget: { y: 2, fov: 20, tilt: -1.3 },
+    } as GridSectionConfig,
+    {
+      id: "section2",
+      type: "verticalGroups",
+      topLabelKey: "section2TopLabel",
+      bottomLabelKey: "section2BottomLabel",
+      introVerse: 6,
+      outroVerse: 19,
+      introOutroBgThemeKey: "s2IntroOutroBg",
+      groups: [
+        {
+          verseIds: [8, 7, 10, 9],
+          isPushedIn: false,
+          isCenter: false,
+          extraRowGap: 0,
+          bgThemeKey: "s2Group1Bg",
+        },
+        {
+          verseIds: [12, 11, 14, 13],
+          isPushedIn: true,
+          isCenter: true,
+          extraRowGap: 0,
+          bgThemeKey: "s2Group2Bg",
+        },
+        {
+          verseIds: [16, 15, 18, 17],
+          isPushedIn: false,
+          isCenter: false,
+          extraRowGap: 0,
+          bgThemeKey: "s2Group3Bg",
+        },
+      ],
+      subCameraTargets: {
+        top: { y: 1.4, fov: 25, tilt: -1.3 },
+        center: { y: 1, fov: 30, tilt: -1.5 },
+        bottom: { y: 0.7, fov: 35, tilt: -1.5 },
+      },
+    } as VerticalGroupsSectionConfig,
+  ],
+  animations: {
+    introCamera: {
+      introPosition: [-1.221, 0.343, 2.756],
+      introTarget: [0.492, 0.176, 1.237],
+      scrollOffset: [0.5, 1.5, 0],
+      targetFollow: 1,
+      allowOrbit: false,
+      handoffDurationMs: 800,
+    },
+    scrollTimeline: {
+      intro: { start: 0, end: 15 },
+      ambient: { start: 15, end: 50 },
+      handoff: { start: 50, end: 60 },
+      story: { start: 60, end: 100 },
+    },
+    scrollLock: {
+      lockPositionPercentage: 0.6,
+      effortRequired: 3000,
+      grabRangePixels: 50,
+    },
+    ambientMediaKeys: [
+      "section1",
+      "section1_step1",
+      "section1_step2",
+      "section1_step3",
+      "section2_top",
+      "section2_center",
+      "section2_bottom",
+    ],
+    computeFoldYPositions: (lm) => [
+      lm.s2Top + 0.09 / 2, // 0.09 is gapBetweenS1andS2
+      lm.v6Y - lm.bigBoxH - lm.groupGap / 2,
+      lm.g1Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+      lm.g1Y - lm.groupH - (lm.groupGap + 0.033) / 2,
+      lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+      lm.g2Y - lm.groupH - (lm.groupGap + 0.033) / 2,
+      lm.g3Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
+      lm.g3Y - lm.groupH - lm.groupGap / 2,
+    ],
+    foldSteps: [
+      {
+        id: "pre-start",
+        folds: [
+          { direction: 1, angleFactor: 0.93 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: +1, angleFactor: -1 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: -1 },
+        ],
+      },
+      {
+        id: "start",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: +1, angleFactor: -1 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: -1 },
+        ],
+      },
+      {
+        id: "outer-open",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: -1 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "inner-open",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: -1, angleFactor: 1 },
+          { direction: -1, angleFactor: -1 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "end",
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+        ],
+      },
+    ],
+  },
+};
+
+// ----------------------------------------------------------------------------
+// LEGACY CONSTANTS & COMPATIBILITY LAYER
+// To keep existing components unbroken until they are updated
+// ----------------------------------------------------------------------------
+export const ALAQ_LAYOUT_CONFIG = ALAK_LAYOUT_CONFIG;
+export const BASE_PAGE_WIDTH = ALAK_LAYOUT_CONFIG.dimensions.paperWidth;
+export const PAGE_HEIGHT = ALAK_LAYOUT_CONFIG.dimensions.paperHeight;
+export const SCENE_CENTER_Y_OFFSET =
+  ALAK_LAYOUT_CONFIG.dimensions.sceneCenterYOffset;
+export const CAPSULE_BORDER_WIDTH =
+  ALAK_LAYOUT_CONFIG.styling.capsuleBorderWidth;
+export const CIRCLE_BORDER_WIDTH = ALAK_LAYOUT_CONFIG.styling.circleBorderWidth;
+export const VERSE_5_6_19_RADIUS = ALAK_LAYOUT_CONFIG.styling.verseRadius;
+export const OPPOSITE_VERSE_CONNECTOR = {
+  paddingX: 0.0065,
+  paddingY: 0.0065,
+  radius: ALAK_LAYOUT_CONFIG.styling.oppositeVerseConnectorRadius,
+};
+export const VERSE_TEXT_RIGHT_PADDING = 0.003;
+export const TOP_LABEL_WIDTH =
+  ALAK_LAYOUT_CONFIG.styling.s1NeonConfig.topLabelGapWidth;
+export const S2_LABEL_WIDTH = 0.47;
+export const S2_LABEL_Y_OFFSET = 0.004;
+export const SMALL_TEXT_SHIFT = -0.018;
+export const BIG_VERSE_VERTICAL_SHIFT = -0.006;
+export const SMALL_VERSE_VERTICAL_SHIFT = -0.005;
+export const S1_NEON_CONFIG = ALAK_LAYOUT_CONFIG.styling.s1NeonConfig;
+
+// ----------------------------------------------------------------------------
+// SECTION: LAYOUT MATH ENGINE
+// ----------------------------------------------------------------------------
+export function createLayoutMath(
+  config: SurahLayoutConfig<AlakLayoutParams>,
+  dynamicPageWidth: number,
+) {
+  const p = config.params;
+  const PAGE_WIDTH = dynamicPageWidth;
+  const PW = PAGE_WIDTH;
+  const PADDING = config.dimensions.padding;
+  const CONTENT_W = PW - PADDING * 2;
+  const START_X = PADDING;
+
+  // --- Section 1 ---
+  const s1H = p.s1Pad * 2 + (p.smallBoxH * 2 + p.gap) + p.s1AnaGap + p.anaAyetH;
+
+  // --- Section 2 ---
+  // groupH, hasIntroOutro, and s2H must be computed BEFORE s2Top because
+  // the centering formula (hasS1 === false branch) depends on s2H.
+
+  const getGroupH = (rows: number, extraGap: number = 0) => {
+    const s2VertGap = p.s2VerticalRowGap ?? p.s2Gap;
+    return (
+      p.groupPad +
+      p.groupPadBottom +
+      (rows * p.smallBoxH2 + Math.max(0, rows - 1) * s2VertGap) +
+      extraGap
+    );
+  };
+
+  const groupH = getGroupH(2);
+
+  const g0H = getGroupH(p.groupRows?.[0] ?? 2);
+  const g1H = getGroupH(p.groupRows?.[1] ?? 2);
+  const g2H = getGroupH(p.groupRows?.[2] ?? 2);
+  const totalGroupsH = g0H + g1H + g2H;
+
+  // When hasIntro is false there are no intro/outro verse boxes, so the two
+  // bigBoxH slots and their two flanking groupGaps are collapsed to zero.
+  // When hasIntro is true the formula is mathematically identical to before.
+  const hasIntroOutro = config.features.hasIntro;
+
+  const s2H = hasIntroOutro
+    ? p.s2VerticalPad * 2 +
+      p.bigBoxH * 2 +
+      p.groupGap * 4 +
+      totalGroupsH +
+      p.middleExtraGap * 2
+    : p.s2VerticalPad * 2 +
+      p.groupGap * 2 +          // the 2 gaps *between* the 3 groups
+      totalGroupsH +
+      p.middleExtraGap * 2;
+
+  // Detect whether a gridWithAnaAyet (Section 1) is part of this config.
+  // If not, we center s2 on the paper rather than chaining from s1Top.
+  const hasS1 = config.sections.some((s) => s.type === "gridWithAnaAyet");
+
+  // s2Top: the Y coordinate of the top of the vertical-groups block.
+  //   hasS1 === true  → Alak path (identical to original formula)
+  //   hasS1 === false → center the block vertically on the paper
+  const s2Top = hasS1
+    ? p.s1Top - s1H - p.gapBetweenS1andS2   // Alak: unchanged
+    // Ayat al-Kursi: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
+    // Shift up by s2H/2 so the block straddles that center symmetrically.
+    : -(config.dimensions.paperHeight / 2) + (s2H / 2) + config.dimensions.sceneCenterYOffset;
+
+  // --- Element Y Positions ---
+  // v6Y marks the intro-verse top; when there is no intro verse the groups
+  // start immediately after s2VerticalPad (same anchor, no bigBoxH shift).
+  const v6Y = s2Top - p.s2VerticalPad;
+  const baseG1Y = hasIntroOutro
+    ? v6Y - p.bigBoxH - p.groupGap          // Alak: identical to original
+    : v6Y;                                   // Ayat al-Kursi: groups slide up
+
+  const baseG2Y = baseG1Y - g0H - (p.groupGap + p.middleExtraGap);
+  const baseG3Y = baseG2Y - g1H - (p.groupGap + p.middleExtraGap);
+  // v19Y position is always computed (keeps type consistent) but only rendered
+  // when hasIntro is true.
+  const baseV19Y = hasIntroOutro
+    ? baseG3Y - g2H - p.groupGap
+    : baseG3Y - g2H;                      // not rendered; safe sentinel
+
+  return {
+    PAGE_WIDTH,
+    PAGE_HEIGHT: config.dimensions.paperHeight,
+    PW,
+    PADDING,
+    CONTENT_W,
+    START_X,
+
+    // Section 1
+    sectionW: CONTENT_W,
+    innerW: CONTENT_W - p.s1Pad * 2,
+    innerHalfW: (CONTENT_W - p.s1Pad * 2 - p.gap) / 2,
+    s1Top: p.s1Top,
+    s1Pad: p.s1Pad,
+    gap: p.gap,
+    s1AnaGap: p.s1AnaGap,
+    smallBoxH: p.smallBoxH,
+    anaAyetH: p.anaAyetH,
+    s1H,
+
+    // Section 2
+    s2Top,
+    s2Pad: p.s2VerticalPad,
+    s2PadTop: p.s2VerticalPad,
+    s2PadBottom: p.s2VerticalPad,
+    bigBoxH: p.bigBoxH,
+    groupGap: p.groupGap,
+    groupPad: p.groupPad,
+    s2Gap: p.s2Gap,
+    smallBoxH2: p.smallBoxH2,
+    groupH,
+    s2H,
+
+    s2BackgroundTexture: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundTexture,
+    s2BackgroundScaleX: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleX,
+    s2BackgroundScaleY: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleY,
+
+    v6Y,
+    g1Y: baseG1Y,
+    g2Y: baseG2Y,
+    g3Y: baseG3Y,
+    v19Y: baseV19Y,
+    baseG1Y,
+    baseG3Y,
+
+    groupInnerW: CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2,
+    groupInnerHalfW: (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
+
+    s2PadLeftRight: p.s2PadLeftRight,
+    s2VerticalRowGap: p.s2VerticalRowGap ?? p.s2Gap,
+    g2Shrink: p.g2Shrink,
+    outerShrink: p.outerShrink ?? 0,
+    s1BorderWidth: p.s1BorderWidth,
+    anaAyetTabW: p.anaAyetTabW,
+    anaAyetTabH: p.anaAyetTabH,
+    anaAyetTabBorderWidth: p.anaAyetTabBorderWidth,
+    anaAyetLabelDrop: p.anaAyetLabelDrop,
+    sgPad: p.sgPad,
+    sgBorderWidth: p.sgBorderWidth,
+    boxExtOffset: p.boxExtOffset,
+    extraRowGap: p.extraRowGap,
+    verseTextScale: p.verseTextScale ?? undefined,
+    outerCurveXOffset: p.outerCurveXOffset ?? 0,
+    centerCurveXOffset: p.centerCurveXOffset ?? 0,
+
+    // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
+    // NOTE: satisfies Record<string, number> is removed because these new
+    // fields are non-number. We use an explicit return type instead.
+    hasIntroOutro,                              // boolean
+    groupYPositions: [baseG1Y, baseG2Y, baseG3Y] as [number, number, number],
+    groupHeights: [g0H, g1H, g2H] as [number, number, number],
+  };
 }
 
-export const layoutMath = createLayoutMath(BASE_PAGE_WIDTH);
+export const layoutMath = createLayoutMath(ALAK_LAYOUT_CONFIG, BASE_PAGE_WIDTH);
 export type LayoutConfig = ReturnType<typeof createLayoutMath>;
 
-// Legacy named exports (base layout). Prefer using `createLayoutMath(...)`.
 export const PAGE_WIDTH = layoutMath.PAGE_WIDTH;
 export const PW = layoutMath.PW;
 export const PADDING = layoutMath.PADDING;
 export const CONTENT_W = layoutMath.CONTENT_W;
 export const START_X = layoutMath.START_X;
 
-// ----------------------------------------------------------------------------
-// CAPSULE BORDER WIDTH
-// Controls the border thickness around all verse capsules (pill + non-pill).
-// Adjust this one value to change borders globally across the whole page.
-// ----------------------------------------------------------------------------
-export const CAPSULE_BORDER_WIDTH = 0.0039;
-
-// Controls the thickness of the border ring around verse numbers.
-export const CIRCLE_BORDER_WIDTH = 0.0035;
-
-// Controls the corner radius for non-pill verse boxes (specifically verses 5, 6 and 19).
-export const VERSE_5_6_19_RADIUS = 0.04;
-
-// ----------------------------------------------------------------------------
-// OPPOSITE VERSE CONNECTOR CONFIG
-// Controls the background section connecting opposite (side-by-side) verses.
-// ----------------------------------------------------------------------------
-export const OPPOSITE_VERSE_CONNECTOR = {
-  paddingX: 0.0065,
-  paddingY: 0.0065,
-  radius: 0.05,
-};
-
-export const VERSE_TEXT_RIGHT_PADDING = 0.003;
-
-// Width for Section 1 label
-export const TOP_LABEL_WIDTH = 0.425;
-
-// Width and vertical offset for Section 2 labels
-export const S2_LABEL_WIDTH = 0.47;
-export const S2_LABEL_Y_OFFSET = 0.004; // Moves labels up by ~1mm
-
-// Section 1 neon border tuning.
-export const SMALL_TEXT_SHIFT = -0.018;
-export const BIG_VERSE_VERTICAL_SHIFT = -0.006;
-export const SMALL_VERSE_VERTICAL_SHIFT = -0.005;
-
-// Section 1 neon border tuning.
-// Sizes live here so glow spread can be adjusted without touching JSX.
-export const S1_NEON_CONFIG = {
-  haloPad: 0.014,
-  haloZ: -0.001,
-  haloOpacity: 0.36,
-  haloEmissiveIntensity: 4.2,
-  outerHaloPad: 0.026,
-  outerHaloOpacity: 0.16,
-  outerHaloEmissiveIntensity: 2.4,
-  topLabelGapWidth: TOP_LABEL_WIDTH,
-  topLabelGapPadding: 0.01,
-  topLabelGapHeight: 0.058,
-  topLabelGapYOffset: 0.022,
-} as const;
-
-// ----------------------------------------------------------------------------
-// EXPORTED FOLD POSITIONS
-// Used by animation engine to know where page fold-lines sit.
-// ----------------------------------------------------------------------------
-export function createFoldYPositions(
-  lm: LayoutConfig,
-): readonly [number, number, number, number, number, number, number, number] {
-  return [
-    lm.s2Top + 0.09 / 2, // between s1 and s2 (gapBetweenS1andS2 / 2)
-    lm.v6Y - lm.bigBoxH - lm.groupGap / 2,
-    lm.g1Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-    lm.g1Y - lm.groupH - (lm.groupGap + 0.033) / 2, // middleExtraGap / 2
-    lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-    lm.g2Y - lm.groupH - (lm.groupGap + 0.033) / 2,
-    lm.g3Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-    lm.g3Y - lm.groupH - lm.groupGap / 2,
-  ] as const;
-}
-
-export const FOLD_Y_POSITIONS = createFoldYPositions(layoutMath);
-
-export { SURAH_DATA };
+// createFoldYPositions and FOLD_Y_POSITIONS were removed and moved to ALAK_LAYOUT_CONFIG.animations.computeFoldYPositions
 
 // ============================================================================
-// LAYOUT ENGINE — AXIS-AGNOSTIC POSITION COMPUTER
-// All element positions are computed HERE once. Components only render —
-// they never perform positional math inline in JSX.
-//
-// Future extension: pass `{ isVertical: false }` options to swap primary/cross
-// axes for a horizontal layout. All axis assignments are isolated in this
-// function, making a layout flip a single-file change.
+// LAYOUT ENGINE
 // ============================================================================
-
-/** Pre-computed x/y/z/w/h for a single UI element. */
-export interface ElementTransform {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-  h: number;
-}
-
-export interface RowConnectorTransform {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-  h: number;
-}
-
-/** Pre-computed geometry and per-verse transforms for one verse group cluster. */
-export interface GroupTransforms {
-  frameX: number;
-  frameY: number;
-  frameW: number;
-  frameH: number;
-  isPushedIn: boolean;
-  isCenter: boolean;
-  /** Verse number → its exact screen transform. */
-  verses: Record<number, ElementTransform>;
-  rowConnectors: RowConnectorTransform[];
-}
-
-export interface S1Transforms {
-  frameX: number;
-  frameY: number;
-  frameW: number;
-  frameH: number;
-  verses: Record<number, ElementTransform>;
-  rowConnectors: RowConnectorTransform[];
-  anaAyet: ElementTransform;
-  anaAyetTabX: number;
-  anaAyetTabY: number;
-  anaAyetTabW: number;
-  anaAyetTabH: number;
-  anaAyetTabBorderWidth: number;
-  anaAyetLabelDrop: number;
-  borderWidth: number;
-  labelPinY: number;
-}
-
-export interface S2Transforms {
-  frameX: number;
-  frameW: number;
-  shiftedTop: number;
-  shiftedBot: number;
-  shiftedH: number;
-  connectorX: number;
-  connectorW: number;
-  topConnectorY: number;
-  topConnectorH: number;
-  bottomConnectorY: number;
-  bottomConnectorH: number;
-  borderWidth: number;
-  introVerse: ElementTransform;
-  outroVerse: ElementTransform;
-  groups: GroupTransforms[];
-  innerW: number;
-  baseX: number;
-  topLabelPinY: number;
-  bottomLabelPinY: number;
-}
 
 export interface SurahTransforms {
-  s1: S1Transforms;
-  s2: S2Transforms;
+  sections: SectionTransforms[];
 }
 
-/**
- * buildSurahTransforms
- * Computes and returns the complete set of pre-baked element transforms for
- * the entire Surah layout in a single pass. Call this once at module load
- * time and share the result across all rendering components.
- */
 export function buildSurahTransforms(
   lm: LayoutConfig,
   startX: number,
+  config: SurahLayoutConfig<AlakLayoutParams>,
 ): SurahTransforms {
-  // ── SECTION 1 ──────────────────────────────────────────────────────────────
-  const s1BaseX = startX + lm.s1Pad;
-  // AnaAyet y absorbs the legacy <group position={[0, -0.01, 0]}> offset so
-  // SectionOne.tsx no longer needs a wrapper group for that element.
-  const ANA_AYET_Y_OFFSET = -0.01;
-  const anaAyetY =
-    lm.s1Top -
-    lm.s1Pad -
-    (lm.smallBoxH * 2 + lm.gap) -
-    lm.s1AnaGap +
-    ANA_AYET_Y_OFFSET;
+  const sections: SectionTransforms[] = [];
 
-  const s1Verses: Record<number, ElementTransform> = {};
-  SURAH_DATA.section1.gridVerses.forEach((v, i) => {
-    const isRightCol = i % 2 !== 0;
-    const isBottomRow = i >= 2;
-    s1Verses[v.number] = {
-      x: s1BaseX + (isRightCol ? lm.innerHalfW + lm.gap : 0),
-      y: lm.s1Top - lm.s1Pad - (isBottomRow ? lm.smallBoxH + lm.gap : 0),
-      z: 0.002,
-      w: lm.innerHalfW,
-      h: lm.smallBoxH,
-    };
-  });
+  // Build transforms for each section dynamically based on its type
+  config.sections.forEach((section) => {
+    if (section.type === "gridWithAnaAyet") {
+      const s1Config = section as GridSectionConfig;
+      const s1BaseX = startX + lm.s1Pad;
+      const ANA_AYET_Y_OFFSET = -0.01;
+      const anaAyetY =
+        lm.s1Top -
+        lm.s1Pad -
+        (lm.smallBoxH * 2 + lm.gap) -
+        lm.s1AnaGap +
+        ANA_AYET_Y_OFFSET;
 
-  const s1Connectors: RowConnectorTransform[] = [];
-  for (let r = 0; r < 2; r++) {
-    const leftV = s1Verses[SURAH_DATA.section1.gridVerses[r * 2].number];
-    const rightV = s1Verses[SURAH_DATA.section1.gridVerses[r * 2 + 1].number];
-    if (leftV && rightV) {
-      s1Connectors.push({
-        x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
-        y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
-        z: 0.0015,
-        w:
-          rightV.x + rightV.w - leftV.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
-        h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
-      });
-    }
-  }
-
-  // ── SECTION 2 ──────────────────────────────────────────────────────────────
-  const s2InnerW = lm.sectionW - lm.s2PadLeftRight * 2;
-  const s2BaseX = startX + lm.s2PadLeftRight;
-
-  const S2_MIRROR_SHIFT = 0.015;
-  const shiftedTop = lm.s2Top - S2_MIRROR_SHIFT;
-  const shiftedBot = lm.s2Top - lm.s2H + S2_MIRROR_SHIFT;
-  const shiftedH = lm.s2H - 2 * S2_MIRROR_SHIFT;
-
-  const bw = lm.sgBorderWidth;
-  const connX = s2BaseX - lm.sgPad;
-  const connW = s2InnerW + lm.sgPad * 2;
-
-  // Since Section 1 (Top Block, verses 6-10) and Section 3 (Bottom Block, verses 15-19)
-  // are perfectly symmetrical, we calculate the outer box dimensions once to ensure
-  // they are exactly identical.
-  const tBox_Y = shiftedTop;
-  const outerSectionH =
-    tBox_Y - ((lm.baseG1Y || lm.g1Y) - lm.groupH - lm.boxExtOffset);
-  const tBox_H = outerSectionH;
-
-  const bBox_Y = (lm.baseG3Y || lm.g3Y) + lm.boxExtOffset;
-  const bBox_H = outerSectionH; // Forcing EXACT same height as the top section!
-
-  // ── GROUP TRANSFORMS ───────────────────────────────────────────────────────
-  const groupYPositions = [lm.g1Y, lm.g2Y, lm.g3Y];
-
-  const groups: GroupTransforms[] = SURAH_DATA.section2.colorGroups.map(
-    (group, gIdx) => {
-      const groupY = groupYPositions[gIdx];
-      const isPushedIn = group.isPushedIn ?? false;
-
-      // Pushed-in groups shrink inward on both sides by g2Shrink
-      const gInnerW = isPushedIn ? s2InnerW - lm.g2Shrink * 2 : s2InnerW;
-      const gBaseX = isPushedIn ? s2BaseX + lm.g2Shrink : s2BaseX;
-      const gHalfW = isPushedIn
-        ? (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2
-        : lm.groupInnerHalfW;
-
-      const extraRowGap = group.extraRowGap ?? 0;
-
-      const verses: Record<number, ElementTransform> = {};
-      group.verses.forEach((v, i) => {
+      const s1Verses: Record<number, ElementTransform> = {};
+      s1Config.verses.forEach((verseId, i) => {
         const isRightCol = i % 2 !== 0;
-        const isSecondRow = i >= 2;
-        const rowOffset = isSecondRow
-          ? lm.smallBoxH2 + lm.s2Gap + extraRowGap
-          : 0;
-
-        verses[v.number] = {
-          // Primary axis (x) — swap with y here for a future horizontal layout
-          x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
-          // Cross axis (y) — swap with x here for a future horizontal layout
-          y: groupY - lm.groupPad - rowOffset,
-          z: 0.003,
-          w: gHalfW,
-          h: lm.smallBoxH2,
+        const isBottomRow = i >= 2;
+        s1Verses[verseId] = {
+          x: s1BaseX + (isRightCol ? lm.innerHalfW + lm.gap : 0),
+          y: lm.s1Top - lm.s1Pad - (isBottomRow ? lm.smallBoxH + lm.gap : 0),
+          z: 0.002,
+          w: lm.innerHalfW,
+          h: lm.smallBoxH,
         };
       });
 
-      const rowConnectors: RowConnectorTransform[] = [];
+      const s1Connectors: RowConnectorTransform[] = [];
       for (let r = 0; r < 2; r++) {
-        const leftV = verses[group.verses[r * 2].number];
-        const rightV = verses[group.verses[r * 2 + 1].number];
+        const leftV = s1Verses[s1Config.verses[r * 2]];
+        const rightV = s1Verses[s1Config.verses[r * 2 + 1]];
         if (leftV && rightV) {
-          rowConnectors.push({
+          s1Connectors.push({
             x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
             y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
-            z: 0.0025,
+            z: 0.0015,
             w:
               rightV.x +
               rightV.w -
@@ -473,83 +817,161 @@ export function buildSurahTransforms(
         }
       }
 
-      return {
-        frameX: gBaseX,
-        frameY: groupY,
-        frameW: gInnerW,
-        frameH: lm.groupH,
-        isPushedIn,
-        isCenter: group.isCenter ?? false,
-        verses,
-        rowConnectors,
-      };
-    },
-  );
+      sections.push({
+        frameX: startX,
+        frameY: lm.s1Top,
+        frameW: lm.sectionW,
+        frameH: lm.s1H,
+        verses: s1Verses,
+        rowConnectors: s1Connectors,
+        anaAyet: {
+          x: s1BaseX,
+          y: anaAyetY,
+          z: 0.002,
+          w: lm.innerW,
+          h: lm.anaAyetH,
+        },
+        anaAyetTabX: s1BaseX + lm.innerW / 2,
+        anaAyetTabY: anaAyetY + 0.015,
+        anaAyetTabW: lm.anaAyetTabW,
+        anaAyetTabH: lm.anaAyetTabH,
+        anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
+        anaAyetLabelDrop: lm.anaAyetLabelDrop,
+        borderWidth: lm.s1BorderWidth,
+        labelPinY: lm.s1Top,
+      });
+    } else if (section.type === "verticalGroups") {
+      const s2Config = section as VerticalGroupsSectionConfig;
+      const s2InnerW = lm.sectionW - lm.s2PadLeftRight * 2;
+      const s2BaseX = startX + lm.s2PadLeftRight;
 
-  return {
-    s1: {
-      frameX: startX,
-      frameY: lm.s1Top,
-      frameW: lm.sectionW,
-      frameH: lm.s1H,
-      verses: s1Verses,
-      rowConnectors: s1Connectors,
-      anaAyet: {
-        x: s1BaseX,
-        y: anaAyetY,
-        z: 0.002,
-        w: lm.innerW,
-        h: lm.anaAyetH,
-      },
-      // Tab is now rendered as a label and pinned to verse 5's top border.
-      anaAyetTabX: s1BaseX + lm.innerW / 2,
-      anaAyetTabY: anaAyetY,
-      anaAyetTabW: lm.anaAyetTabW,
-      anaAyetTabH: lm.anaAyetTabH,
-      anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
-      anaAyetLabelDrop: lm.anaAyetLabelDrop,
-      borderWidth: lm.s1BorderWidth,
-      labelPinY: lm.s1Top,
-    },
-    s2: {
-      frameX: startX,
-      frameW: lm.sectionW,
-      shiftedTop,
-      shiftedBot,
-      shiftedH,
-      connectorX: connX,
-      connectorW: connW,
-      topConnectorY: tBox_Y,
-      topConnectorH: tBox_H,
-      bottomConnectorY: bBox_Y,
-      bottomConnectorH: bBox_H,
-      borderWidth: bw,
-      introVerse: {
-        x: s2BaseX,
-        y: lm.v6Y,
-        z: 0.003,
-        w: s2InnerW,
-        h: lm.bigBoxH,
-      },
-      outroVerse: {
-        x: s2BaseX,
-        y: lm.v19Y,
-        z: 0.003,
-        w: s2InnerW,
-        h: lm.bigBoxH,
-      },
-      groups,
-      innerW: s2InnerW,
-      baseX: s2BaseX,
-      topLabelPinY: shiftedTop,
-      bottomLabelPinY: shiftedBot,
-    },
-  };
+      const S2_MIRROR_SHIFT = 0.015;
+      const shiftedTop = lm.s2Top - S2_MIRROR_SHIFT;
+      const shiftedBot = lm.s2Top - lm.s2H + S2_MIRROR_SHIFT;
+      const shiftedH = lm.s2H - 2 * S2_MIRROR_SHIFT;
+
+      const bw = lm.sgBorderWidth;
+      const connX = s2BaseX - lm.sgPad;
+      const connW = s2InnerW + lm.sgPad * 2;
+
+      // ── Group Y positions come from the layout math engine ────────────────
+      const groupYPositions = lm.groupYPositions;
+
+      const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
+        const groupY = groupYPositions[gIdx];
+        const isPushedIn = group.isPushedIn ?? false;
+        const shrinkAmount = isPushedIn ? lm.g2Shrink : lm.outerShrink;
+        const gInnerW = s2InnerW - shrinkAmount * 2;
+        const gBaseX = s2BaseX + shrinkAmount;
+
+        const gHalfW = (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2;
+        const extraRowGap = group.extraRowGap ?? 0;
+
+        const verses: Record<number, ElementTransform> = {};
+        group.verseIds.forEach((verseId, i) => {
+          const isRightCol = i % 2 !== 0;
+          const isSecondRow = i >= 2;
+          const rowOffset = isSecondRow
+            ? lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap
+            : 0;
+          verses[verseId] = {
+            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
+            y: groupY - lm.groupPad - rowOffset,
+            z: 0.003,
+            w: gHalfW,
+            h: lm.smallBoxH2,
+          };
+        });
+
+        const rowConnectors: RowConnectorTransform[] = [];
+        for (let r = 0; r < 2; r++) {
+          const leftV = verses[group.verseIds[r * 2]];
+          const rightV = verses[group.verseIds[r * 2 + 1]];
+          if (leftV && rightV) {
+            rowConnectors.push({
+              x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+              y: leftV.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+              z: 0.0025,
+              w:
+                rightV.x +
+                rightV.w -
+                leftV.x +
+                OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+              h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+            });
+          }
+        }
+
+        return {
+          frameX: gBaseX,
+          frameY: groupY,
+          frameW: gInnerW,
+          frameH: lm.groupHeights[gIdx] ?? lm.groupH,
+          isPushedIn,
+          isCenter: group.isCenter ?? false,
+          verses,
+          rowConnectors,
+        };
+      });
+
+      // ── Base section transform (always present) ───────────────────────────
+      const sectionTransform: SectionTransforms = {
+        frameX: startX,
+        frameW: lm.sectionW,
+        shiftedTop,
+        shiftedBot,
+        shiftedH,
+        connectorX: connX,
+        connectorW: connW,
+        borderWidth: bw,
+        groups,
+        innerW: s2InnerW,
+        baseX: s2BaseX,
+        topLabelPinY: shiftedTop,
+        bottomLabelPinY: shiftedBot,
+      };
+
+      // ── Intro/outro verse boxes and frame connectors — ONLY when hasIntro ─
+      if (config.features.hasIntro) {
+        const tBox_Y = shiftedTop;
+        const outerSectionH = tBox_Y - (lm.g1Y - lm.groupH - lm.boxExtOffset);
+        const tBox_H = outerSectionH;
+        const bBox_Y = lm.g3Y + lm.boxExtOffset;
+        const bBox_H = outerSectionH;
+
+        sectionTransform.topConnectorY    = tBox_Y;
+        sectionTransform.topConnectorH    = tBox_H;
+        sectionTransform.bottomConnectorY = bBox_Y;
+        sectionTransform.bottomConnectorH = bBox_H;
+        sectionTransform.introVerse = {
+          x: s2BaseX,
+          y: lm.v6Y,
+          z: 0.003,
+          w: s2InnerW,
+          h: lm.bigBoxH,
+        };
+        sectionTransform.outroVerse = {
+          x: s2BaseX,
+          y: lm.v19Y,
+          z: 0.003,
+          w: s2InnerW,
+          h: lm.bigBoxH,
+        };
+      }
+
+      sections.push(sectionTransform);
+    }
+  });
+
+  return { sections };
 }
 
-// Module-level singleton — computed once at boot since all inputs are static constants.
-// All components import `SURAH_TRANSFORMS` directly; no prop-drilling of math needed.
-export const SURAH_TRANSFORMS = buildSurahTransforms(layoutMath, START_X);
+// Output is just { sections } now
+export const SURAH_TRANSFORMS = buildSurahTransforms(
+  layoutMath,
+  START_X,
+  ALAK_LAYOUT_CONFIG,
+);
 
 export function getPopUpTrackerPosition(
   verses: { y: number; h: number }[],

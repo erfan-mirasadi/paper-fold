@@ -1,11 +1,15 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSpring, a, to } from "@react-spring/three";
+import { useSpring, a, to, SpringValue } from "@react-spring/three";
 import {
   useFoldAnimation,
   useMiddleHorizontalFoldAnimation,
 } from "../../../hooks/useFoldAnimation";
-import { useElevateAnimation, SECTION_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
+import {
+  useElevateAnimation,
+  SECTION_ELEVATION_HEIGHT,
+} from "../../../hooks/useElevateAnimation";
+
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import {
   dragEngine,
@@ -19,6 +23,7 @@ import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { useHandoffOpacity } from "../sections-object/ElevatedSectionSurfaces";
 import { VerseConfig } from "../../../data/surahDataGenerator";
 import { VerseMesh } from "./VerseMesh";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 const SECTION_SURFACE_SHADOW_MOTION = {
   liftHeight: SECTION_ELEVATION_HEIGHT,
@@ -30,25 +35,11 @@ const SECTION_SURFACE_SHADOW_MOTION = {
   },
 } as const;
 
-/** Static verse-pair mapping: paired verses share a single drag lead. */
-const VERSE_PAIR_LEAD: Record<number, number> = {
-  1: 1,
-  2: 1,
-  3: 3,
-  4: 3,
-  7: 7,
-  8: 7,
-  9: 9,
-  10: 9,
-  11: 11,
-  12: 11,
-  13: 13,
-  14: 13,
-  15: 15,
-  16: 15,
-  17: 17,
-  18: 17,
-};
+/** Dynamic verse pair lead: the smaller ID of the two paired verses. */
+function getLeadVerseId(configId: number, pairings: Record<number, number> | undefined) {
+  const pairedVerseId = pairings?.[configId];
+  return pairedVerseId ? Math.min(configId, pairedVerseId) : configId;
+}
 
 const ZERO_OFFSET = { x: 0, y: 0 };
 
@@ -56,19 +47,41 @@ import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 
-type ShadowSurfaceSectionId = "s1" | "s2_top" | "s2_bottom";
+import { useStoryStore } from "../../../stores/useStoryStore";
+import { SurahLayoutConfig } from "../../../data/schema";
+
+type ShadowSurfaceSectionId = string;
 
 function getShadowSurfaceSectionId(
   verseId: number,
+  storyConfig: SurahLayoutConfig<any>
 ): ShadowSurfaceSectionId | null {
-  if (verseId >= 1 && verseId <= 5) return "s1";
-  if (verseId >= 6 && verseId <= 10) return "s2_top";
-  if (verseId >= 15 && verseId <= 19) return "s2_bottom";
+  const S1_ID = storyConfig.sections[0]?.id;
+  const S2_ID = storyConfig.sections[1]?.id;
+  // If there is no section 2, no shadow surface mapping is possible.
+  if (!S1_ID || !S2_ID) return null;
+  const S2_TOP_ID = `${S2_ID}_top`;
+  const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
+  if (verseId >= 1 && verseId <= 5) return S1_ID;
+  if (verseId >= 6 && verseId <= 10) return S2_TOP_ID;
+  if (verseId >= 15 && verseId <= 19) return S2_BOTTOM_ID;
   return null;
 }
 
 export function VerseController({ config }: { config: VerseConfig }) {
+  const activeStoryConfig = useStoryStore((state) => state.activeConfig);
+  const S1_ID = activeStoryConfig.sections[0]?.id ?? "section1";
+  const S2_ID = activeStoryConfig.sections[1]?.id ?? "__no_s2__";
+  const S2_CENTER_ID = `${S2_ID}_center`;
+  
   const runtime = useSurahLayoutRuntime();
+  const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
+  
+  let finalVerseTextScale = runtime.layoutMath.verseTextScale;
+  if (activeStoryConfig.id === "ayatalkursi" && activeLanguage !== "ar") {
+    finalVerseTextScale = undefined; // Drop scaling for translations so it uses smaller defaults
+  }
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
   const backfaceColor = "#e8e4d8";
@@ -91,10 +104,10 @@ export function VerseController({ config }: { config: VerseConfig }) {
     state.activeVerseIds.includes(config.id),
   );
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const isCenterSectionRaised = activeSectionIds.includes("s2_center");
+  const isCenterSectionRaised = activeSectionIds.includes(S2_CENTER_ID);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id);
+  const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id, activeStoryConfig);
   const isSectionSurfaceRaised =
     shadowSurfaceSectionId !== null &&
     activeSectionIds.includes(shadowSurfaceSectionId);
@@ -153,7 +166,8 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const zOffset = foldVisibility.zOffset;
 
   // Fade out both the fold opacity and elevate opacity during the handoff phase
-  const opacity = useHandoffOpacity(foldVisibility.opacity, sectionId);
+  const baseOpacity = foldVisibility.opacity;
+  const opacity = useHandoffOpacity(baseOpacity, sectionId);
   const handoffElevateOpacity = useHandoffOpacity(elevateOpacity, sectionId);
 
   const rotLeft = verticalFold.rotLeft;
@@ -171,12 +185,12 @@ export function VerseController({ config }: { config: VerseConfig }) {
       ? middleGapHalf
       : 0;
 
-  const leadVerseId = VERSE_PAIR_LEAD[config.id] ?? config.id;
+  const leadVerseId = getLeadVerseId(config.id, activeStoryConfig.specialVerses?.versePairings);
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
   const useSectionGroupDrag =
-    isCenterSectionRaised && sectionId === "s2_center" && sectionDrag !== null;
+    isCenterSectionRaised && sectionId === S2_CENTER_ID && sectionDrag !== null;
 
   const isVerseSeparated = useDragState((s) =>
     s.draggedVerseIds.includes(leadVerseId),
@@ -186,7 +200,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
 
   const sectionBounds = useMemo(() => {
-    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === "s2_center")
+    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === S2_CENTER_ID)
       return undefined;
     return calculateSectionBounds(
       sectionId,
@@ -204,7 +218,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     springY:
       useSectionGroupDrag && sectionDrag ? sectionDrag.y : leadVerseDrag.y,
     dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
-    dragSectionId: useSectionGroupDrag ? "s2_center" : undefined,
+    dragSectionId: useSectionGroupDrag ? S2_CENTER_ID : undefined,
     sectionBounds,
     sectionSpringX: sectionDrag?.x,
     sectionSpringY: sectionDrag?.y,
@@ -280,8 +294,13 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBorderCol={config.circleBorderCol}
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
+          textColor={config.textColor}
+          textScaleOverride={finalVerseTextScale}
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
+          customFrameSvg={config.customFrameSvg}
+          frameScaleLTR={config.frameScaleLTR}
+          anaAyetTab={config.anaAyetTab}
         />
       </a.group>
     </group>

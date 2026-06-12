@@ -3,7 +3,7 @@
 :root {
   --page-bg: #ffffff;
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -19,37 +19,6 @@
 }
 
 :root {
-  --overlay-bg: rgba(255, 255, 255, 0.65);
-  --overlay-border: 1px solid rgba(255, 255, 255, 0.4);
-  --overlay-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-  --overlay-text: #0f1218;
-
-  --overlay-hover-bg: rgba(255, 255, 255, 0.85);
-  --overlay-hover-border-color: rgba(255, 255, 255, 0.6);
-  --overlay-hover-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
-
-  --overlay-active-bg: rgba(230, 235, 242, 0.7);
-  --overlay-active-border: 1px solid rgba(255, 255, 255, 0.5);
-  --overlay-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-  --overlay-item-hover-bg: rgba(56, 66, 82, 0.1);
-  --overlay-panel-shadow:
-    0 8px 24px rgba(19, 22, 29, 0.12), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-  --overlay-divider: rgba(15, 18, 24, 0.1);
-  --overlay-transparent-bg: rgba(56, 66, 82, 0);
-
-  --overlay-glow: transparent;
-
-  --overlay-knob-bg: #ffffff;
-  --overlay-knob-border: 1px solid rgba(0, 0, 0, 0.05);
-  --overlay-knob-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-  --sweep-1-bg: transparent;
-  --sweep-2-bg: transparent;
-  --sweep-3-bg: transparent;
-
   --shadow-color: 0, 0, 0;
 }
 
@@ -57,33 +26,6 @@
   --page-bg: #000000;
   --background: #0a0a0a;
   --foreground: #ededed;
-
-  --overlay-bg: rgba(20, 24, 32, 0.65);
-  --overlay-border: 1px solid rgba(255, 255, 255, 0.1);
-  --overlay-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  --overlay-text: rgba(241, 246, 255, 0.95);
-
-  --overlay-hover-bg: rgba(30, 36, 48, 0.75);
-  --overlay-hover-border-color: rgba(255, 255, 255, 0.15);
-  --overlay-hover-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
-
-  --overlay-active-bg: rgba(40, 48, 64, 0.7);
-  --overlay-active-border: 1px solid rgba(255, 255, 255, 0.2);
-  --overlay-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-
-  --overlay-item-hover-bg: rgba(255, 255, 255, 0.1);
-  --overlay-panel-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
-  --overlay-divider: rgba(255, 255, 255, 0.12);
-  --overlay-transparent-bg: rgba(210, 228, 255, 0);
-
-  --overlay-glow: transparent;
-
-  --overlay-knob-bg: rgba(42, 52, 67, 0.94);
-  --overlay-knob-border: 1px solid rgba(255, 255, 255, 0.1);
-  --overlay-knob-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 
   --sweep-1-bg: transparent;
   --sweep-2-bg: transparent;

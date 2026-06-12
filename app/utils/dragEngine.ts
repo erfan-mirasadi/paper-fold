@@ -1,27 +1,56 @@
 import { SpringValue } from "@react-spring/three";
 import { create } from "zustand";
 import { type ElevatedSectionId } from "../stores/useElevatedStore";
+import { getActiveStoryConfig } from "../stores/useStoryStore";
+import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
 
 export const DRAG_SPRING_CONFIG = { mass: 1.5, tension: 350, friction: 35 };
 
 const createSpring = () => new SpringValue(0, { config: DRAG_SPRING_CONFIG });
 
+const dynamicSectionsTarget: Record<string, { x: SpringValue<number>; y: SpringValue<number> }> = {};
+const dynamicVersesTarget: Record<number, { x: SpringValue<number>; y: SpringValue<number> }> = {};
+
+const dynamicSections = new Proxy(dynamicSectionsTarget, {
+  get(target, prop: string) {
+    if (typeof prop === "symbol" || prop === "toJSON" || prop === "constructor") return target[prop as any];
+    if (prop === "length" || prop === "name") return target[prop as any];
+    
+    // Some react or internal checks might ask for weird string props, be careful.
+    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+      return target[prop];
+    }
+
+    // Generate on demand
+    target[prop] = { x: createSpring(), y: createSpring() };
+    return target[prop];
+  }
+});
+
+const dynamicVerses = new Proxy(dynamicVersesTarget, {
+  get(target, prop: string) {
+    if (typeof prop === "symbol" || prop === "toJSON" || prop === "constructor") return target[prop as any];
+    const num = Number(prop);
+    if (isNaN(num)) {
+      return target[prop as any];
+    }
+    
+    if (target[num]) {
+      return target[num];
+    }
+
+    // Generate on demand
+    target[num] = { x: createSpring(), y: createSpring() };
+    return target[num];
+  }
+});
+
 export const dragEngine = {
-  sections: {
-    s1: { x: createSpring(), y: createSpring() },
-    s2_top: { x: createSpring(), y: createSpring() },
-    s2_bottom: { x: createSpring(), y: createSpring() },
-    s2_center: { x: createSpring(), y: createSpring() },
-  } as Record<
-    ElevatedSectionId,
-    { x: SpringValue<number>; y: SpringValue<number> }
-  >,
-  verses: Object.fromEntries(
-    Array.from({ length: 19 }, (_, i) => [
-      i + 1,
-      { x: createSpring(), y: createSpring() },
-    ]),
-  ) as Record<number, { x: SpringValue<number>; y: SpringValue<number> }>,
+  sections: dynamicSections,
+  verses: dynamicVerses,
+  // We expose the raw targets if we ever need to iterate over all instantiated springs safely
+  _sectionsTarget: dynamicSectionsTarget,
+  _versesTarget: dynamicVersesTarget,
 };
 
 const draggedVerseIds = new Set<number>();
@@ -152,11 +181,11 @@ export function unmarkSectionDragged(sectionId: ElevatedSectionId) {
 }
 
 export function resetAllDrags() {
-  Object.values(dragEngine.sections).forEach((s) => {
+  Object.values(dragEngine._sectionsTarget).forEach((s) => {
     s.x.start(0);
     s.y.start(0);
   });
-  Object.values(dragEngine.verses).forEach((v) => {
+  Object.values(dragEngine._versesTarget).forEach((v) => {
     v.x.start(0);
     v.y.start(0);
   });
@@ -167,9 +196,16 @@ export function resetAllDrags() {
 
 /** Helper to resolve verse -> section map */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
-  if (verseId >= 1 && verseId <= 5) return "s1";
-  if (verseId >= 6 && verseId <= 10) return "s2_top";
-  if (verseId >= 11 && verseId <= 14) return "s2_center";
-  if (verseId >= 15 && verseId <= 19) return "s2_bottom";
+  for (const sec of getActiveStoryConfig().sections) {
+    if (sec.type === "gridWithAnaAyet") {
+      const g = sec as GridSectionConfig;
+      if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;
+    } else if (sec.type === "verticalGroups") {
+      const v = sec as VerticalGroupsSectionConfig;
+      if (v.introVerse === verseId || (v.groups[0] && v.groups[0].verseIds.includes(verseId))) return `${v.id}_top`;
+      if (v.groups[1] && v.groups[1].verseIds.includes(verseId)) return `${v.id}_center`;
+      if (v.outroVerse === verseId || (v.groups[2] && v.groups[2].verseIds.includes(verseId))) return `${v.id}_bottom`;
+    }
+  }
   return null;
 }

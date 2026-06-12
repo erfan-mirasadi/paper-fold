@@ -3,26 +3,78 @@
 import { useFrame } from "@react-three/fiber";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
-import { Vector3 } from "three";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
+import { GridSectionConfig, VerticalGroupsSectionConfig, CameraTargetConfig } from "../../../data/schema";
 
-const SECTION_ZOOM_TARGETS: Record<
-  string,
-  { y: number; fov: number; tilt: number }
-> = {
-  // y: بالا و پایین رفتن دوربین
-  // fov: زوم لنز دوربین (مقدار پیش‌فرض 50 است. عدد کمتر = زوم بیشتر)
-  // tilt: زاویه دید بالا/پایین (عدد منفی = نگاه به سمت پایین، صفر = نگاه مستقیم)
-  s1: { y: 2, fov: 20, tilt: -1.3 },
-  s2_top: { y: 1.4, fov: 25, tilt: -1.3 },
-  s2_center: { y: 1, fov: 30, tilt: -1.5 },
-  s2_bottom: { y: 0.7, fov: 35, tilt: -1.5 },
-};
-
-const _camPos = new Vector3();
-const _lookTarget = new Vector3();
+import { useMemo } from "react";
 
 export function SectionZoomCamera() {
+  const config = useStoryStore(state => state.activeConfig);
+
+  const { zoomTargets, getSectionIdForVerse } = useMemo(() => {
+    const zoomTargets: Record<string, CameraTargetConfig> = {};
+
+    config.sections.forEach((section) => {
+      if (section.type === "gridWithAnaAyet") {
+        const s1 = section as GridSectionConfig;
+        if (s1.cameraTarget) {
+          zoomTargets[s1.id] = s1.cameraTarget;
+        }
+      } else if (section.type === "verticalGroups") {
+        const s2 = section as VerticalGroupsSectionConfig;
+        const defaultTarget = s2.cameraTarget;
+        
+        if (s2.subCameraTargets) {
+          if (s2.subCameraTargets.top || defaultTarget) {
+            zoomTargets[`${s2.id}_top`] = (s2.subCameraTargets.top ?? defaultTarget)!;
+          }
+          if (s2.subCameraTargets.center || defaultTarget) {
+            zoomTargets[`${s2.id}_center`] = (s2.subCameraTargets.center ?? defaultTarget)!;
+          }
+          if (s2.subCameraTargets.bottom || defaultTarget) {
+            zoomTargets[`${s2.id}_bottom`] = (s2.subCameraTargets.bottom ?? defaultTarget)!;
+          }
+        } else if (defaultTarget) {
+          // Fallback to section's main camera target if no sub targets are defined
+          zoomTargets[`${s2.id}_top`] = defaultTarget;
+          zoomTargets[`${s2.id}_center`] = defaultTarget;
+          zoomTargets[`${s2.id}_bottom`] = defaultTarget;
+        }
+        
+        if (defaultTarget) {
+          zoomTargets[s2.id] = defaultTarget;
+        }
+      }
+    });
+
+    const getSectionIdForVerse = (vid: number): string | null => {
+      for (const section of config.sections) {
+        if (section.type === "gridWithAnaAyet") {
+          const s1 = section as GridSectionConfig;
+          if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
+        } else if (section.type === "verticalGroups") {
+          const s2 = section as VerticalGroupsSectionConfig;
+          if (s2.subCameraTargets) {
+            if (s2.introVerse === vid) return `${s2.id}_top`;
+            if (s2.outroVerse === vid) return `${s2.id}_bottom`;
+            if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
+            if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
+            if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
+          } else {
+            if (s2.introVerse === vid) return s2.id;
+            if (s2.outroVerse === vid) return s2.id;
+            for (const group of s2.groups || []) {
+              if (group.verseIds.includes(vid)) return s2.id;
+            }
+          }
+        }
+      }
+      return null;
+    };
+
+    return { zoomTargets, getSectionIdForVerse };
+  }, [config.sections]);
   useFrame((state) => {
     // 1. Only run zoom logic when in paper mode
     const isIntroActive = useFoldStore.getState().isIntroActive;
@@ -36,8 +88,8 @@ export function SectionZoomCamera() {
     const controls = state.controls as any;
 
     // 2. Base camera position and target from config
-    const [defX, defY, defZ] = CAMERA_CONFIG.initialCamera.position;
-    const [defTX, defTY, defTZ] = CAMERA_CONFIG.initialCamera.target;
+    const [, defY] = CAMERA_CONFIG.initialCamera.position;
+    const [, defTY] = CAMERA_CONFIG.initialCamera.target;
 
     const defFov = CAMERA_CONFIG.initialCamera.fov;
 
@@ -48,16 +100,12 @@ export function SectionZoomCamera() {
     // Infer section if we only clicked a verse and activeSectionId is null
     let targetSectionId = activeSectionId;
     if (!targetSectionId && activeVerseIds.length > 0) {
-      const vid = activeVerseIds[0];
-      if (vid <= 5) targetSectionId = "s1";
-      else if (vid <= 10) targetSectionId = "s2_top";
-      else if (vid <= 14) targetSectionId = "s2_center";
-      else targetSectionId = "s2_bottom";
+      targetSectionId = getSectionIdForVerse(activeVerseIds[0]);
     }
 
     // 3. If a section is active and we are NOT in all sections mode, zoom to it
     if (phase === "elevated" && !isAllSectionsMode && targetSectionId) {
-      const zoomCoords = SECTION_ZOOM_TARGETS[targetSectionId];
+      const zoomCoords = zoomTargets[targetSectionId];
       if (zoomCoords) {
         targetCamY = zoomCoords.y;
         targetFov = zoomCoords.fov;
@@ -68,22 +116,36 @@ export function SectionZoomCamera() {
     }
 
     // 4. Smoothly interpolate camera position and target
-    _camPos.set(defX, targetCamY, defZ); // Z is locked to default!
-    _lookTarget.set(defTX, lookAtY, defTZ);
+    // IMPORTANT: We only control Y-height and FOV.
+    // X and Z are owned by OrbitControls (azimuth rotation) — do NOT lerp them.
+    const lerpFactor = 0.025; // Lower = smoother/slower zoom
+    const threshold = 0.001;
 
-    camera.position.lerp(_camPos, 0.05);
+    const yDiff = targetCamY - camera.position.y;
+    if (Math.abs(yDiff) > threshold) {
+      camera.position.y += yDiff * lerpFactor;
+    }
 
     const currentFov = (camera as any).fov;
     if (currentFov !== undefined) {
-      (camera as any).fov += (targetFov - currentFov) * 0.05;
-      camera.updateProjectionMatrix();
+      const fovDiff = targetFov - currentFov;
+      if (Math.abs(fovDiff) > threshold) {
+        (camera as any).fov += fovDiff * lerpFactor;
+        camera.updateProjectionMatrix();
+      }
     }
 
     if (controls?.target) {
-      controls.target.lerp(_lookTarget, 0.05);
-      controls.update();
+      const targetYDiff = lookAtY - controls.target.y;
+      if (Math.abs(targetYDiff) > threshold) {
+        controls.target.y += targetYDiff * lerpFactor;
+      }
+      // Do NOT call controls.update() here — CameraViewController owns the
+      // camera orientation each frame. Calling controls.update() here would
+      // fight its azimuth positioning and cause jitter/resets.
     } else {
-      camera.lookAt(_lookTarget);
+      // Fallback: directly tilt the camera to face the lookAtY
+      camera.lookAt(camera.position.x, lookAtY, camera.position.z);
     }
   });
 

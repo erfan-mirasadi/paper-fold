@@ -13,7 +13,7 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../stores/useElevatedStore";
-import { PAGE_WIDTH, PAGE_HEIGHT } from "../data/SurahConfig";
+import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
 import { SectionBounds } from "../utils/boundsHelper";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 
@@ -79,6 +79,8 @@ export function useElevatedDrag({
     invQuat: new Quaternion(),
     dragMarked: false,
   });
+
+  const runtime = useSurahLayoutRuntime();
 
   return useMemo<DragBindings>(() => {
     if (!enabled) return EMPTY_DRAG_BINDINGS;
@@ -161,10 +163,10 @@ export function useElevatedDrag({
               localHit.y <= sectionBounds.maxY + sy;
           } else if (!isAllSectionsMode) {
             shouldSnapHome =
-              localHit.x >= -PAGE_WIDTH / 2 &&
-              localHit.x <= PAGE_WIDTH / 2 &&
+              localHit.x >= -runtime.PAGE_WIDTH / 2 &&
+              localHit.x <= runtime.PAGE_WIDTH / 2 &&
               localHit.y <= 0 &&
-              localHit.y >= -PAGE_HEIGHT;
+              localHit.y >= -runtime.PAGE_HEIGHT;
           }
         }
       }
@@ -211,5 +213,6 @@ export function useElevatedDrag({
     sectionBounds,
     sectionSpringX,
     sectionSpringY,
+    runtime,
   ]);
 }

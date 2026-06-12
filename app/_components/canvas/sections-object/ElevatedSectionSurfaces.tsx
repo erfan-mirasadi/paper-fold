@@ -35,13 +35,12 @@ import {
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
+import { SectionTransforms, RowConnectorTransform } from "../../../data/schema";
 
 import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
   SECTION_BG_TEXTURE,
   S1_INNER_BORDER,
-  MAROON_THEME,
-  GREEN_THEME,
   S1_FRAME_BG_COLOR,
   S2_FRAME_BG_COLOR,
   S1_FRAME_IMAGE,
@@ -61,6 +60,7 @@ import {
   type SectionBounds,
 } from "../../../utils/boundsHelper";
 import { PAPER_MATERIAL_CONFIG } from "../3d-scene/PaperMaterial";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
 import { IntroGuide3DReporter } from "../intro/section-guides/IntroGuide3DReporter";
@@ -135,10 +135,10 @@ function useSectionSurfaceSpring(
     from: { opacity: 0 },
     delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
-      : isIntroActive || sectionId === "s1" || !justLeftIntro
+      : isIntroActive || sectionId === useStoryStore.getState().activeConfig.sections[0].id || !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
-    immediate: actuallyActive || (justLeftIntro && sectionId !== "s1"), // Snap to 0 instantly ONLY when leaving the intro!
+    immediate: actuallyActive || (justLeftIntro && sectionId !== useStoryStore.getState().activeConfig.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
     config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -172,7 +172,7 @@ export function useHandoffOpacity(
     // Sync opacity directly to the store without triggering React re-renders
     return useFoldStore.subscribe((state) => {
       const targetOpacity =
-        state.isIntroActive && sectionId && sectionId !== "s1"
+        state.isIntroActive && sectionId && sectionId !== useStoryStore.getState().activeConfig.sections[0].id
           ? 1 - state.introHandoffProgress
           : 1;
 
@@ -208,6 +208,7 @@ interface ElevatedLayerProps {
   sectionBgTexture?: Texture | null;
   /** When true the shadow is fully suppressed (e.g. during intro flight). */
   suppressShadow?: boolean;
+  renderOrder?: number;
 }
 
 function ElevatedLayer({
@@ -224,6 +225,7 @@ function ElevatedLayer({
   shadowInsetZ = VERSE_MIMIC_SHADOW.insetZ,
   sectionBgTexture = null,
   suppressShadow = false,
+  renderOrder,
 }: ElevatedLayerProps) {
   const runtime = useSurahLayoutRuntime();
   const PAGE_WIDTH = runtime.PAGE_WIDTH;
@@ -293,7 +295,7 @@ function ElevatedLayer({
         </a.mesh>
       )}
 
-      <a.mesh>
+      <a.mesh renderOrder={renderOrder}>
         <RoundedShapeComponent w={w} h={h} radius={radius} />
         {usesTextureFill ? (
           <a.meshBasicMaterial
@@ -490,49 +492,56 @@ export function ElevatedSectionSurfaces() {
     texture.colorSpace = SRGBColorSpace;
   });
 
-  const s1Active = useElevatedStore((s) => s.activeSectionIds.includes("s1"));
+  const config = useStoryStore(state => state.activeConfig);
+  const S1_ID = config.sections[0]?.id ?? "section1";
+  const S2_ID = config.sections[1]?.id ?? "__no_s2__";
+  const S2_TOP_ID = `${S2_ID}_top`;
+  const S2_CENTER_ID = `${S2_ID}_center`;
+  const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
+  const s1Active = useElevatedStore((s) => s.activeSectionIds.includes(S1_ID));
   const s2TopActive = useElevatedStore((s) =>
-    s.activeSectionIds.includes("s2_top"),
+    s.activeSectionIds.includes(S2_TOP_ID),
   );
   const s2CenterActive = useElevatedStore((s) =>
-    s.activeSectionIds.includes("s2_center"),
+    s.activeSectionIds.includes(S2_CENTER_ID),
   );
   const s2BottomActive = useElevatedStore((s) =>
-    s.activeSectionIds.includes("s2_bottom"),
+    s.activeSectionIds.includes(S2_BOTTOM_ID),
   );
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  const s1BaseSpring = useSectionSurfaceSpring(s1Active, "s1");
-  const s2TopBaseSpring = useSectionSurfaceSpring(s2TopActive, "s2_top");
+  const s1BaseSpring = useSectionSurfaceSpring(s1Active, S1_ID);
+  const s2TopBaseSpring = useSectionSurfaceSpring(s2TopActive, S2_TOP_ID);
   const s2CenterBaseSpring = useSectionSurfaceSpring(
     s2CenterActive,
-    "s2_center",
+    S2_CENTER_ID,
   );
   const s2BottomBaseSpring = useSectionSurfaceSpring(
     s2BottomActive,
-    "s2_bottom",
+    S2_BOTTOM_ID,
   );
 
   const s1Spring = {
     ...s1BaseSpring,
-    opacity: useHandoffOpacity(s1BaseSpring.opacity, "s1"),
+    opacity: useHandoffOpacity(s1BaseSpring.opacity, S1_ID),
   };
   const s2TopSpring = {
     ...s2TopBaseSpring,
-    opacity: useHandoffOpacity(s2TopBaseSpring.opacity, "s2_top"),
+    opacity: useHandoffOpacity(s2TopBaseSpring.opacity, S2_TOP_ID),
   };
   const s2CenterSpring = {
     ...s2CenterBaseSpring,
-    opacity: useHandoffOpacity(s2CenterBaseSpring.opacity, "s2_center"),
+    opacity: useHandoffOpacity(s2CenterBaseSpring.opacity, S2_CENTER_ID),
   };
   const s2BottomSpring = {
     ...s2BottomBaseSpring,
-    opacity: useHandoffOpacity(s2BottomBaseSpring.opacity, "s2_bottom"),
+    opacity: useHandoffOpacity(s2BottomBaseSpring.opacity, S2_BOTTOM_ID),
   };
 
-  const s1 = SURAH_TRANSFORMS.s1;
-  const s2 = SURAH_TRANSFORMS.s2;
+  const s1 = SURAH_TRANSFORMS.sections[0] as Required<SectionTransforms>;
+  const s2 = SURAH_TRANSFORMS.sections[1] as Required<SectionTransforms>;
 
   const bw = s2.borderWidth;
   const innerBorderInset = bw * 0.7;
@@ -591,19 +600,19 @@ export function ElevatedSectionSurfaces() {
     () =>
       isAllSectionsMode
         ? undefined
-        : calculateSectionBounds("s1", SURAH_TRANSFORMS, runtime.PAGE_WIDTH),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
+        : calculateSectionBounds(S1_ID, SURAH_TRANSFORMS, runtime.PAGE_WIDTH),
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S1_ID],
   );
   const s2TopBounds = useMemo(
     () =>
       isAllSectionsMode
         ? undefined
         : calculateSectionBounds(
-            "s2_top",
+            S2_TOP_ID,
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_TOP_ID],
   );
   const s2CenterBounds = undefined;
   const s2BottomBounds = useMemo(
@@ -611,30 +620,30 @@ export function ElevatedSectionSurfaces() {
       isAllSectionsMode
         ? undefined
         : calculateSectionBounds(
-            "s2_bottom",
+            S2_BOTTOM_ID,
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH],
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_BOTTOM_ID],
   );
 
-  const s1IntroRef = useIntroSectionOffset("s1");
-  const s2TopIntroRef = useIntroSectionOffset("s2_top");
-  const s2CenterIntroRef = useIntroSectionOffset("s2_center");
-  const s2BottomIntroRef = useIntroSectionOffset("s2_bottom");
+  const s1IntroRef = useIntroSectionOffset(S1_ID);
+  const s2TopIntroRef = useIntroSectionOffset(S2_TOP_ID);
+  const s2CenterIntroRef = useIntroSectionOffset(S2_CENTER_ID);
+  const s2BottomIntroRef = useIntroSectionOffset(S2_BOTTOM_ID);
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
       {/* ─── Section 1 ─────────────────────────────────────────────── */}
       <group ref={s1IntroRef}>
         <DraggableSectionGroup
-          sectionId="s1"
+          sectionId={S1_ID}
           isActive={s1Active}
           sectionBounds={s1Bounds}
         >
           {isIntroActive && (
             <IntroGuide3DReporter
-              guideId="s1"
+              guideId={S1_ID}
               position={[
                 s1.frameX - runtime.PAGE_WIDTH / 2 + s1.frameW,
                 s1.frameY,
@@ -661,7 +670,7 @@ export function ElevatedSectionSurfaces() {
               zOffset={0.001}
               scallopPosition="top"
             />
-            {s1.rowConnectors.map((rc, i) => (
+            {s1.rowConnectors.map((rc: RowConnectorTransform, i: number) => (
               <ElevatedLayer
                 key={`s1-rc-${i}`}
                 x={rc.x}
@@ -673,6 +682,7 @@ export function ElevatedSectionSurfaces() {
                 sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
                 spring={s1Spring}
                 zOffset={0.0015}
+                renderOrder={3}
               />
             ))}
           </group>
@@ -682,13 +692,13 @@ export function ElevatedSectionSurfaces() {
       {/* ─── Section 2 top connector ───────────────────────────────── */}
       <group ref={s2TopIntroRef}>
         <DraggableSectionGroup
-          sectionId="s2_top"
+          sectionId={S2_TOP_ID}
           isActive={s2TopActive}
           sectionBounds={s2TopBounds}
         >
           {isIntroActive && (
             <IntroGuide3DReporter
-              guideId="s2_top"
+              guideId={S2_TOP_ID}
               position={[
                 s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
                 s2.shiftedTop,
@@ -717,7 +727,7 @@ export function ElevatedSectionSurfaces() {
               zOffset={0.001}
               scallopPosition="none"
             />
-            {s2.groups[0].rowConnectors.map((rc, i) => (
+            {s2.groups[0].rowConnectors.map((rc: RowConnectorTransform, i: number) => (
               <ElevatedLayer
                 key={`s2-top-rc-${i}`}
                 x={rc.x}
@@ -725,10 +735,11 @@ export function ElevatedSectionSurfaces() {
                 w={rc.w}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={MAROON_THEME}
-                sectionBgTexture={getTextureForColor(MAROON_THEME)}
+                color={config.styling.colors.s2Group1Bg}
+                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group1Bg)}
                 spring={s2TopSpring}
                 zOffset={0.0025}
+                renderOrder={3}
               />
             ))}
           </group>
@@ -738,13 +749,13 @@ export function ElevatedSectionSurfaces() {
       {/* ─── Section 2 Center Group ────────────────────────────────────── */}
       <group ref={s2CenterIntroRef}>
         <DraggableSectionGroup
-          sectionId="s2_center"
+          sectionId={S2_CENTER_ID}
           isActive={s2CenterActive}
           sectionBounds={s2CenterBounds}
         >
           {isIntroActive && (
             <IntroGuide3DReporter
-              guideId="s2_center"
+              guideId={S2_CENTER_ID}
               position={[
                 s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
                 s2.groups[1].frameY,
@@ -753,7 +764,7 @@ export function ElevatedSectionSurfaces() {
             />
           )}
           <group>
-            {s2.groups[1].rowConnectors.map((rc, i) => (
+            {s2.groups[1].rowConnectors.map((rc: RowConnectorTransform, i: number) => (
               <ElevatedLayer
                 key={`s2-center-rc-${i}`}
                 x={rc.x}
@@ -761,10 +772,11 @@ export function ElevatedSectionSurfaces() {
                 w={rc.w}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={GREEN_THEME}
-                sectionBgTexture={getTextureForColor(GREEN_THEME)}
+                color={config.styling.colors.s2Group2Bg}
+                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group2Bg)}
                 spring={s2CenterSpring}
                 zOffset={0.0025}
+                renderOrder={3}
               />
             ))}
           </group>
@@ -774,13 +786,13 @@ export function ElevatedSectionSurfaces() {
       {/* ─── Section 2 bottom connector ────────────────────────────── */}
       <group ref={s2BottomIntroRef}>
         <DraggableSectionGroup
-          sectionId="s2_bottom"
+          sectionId={S2_BOTTOM_ID}
           isActive={s2BottomActive}
           sectionBounds={s2BottomBounds}
         >
           {isIntroActive && (
             <IntroGuide3DReporter
-              guideId="s2_bottom"
+              guideId={S2_BOTTOM_ID}
               position={[
                 s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
                 s2.groups[2].frameY,
@@ -809,7 +821,7 @@ export function ElevatedSectionSurfaces() {
               zOffset={0.001}
               scallopPosition="none"
             />
-            {s2.groups[2].rowConnectors.map((rc, i) => (
+            {s2.groups[2].rowConnectors.map((rc: RowConnectorTransform, i: number) => (
               <ElevatedLayer
                 key={`s2-bottom-rc-${i}`}
                 x={rc.x}
@@ -817,10 +829,11 @@ export function ElevatedSectionSurfaces() {
                 w={rc.w}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={MAROON_THEME}
-                sectionBgTexture={getTextureForColor(MAROON_THEME)}
+                color={config.styling.colors.s2Group3Bg}
+                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group3Bg)}
                 spring={s2BottomSpring}
                 zOffset={0.0025}
+                renderOrder={3}
               />
             ))}
           </group>

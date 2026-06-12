@@ -16,13 +16,8 @@ export function NavigationOverlay() {
 
   const isEndStage = useFoldStore((s) => s.currentOffset < 0.5);
 
-  // Fluid placement/size: match other overlays on the right
-  const rightOffset = "clamp(170px, 24vw, 240px)";
-  const insetY = "clamp(12px, 2vw, 16px)";
-  const stackGap = "clamp(8px, 1.2vw, 10px)";
 
-  // Keep label/icon color fixed while the glass surface adapts to theme.
-  const accentColor = "var(--overlay-text)";
+  const accentColor = "var(--foreground)";
   const iconUnfold = (
     <svg
       width="22"
@@ -122,15 +117,7 @@ export function NavigationOverlay() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      style={{
-        position: "fixed",
-        top: insetY,
-        right: rightOffset,
-        display: "flex",
-        flexDirection: "column",
-        gap: stackGap,
-        zIndex: 100,
-      }}
+      className="pointer-events-auto flex flex-row-reverse md:flex-col gap-2 md:gap-3 items-center"
     >
       {!isPaperDocked && !isAllSectionsMode && (
         <NavButton
@@ -169,13 +156,6 @@ const NavButton = memo(function NavButton({
   isPending,
   variants,
 }: NavButtonProps) {
-  const btnH = "clamp(40px, 4.4vw, 46px)";
-  const btnMinW = "clamp(58px, 6.2vw, 66px)";
-  const btnPadX = "clamp(6px, 1vw, 7px)";
-  const btnPadY = "clamp(2px, 0.6vw, 3px)";
-  const btnRadius = "clamp(10px, 1.35vw, 11px)";
-  const labelFont = "clamp(9.5px, 1.2vw, 10.5px)";
-
   const handleClick = () => {
     if (isPending) return;
     onClick();
@@ -184,25 +164,19 @@ const NavButton = memo(function NavButton({
   return (
     <OverlayButton
       variants={variants}
-      isPending={isPending}
+      disabled={isPending}
       onClick={handleClick}
       aria-busy={isPending}
-      icon={icon}
-      label={label}
-      height={btnH}
-      minWidth={btnMinW}
-      padding={`${btnPadY} ${btnPadX}`}
-      borderRadius={btnRadius}
-      direction="column"
-      gap="2px"
-      fontSize={labelFont}
-      fontWeight={600}
-      style={{
-        position: "relative",
-        cursor: isPending ? "wait" : "pointer",
-        letterSpacing: "0.01em",
-        overflow: "hidden",
-      }}
-    ></OverlayButton>
+      className="flex flex-col items-center justify-center gap-1 w-14 h-14"
+    >
+      <span className="flex items-center justify-center pointer-events-none">
+        {icon}
+      </span>
+      {label && (
+        <span className="text-[10px] font-semibold tracking-wider pointer-events-none uppercase text-foreground">
+          {label}
+        </span>
+      )}
+    </OverlayButton>
   );
 });

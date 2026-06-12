@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import type { ElevatedSectionId } from "../stores/useElevatedStore";
+import { getActiveStoryConfig } from "../stores/useStoryStore";
 
 // ─── Animation Config ───────────────────────────────────────────────────
 // 1. When does the scale-up start? (Overall scroll percentage from 0 to 100)
@@ -25,21 +26,60 @@ export const PAGE2_EXTRA_RX = 0.15;
 /** Convert degrees to radians — keeps scatter config human-readable. */
 const deg = (d: number): number => (d * Math.PI) / 180;
 
+// ─── Lazy ID accessors ────────────────────────────────────────────────────
+// Section IDs are read lazily (at call-time) so module evaluation never
+// crashes when the active config has fewer than 2 sections (e.g. Ayat al-Kursi).
+const getS1Id = (): string =>
+  getActiveStoryConfig().sections[0]?.id ?? "section1";
+const getS2Id = (): string =>
+  getActiveStoryConfig().sections[1]?.id ?? "section2";
+const getS2TopId = (): string => `${getS2Id()}_top`;
+const getS2CenterId = (): string => `${getS2Id()}_center`;
+const getS2BotId = (): string => `${getS2Id()}_bottom`;
+
+/** Returns the four canonical ElevatedSectionIds for the current config. */
+function getSessionIds(): ElevatedSectionId[] {
+  return [
+    getS1Id(),
+    getS2TopId(),
+    getS2CenterId(),
+    getS2BotId(),
+  ] as ElevatedSectionId[];
+}
+
 // ─── Scatter: [x, y, z, rx°, ry°, rz°] ─────────────────────────────────
-// Rotations are NOW in DEGREES — use the deg() helper when reading them.
+// Built lazily per-call so keys always match the current config's section ids.
 // Positive rx = tilt top away from camera ("lean back")
 // Positive ry = rotate right edge towards camera
 // Positive rz = counter-clockwise twist
-export const INTRO_SECTION_SCATTER: Record<
+function getIntroSectionScatter(): Record<
   ElevatedSectionId,
   [number, number, number, number?, number?, number?]
-> = {
-  //     x      y      z      rx(°)   ry(°)    rz(°)
-  s1: [0.75, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
-  s2_top: [0, -0.6, -0.4],
-  s2_center: [0.06, -0.55, -1.2],
-  s2_bottom: [0, -0.63, 0.5],
-};
+> {
+  const s1 = getS1Id();
+  const s2t = getS2TopId();
+  const s2c = getS2CenterId();
+  const s2b = getS2BotId();
+  return {
+    //     x      y      z      rx(°)    ry(°)    rz(°)
+    [s1]: [0.82, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
+    [s2t]: [0, -0.6, -0.4],
+    [s2c]: [0.06, -0.55, -1.2],
+    [s2b]: [0, -0.63, 0.5],
+  } as Record<
+    ElevatedSectionId,
+    [number, number, number, number?, number?, number?]
+  >;
+}
+
+/** Public export kept for backwards compat — reads lazily. */
+export const INTRO_SECTION_SCATTER = new Proxy(
+  {} as Record<
+    ElevatedSectionId,
+    [number, number, number, number?, number?, number?]
+  >,
+  { get: (_t, key) => getIntroSectionScatter()[key as ElevatedSectionId] },
+);
 
 // ─── Idle breathing for s1 while scattered ──────────────────────────────
 // Gives the floating section a living, gentle sway.
@@ -65,17 +105,32 @@ const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
  *  While true the single controller useFrame skips all work. */
 let _isSettled = false;
 
-export const HANDOFF_SECTION_TARGET: Record<
+function getHandoffSectionTarget(): Record<
   ElevatedSectionId,
   { x: number; y: number; z: number; scale: number }
-> = {
-  s1: { x: 0, y: 0, z: 0, scale: 1 },
-  // Give all S2 sections the exact same displacement so they move as a unified block
-  // and maintain their relative positions.
-  s2_top: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
-  s2_center: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
-  s2_bottom: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
-};
+> {
+  const s1 = getS1Id();
+  const s2t = getS2TopId();
+  const s2c = getS2CenterId();
+  const s2b = getS2BotId();
+  return {
+    [s1]: { x: 0, y: 0, z: 0, scale: 1 },
+    [s2t]: { x: 0, y: 0.5, z: -0.5, scale: 0.85 },
+    [s2c]: { x: 0, y: 0.8, z: -1.0, scale: 0.85 },
+    [s2b]: { x: 0, y: 1.3, z: -1.5, scale: 0.85 },
+  } as Record<
+    ElevatedSectionId,
+    { x: number; y: number; z: number; scale: number }
+  >;
+}
+
+export const HANDOFF_SECTION_TARGET = new Proxy(
+  {} as Record<
+    ElevatedSectionId,
+    { x: number; y: number; z: number; scale: number }
+  >,
+  { get: (_t, key) => getHandoffSectionTarget()[key as ElevatedSectionId] },
+);
 
 // ─── Types ───────────────────────────────────────────────────────────────
 interface Transform7 {
@@ -98,32 +153,20 @@ const IDENTITY: Transform7 = {
   rz: 0,
 };
 
-// ─── Module-level pre-computed results (written once per frame by controller) ─
-const ALL_SECTION_IDS: ElevatedSectionId[] = [
-  "s1",
-  "s2_top",
-  "s2_center",
-  "s2_bottom",
-];
-
+// ─── Module-level mutable stores (keyed by section id, populated lazily) ──
 /** Current lerped transform for each section. Read by all useIntroSectionOffset consumers. */
-const _liveTransforms: Record<ElevatedSectionId, Transform7> = {
-  s1: { ...IDENTITY },
-  s2_top: { ...IDENTITY },
-  s2_center: { ...IDENTITY },
-  s2_bottom: { ...IDENTITY },
-};
+const _liveTransforms: Record<string, Transform7> = {};
 
 /** Group refs registered by consumers — the controller applies transforms to all of them. */
-const _registeredGroups: Record<
-  ElevatedSectionId,
-  Set<RefObject<Group | null>>
-> = {
-  s1: new Set(),
-  s2_top: new Set(),
-  s2_center: new Set(),
-  s2_bottom: new Set(),
-};
+const _registeredGroups: Record<string, Set<RefObject<Group | null>>> = {};
+
+/** Ensure entries exist for all current session section ids. */
+function ensureSessionEntries() {
+  for (const sid of getSessionIds()) {
+    if (!_liveTransforms[sid]) _liveTransforms[sid] = { ...IDENTITY };
+    if (!_registeredGroups[sid]) _registeredGroups[sid] = new Set();
+  }
+}
 
 let _identityReadyAt = 0;
 
@@ -132,7 +175,8 @@ function getTransformTarget(
   sectionId: ElevatedSectionId,
   time: number,
 ): Transform7 {
-  const scatter = INTRO_SECTION_SCATTER[sectionId];
+  const scatter = getIntroSectionScatter()[sectionId];
+  if (!scatter) return IDENTITY;
   const scatterX = scatter[0];
   const scatterY = scatter[1];
   const scatterZ = scatter[2];
@@ -172,7 +216,7 @@ function getTransformTarget(
   let rz = scatterRz * invT;
 
   // ── s1 idle breathing while scattered ──
-  if (sectionId === "s1" && invT > 0.01) {
+  if (sectionId === getS1Id() && invT > 0.01) {
     const breathe = invT; // fade breathing out as section converges
     y += Math.sin(time * S1_IDLE.yFreq) * S1_IDLE.yAmp * breathe;
     rx += Math.sin(time * S1_IDLE.rxFreq) * S1_IDLE.rxAmp * breathe;
@@ -209,11 +253,13 @@ function getTransformTarget(
   const clampedHandoff = clamp01(introHandoffProgress);
   const handoffT = easeInOut(clampedHandoff);
   if (handoffT > 0) {
-    const target = HANDOFF_SECTION_TARGET[sectionId];
-    x += target.x * handoffT;
-    y += target.y * handoffT;
-    z += target.z * handoffT;
-    scale -= (1 - target.scale) * handoffT;
+    const target = getHandoffSectionTarget()[sectionId];
+    if (target) {
+      x += target.x * handoffT;
+      y += target.y * handoffT;
+      z += target.z * handoffT;
+      scale -= (1 - target.scale) * handoffT;
+    }
   }
 
   // Creative Highlight Effect at the "joined step"
@@ -245,6 +291,10 @@ function getTransformTarget(
  */
 export function IntroSectionAnimationController() {
   useFrame((state, delta) => {
+    // Skip all intro animation work for Surahs that have no intro.
+    const hasIntro = getActiveStoryConfig().features.hasIntro;
+    if (!hasIntro) return;
+
     // Early exit: once settled, skip all work permanently until intro restarts.
     if (_isSettled) {
       // Check if intro reactivated (user scrolled back up)
@@ -256,6 +306,8 @@ export function IntroSectionAnimationController() {
       }
     }
 
+    ensureSessionEntries();
+
     const time = state.clock.elapsedTime;
     // Softer (narm-tar) lerp for a premium transition feel
     const factor = Math.min(delta * 4.5, 1);
@@ -265,8 +317,9 @@ export function IntroSectionAnimationController() {
     // slow lerp so the crossfade starts with positions exactly matching paper.
     const shouldSnap = !isIntroActive && introHandoffProgress >= 1;
 
-    for (let i = 0; i < ALL_SECTION_IDS.length; i++) {
-      const sid = ALL_SECTION_IDS[i];
+    const currentIds = getSessionIds();
+    for (let i = 0; i < currentIds.length; i++) {
+      const sid = currentIds[i];
       const target = getTransformTarget(sid, time);
       const live = _liveTransforms[sid];
 
@@ -305,16 +358,18 @@ export function IntroSectionAnimationController() {
 
       // Apply to all registered groups for this section
       const groups = _registeredGroups[sid];
-      groups.forEach((ref) => {
-        const g = ref.current;
-        if (g) {
-          g.position.x = live.x;
-          g.position.y = live.y;
-          g.position.z = live.z;
-          g.scale.setScalar(live.scale);
-          g.rotation.set(live.rx, live.ry, live.rz);
-        }
-      });
+      if (groups) {
+        groups.forEach((ref) => {
+          const g = ref.current;
+          if (g) {
+            g.position.x = live.x;
+            g.position.y = live.y;
+            g.position.z = live.z;
+            g.scale.setScalar(live.scale);
+            g.rotation.set(live.rx, live.ry, live.rz);
+          }
+        });
+      }
     }
 
     // Mark settled once all sections are at identity and handoff is complete.
@@ -340,8 +395,16 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
   useEffect(() => {
     if (!sectionId) return;
 
+    if (!_registeredGroups[sectionId]) {
+      _registeredGroups[sectionId] = new Set();
+    }
+
     // Register this group ref so the controller can write transforms to it
     _registeredGroups[sectionId].add(groupRef);
+
+    if (!_liveTransforms[sectionId]) {
+      _liveTransforms[sectionId] = { ...IDENTITY };
+    }
 
     // Apply initial transform immediately (don't wait for first frame)
     const live = _liveTransforms[sectionId];
@@ -353,7 +416,7 @@ export function useIntroSectionOffset(sectionId: ElevatedSectionId | null) {
     }
 
     return () => {
-      _registeredGroups[sectionId].delete(groupRef);
+      _registeredGroups[sectionId]?.delete(groupRef);
     };
   }, [sectionId]);
 

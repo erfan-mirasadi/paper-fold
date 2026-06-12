@@ -14,8 +14,8 @@ function StackIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="19"
-      height="19"
+      width="24"
+      height="24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.45"
@@ -41,8 +41,8 @@ function RestoreIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="19"
-      height="19"
+      width="24"
+      height="24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.65"
@@ -65,11 +65,7 @@ export function AllSectionsOverlay() {
   const showAllSections = useElevatedStore((s) => s.showAllSections);
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
 
-  // Fluid placement/size: mobile + XL remain familiar; mid-sizes tighten up.
   const rightOffset = "clamp(250px, 35vw, 340px)";
-  const buttonW = "clamp(46px, 5.4vw, 54px)";
-  const buttonH = "clamp(38px, 4.2vw, 44px)";
-  const radius = "clamp(12px, 1.4vw, 14px)";
 
   const canShowControl = isAllSectionsMode || isPastThreshold;
 
@@ -91,13 +87,7 @@ export function AllSectionsOverlay() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 170, damping: 22 }}
-          style={{
-            position: "fixed",
-            top: "16px",
-            right: rightOffset,
-            zIndex: 100,
-            pointerEvents: "none",
-          }}
+          className="pointer-events-auto flex items-center justify-center"
         >
           <OverlayButton
             key={isAllSectionsMode ? "restore" : "show-all"}
@@ -108,11 +98,10 @@ export function AllSectionsOverlay() {
             }
             onClick={handleClick}
             onPointerDown={(e) => e.preventDefault()}
-            width={buttonW}
-            height={buttonH}
-            borderRadius={radius}
-            icon={isAllSectionsMode ? <RestoreIcon /> : <StackIcon />}
-          />
+            className="w-14 h-14"
+          >
+            {isAllSectionsMode ? <RestoreIcon /> : <StackIcon />}
+          </OverlayButton>
         </motion.div>
       )}
     </AnimatePresence>

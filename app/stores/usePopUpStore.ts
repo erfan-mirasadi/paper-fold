@@ -12,6 +12,7 @@ export type MiddleHorizontalColumn = "left" | "right";
 const INITIAL_POPUP_GROUPS: PopUpGroup[] = [
   { id: "g_1_2", verseIds: [1, 2], isOpen: false, hasEverOpened: false },
   { id: "g_3_4", verseIds: [3, 4], isOpen: false, hasEverOpened: false },
+  { id: "g_5_6", verseIds: [5, 6], isOpen: false, hasEverOpened: false },
   { id: "g_7_8", verseIds: [7, 8], isOpen: false, hasEverOpened: false },
   { id: "g_9_10", verseIds: [9, 10], isOpen: false, hasEverOpened: false },
   {
@@ -40,6 +41,7 @@ interface PopUpStoreState {
   ) => void;
   handleHoverScroll: (direction: "down" | "up") => void;
   syncScrollOffset: (offset: number) => void;
+  reset: () => void;
 }
 
 export function getUnlockedPopUpGroups(offset: number): string[] {
@@ -47,15 +49,16 @@ export function getUnlockedPopUpGroups(offset: number): string[] {
     return [
       "g_1_2",
       "g_3_4",
+      "g_5_6",
       "g_7_8",
       "g_9_10",
       "g_11_12_13_14",
       "g_15_16",
       "g_17_18",
     ];
-  if (offset >= 0.75) return ["g_1_2", "g_3_4", "g_7_8", "g_9_10"];
-  if (offset >= 0.5) return ["g_1_2", "g_3_4", "g_7_8"];
-  return ["g_1_2", "g_3_4"];
+  if (offset >= 0.75) return ["g_1_2", "g_3_4", "g_5_6", "g_7_8", "g_9_10"];
+  if (offset >= 0.5) return ["g_1_2", "g_3_4", "g_5_6", "g_7_8"];
+  return ["g_1_2", "g_3_4", "g_5_6"];
 }
 
 export const usePopUpStore = create<PopUpStoreState>((set) => ({
@@ -252,5 +255,15 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
           ? state.hoveredMiddleColumn
           : null,
       };
+    }),
+
+  reset: () =>
+    set({
+      popUpGroups: INITIAL_POPUP_GROUPS,
+      popUpAllOpen: false,
+      unlockedGroupIds: getUnlockedPopUpGroups(0),
+      middleHorizontalFolded: null,
+      hoveredGroupId: null,
+      hoveredMiddleColumn: null,
     }),
 }));

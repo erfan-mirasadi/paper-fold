@@ -1,4 +1,6 @@
 import { SurahTransforms } from "../data/SurahConfig";
+import { SectionTransforms, RowConnectorTransform } from "../data/schema";
+import { getActiveStoryConfig } from "../stores/useStoryStore";
 
 export type SectionBounds = {
   minX: number;
@@ -10,21 +12,41 @@ export type SectionBounds = {
 export const BOUNDS_PAD = 0.06;
 
 export function calculateSectionBounds(
-  sectionId: "s1" | "s2_top" | "s2_center" | "s2_bottom",
+  sectionId: string,
   transforms: SurahTransforms,
   pageWidth: number,
 ): SectionBounds {
-  const { s1, s2 } = transforms;
+  const s1 = transforms.sections[0] as Required<SectionTransforms>;
+  const s2 = transforms.sections[1] as Required<SectionTransforms> | undefined;
 
-  switch (sectionId) {
-    case "s1":
+  const S1_ID = getActiveStoryConfig().sections[0]?.id ?? "section1";
+  const S2_ID = getActiveStoryConfig().sections[1]?.id ?? "__no_s2__";
+  const S2_TOP_ID = `${S2_ID}_top`;
+  const S2_CENTER_ID = `${S2_ID}_center`;
+  const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+
+  // Guard: if section 2 does not exist, fall straight to default (full-screen bounds).
+  if (!s2) {
+    if (sectionId === S1_ID) {
       return {
         minX: s1.frameX - pageWidth / 2 - BOUNDS_PAD,
         maxX: s1.frameX - pageWidth / 2 + s1.frameW + BOUNDS_PAD,
         maxY: s1.frameY + BOUNDS_PAD,
         minY: s1.frameY - s1.frameH - BOUNDS_PAD,
       };
-    case "s2_top": {
+    }
+    return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
+  }
+
+  switch (sectionId) {
+    case S1_ID:
+      return {
+        minX: s1.frameX - pageWidth / 2 - BOUNDS_PAD,
+        maxX: s1.frameX - pageWidth / 2 + s1.frameW + BOUNDS_PAD,
+        maxY: s1.frameY + BOUNDS_PAD,
+        minY: s1.frameY - s1.frameH - BOUNDS_PAD,
+      };
+    case S2_TOP_ID: {
       const outerY = s2.topConnectorY;
       const outerH = s2.topConnectorH;
       const outerX = s2.connectorX - s2.borderWidth;
@@ -32,7 +54,7 @@ export function calculateSectionBounds(
       const rcs = s2.groups[0].rowConnectors;
       const rcMinY =
         rcs.length > 0
-          ? Math.min(...rcs.map((rc) => rc.y - rc.h))
+          ? Math.min(...rcs.map((rc: RowConnectorTransform) => rc.y - rc.h))
           : outerY - outerH;
 
       return {
@@ -42,15 +64,15 @@ export function calculateSectionBounds(
         minY: Math.min(outerY - outerH, rcMinY) - BOUNDS_PAD,
       };
     }
-    case "s2_center": {
+    case S2_CENTER_ID: {
       const rcs = s2.groups[1].rowConnectors;
       if (rcs.length === 0) {
         return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
       }
-      const topY = Math.max(...rcs.map((rc) => rc.y));
-      const botY = Math.min(...rcs.map((rc) => rc.y - rc.h));
-      const leftX = Math.min(...rcs.map((rc) => rc.x));
-      const rightX = Math.max(...rcs.map((rc) => rc.x + rc.w));
+      const topY = Math.max(...rcs.map((rc: RowConnectorTransform) => rc.y));
+      const botY = Math.min(...rcs.map((rc: RowConnectorTransform) => rc.y - rc.h));
+      const leftX = Math.min(...rcs.map((rc: RowConnectorTransform) => rc.x));
+      const rightX = Math.max(...rcs.map((rc: RowConnectorTransform) => rc.x + rc.w));
 
       return {
         minX: leftX - pageWidth / 2 - BOUNDS_PAD,
@@ -59,14 +81,14 @@ export function calculateSectionBounds(
         minY: botY - BOUNDS_PAD,
       };
     }
-    case "s2_bottom": {
+    case S2_BOTTOM_ID: {
       const outerY = s2.bottomConnectorY;
       const outerH = s2.bottomConnectorH;
       const outerX = s2.connectorX - s2.borderWidth;
       const outerW = s2.connectorW + s2.borderWidth * 2;
       const rcs = s2.groups[2].rowConnectors;
       const rcMaxY =
-        rcs.length > 0 ? Math.max(...rcs.map((rc) => rc.y)) : outerY;
+        rcs.length > 0 ? Math.max(...rcs.map((rc: RowConnectorTransform) => rc.y)) : outerY;
 
       return {
         minX: outerX - pageWidth / 2 - BOUNDS_PAD,
@@ -75,5 +97,7 @@ export function calculateSectionBounds(
         minY: outerY - outerH - BOUNDS_PAD,
       };
     }
+    default:
+      return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
   }
 }

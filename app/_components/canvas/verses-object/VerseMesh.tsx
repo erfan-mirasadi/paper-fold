@@ -2,10 +2,22 @@
 import * as THREE from "three";
 import { useMemo } from "react";
 import { a, SpringValue, to } from "@react-spring/three";
-import { RenderTexture, OrthographicCamera } from "@react-three/drei";
-import { VerseBox, RoundedShapeComponent } from "../SurahLayout/SharedUI";
+import {
+  RenderTexture,
+  OrthographicCamera,
+  useTexture,
+} from "@react-three/drei";
+import {
+  VerseBox,
+  RoundedShapeComponent,
+  AnaAyetTab,
+} from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
-import { ELEVATE_TIMING, SECTION_ELEVATION_HEIGHT } from "../../../hooks/useElevateAnimation";
+import {
+  ELEVATE_TIMING,
+  SECTION_ELEVATION_HEIGHT,
+} from "../../../hooks/useElevateAnimation";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 export interface VerseMeshProps {
   hingeX: number;
@@ -35,10 +47,67 @@ export interface VerseMeshProps {
   bg: string;
   border: string;
   circleBorderCol: string;
-  circleBg: string;
+  circleBg?: string;
   circleTextCol: string;
+  textColor?: string;
+  textScaleOverride?: number;
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
+  customFrameSvg?: string;
+  frameScaleLTR?: number;
+  anaAyetTab?: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    borderWidth: number;
+    labelDrop?: number;
+  };
+}
+
+function BorderSvg({
+  w,
+  h,
+  assetUrl,
+  opacity,
+  elevateOpacity,
+  frameScaleLTR,
+}: {
+  w: number;
+  h: number;
+  assetUrl: string;
+  opacity: any;
+  elevateOpacity: SpringValue<number>;
+  frameScaleLTR?: number;
+}) {
+  const texture = useTexture(assetUrl, (t: any) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+
+  const activeLanguage = useSurahLanguageStore.getState().activeLanguage;
+  const isArabic = activeLanguage === "ar";
+  
+  const widthScale = 0.8;
+  const heightScale = 0.93;
+  
+  const frameScaleMult = (!isArabic && frameScaleLTR) ? frameScaleLTR : 1.0;
+
+  const renderW = w * widthScale * frameScaleMult;
+  const renderH = h * heightScale * frameScaleMult;
+
+  return (
+    <mesh position={[w / 2, -h / 2, 0.01]} renderOrder={102}>
+      <planeGeometry args={[renderW, renderH]} />
+      <a.meshBasicMaterial
+        map={texture as any}
+        transparent
+        depthTest={true}
+        depthWrite={false}
+        toneMapped={false}
+        opacity={to([opacity, elevateOpacity], (o1, o2) => Math.max(o1, o2))}
+      />
+    </mesh>
+  );
 }
 
 export function VerseMesh({
@@ -70,8 +139,13 @@ export function VerseMesh({
   circleBorderCol,
   circleBg,
   circleTextCol,
+  textColor,
+  textScaleOverride,
   suppressShadow = false,
   shadowRenderOrder,
+  customFrameSvg,
+  frameScaleLTR,
+  anaAyetTab,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
@@ -84,7 +158,7 @@ export function VerseMesh({
   };
 
   const bw = 0.0055;
-  const shrinkX = 0.001;
+  const shrinkX = isPill ? 0.001 : 0;
   const outerW = w - shrinkX * 2 + bw * 2;
   const outerH = h + bw * 2;
   const outerRadius = h / 2 + bw;
@@ -270,6 +344,17 @@ export function VerseMesh({
                     />
                   </mesh>
 
+                  {customFrameSvg && (
+                    <BorderSvg
+                      w={outerW}
+                      h={outerH}
+                      assetUrl={customFrameSvg}
+                      opacity={opacity}
+                      elevateOpacity={elevateOpacity}
+                      frameScaleLTR={frameScaleLTR}
+                    />
+                  )}
+
                   <mesh
                     position={[outerW / 2, -outerH / 2, 0.002]}
                     renderOrder={101}
@@ -310,6 +395,8 @@ export function VerseMesh({
                             circleBorderCol={circleBorderCol}
                             circleBg={circleBg}
                             circleTextCol={circleTextCol}
+                            textColor={textColor}
+                            textScaleOverride={textScaleOverride}
                             isPill={isPill}
                             shadow={false}
                             verseTextEnterDurationMs={0}
@@ -319,6 +406,35 @@ export function VerseMesh({
                     </a.meshStandardMaterial>
                   </mesh>
                 </group>
+
+                {/* AnaAyetTab – inside the fold transform hierarchy */}
+                {anaAyetTab &&
+                  (() => {
+                    const labelW = anaAyetTab.w;
+                    const labelH = anaAyetTab.h;
+                    const ANA_LABEL_PIN_OVERLAP = 0.0015;
+                    const labelDrop = anaAyetTab.labelDrop ?? 0.015;
+
+                    // Use the exact config coordinates passed by surahDataGenerator.
+                    // The tab is a sibling to the brick group (not a child), so it does
+                    // NOT inherit the [outerLeft, outerTop] offsets. We can use the native
+                    // relative coordinates calculated in the generator perfectly.
+                    return (
+                      <group
+                        position={[anaAyetTab.x, anaAyetTab.y, 0.01 + 0.0025]}
+                      >
+                        <AnaAyetTab
+                          x={0}
+                          y={0}
+                          w={labelW}
+                          h={labelH}
+                          z={0}
+                          borderWidth={anaAyetTab.borderWidth}
+                          renderOrder={110}
+                        />
+                      </group>
+                    );
+                  })()}
               </a.group>
             </a.group>
           </a.group>

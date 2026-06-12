@@ -1,12 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import {
-  SURAH_DATA_ARABIC,
-  SURAH_DATA_ENGLISH,
-  SURAH_DATA_TURKISH,
-  type SurahDataShape,
-} from "../data/surahData";
+
 
 export type SurahLanguage = "ar" | "en" | "tr";
 
@@ -16,11 +11,6 @@ export const SURAH_LANGUAGE_ORDER: readonly SurahLanguage[] = [
   "tr",
 ];
 
-export const SURAH_DATA_BY_LANGUAGE: Record<SurahLanguage, SurahDataShape> = {
-  ar: SURAH_DATA_ARABIC,
-  en: SURAH_DATA_ENGLISH,
-  tr: SURAH_DATA_TURKISH,
-};
 
 export const ANA_AYET_LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
   ar: "Ana Ayet",

@@ -22,7 +22,7 @@ export const S2_FRAME_IMAGE = "/Group 92.svg";
 export const S1_OUTER_BG = SECTION_BG_TEXTURE;
 export const S1_INNER_BG = "#fbf1d5";
 export const S1_OUTER_BORDER = "#D9BC81";
-export const S1_INNER_BORDER = "#e2caae";
+export const S1_INNER_BORDER = "#d2ae84";
 export const S1_ANA_BG = "#C4963B";
 
 export const S1_VERSE_NUMBER_BG = S1_INNER_BG;

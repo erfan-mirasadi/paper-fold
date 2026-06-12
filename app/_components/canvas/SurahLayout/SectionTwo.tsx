@@ -1,5 +1,5 @@
 "use client";
-import { TopLabel, VerseBox } from "./SharedUI";
+import { TopLabel, VerseBox, UiRect } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 // import { HollowConnector } from "./HollowConnector";
 import { VerseGroup } from "./VerseGroup";
@@ -8,22 +8,19 @@ import * as THREE from "three";
 import {
   // S2_OUTER_BORDER,
   // S2_OUTER_BG,
-  BLUE_THEME,
-  CAPSULE_BG_6_19,
   S2_TOP_LABEL_BG,
   S2_TOP_LABEL_BORDER,
   S2_FRAME_BG_COLOR,
   S2_FRAME_IMAGE,
 } from "../../../data/theme";
-import type {
-  SectionTwoData,
-  LayoutConfig,
-  S2Transforms,
-} from "../../../data/SurahConfig";
+import type { SectionTwoData, LayoutConfig } from "../../../data/SurahConfig";
+import { SectionTransforms } from "../../../data/schema";
 import { S2_LABEL_WIDTH, S2_LABEL_Y_OFFSET } from "../../../data/SurahConfig";
+import { useStoryStore } from "../../../stores/useStoryStore";
+
 interface SectionTwoProps {
   data: SectionTwoData;
-  transforms: S2Transforms;
+  transforms: SectionTransforms;
   layout: LayoutConfig;
   startX: number;
   PW: number;
@@ -57,143 +54,210 @@ export function SectionTwo({
   startX,
   PW,
 }: SectionTwoProps) {
-  const t = transforms;
+  const t = transforms as Required<SectionTransforms>;
   const edgeVerseBorderWidth = t.borderWidth;
 
+  // ── Config-driven intro/outro verse colours ──────────────────────────────
+  const config = useStoryStore((state) => state.activeConfig);
+  const introVerseNum = data.introVerse?.number ?? 6;
+  const outroVerseNum = data.outroVerse?.number ?? 19;
+  const introOverride = config.verseOverrides?.[introVerseNum];
+  const outroOverride = config.verseOverrides?.[outroVerseNum];
+  // Fallback: s2IntroOutroBg for background, maroonTheme for border.
+  const introBg = introOverride?.bg ?? config.styling.colors.s2IntroOutroBg;
+  const introBorder =
+    introOverride?.border ?? config.styling.colors.maroonTheme;
+  const outroBg = outroOverride?.bg ?? config.styling.colors.s2IntroOutroBg;
+  const outroBorder =
+    outroOverride?.border ?? config.styling.colors.maroonTheme;
+
+  // useTexture must always be called (React hook rules), but the mesh that
+  // uses it is only mounted when hasFrames is true — no wasted render cost.
   const texture = useTexture(S2_FRAME_IMAGE, (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace;
   });
 
+  // ── Conditional rendering guards — derived from data/transforms, NOT config.id ──
+  // The buildSurahTransforms engine only writes topConnectorY/H when hasIntro===true.
+  const hasFrames =
+    t.topConnectorY !== undefined &&
+    t.topConnectorH !== undefined &&
+    t.bottomConnectorY !== undefined &&
+    t.bottomConnectorH !== undefined;
+
+  // Intro/outro verse exists when the transform object contains the field
+  // AND the verse has a meaningful (non-zero) number.
+  const hasIntroVerse =
+    transforms.introVerse !== undefined && (data.introVerse?.number ?? 0) > 0;
+  const hasOutroVerse =
+    transforms.outroVerse !== undefined && (data.outroVerse?.number ?? 0) > 0;
+
+  // Only render section labels if there is something to say.
+  const hasTopLabel = !!data.topLabel;
+  const hasBottomLabel = !!data.bottomLabel;
+
+  // Pass to SideCurves — it needs to know the group geometry and intro context.
+  const groups = transforms.groups ?? [];
+
   return (
     <group>
-      {/* ─── SECTION OUTER FRAME ─────────────────────────────────────────── */}
       {/* ─── TOP BLOCK BACKGROUND (Section 2) ──────────────────────────── */}
-      <>
-        {/* Yellow solid background */}
-        <mesh
-          position={[
-            t.connectorX + t.connectorW / 2 + S2_TOP_SOLID_X_OFFSET,
-            t.topConnectorY - t.topConnectorH / 2 + S2_TOP_SOLID_Y_OFFSET,
-            -0.001,
-          ]}
-          scale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
-          renderOrder={1}
-        >
-          <planeGeometry args={[t.connectorW, t.topConnectorH]} />
-          <meshBasicMaterial
-            color={S2_FRAME_BG_COLOR}
-            toneMapped={false}
-            depthTest={false}
-            depthWrite={false}
-          />
-        </mesh>
+      {hasFrames && (
+        <>
+          {/* Yellow solid background */}
+          <mesh
+            position={[
+              t.connectorX + t.connectorW / 2 + S2_TOP_SOLID_X_OFFSET,
+              t.topConnectorY - t.topConnectorH / 2 + S2_TOP_SOLID_Y_OFFSET,
+              -0.001,
+            ]}
+            scale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
+            renderOrder={1}
+          >
+            <planeGeometry args={[t.connectorW, t.topConnectorH]} />
+            <meshBasicMaterial
+              color={S2_FRAME_BG_COLOR}
+              toneMapped={false}
+              depthTest={false}
+              depthWrite={false}
+            />
+          </mesh>
 
-        {/* Stretched main-frame image as background */}
-        <mesh
-          position={[
-            t.connectorX + t.connectorW / 2 + S2_TOP_IMAGE_X_OFFSET,
-            t.topConnectorY - t.topConnectorH / 2 + S2_TOP_IMAGE_Y_OFFSET,
-            0,
-          ]}
-          scale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
-          renderOrder={2}
-        >
-          <planeGeometry args={[t.connectorW, t.topConnectorH]} />
-          <meshBasicMaterial
-            map={texture}
-            transparent
-            depthTest={false}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </mesh>
-      </>
+          {/* Stretched main-frame image as background */}
+          <mesh
+            position={[
+              t.connectorX + t.connectorW / 2 + S2_TOP_IMAGE_X_OFFSET,
+              t.topConnectorY - t.topConnectorH / 2 + S2_TOP_IMAGE_Y_OFFSET,
+              0,
+            ]}
+            scale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
+            renderOrder={2}
+          >
+            <planeGeometry args={[t.connectorW, t.topConnectorH]} />
+            <meshBasicMaterial
+              map={texture}
+              transparent
+              depthTest={false}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
 
-      {/* ─── TOP HOLLOW CONNECTOR (Replaced by Image Background) ───────── */}
-      {/* <HollowConnector
-        position="top"
-        boxX={t.connectorX}
-        boxW={t.connectorW}
-        yTop={t.topConnectorY}
-        yBottom={t.topConnectorY - t.topConnectorH}
-        height={t.topConnectorH}
-        borderWidth={t.borderWidth}
-      /> */}
+          {/* ─── BOTTOM BLOCK BACKGROUND (Section 4) ─────────────────────── */}
+          {/* Yellow solid background */}
+          <mesh
+            position={[
+              t.connectorX + t.connectorW / 2 + S2_BOTTOM_SOLID_X_OFFSET,
+              t.bottomConnectorY -
+                t.bottomConnectorH / 2 +
+                S2_BOTTOM_SOLID_Y_OFFSET,
+              -0.001,
+            ]}
+            scale={[S2_BOTTOM_SOLID_SCALE_X, S2_BOTTOM_SOLID_SCALE_Y, 1]}
+            renderOrder={1}
+          >
+            <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
+            <meshBasicMaterial
+              color={S2_FRAME_BG_COLOR}
+              toneMapped={false}
+              depthTest={false}
+              depthWrite={false}
+            />
+          </mesh>
 
-      {/* ─── BOTTOM BLOCK BACKGROUND (Section 4) ───────────────────────── */}
-      <>
-        {/* Yellow solid background */}
-        <mesh
-          position={[
-            t.connectorX + t.connectorW / 2 + S2_BOTTOM_SOLID_X_OFFSET,
-            t.bottomConnectorY -
-              t.bottomConnectorH / 2 +
-              S2_BOTTOM_SOLID_Y_OFFSET,
-            -0.001,
-          ]}
-          scale={[S2_BOTTOM_SOLID_SCALE_X, S2_BOTTOM_SOLID_SCALE_Y, 1]}
-          renderOrder={1}
-        >
-          <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
-          <meshBasicMaterial
-            color={S2_FRAME_BG_COLOR}
-            toneMapped={false}
-            depthTest={false}
-            depthWrite={false}
-          />
-        </mesh>
+          {/* Stretched main-frame image as background */}
+          <mesh
+            position={[
+              t.connectorX + t.connectorW / 2 + S2_BOTTOM_IMAGE_X_OFFSET,
+              t.bottomConnectorY -
+                t.bottomConnectorH / 2 +
+                S2_BOTTOM_IMAGE_Y_OFFSET,
+              0,
+            ]}
+            scale={[S2_BOTTOM_IMAGE_SCALE_X, S2_BOTTOM_IMAGE_SCALE_Y, 1]}
+            renderOrder={2}
+          >
+            <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
+            <meshBasicMaterial
+              map={texture}
+              transparent
+              depthTest={false}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        </>
+      )}
 
-        {/* Stretched main-frame image as background */}
-        <mesh
-          position={[
-            t.connectorX + t.connectorW / 2 + S2_BOTTOM_IMAGE_X_OFFSET,
-            t.bottomConnectorY -
-              t.bottomConnectorH / 2 +
-              S2_BOTTOM_IMAGE_Y_OFFSET,
-            0,
-          ]}
-          scale={[S2_BOTTOM_IMAGE_SCALE_X, S2_BOTTOM_IMAGE_SCALE_Y, 1]}
-          renderOrder={2}
-        >
-          <planeGeometry args={[t.connectorW, t.bottomConnectorH]} />
-          <meshBasicMaterial
-            map={texture}
-            transparent
-            depthTest={false}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </mesh>
-      </>
+      {/* ─── DYNAMIC BACKGROUND (from config) ────────────────────────────── */}
+      {layout.s2BackgroundTexture && (
+        <DynamicBackground
+          url={layout.s2BackgroundTexture}
+          layout={layout}
+          startX={startX}
+        />
+      )}
 
-      {/* ─── BOTTOM HOLLOW CONNECTOR (Replaced by Image Background) ────── */}
-      {/* <HollowConnector
-        position="bottom"
-        boxX={t.connectorX}
-        boxW={t.connectorW}
-        yTop={t.bottomConnectorY}
-        yBottom={t.bottomConnectorY - t.bottomConnectorH}
-        height={t.bottomConnectorH}
-        borderWidth={t.borderWidth}
-      /> */}
+      {/* ─── AYAT AL KURSI PAPER COLORED BACKGROUNDS ───────────── */}
+      {config.styling.colors.sectionBackgrounds && (
+        <group position={[startX, 0, -0.0005]}>
+          {groups.map((gt, i) => {
+            const bgColors = config.styling.colors.sectionBackgrounds;
+            const color = bgColors![i] || bgColors![0]; // fallback
 
-      {/* ─── INTRO VERSE (verse 6) ───────────────────────────────────────── */}
-      <VerseBox
-        x={t.introVerse.x}
-        y={t.introVerse.y}
-        z={t.introVerse.z}
-        w={t.introVerse.w}
-        h={t.introVerse.h}
-        verse={data.introVerse.text}
-        number={data.introVerse.number}
-        bg={CAPSULE_BG_6_19}
-        border={BLUE_THEME}
-        circleBorderCol={BLUE_THEME}
-        circleBg={CAPSULE_BG_6_19}
-        circleTextCol={BLUE_THEME}
-        isPill={false}
-        borderWidth={edgeVerseBorderWidth}
-      />
+            const isFirst = i === 0;
+            const isLast = i === groups.length - 1;
+            const gtBottom = gt.frameY - gt.frameH;
+
+            const padYOuter = 0.02; // Reduced from 0.05 to prevent sticking out vertically
+
+            const yTop = isFirst
+              ? gt.frameY + padYOuter
+              : (groups[i - 1].frameY - groups[i - 1].frameH + gt.frameY) / 2;
+
+            const yBot = isLast
+              ? gtBottom - padYOuter
+              : (gtBottom + groups[i + 1].frameY) / 2;
+
+            const padX = 0.035; // reduced from 0.08 to make it wider on both sides
+            const w = layout.sectionW - padX * 2;
+            const h = yTop - yBot;
+
+            return (
+              <UiRect
+                key={`sec-bg-${i}`}
+                x={padX}
+                y={yTop}
+                w={w}
+                h={h}
+                radius={0.06}
+                color={color}
+                depthTest={false}
+              />
+            );
+          })}
+        </group>
+      )}
+
+      {/* ─── INTRO VERSE (verse 6 for Alak) ─────────────────────────────── */}
+      {hasIntroVerse && (
+        <VerseBox
+          x={transforms.introVerse!.x}
+          y={transforms.introVerse!.y}
+          z={transforms.introVerse!.z}
+          w={transforms.introVerse!.w}
+          h={transforms.introVerse!.h}
+          verse={data.introVerse.text}
+          number={data.introVerse.number}
+          bg={introBg}
+          border={introBorder}
+          circleBorderCol={introOverride?.circleBorderCol ?? introBorder}
+          circleBg={introOverride?.circleBg ?? introBg}
+          circleTextCol={introOverride?.circleTextCol ?? introBorder}
+          isPill={false}
+          borderWidth={edgeVerseBorderWidth}
+        />
+      )}
 
       {/* ─── VERSE GROUPS — mapped from pre-computed group transforms ─────── */}
       {data.colorGroups.map((group, index) => (
@@ -202,64 +266,113 @@ export function SectionTwo({
           group={group}
           groupTransform={t.groups[index]}
           groupIndex={index}
+          layout={layout}
         />
       ))}
 
-      {/* ─── OUTRO VERSE (verse 19) ──────────────────────────────────────── */}
-      <VerseBox
-        x={t.outroVerse.x}
-        y={t.outroVerse.y}
-        z={t.outroVerse.z}
-        w={t.outroVerse.w}
-        h={t.outroVerse.h}
-        verse={data.outroVerse.text}
-        number={data.outroVerse.number}
-        bg={CAPSULE_BG_6_19}
-        border={BLUE_THEME}
-        circleBorderCol={BLUE_THEME}
-        circleBg={CAPSULE_BG_6_19}
-        circleTextCol={BLUE_THEME}
-        isPill={false}
-        borderWidth={edgeVerseBorderWidth}
-      />
+      {/* ─── OUTRO VERSE (verse 19 for Alak) ────────────────────────────── */}
+      {hasOutroVerse && (
+        <VerseBox
+          x={transforms.outroVerse!.x}
+          y={transforms.outroVerse!.y}
+          z={transforms.outroVerse!.z}
+          w={transforms.outroVerse!.w}
+          h={transforms.outroVerse!.h}
+          verse={data.outroVerse.text}
+          number={data.outroVerse.number}
+          bg={outroBg}
+          border={outroBorder}
+          circleBorderCol={outroOverride?.circleBorderCol ?? outroBorder}
+          circleBg={outroOverride?.circleBg ?? outroBg}
+          circleTextCol={outroOverride?.circleTextCol ?? outroBorder}
+          isPill={false}
+          borderWidth={edgeVerseBorderWidth}
+        />
+      )}
 
-      {/* ─── SIDE CURVES (still read raw layout math) ────────────────────── */}
+      {/* ─── SIDE CURVES ─────────────────────────────────────────────────── */}
       <SideCurves
         layout={layout}
         startX={startX}
         borderWidth={edgeVerseBorderWidth}
+        groups={groups}
+        hasIntroOutro={layout.hasIntroOutro}
       />
 
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
-      {/* 
+      {/*
         IMPORTANT NOTE ON SYMMETRY:
         The Top and Bottom labels of Section 2 are perfectly symmetrical (mirrored).
-        Therefore, any vertical offset applied to the top label to push it outward (UP, +) 
-        must be inverted (DOWN, -) for the bottom label. 
+        Therefore, any vertical offset applied to the top label to push it outward (UP, +)
+        must be inverted (DOWN, -) for the bottom label.
       */}
-      <TopLabel
-        x={PW / 2}
-        y={t.topLabelPinY + S2_LABEL_Y_OFFSET}
-        z={0.004}
-        text={data.topLabel}
-        labelWidth={S2_LABEL_WIDTH}
-        partialBorder={true}
-        bgColor={S2_TOP_LABEL_BG}
-        borderColor={S2_TOP_LABEL_BORDER}
-        renderOrder={100}
-      />
-      <TopLabel
-        x={PW / 2}
-        y={t.bottomLabelPinY - S2_LABEL_Y_OFFSET}
-        z={0.004}
-        text={data.bottomLabel}
-        labelWidth={S2_LABEL_WIDTH}
-        partialBorder={true}
-        bottomBorder={true}
-        bgColor={S2_TOP_LABEL_BG}
-        borderColor={S2_TOP_LABEL_BORDER}
-        renderOrder={100}
-      />
+      {hasTopLabel && (
+        <TopLabel
+          x={PW / 2}
+          y={t.topLabelPinY + S2_LABEL_Y_OFFSET}
+          z={0.004}
+          text={data.topLabel}
+          labelWidth={S2_LABEL_WIDTH}
+          partialBorder={true}
+          bgColor={S2_TOP_LABEL_BG}
+          borderColor={S2_TOP_LABEL_BORDER}
+          renderOrder={100}
+        />
+      )}
+      {hasBottomLabel && (
+        <TopLabel
+          x={PW / 2}
+          y={t.bottomLabelPinY - S2_LABEL_Y_OFFSET}
+          z={0.004}
+          text={data.bottomLabel}
+          labelWidth={S2_LABEL_WIDTH}
+          partialBorder={true}
+          bottomBorder={true}
+          bgColor={S2_TOP_LABEL_BG}
+          borderColor={S2_TOP_LABEL_BORDER}
+          renderOrder={100}
+        />
+      )}
     </group>
+  );
+}
+
+// ─── HELPER COMPONENT FOR DYNAMIC BACKGROUND ───────────────────────────────
+function DynamicBackground({
+  url,
+  layout,
+  startX,
+}: {
+  url: string;
+  layout: LayoutConfig;
+  startX: number;
+}) {
+  const tex = useTexture(url, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+
+  return (
+    <mesh
+      position={[
+        startX + layout.sectionW / 2,
+        layout.s2Top - layout.s2H / 2,
+        -0.001,
+      ]}
+      scale={[
+        (layout as any).s2BackgroundScaleX ?? 1,
+        (layout as any).s2BackgroundScaleY ?? 1,
+        1,
+      ]}
+      renderOrder={1}
+    >
+      <planeGeometry args={[layout.sectionW, layout.s2H]} />
+      <meshBasicMaterial
+        map={tex}
+        transparent
+        depthTest={false}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
   );
 }

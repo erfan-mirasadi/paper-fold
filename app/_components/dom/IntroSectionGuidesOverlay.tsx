@@ -6,7 +6,7 @@ import {
   INTRO_SECTION_GUIDE_ORDER,
   introGuideMarkerDomId,
 } from "../canvas/intro/section-guides/introGuideAnchorLayout";
-import { INTRO_SECTION_GUIDE_UI_TEXT } from "../../data/introSectionGuideCopy";
+import { useStoryStore } from "../../stores/useStoryStore";
 import { useFoldStore } from "../canvas/orchestrator/ScrollManager";
 
 export function IntroSectionGuidesOverlay() {
@@ -31,6 +31,8 @@ export function IntroSectionGuidesOverlay() {
     });
   }, []);
 
+  const config = useStoryStore((state) => state.activeConfig);
+
   return (
     <div
       className="pointer-events-none"
@@ -44,7 +46,7 @@ export function IntroSectionGuidesOverlay() {
         <IntroGuideHudRow
           key={id}
           sectionId={id}
-          caption={INTRO_SECTION_GUIDE_UI_TEXT[id]}
+          caption={config.introGuides?.[id] || ""}
           polePx={polePx}
           lineStroke={line}
           tipFill={tip}

@@ -1,21 +1,25 @@
 import { useMemo, useEffect, useCallback } from "react";
 import { Color, type Texture } from "three";
 import { usePopUpStore } from "../stores/usePopUpStore";
-import {
-  useElevatedStore,
-  type ElevatedSectionId,
-} from "../stores/useElevatedStore";
+import { useElevatedStore } from "../stores/useElevatedStore";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import { ORIGINAL_TEXTURE_TIMING } from "./useFoldAnimation";
 import { ELEVATE_TEXTURE_TIMING } from "./useElevateAnimation";
-import { S1_INNER_BORDER } from "../data/theme";
 import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
 import { VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
+import { getActiveStoryConfig, useStoryStore } from "../stores/useStoryStore";
+import {
+  SectionTransforms,
+  GroupTransforms,
+  ElementTransform,
+  GridSectionConfig,
+  VerticalGroupsSectionConfig,
+  ThemeColors,
+} from "../data/schema";
+import { S1_INNER_BG, S1_INNER_BORDER } from "../data/theme";
 
 export const MASK_CONFIG = {
-  // Increase this to make the full section masks larger (e.g., 0.02, 0.03)
   sectionExpand: 0.013,
-  // Increase this to make the capsule/verse masks larger (e.g., 0.005, 0.01)
   verseExpand: 0.006,
 };
 
@@ -28,28 +32,34 @@ const isMiddleHorizontalFoldedForVerse = (
   state: { middleHorizontalFolded: "left" | "right" | null },
   verseId: number,
 ) => {
+  const folds = getActiveStoryConfig().specialVerses?.middleFoldVerses;
+  if (!folds) return false;
+
   if (state.middleHorizontalFolded === "left") {
-    return verseId === 12 || verseId === 14;
+    return folds.left.includes(verseId);
   }
   if (state.middleHorizontalFolded === "right") {
-    return verseId === 11 || verseId === 13;
+    return folds.right.includes(verseId);
   }
   return false;
 };
 
+// Maximum bounds for shader arrays to support any surah without recompiling
+const MAX_VERSE_ID = 100;
+const VERSE_ARR_SIZE = MAX_VERSE_ID + 1;
+const TOTAL_SECTIONS = 10;
+
 export function usePaperMasking(paperTextureDiffuse: Texture) {
-  // Read exact layout numbers dynamically to support language swapping
   const { PAGE_WIDTH, PAGE_HEIGHT, SURAH_TRANSFORMS, FOLD_Y_POSITIONS } =
     useSurahLayoutRuntime();
+  const activeConfig = useStoryStore((state) => state.activeConfig);
 
-  // Memoize geometry to avoid creating Float32Arrays constantly
   const { verseRects, verseRadii, sectionRects, verseBgColors } =
     useMemo(() => {
-      const s1 = SURAH_TRANSFORMS.s1;
-      const s2 = SURAH_TRANSFORMS.s2;
-
-      const vRects = new Float32Array(20 * 4);
-      const vRadii = new Float32Array(20);
+      const vRects = new Float32Array(VERSE_ARR_SIZE * 4);
+      const vRadii = new Float32Array(VERSE_ARR_SIZE);
+      const verseIsPill = new Array<boolean>(VERSE_ARR_SIZE).fill(true);
+      const sRects = new Float32Array(TOTAL_SECTIONS * 4);
 
       const setVerseRect = (
         num: number,
@@ -61,46 +71,121 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         vRects[num * 4 + 2] = t.w;
         vRects[num * 4 + 3] = t.h;
         vRadii[num] = isPill ? t.h / 2.0 : VERSE_5_6_19_RADIUS;
+        verseIsPill[num] = isPill;
       };
 
-      Object.entries(s1.verses).forEach(([num, t]) =>
-        setVerseRect(parseInt(num), t, true),
-      );
-      setVerseRect(5, s1.anaAyet, false);
-      setVerseRect(6, s2.introVerse, false);
-      s2.groups.forEach((g) => {
-        Object.entries(g.verses).forEach(([num, t]) =>
-          setVerseRect(parseInt(num), t, true),
-        );
-      });
-      setVerseRect(19, s2.outroVerse, false);
-
-      const sRects = new Float32Array(4 * 4);
       const PAD = 0.02;
       const exp = MASK_CONFIG.sectionExpand;
+      let secIdx = 0;
 
-      sRects[0 * 4 + 0] = s1.frameX - PAD / 2 - exp;
-      sRects[0 * 4 + 1] = s1.frameY + PAD / 2 + exp;
-      sRects[0 * 4 + 2] = s1.frameW + PAD + exp * 2;
-      sRects[0 * 4 + 3] = s1.frameH + PAD + exp * 2;
+      activeConfig.sections.forEach((sec, idx) => {
+        const sTransform = SURAH_TRANSFORMS.sections[
+          idx
+        ] as Required<SectionTransforms>;
+        if (sec.type === "gridWithAnaAyet") {
+          const g = sec as GridSectionConfig;
+          // Apply any expand override so the shader cutout matches the actual VerseBox size.
+          // Verses without an override fall back to their raw transform.
+          g.verses.forEach((vId) => {
+            const ov = activeConfig.verseOverrides?.[vId];
+            const expandW = ov?.expandW ?? 0;
+            const expandH = ov?.expandH ?? 0;
+            const rawT = sTransform.verses[vId];
+            setVerseRect(
+              vId,
+              {
+                x: rawT.x - expandW,
+                y: rawT.y + expandH,
+                w: rawT.w + expandW * 2,
+                h: rawT.h + expandH * 2,
+              },
+              ov?.isPill ?? true,
+            );
+          });
 
-      sRects[1 * 4 + 0] = s2.frameX - PAD / 2 - exp;
-      sRects[1 * 4 + 1] = s2.shiftedTop + PAD / 2 + exp;
-      sRects[1 * 4 + 2] = s2.frameW + PAD + exp * 2;
-      sRects[1 * 4 + 3] = s2.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
+          // anaAyet: always apply its expand override
+          const anaOv = activeConfig.verseOverrides?.[g.anaAyet];
+          const anaExpandW = anaOv?.expandW ?? 0;
+          const anaExpandH = anaOv?.expandH ?? 0;
+          const anaRawT = sTransform.anaAyet;
+          setVerseRect(
+            g.anaAyet,
+            {
+              x: anaRawT.x - anaExpandW,
+              y: anaRawT.y + anaExpandH,
+              w: anaRawT.w + anaExpandW * 2,
+              h: anaRawT.h + anaExpandH * 2,
+            },
+            anaOv?.isPill ?? false,
+          );
 
-      sRects[2 * 4 + 0] = s2.frameX - PAD / 2 - exp;
-      sRects[2 * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
-      sRects[2 * 4 + 2] = s2.frameW + PAD + exp * 2;
-      sRects[2 * 4 + 3] =
-        FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
+          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+          sRects[secIdx * 4 + 1] = sTransform.frameY + PAD / 2 + exp;
+          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] = sTransform.frameH + PAD + exp * 2;
+          secIdx++;
+        } else if (sec.type === "verticalGroups") {
+          const v = sec as VerticalGroupsSectionConfig;
+          if (v.introVerse)
+            setVerseRect(v.introVerse, sTransform.introVerse, false);
+          if (v.outroVerse)
+            setVerseRect(v.outroVerse, sTransform.outroVerse, false);
+          v.groups.forEach((gConf, gIdx) => {
+            const gTrans = sTransform.groups[gIdx];
+            gConf.verseIds.forEach((vId) =>
+              setVerseRect(vId, gTrans.verses[vId], true),
+            );
+          });
 
-      sRects[3 * 4 + 0] = s2.frameX - PAD / 2 - exp;
-      sRects[3 * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
-      sRects[3 * 4 + 2] = s2.frameW + PAD + exp * 2;
-      sRects[3 * 4 + 3] = FOLD_Y_POSITIONS[5] - s2.shiftedBot + PAD + exp * 2;
+          // s2_top
+          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+          sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
+          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] =
+            sTransform.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
+          secIdx++;
 
-      const bgColors = new Float32Array(20 * 3);
+          // s2_center
+          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+          sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
+          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] =
+            FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
+          secIdx++;
+
+          // s2_bottom
+          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+          sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
+          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+          sRects[secIdx * 4 + 3] =
+            FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
+          secIdx++;
+        }
+      });
+
+      const verseColorKeys = new Array<keyof ThemeColors | undefined>(VERSE_ARR_SIZE);
+      const verseIsSection1 = new Array<boolean>(VERSE_ARR_SIZE).fill(false);
+
+      activeConfig.sections.forEach((sec) => {
+        if (sec.type === "gridWithAnaAyet") {
+          const g = sec as GridSectionConfig;
+          g.verses.forEach((v) => {
+            verseColorKeys[v] = g.bgThemeKey;
+            verseIsSection1[v] = true;
+          });
+          verseColorKeys[g.anaAyet] = g.bgThemeKey;
+          verseIsSection1[g.anaAyet] = true;
+        } else if (sec.type === "verticalGroups") {
+          const v = sec as VerticalGroupsSectionConfig;
+          if (v.introVerse) verseColorKeys[v.introVerse] = v.introOutroBgThemeKey;
+          if (v.outroVerse) verseColorKeys[v.outroVerse] = v.introOutroBgThemeKey;
+          v.groups.forEach((g) => {
+            g.verseIds.forEach((vId) => (verseColorKeys[vId] = g.bgThemeKey));
+          });
+        }
+      });
+
+      const bgColors = new Float32Array(VERSE_ARR_SIZE * 3);
       const tempCol = new Color();
       const setCol = (i: number, hex: string) => {
         tempCol.set(hex);
@@ -109,15 +194,33 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         bgColors[i * 3 + 2] = tempCol.b;
       };
 
-      for (let i = 1; i <= 5; i++) setCol(i, S1_INNER_BORDER);
-      const BLUE = "#C4963B";
-      setCol(6, BLUE);
-      setCol(19, BLUE);
-      const MAROON = "#7c8cb0";
-      const GREEN = "#5E7367";
-      [7, 8, 9, 10].forEach((i) => setCol(i, MAROON));
-      [11, 12, 13, 14].forEach((i) => setCol(i, GREEN));
-      [15, 16, 17, 18].forEach((i) => setCol(i, MAROON));
+      for (let i = 1; i <= MAX_VERSE_ID; i++) {
+        const ov = activeConfig.verseOverrides?.[i];
+        const isPill = verseIsPill[i];
+        
+        let colorHex: string | undefined;
+        
+        if (isPill) {
+          colorHex = ov?.border;
+        } else {
+          colorHex = ov?.bg;
+        }
+
+        if (!colorHex) {
+          if (verseIsSection1[i]) {
+            colorHex = isPill ? S1_INNER_BORDER : S1_INNER_BG;
+          } else {
+            const key = verseColorKeys[i];
+            if (key && activeConfig.styling.colors[key]) {
+              colorHex = activeConfig.styling.colors[key] as string;
+            }
+          }
+        }
+        
+        if (colorHex) {
+          setCol(i, colorHex);
+        }
+      }
 
       return {
         verseRects: vRects,
@@ -125,27 +228,24 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         sectionRects: sRects,
         verseBgColors: bgColors,
       };
-    }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS]);
+    }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS, activeConfig]);
 
-  // CRITICAL FIX: The uniforms object MUST be stable (empty dependency array).
   const uniforms = useMemo(
     () => ({
-      uVerseVisibility: { value: new Float32Array(20).fill(1.0) },
-      uSectionVisibility: { value: new Float32Array(4).fill(1.0) },
-      uVerseRects: { value: new Float32Array(20 * 4) },
-      uVerseRadii: { value: new Float32Array(20) },
-      uSectionRects: { value: new Float32Array(4 * 4) },
-      uVerseBgColors: { value: new Float32Array(20 * 3) },
+      uVerseVisibility: { value: new Float32Array(VERSE_ARR_SIZE).fill(1.0) },
+      uSectionVisibility: { value: new Float32Array(TOTAL_SECTIONS).fill(1.0) },
+      uVerseRects: { value: new Float32Array(VERSE_ARR_SIZE * 4) },
+      uVerseRadii: { value: new Float32Array(VERSE_ARR_SIZE) },
+      uSectionRects: { value: new Float32Array(TOTAL_SECTIONS * 4) },
+      uVerseBgColors: { value: new Float32Array(VERSE_ARR_SIZE * 3) },
       uPageWidth: { value: 1.54 },
       uPageHeight: { value: 1.76 },
       uBaseTexture: { value: paperTextureDiffuse },
       uVerseExpand: { value: 0.005 },
     }),
-    [],
+    [paperTextureDiffuse],
   );
 
-  // Sync the latest layout values into the stable uniforms object safely
-  // Using .set() ensures Three.js WebGL bindings don't get detached!
   useEffect(() => {
     (uniforms.uVerseRects.value as Float32Array).set(verseRects);
     (uniforms.uVerseRadii.value as Float32Array).set(verseRadii);
@@ -163,12 +263,10 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     uniforms,
   ]);
 
-  // Sync texture separately so it doesn't cause unnecessary re-evaluations
   useEffect(() => {
     uniforms.uBaseTexture.value = paperTextureDiffuse;
   }, [paperTextureDiffuse, uniforms]);
 
-  // Sync mask scale separately
   useEffect(() => {
     uniforms.uVerseExpand.value = MASK_CONFIG.verseExpand;
   }, [uniforms]);
@@ -185,7 +283,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
         const isIntroActiveNow = useFoldStore.getState().isIntroActive;
         const currentOffsetNow = useFoldStore.getState().currentOffset;
-        const isFoldedMainPaperNow = !isIntroActiveNow && currentOffsetNow < 0.98;
+        const isFoldedMainPaperNow =
+          !isIntroActiveNow && currentOffsetNow < 0.98;
 
         const g = s.popUpGroups.find((group) => group.verseIds.includes(id));
         const isHidden =
@@ -213,7 +312,10 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     const currentOffset = useFoldStore.getState().currentOffset;
     const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;
 
-    for (let i = 1; i <= 19; i++) {
+    uniforms.uVerseVisibility.value.fill(1.0);
+    uniforms.uSectionVisibility.value.fill(1.0);
+
+    for (let i = 1; i <= MAX_VERSE_ID; i++) {
       let hidden = !isFoldedMainPaper && e.activeVerseIds.includes(i);
       if (!hidden) {
         const g = s.popUpGroups.find((group) => group.verseIds.includes(i));
@@ -223,16 +325,22 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniforms.uVerseVisibility.value[i] = hidden ? 0.0 : 1.0;
     }
 
-    const sectionMap: Record<ElevatedSectionId, number> = {
-      s1: 0,
-      s2_top: 1,
-      s2_center: 2,
-      s2_bottom: 3,
-    };
-    
+    const sectionMap: Record<string, number> = {};
+    let sIdx = 0;
+    activeConfig.sections.forEach((sec) => {
+      if (sec.type === "gridWithAnaAyet") {
+        sectionMap[sec.id] = sIdx++;
+      } else if (sec.type === "verticalGroups") {
+        sectionMap[`${sec.id}_top`] = sIdx++;
+        sectionMap[`${sec.id}_center`] = sIdx++;
+        sectionMap[`${sec.id}_bottom`] = sIdx++;
+      }
+    });
+
     Object.entries(sectionMap).forEach(([id, idx]) => {
-      const isElevated = e.activeSectionIds.includes(id as ElevatedSectionId);
-      uniforms.uSectionVisibility.value[idx] = (isElevated && !isIntroActive && !isFoldedMainPaper) ? 0.0 : 1.0;
+      const isElevated = e.activeSectionIds.includes(id);
+      uniforms.uSectionVisibility.value[idx] =
+        isElevated && !isIntroActive && !isFoldedMainPaper ? 0.0 : 1.0;
     });
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
@@ -245,22 +353,30 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       });
 
       if (state.middleHorizontalFolded !== prevState.middleHorizontalFolded) {
-        [11, 12, 13, 14].forEach((id) => idsToCheck.add(id));
+        const middleFoldVerses =
+          activeConfig.specialVerses?.middleFoldVerses;
+        if (middleFoldVerses) {
+          [...middleFoldVerses.left, ...middleFoldVerses.right].forEach((id) =>
+            idsToCheck.add(id),
+          );
+        }
       }
 
       idsToCheck.forEach((id) => {
         const g = state.popUpGroups.find((group) =>
           group.verseIds.includes(id),
         );
-        
+
         const isIntroActiveNow = useFoldStore.getState().isIntroActive;
         const currentOffsetNow = useFoldStore.getState().currentOffset;
-        const isFoldedMainPaperNow = !isIntroActiveNow && currentOffsetNow < 0.98;
+        const isFoldedMainPaperNow =
+          !isIntroActiveNow && currentOffsetNow < 0.98;
 
         const shouldBeHidden =
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(state, id) ||
-          (!isFoldedMainPaperNow && useElevatedStore.getState().activeVerseIds.includes(id));
+          (!isFoldedMainPaperNow &&
+            useElevatedStore.getState().activeVerseIds.includes(id));
 
         const delay = shouldBeHidden
           ? ORIGINAL_TEXTURE_TIMING.hideDelay
@@ -283,7 +399,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const g = usePopUpStore
           .getState()
           .popUpGroups.find((group) => group.verseIds.includes(id));
-        
+
         const isIntroActive = useFoldStore.getState().isIntroActive;
         const currentOffset = useFoldStore.getState().currentOffset;
         const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;
@@ -301,10 +417,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       });
 
       Object.entries(sectionMap).forEach(([sid, idx]) => {
-        const now = state.activeSectionIds.includes(sid as ElevatedSectionId);
-        const prev = prevState.activeSectionIds.includes(
-          sid as ElevatedSectionId,
-        );
+        const now = state.activeSectionIds.includes(sid);
+        const prev = prevState.activeSectionIds.includes(sid);
         if (now !== prev) {
           const introNow = useFoldStore.getState().isIntroActive;
           const currentOffset = useFoldStore.getState().currentOffset;
@@ -333,13 +447,13 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       Object.assign(shader.uniforms, uniforms);
 
       shader.fragmentShader = `
-      uniform float uVerseVisibility[20];
-      uniform float uSectionVisibility[4];
-      uniform vec4 uVerseRects[20];
-      uniform float uVerseRadii[20];
+      uniform float uVerseVisibility[${VERSE_ARR_SIZE}];
+      uniform float uSectionVisibility[${TOTAL_SECTIONS}];
+      uniform vec4 uVerseRects[${VERSE_ARR_SIZE}];
+      uniform float uVerseRadii[${VERSE_ARR_SIZE}];
       uniform float uVerseExpand;
-      uniform vec4 uSectionRects[4];
-      uniform vec3 uVerseBgColors[20];
+      uniform vec4 uSectionRects[${TOTAL_SECTIONS}];
+      uniform vec3 uVerseBgColors[${VERSE_ARR_SIZE}];
       uniform float uPageWidth;
       uniform float uPageHeight;
       uniform sampler2D uBaseTexture;
@@ -353,7 +467,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
       // 1. Check Full Section Masking
       bool sectionHidden = false;
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < ${TOTAL_SECTIONS}; i++) {
         vec4 r = uSectionRects[i];
         if (lx >= r.x && lx <= r.x + r.z && ly <= r.y && ly >= r.y - r.w) {
           if (uSectionVisibility[i] < 0.5) {
@@ -367,7 +481,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         diffuseColor = texture2D(uBaseTexture, vMapUv);
       } else {
         // 2. Check Individual Verse Masking with SDF (Rounded rectangles)
-        for (int i = 1; i <= 19; i++) {
+        for (int i = 1; i <= ${MAX_VERSE_ID}; i++) {
           if (uVerseVisibility[i] >= 0.5) continue; // Shader optimization
 
           vec4 r = uVerseRects[i];
