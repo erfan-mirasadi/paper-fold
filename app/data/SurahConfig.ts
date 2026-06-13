@@ -126,6 +126,28 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
   introMedia: {
+    section1_start: {
+      src: "",
+      isVideo: false,
+      backgroundText: {
+        title: "İkra!",
+        arabicHollowText: "اقرأ",
+        titleSize: "text-[16vw] md:text-[12vw]",
+        groupId: "oku_intro",
+        isZoomed: false,
+      },
+    },
+    section1_zoom: {
+      src: "",
+      isVideo: false,
+      backgroundText: {
+        title: "İkra!",
+        arabicHollowText: "اقرأ",
+        titleSize: "text-[16vw] md:text-[12vw]",
+        groupId: "oku_intro",
+        isZoomed: true,
+      },
+    },
     section1: {
       src: "",
       isVideo: false,
@@ -473,6 +495,8 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       grabRangePixels: 50,
     },
     ambientMediaKeys: [
+      "section1_start",
+      "section1_zoom",
       "section1",
       "section1_step1",
       "section1_step2",

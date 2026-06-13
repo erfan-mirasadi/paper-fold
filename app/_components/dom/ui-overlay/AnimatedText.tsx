@@ -36,6 +36,8 @@ export interface AnimatedTextProps {
   style?: CSSProperties;
   // Custom classes for the word spans
   spanClassName?: string;
+  // Controls how the text is split for animation
+  splitLevel?: "char" | "word" | "none";
 }
 
 export const AnimatedText: FC<AnimatedTextProps> = ({
@@ -50,6 +52,7 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
   cinematic = false,
   style,
   spanClassName,
+  splitLevel = "char",
 }) => {
   // Base typography styles matching the ORYZO references
   const variantStyles = {
@@ -176,39 +179,76 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
   const renderElements: ReactNode[] = [];
 
   lines.forEach((line, lineIndex) => {
-    // Split each line into words
-    const words = line.split(" ");
-    words.forEach((word, wordIndex) => {
-      const chars = word.split("");
-      const wordElements = chars.map((char, charIndex) => (
+    if (splitLevel === "none") {
+      renderElements.push(
         <motion.span
-          key={`${lineIndex}-${wordIndex}-${charIndex}`}
+          key={`line-${lineIndex}`}
           variants={childVariants}
-          className={cn("inline-block relative", spanClassName)}
+          className={cn("inline-block relative whitespace-nowrap", spanClassName)}
           style={{
-            zIndex: 1000 - charIndex,
+            zIndex: 1000 - lineIndex,
             willChange: cinematic
               ? "transform, filter, opacity"
               : "transform, opacity",
           }}
         >
-          {char}
+          {line}
         </motion.span>
-      ));
-
-      renderElements.push(
-        <span
-          key={`word-${lineIndex}-${wordIndex}`}
-          className="inline-block whitespace-nowrap relative"
-          style={{ zIndex: 1000 - wordIndex }}
-        >
-          {wordElements}
-          {wordIndex < words.length - 1 && (
-            <span className="inline-block">&nbsp;</span>
-          )}
-        </span>,
       );
-    });
+    } else {
+      // Split each line into words
+      const words = line.split(" ");
+      words.forEach((word, wordIndex) => {
+        let wordContent: ReactNode;
+        if (splitLevel === "word") {
+          wordContent = (
+            <motion.span
+              key={`word-anim-${lineIndex}-${wordIndex}`}
+              variants={childVariants}
+              className={cn("inline-block relative", spanClassName)}
+              style={{
+                zIndex: 1000,
+                willChange: cinematic
+                  ? "transform, filter, opacity"
+                  : "transform, opacity",
+              }}
+            >
+              {word}
+            </motion.span>
+          );
+        } else {
+          const chars = word.split("");
+          wordContent = chars.map((char, charIndex) => (
+            <motion.span
+              key={`${lineIndex}-${wordIndex}-${charIndex}`}
+              variants={childVariants}
+              className={cn("inline-block relative", spanClassName)}
+              style={{
+                zIndex: 1000 - charIndex,
+                willChange: cinematic
+                  ? "transform, filter, opacity"
+                  : "transform, opacity",
+              }}
+            >
+              {char}
+            </motion.span>
+          ));
+        }
+
+        renderElements.push(
+          <span
+            key={`word-${lineIndex}-${wordIndex}`}
+            className="inline-block whitespace-nowrap relative"
+            style={{ zIndex: 1000 - wordIndex }}
+          >
+            {wordContent}
+            {wordIndex < words.length - 1 && (
+              <span className="inline-block">&nbsp;</span>
+            )}
+          </span>,
+        );
+      });
+    }
 
     // Add a line break element if it's not the last line
     if (lineIndex < lines.length - 1) {

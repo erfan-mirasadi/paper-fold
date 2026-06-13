@@ -202,6 +202,9 @@ export interface IntroMediaItem {
     subtitle?: string;
     body?: string;
     titleSize?: string;
+    arabicHollowText?: string;
+    isZoomed?: boolean;
+    groupId?: string;
   };
 }
 

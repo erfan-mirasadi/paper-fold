@@ -50,24 +50,27 @@ export function IntroBackgroundTextOverlay() {
 
   const config = useStoryStore((state) => state.activeConfig);
   const effectiveActiveId = activeAmbientMediaId || scrollAmbientMediaId;
-  const data = effectiveActiveId && config.introMedia
-    ? config.introMedia[effectiveActiveId]?.backgroundText
-    : null;
-
-
+  const data =
+    effectiveActiveId && config.introMedia
+      ? config.introMedia[effectiveActiveId]?.backgroundText
+      : null;
 
   return (
     <div className="pointer-events-none fixed inset-0 flex items-center justify-end pr-6 md:pr-16 lg:pr-24 pb-24 md:pb-40 overflow-hidden z-40">
       <AnimatePresence mode="popLayout">
         {isIntroActive && isAmbientPhase && data && (
           <motion.div
-            key={effectiveActiveId}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            key={data.groupId || effectiveActiveId}
+            initial={{ opacity: 0, scale: 0.9, y: 30, filter: "blur(10px)" }}
             animate={{
-              opacity: 1,
-              scale: 1,
+              opacity: data.isZoomed ? 0 : 1,
+              scale: data.isZoomed ? 3.5 : 1,
               y: 0,
-              transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+              filter: data.isZoomed ? "blur(20px)" : "blur(0px)",
+              transition: {
+                duration: data.isZoomed ? 2 : 1.2,
+                ease: data.isZoomed ? [0.25, 0.1, 0.25, 1] : [0.16, 1, 0.3, 1],
+              },
             }}
             exit={{
               opacity: 0,
@@ -76,13 +79,15 @@ export function IntroBackgroundTextOverlay() {
               transition: { duration: 0.2, ease: "easeOut" },
             }}
             className="relative flex flex-col items-center w-[55vw] md:w-[45vw] text-center intro-text-container"
-            style={{ 
-              willChange: "transform, opacity",
-              "--intro-caption-shadow": "none",
-              "--intro-title-shadow": "none",
-              "--intro-subtitle-shadow": "none",
-              "--intro-body-shadow": "none",
-            } as React.CSSProperties}
+            style={
+              {
+                willChange: "transform, opacity",
+                "--intro-caption-shadow": "none",
+                "--intro-title-shadow": "none",
+                "--intro-subtitle-shadow": "none",
+                "--intro-body-shadow": "none",
+              } as React.CSSProperties
+            }
           >
             <style>{`
               :global(.dark) .intro-text-container, .dark .intro-text-container {
@@ -105,16 +110,43 @@ export function IntroBackgroundTextOverlay() {
               />
             )}
             {data.title && (
-              <AnimatedText
-                text={data.title}
-                variant="title"
-                animationType={data.title.includes("\n") && data.title.length > 80 ? "movieCredits" : "flyInBottom"}
-                cinematic={true}
-                style={{
-                  textShadow: "var(--intro-title-shadow)",
-                }}
-                className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-black in-[.dark]:text-[#F8F9FA]`}
-              />
+              <div className="relative w-full flex justify-center items-center">
+                {data.arabicHollowText && (
+                  <div
+                    className="absolute z-0 flex justify-center items-center pointer-events-none translate-y-[12%] blur-[2px] in-[.dark]:blur-[3px]"
+                    style={{ opacity: 0.55 }}
+                  >
+                    <AnimatedText
+                      text={data.arabicHollowText}
+                      variant="title"
+                      animationType="fadeIn"
+                      cinematic={true}
+                      splitLevel="none"
+                      className="font-light tracking-tight select-none flex justify-center items-center text-[55vw] md:text-[35vw] text-black in-[.dark]:text-white"
+                      style={{
+                        fontFamily: "QuranFont, serif",
+                        WebkitTextFillColor: "transparent",
+                        WebkitTextStroke: "1px currentColor",
+                        textShadow: "none",
+                      }}
+                    />
+                  </div>
+                )}
+                <AnimatedText
+                  text={data.title}
+                  variant="title"
+                  animationType={
+                    data.title.includes("\n") && data.title.length > 80
+                      ? "movieCredits"
+                      : "flyInBottom"
+                  }
+                  cinematic={true}
+                  style={{
+                    textShadow: "var(--intro-title-shadow)",
+                  }}
+                  className={`relative z-10 font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-black in-[.dark]:text-[#F8F9FA]`}
+                />
+              </div>
             )}
             {data.subtitle && (
               <AnimatedText
