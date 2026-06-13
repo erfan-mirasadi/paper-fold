@@ -75,9 +75,23 @@ export function IntroBackgroundTextOverlay() {
               y: 0,
               transition: { duration: 0.2, ease: "easeOut" },
             }}
-            className="relative flex flex-col items-center w-[55vw] md:w-[45vw] text-center"
-            style={{ willChange: "transform, opacity" }}
+            className="relative flex flex-col items-center w-[55vw] md:w-[45vw] text-center intro-text-container"
+            style={{ 
+              willChange: "transform, opacity",
+              "--intro-caption-shadow": "none",
+              "--intro-title-shadow": "none",
+              "--intro-subtitle-shadow": "none",
+              "--intro-body-shadow": "none",
+            } as React.CSSProperties}
           >
+            <style>{`
+              :global(.dark) .intro-text-container, .dark .intro-text-container {
+                --intro-caption-shadow: -2px 2px 5px rgba(248,249,250,0.18), -8px 8px 18px rgba(0,0,0,0.55), ${getDistantShadow(0.33)};
+                --intro-title-shadow: -8px 8px 12px rgba(167,139,250,0.2), -18px 18px 30px rgba(167,139,250,0.12), -30px 30px 50px rgba(0,0,0,0.45), ${getDistantShadow(1)};
+                --intro-subtitle-shadow: -4px 4px 8px rgba(248,249,250,0.18), -12px 12px 24px rgba(0,0,0,0.55), ${getDistantShadow(0.66)};
+                --intro-body-shadow: -3px 3px 7px rgba(167,139,250,0.18), -9px 9px 20px rgba(0,0,0,0.55), ${getDistantShadow(0.5)};
+              }
+            `}</style>
             {data.caption && (
               <AnimatedText
                 text={data.caption}
@@ -85,7 +99,7 @@ export function IntroBackgroundTextOverlay() {
                 animationType="flyInLeft"
                 cinematic={true}
                 style={{
-                  textShadow: `-2px 2px 5px rgba(248,249,250,0.18), -8px 8px 18px rgba(0,0,0,0.55), ${getDistantShadow(0.33)}`,
+                  textShadow: "var(--intro-caption-shadow)",
                 }}
                 className="tracking-widest text-base md:text-lg font-(family-name:--font-poppins) font-medium w-full justify-center z-10 text-[#A78BFA]"
               />
@@ -94,10 +108,10 @@ export function IntroBackgroundTextOverlay() {
               <AnimatedText
                 text={data.title}
                 variant="title"
-                animationType="flyInBottom"
+                animationType={data.title.includes("\n") && data.title.length > 80 ? "movieCredits" : "flyInBottom"}
                 cinematic={true}
                 style={{
-                  textShadow: `-8px 8px 12px rgba(167,139,250,0.2), -18px 18px 30px rgba(167,139,250,0.12), -30px 30px 50px rgba(0,0,0,0.45), ${getDistantShadow(1)}`,
+                  textShadow: "var(--intro-title-shadow)",
                 }}
                 className={`font-light font-(family-name:--font-fraunces) tracking-tight select-none w-full justify-center ${data.titleSize ? data.titleSize : getSmartTitleSizeClass(data.title)} text-black in-[.dark]:text-[#F8F9FA]`}
               />
@@ -109,7 +123,7 @@ export function IntroBackgroundTextOverlay() {
                 animationType="flyInBottom"
                 cinematic={true}
                 style={{
-                  textShadow: `-4px 4px 8px rgba(248,249,250,0.18), -12px 12px 24px rgba(0,0,0,0.55), ${getDistantShadow(0.66)}`,
+                  textShadow: "var(--intro-subtitle-shadow)",
                 }}
                 className="font-light font-(family-name:--font-fraunces) tracking-tight leading-none select-none w-full justify-center text-[3.5vw] md:text-[2.5vw] -mt-6 md:-mt-10 mb-4 text-black in-[.dark]:text-[#A78BFA]"
               />
@@ -121,7 +135,7 @@ export function IntroBackgroundTextOverlay() {
                 animationType="fadeIn"
                 cinematic={true}
                 style={{
-                  textShadow: `-3px 3px 7px rgba(167,139,250,0.18), -9px 9px 20px rgba(0,0,0,0.55), ${getDistantShadow(0.5)}`,
+                  textShadow: "var(--intro-body-shadow)",
                 }}
                 className="font-(family-name:--font-dm-serif) italic leading-none select-none w-full justify-center text-lg md:text-xl -mt-2 md:-mt-4 text-black in-[.dark]:text-white/90"
               />

@@ -20,7 +20,12 @@ export interface AnimatedTextProps {
   // Predetermined typography styles
   variant?: "title" | "subtitle" | "body" | "caption";
   // Direction of the entrance animation
-  animationType?: "flyInBottom" | "flyInTop" | "fadeIn" | "flyInLeft";
+  animationType?:
+    | "flyInBottom"
+    | "flyInTop"
+    | "fadeIn"
+    | "flyInLeft"
+    | "movieCredits";
   // Time between each word animating
   staggerDelay?: number;
   // Prevents text from wrapping to multiple lines
@@ -67,18 +72,36 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
 
   // Container variants to handle the staggering of children (words)
   const containerVariants: Variants = {
-    hidden: { opacity: 0 },
+    hidden: {
+      opacity: 0,
+      ...(animationType === "movieCredits" && { y: 400 }),
+    },
     visible: (i = 1) => ({
       opacity: 1,
+      ...(animationType === "movieCredits" && { y: 0 }),
       transition: {
-        staggerChildren: cinematic ? staggerDelay * 1.5 : staggerDelay,
-        delayChildren: cinematic ? 0.05 * i : 0.1 * i,
+        ...(animationType === "movieCredits" && {
+          y: { duration: 4, ease: [0.16, 1, 0.3, 1] },
+        }),
+        staggerChildren:
+          animationType === "movieCredits"
+            ? staggerDelay
+            : cinematic
+              ? staggerDelay * 1.5
+              : staggerDelay,
+        delayChildren:
+          animationType === "movieCredits"
+            ? 0.2 * i
+            : cinematic
+              ? 0.05 * i
+              : 0.1 * i,
       },
     }),
   };
 
   // Determine the starting Y position based on animationType
   const getInitialY = () => {
+    if (animationType === "movieCredits") return 130;
     if (animationType === "flyInTop") return -40;
     if (animationType === "flyInBottom") return 40;
     return 0; // fadeIn, flyInLeft
@@ -96,33 +119,51 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
       opacity: 1,
       y: 0,
       x: 0,
-      filter: cinematic ? "blur(0px)" : undefined,
-      transition: cinematic
-        ? {
-            duration: 1.2,
-            ease: [0.16, 1, 0.3, 1], // cinematic smooth ease
-          }
-        : {
-            type: "spring",
-            damping: 20,
-            stiffness: 100,
-          },
+      rotateX: 0,
+      filter:
+        cinematic || animationType === "movieCredits" ? "blur(0px)" : undefined,
+      transition:
+        animationType === "movieCredits"
+          ? {
+              duration: 1.5, // exceptionally slow and smooth
+              ease: [0.16, 1, 0.3, 1],
+            }
+          : cinematic
+            ? {
+                duration: 1.2,
+                ease: [0.16, 1, 0.3, 1], // cinematic smooth ease
+              }
+            : {
+                type: "spring",
+                damping: 20,
+                stiffness: 100,
+              },
     },
     hidden: {
       opacity: 0,
       y: getInitialY(),
       x: getInitialX(),
-      filter: cinematic ? "blur(8px)" : undefined,
-      transition: cinematic
-        ? {
-            duration: 1.2,
-            ease: [0.16, 1, 0.3, 1],
-          }
-        : {
-            type: "spring",
-            damping: 20,
-            stiffness: 100,
-          },
+      rotateX: animationType === "movieCredits" ? 60 : 0,
+      filter:
+        cinematic || animationType === "movieCredits"
+          ? "blur(12px)"
+          : undefined,
+      transition:
+        animationType === "movieCredits"
+          ? {
+              duration: 1.5,
+              ease: [0.16, 1, 0.3, 1],
+            }
+          : cinematic
+            ? {
+                duration: 1.2,
+                ease: [0.16, 1, 0.3, 1],
+              }
+            : {
+                type: "spring",
+                damping: 20,
+                stiffness: 100,
+              },
     },
   };
 
@@ -144,9 +185,11 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
           key={`${lineIndex}-${wordIndex}-${charIndex}`}
           variants={childVariants}
           className={cn("inline-block relative", spanClassName)}
-          style={{ 
+          style={{
             zIndex: 1000 - charIndex,
-            willChange: cinematic ? "transform, filter, opacity" : "transform, opacity",
+            willChange: cinematic
+              ? "transform, filter, opacity"
+              : "transform, opacity",
           }}
         >
           {char}
@@ -169,9 +212,7 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
 
     // Add a line break element if it's not the last line
     if (lineIndex < lines.length - 1) {
-      renderElements.push(
-        <br key={`br-${lineIndex}`} />,
-      );
+      renderElements.push(<br key={`br-${lineIndex}`} />);
     }
   });
 

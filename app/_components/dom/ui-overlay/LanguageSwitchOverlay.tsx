@@ -10,7 +10,7 @@ import {
 import { OverlayButton } from "./OverlayButton";
 
 const LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
-  ar: "العربية",
+  ar: "Arabic",
   en: "English",
   tr: "Türkçe",
 };
@@ -151,7 +151,12 @@ export function LanguageSwitchOverlay() {
               }}
               animate={{ opacity: 1, scale: 1, rotate: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, scale: 0.5, rotate: 90, filter: "blur(4px)" }}
-              transition={{ type: "spring", stiffness: 100, damping: 22, mass: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 100,
+                damping: 22,
+                mass: 1,
+              }}
               className="absolute inset-0 flex items-center justify-center"
             >
               <OverlayButton
@@ -197,7 +202,12 @@ export function LanguageSwitchOverlay() {
                         filter: "blur(0px)",
                       },
                     }}
-                    transition={{ type: "spring", stiffness: 100, damping: 22, mass: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 22,
+                      mass: 1,
+                    }}
                   >
                     <OverlayButton
                       onClick={(e) => {
