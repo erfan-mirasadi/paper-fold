@@ -97,6 +97,7 @@ export interface VerseBlockConfig {
   isCenter?: boolean;
   extraRowGap?: number;
   bgThemeKey?: keyof ThemeColors;
+  customShrink?: number;
 }
 
 export interface CameraTargetConfig {
@@ -133,6 +134,8 @@ export interface VerticalGroupsSectionConfig {
   backgroundTexture?: string;
   backgroundScaleX?: number;
   backgroundScaleY?: number;
+  /** When true, the horizontal row-connector bars between paired capsules are hidden. */
+  hideRowConnectors?: boolean;
 }
 
 export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
@@ -164,6 +167,8 @@ export interface VerseOverrideConfig {
   textColor?: string;
   /** When true, an AnaAyetTab label is rendered above this verse in section and mesh views */
   hasAnaAyetTab?: boolean;
+  /** Override the verse text scale for this specific verse. */
+  textScaleOverride?: number;
 }
 
 export interface SurahAssets {

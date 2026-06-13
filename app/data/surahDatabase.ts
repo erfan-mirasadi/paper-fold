@@ -27,6 +27,11 @@ import {
   AYAT_AL_KURSI_TEXT_DATA,
 } from "./ayatAlKursiConfig";
 
+import {
+  AHZAB_35_CONFIG,
+  AHZAB_35_TEXT_DATA,
+} from "./ahzab35Config";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -70,6 +75,14 @@ const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
     reference: "Bakara 255",
     config: AYAT_AL_KURSI_CONFIG,
     textData: AYAT_AL_KURSI_TEXT_DATA,
+  },
+  {
+    id: "ahzab35",
+    displayName: "Al-Ahzab 35",
+    arabicName: "الأحزاب ٣٥",
+    reference: "Ahzab 35",
+    config: AHZAB_35_CONFIG,
+    textData: AHZAB_35_TEXT_DATA,
   },
 ] as const;
 

@@ -5,6 +5,7 @@ import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
   GroupTransforms,
   RowConnectorTransform,
+  VerticalGroupsSectionConfig,
 } from "../../../data/schema";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
@@ -44,10 +45,17 @@ export function VerseGroup({
   const firstVerseOverride = config.verseOverrides?.[group.verses?.[0]?.number ?? -1];
   const borderColor = firstVerseOverride?.border ?? groupFallbackBorder;
 
+  // ── Row connector visibility ───────────────────────────────────────────────
+  // Read hideRowConnectors from the verticalGroups section config.
+  const sectionConfig = config.sections.find(
+    (s) => s.type === "verticalGroups",
+  ) as VerticalGroupsSectionConfig | undefined;
+  const hideConnectors = sectionConfig?.hideRowConnectors ?? false;
+
   return (
     <group>
-      {/* Row Connectors for opposite verses */}
-      {gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
+      {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}
+      {!hideConnectors && gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
         const leftV = group.verses[i * 2];
         const rightV = group.verses[i * 2 + 1];
 
@@ -134,6 +142,8 @@ export function VerseGroup({
         const finalCircleBorder = override?.circleBorderCol ?? finalBorder;
         const finalCircleText   = override?.circleTextCol   ?? config.styling.colors.verseNumberText;
 
+        const finalTextScale = override?.textScaleOverride ?? finalVerseTextScale;
+
         return (
           <VerseBox
             key={v.number}
@@ -150,7 +160,7 @@ export function VerseGroup({
             circleBg={finalCircleBg}
             circleTextCol={finalCircleText}
             isPill={true}
-            textScaleOverride={finalVerseTextScale}
+            textScaleOverride={finalTextScale}
           />
         );
       })}

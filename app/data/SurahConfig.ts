@@ -646,24 +646,37 @@ export function createLayoutMath(
 
   const groupH = getGroupH(2);
 
-  const g0H = getGroupH(p.groupRows?.[0] ?? 2);
-  const g1H = getGroupH(p.groupRows?.[1] ?? 2);
-  const g2H = getGroupH(p.groupRows?.[2] ?? 2);
-  const totalGroupsH = g0H + g1H + g2H;
+  // ── Dynamic group heights — driven by the actual groupRows array length ──
+  // groupRows[i] specifies how many rows of capsules group i contains.
+  // Any group not listed in groupRows defaults to 2 rows (backward-compat).
+  const numGroups = p.groupRows ? p.groupRows.length : 3;
+  const dynamicGroupHeights: number[] = Array.from({ length: numGroups }, (_, i) =>
+    getGroupH(p.groupRows?.[i] ?? 2)
+  );
+
+  // Legacy aliases kept for backward-compatibility with Alak / Ayat al-Kursi.
+  const g0H = dynamicGroupHeights[0] ?? getGroupH(2);
+  const g1H = dynamicGroupHeights[1] ?? getGroupH(2);
+  const g2H = dynamicGroupHeights[2] ?? getGroupH(2);
+
+  const totalGroupsH = dynamicGroupHeights.reduce((sum, h) => sum + h, 0);
 
   // When hasIntro is false there are no intro/outro verse boxes, so the two
   // bigBoxH slots and their two flanking groupGaps are collapsed to zero.
   // When hasIntro is true the formula is mathematically identical to before.
   const hasIntroOutro = config.features.hasIntro;
 
+  // Number of inter-group gaps = numGroups - 1 (minimum 0).
+  const interGroupGaps = Math.max(0, numGroups - 1);
+
   const s2H = hasIntroOutro
     ? p.s2VerticalPad * 2 +
       p.bigBoxH * 2 +
-      p.groupGap * 4 +
+      p.groupGap * (interGroupGaps + 2) +   // gaps between groups + 2 flanking
       totalGroupsH +
       p.middleExtraGap * 2
     : p.s2VerticalPad * 2 +
-      p.groupGap * 2 +          // the 2 gaps *between* the 3 groups
+      p.groupGap * interGroupGaps +         // gaps *between* groups
       totalGroupsH +
       p.middleExtraGap * 2;
 
@@ -676,7 +689,7 @@ export function createLayoutMath(
   //   hasS1 === false → center the block vertically on the paper
   const s2Top = hasS1
     ? p.s1Top - s1H - p.gapBetweenS1andS2   // Alak: unchanged
-    // Ayat al-Kursi: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
+    // Ayat al-Kursi / Ahzab: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
     // Shift up by s2H/2 so the block straddles that center symmetrically.
     : -(config.dimensions.paperHeight / 2) + (s2H / 2) + config.dimensions.sceneCenterYOffset;
 
@@ -686,15 +699,31 @@ export function createLayoutMath(
   const v6Y = s2Top - p.s2VerticalPad;
   const baseG1Y = hasIntroOutro
     ? v6Y - p.bigBoxH - p.groupGap          // Alak: identical to original
-    : v6Y;                                   // Ayat al-Kursi: groups slide up
+    : v6Y;                                   // Ayat al-Kursi / Ahzab: groups slide up
 
-  const baseG2Y = baseG1Y - g0H - (p.groupGap + p.middleExtraGap);
-  const baseG3Y = baseG2Y - g1H - (p.groupGap + p.middleExtraGap);
+  // Build all group Y positions dynamically.
+  // groupYPositions[0] = baseG1Y; each subsequent group steps down by the
+  // previous group's height + the inter-group gap (with middleExtraGap).
+  const dynamicGroupYPositions: number[] = [];
+  dynamicGroupYPositions[0] = baseG1Y;
+  for (let i = 1; i < numGroups; i++) {
+    dynamicGroupYPositions[i] =
+      dynamicGroupYPositions[i - 1] -
+      dynamicGroupHeights[i - 1] -
+      (p.groupGap + p.middleExtraGap);
+  }
+
+  // Legacy aliases for Alak / Ayat al-Kursi backward compatibility.
+  const baseG2Y = dynamicGroupYPositions[1] ?? baseG1Y;
+  const baseG3Y = dynamicGroupYPositions[2] ?? baseG2Y;
+
   // v19Y position is always computed (keeps type consistent) but only rendered
   // when hasIntro is true.
+  const lastGroupY = dynamicGroupYPositions[numGroups - 1] ?? baseG1Y;
+  const lastGroupH = dynamicGroupHeights[numGroups - 1] ?? g0H;
   const baseV19Y = hasIntroOutro
-    ? baseG3Y - g2H - p.groupGap
-    : baseG3Y - g2H;                      // not rendered; safe sentinel
+    ? lastGroupY - lastGroupH - p.groupGap
+    : lastGroupY - lastGroupH;            // not rendered; safe sentinel
 
   return {
     PAGE_WIDTH,
@@ -765,8 +794,9 @@ export function createLayoutMath(
     // NOTE: satisfies Record<string, number> is removed because these new
     // fields are non-number. We use an explicit return type instead.
     hasIntroOutro,                              // boolean
-    groupYPositions: [baseG1Y, baseG2Y, baseG3Y] as [number, number, number],
-    groupHeights: [g0H, g1H, g2H] as [number, number, number],
+    // Fully dynamic — length matches the actual number of groups defined.
+    groupYPositions: dynamicGroupYPositions as number[],
+    groupHeights: dynamicGroupHeights as number[],
   };
 }
 
@@ -884,7 +914,7 @@ export function buildSurahTransforms(
       const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
         const groupY = groupYPositions[gIdx];
         const isPushedIn = group.isPushedIn ?? false;
-        const shrinkAmount = isPushedIn ? lm.g2Shrink : lm.outerShrink;
+        const shrinkAmount = group.customShrink ?? (isPushedIn ? lm.g2Shrink : lm.outerShrink);
         const gInnerW = s2InnerW - shrinkAmount * 2;
         const gBaseX = s2BaseX + shrinkAmount;
 
@@ -894,10 +924,10 @@ export function buildSurahTransforms(
         const verses: Record<number, ElementTransform> = {};
         group.verseIds.forEach((verseId, i) => {
           const isRightCol = i % 2 !== 0;
-          const isSecondRow = i >= 2;
-          const rowOffset = isSecondRow
-            ? lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap
-            : 0;
+          // Dynamic row index: each pair of capsules (left+right) occupies one row.
+          const rowIndex = Math.floor(i / 2);
+          const rowOffset =
+            rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
           verses[verseId] = {
             x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
             y: groupY - lm.groupPad - rowOffset,
@@ -907,8 +937,10 @@ export function buildSurahTransforms(
           };
         });
 
+        // Dynamic row connectors — one per row (pair of capsules).
+        const numRows = Math.ceil(group.verseIds.length / 2);
         const rowConnectors: RowConnectorTransform[] = [];
-        for (let r = 0; r < 2; r++) {
+        for (let r = 0; r < numRows; r++) {
           const leftV = verses[group.verseIds[r * 2]];
           const rightV = verses[group.verseIds[r * 2 + 1]];
           if (leftV && rightV) {
