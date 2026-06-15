@@ -48,6 +48,9 @@ interface BracketSpec {
   isCenter: boolean;
   color: string;
   fillColor: string;
+  shrinkTop?: number;
+  shrinkBot?: number;
+  rightColXOffset?: number;
 }
 
 // ── Static fallbacks — used when the config provides no curveColors ───────────
@@ -90,7 +93,7 @@ function computeBrackets(
   hasIntroOutro: boolean,
   outerColors: Array<{ color: string; fillColor: string }> = FALLBACK_OUTER_COLORS,
   centerColor: { color: string; fillColor: string } = FALLBACK_CENTER_COLOR,
-  rawGroups: import("../../data/schema").VerseBlockConfig[] = [],
+  rawGroups: import("../../../data/schema").VerseBlockConfig[] = [],
 ): BracketSpec[] {
   if (groups.length === 0) return [];
 
@@ -209,6 +212,7 @@ function computeBrackets(
         isCenter: false,
         shrinkTop,
         shrinkBot,
+        rightColXOffset: gTop.rightColXOffset,
         ...outerColors[i],
       });
     }
@@ -229,6 +233,7 @@ function computeBrackets(
         isCenter: true,
         shrinkTop: shrinkCenter,
         shrinkBot: shrinkCenter,
+        rightColXOffset: centerGroup.rightColXOffset,
         ...centerColor,
       });
     }
@@ -486,20 +491,24 @@ export const SideCurves = ({
         const innerInwardOffset = layout.curveInnerInwardOffset ?? INNER_CURVE_INWARD_OFFSET;
         const innerCurveGap = CURVE_GAP + (layout.innerCurveGapDiff ?? (INNER_CURVE_GAP - CURVE_GAP));
 
-        const tipXTop_L = startX_L + CURVE_INWARD_OFFSET + shrinkTop;
-        const tipXTop_R = startX_R - CURVE_INWARD_OFFSET - shrinkTop;
-        const tipXBot_L = startX_L + CURVE_INWARD_OFFSET + shrinkBot;
-        const tipXBot_R = startX_R - CURVE_INWARD_OFFSET - shrinkBot;
+        const inwardOffset = layout.curveInwardOffset ?? CURVE_INWARD_OFFSET;
+        const deepOffsetOuter = layout.curveDeepOffsetOuter ?? CURVE_DEEP_OFFSET_OUTER;
+        const deepOffsetInner = layout.curveDeepOffsetInner ?? CURVE_DEEP_OFFSET_INNER;
 
-        const deepTipXTop_L = startX_L + CURVE_DEEP_OFFSET_OUTER + shrinkTop;
-        const deepTipXTop_R = startX_R - CURVE_DEEP_OFFSET_OUTER - shrinkTop;
-        const deepTipXBot_L = startX_L + CURVE_DEEP_OFFSET_OUTER + shrinkBot;
-        const deepTipXBot_R = startX_R - CURVE_DEEP_OFFSET_OUTER - shrinkBot;
+        const tipXTop_L = startX_L + inwardOffset + shrinkTop;
+        const tipXTop_R = startX_R - inwardOffset - shrinkTop;
+        const tipXBot_L = startX_L + inwardOffset + shrinkBot;
+        const tipXBot_R = startX_R - inwardOffset - shrinkBot;
 
-        const deepInnerTipXTop_L = startX_L + CURVE_DEEP_OFFSET_INNER + shrinkTop;
-        const deepInnerTipXTop_R = startX_R - CURVE_DEEP_OFFSET_INNER - shrinkTop;
-        const deepInnerTipXBot_L = startX_L + CURVE_DEEP_OFFSET_INNER + shrinkBot;
-        const deepInnerTipXBot_R = startX_R - CURVE_DEEP_OFFSET_INNER - shrinkBot;
+        const deepTipXTop_L = startX_L + deepOffsetOuter + shrinkTop;
+        const deepTipXTop_R = startX_R - deepOffsetOuter - shrinkTop;
+        const deepTipXBot_L = startX_L + deepOffsetOuter + shrinkBot;
+        const deepTipXBot_R = startX_R - deepOffsetOuter - shrinkBot;
+
+        const deepInnerTipXTop_L = startX_L + deepOffsetInner + shrinkTop;
+        const deepInnerTipXTop_R = startX_R - deepOffsetInner - shrinkTop;
+        const deepInnerTipXBot_L = startX_L + deepOffsetInner + shrinkBot;
+        const deepInnerTipXBot_R = startX_R - deepOffsetInner - shrinkBot;
 
         const outerControlTop_L = startX_L - CURVE_GAP * bowMultiplier + shrinkTop * 0.5;
         const outerControlTop_R = startX_R + CURVE_GAP * bowMultiplier - shrinkTop * 0.5;
@@ -523,6 +532,27 @@ export const SideCurves = ({
 
         const topDelta  = idx === 0 ? borderDelta : 0;
         const botDelta  = idx === 0 ? borderDelta : 0;
+
+        const anchoredLeft = layout.rightCurveAnchorsLeft?.includes(b.nestLevel);
+        const rightOffsetForLeftAnchor = layout.groupInnerHalfW + layout.s2Gap;
+        const anchorLeftStartX = startX_L + rightOffsetForLeftAnchor + (b.rightColXOffset || 0);
+
+        const tipXTop_R_AL = anchorLeftStartX + inwardOffset;
+        const tipXBot_R_AL = anchorLeftStartX + inwardOffset;
+        const deepTipXTop_R_AL = anchorLeftStartX + deepOffsetOuter;
+        const deepTipXBot_R_AL = anchorLeftStartX + deepOffsetOuter;
+        const deepInnerTipXTop_R_AL = anchorLeftStartX + deepOffsetInner;
+        const deepInnerTipXBot_R_AL = anchorLeftStartX + deepOffsetInner;
+
+        const outerControlTop_R_AL = anchorLeftStartX - CURVE_GAP * bowMultiplier;
+        const outerControlBot_R_AL = anchorLeftStartX - CURVE_GAP * bowMultiplier;
+        const innerControlTop_R_AL = anchorLeftStartX - innerCurveGap * bowMultiplier;
+        const innerControlBot_R_AL = anchorLeftStartX - innerCurveGap * bowMultiplier;
+
+        const outerTipTop_R_AL = b.isCenter ? deepTipXTop_R_AL : tipXTop_R_AL;
+        const outerTipBot_R_AL = b.isCenter ? deepTipXBot_R_AL : tipXBot_R_AL;
+        const innerTipTop_R_AL = b.isCenter ? deepInnerTipXTop_R_AL : tipXTop_R_AL + innerInwardOffset;
+        const innerTipBot_R_AL = b.isCenter ? deepInnerTipXBot_R_AL : tipXBot_R_AL + innerInwardOffset;
 
         return (
           <Fragment key={idx}>
@@ -549,16 +579,16 @@ export const SideCurves = ({
               key={`R-${idx}`}
               outerYTop={b.outerYTop + topDelta}
               outerYBot={b.outerYBot - botDelta}
-              outerControlXTop={outerControlTop_R}
-              outerControlXBot={outerControlBot_R}
-              outerTipXTop={outerTipTop_R}
-              outerTipXBot={outerTipBot_R}
+              outerControlXTop={anchoredLeft ? outerControlTop_R_AL : outerControlTop_R}
+              outerControlXBot={anchoredLeft ? outerControlBot_R_AL : outerControlBot_R}
+              outerTipXTop={anchoredLeft ? outerTipTop_R_AL : outerTipTop_R}
+              outerTipXBot={anchoredLeft ? outerTipBot_R_AL : outerTipBot_R}
               innerYTop={b.innerYTop + topDelta}
               innerYBot={b.innerYBot - botDelta}
-              innerControlXTop={innerControlTop_R}
-              innerControlXBot={innerControlBot_R}
-              innerTipXTop={innerTipTop_R}
-              innerTipXBot={innerTipBot_R}
+              innerControlXTop={anchoredLeft ? innerControlTop_R_AL : innerControlTop_R}
+              innerControlXBot={anchoredLeft ? innerControlBot_R_AL : innerControlBot_R}
+              innerTipXTop={anchoredLeft ? innerTipTop_R_AL : innerTipTop_R}
+              innerTipXBot={anchoredLeft ? innerTipBot_R_AL : innerTipBot_R}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}

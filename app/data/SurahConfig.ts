@@ -37,6 +37,7 @@ export interface ColorGroup {
   topLabel?: string;
   isPushedIn?: boolean;
   isCenter?: boolean;
+  rightColXOffset?: number;
   extraRowGap?: number;
 }
 
@@ -98,6 +99,10 @@ export interface AlakLayoutParams {
   curvePad?: number;
   curveInnerInwardOffset?: number;
   innerCurveGapDiff?: number;
+  curveInwardOffset?: number;
+  curveDeepOffsetOuter?: number;
+  curveDeepOffsetInner?: number;
+  rightCurveAnchorsLeft?: number[];
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -806,6 +811,10 @@ export function createLayoutMath(
     curvePad: p.curvePad,
     curveInnerInwardOffset: p.curveInnerInwardOffset,
     innerCurveGapDiff: p.innerCurveGapDiff,
+    curveInwardOffset: p.curveInwardOffset,
+    curveDeepOffsetOuter: p.curveDeepOffsetOuter,
+    curveDeepOffsetInner: p.curveDeepOffsetInner,
+    rightCurveAnchorsLeft: p.rightCurveAnchorsLeft,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
@@ -938,6 +947,7 @@ export function buildSurahTransforms(
 
         const gHalfW = (gInnerW - lm.groupPad * 2 - groupGapAmount) / 2;
         const extraRowGap = group.extraRowGap ?? 0;
+        const rightColXOffset = group.rightColXOffset ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
         group.verseIds.forEach((verseId, i) => {
@@ -947,7 +957,7 @@ export function buildSurahTransforms(
           const rowOffset =
             rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
           verses[verseId] = {
-            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + groupGapAmount : 0),
+            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + groupGapAmount + rightColXOffset : 0),
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
             w: gHalfW,
@@ -986,6 +996,7 @@ export function buildSurahTransforms(
           verses,
           rowConnectors,
           topLabelConfig: group.topLabelConfig,
+          rightColXOffset,
         };
       });
 

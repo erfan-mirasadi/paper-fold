@@ -193,6 +193,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2IntroOutroBg: YELLOW_BORDER, // unused
       s2Group1Bg: YELLOW_BG,
       s2Group2Bg: BLUE_BG,
+      s2Group3Bg: GREEN_BG,
       curveColors: [
         { color: YELLOW_BORDER, fillColor: YELLOW_BG },
         { color: BLUE_BORDER, fillColor: BLUE_BG },
@@ -253,12 +254,16 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
 
-    outerCurveXOffset: 0.05,
-    centerCurveXOffset: -0.015,
-    curvePad: 0.005,
-    curveTipThickness: 0.006,
-    curveInnerInwardOffset: 0.004,
+    outerCurveXOffset: 0.004,
+    centerCurveXOffset: -0.0015,
+    curvePad: 0.062,
+    curveTipThickness: 0.06,
+    curveInnerInwardOffset: 0,
     innerCurveGapDiff: -0.002,
+    curveInwardOffset: 0,
+    curveDeepOffsetOuter: 0,
+    curveDeepOffsetInner: 0,
+    rightCurveAnchorsLeft: [1, 2],
   },
 
   sections: [
@@ -287,6 +292,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
+          rightColXOffset: 0.08,
         },
         // ── Group 2 — Green / pushed in (2 rows) ─────────────────────────
         {
@@ -295,6 +301,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group3Bg",
+          rightColXOffset: 0.18,
         },
         // ── Group 3 — Blue (1 row) ────────────────────────────────────────
         {
@@ -303,6 +310,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
+          rightColXOffset: 0.08,
         },
         // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
         {
