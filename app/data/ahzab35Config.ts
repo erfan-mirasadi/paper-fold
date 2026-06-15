@@ -115,7 +115,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      textScaleOverride: 0.85,
     },
     6: {
       bg: GREEN_BG,
@@ -123,7 +122,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      textScaleOverride: 0.85,
     },
     7: {
       bg: GREEN_BG,
@@ -131,7 +129,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      textScaleOverride: 0.85,
     },
     8: {
       bg: GREEN_BG,
@@ -139,7 +136,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      textScaleOverride: 0.85,
     },
     // ── Group 3 — Blue ───────────────────────────────────────────────────
     9: {
@@ -163,7 +159,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
-      textScaleOverride: 0.75,
     },
     12: {
       bg: YELLOW_BG,
@@ -171,7 +166,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
-      textScaleOverride: 0.75,
     },
   },
 
@@ -199,9 +193,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2IntroOutroBg: YELLOW_BORDER, // unused
       s2Group1Bg: YELLOW_BG,
       s2Group2Bg: BLUE_BG,
-      s2Group3Bg: GREEN_BG,
-      // No side brackets for now — deliberately empty.
-      curveColors: [],
+      curveColors: [
+        { color: YELLOW_BORDER, fillColor: YELLOW_BG },
+        { color: BLUE_BORDER, fillColor: BLUE_BG },
+        { color: GREEN_BORDER, fillColor: GREEN_BG },
+      ],
     },
     capsuleBorderWidth: 0.0039,
     circleBorderWidth: 0.0035,
@@ -257,8 +253,12 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
 
-    outerCurveXOffset: 0.0,
-    centerCurveXOffset: 0.0,
+    outerCurveXOffset: 0.05,
+    centerCurveXOffset: -0.015,
+    curvePad: 0.005,
+    curveTipThickness: 0.006,
+    curveInnerInwardOffset: 0.004,
+    innerCurveGapDiff: -0.002,
   },
 
   sections: [

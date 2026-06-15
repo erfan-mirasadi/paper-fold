@@ -90,6 +90,7 @@ function computeBrackets(
   hasIntroOutro: boolean,
   outerColors: Array<{ color: string; fillColor: string }> = FALLBACK_OUTER_COLORS,
   centerColor: { color: string; fillColor: string } = FALLBACK_CENTER_COLOR,
+  rawGroups: import("../../data/schema").VerseBlockConfig[] = [],
 ): BracketSpec[] {
   if (groups.length === 0) return [];
 
@@ -119,17 +120,6 @@ function computeBrackets(
     // Bracket 1 (index 1):
     //   top  = g1Y - groupPad                            (top of row 1, group 1)
     //   bot  = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2 (bottom of row 2, group 3)
-    //   inner top = top - smallBoxH2
-    //   inner bot = bot + smallBoxH2
-    //
-    // Bracket 2 (index 2):
-    //   top  = g1Y - groupPad - smallBoxH2 - s2Gap      (top of row 2, group 1)
-    //   bot  = g3Y - groupPad - smallBoxH2              (top of row 1, group 3)
-    //   inner top = top - smallBoxH2
-    //   inner bot = bot + smallBoxH2
-    //
-    // These formulas exactly reproduce the previous hardcoded y6/y8/y10 values.
-
     const outerTop0 = v6Y;
     const outerBot0 = v19Y - bigBoxH;
     brackets.push({
@@ -139,6 +129,8 @@ function computeBrackets(
       innerYBot: v19Y,
       nestLevel: 0,
       isCenter: false,
+      shrinkTop: 0,
+      shrinkBot: 0,
       ...(outerColors[0] ?? FALLBACK_OUTER_COLORS[0]),
     });
 
@@ -151,6 +143,8 @@ function computeBrackets(
       innerYBot: outerBot1 + smallBoxH2,
       nestLevel: 1,
       isCenter: false,
+      shrinkTop: 0,
+      shrinkBot: 0,
       ...(outerColors[1] ?? FALLBACK_OUTER_COLORS[1]),
     });
 
@@ -163,10 +157,11 @@ function computeBrackets(
       innerYBot: outerBot2 + smallBoxH2,
       nestLevel: 2,
       isCenter: false,
+      shrinkTop: 0,
+      shrinkBot: 0,
       ...(outerColors[2] ?? FALLBACK_OUTER_COLORS[2]),
     });
 
-    // Inner center bracket — tightly wraps the center group
     if (centerGroup) {
       const cTop = centerGroup.frameY - groupPad;
       const cBot = centerGroup.frameY - groupPad - smallBoxH2 - s2Gap - smallBoxH2;
@@ -177,37 +172,63 @@ function computeBrackets(
         innerYBot: cBot + smallBoxH2,
         nestLevel: 3,
         isCenter: true,
+        shrinkTop: 0,
+        shrinkBot: 0,
         ...centerColor,
       });
     }
   } else {
-    // ── Generic topology: 1 outer + 1 inner center ────────────────────────
+    const lastIdx = groups.length - 1;
+    const outerPairs = Math.min(outerColors.length, Math.floor(groups.length / 2));
     
-    // Outer bracket dynamically wraps all rows of the first and last group.
-    const outerTop = g0.frameY - groupPad;
-    const outerBot = gLast.frameY - gLast.frameH + groupPad; // Assumes groupPadBottom is equal to groupPad
+    for (let i = 0; i < outerPairs; i++) {
+      const gTop = groups[i];
+      const gBot = groups[lastIdx - i];
+      
+      if (!gTop || !gBot) continue;
 
-    brackets.push({
-      outerYTop: outerTop,
-      outerYBot: outerBot,
-      innerYTop: outerTop - smallBoxH2, // Bracket tip thickness matches verse height
-      innerYBot: outerBot + smallBoxH2,
-      nestLevel: 0,
-      isCenter: false,
-      ...(outerColors[0] ?? FALLBACK_OUTER_COLORS[0]),
-    });
+      const pad = layout.curvePad ?? groupPad;
+
+      const outerTop = gTop.frameY - pad;
+      const outerBot = gBot.frameY - gBot.frameH + pad;
+
+      const tipThickness = layout.curveTipThickness ?? smallBoxH2;
+      
+      const rawTop = rawGroups[i];
+      const rawBot = rawGroups[lastIdx - i];
+
+      const shrinkTop = gTop.isCenter ? layout.g2Shrink : (rawTop?.customShrink || 0);
+      const shrinkBot = gBot.isCenter ? layout.g2Shrink : (rawBot?.customShrink || 0);
+
+      brackets.push({
+        outerYTop: outerTop,
+        outerYBot: outerBot,
+        innerYTop: outerTop - tipThickness, 
+        innerYBot: outerBot + tipThickness,
+        nestLevel: i,
+        isCenter: false,
+        shrinkTop,
+        shrinkBot,
+        ...outerColors[i],
+      });
+    }
 
     if (centerGroup) {
-      const cTop = centerGroup.frameY - groupPad;
-      const cBot = centerGroup.frameY - centerGroup.frameH + groupPad;
+      const pad = layout.curvePad ?? groupPad;
+      const cTop = centerGroup.frameY - pad;
+      const cBot = centerGroup.frameY - centerGroup.frameH + pad;
+      const tipThickness = layout.curveTipThickness ?? smallBoxH2;
+      const shrinkCenter = centerGroup.isCenter ? layout.g2Shrink : 0;
 
       brackets.push({
         outerYTop: cTop,
         outerYBot: cBot,
-        innerYTop: cTop - smallBoxH2,
-        innerYBot: cBot + smallBoxH2,
-        nestLevel: 1,
+        innerYTop: cTop - tipThickness,
+        innerYBot: cBot + tipThickness,
+        nestLevel: outerPairs,
         isCenter: true,
+        shrinkTop: shrinkCenter,
+        shrinkBot: shrinkCenter,
         ...centerColor,
       });
     }
@@ -220,16 +241,18 @@ function computeBrackets(
 // Bezier helper
 // =============================================================================
 const getSmoothCurvePoints = (
-  tipX: number,
-  controlX: number,
+  tipXTop: number,
+  controlXTop: number,
+  tipXBot: number,
+  controlXBot: number,
   yTop: number,
   yBot: number,
 ) => {
   const curve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(tipX, yTop, 0),
-    new THREE.Vector3(controlX, yTop, 0),
-    new THREE.Vector3(controlX, yBot, 0),
-    new THREE.Vector3(tipX, yBot, 0),
+    new THREE.Vector3(tipXTop, yTop, 0),
+    new THREE.Vector3(controlXTop, yTop, 0),
+    new THREE.Vector3(controlXBot, yBot, 0),
+    new THREE.Vector3(tipXBot, yBot, 0),
   );
   return curve.getPoints(50);
 };
@@ -240,36 +263,46 @@ const getSmoothCurvePoints = (
 const CurvePair = ({
   outerYTop,
   outerYBot,
-  outerControlX,
-  outerTipX,
+  outerControlXTop,
+  outerControlXBot,
+  outerTipXTop,
+  outerTipXBot,
   innerYTop,
   innerYBot,
-  innerControlX,
-  innerTipX,
+  innerControlXTop,
+  innerControlXBot,
+  innerTipXTop,
+  innerTipXBot,
   color,
   fillColor,
   shouldHide = false,
+  lineWidth,
 }: {
   outerYTop: number;
   outerYBot: number;
-  outerControlX: number;
-  outerTipX: number;
+  outerControlXTop: number;
+  outerControlXBot: number;
+  outerTipXTop: number;
+  outerTipXBot: number;
   innerYTop: number;
   innerYBot: number;
-  innerControlX: number;
-  innerTipX: number;
+  innerControlXTop: number;
+  innerControlXBot: number;
+  innerTipXTop: number;
+  innerTipXBot: number;
   color: string;
   fillColor?: string;
   shouldHide?: boolean;
+  lineWidth?: number;
 }) => {
   const outerPoints = useMemo(
-    () => getSmoothCurvePoints(outerTipX, outerControlX, outerYTop, outerYBot),
-    [outerTipX, outerControlX, outerYTop, outerYBot],
+    () => getSmoothCurvePoints(outerTipXTop, outerControlXTop, outerTipXBot, outerControlXBot, outerYTop, outerYBot),
+    [outerTipXTop, outerControlXTop, outerTipXBot, outerControlXBot, outerYTop, outerYBot],
   );
 
   const innerPoints = useMemo(
-    () => getSmoothCurvePoints(innerTipX, innerControlX, innerYTop, innerYBot),
-    [innerTipX, innerControlX, innerYTop, innerYBot],
+    () => getSmoothCurvePoints(innerTipXTop, innerControlXTop, innerTipXBot, innerControlXBot, innerYTop, innerYBot),
+    [innerTipXTop, innerControlXTop, innerTipXBot, innerControlXBot, innerYTop, innerYBot],
   );
 
   // Build the fill shape from the exact same sample points as the lines.
@@ -349,7 +382,7 @@ const CurvePair = ({
           ref={lineRef1}
           points={outerPoints}
           color={activeColor}
-          lineWidth={CURVE_OUTER_LINE_WIDTH}
+          lineWidth={lineWidth ?? CURVE_OUTER_LINE_WIDTH}
           transparent={true}
           renderOrder={5}
         />
@@ -357,7 +390,7 @@ const CurvePair = ({
           ref={lineRef2}
           points={innerPoints}
           color={activeColor}
-          lineWidth={CURVE_INNER_LINE_WIDTH}
+          lineWidth={lineWidth ?? CURVE_INNER_LINE_WIDTH}
           transparent={true}
           renderOrder={5}
         />
@@ -385,9 +418,7 @@ interface SideCurvesProps {
   layout: LayoutConfig;
   startX: number;
   borderWidth?: number;
-  /** Pre-computed group transforms from SectionTwo (already sliced per-side) */
   groups: GroupTransforms[];
-  /** Whether this layout has intro/outro verses (drives bracket topology) */
   hasIntroOutro: boolean;
 }
 
@@ -402,26 +433,20 @@ export const SideCurves = ({
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isAllSectionsMode = useElevatedStore((state) => state.isAllSectionsMode);
 
-  // Read curve colors from the active config — dynamic, no Alak hardcoding.
   const configColors = useStoryStore((state) => state.activeConfig.styling.colors);
   const configCurveColors = configColors.curveColors;
 
-  // ── Resolve outer vs center colors from config (or fall back) ────────────
-  // curveColors layout: [outer0, outer1, ..., outerN, center]
-  // The center bracket is the last entry; all earlier ones are outer brackets.
   const outerColors: Array<{ color: string; fillColor: string }> = configCurveColors
-    ? configCurveColors.slice(0, -1)          // all but last = outer
+    ? configCurveColors.slice(0, -1)
     : FALLBACK_OUTER_COLORS;
   const centerColor: { color: string; fillColor: string } = configCurveColors
     ? (configCurveColors[configCurveColors.length - 1] ?? FALLBACK_CENTER_COLOR)
     : FALLBACK_CENTER_COLOR;
 
-  // Hide curves whenever any inner popup group (not 1–2 or 3–4) is open.
   const hideFromPopUps = popUpGroups.some(
     (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
   );
 
-  // Also hide curves during section-level elevation for Section 2 hollow blocks.
   const hideFromSectionElevate =
     !isAllSectionsMode &&
     (activeSectionIds.includes("s2_top") ||
@@ -431,103 +456,113 @@ export const SideCurves = ({
   const shouldHide = hideFromPopUps || hideFromSectionElevate;
 
   const { s2Pad, sectionW } = layout;
-
-  // ── Border delta (only the delta from VerseBox default, not the full width) ─
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
-
-  // ── Reference edges (flush with the section box sides) ───────────────────
   const baseStartX_L = startX + s2Pad - 0.005;
   const baseStartX_R = startX + sectionW - s2Pad + 0.005;
 
-  // ── Compute brackets from group topology ─────────────────────────────────
+  const activeConfig = useStoryStore((state) => state.activeConfig);
+  const vertSection = activeConfig?.sections?.find((s) => s.type === "verticalGroups") as import("../../../data/schema").VerticalGroupsSectionConfig | undefined;
+  const rawGroups = vertSection?.groups ?? [];
+
   const brackets = useMemo(
-    () => computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [groups, layout, hasIntroOutro, outerColors, centerColor],
+    () => computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor, rawGroups as any),
+    [groups, layout, hasIntroOutro, outerColors, centerColor, rawGroups],
   );
 
-  // ── Build control and tip X arrays dynamically ───────────────────────────
-  // The number of brackets determines how many bow steps to spread.
-  // Outermost bracket (nestLevel 0) gets the maximum bow; each subsequent
-  // level steps one CURVE_GAP / INNER_CURVE_GAP closer to the page edge.
-  //
-  // For Alak (4 brackets): outermost bow = 4×CURVE_GAP — matches old control1.
-  // For Ayat al-Kursi (2 brackets): outermost bow = 2×CURVE_GAP.
   const totalLevels = brackets.length;
-
-  // ── Render both sides via a single .map() over the brackets array ─────────
-  // We render left-side and right-side pairs together inside the loop to keep
-  // the key structure simple and avoid duplication.
 
   return (
     <group position={[0, 0, 0.0025]} renderOrder={5}>
       {brackets.map((b, idx) => {
-        // Bow depth: outermost bracket gets the deepest bow.
-        // nestLevel 0 (outermost) → totalLevels bow steps away from edge.
-        // nestLevel N → (totalLevels - N) bow steps.
         const bowMultiplier = totalLevels - b.nestLevel;
 
         const shiftX = b.isCenter ? -(layout.centerCurveXOffset || 0) : (layout.outerCurveXOffset || 0);
         const startX_L = baseStartX_L + shiftX;
         const startX_R = baseStartX_R - shiftX;
+        
+        const shrinkTop = b.shrinkTop || 0;
+        const shrinkBot = b.shrinkBot || 0;
 
-        // Standard bracket tips
-        const tipX_L = startX_L + CURVE_INWARD_OFFSET;
-        const tipX_R = startX_R - CURVE_INWARD_OFFSET;
+        const innerInwardOffset = layout.curveInnerInwardOffset ?? INNER_CURVE_INWARD_OFFSET;
+        const innerCurveGap = CURVE_GAP + (layout.innerCurveGapDiff ?? (INNER_CURVE_GAP - CURVE_GAP));
 
-        // Deep-penetration tips for the center bracket
-        const deepTipX_L = startX_L + CURVE_DEEP_OFFSET_OUTER;
-        const deepTipX_R = startX_R - CURVE_DEEP_OFFSET_OUTER;
-        const deepInnerTipX_L = startX_L + CURVE_DEEP_OFFSET_INNER;
-        const deepInnerTipX_R = startX_R - CURVE_DEEP_OFFSET_INNER;
+        const tipXTop_L = startX_L + CURVE_INWARD_OFFSET + shrinkTop;
+        const tipXTop_R = startX_R - CURVE_INWARD_OFFSET - shrinkTop;
+        const tipXBot_L = startX_L + CURVE_INWARD_OFFSET + shrinkBot;
+        const tipXBot_R = startX_R - CURVE_INWARD_OFFSET - shrinkBot;
 
-        const outerControl_L = startX_L - CURVE_GAP * bowMultiplier;
-        const outerControl_R = startX_R + CURVE_GAP * bowMultiplier;
-        const innerControl_L = startX_L - INNER_CURVE_GAP * bowMultiplier;
-        const innerControl_R = startX_R + INNER_CURVE_GAP * bowMultiplier;
+        const deepTipXTop_L = startX_L + CURVE_DEEP_OFFSET_OUTER + shrinkTop;
+        const deepTipXTop_R = startX_R - CURVE_DEEP_OFFSET_OUTER - shrinkTop;
+        const deepTipXBot_L = startX_L + CURVE_DEEP_OFFSET_OUTER + shrinkBot;
+        const deepTipXBot_R = startX_R - CURVE_DEEP_OFFSET_OUTER - shrinkBot;
 
-        // Center brackets get deeper-penetration tips; others get standard tips.
-        const outerTip_L = b.isCenter ? deepTipX_L : tipX_L;
-        const outerTip_R = b.isCenter ? deepTipX_R : tipX_R;
-        const innerTip_L = b.isCenter ? deepInnerTipX_L : tipX_L + INNER_CURVE_INWARD_OFFSET;
-        const innerTip_R = b.isCenter ? deepInnerTipX_R : tipX_R - INNER_CURVE_INWARD_OFFSET;
+        const deepInnerTipXTop_L = startX_L + CURVE_DEEP_OFFSET_INNER + shrinkTop;
+        const deepInnerTipXTop_R = startX_R - CURVE_DEEP_OFFSET_INNER - shrinkTop;
+        const deepInnerTipXBot_L = startX_L + CURVE_DEEP_OFFSET_INNER + shrinkBot;
+        const deepInnerTipXBot_R = startX_R - CURVE_DEEP_OFFSET_INNER - shrinkBot;
 
-        // Apply border delta only to the outermost bracket (bracket 0) whose
-        // edges are flush with the intro/outro verse borders.
+        const outerControlTop_L = startX_L - CURVE_GAP * bowMultiplier + shrinkTop * 0.5;
+        const outerControlTop_R = startX_R + CURVE_GAP * bowMultiplier - shrinkTop * 0.5;
+        const outerControlBot_L = startX_L - CURVE_GAP * bowMultiplier + shrinkBot * 0.5;
+        const outerControlBot_R = startX_R + CURVE_GAP * bowMultiplier - shrinkBot * 0.5;
+
+        const innerControlTop_L = startX_L - innerCurveGap * bowMultiplier + shrinkTop * 0.5;
+        const innerControlTop_R = startX_R + innerCurveGap * bowMultiplier - shrinkTop * 0.5;
+        const innerControlBot_L = startX_L - innerCurveGap * bowMultiplier + shrinkBot * 0.5;
+        const innerControlBot_R = startX_R + innerCurveGap * bowMultiplier - shrinkBot * 0.5;
+
+        const outerTipTop_L = b.isCenter ? deepTipXTop_L : tipXTop_L;
+        const outerTipTop_R = b.isCenter ? deepTipXTop_R : tipXTop_R;
+        const outerTipBot_L = b.isCenter ? deepTipXBot_L : tipXBot_L;
+        const outerTipBot_R = b.isCenter ? deepTipXBot_R : tipXBot_R;
+
+        const innerTipTop_L = b.isCenter ? deepInnerTipXTop_L : tipXTop_L + innerInwardOffset;
+        const innerTipTop_R = b.isCenter ? deepInnerTipXTop_R : tipXTop_R - innerInwardOffset;
+        const innerTipBot_L = b.isCenter ? deepInnerTipXBot_L : tipXBot_L + innerInwardOffset;
+        const innerTipBot_R = b.isCenter ? deepInnerTipXBot_R : tipXBot_R - innerInwardOffset;
+
         const topDelta  = idx === 0 ? borderDelta : 0;
         const botDelta  = idx === 0 ? borderDelta : 0;
 
         return (
           <Fragment key={idx}>
-            {/* LEFT side */}
             <CurvePair
               key={`L-${idx}`}
               outerYTop={b.outerYTop + topDelta}
               outerYBot={b.outerYBot - botDelta}
-              outerControlX={outerControl_L}
-              outerTipX={outerTip_L}
+              outerControlXTop={outerControlTop_L}
+              outerControlXBot={outerControlBot_L}
+              outerTipXTop={outerTipTop_L}
+              outerTipXBot={outerTipBot_L}
               innerYTop={b.innerYTop + topDelta}
               innerYBot={b.innerYBot - botDelta}
-              innerControlX={innerControl_L}
-              innerTipX={innerTip_L}
+              innerControlXTop={innerControlTop_L}
+              innerControlXBot={innerControlBot_L}
+              innerTipXTop={innerTipTop_L}
+              innerTipXBot={innerTipBot_L}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}
+              lineWidth={configColors.curveLineWidth}
             />
-            {/* RIGHT side */}
             <CurvePair
               key={`R-${idx}`}
               outerYTop={b.outerYTop + topDelta}
               outerYBot={b.outerYBot - botDelta}
-              outerControlX={outerControl_R}
-              outerTipX={outerTip_R}
+              outerControlXTop={outerControlTop_R}
+              outerControlXBot={outerControlBot_R}
+              outerTipXTop={outerTipTop_R}
+              outerTipXBot={outerTipBot_R}
               innerYTop={b.innerYTop + topDelta}
               innerYBot={b.innerYBot - botDelta}
-              innerControlX={innerControl_R}
-              innerTipX={innerTip_R}
+              innerControlXTop={innerControlTop_R}
+              innerControlXBot={innerControlBot_R}
+              innerTipXTop={innerTipTop_R}
+              innerTipXBot={innerTipBot_R}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}
+              lineWidth={configColors.curveLineWidth}
             />
           </Fragment>
         );

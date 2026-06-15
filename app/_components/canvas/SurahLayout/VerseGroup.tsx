@@ -53,8 +53,27 @@ export function VerseGroup({
   ) as VerticalGroupsSectionConfig | undefined;
   const hideConnectors = sectionConfig?.hideRowConnectors ?? false;
 
+  const activeTextData = useStoryStore.getState().activeTextData;
+  const arabicGroups = activeTextData?.["ar"]?.section2?.colorGroups;
+  const textDataGroup = (groupIndex !== undefined && arabicGroups) ? arabicGroups[groupIndex] : group;
+  const topLabelText = textDataGroup?.topLabel;
+  const topLabelConfig = (gt as any).topLabelConfig;
+
   return (
     <group>
+      {topLabelText && topLabelConfig && (
+        <TopLabel
+          x={gt.frameX + gt.frameW / 2}
+          y={gt.frameY + (topLabelConfig.yOffset || 0)}
+          z={0.005}
+          text={topLabelText}
+          labelWidth={topLabelConfig.width || 0.3}
+          partialBorder={false}
+          bgColor={config.styling.colors.paperBase}
+          borderColor={config.styling.colors.s1InnerBorder}
+          renderOrder={20}
+        />
+      )}
       {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}
       {!hideConnectors &&
         gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
@@ -171,23 +190,6 @@ export function VerseGroup({
         );
       })}
 
-      {group.topLabel && (
-        <TopLabel
-          text={group.topLabel}
-          x={layout.START_X + layout.sectionW / 2}
-          y={gt.frameY + (gt.topLabelConfig?.yOffset ?? 0.07)}
-          labelWidth={gt.topLabelConfig?.width ?? 0.3}
-          labelHeight={gt.topLabelConfig?.height ?? 0.065}
-          textOffsetY={gt.topLabelConfig?.textOffsetY ?? -0.008}
-          partialBorder={false}
-          bottomBorder={false}
-          noBorder={false}
-          borderColor={config.styling.colors.maroonTheme}
-          bgColor={"#ffffff"}
-          shadow={false}
-          renderOrder={20}
-        />
-      )}
     </group>
   );
 }

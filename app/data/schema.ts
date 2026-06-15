@@ -55,6 +55,7 @@ export interface ThemeColors {
    * Provide one entry per bracket (outer brackets first, center last).
    */
   curveColors?: Array<{ color: string; fillColor: string }>;
+  curveLineWidth?: number;
   
   /**
    * Optional background colors for vertical sections (like Ayat Al Kursi).
@@ -278,6 +279,8 @@ export interface BracketSpec {
   isCenter: boolean;
   color: string;
   fillColor: string;
+  shrinkTop?: number;
+  shrinkBot?: number;
 }
 
 export interface RowConnectorTransform {

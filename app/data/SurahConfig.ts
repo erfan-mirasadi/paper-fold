@@ -94,6 +94,10 @@ export interface AlakLayoutParams {
   centerCurveXOffset?: number;
   outerShrink?: number;
   s2VerticalRowGap?: number;
+  curveTipThickness?: number;
+  curvePad?: number;
+  curveInnerInwardOffset?: number;
+  innerCurveGapDiff?: number;
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -798,6 +802,10 @@ export function createLayoutMath(
     verseTextScale: p.verseTextScale ?? undefined,
     outerCurveXOffset: p.outerCurveXOffset ?? 0,
     centerCurveXOffset: p.centerCurveXOffset ?? 0,
+    curveTipThickness: p.curveTipThickness,
+    curvePad: p.curvePad,
+    curveInnerInwardOffset: p.curveInnerInwardOffset,
+    innerCurveGapDiff: p.innerCurveGapDiff,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
