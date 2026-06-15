@@ -33,14 +33,23 @@ export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
       SECTION_PRIORITY.push(topId, centerId, bottomId);
       
       SECTION_VERSE_IDS[topId] = [];
-      if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
-      if (s2.groups[0]) SECTION_VERSE_IDS[topId].push(...s2.groups[0].verseIds);
-
       SECTION_VERSE_IDS[centerId] = [];
-      if (s2.groups[1]) SECTION_VERSE_IDS[centerId].push(...s2.groups[1].verseIds);
-
       SECTION_VERSE_IDS[bottomId] = [];
-      if (s2.groups[2]) SECTION_VERSE_IDS[bottomId].push(...s2.groups[2].verseIds);
+
+      if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
+
+      let centerStarted = false;
+      s2.groups.forEach((g) => {
+        if (g.isCenter) {
+          centerStarted = true;
+          SECTION_VERSE_IDS[centerId].push(...g.verseIds);
+        } else if (!centerStarted) {
+          SECTION_VERSE_IDS[topId].push(...g.verseIds);
+        } else {
+          SECTION_VERSE_IDS[bottomId].push(...g.verseIds);
+        }
+      });
+
       if (s2.outroVerse) SECTION_VERSE_IDS[bottomId].push(s2.outroVerse);
     }
   });

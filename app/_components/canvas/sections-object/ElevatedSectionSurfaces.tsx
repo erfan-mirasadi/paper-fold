@@ -35,7 +35,7 @@ import {
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
-import { SectionTransforms, RowConnectorTransform } from "../../../data/schema";
+import { SectionTransforms, RowConnectorTransform, VerticalGroupsSectionConfig } from "../../../data/schema";
 
 import {
   HOLLOW_CONNECTOR_INNER_BG_1_3,
@@ -135,10 +135,15 @@ function useSectionSurfaceSpring(
     from: { opacity: 0 },
     delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
-      : isIntroActive || sectionId === useStoryStore.getState().activeConfig.sections[0].id || !justLeftIntro
+      : isIntroActive ||
+          sectionId === useStoryStore.getState().activeConfig.sections[0].id ||
+          !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
-    immediate: actuallyActive || (justLeftIntro && sectionId !== useStoryStore.getState().activeConfig.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
+    immediate:
+      actuallyActive ||
+      (justLeftIntro &&
+        sectionId !== useStoryStore.getState().activeConfig.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
     config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -172,7 +177,9 @@ export function useHandoffOpacity(
     // Sync opacity directly to the store without triggering React re-renders
     return useFoldStore.subscribe((state) => {
       const targetOpacity =
-        state.isIntroActive && sectionId && sectionId !== useStoryStore.getState().activeConfig.sections[0].id
+        state.isIntroActive &&
+        sectionId &&
+        sectionId !== useStoryStore.getState().activeConfig.sections[0].id
           ? 1 - state.introHandoffProgress
           : 1;
 
@@ -492,9 +499,12 @@ export function ElevatedSectionSurfaces() {
     texture.colorSpace = SRGBColorSpace;
   });
 
-  const config = useStoryStore(state => state.activeConfig);
-  const S1_ID = config.sections[0]?.id ?? "section1";
-  const S2_ID = config.sections[1]?.id ?? "__no_s2__";
+  const config = useStoryStore((state) => state.activeConfig);
+  const gridConfig = config.sections.find((s) => s.type === "gridWithAnaAyet");
+  const vertConfig = config.sections.find((s) => s.type === "verticalGroups");
+
+  const S1_ID = gridConfig?.id ?? "__no_s1__";
+  const S2_ID = vertConfig?.id ?? "__no_s2__";
   const S2_TOP_ID = `${S2_ID}_top`;
   const S2_CENTER_ID = `${S2_ID}_center`;
   const S2_BOTTOM_ID = `${S2_ID}_bottom`;
@@ -540,10 +550,27 @@ export function ElevatedSectionSurfaces() {
     opacity: useHandoffOpacity(s2BottomBaseSpring.opacity, S2_BOTTOM_ID),
   };
 
-  const s1 = SURAH_TRANSFORMS.sections[0] as Required<SectionTransforms>;
-  const s2 = SURAH_TRANSFORMS.sections[1] as Required<SectionTransforms>;
+  const gridConfigIndex = config.sections.findIndex(
+    (s) => s.type === "gridWithAnaAyet",
+  );
+  const vertConfigIndex = config.sections.findIndex(
+    (s) => s.type === "verticalGroups",
+  );
 
-  const bw = s2.borderWidth;
+  const s1 =
+    gridConfigIndex >= 0
+      ? (SURAH_TRANSFORMS.sections[
+          gridConfigIndex
+        ] as Required<SectionTransforms>)
+      : undefined;
+  const s2 =
+    vertConfigIndex >= 0
+      ? (SURAH_TRANSFORMS.sections[
+          vertConfigIndex
+        ] as Required<SectionTransforms>)
+      : undefined;
+
+  const bw = s2?.borderWidth ?? 0;
   const innerBorderInset = bw * 0.7;
 
   const buildConnectorLayers = (
@@ -551,6 +578,7 @@ export function ElevatedSectionSurfaces() {
     height: number,
     position: "top" | "bottom",
   ) => {
+    if (!s2) return null;
     const outerX = s2.connectorX - bw;
     const outerW = s2.connectorW + bw * 2;
     const outerH = height + bw * 3;
@@ -580,52 +608,99 @@ export function ElevatedSectionSurfaces() {
     };
   };
 
-  const topConnector = buildConnectorLayers(
-    s2.topConnectorY,
-    s2.topConnectorH,
-    "top",
-  );
+  const topConnector = s2
+    ? buildConnectorLayers(s2.topConnectorY, s2.topConnectorH, "top")
+    : null;
 
-  const bottomConnector = buildConnectorLayers(
-    s2.bottomConnectorY,
-    s2.bottomConnectorH,
-    "bottom",
-  );
+  const bottomConnector = s2
+    ? buildConnectorLayers(s2.bottomConnectorY, s2.bottomConnectorH, "bottom")
+    : null;
   const getTextureForColor = (color: string): Texture | null =>
     color === SECTION_BG_TEXTURE || color === HOLLOW_CONNECTOR_INNER_BG_1_3
       ? sectionBgTexture
       : null;
 
+  const getGroupColor = (idx: number, fallback: string) => {
+    if (
+      vertConfig &&
+      vertConfig.type === "verticalGroups" &&
+      vertConfig.groups[idx]
+    ) {
+      const key = vertConfig.groups[idx].bgThemeKey;
+      if (key) return (config.styling.colors as any)[key] ?? fallback;
+    }
+    return fallback;
+  };
+
   const s1Bounds = useMemo(
     () =>
-      isAllSectionsMode
+      isAllSectionsMode || !s1
         ? undefined
         : calculateSectionBounds(S1_ID, SURAH_TRANSFORMS, runtime.PAGE_WIDTH),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S1_ID],
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S1_ID, s1],
   );
   const s2TopBounds = useMemo(
     () =>
-      isAllSectionsMode
+      isAllSectionsMode || !s2
         ? undefined
         : calculateSectionBounds(
             S2_TOP_ID,
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_TOP_ID],
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_TOP_ID, s2],
   );
-  const s2CenterBounds = undefined;
+  const s2CenterBounds = useMemo(
+    () =>
+      isAllSectionsMode || !s2
+        ? undefined
+        : calculateSectionBounds(
+            S2_CENTER_ID,
+            SURAH_TRANSFORMS,
+            runtime.PAGE_WIDTH,
+          ),
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_CENTER_ID, s2],
+  );
   const s2BottomBounds = useMemo(
     () =>
-      isAllSectionsMode
+      isAllSectionsMode || !s2
         ? undefined
         : calculateSectionBounds(
             S2_BOTTOM_ID,
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_BOTTOM_ID],
+    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_BOTTOM_ID, s2],
   );
+
+  const getConnectorColor = (groupIdx: number) => {
+    if (!vertConfig || vertConfig.type !== "verticalGroups") return config.styling.colors.maroonTheme ?? "#000000";
+    const group = vertConfig.groups[groupIdx];
+    if (!group) return config.styling.colors.maroonTheme ?? "#000000";
+    const firstVerseId = group.verseIds?.[0];
+    const override = firstVerseId !== undefined ? config.verseOverrides?.[firstVerseId] : undefined;
+    if (override?.border) return override.border;
+    return group.isCenter ? (config.styling.colors.greenTheme ?? "#000000") : (config.styling.colors.maroonTheme ?? "#000000");
+  };
+
+  const hideConnectors = (vertConfig as VerticalGroupsSectionConfig | undefined)?.hideRowConnectors ?? false;
+
+  const topGroupIndices: number[] = [];
+  const centerGroupIndices: number[] = [];
+  const bottomGroupIndices: number[] = [];
+  if (s2) {
+    let foundCenter = false;
+    s2.groups.forEach((g, idx) => {
+      if (g.isCenter) {
+        centerGroupIndices.push(idx);
+        foundCenter = true;
+      } else if (!foundCenter) {
+        topGroupIndices.push(idx);
+      } else {
+        bottomGroupIndices.push(idx);
+      }
+    });
+  }
 
   const s1IntroRef = useIntroSectionOffset(S1_ID);
   const s2TopIntroRef = useIntroSectionOffset(S2_TOP_ID);
@@ -634,211 +709,248 @@ export function ElevatedSectionSurfaces() {
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
-      {/* ─── Section 1 ─────────────────────────────────────────────── */}
-      <group ref={s1IntroRef}>
-        <DraggableSectionGroup
-          sectionId={S1_ID}
-          isActive={s1Active}
-          sectionBounds={s1Bounds}
-        >
-          {isIntroActive && (
-            <IntroGuide3DReporter
-              guideId={S1_ID}
-              position={[
-                s1.frameX - runtime.PAGE_WIDTH / 2 + s1.frameW,
-                s1.frameY,
-                0.005,
-              ]}
-            />
-          )}
-          <group>
-            <ElevatedSvgFrame
-              centerX={s1.frameX + s1.frameW / 2}
-              centerY={s1.frameY - s1.frameH / 2}
-              w={s1.frameW}
-              h={s1.frameH}
-              solidColor={S1_FRAME_BG_COLOR}
-              texturePath={S1_FRAME_IMAGE}
-              solidScale={[S1_SOLID_SCALE_X, S1_SOLID_SCALE_Y, 1]}
-              imageScale={[S1_IMAGE_SCALE, S1_IMAGE_SCALE, 1]}
-              solidYOffset={S1_SOLID_Y_OFFSET}
-              imageYOffset={S1_IMAGE_Y_OFFSET}
-              spring={s1Spring}
-              shadow
-              shadowStrength={0.95}
-              suppressShadow={false}
-              zOffset={0.001}
-              scallopPosition="top"
-            />
-            {s1.rowConnectors.map((rc: RowConnectorTransform, i: number) => (
-              <ElevatedLayer
-                key={`s1-rc-${i}`}
-                x={rc.x}
-                y={rc.y}
-                w={rc.w}
-                h={rc.h}
-                radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={S1_INNER_BORDER}
-                sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
+      {/* ─── Section 1 (Grid + AnaAyet) ──────────────────────────────── */}
+      {s1 && (
+        <group ref={s1IntroRef}>
+          <DraggableSectionGroup
+            sectionId={S1_ID}
+            isActive={s1Active}
+            sectionBounds={s1Bounds}
+          >
+            {isIntroActive && (
+              <IntroGuide3DReporter
+                guideId={S1_ID}
+                position={[
+                  s1.frameX - runtime.PAGE_WIDTH / 2 + s1.frameW,
+                  s1.frameY,
+                  0.005,
+                ]}
+              />
+            )}
+            <group>
+              <ElevatedSvgFrame
+                centerX={s1.frameX + s1.frameW / 2}
+                centerY={s1.frameY - s1.frameH / 2}
+                w={s1.frameW}
+                h={s1.frameH}
+                solidColor={S1_FRAME_BG_COLOR}
+                texturePath={S1_FRAME_IMAGE}
+                solidScale={[1, S1_SOLID_SCALE_Y, 1]}
+                imageScale={[S1_IMAGE_SCALE, S1_IMAGE_SCALE, 1]}
+                solidYOffset={S1_SOLID_Y_OFFSET}
+                imageYOffset={S1_IMAGE_Y_OFFSET}
                 spring={s1Spring}
-                zOffset={0.0015}
-                renderOrder={3}
+                shadow
+                shadowStrength={0.6}
+                suppressShadow={isIntroActive && !s1Active}
+                zOffset={0.001}
+                scallopPosition="top"
               />
-            ))}
-          </group>
-        </DraggableSectionGroup>
-      </group>
+              {s1.rowConnectors?.map((rc: RowConnectorTransform, i: number) => (
+                <ElevatedLayer
+                  key={`s1-rc-${i}`}
+                  x={rc.x}
+                  y={rc.y}
+                  w={rc.w}
+                  h={rc.h}
+                  radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                  color={S1_INNER_BORDER}
+                  sectionBgTexture={getTextureForColor(S1_INNER_BORDER)}
+                  spring={s1Spring}
+                  zOffset={0.0015}
+                  renderOrder={3}
+                />
+              ))}
+            </group>
+          </DraggableSectionGroup>
+        </group>
+      )}
 
-      {/* ─── Section 2 top connector ───────────────────────────────── */}
-      <group ref={s2TopIntroRef}>
-        <DraggableSectionGroup
-          sectionId={S2_TOP_ID}
-          isActive={s2TopActive}
-          sectionBounds={s2TopBounds}
-        >
-          {isIntroActive && (
-            <IntroGuide3DReporter
-              guideId={S2_TOP_ID}
-              position={[
-                s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
-                s2.shiftedTop,
-                0.005,
-              ]}
-            />
-          )}
-          <group>
-            <ElevatedSvgFrame
-              centerX={s2.connectorX + s2.connectorW / 2}
-              centerY={s2.topConnectorY - s2.topConnectorH / 2}
-              w={s2.connectorW}
-              h={s2.topConnectorH}
-              solidColor={S2_FRAME_BG_COLOR}
-              texturePath={S2_FRAME_IMAGE}
-              solidScale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
-              imageScale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
-              solidXOffset={S2_TOP_SOLID_X_OFFSET}
-              solidYOffset={S2_TOP_SOLID_Y_OFFSET}
-              imageXOffset={S2_TOP_IMAGE_X_OFFSET}
-              imageYOffset={S2_TOP_IMAGE_Y_OFFSET}
-              spring={s2TopSpring}
-              shadow
-              shadowStrength={0.8}
-              suppressShadow={false}
-              zOffset={0.001}
-              scallopPosition="none"
-            />
-            {s2.groups[0].rowConnectors.map((rc: RowConnectorTransform, i: number) => (
-              <ElevatedLayer
-                key={`s2-top-rc-${i}`}
-                x={rc.x}
-                y={rc.y}
-                w={rc.w}
-                h={rc.h}
-                radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={config.styling.colors.s2Group1Bg}
-                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group1Bg)}
-                spring={s2TopSpring}
-                zOffset={0.0025}
-                renderOrder={3}
-              />
-            ))}
+      {s2 && (
+        <>
+          {/* ─── Section 2 top connector ───────────────────────────────── */}
+          <group ref={s2TopIntroRef}>
+            <DraggableSectionGroup
+              sectionId={S2_TOP_ID}
+              isActive={s2TopActive}
+              sectionBounds={s2TopBounds}
+            >
+              {isIntroActive && (
+                <IntroGuide3DReporter
+                  guideId={S2_TOP_ID}
+                  position={[
+                    s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
+                    s2.shiftedTop,
+                    0.005,
+                  ]}
+                />
+              )}
+              <group>
+                {config.features.hasIntro && s2.topConnectorY !== undefined && (
+                  <ElevatedSvgFrame
+                    centerX={s2.connectorX + s2.connectorW / 2}
+                    centerY={s2.topConnectorY - s2.topConnectorH / 2}
+                    w={s2.connectorW}
+                    h={s2.topConnectorH}
+                    solidColor={S2_FRAME_BG_COLOR}
+                    texturePath={S2_FRAME_IMAGE}
+                    solidScale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
+                    imageScale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
+                    solidXOffset={S2_TOP_SOLID_X_OFFSET}
+                    solidYOffset={S2_TOP_SOLID_Y_OFFSET}
+                    imageXOffset={S2_TOP_IMAGE_X_OFFSET}
+                    imageYOffset={S2_TOP_IMAGE_Y_OFFSET}
+                    spring={s2TopSpring}
+                    shadow
+                    shadowStrength={0.8}
+                    suppressShadow={false}
+                    zOffset={0.001}
+                    scallopPosition="none"
+                  />
+                )}
+                {!hideConnectors && topGroupIndices.map((idx) => {
+                  const group = s2.groups[idx];
+                  if (!group) return null;
+                  const color = getConnectorColor(idx);
+                  return group.rowConnectors.map(
+                    (rc: RowConnectorTransform, i: number) => (
+                      <ElevatedLayer
+                        key={`s2-top-rc-${idx}-${i}`}
+                        x={rc.x} y={rc.y} w={rc.w} h={rc.h}
+                        radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                        color={color}
+                        sectionBgTexture={getTextureForColor(color)}
+                        spring={s2TopSpring}
+                        zOffset={0.0025}
+                        renderOrder={3}
+                      />
+                    ),
+                  );
+                })}
+              </group>
+            </DraggableSectionGroup>
           </group>
-        </DraggableSectionGroup>
-      </group>
 
-      {/* ─── Section 2 Center Group ────────────────────────────────────── */}
-      <group ref={s2CenterIntroRef}>
-        <DraggableSectionGroup
-          sectionId={S2_CENTER_ID}
-          isActive={s2CenterActive}
-          sectionBounds={s2CenterBounds}
-        >
-          {isIntroActive && (
-            <IntroGuide3DReporter
-              guideId={S2_CENTER_ID}
-              position={[
-                s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
-                s2.groups[1].frameY,
-                0.005,
-              ]}
-            />
-          )}
-          <group>
-            {s2.groups[1].rowConnectors.map((rc: RowConnectorTransform, i: number) => (
-              <ElevatedLayer
-                key={`s2-center-rc-${i}`}
-                x={rc.x}
-                y={rc.y}
-                w={rc.w}
-                h={rc.h}
-                radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={config.styling.colors.s2Group2Bg}
-                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group2Bg)}
-                spring={s2CenterSpring}
-                zOffset={0.0025}
-                renderOrder={3}
-              />
-            ))}
+          {/* ─── Section 2 Center Group ────────────────────────────────────── */}
+          <group ref={s2CenterIntroRef}>
+            <DraggableSectionGroup
+              sectionId={S2_CENTER_ID}
+              isActive={s2CenterActive}
+              sectionBounds={s2CenterBounds}
+            >
+              {isIntroActive && (
+                <IntroGuide3DReporter
+                  guideId={S2_CENTER_ID}
+                  position={[
+                    s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
+                    s2.groups.length > 1 ? s2.groups[1].frameY : s2.frameY,
+                    0.005,
+                  ]}
+                />
+              )}
+              <group>
+                {!hideConnectors && centerGroupIndices.map((idx) => {
+                  const group = s2.groups[idx];
+                  if (!group) return null;
+                  const color = getConnectorColor(idx);
+                  return (
+                    <group key={`center-group-${idx}`}>
+                      {group.rowConnectors.map(
+                        (rc: RowConnectorTransform, i: number) => (
+                          <ElevatedLayer
+                            key={`s2-center-rc-${idx}-${i}`}
+                            x={rc.x} y={rc.y} w={rc.w} h={rc.h}
+                            radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                            color={color}
+                            sectionBgTexture={getTextureForColor(color)}
+                            spring={s2CenterSpring}
+                            zOffset={0.0025}
+                            renderOrder={3}
+                          />
+                        ),
+                      )}
+                    </group>
+                  );
+                })}
+              </group>
+            </DraggableSectionGroup>
           </group>
-        </DraggableSectionGroup>
-      </group>
 
-      {/* ─── Section 2 bottom connector ────────────────────────────── */}
-      <group ref={s2BottomIntroRef}>
-        <DraggableSectionGroup
-          sectionId={S2_BOTTOM_ID}
-          isActive={s2BottomActive}
-          sectionBounds={s2BottomBounds}
-        >
-          {isIntroActive && (
-            <IntroGuide3DReporter
-              guideId={S2_BOTTOM_ID}
-              position={[
-                s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
-                s2.groups[2].frameY,
-                0.005,
-              ]}
-            />
-          )}
-          <group>
-            <ElevatedSvgFrame
-              centerX={s2.connectorX + s2.connectorW / 2}
-              centerY={s2.bottomConnectorY - s2.bottomConnectorH / 2}
-              w={s2.connectorW}
-              h={s2.bottomConnectorH}
-              solidColor={S2_FRAME_BG_COLOR}
-              texturePath={S2_FRAME_IMAGE}
-              solidScale={[S2_BOTTOM_SOLID_SCALE_X, S2_BOTTOM_SOLID_SCALE_Y, 1]}
-              imageScale={[S2_BOTTOM_IMAGE_SCALE_X, S2_BOTTOM_IMAGE_SCALE_Y, 1]}
-              solidXOffset={S2_BOTTOM_SOLID_X_OFFSET}
-              solidYOffset={S2_BOTTOM_SOLID_Y_OFFSET}
-              imageXOffset={S2_BOTTOM_IMAGE_X_OFFSET}
-              imageYOffset={S2_BOTTOM_IMAGE_Y_OFFSET}
-              spring={s2BottomSpring}
-              shadow
-              shadowStrength={0.8}
-              suppressShadow={false}
-              zOffset={0.001}
-              scallopPosition="none"
-            />
-            {s2.groups[2].rowConnectors.map((rc: RowConnectorTransform, i: number) => (
-              <ElevatedLayer
-                key={`s2-bottom-rc-${i}`}
-                x={rc.x}
-                y={rc.y}
-                w={rc.w}
-                h={rc.h}
-                radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={config.styling.colors.s2Group3Bg}
-                sectionBgTexture={getTextureForColor(config.styling.colors.s2Group3Bg)}
-                spring={s2BottomSpring}
-                zOffset={0.0025}
-                renderOrder={3}
-              />
-            ))}
+          {/* ─── Section 2 bottom connector ────────────────────────────── */}
+          <group ref={s2BottomIntroRef}>
+            <DraggableSectionGroup
+              sectionId={S2_BOTTOM_ID}
+              isActive={s2BottomActive}
+              sectionBounds={s2BottomBounds}
+            >
+              {isIntroActive && (
+                <IntroGuide3DReporter
+                  guideId={S2_BOTTOM_ID}
+                  position={[
+                    s2.frameX - runtime.PAGE_WIDTH / 2 + s2.frameW,
+                    s2.groups.length > 0
+                      ? s2.groups[s2.groups.length - 1].frameY
+                      : s2.frameY,
+                    0.005,
+                  ]}
+                />
+              )}
+              <group>
+                {config.features.hasIntro &&
+                  s2.bottomConnectorY !== undefined && (
+                    <ElevatedSvgFrame
+                      centerX={s2.connectorX + s2.connectorW / 2}
+                      centerY={s2.bottomConnectorY - s2.bottomConnectorH / 2}
+                      w={s2.connectorW}
+                      h={s2.bottomConnectorH}
+                      solidColor={S2_FRAME_BG_COLOR}
+                      texturePath={S2_FRAME_IMAGE}
+                      solidScale={[
+                        S2_BOTTOM_SOLID_SCALE_X,
+                        S2_BOTTOM_SOLID_SCALE_Y,
+                        1,
+                      ]}
+                      imageScale={[
+                        S2_BOTTOM_IMAGE_SCALE_X,
+                        S2_BOTTOM_IMAGE_SCALE_Y,
+                        1,
+                      ]}
+                      solidXOffset={S2_BOTTOM_SOLID_X_OFFSET}
+                      solidYOffset={S2_BOTTOM_SOLID_Y_OFFSET}
+                      imageXOffset={S2_BOTTOM_IMAGE_X_OFFSET}
+                      imageYOffset={S2_BOTTOM_IMAGE_Y_OFFSET}
+                      spring={s2BottomSpring}
+                      shadow
+                      shadowStrength={0.8}
+                      suppressShadow={false}
+                      zOffset={0.001}
+                      scallopPosition="none"
+                    />
+                  )}
+                {!hideConnectors && bottomGroupIndices.map((idx) => {
+                  const group = s2.groups[idx];
+                  if (!group) return null;
+                  const color = getConnectorColor(idx);
+                  return group.rowConnectors.map(
+                    (rc: RowConnectorTransform, i: number) => (
+                      <ElevatedLayer
+                        key={`s2-bottom-rc-${idx}-${i}`}
+                        x={rc.x} y={rc.y} w={rc.w} h={rc.h}
+                        radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                        color={color}
+                        sectionBgTexture={getTextureForColor(color)}
+                        spring={s2BottomSpring}
+                        zOffset={0.0025}
+                        renderOrder={3}
+                      />
+                    ),
+                  );
+                })}
+              </group>
+            </DraggableSectionGroup>
           </group>
-        </DraggableSectionGroup>
-      </group>
+        </>
+      )}
     </group>
   );
 }

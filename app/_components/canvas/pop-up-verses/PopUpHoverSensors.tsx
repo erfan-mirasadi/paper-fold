@@ -45,7 +45,7 @@ export function PopUpHoverSensors({
   const isFoldedMainPaper = useFoldStore(
     (s) => !s.isIntroActive && s.currentOffset < 0.98,
   );
-  const activeConfigId = useStoryStore((s) => s.activeConfig.id);
+  const activeConfig = useStoryStore((s) => s.activeConfig);
 
   useEffect(() => {
     return () => {
@@ -53,12 +53,12 @@ export function PopUpHoverSensors({
     };
   }, []);
 
-  if (isIntroActive || isFoldedMainPaper) return null;
+  if (isIntroActive || isFoldedMainPaper || !activeConfig.features.hasPopUps) return null;
 
   return (
     <>
       {groups.map((group) => {
-        if (group.id === "g_5_6" && activeConfigId === "alak") return null;
+        if (group.id === "g_5_6" && activeConfig.id === "alak") return null;
 
         const versesInGroup = versesConfig.filter((config) =>
           group.verseIds.includes(config.id),

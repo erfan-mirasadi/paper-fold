@@ -211,44 +211,50 @@ export function ElevatedSectionLabels() {
       });
     } else if (section.type === "verticalGroups") {
       const vConfig = section as VerticalGroupsSectionConfig;
-      labelsToRender.push({
-        key: `${vConfig.id}_top`,
-        sectionId: `${vConfig.id}_top`,
-        y: sTransform.topLabelPinY!,
-        text: getLabelText(vConfig.topLabelKey),
-        bgColor: S2_TOP_LABEL_BG,
-        borderColor: S2_TOP_LABEL_BORDER,
-        partialBorder: true,
-        delayMs: 95,
-        liftHeight: LABEL_ELEVATION_HEIGHT,
-        tension: 90,
-        friction: 23,
-        zBaseOffset: 0.0022,
-        labelZ: 0.00035,
-        renderOrder: 240,
-        depthTest: true,
-        showInIntro: false,
-      });
+      const topText = getLabelText(vConfig.topLabelKey);
+      if (topText) {
+        labelsToRender.push({
+          key: `${vConfig.id}_top`,
+          sectionId: `${vConfig.id}_top`,
+          y: sTransform.topLabelPinY!,
+          text: topText,
+          bgColor: S2_TOP_LABEL_BG,
+          borderColor: S2_TOP_LABEL_BORDER,
+          partialBorder: true,
+          delayMs: 95,
+          liftHeight: LABEL_ELEVATION_HEIGHT,
+          tension: 90,
+          friction: 23,
+          zBaseOffset: 0.0022,
+          labelZ: 0.00035,
+          renderOrder: 240,
+          depthTest: true,
+          showInIntro: false,
+        });
+      }
 
-      labelsToRender.push({
-        key: `${vConfig.id}_bottom`,
-        sectionId: `${vConfig.id}_bottom`,
-        y: sTransform.bottomLabelPinY!,
-        text: getLabelText(vConfig.bottomLabelKey),
-        bgColor: S2_TOP_LABEL_BG,
-        borderColor: S2_TOP_LABEL_BORDER,
-        partialBorder: true,
-        bottomBorder: true,
-        delayMs: 130,
-        liftHeight: LABEL_ELEVATION_HEIGHT,
-        tension: 84,
-        friction: 22,
-        zBaseOffset: 0.0022,
-        labelZ: 0.00035,
-        renderOrder: 240,
-        depthTest: true,
-        showInIntro: false,
-      });
+      const bottomText = getLabelText(vConfig.bottomLabelKey);
+      if (bottomText) {
+        labelsToRender.push({
+          key: `${vConfig.id}_bottom`,
+          sectionId: `${vConfig.id}_bottom`,
+          y: sTransform.bottomLabelPinY!,
+          text: bottomText,
+          bgColor: S2_TOP_LABEL_BG,
+          borderColor: S2_TOP_LABEL_BORDER,
+          partialBorder: true,
+          bottomBorder: true,
+          delayMs: 130,
+          liftHeight: LABEL_ELEVATION_HEIGHT,
+          tension: 84,
+          friction: 22,
+          zBaseOffset: 0.0022,
+          labelZ: 0.00035,
+          renderOrder: 240,
+          depthTest: true,
+          showInIntro: false,
+        });
+      }
     }
   });
 

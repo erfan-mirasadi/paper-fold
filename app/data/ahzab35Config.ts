@@ -22,14 +22,14 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 // COLOR PALETTE — matches the hand-drawn sketch exactly
 // ---------------------------------------------------------------------------
 
-const YELLOW_BG     = "#FDF4CA"; // Top & bottom groups (İman / dome)
+const YELLOW_BG = "#FDF4CA"; // Top & bottom groups (İman / dome)
 const YELLOW_BORDER = "#BE9E63";
 
-const BLUE_BG       = "#CBE2EE"; // 2nd and 4th groups
-const BLUE_BORDER   = "#7A9CAD";
+const BLUE_BG = "#CBE2EE"; // 2nd and 4th groups
+const BLUE_BORDER = "#7A9CAD";
 
-const GREEN_BG      = "#DCE8DC"; // Center pushed-in group
-const GREEN_BORDER  = "#8FA88F";
+const GREEN_BG = "#DCE8DC"; // Center pushed-in group
+const GREEN_BORDER = "#8FA88F";
 
 // ---------------------------------------------------------------------------
 // LAYOUT CONFIG
@@ -43,7 +43,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   features: {
     hasIntro: false,
-    hasElevatedSections: false,
+    hasElevatedSections: true,
     hasPopUps: false,
     hideVerseNumbers: false,
   },
@@ -57,120 +57,207 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   specialVerses: {
-    middleFoldVerses: { left: [2, 4, 6, 8, 10, 12], right: [1, 3, 5, 7, 9, 11] },
+    middleFoldVerses: {
+      left: [2, 4, 6, 8, 10, 12],
+      right: [1, 3, 5, 7, 9, 11],
+    },
     versePairings: {
-      1: 2,  2: 1,
-      3: 4,  4: 3,
-      5: 6,  6: 5,
-      7: 8,  8: 7,
-      9: 10, 10: 9,
-      11: 12, 12: 11,
+      1: 2,
+      2: 1,
+      3: 4,
+      4: 3,
+      5: 6,
+      6: 5,
+      7: 8,
+      8: 7,
+      9: 10,
+      10: 9,
+      11: 12,
+      12: 11,
     },
   },
 
   verseOverrides: {
     // ── Group 0 — Yellow (İman) ───────────────────────────────────────────
-    1:  { bg: YELLOW_BG, border: YELLOW_BORDER, circleBg: YELLOW_BG, circleBorderCol: YELLOW_BORDER, circleTextCol: YELLOW_BORDER },
-    2:  { bg: YELLOW_BG, border: YELLOW_BORDER, circleBg: YELLOW_BG, circleBorderCol: YELLOW_BORDER, circleTextCol: YELLOW_BORDER },
+    1: {
+      bg: YELLOW_BG,
+      border: YELLOW_BORDER,
+      circleBg: YELLOW_BG,
+      circleBorderCol: YELLOW_BORDER,
+      circleTextCol: YELLOW_BORDER,
+    },
+    2: {
+      bg: YELLOW_BG,
+      border: YELLOW_BORDER,
+      circleBg: YELLOW_BG,
+      circleBorderCol: YELLOW_BORDER,
+      circleTextCol: YELLOW_BORDER,
+    },
     // ── Group 1 — Blue ───────────────────────────────────────────────────
-    3:  { bg: BLUE_BG,   border: BLUE_BORDER,   circleBg: BLUE_BG,   circleBorderCol: BLUE_BORDER,   circleTextCol: BLUE_BORDER   },
-    4:  { bg: BLUE_BG,   border: BLUE_BORDER,   circleBg: BLUE_BG,   circleBorderCol: BLUE_BORDER,   circleTextCol: BLUE_BORDER   },
+    3: {
+      bg: BLUE_BG,
+      border: BLUE_BORDER,
+      circleBg: BLUE_BG,
+      circleBorderCol: BLUE_BORDER,
+      circleTextCol: BLUE_BORDER,
+    },
+    4: {
+      bg: BLUE_BG,
+      border: BLUE_BORDER,
+      circleBg: BLUE_BG,
+      circleBorderCol: BLUE_BORDER,
+      circleTextCol: BLUE_BORDER,
+    },
     // ── Group 2 — Green (pushed in) ──────────────────────────────────────
-    5:  { bg: GREEN_BG,  border: GREEN_BORDER,  circleBg: GREEN_BG,  circleBorderCol: GREEN_BORDER,  circleTextCol: GREEN_BORDER,  textScaleOverride: 0.85 },
-    6:  { bg: GREEN_BG,  border: GREEN_BORDER,  circleBg: GREEN_BG,  circleBorderCol: GREEN_BORDER,  circleTextCol: GREEN_BORDER,  textScaleOverride: 0.85 },
-    7:  { bg: GREEN_BG,  border: GREEN_BORDER,  circleBg: GREEN_BG,  circleBorderCol: GREEN_BORDER,  circleTextCol: GREEN_BORDER,  textScaleOverride: 0.85 },
-    8:  { bg: GREEN_BG,  border: GREEN_BORDER,  circleBg: GREEN_BG,  circleBorderCol: GREEN_BORDER,  circleTextCol: GREEN_BORDER,  textScaleOverride: 0.85 },
+    5: {
+      bg: GREEN_BG,
+      border: GREEN_BORDER,
+      circleBg: GREEN_BG,
+      circleBorderCol: GREEN_BORDER,
+      circleTextCol: GREEN_BORDER,
+      textScaleOverride: 0.85,
+    },
+    6: {
+      bg: GREEN_BG,
+      border: GREEN_BORDER,
+      circleBg: GREEN_BG,
+      circleBorderCol: GREEN_BORDER,
+      circleTextCol: GREEN_BORDER,
+      textScaleOverride: 0.85,
+    },
+    7: {
+      bg: GREEN_BG,
+      border: GREEN_BORDER,
+      circleBg: GREEN_BG,
+      circleBorderCol: GREEN_BORDER,
+      circleTextCol: GREEN_BORDER,
+      textScaleOverride: 0.85,
+    },
+    8: {
+      bg: GREEN_BG,
+      border: GREEN_BORDER,
+      circleBg: GREEN_BG,
+      circleBorderCol: GREEN_BORDER,
+      circleTextCol: GREEN_BORDER,
+      textScaleOverride: 0.85,
+    },
     // ── Group 3 — Blue ───────────────────────────────────────────────────
-    9:  { bg: BLUE_BG,   border: BLUE_BORDER,   circleBg: BLUE_BG,   circleBorderCol: BLUE_BORDER,   circleTextCol: BLUE_BORDER   },
-    10: { bg: BLUE_BG,   border: BLUE_BORDER,   circleBg: BLUE_BG,   circleBorderCol: BLUE_BORDER,   circleTextCol: BLUE_BORDER   },
+    9: {
+      bg: BLUE_BG,
+      border: BLUE_BORDER,
+      circleBg: BLUE_BG,
+      circleBorderCol: BLUE_BORDER,
+      circleTextCol: BLUE_BORDER,
+    },
+    10: {
+      bg: BLUE_BG,
+      border: BLUE_BORDER,
+      circleBg: BLUE_BG,
+      circleBorderCol: BLUE_BORDER,
+      circleTextCol: BLUE_BORDER,
+    },
     // ── Group 4 — Yellow (dome text, compact) ───────────────────────────
-    11: { bg: YELLOW_BG, border: YELLOW_BORDER, circleBg: YELLOW_BG, circleBorderCol: YELLOW_BORDER, circleTextCol: YELLOW_BORDER, textScaleOverride: 0.75 },
-    12: { bg: YELLOW_BG, border: YELLOW_BORDER, circleBg: YELLOW_BG, circleBorderCol: YELLOW_BORDER, circleTextCol: YELLOW_BORDER, textScaleOverride: 0.75 },
+    11: {
+      bg: YELLOW_BG,
+      border: YELLOW_BORDER,
+      circleBg: YELLOW_BG,
+      circleBorderCol: YELLOW_BORDER,
+      circleTextCol: YELLOW_BORDER,
+      textScaleOverride: 0.75,
+    },
+    12: {
+      bg: YELLOW_BG,
+      border: YELLOW_BORDER,
+      circleBg: YELLOW_BG,
+      circleBorderCol: YELLOW_BORDER,
+      circleTextCol: YELLOW_BORDER,
+      textScaleOverride: 0.75,
+    },
   },
 
   styling: {
     colors: {
-      paperBase:              "#FAF7F2",
-      shadow:                 "#000000",
-      backface:               "#EDE8D6",
-      textDark:               "#333333",
-      textLabel:              "#555555",
-      circleBorder:           "#bbbbbb",
-      verseNumberText:        "#222222",
-      s1AnaLabelBg:           "#ffffff",
-      s1AnaLabelText:         "#000000",
-      s1AnaLabelBorder:       "#dddddd",
-      s2FrameBg:              "#f4f4f4",
-      boarderFrame:           "#ffffff",
-      boarderHalo:            "#ADADAD",
-      innerCard:              "#eeeeee",
-      sectionBgTexture:       "#fcfcfc",
+      paperBase: "#FAF7F2",
+      shadow: "#000000",
+      backface: "#EDE8D6",
+      textDark: "#333333",
+      textLabel: "#555555",
+      circleBorder: "#bbbbbb",
+      verseNumberText: "#222222",
+      s1AnaLabelBg: "#ffffff",
+      s1AnaLabelText: "#000000",
+      s1AnaLabelBorder: "#dddddd",
+      s2FrameBg: "#f4f4f4",
+      boarderFrame: "#ffffff",
+      boarderHalo: "#ADADAD",
+      innerCard: "#eeeeee",
+      sectionBgTexture: "#fcfcfc",
       hollowConnectorInnerBg: "#e3e3e3",
-      maroonTheme:            YELLOW_BORDER, // fallback for outer groups
-      greenTheme:             GREEN_BORDER,  // fallback for center group
-      s1InnerBorder:          "#cccccc",
-      s2IntroOutroBg:         YELLOW_BORDER, // unused
-      s2Group1Bg:             YELLOW_BG,
-      s2Group2Bg:             BLUE_BG,
-      s2Group3Bg:             GREEN_BG,
+      maroonTheme: YELLOW_BORDER, // fallback for outer groups
+      greenTheme: GREEN_BORDER, // fallback for center group
+      s1InnerBorder: "#cccccc",
+      s2IntroOutroBg: YELLOW_BORDER, // unused
+      s2Group1Bg: YELLOW_BG,
+      s2Group2Bg: BLUE_BG,
+      s2Group3Bg: GREEN_BG,
       // No side brackets for now — deliberately empty.
       curveColors: [],
     },
-    capsuleBorderWidth:           0.0039,
-    circleBorderWidth:            0.0035,
-    verseRadius:                  0.04,
+    capsuleBorderWidth: 0.0039,
+    circleBorderWidth: 0.0035,
+    verseRadius: 0.04,
     oppositeVerseConnectorRadius: 0.05,
     elevatedSectionRadii: {
-      base:     0.039,
+      base: 0.039,
       scallopX: 0.015,
       scallopY: 0.015,
-      outer:    0.025,
-      innerA:   0.023,
-      innerB:   0.022,
+      outer: 0.025,
+      innerA: 0.023,
+      innerB: 0.022,
     },
   },
 
   params: {
     // --- Section 1 (stub — not rendered) ---
-    s1Top:             0.5,
-    s1Pad:             0.01,
-    gap:               0.01,
-    s1AnaGap:          0.01,
-    smallBoxH:         0.04,
-    anaAyetH:          0.04,
+    s1Top: 0.5,
+    s1Pad: 0.01,
+    gap: 0.01,
+    s1AnaGap: 0.01,
+    smallBoxH: 0.04,
+    anaAyetH: 0.04,
     gapBetweenS1andS2: 0.01,
 
     // --- Section 2 ---
-    s2VerticalPad:    0.03,
-    bigBoxH:          0.07,
-    groupGap:         0.022,
-    groupPad:         0.012,
-    groupPadBottom:   0.012,
-    s2Gap:            0.025,        // horizontal gap between left / right columns
-    s2VerticalRowGap: 0.018,        // vertical gap between rows inside a group
-    smallBoxH2:       0.075,        // capsule height
-    middleExtraGap:   0.0,
-    s2PadLeftRight:   0.025,
-    g2Shrink:         0.05,         // how much the center group is indented
-    outerShrink:      0.0,
-    s1BorderWidth:    0,
+    s2VerticalPad: 0.03,
+    bigBoxH: 0.07,
+    groupGap: 0.022,
+    groupPad: 0.012,
+    groupPadBottom: 0.012,
+    s2Gap: 0.025, // horizontal gap between left / right columns
+    s2VerticalRowGap: 0.018, // vertical gap between rows inside a group
+    smallBoxH2: 0.075, // capsule height
+    middleExtraGap: 0.0,
+    s2PadLeftRight: 0.025,
+    g2Shrink: 0.06, // how much the center group is indented
+    outerShrink: 0.0,
+    s1BorderWidth: 0,
 
     // --- Misc ---
-    anaAyetTabW:           0.2,
-    anaAyetTabH:           0.032,
+    anaAyetTabW: 0.2,
+    anaAyetTabH: 0.032,
     anaAyetTabBorderWidth: 0.0035,
-    anaAyetLabelDrop:      0.015,
-    sgPad:                 0.03,
-    sgBorderWidth:         0.006,
-    boxExtOffset:          0.02,
-    extraRowGap:           0.0,
-    labelHitboxWidth:      0.43,
-    verseTextScale:        1.0,
+    anaAyetLabelDrop: 0.015,
+    sgPad: 0.03,
+    sgBorderWidth: 0.006,
+    boxExtOffset: 0.02,
+    extraRowGap: 0.0,
+    labelHitboxWidth: 0.43,
+    verseTextScale: 1.0,
 
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
 
-    outerCurveXOffset:  0.0,
+    outerCurveXOffset: 0.0,
     centerCurveXOffset: 0.0,
   },
 
@@ -185,7 +272,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           verseIds: [2, 1],
           isPushedIn: false,
-          isCenter:   false,
+          isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
         },
@@ -193,7 +280,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           verseIds: [4, 3],
           isPushedIn: false,
-          isCenter:   false,
+          isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
         },
@@ -201,7 +288,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           verseIds: [6, 5, 8, 7],
           isPushedIn: true,
-          isCenter:   true,
+          isCenter: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group3Bg",
         },
@@ -209,7 +296,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           verseIds: [10, 9],
           isPushedIn: false,
-          isCenter:   false,
+          isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
         },
@@ -217,10 +304,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           verseIds: [12, 11],
           isPushedIn: false,
-          isCenter:   false,
+          isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
-          customShrink: 0.22,
+          customShrink: 0.28,
         },
       ],
       cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
@@ -231,10 +318,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     computeFoldYPositions: (lm) => {
       // 5 groups with 4 inter-group gaps → 4 fold positions, one between each group.
       const positions = lm.groupYPositions as number[];
-      const heights   = lm.groupHeights   as number[];
+      const heights = lm.groupHeights as number[];
       return Array.from({ length: 4 }, (_, i) => {
-        const botOfGroup  = positions[i] - heights[i];
-        const topOfNext   = positions[i + 1] ?? botOfGroup;
+        const botOfGroup = positions[i] - heights[i];
+        const topOfNext = positions[i + 1] ?? botOfGroup;
         return (botOfGroup + topOfNext) / 2;
       });
     },
@@ -243,34 +330,34 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       {
         id: "pre-start",
         folds: [
-          { direction:  1, angleFactor: 0.5 },
+          { direction: 1, angleFactor: 0.5 },
           { direction: -1, angleFactor: 0.8 },
-          { direction:  1, angleFactor: 0.5 },
+          { direction: 1, angleFactor: 0.5 },
           { direction: -1, angleFactor: 0.8 },
         ],
       },
       {
         id: "end",
         folds: [
-          { direction:  1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
-          { direction:  1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
         ],
       },
     ] as const,
 
     scrollTimeline: {
-      intro:   { start: 0,  end: 10  },
-      ambient: { start: 10, end: 40  },
-      handoff: { start: 40, end: 55  },
-      story:   { start: 55, end: 100 },
+      intro: { start: 0, end: 10 },
+      ambient: { start: 10, end: 40 },
+      handoff: { start: 40, end: 55 },
+      story: { start: 55, end: 100 },
     },
 
     scrollLock: {
       lockPositionPercentage: 0.55,
-      effortRequired:         2500,
-      grabRangePixels:        50,
+      effortRequired: 2500,
+      grabRangePixels: 50,
     },
   },
 };
@@ -296,7 +383,7 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       // ── Group 0 — Yellow ─────────────────────────────────────────────────
       {
         isPushedIn: false,
-        isCenter:   false,
+        isCenter: false,
         extraRowGap: 0,
         verses: [
           { number: 2, text: "وَالْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ" },
@@ -306,7 +393,7 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       // ── Group 1 — Blue ───────────────────────────────────────────────────
       {
         isPushedIn: false,
-        isCenter:   false,
+        isCenter: false,
         extraRowGap: 0,
         verses: [
           { number: 4, text: "وَالصَّادِقِينَ وَالصَّادِقَاتِ" },
@@ -316,7 +403,7 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       // ── Group 2 — Green (pushed in, 2 rows) ──────────────────────────────
       {
         isPushedIn: true,
-        isCenter:   true,
+        isCenter: true,
         extraRowGap: 0,
         verses: [
           { number: 6, text: "وَالْخَاشِعِينَ وَالْخَاشِعَاتِ" },
@@ -328,17 +415,20 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       // ── Group 3 — Blue ───────────────────────────────────────────────────
       {
         isPushedIn: false,
-        isCenter:   false,
+        isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 10, text: "وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ" },
-          { number: 9,  text: "وَالْحَافِظِينَ فُرُوجَهُمْ وَالْحَافِظَاتِ" },
+          {
+            number: 10,
+            text: "وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ",
+          },
+          { number: 9, text: "وَالْحَافِظِينَ فُرُوجَهُمْ وَالْحَافِظَاتِ" },
         ],
       },
       // ── Group 4 — Yellow / dome text ─────────────────────────────────────
       {
         isPushedIn: false,
-        isCenter:   false,
+        isCenter: false,
         extraRowGap: 0,
         verses: [
           { number: 12, text: "مَغْفِرَةً" },
@@ -367,37 +457,62 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
           { number: 2, text: "ve mümin erkekler ve mümin kadınlar" },
-          { number: 1, text: "Şüphesiz müslüman erkekler ve müslüman kadınlar" },
+          {
+            number: 1,
+            text: "Şüphesiz müslüman erkekler ve müslüman kadınlar",
+          },
         ],
       },
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
           { number: 4, text: "ve sadık erkekler ve sadık kadınlar" },
           { number: 3, text: "ve itaat eden erkekler ve itaat eden kadınlar" },
         ],
       },
       {
-        isPushedIn: true, isCenter: true, extraRowGap: 0,
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
         verses: [
-          { number: 6, text: "ve huşu içinde olan erkekler ve huşu içinde olan kadınlar" },
+          {
+            number: 6,
+            text: "ve huşu içinde olan erkekler ve huşu içinde olan kadınlar",
+          },
           { number: 5, text: "ve sabreden erkekler ve sabreden kadınlar" },
           { number: 8, text: "ve oruç tutan erkekler ve oruç tutan kadınlar" },
-          { number: 7, text: "ve sadaka veren erkekler ve sadaka veren kadınlar" },
+          {
+            number: 7,
+            text: "ve sadaka veren erkekler ve sadaka veren kadınlar",
+          },
         ],
       },
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
-          { number: 10, text: "ve Allah'ı çok zikreden erkekler ve zikreden kadınlar" },
-          { number: 9,  text: "ve iffetlerini koruyan erkekler ve koruyan kadınlar" },
+          {
+            number: 10,
+            text: "ve Allah'ı çok zikreden erkekler ve zikreden kadınlar",
+          },
+          {
+            number: 9,
+            text: "ve iffetlerini koruyan erkekler ve koruyan kadınlar",
+          },
         ],
       },
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
           { number: 12, text: "mağfiret" },
           { number: 11, text: "ve büyük bir mükâfat" },
@@ -425,37 +540,56 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
           { number: 2, text: "and believing men and believing women" },
           { number: 1, text: "Indeed, the Muslim men and Muslim women" },
         ],
       },
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
           { number: 4, text: "and truthful men and truthful women" },
           { number: 3, text: "and obedient men and obedient women" },
         ],
       },
       {
-        isPushedIn: true, isCenter: true, extraRowGap: 0,
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
         verses: [
-          { number: 6, text: "and humbly submissive men and humbly submissive women" },
+          {
+            number: 6,
+            text: "and humbly submissive men and humbly submissive women",
+          },
           { number: 5, text: "and patient men and patient women" },
           { number: 8, text: "and fasting men and fasting women" },
           { number: 7, text: "and charitable men and charitable women" },
         ],
       },
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
-          { number: 10, text: "and men who remember Allah often and women who do so" },
-          { number: 9,  text: "and men who guard their private parts and women who do so" },
+          {
+            number: 10,
+            text: "and men who remember Allah often and women who do so",
+          },
+          {
+            number: 9,
+            text: "and men who guard their private parts and women who do so",
+          },
         ],
       },
       {
-        isPushedIn: false, isCenter: false, extraRowGap: 0,
+        isPushedIn: false,
+        isCenter: false,
+        extraRowGap: 0,
         verses: [
           { number: 12, text: "forgiveness" },
           { number: 11, text: "and a great reward" },

@@ -13,6 +13,7 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../stores/useElevatedStore";
+import { useStoryStore } from "../stores/useStoryStore";
 import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
 import { SectionBounds } from "../utils/boundsHelper";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
@@ -86,6 +87,7 @@ export function useElevatedDrag({
     if (!enabled) return EMPTY_DRAG_BINDINGS;
 
     const isDragAllowed = () => {
+      if (!useStoryStore.getState().activeConfig.features.hasElevatedSections) return false;
       if (useFoldStore.getState().isIntroActive) return false;
       const elevatedState = useElevatedStore.getState();
       if (elevatedState.phase === "elevated" && !elevatedState.isAllSectionsMode) return false;

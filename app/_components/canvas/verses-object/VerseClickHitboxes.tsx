@@ -154,115 +154,146 @@ function buildHitboxes(
       const bottomId = `${vConfig.id}_bottom`;
 
       const topVerseIds: number[] = [];
-      if (vConfig.introVerse) topVerseIds.push(vConfig.introVerse);
-      if (vConfig.groups[0]) topVerseIds.push(...vConfig.groups[0].verseIds);
-
-      const centerVerseIds = vConfig.groups[1] ? [...vConfig.groups[1].verseIds] : [];
-
+      const centerVerseIds: number[] = [];
       const bottomVerseIds: number[] = [];
-      if (vConfig.groups[2]) bottomVerseIds.push(...vConfig.groups[2].verseIds);
+
+      if (vConfig.introVerse) topVerseIds.push(vConfig.introVerse);
+
+      let centerStarted = false;
+      vConfig.groups.forEach((g) => {
+        if (g.isCenter) {
+          centerStarted = true;
+          centerVerseIds.push(...g.verseIds);
+        } else if (!centerStarted) {
+          topVerseIds.push(...g.verseIds);
+        } else {
+          bottomVerseIds.push(...g.verseIds);
+        }
+      });
+
       if (vConfig.outroVerse) bottomVerseIds.push(vConfig.outroVerse);
 
       // Top label
-      hitboxes.push({
-        key: `section-${topId}-label`,
-        cx: 0,
-        cy: sTransform.topLabelPinY,
-        cz: zFront,
-        w: LABEL_HITBOX.width,
-        h: LABEL_HITBOX.height,
-        kind: "section",
-        sectionId: topId,
-        verseIds: topVerseIds,
-      });
+      if (vConfig.topLabelKey && sTransform.topLabelPinY) {
+        hitboxes.push({
+          key: `section-${topId}-label`,
+          cx: 0,
+          cy: sTransform.topLabelPinY,
+          cz: zFront,
+          w: LABEL_HITBOX.width,
+          h: LABEL_HITBOX.height,
+          kind: "section",
+          sectionId: topId,
+          verseIds: topVerseIds,
+        });
+      }
 
       // Top hollow
-      hitboxes.push({
-        key: `section-${topId}-hollow`,
-        cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
-        cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
-        cz: zSection,
-        w: sTransform.connectorW,
-        h: sTransform.topConnectorH,
-        kind: "section",
-        sectionId: topId,
-        verseIds: topVerseIds,
-      });
+      if (config.features.hasIntro && sTransform.topConnectorY !== undefined) {
+        hitboxes.push({
+          key: `section-${topId}-hollow`,
+          cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+          cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
+          cz: zSection,
+          w: sTransform.connectorW,
+          h: sTransform.topConnectorH,
+          kind: "section",
+          sectionId: topId,
+          verseIds: topVerseIds,
+        });
+      }
 
       // Bottom label
-      hitboxes.push({
-        key: `section-${bottomId}-label`,
-        cx: 0,
-        cy: sTransform.bottomLabelPinY,
-        cz: zFront,
-        w: LABEL_HITBOX.width,
-        h: LABEL_HITBOX.height,
-        kind: "section",
-        sectionId: bottomId,
-        verseIds: bottomVerseIds,
-      });
+      if (vConfig.bottomLabelKey && sTransform.bottomLabelPinY) {
+        hitboxes.push({
+          key: `section-${bottomId}-label`,
+          cx: 0,
+          cy: sTransform.bottomLabelPinY,
+          cz: zFront,
+          w: LABEL_HITBOX.width,
+          h: LABEL_HITBOX.height,
+          kind: "section",
+          sectionId: bottomId,
+          verseIds: bottomVerseIds,
+        });
+      }
 
       // Bottom hollow
-      hitboxes.push({
-        key: `section-${bottomId}-hollow`,
-        cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
-        cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
-        cz: zSection,
-        w: sTransform.connectorW,
-        h: sTransform.bottomConnectorH,
-        kind: "section",
-        sectionId: bottomId,
-        verseIds: bottomVerseIds,
-      });
+      if (config.features.hasIntro && sTransform.bottomConnectorY !== undefined) {
+        hitboxes.push({
+          key: `section-${bottomId}-hollow`,
+          cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+          cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
+          cz: zSection,
+          w: sTransform.connectorW,
+          h: sTransform.bottomConnectorH,
+          kind: "section",
+          sectionId: bottomId,
+          verseIds: bottomVerseIds,
+        });
+      }
 
       // Center hollow
-      const middleGroup = sTransform.groups[1];
-      if (middleGroup) {
+      const centerGroups = vConfig.groups
+        .map((g, idx) => (g.isCenter ? sTransform.groups[idx] : null))
+        .filter(Boolean);
+
+      if (centerGroups.length > 0) {
+        const firstCenter = centerGroups[0]!;
+        const lastCenter = centerGroups[centerGroups.length - 1]!;
+
+        const middleTop = firstCenter.frameY;
+        const middleBottom = lastCenter.frameY - lastCenter.frameH;
+        const middleHeight = middleTop - middleBottom;
+        const middleCenterY = (middleTop + middleBottom) / 2;
+
         hitboxes.push({
           key: `section-${centerId}-hollow`,
-          cx: middleGroup.frameX + middleGroup.frameW / 2 - PAGE_WIDTH / 2,
-          cy: middleGroup.frameY - middleGroup.frameH / 2,
+          cx: firstCenter.frameX + firstCenter.frameW / 2 - PAGE_WIDTH / 2,
+          cy: middleCenterY,
           cz: zSection,
-          w: middleGroup.frameW,
-          h: middleGroup.frameH,
+          w: firstCenter.frameW,
+          h: middleHeight,
           kind: "section",
           sectionId: centerId,
           verseIds: centerVerseIds,
         });
 
-        const middleTop = middleGroup.frameY + 0.01;
-        const middleBottom = middleGroup.frameY - middleGroup.frameH - 0.01;
-        const middleHeight = middleTop - middleBottom;
-        const middleCenterY = (middleTop + middleBottom) / 2;
+        if (config.features.hasIntro) {
+          const middleTopInner = firstCenter.frameY + 0.01;
+          const middleBottomInner = lastCenter.frameY - lastCenter.frameH - 0.01;
+          const middleHeightInner = middleTopInner - middleBottomInner;
+          const middleCenterYInner = (middleTopInner + middleBottomInner) / 2;
 
-        const curveZoneW = 0.31;
-        const leftCurveX = sTransform.baseX - 0.33;
-        const rightCurveX = sTransform.baseX + sTransform.innerW + 0.02;
+          const curveZoneW = 0.31;
+          const leftCurveX = sTransform.baseX - 0.33;
+          const rightCurveX = sTransform.baseX + sTransform.innerW + 0.02;
 
-        hitboxes.push(
-          {
-            key: `section-${centerId}-curves-left`,
-            cx: leftCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
-            cy: middleCenterY,
-            cz: zFront,
-            w: curveZoneW,
-            h: middleHeight,
-            kind: "section",
-            sectionId: centerId,
-            verseIds: centerVerseIds,
-          },
-          {
-            key: `section-${centerId}-curves-right`,
-            cx: rightCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
-            cy: middleCenterY,
-            cz: zFront,
-            w: curveZoneW,
-            h: middleHeight,
-            kind: "section",
-            sectionId: centerId,
-            verseIds: centerVerseIds,
-          },
-        );
+          hitboxes.push(
+            {
+              key: `section-${centerId}-curves-left`,
+              cx: leftCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
+              cy: middleCenterYInner,
+              cz: zFront,
+              w: curveZoneW,
+              h: middleHeightInner,
+              kind: "section",
+              sectionId: centerId,
+              verseIds: centerVerseIds,
+            },
+            {
+              key: `section-${centerId}-curves-right`,
+              cx: rightCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
+              cy: middleCenterYInner,
+              cz: zFront,
+              w: curveZoneW,
+              h: middleHeightInner,
+              kind: "section",
+              sectionId: centerId,
+              verseIds: centerVerseIds,
+            },
+          );
+        }
       }
     }
   });
@@ -275,6 +306,9 @@ const canUseElevatedInteraction = (
   verseId?: number,
   verseIds?: number[],
 ) => {
+  const activeConfig = useStoryStore.getState().activeConfig;
+  if (!activeConfig.features.hasElevatedSections) return false;
+
   const unlocked = useElevatedStore.getState().unlockedVerseIds;
   if (kind === "verse" && typeof verseId === "number") {
     return unlocked.includes(verseId);
