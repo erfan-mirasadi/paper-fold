@@ -98,6 +98,14 @@ export interface VerseBlockConfig {
   extraRowGap?: number;
   bgThemeKey?: keyof ThemeColors;
   customShrink?: number;
+  customGap?: number;
+  pushDown?: number;
+  topLabelConfig?: {
+    width?: number;
+    height?: number;
+    yOffset?: number;
+    textOffsetY?: number;
+  };
 }
 
 export interface CameraTargetConfig {
@@ -289,6 +297,12 @@ export interface GroupTransforms {
   isCenter: boolean;
   verses: Record<number, ElementTransform>;
   rowConnectors: RowConnectorTransform[];
+  topLabelConfig?: {
+    width?: number;
+    height?: number;
+    yOffset?: number;
+    textOffsetY?: number;
+  };
 }
 
 export interface SectionTransforms {

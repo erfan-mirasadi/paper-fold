@@ -1,5 +1,5 @@
 "use client";
-import { VerseBox, UiRect } from "./SharedUI";
+import { VerseBox, UiRect, TopLabel } from "./SharedUI";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
@@ -42,7 +42,8 @@ export function VerseGroup({
   // We use the border from the first verse's override if available; otherwise
   // the group-level fallback. This keeps the connector stripe in sync with
   // the verse capsule colours automatically.
-  const firstVerseOverride = config.verseOverrides?.[group.verses?.[0]?.number ?? -1];
+  const firstVerseOverride =
+    config.verseOverrides?.[group.verses?.[0]?.number ?? -1];
   const borderColor = firstVerseOverride?.border ?? groupFallbackBorder;
 
   // ── Row connector visibility ───────────────────────────────────────────────
@@ -55,32 +56,33 @@ export function VerseGroup({
   return (
     <group>
       {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}
-      {!hideConnectors && gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
-        const leftV = group.verses[i * 2];
-        const rightV = group.verses[i * 2 + 1];
+      {!hideConnectors &&
+        gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
+          const leftV = group.verses[i * 2];
+          const rightV = group.verses[i * 2 + 1];
 
-        if (!leftV || !rightV) return null;
+          if (!leftV || !rightV) return null;
 
-        // Per-row connector color — derive from the left verse in this row so
-        // each row pair tracks its own hue when overrides differ per row.
-        const rowLeftOverride = config.verseOverrides?.[leftV.number];
-        const rowBorderColor = rowLeftOverride?.border ?? groupFallbackBorder;
+          // Per-row connector color — derive from the left verse in this row so
+          // each row pair tracks its own hue when overrides differ per row.
+          const rowLeftOverride = config.verseOverrides?.[leftV.number];
+          const rowBorderColor = rowLeftOverride?.border ?? groupFallbackBorder;
 
-        return (
-          <group key={`connector-${i}`}>
-            <UiRect
-              x={rc.x}
-              y={rc.y}
-              z={rc.z}
-              w={rc.w}
-              h={rc.h}
-              radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={rowBorderColor}
-              renderOrder={3}
-            />
-          </group>
-        );
-      })}
+          return (
+            <group key={`connector-${i}`}>
+              <UiRect
+                x={rc.x}
+                y={rc.y}
+                z={rc.z}
+                w={rc.w}
+                h={rc.h}
+                radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                color={rowBorderColor}
+                renderOrder={3}
+              />
+            </group>
+          );
+        })}
 
       {/* 2×2 verse grid — position comes from the engine, no math here */}
       {group.verses.map((v, i) => {
@@ -128,21 +130,25 @@ export function VerseGroup({
         // 1. Check verseOverrides for this specific verse number (Arabic ID).
         // 2. Fallback: group.verseBg (SectionTwoData level, rarely set).
         // 3. Final fallback: group-level theme key from styling.colors.
-        const override = config.verseOverrides?.[lookupNumber] ?? config.verseOverrides?.[v.number];
+        const override =
+          config.verseOverrides?.[lookupNumber] ??
+          config.verseOverrides?.[v.number];
 
         const finalBg =
           override?.bg ??
           group.verseBg ??
           (gt.isCenter
-            ? config.styling.colors.greenTheme   // centre group bg fallback
+            ? config.styling.colors.greenTheme // centre group bg fallback
             : config.styling.colors.maroonTheme); // outer group bg fallback
 
-        const finalBorder   = override?.border          ?? groupFallbackBorder;
-        const finalCircleBg = override?.circleBg         ?? finalBg;
+        const finalBorder = override?.border ?? groupFallbackBorder;
+        const finalCircleBg = override?.circleBg ?? finalBg;
         const finalCircleBorder = override?.circleBorderCol ?? finalBorder;
-        const finalCircleText   = override?.circleTextCol   ?? config.styling.colors.verseNumberText;
+        const finalCircleText =
+          override?.circleTextCol ?? config.styling.colors.verseNumberText;
 
-        const finalTextScale = override?.textScaleOverride ?? finalVerseTextScale;
+        const finalTextScale =
+          override?.textScaleOverride ?? finalVerseTextScale;
 
         return (
           <VerseBox
@@ -164,7 +170,24 @@ export function VerseGroup({
           />
         );
       })}
+
+      {group.topLabel && (
+        <TopLabel
+          text={group.topLabel}
+          x={layout.START_X + layout.sectionW / 2}
+          y={gt.frameY + (gt.topLabelConfig?.yOffset ?? 0.07)}
+          labelWidth={gt.topLabelConfig?.width ?? 0.3}
+          labelHeight={gt.topLabelConfig?.height ?? 0.065}
+          textOffsetY={gt.topLabelConfig?.textOffsetY ?? -0.008}
+          partialBorder={false}
+          bottomBorder={false}
+          noBorder={false}
+          borderColor={config.styling.colors.maroonTheme}
+          bgColor={"#ffffff"}
+          shadow={false}
+          renderOrder={20}
+        />
+      )}
     </group>
   );
 }
-

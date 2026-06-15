@@ -50,7 +50,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   dimensions: {
     paperWidth: 1.8,
-    paperHeight: 1.55,
+    paperHeight: 1.65,
     sceneCenterYOffset: 0.0,
     padding: 0.22,
     scrollPages: 2,
@@ -228,17 +228,17 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     gapBetweenS1andS2: 0.01,
 
     // --- Section 2 ---
-    s2VerticalPad: 0.03,
+    s2VerticalPad: 0.02,
     bigBoxH: 0.07,
-    groupGap: 0.022,
+    groupGap: 0.035,
     groupPad: 0.012,
     groupPadBottom: 0.012,
-    s2Gap: 0.025, // horizontal gap between left / right columns
-    s2VerticalRowGap: 0.018, // vertical gap between rows inside a group
-    smallBoxH2: 0.075, // capsule height
+    s2Gap: 0.12, // increase horizontal gap between left / right columns
+    s2VerticalRowGap: 0.008, // very small gap between the two green rows
+    smallBoxH2: 0.16, // make capsules extremely tall
     middleExtraGap: 0.0,
-    s2PadLeftRight: 0.025,
-    g2Shrink: 0.06, // how much the center group is indented
+    s2PadLeftRight: 0.005, // push outward to the red borders
+    g2Shrink: 0.1, // indent the green group to fit the inward SVG border
     outerShrink: 0.0,
     s1BorderWidth: 0,
 
@@ -252,7 +252,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     boxExtOffset: 0.02,
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
-    verseTextScale: 1.0,
+    verseTextScale: 1.5,
 
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
@@ -267,6 +267,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       type: "verticalGroups",
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
+      backgroundTexture: "/ahzab/ahzab-frame.svg",
+      backgroundScaleX: 1.55,
+      backgroundScaleY: 1.45,
       groups: [
         // ── Group 0 — Yellow / İman (1 row) ──────────────────────────────
         {
@@ -275,6 +278,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
+          pushDown: -0.06, // negative value pushes the group UP
         },
         // ── Group 1 — Blue (1 row) ────────────────────────────────────────
         {
@@ -307,7 +311,15 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
-          customShrink: 0.28,
+          customShrink: 0.22,
+          customGap: 0.18,
+          pushDown: 0.135,
+          topLabelConfig: {
+            width: 0.3,
+            height: 0.065,
+            yOffset: 0.07,
+            textOffsetY: -0.008,
+          },
         },
       ],
       cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
@@ -430,6 +442,7 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
+        topLabel: "أَعَدَّ اللَّهُ لَهُمْ",
         verses: [
           { number: 12, text: "مَغْفِرَةً" },
           { number: 11, text: "وَأَجْرًا عَظِيمًا" },

@@ -288,6 +288,7 @@ interface TopLabelProps {
   z?: number;
   text: string;
   labelWidth?: number;
+  labelHeight?: number;
   partialBorder?: boolean;
   borderColor?: string;
   bottomBorder?: boolean;
@@ -297,6 +298,7 @@ interface TopLabelProps {
   depthTest?: boolean;
   fontSizeOverride?: number;
   shadow?: boolean;
+  textOffsetY?: number;
 }
 
 export function TopLabel({
@@ -305,6 +307,7 @@ export function TopLabel({
   z = 0,
   text,
   labelWidth = TOP_LABEL_WIDTH,
+  labelHeight,
   partialBorder = false,
   borderColor = HOLLOW_BORDER_COLOR,
   bottomBorder = false,
@@ -314,13 +317,14 @@ export function TopLabel({
   depthTest = false,
   fontSizeOverride,
   shadow,
+  textOffsetY = 0,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
   const labelWidthScale = LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1;
 
   const w = labelWidth * labelWidthScale;
-  const h = 0.046;
+  const h = labelHeight ?? 0.046;
   const radius = h / 2;
 
   const groupRef = useRef<THREE.Group>(null);
@@ -366,7 +370,7 @@ export function TopLabel({
         depthTest={depthTest}
         xMultiplier={1.5}
       />
-      <group position={[w / 2, -h / 2, 0.002]}>
+      <group position={[w / 2, -h / 2 + textOffsetY, 0.002]}>
         <CanvasText
           text={text}
           font={fontToUse}

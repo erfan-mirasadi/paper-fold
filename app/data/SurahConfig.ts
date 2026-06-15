@@ -34,6 +34,7 @@ export interface Verse {
 export interface ColorGroup {
   verses: Verse[];
   verseBg?: string;
+  topLabel?: string;
   isPushedIn?: boolean;
   isCenter?: boolean;
   extraRowGap?: number;
@@ -706,11 +707,19 @@ export function createLayoutMath(
   // previous group's height + the inter-group gap (with middleExtraGap).
   const dynamicGroupYPositions: number[] = [];
   dynamicGroupYPositions[0] = baseG1Y;
+  const s2Config = config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined;
+  const s2Groups = s2Config?.groups ?? [];
   for (let i = 1; i < numGroups; i++) {
+    const pushDown = s2Groups[i]?.pushDown ?? 0;
     dynamicGroupYPositions[i] =
       dynamicGroupYPositions[i - 1] -
       dynamicGroupHeights[i - 1] -
-      (p.groupGap + p.middleExtraGap);
+      (p.groupGap + p.middleExtraGap) - pushDown;
+  }
+
+  // Allow independent vertical shifting for the very first group
+  if (s2Groups[0]?.pushDown) {
+    dynamicGroupYPositions[0] -= s2Groups[0].pushDown;
   }
 
   // Legacy aliases for Alak / Ayat al-Kursi backward compatibility.
@@ -915,10 +924,11 @@ export function buildSurahTransforms(
         const groupY = groupYPositions[gIdx];
         const isPushedIn = group.isPushedIn ?? false;
         const shrinkAmount = group.customShrink ?? (isPushedIn ? lm.g2Shrink : lm.outerShrink);
+        const groupGapAmount = group.customGap ?? lm.s2Gap;
         const gInnerW = s2InnerW - shrinkAmount * 2;
         const gBaseX = s2BaseX + shrinkAmount;
 
-        const gHalfW = (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2;
+        const gHalfW = (gInnerW - lm.groupPad * 2 - groupGapAmount) / 2;
         const extraRowGap = group.extraRowGap ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
@@ -929,7 +939,7 @@ export function buildSurahTransforms(
           const rowOffset =
             rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
           verses[verseId] = {
-            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
+            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + groupGapAmount : 0),
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
             w: gHalfW,
@@ -967,6 +977,7 @@ export function buildSurahTransforms(
           isCenter: group.isCenter ?? false,
           verses,
           rowConnectors,
+          topLabelConfig: group.topLabelConfig,
         };
       });
 
