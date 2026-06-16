@@ -37,7 +37,6 @@ export interface ColorGroup {
   topLabel?: string;
   isPushedIn?: boolean;
   isCenter?: boolean;
-  rightColXOffset?: number;
   extraRowGap?: number;
 }
 
@@ -103,7 +102,6 @@ export interface AlakLayoutParams {
   curveGap?: number | number[];
   curveDeepOffsetOuter?: number;
   curveDeepOffsetInner?: number;
-  rightCurveAnchorsLeft?: number[];
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -843,7 +841,6 @@ export function createLayoutMath(
     curveGap: p.curveGap,
     curveDeepOffsetOuter: p.curveDeepOffsetOuter,
     curveDeepOffsetInner: p.curveDeepOffsetInner,
-    rightCurveAnchorsLeft: p.rightCurveAnchorsLeft,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
@@ -977,8 +974,6 @@ export function buildSurahTransforms(
 
         const gHalfW = (gInnerW - lm.groupPad * 2 - groupGapAmount) / 2;
         const extraRowGap = group.extraRowGap ?? 0;
-        const rightColXOffset = group.rightColXOffset ?? 0;
-        const leftColXOffset = group.leftColXOffset ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
         group.verseIds.forEach((verseId, i) => {
@@ -991,7 +986,7 @@ export function buildSurahTransforms(
             x:
               gBaseX +
               lm.groupPad +
-              (isRightCol ? gHalfW + groupGapAmount + rightColXOffset : leftColXOffset),
+              (isRightCol ? gHalfW + groupGapAmount : 0),
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
             w: gHalfW,
@@ -1030,8 +1025,6 @@ export function buildSurahTransforms(
           verses,
           rowConnectors,
           topLabelConfig: group.topLabelConfig,
-          rightColXOffset,
-          leftColXOffset,
           backgroundTexture: group.backgroundTexture,
           backgroundScaleX: group.backgroundScaleX,
           backgroundScaleY: group.backgroundScaleY,

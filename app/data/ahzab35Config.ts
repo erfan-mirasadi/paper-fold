@@ -264,7 +264,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     curveGap: [0.12, 0.06, 0.06], // Increased outermost curve gap to prevent collision
     curveDeepOffsetOuter: 0,
     curveDeepOffsetInner: 0,
-    rightCurveAnchorsLeft: [1, 2],
   },
 
   sections: [
@@ -294,8 +293,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
-          leftColXOffset: -0.03,
-          rightColXOffset: 0.08,
           customShrink: -0.07,
           pushDown: -0.06,
           backgroundTexture: "/ahzab/blue-frame.svg",
@@ -311,8 +308,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: true,
           extraRowGap: 0.01,
           bgThemeKey: "s2Group3Bg",
-          leftColXOffset: -0.1,
-          rightColXOffset: 0.18,
           backgroundTexture: "/ahzab/green-frame.svg",
           backgroundScaleX: 1.2,
           backgroundScaleY: 1.2,
@@ -326,8 +321,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
-          leftColXOffset: -0.03,
-          rightColXOffset: 0.08,
           customShrink: -0.07,
         },
         // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
@@ -338,8 +331,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
           customShrink: 0.15,
-          leftColXOffset: -0.03,
-          rightColXOffset: 0.03,
           pushDown: 0.15,
           topLabelConfig: {
             width: 0.25,

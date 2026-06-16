@@ -54,8 +54,6 @@ interface BracketSpec {
   rightEdgeTop?: number;
   leftEdgeBot?: number;
   rightEdgeBot?: number;
-  rightColLeftEdgeTop?: number;
-  rightColLeftEdgeBot?: number;
 }
 
 // ── Static fallbacks — used when the config provides no curveColors ───────────
@@ -117,7 +115,6 @@ function computeBrackets(
     return {
       leftEdge: leftCapsule.x,
       rightEdge: rightCapsule.x + rightCapsule.w,
-      rightColLeftEdge: rightCapsule.x,
     };
   };
 
@@ -242,8 +239,6 @@ function computeBrackets(
         rightEdgeTop: topEdges.rightEdge,
         leftEdgeBot: botEdges.leftEdge,
         rightEdgeBot: botEdges.rightEdge,
-        rightColLeftEdgeTop: topEdges.rightColLeftEdge,
-        rightColLeftEdgeBot: botEdges.rightColLeftEdge,
         ...outerColors[i],
       });
     }
@@ -272,8 +267,6 @@ function computeBrackets(
         rightEdgeTop: centerEdges.rightEdge,
         leftEdgeBot: centerEdges.leftEdge,
         rightEdgeBot: centerEdges.rightEdge,
-        rightColLeftEdgeTop: centerEdges.rightColLeftEdge,
-        rightColLeftEdgeBot: centerEdges.rightColLeftEdge,
         ...centerColor,
       });
     }
@@ -639,33 +632,8 @@ export const SideCurves = ({
         const innerTipTop_R = b.isCenter ? deepInnerTipXTop_R : tipXTop_R - innerInwardOffset;
         const innerTipBot_R = b.isCenter ? deepInnerTipXBot_R : tipXBot_R - innerInwardOffset;
 
-        // ANCHORED LEFT RIGHT CURVE (R_AL)
-        const anchorLeftStartXTop = b.rightColLeftEdgeTop ?? startX_R;
-        const anchorLeftStartXBot = b.rightColLeftEdgeBot ?? startX_R;
-
-        const tipXTop_R_AL = anchorLeftStartXTop + inwardOffset;
-        const tipXBot_R_AL = anchorLeftStartXBot + inwardOffset;
-        const deepTipXTop_R_AL = anchorLeftStartXTop + deepOffsetOuter;
-        const deepTipXBot_R_AL = anchorLeftStartXBot + deepOffsetOuter;
-        const deepInnerTipXTop_R_AL = anchorLeftStartXTop + deepOffsetInner;
-        const deepInnerTipXBot_R_AL = anchorLeftStartXBot + deepOffsetInner;
-
-        const outerControlTop_R_AL = anchorLeftStartXTop - curveGap * bowMultiplier;
-        const outerControlBot_R_AL = anchorLeftStartXBot - curveGap * bowMultiplier;
-        const innerControlTop_R_AL = anchorLeftStartXTop - innerCurveGap * bowMultiplier;
-        const innerControlBot_R_AL = anchorLeftStartXBot - innerCurveGap * bowMultiplier;
-
-        const outerTipTop_R_AL = b.isCenter ? deepTipXTop_R_AL : tipXTop_R_AL;
-        const outerTipBot_R_AL = b.isCenter ? deepTipXBot_R_AL : tipXBot_R_AL;
-        const innerTipTop_R_AL = b.isCenter ? deepInnerTipXTop_R_AL : tipXTop_R_AL + innerInwardOffset;
-        const innerTipBot_R_AL = b.isCenter ? deepInnerTipXBot_R_AL : tipXBot_R_AL + innerInwardOffset;
-
         const topDelta = idx === 0 ? borderDelta : 0;
         const botDelta = idx === 0 ? borderDelta : 0;
-        
-        const anchoredLeft = layout.rightCurveAnchorsLeft?.includes(
-          b.nestLevel,
-        );
 
         return (
           <Fragment key={idx}>
@@ -692,24 +660,16 @@ export const SideCurves = ({
               key={`R-${idx}`}
               outerYTop={b.outerYTop + topDelta}
               outerYBot={b.outerYBot - botDelta}
-              outerControlXTop={
-                anchoredLeft ? outerControlTop_R_AL : outerControlTop_R
-              }
-              outerControlXBot={
-                anchoredLeft ? outerControlBot_R_AL : outerControlBot_R
-              }
-              outerTipXTop={anchoredLeft ? outerTipTop_R_AL : outerTipTop_R}
-              outerTipXBot={anchoredLeft ? outerTipBot_R_AL : outerTipBot_R}
+              outerControlXTop={outerControlTop_R}
+              outerControlXBot={outerControlBot_R}
+              outerTipXTop={outerTipTop_R}
+              outerTipXBot={outerTipBot_R}
               innerYTop={b.innerYTop + topDelta}
               innerYBot={b.innerYBot - botDelta}
-              innerControlXTop={
-                anchoredLeft ? innerControlTop_R_AL : innerControlTop_R
-              }
-              innerControlXBot={
-                anchoredLeft ? innerControlBot_R_AL : innerControlBot_R
-              }
-              innerTipXTop={anchoredLeft ? innerTipTop_R_AL : innerTipTop_R}
-              innerTipXBot={anchoredLeft ? innerTipBot_R_AL : innerTipBot_R}
+              innerControlXTop={innerControlTop_R}
+              innerControlXBot={innerControlBot_R}
+              innerTipXTop={innerTipTop_R}
+              innerTipXBot={innerTipBot_R}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}

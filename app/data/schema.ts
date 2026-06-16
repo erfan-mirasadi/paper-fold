@@ -101,8 +101,6 @@ export interface VerseBlockConfig {
   customShrink?: number;
   customGap?: number;
   pushDown?: number;
-  rightColXOffset?: number;
-  leftColXOffset?: number;
   topLabelConfig?: {
     width?: number;
     height?: number;
@@ -288,7 +286,6 @@ export interface BracketSpec {
   fillColor: string;
   shrinkTop?: number;
   shrinkBot?: number;
-  rightColXOffset?: number;
 }
 
 export interface RowConnectorTransform {
@@ -314,8 +311,6 @@ export interface GroupTransforms {
     yOffset?: number;
     textOffsetY?: number;
   };
-  rightColXOffset?: number;
-  leftColXOffset?: number;
   backgroundTexture?: string;
   backgroundScaleX?: number;
   backgroundScaleY?: number;
