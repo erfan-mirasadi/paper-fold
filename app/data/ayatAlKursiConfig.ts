@@ -196,8 +196,8 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     smallBoxH2: 0.085, // height of each individual verse capsule
     middleExtraGap: 0.007,
     s2PadLeftRight: 0.028,
-    g2Shrink: 0.0,
-    outerShrink: 0.05,
+    g2Scale: 0.0,
+    outerScale: 0.05,
     s1BorderWidth: 0,
 
     // --- Misc (carried over from Alak; not material for this layout) ---

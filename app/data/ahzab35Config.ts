@@ -195,9 +195,24 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group2Bg: BLUE_BG,
       s2Group3Bg: GREEN_BG,
       curveColors: [
-        { color: YELLOW_BORDER, fillColor: YELLOW_BG },
-        { color: BLUE_BORDER, fillColor: BLUE_BG },
-        { color: GREEN_BORDER, fillColor: GREEN_BG },
+        {
+          color: YELLOW_BORDER,
+          fillColor: YELLOW_BG,
+          bowGap: 0.4,
+          innerBowGap: 0.39,
+          inwardOffset: 0.02,
+        },
+        {
+          color: BLUE_BORDER,
+          fillColor: BLUE_BG,
+          bowGap: 0.2,
+          innerBowGap: 0.19,
+          inwardOffset: 0.015,
+        },
+        {
+          color: GREEN_BORDER,
+          fillColor: GREEN_BG,
+        },
       ],
     },
     capsuleBorderWidth: 0.0039,
@@ -232,11 +247,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupPadBottom: 0.012,
     s2Gap: 0.12, // increase horizontal gap between left / right columns
     s2VerticalRowGap: 0.008, // very small gap between the two green rows
-    smallBoxH2: 0.16, // make capsules extremely tall
+    smallBoxH2: 0.085, // default height of each individual verse capsule
     middleExtraGap: 0.0,
     s2PadLeftRight: 0.005, // push outward to the red borders
-    g2Shrink: 0.1, // indent the green group to fit the inward SVG border
-    outerShrink: 0.0,
+    g2Scale: 0.1, // indent the green group to fit the inward SVG border
+    outerScale: 0.0,
     s1BorderWidth: 0,
 
     // --- Misc ---
@@ -250,20 +265,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
     verseTextScale: 1.5,
-
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
 
     outerCurveXOffset: 0.004,
     centerCurveXOffset: -0.0015,
-    curvePad: 0.062,
-    curveTipThickness: 0.06,
-    curveInnerInwardOffset: 0,
-    innerCurveGapDiff: -0.002,
-    curveInwardOffset: 0,
-    curveGap: [0.12, 0.06, 0.06], // Increased outermost curve gap to prevent collision
-    curveDeepOffsetOuter: 0,
-    curveDeepOffsetInner: 0,
   },
 
   sections: [
@@ -272,10 +278,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       type: "verticalGroups",
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
-      backgroundTexture: "/ahzab/ahzab-frame.svg",
-      backgroundScaleX: 1,
-      backgroundScaleY: 1.17,
-      backgroundOffsetX: 0.05,
       groups: [
         // ── Group 0 — Yellow / İman (1 row) ──────────────────────────────
         {
@@ -293,13 +295,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
-          customShrink: -0.07,
+          customScale: -0.07,
           pushDown: -0.06,
-          backgroundTexture: "/ahzab/blue-frame.svg",
-          backgroundScaleX: 1.15,
-          backgroundScaleY: 4.9,
-          backgroundOffsetX: 0,
-          backgroundOffsetY: -0.305,
         },
         // ── Group 2 — Green / pushed in (2 rows) ─────────────────────────
         {
@@ -308,11 +305,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: true,
           extraRowGap: 0.01,
           bgThemeKey: "s2Group3Bg",
-          backgroundTexture: "/ahzab/green-frame.svg",
-          backgroundScaleX: 1.2,
-          backgroundScaleY: 1.2,
-          backgroundOffsetX: 0,
-          backgroundOffsetY: 0,
         },
         // ── Group 3 — Blue (1 row) ────────────────────────────────────────
         {
@@ -321,7 +313,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
-          customShrink: -0.07,
+          customScale: -0.07,
         },
         // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
         {
@@ -330,7 +322,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
-          customShrink: 0.15,
+          customScale: 0.15,
           pushDown: 0.15,
           topLabelConfig: {
             width: 0.25,

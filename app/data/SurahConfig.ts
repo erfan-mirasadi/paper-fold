@@ -77,7 +77,7 @@ export interface AlakLayoutParams {
   smallBoxH2: number;
   middleExtraGap: number;
   s2PadLeftRight: number;
-  g2Shrink: number;
+  g2Scale: number;
   s1BorderWidth: number;
   anaAyetTabW: number;
   anaAyetTabH: number;
@@ -90,18 +90,8 @@ export interface AlakLayoutParams {
   labelHitboxWidth: number;
   verseTextScale?: number;
   groupRows?: number[];
-  outerCurveXOffset?: number;
-  centerCurveXOffset?: number;
-  outerShrink?: number;
   s2VerticalRowGap?: number;
-  curveTipThickness?: number;
-  curvePad?: number;
-  curveInnerInwardOffset?: number;
-  innerCurveGapDiff?: number;
-  curveInwardOffset?: number;
-  curveGap?: number | number[];
-  curveDeepOffsetOuter?: number;
-  curveDeepOffsetInner?: number;
+  outerScale?: number;
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -431,7 +421,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     smallBoxH2: 0.075,
     middleExtraGap: 0.03,
     s2PadLeftRight: 0.035,
-    g2Shrink: 0.01,
+    g2Scale: 0.01,
     s1BorderWidth: 0,
     anaAyetTabW: 0.2,
     anaAyetTabH: 0.032,
@@ -786,6 +776,8 @@ export function createLayoutMath(
     groupPad: p.groupPad,
     s2Gap: p.s2Gap,
     smallBoxH2: p.smallBoxH2,
+    g2Scale: p.g2Scale,
+    outerScale: p.outerScale ?? 0,
     groupH,
     s2H,
 
@@ -831,16 +823,6 @@ export function createLayoutMath(
     boxExtOffset: p.boxExtOffset,
     extraRowGap: p.extraRowGap,
     verseTextScale: p.verseTextScale ?? undefined,
-    outerCurveXOffset: p.outerCurveXOffset ?? 0,
-    centerCurveXOffset: p.centerCurveXOffset ?? 0,
-    curveTipThickness: p.curveTipThickness,
-    curvePad: p.curvePad,
-    curveInnerInwardOffset: p.curveInnerInwardOffset,
-    innerCurveGapDiff: p.innerCurveGapDiff,
-    curveInwardOffset: p.curveInwardOffset,
-    curveGap: p.curveGap,
-    curveDeepOffsetOuter: p.curveDeepOffsetOuter,
-    curveDeepOffsetInner: p.curveDeepOffsetInner,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
@@ -966,11 +948,11 @@ export function buildSurahTransforms(
       const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
         const groupY = groupYPositions[gIdx];
         const isPushedIn = group.isPushedIn ?? false;
-        const shrinkAmount =
-          group.customShrink ?? (isPushedIn ? lm.g2Shrink : lm.outerShrink);
+        const scaleAmount =
+          group.customScale ?? (isPushedIn ? lm.g2Scale : lm.outerScale);
         const groupGapAmount = group.customGap ?? lm.s2Gap;
-        const gInnerW = s2InnerW - shrinkAmount * 2;
-        const gBaseX = s2BaseX + shrinkAmount;
+        const gInnerW = s2InnerW - scaleAmount * 2;
+        const gBaseX = s2BaseX + scaleAmount;
 
         const gHalfW = (gInnerW - lm.groupPad * 2 - groupGapAmount) / 2;
         const extraRowGap = group.extraRowGap ?? 0;

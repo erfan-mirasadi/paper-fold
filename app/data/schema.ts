@@ -24,6 +24,14 @@ export interface LayoutDimensions {
   scrollPages: number;
 }
 
+export interface CurveColorConfig {
+  color: string;
+  fillColor: string;
+  bowGap?: number;
+  innerBowGap?: number;
+  inwardOffset?: number;
+}
+
 export interface ThemeColors {
   paperBase: string;
   shadow: string;
@@ -54,7 +62,7 @@ export interface ThemeColors {
    * The last entry is always the center (inner) bracket.
    * Provide one entry per bracket (outer brackets first, center last).
    */
-  curveColors?: Array<{ color: string; fillColor: string }>;
+  curveColors?: CurveColorConfig[];
   curveLineWidth?: number;
   
   /**
@@ -98,7 +106,7 @@ export interface VerseBlockConfig {
   isCenter?: boolean;
   extraRowGap?: number;
   bgThemeKey?: keyof ThemeColors;
-  customShrink?: number;
+  customScale?: number;
   customGap?: number;
   pushDown?: number;
   topLabelConfig?: {
@@ -284,8 +292,8 @@ export interface BracketSpec {
   isCenter: boolean;
   color: string;
   fillColor: string;
-  shrinkTop?: number;
-  shrinkBot?: number;
+  scaleTop?: number;
+  scaleBot?: number;
 }
 
 export interface RowConnectorTransform {

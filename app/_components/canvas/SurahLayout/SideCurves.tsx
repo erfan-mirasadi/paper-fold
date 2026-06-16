@@ -19,90 +19,55 @@ import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../../../data/SurahConfig";
 import type { GroupTransforms } from "../../../data/schema";
 
-export const CURVE_GAP = 0.1; // Bow step between nesting levels (outer)
-export const CURVE_INWARD_OFFSET = 0.015; // How far the bracket tip pokes inward
-export const CURVE_DEEP_OFFSET_OUTER = 0.025; // Deeper tip for the center bracket
-export const CURVE_DEEP_OFFSET_INNER = 0.028; // Deeper inner tip for center bracket
-export const DEFAULT_VERSE_BORDER_WIDTH = 0.004; // Matches VerseBox default border width
+export const CURVE_GAP = 0.1;
+export const CURVE_INWARD_OFFSET = 0.015;
+export const CURVE_DEEP_OFFSET_OUTER = 0.025;
+export const CURVE_DEEP_OFFSET_INNER = 0.028;
+export const DEFAULT_VERSE_BORDER_WIDTH = 0.004;
 
-export const INNER_CURVE_GAP = 0.095; // Bow step for inner curves
-export const INNER_CURVE_INWARD_OFFSET = 0.009; // Inner tip penetration
+export const INNER_CURVE_GAP = 0.095;
+export const INNER_CURVE_INWARD_OFFSET = 0.009;
 
-// ── Line width constants
 export const CURVE_OUTER_LINE_WIDTH = 2;
 export const CURVE_INNER_LINE_WIDTH = 2;
 
-// ── Bracket descriptor produced by the topology engine ───────────────────────
-interface BracketSpec {
-  /** Y of the bracket's outermost top edge (outer curve tip at top) */
-  outerYTop: number;
-  /** Y of the bracket's outermost bottom edge (outer curve tip at bottom) */
-  outerYBot: number;
-  /** Y of the bracket's inner top edge (inner curve tip at top) */
-  innerYTop: number;
-  /** Y of the bracket's inner bottom edge (inner curve tip at bottom) */
-  innerYBot: number;
-  /** 0 = outermost, increasing inward — determines bow depth */
-  nestLevel: number;
-  /** Is this the innermost center bracket? Drives deep-penetration tip offsets. */
-  isCenter: boolean;
+export interface CurveConfig {
   color: string;
   fillColor: string;
-  shrinkTop?: number;
-  shrinkBot?: number;
+  bowGap?: number;
+  innerBowGap?: number;
+  inwardOffset?: number;
+}
+
+interface BracketSpec extends CurveConfig {
+  outerYTop: number;
+  outerYBot: number;
+  innerYTop: number;
+  innerYBot: number;
+  nestLevel: number;
+  isCenter: boolean;
   leftEdgeTop?: number;
   rightEdgeTop?: number;
   leftEdgeBot?: number;
   rightEdgeBot?: number;
 }
 
-// ── Static fallbacks — used when the config provides no curveColors ───────────
-// These replicate the previous Alak hardcoded values and keep other surahs
-// visually correct even before they define their own curveColors.
-const FALLBACK_OUTER_COLORS: Array<{ color: string; fillColor: string }> = [
+const FALLBACK_OUTER_COLORS: CurveConfig[] = [
   { color: BLUE_THEME, fillColor: CAPSULE_BG_6_19 },
   { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
   { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
 ];
-const FALLBACK_CENTER_COLOR = {
+const FALLBACK_CENTER_COLOR: CurveConfig = {
   color: GREEN_THEME,
   fillColor: CAPSULE_BG_12_14,
 };
 
-// =============================================================================
-// computeBrackets — Generic topological bracket generator
-//
-// Strategy
-// ─────────
-// Given the ordered GroupTransforms array and the layout math object:
-//
-// 1. Locate the "center" group (isPushedIn && isCenter). It receives an inner
-//    bracket that wraps it tightly using its own frameY / frameH.
-//
-// 2. For hasIntroOutro === true (Alak-like layouts):
-//    Outer bracket span comes from the intro-verse top (v6Y) → outro-verse
-//    bottom (v19Y - bigBoxH), with two additional intermediate brackets derived
-//    by the Alak row-offset math (matching the old hardcoded y8/y10/y18/y16).
-//    This yields exactly 3 outer brackets + 1 inner = 4 total (Alak's structure).
-//
-// 3. For hasIntroOutro === false (Ayat al-Kursi):
-//    ONE outer bracket sweeping from group[0].frameY → group[last].frameY - groupH.
-//    ONE inner bracket for the center group.
-//    Total: 2.
-//
-// The nestLevel field drives the bow depth for both outer and inner control
-// points. Level 0 = tightest bow, increasing outward with each additional level.
-// =============================================================================
 function computeBrackets(
   groups: GroupTransforms[],
   layout: LayoutConfig,
   hasIntroOutro: boolean,
-  outerColors: Array<{
-    color: string;
-    fillColor: string;
-  }> = FALLBACK_OUTER_COLORS,
-  centerColor: { color: string; fillColor: string } = FALLBACK_CENTER_COLOR,
-  rawGroups: import("../../../data/schema").VerseBlockConfig[] = [],
+  outerColors: CurveConfig[] = FALLBACK_OUTER_COLORS,
+  centerColor: CurveConfig = FALLBACK_CENTER_COLOR,
 ): BracketSpec[] {
   if (groups.length === 0) return [];
 
@@ -110,35 +75,17 @@ function computeBrackets(
     if (!group || !group.verses) return {};
     const arr = Object.values(group.verses).sort((a, b) => a.x - b.x);
     if (arr.length === 0) return {};
-    const leftCapsule = arr[0];
-    const rightCapsule = arr[arr.length - 1];
     return {
-      leftEdge: leftCapsule.x,
-      rightEdge: rightCapsule.x + rightCapsule.w,
+      left: arr[0].x,
+      right: arr[arr.length - 1].x + arr[arr.length - 1].w,
     };
   };
 
-  const { v6Y, v19Y, bigBoxH, groupPad, smallBoxH2, s2Gap, g1Y, g3Y, groupH } =
-    layout;
-
+  const { v6Y, v19Y, bigBoxH, groupPad, smallBoxH2, s2Gap, g1Y, g3Y } = layout;
   const centerGroup = groups.find((g) => g.isCenter && g.isPushedIn);
-  const g0 = groups[0];
-  const gLast = groups[groups.length - 1];
-
   const brackets: BracketSpec[] = [];
 
   if (hasIntroOutro) {
-    // ── Alak topology: exactly 3 outer brackets + 1 inner center ─────────
-    //
-    // Bracket 0 (index 0 from curveColors) — outermost:
-    //   top  = intro-verse top  = v6Y
-    //   bot  = outro-verse bot  = v19Y - bigBoxH
-    //   inner top = v6Y - bigBoxH      (bottom edge of intro verse)
-    //   inner bot = v19Y               (top edge of outro verse)
-    //
-    // Bracket 1 (index 1):
-    //   top  = g1Y - groupPad                            (top of row 1, group 1)
-    //   bot  = g3Y - groupPad - smallBoxH2 - s2Gap - smallBoxH2 (bottom of row 2, group 3)
     const outerTop0 = v6Y;
     const outerBot0 = v19Y - bigBoxH;
     brackets.push({
@@ -148,8 +95,6 @@ function computeBrackets(
       innerYBot: v19Y,
       nestLevel: 0,
       isCenter: false,
-      shrinkTop: 0,
-      shrinkBot: 0,
       ...(outerColors[0] ?? FALLBACK_OUTER_COLORS[0]),
     });
 
@@ -162,8 +107,6 @@ function computeBrackets(
       innerYBot: outerBot1 + smallBoxH2,
       nestLevel: 1,
       isCenter: false,
-      shrinkTop: 0,
-      shrinkBot: 0,
       ...(outerColors[1] ?? FALLBACK_OUTER_COLORS[1]),
     });
 
@@ -176,8 +119,6 @@ function computeBrackets(
       innerYBot: outerBot2 + smallBoxH2,
       nestLevel: 2,
       isCenter: false,
-      shrinkTop: 0,
-      shrinkBot: 0,
       ...(outerColors[2] ?? FALLBACK_OUTER_COLORS[2]),
     });
 
@@ -192,8 +133,6 @@ function computeBrackets(
         innerYBot: cBot + smallBoxH2,
         nestLevel: 3,
         isCenter: true,
-        shrinkTop: 0,
-        shrinkBot: 0,
         ...centerColor,
       });
     }
@@ -207,66 +146,42 @@ function computeBrackets(
     for (let i = 0; i < outerPairs; i++) {
       const gTop = groups[i];
       const gBot = groups[lastIdx - i];
-
       if (!gTop || !gBot) continue;
 
       const pad = layout.curvePad ?? groupPad;
-
-      const outerTop = gTop.frameY - pad;
-      const outerBot = gBot.frameY - gBot.frameH + pad;
-
-      const tipThickness = layout.curveTipThickness ?? smallBoxH2;
-
-      const rawTop = rawGroups[i];
-      const rawBot = rawGroups[lastIdx - i];
-
-      const shrinkTop = rawTop?.customShrink ?? (gTop.isPushedIn ? layout.g2Shrink : layout.outerShrink ?? 0);
-      const shrinkBot = rawBot?.customShrink ?? (gBot.isPushedIn ? layout.g2Shrink : layout.outerShrink ?? 0);
-
+      const tipThickness = smallBoxH2;
       const topEdges = getEdges(gTop);
       const botEdges = getEdges(gBot);
 
       brackets.push({
-        outerYTop: outerTop,
-        outerYBot: outerBot,
-        innerYTop: outerTop - tipThickness,
-        innerYBot: outerBot + tipThickness,
+        outerYTop: gTop.frameY - pad,
+        outerYBot: gBot.frameY - gBot.frameH + pad,
+        innerYTop: gTop.frameY - pad - tipThickness,
+        innerYBot: gBot.frameY - gBot.frameH + pad + tipThickness,
         nestLevel: i,
         isCenter: false,
-        shrinkTop,
-        shrinkBot,
-        leftEdgeTop: topEdges.leftEdge,
-        rightEdgeTop: topEdges.rightEdge,
-        leftEdgeBot: botEdges.leftEdge,
-        rightEdgeBot: botEdges.rightEdge,
+        leftEdgeTop: topEdges.left,
+        rightEdgeTop: topEdges.right,
+        leftEdgeBot: botEdges.left,
+        rightEdgeBot: botEdges.right,
         ...outerColors[i],
       });
     }
 
     if (centerGroup) {
-      const pad = layout.curvePad ?? groupPad;
-      const cTop = centerGroup.frameY - pad;
-      const cBot = centerGroup.frameY - centerGroup.frameH + pad;
-      const tipThickness = layout.curveTipThickness ?? smallBoxH2;
-      
-      const rawCenter = rawGroups.find(g => g.isCenter && g.isPushedIn);
-      const shrinkCenter = rawCenter?.customShrink ?? (centerGroup.isPushedIn ? layout.g2Shrink : layout.outerShrink ?? 0);
-
+      const pad = groupPad;
       const centerEdges = getEdges(centerGroup);
-
       brackets.push({
-        outerYTop: cTop,
-        outerYBot: cBot,
-        innerYTop: cTop - tipThickness,
-        innerYBot: cBot + tipThickness,
+        outerYTop: centerGroup.frameY - pad,
+        outerYBot: centerGroup.frameY - centerGroup.frameH + pad,
+        innerYTop: centerGroup.frameY - pad - smallBoxH2,
+        innerYBot: centerGroup.frameY - centerGroup.frameH + pad + smallBoxH2,
         nestLevel: outerPairs,
         isCenter: true,
-        shrinkTop: shrinkCenter,
-        shrinkBot: shrinkCenter,
-        leftEdgeTop: centerEdges.leftEdge,
-        rightEdgeTop: centerEdges.rightEdge,
-        leftEdgeBot: centerEdges.leftEdge,
-        rightEdgeBot: centerEdges.rightEdge,
+        leftEdgeTop: centerEdges.left,
+        rightEdgeTop: centerEdges.right,
+        leftEdgeBot: centerEdges.left,
+        rightEdgeBot: centerEdges.right,
         ...centerColor,
       });
     }
@@ -275,108 +190,32 @@ function computeBrackets(
   return brackets;
 }
 
-// =============================================================================
-// Bezier helper
-// =============================================================================
 const getSmoothCurvePoints = (
   tipXTop: number,
-  controlXTop: number,
+  controlX: number,
   tipXBot: number,
-  controlXBot: number,
   yTop: number,
   yBot: number,
 ) => {
-  const curve = new THREE.CubicBezierCurve3(
+  return new THREE.CubicBezierCurve3(
     new THREE.Vector3(tipXTop, yTop, 0),
-    new THREE.Vector3(controlXTop, yTop, 0),
-    new THREE.Vector3(controlXBot, yBot, 0),
+    new THREE.Vector3(controlX, yTop, 0),
+    new THREE.Vector3(controlX, yBot, 0),
     new THREE.Vector3(tipXBot, yBot, 0),
-  );
-  return curve.getPoints(50);
+  ).getPoints(50);
 };
 
-// =============================================================================
-// CurvePair — renders one nested bracket (outer line + inner line + fill mesh)
-// =============================================================================
-const CurvePair = ({
-  outerYTop,
-  outerYBot,
-  outerControlXTop,
-  outerControlXBot,
-  outerTipXTop,
-  outerTipXBot,
-  innerYTop,
-  innerYBot,
-  innerControlXTop,
-  innerControlXBot,
-  innerTipXTop,
-  innerTipXBot,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CurveComponent = ({
+  outerPoints,
+  innerPoints,
   color,
   fillColor,
-  shouldHide = false,
+  shouldHide,
   lineWidth,
-}: {
-  outerYTop: number;
-  outerYBot: number;
-  outerControlXTop: number;
-  outerControlXBot: number;
-  outerTipXTop: number;
-  outerTipXBot: number;
-  innerYTop: number;
-  innerYBot: number;
-  innerControlXTop: number;
-  innerControlXBot: number;
-  innerTipXTop: number;
-  innerTipXBot: number;
-  color: string;
-  fillColor?: string;
-  shouldHide?: boolean;
-  lineWidth?: number;
-}) => {
-  const outerPoints = useMemo(
-    () =>
-      getSmoothCurvePoints(
-        outerTipXTop,
-        outerControlXTop,
-        outerTipXBot,
-        outerControlXBot,
-        outerYTop,
-        outerYBot,
-      ),
-    [
-      outerTipXTop,
-      outerControlXTop,
-      outerTipXBot,
-      outerControlXBot,
-      outerYTop,
-      outerYBot,
-    ],
-  );
-
-  const innerPoints = useMemo(
-    () =>
-      getSmoothCurvePoints(
-        innerTipXTop,
-        innerControlXTop,
-        innerTipXBot,
-        innerControlXBot,
-        innerYTop,
-        innerYBot,
-      ),
-    [
-      innerTipXTop,
-      innerControlXTop,
-      innerTipXBot,
-      innerControlXBot,
-      innerYTop,
-      innerYBot,
-    ],
-  );
-
-  // Build the fill shape from the exact same sample points as the lines.
+}: any) => {
   const fillShape = useMemo(() => {
     const s = new THREE.Shape();
-
     if (outerPoints.length > 0 && innerPoints.length > 0) {
       s.moveTo(outerPoints[0].x, outerPoints[0].y);
       for (let i = 1; i < outerPoints.length; i++) {
@@ -389,94 +228,67 @@ const CurvePair = ({
       }
       s.lineTo(outerPoints[0].x, outerPoints[0].y);
     }
-
     return s;
   }, [outerPoints, innerPoints]);
 
   const groupRef = useRef<THREE.Group>(null);
-  const fillMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
+  const fillMatRef = useRef<THREE.MeshBasicMaterial>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lineRef1 = useRef<any>(null);
+  const line1Ref = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lineRef2 = useRef<any>(null);
+  const line2Ref = useRef<any>(null);
 
-  const globalOpacityRef = useRef(1);
-  const isAnimating = useRef(false);
+  const isAnim = useRef(false);
+  const opRef = useRef(1);
 
   useEffect(() => {
-    isAnimating.current = true;
-    if (!shouldHide && groupRef.current) {
-      groupRef.current.visible = true;
-    }
+    isAnim.current = true;
+    if (!shouldHide && groupRef.current) groupRef.current.visible = true;
   }, [shouldHide]);
 
   useFrame((_, delta) => {
-    if (!isAnimating.current) return;
+    if (!isAnim.current) return;
+    const target = shouldHide ? 0 : 1;
+    opRef.current = THREE.MathUtils.damp(opRef.current, target, 4, delta);
+    const go = opRef.current;
 
-    const targetOp = shouldHide ? 0 : 1;
-    globalOpacityRef.current = THREE.MathUtils.damp(
-      globalOpacityRef.current,
-      targetOp,
-      4,
-      delta,
-    );
-    const go = globalOpacityRef.current;
+    if (fillMatRef.current) fillMatRef.current.opacity = 0.999 * go;
+    if (line1Ref.current?.material) line1Ref.current.material.opacity = go;
+    if (line2Ref.current?.material) line2Ref.current.material.opacity = go;
 
-    if (fillMaterialRef.current) {
-      fillMaterialRef.current.opacity = 0.999 * go;
-    }
-    if (lineRef1.current?.material) {
-      lineRef1.current.material.opacity = go;
-    }
-    if (lineRef2.current?.material) {
-      lineRef2.current.material.opacity = go;
-    }
-
-    if (Math.abs(go - targetOp) < 0.01) {
-      isAnimating.current = false;
-      if (shouldHide && groupRef.current) {
-        groupRef.current.visible = false;
-      }
+    if (Math.abs(go - target) < 0.01) {
+      isAnim.current = false;
+      if (shouldHide && groupRef.current) groupRef.current.visible = false;
     }
   });
 
-  const activeColor = color;
-  const activeFillColor = fillColor ?? color;
+  const hasFill = fillColor !== "transparent" && fillColor !== "none";
 
   return (
     <group ref={groupRef} position={[0, 0, 0.0012]}>
       <group position={[0, 0, 0.0012]} renderOrder={5}>
         <Line
-          ref={lineRef1}
+          ref={line1Ref}
           points={outerPoints}
-          color={activeColor}
+          color={color}
           lineWidth={lineWidth ?? CURVE_OUTER_LINE_WIDTH}
-          transparent={true}
+          transparent
           renderOrder={5}
         />
         <Line
-          ref={lineRef2}
+          ref={line2Ref}
           points={innerPoints}
-          color={activeColor}
+          color={color}
           lineWidth={lineWidth ?? CURVE_INNER_LINE_WIDTH}
-          transparent={true}
+          transparent
           renderOrder={5}
         />
       </group>
-      <mesh
-        renderOrder={4}
-        visible={
-          activeFillColor !== "transparent" && activeFillColor !== "none"
-        }
-      >
+      <mesh renderOrder={4} visible={hasFill}>
         <shapeGeometry args={[fillShape]} />
         <meshBasicMaterial
-          ref={fillMaterialRef}
-          color={
-            activeFillColor !== "transparent" && activeFillColor !== "none"
-              ? activeFillColor
-              : "#ffffff"
-          }
+          ref={fillMatRef}
+          color={hasFill ? fillColor : "#ffffff"}
           transparent
           opacity={0.999}
           depthTest={false}
@@ -487,25 +299,14 @@ const CurvePair = ({
   );
 };
 
-// =============================================================================
-// SideCurves — the smart, data-driven curve renderer
-// =============================================================================
-
-interface SideCurvesProps {
-  layout: LayoutConfig;
-  startX: number;
-  borderWidth?: number;
-  groups: GroupTransforms[];
-  hasIntroOutro: boolean;
-}
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SideCurves = ({
   layout,
   startX,
   borderWidth = DEFAULT_VERSE_BORDER_WIDTH,
   groups,
   hasIntroOutro,
-}: SideCurvesProps) => {
+}: any) => {
   const popUpGroups = usePopUpStore((state) => state.popUpGroups);
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isAllSectionsMode = useElevatedStore(
@@ -515,48 +316,32 @@ export const SideCurves = ({
   const configColors = useStoryStore(
     (state) => state.activeConfig.styling.colors,
   );
-  const configCurveColors = configColors.curveColors;
+  const configCurveColors = configColors.curveColors as
+    | CurveConfig[]
+    | undefined;
 
-  const outerColors: Array<{ color: string; fillColor: string }> =
-    configCurveColors ? configCurveColors.slice(0, -1) : FALLBACK_OUTER_COLORS;
-  const centerColor: { color: string; fillColor: string } = configCurveColors
+  const outerColors = configCurveColors
+    ? configCurveColors.slice(0, -1)
+    : FALLBACK_OUTER_COLORS;
+  const centerColor = configCurveColors
     ? (configCurveColors[configCurveColors.length - 1] ?? FALLBACK_CENTER_COLOR)
     : FALLBACK_CENTER_COLOR;
 
-  const hideFromPopUps = popUpGroups.some(
-    (g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4",
-  );
+  const shouldHide =
+    popUpGroups.some((g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4") ||
+    (!isAllSectionsMode &&
+      (activeSectionIds.includes("s2_top") ||
+        activeSectionIds.includes("s2_center") ||
+        activeSectionIds.includes("s2_bottom")));
 
-  const hideFromSectionElevate =
-    !isAllSectionsMode &&
-    (activeSectionIds.includes("s2_top") ||
-      activeSectionIds.includes("s2_center") ||
-      activeSectionIds.includes("s2_bottom"));
-
-  const shouldHide = hideFromPopUps || hideFromSectionElevate;
-
-  const { s2Pad, sectionW } = layout;
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
-  const baseStartX_L = startX + s2Pad - 0.005;
-  const baseStartX_R = startX + sectionW - s2Pad + 0.005;
-
-  const activeConfig = useStoryStore((state) => state.activeConfig);
-  const vertSection = activeConfig?.sections?.find(
-    (s) => s.type === "verticalGroups",
-  ) as import("../../../data/schema").VerticalGroupsSectionConfig | undefined;
-  const rawGroups = vertSection?.groups ?? [];
+  const baseStartX_L = startX + layout.s2Pad - 0.005;
+  const baseStartX_R = startX + layout.sectionW - layout.s2Pad + 0.005;
 
   const brackets = useMemo(
     () =>
-      computeBrackets(
-        groups,
-        layout,
-        hasIntroOutro,
-        outerColors,
-        centerColor,
-        rawGroups as any,
-      ),
-    [groups, layout, hasIntroOutro, outerColors, centerColor, rawGroups],
+      computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor),
+    [groups, layout, hasIntroOutro, outerColors, centerColor],
   );
 
   const totalLevels = brackets.length;
@@ -566,110 +351,108 @@ export const SideCurves = ({
       {brackets.map((b, idx) => {
         if (b.color === "transparent" || b.color === "none") return null;
 
-        const shrinkTop = b.shrinkTop || 0;
-        const shrinkBot = b.shrinkBot || 0;
-
         const bowMultiplier = totalLevels - b.nestLevel;
+        const nestMultiplier = b.nestLevel + 1;
 
-        const shiftX = b.isCenter
-          ? -(layout.centerCurveXOffset || 0)
-          : layout.outerCurveXOffset || 0;
-        const startX_L = baseStartX_L + shiftX;
-        const startX_R = baseStartX_R - shiftX;
+        const outerBow = b.bowGap ?? CURVE_GAP * bowMultiplier;
+        const innerBow = b.innerBowGap ?? INNER_CURVE_GAP * bowMultiplier;
+        const inwardOffset = b.inwardOffset ?? CURVE_INWARD_OFFSET;
 
-        const innerInwardOffset =
-          layout.curveInnerInwardOffset ?? INNER_CURVE_INWARD_OFFSET;
-        
-        const rawCurveGap = layout.curveGap ?? CURVE_GAP;
-        const curveGap = Array.isArray(rawCurveGap) ? (rawCurveGap[b.nestLevel] ?? CURVE_GAP) : rawCurveGap;
-        const innerCurveGap =
-          curveGap + (layout.innerCurveGapDiff ?? INNER_CURVE_GAP - CURVE_GAP);
+        const innerInwardOffset = INNER_CURVE_INWARD_OFFSET * nestMultiplier;
+        const deepOffsetOuter = CURVE_DEEP_OFFSET_OUTER;
+        const deepOffsetInner = CURVE_DEEP_OFFSET_INNER;
 
-        const inwardOffset = layout.curveInwardOffset ?? CURVE_INWARD_OFFSET;
-        const deepOffsetOuter =
-          layout.curveDeepOffsetOuter ?? CURVE_DEEP_OFFSET_OUTER;
-        const deepOffsetInner =
-          layout.curveDeepOffsetInner ?? CURVE_DEEP_OFFSET_INNER;
+        const leftEdgeTop = b.leftEdgeTop ?? baseStartX_L;
+        const leftEdgeBot = b.leftEdgeBot ?? baseStartX_L;
+        const rightEdgeTop = b.rightEdgeTop ?? baseStartX_R;
+        const rightEdgeBot = b.rightEdgeBot ?? baseStartX_R;
 
-        const leftEdgeTop = b.leftEdgeTop ?? startX_L;
-        const leftEdgeBot = b.leftEdgeBot ?? startX_L;
-        const rightEdgeTop = b.rightEdgeTop ?? startX_R;
-        const rightEdgeBot = b.rightEdgeBot ?? startX_R;
+        const minLeftX = Math.min(leftEdgeTop, leftEdgeBot);
+        const maxRightX = Math.max(rightEdgeTop, rightEdgeBot);
 
-        // LEFT CURVE (L)
-        const tipXTop_L = leftEdgeTop + inwardOffset;
-        const tipXBot_L = leftEdgeBot + inwardOffset;
-        const deepTipXTop_L = leftEdgeTop + deepOffsetOuter;
-        const deepTipXBot_L = leftEdgeBot + deepOffsetOuter;
-        const deepInnerTipXTop_L = leftEdgeTop + deepOffsetInner;
-        const deepInnerTipXBot_L = leftEdgeBot + deepOffsetInner;
+        const outerCtrl_L = minLeftX - outerBow;
+        const innerCtrl_L = minLeftX - innerBow;
 
-        const outerControlTop_L = leftEdgeTop - curveGap * bowMultiplier;
-        const outerControlBot_L = leftEdgeBot - curveGap * bowMultiplier;
-        const innerControlTop_L = leftEdgeTop - innerCurveGap * bowMultiplier;
-        const innerControlBot_L = leftEdgeBot - innerCurveGap * bowMultiplier;
+        const outerCtrl_R = maxRightX + outerBow;
+        const innerCtrl_R = maxRightX + innerBow;
 
-        const outerTipTop_L = b.isCenter ? deepTipXTop_L : tipXTop_L;
-        const outerTipBot_L = b.isCenter ? deepTipXBot_L : tipXBot_L;
-        const innerTipTop_L = b.isCenter ? deepInnerTipXTop_L : tipXTop_L + innerInwardOffset;
-        const innerTipBot_L = b.isCenter ? deepInnerTipXBot_L : tipXBot_L + innerInwardOffset;
+        const outerTipTop_L = b.isCenter
+          ? leftEdgeTop + deepOffsetOuter
+          : leftEdgeTop + inwardOffset;
+        const outerTipBot_L = b.isCenter
+          ? leftEdgeBot + deepOffsetOuter
+          : leftEdgeBot + inwardOffset;
+        const innerTipTop_L = b.isCenter
+          ? leftEdgeTop + deepOffsetInner
+          : leftEdgeTop + inwardOffset + innerInwardOffset;
+        const innerTipBot_L = b.isCenter
+          ? leftEdgeBot + deepOffsetInner
+          : leftEdgeBot + inwardOffset + innerInwardOffset;
 
-        // RIGHT CURVE (R) (NORMAL)
-        const tipXTop_R = rightEdgeTop - inwardOffset;
-        const tipXBot_R = rightEdgeBot - inwardOffset;
-        const deepTipXTop_R = rightEdgeTop - deepOffsetOuter;
-        const deepTipXBot_R = rightEdgeBot - deepOffsetOuter;
-        const deepInnerTipXTop_R = rightEdgeTop - deepOffsetInner;
-        const deepInnerTipXBot_R = rightEdgeBot - deepOffsetInner;
-
-        const outerControlTop_R = rightEdgeTop + curveGap * bowMultiplier;
-        const outerControlBot_R = rightEdgeBot + curveGap * bowMultiplier;
-        const innerControlTop_R = rightEdgeTop + innerCurveGap * bowMultiplier;
-        const innerControlBot_R = rightEdgeBot + innerCurveGap * bowMultiplier;
-
-        const outerTipTop_R = b.isCenter ? deepTipXTop_R : tipXTop_R;
-        const outerTipBot_R = b.isCenter ? deepTipXBot_R : tipXBot_R;
-        const innerTipTop_R = b.isCenter ? deepInnerTipXTop_R : tipXTop_R - innerInwardOffset;
-        const innerTipBot_R = b.isCenter ? deepInnerTipXBot_R : tipXBot_R - innerInwardOffset;
+        const outerTipTop_R = b.isCenter
+          ? rightEdgeTop - deepOffsetOuter
+          : rightEdgeTop - inwardOffset;
+        const outerTipBot_R = b.isCenter
+          ? rightEdgeBot - deepOffsetOuter
+          : rightEdgeBot - inwardOffset;
+        const innerTipTop_R = b.isCenter
+          ? rightEdgeTop - deepOffsetInner
+          : rightEdgeTop - inwardOffset - innerInwardOffset;
+        const innerTipBot_R = b.isCenter
+          ? rightEdgeBot - deepOffsetInner
+          : rightEdgeBot - inwardOffset - innerInwardOffset;
 
         const topDelta = idx === 0 ? borderDelta : 0;
         const botDelta = idx === 0 ? borderDelta : 0;
 
+        const yTopOuter = b.outerYTop + topDelta;
+        const yBotOuter = b.outerYBot - botDelta;
+        const yTopInner = b.innerYTop + topDelta;
+        const yBotInner = b.innerYBot - botDelta;
+
+        const lOutPts = getSmoothCurvePoints(
+          outerTipTop_L,
+          outerCtrl_L,
+          outerTipBot_L,
+          yTopOuter,
+          yBotOuter,
+        );
+        const lInPts = getSmoothCurvePoints(
+          innerTipTop_L,
+          innerCtrl_L,
+          innerTipBot_L,
+          yTopInner,
+          yBotInner,
+        );
+
+        const rOutPts = getSmoothCurvePoints(
+          outerTipTop_R,
+          outerCtrl_R,
+          outerTipBot_R,
+          yTopOuter,
+          yBotOuter,
+        );
+        const rInPts = getSmoothCurvePoints(
+          innerTipTop_R,
+          innerCtrl_R,
+          innerTipBot_R,
+          yTopInner,
+          yBotInner,
+        );
+
         return (
           <Fragment key={idx}>
-            <CurvePair
-              key={`L-${idx}`}
-              outerYTop={b.outerYTop + topDelta}
-              outerYBot={b.outerYBot - botDelta}
-              outerControlXTop={outerControlTop_L}
-              outerControlXBot={outerControlBot_L}
-              outerTipXTop={outerTipTop_L}
-              outerTipXBot={outerTipBot_L}
-              innerYTop={b.innerYTop + topDelta}
-              innerYBot={b.innerYBot - botDelta}
-              innerControlXTop={innerControlTop_L}
-              innerControlXBot={innerControlBot_L}
-              innerTipXTop={innerTipTop_L}
-              innerTipXBot={innerTipBot_L}
+            <CurveComponent
+              outerPoints={lOutPts}
+              innerPoints={lInPts}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}
               lineWidth={configColors.curveLineWidth}
             />
-            <CurvePair
-              key={`R-${idx}`}
-              outerYTop={b.outerYTop + topDelta}
-              outerYBot={b.outerYBot - botDelta}
-              outerControlXTop={outerControlTop_R}
-              outerControlXBot={outerControlBot_R}
-              outerTipXTop={outerTipTop_R}
-              outerTipXBot={outerTipBot_R}
-              innerYTop={b.innerYTop + topDelta}
-              innerYBot={b.innerYBot - botDelta}
-              innerControlXTop={innerControlTop_R}
-              innerControlXBot={innerControlBot_R}
-              innerTipXTop={innerTipTop_R}
-              innerTipXBot={innerTipBot_R}
+            <CurveComponent
+              outerPoints={rOutPts}
+              innerPoints={rInPts}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}
