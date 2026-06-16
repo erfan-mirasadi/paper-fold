@@ -1,4 +1,6 @@
 "use client";
+import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
 import { VerseBox, UiRect, TopLabel } from "./SharedUI";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
@@ -59,8 +61,63 @@ export function VerseGroup({
   const topLabelText = textDataGroup?.topLabel;
   const topLabelConfig = (gt as any).topLabelConfig;
 
+  const bgTex = (gt as any).backgroundTexture;
+  const bgScaleX = (gt as any).backgroundScaleX;
+  const bgScaleY = (gt as any).backgroundScaleY;
+  const bgOffsetX = (gt as any).backgroundOffsetX;
+  const bgOffsetY = (gt as any).backgroundOffsetY;
+
+  const leftVerses: any[] = [];
+  const rightVerses: any[] = [];
+  const versesArr = Object.values(gt.verses).sort((a: any, b: any) => a.x - b.x);
+  const half = Math.floor(versesArr.length / 2);
+  leftVerses.push(...versesArr.slice(0, half));
+  rightVerses.push(...versesArr.slice(half));
+
+  const getBounds = (verses: any[]) => {
+    if (verses.length === 0) return null;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const v of verses) {
+      if (v.x < minX) minX = v.x;
+      if (v.x + v.w > maxX) maxX = v.x + v.w;
+      if (v.y - v.h < minY) minY = v.y - v.h;
+      if (v.y > maxY) maxY = v.y;
+    }
+    return { x: minX, y: maxY, w: maxX - minX, h: maxY - minY };
+  };
+
+  const leftBox = getBounds(leftVerses);
+  const rightBox = getBounds(rightVerses);
+  const bp = 0.004;
+
   return (
     <group>
+      {bgTex && leftBox && (
+        <GroupFrameBackground
+          url={bgTex}
+          x={leftBox.x - bp}
+          y={leftBox.y + bp}
+          w={leftBox.w + bp * 2}
+          h={leftBox.h + bp * 2}
+          scaleX={bgScaleX}
+          scaleY={bgScaleY}
+          offsetX={bgOffsetX}
+          offsetY={bgOffsetY}
+        />
+      )}
+      {bgTex && rightBox && (
+        <GroupFrameBackground
+          url={bgTex}
+          x={rightBox.x - bp}
+          y={rightBox.y + bp}
+          w={rightBox.w + bp * 2}
+          h={rightBox.h + bp * 2}
+          scaleX={bgScaleX}
+          scaleY={bgScaleY}
+          offsetX={bgOffsetX}
+          offsetY={bgOffsetY}
+        />
+      )}
       {topLabelText && topLabelConfig && (
         <TopLabel
           x={gt.frameX + gt.frameW / 2}
@@ -68,6 +125,7 @@ export function VerseGroup({
           z={0.005}
           text={topLabelText}
           labelWidth={topLabelConfig.width || 0.3}
+          labelHeight={topLabelConfig.height}
           partialBorder={false}
           bgColor={config.styling.colors.paperBase}
           borderColor={config.styling.colors.s1InnerBorder}
@@ -191,5 +249,48 @@ export function VerseGroup({
       })}
 
     </group>
+  );
+}
+
+function GroupFrameBackground({
+  url,
+  x,
+  y,
+  w,
+  h,
+  scaleX = 1,
+  scaleY = 1,
+  offsetX = 0,
+  offsetY = 0,
+}: {
+  url: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  scaleX?: number;
+  scaleY?: number;
+  offsetX?: number;
+  offsetY?: number;
+}) {
+  const tex = useTexture(url, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+
+  return (
+    <mesh
+      position={[x + w / 2 + offsetX, y - h / 2 + offsetY, -0.002]}
+      scale={[scaleX, scaleY, 1]}
+      renderOrder={1}
+    >
+      <planeGeometry args={[w, h]} />
+      <meshBasicMaterial
+        map={tex}
+        transparent
+        depthTest={false}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
   );
 }

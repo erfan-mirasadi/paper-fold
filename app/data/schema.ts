@@ -102,12 +102,18 @@ export interface VerseBlockConfig {
   customGap?: number;
   pushDown?: number;
   rightColXOffset?: number;
+  leftColXOffset?: number;
   topLabelConfig?: {
     width?: number;
     height?: number;
     yOffset?: number;
     textOffsetY?: number;
   };
+  backgroundTexture?: string;
+  backgroundScaleX?: number;
+  backgroundScaleY?: number;
+  backgroundOffsetX?: number;
+  backgroundOffsetY?: number;
 }
 
 export interface CameraTargetConfig {
@@ -309,6 +315,12 @@ export interface GroupTransforms {
     textOffsetY?: number;
   };
   rightColXOffset?: number;
+  leftColXOffset?: number;
+  backgroundTexture?: string;
+  backgroundScaleX?: number;
+  backgroundScaleY?: number;
+  backgroundOffsetX?: number;
+  backgroundOffsetY?: number;
 }
 
 export interface SectionTransforms {

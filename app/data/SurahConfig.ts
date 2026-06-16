@@ -100,6 +100,7 @@ export interface AlakLayoutParams {
   curveInnerInwardOffset?: number;
   innerCurveGapDiff?: number;
   curveInwardOffset?: number;
+  curveGap?: number | number[];
   curveDeepOffsetOuter?: number;
   curveDeepOffsetInner?: number;
   rightCurveAnchorsLeft?: number[];
@@ -125,14 +126,22 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   specialVerses: {
     middleFoldVerses: { left: [12, 14], right: [11, 13] },
     versePairings: {
-      1: 2, 2: 1,
-      3: 4, 4: 3,
-      7: 8, 8: 7,
-      9: 10, 10: 9,
-      11: 12, 12: 11,
-      13: 14, 14: 13,
-      15: 16, 16: 15,
-      17: 18, 18: 17,
+      1: 2,
+      2: 1,
+      3: 4,
+      4: 3,
+      7: 8,
+      8: 7,
+      9: 10,
+      10: 9,
+      11: 12,
+      12: 11,
+      13: 14,
+      14: 13,
+      15: 16,
+      16: 15,
+      17: 18,
+      18: 17,
     },
   },
   introMedia: {
@@ -375,10 +384,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
        * Index 3   = center bracket (green).
        */
       curveColors: [
-        { color: BLUE_THEME,   fillColor: CAPSULE_BG_6_19 },
+        { color: BLUE_THEME, fillColor: CAPSULE_BG_6_19 },
         { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
         { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
-        { color: GREEN_THEME,  fillColor: CAPSULE_BG_12_14 },
+        { color: GREEN_THEME, fillColor: CAPSULE_BG_12_14 },
       ],
     },
     capsuleBorderWidth: 0.0039,
@@ -660,8 +669,9 @@ export function createLayoutMath(
   // groupRows[i] specifies how many rows of capsules group i contains.
   // Any group not listed in groupRows defaults to 2 rows (backward-compat).
   const numGroups = p.groupRows ? p.groupRows.length : 3;
-  const dynamicGroupHeights: number[] = Array.from({ length: numGroups }, (_, i) =>
-    getGroupH(p.groupRows?.[i] ?? 2)
+  const dynamicGroupHeights: number[] = Array.from(
+    { length: numGroups },
+    (_, i) => getGroupH(p.groupRows?.[i] ?? 2),
   );
 
   // Legacy aliases kept for backward-compatibility with Alak / Ayat al-Kursi.
@@ -682,11 +692,11 @@ export function createLayoutMath(
   const s2H = hasIntroOutro
     ? p.s2VerticalPad * 2 +
       p.bigBoxH * 2 +
-      p.groupGap * (interGroupGaps + 2) +   // gaps between groups + 2 flanking
+      p.groupGap * (interGroupGaps + 2) + // gaps between groups + 2 flanking
       totalGroupsH +
       p.middleExtraGap * 2
     : p.s2VerticalPad * 2 +
-      p.groupGap * interGroupGaps +         // gaps *between* groups
+      p.groupGap * interGroupGaps + // gaps *between* groups
       totalGroupsH +
       p.middleExtraGap * 2;
 
@@ -698,32 +708,37 @@ export function createLayoutMath(
   //   hasS1 === true  → Alak path (identical to original formula)
   //   hasS1 === false → center the block vertically on the paper
   const s2Top = hasS1
-    ? p.s1Top - s1H - p.gapBetweenS1andS2   // Alak: unchanged
-    // Ayat al-Kursi / Ahzab: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
-    // Shift up by s2H/2 so the block straddles that center symmetrically.
-    : -(config.dimensions.paperHeight / 2) + (s2H / 2) + config.dimensions.sceneCenterYOffset;
+    ? p.s1Top - s1H - p.gapBetweenS1andS2 // Alak: unchanged
+    : // Ayat al-Kursi / Ahzab: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
+      // Shift up by s2H/2 so the block straddles that center symmetrically.
+      -(config.dimensions.paperHeight / 2) +
+      s2H / 2 +
+      config.dimensions.sceneCenterYOffset;
 
   // --- Element Y Positions ---
   // v6Y marks the intro-verse top; when there is no intro verse the groups
   // start immediately after s2VerticalPad (same anchor, no bigBoxH shift).
   const v6Y = s2Top - p.s2VerticalPad;
   const baseG1Y = hasIntroOutro
-    ? v6Y - p.bigBoxH - p.groupGap          // Alak: identical to original
-    : v6Y;                                   // Ayat al-Kursi / Ahzab: groups slide up
+    ? v6Y - p.bigBoxH - p.groupGap // Alak: identical to original
+    : v6Y; // Ayat al-Kursi / Ahzab: groups slide up
 
   // Build all group Y positions dynamically.
   // groupYPositions[0] = baseG1Y; each subsequent group steps down by the
   // previous group's height + the inter-group gap (with middleExtraGap).
   const dynamicGroupYPositions: number[] = [];
   dynamicGroupYPositions[0] = baseG1Y;
-  const s2Config = config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined;
+  const s2Config = config.sections.find((s) => s.type === "verticalGroups") as
+    | VerticalGroupsSectionConfig
+    | undefined;
   const s2Groups = s2Config?.groups ?? [];
   for (let i = 1; i < numGroups; i++) {
     const pushDown = s2Groups[i]?.pushDown ?? 0;
     dynamicGroupYPositions[i] =
       dynamicGroupYPositions[i - 1] -
       dynamicGroupHeights[i - 1] -
-      (p.groupGap + p.middleExtraGap) - pushDown;
+      (p.groupGap + p.middleExtraGap) -
+      pushDown;
   }
 
   // Allow independent vertical shifting for the very first group
@@ -741,7 +756,7 @@ export function createLayoutMath(
   const lastGroupH = dynamicGroupHeights[numGroups - 1] ?? g0H;
   const baseV19Y = hasIntroOutro
     ? lastGroupY - lastGroupH - p.groupGap
-    : lastGroupY - lastGroupH;            // not rendered; safe sentinel
+    : lastGroupY - lastGroupH; // not rendered; safe sentinel
 
   return {
     PAGE_WIDTH,
@@ -776,9 +791,21 @@ export function createLayoutMath(
     groupH,
     s2H,
 
-    s2BackgroundTexture: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundTexture,
-    s2BackgroundScaleX: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleX,
-    s2BackgroundScaleY: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleY,
+    s2BackgroundTexture: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundTexture,
+    s2BackgroundScaleX: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundScaleX,
+    s2BackgroundScaleY: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundScaleY,
 
     v6Y,
     g1Y: baseG1Y,
@@ -789,7 +816,8 @@ export function createLayoutMath(
     baseG3Y,
 
     groupInnerW: CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2,
-    groupInnerHalfW: (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
+    groupInnerHalfW:
+      (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
 
     s2PadLeftRight: p.s2PadLeftRight,
     s2VerticalRowGap: p.s2VerticalRowGap ?? p.s2Gap,
@@ -812,6 +840,7 @@ export function createLayoutMath(
     curveInnerInwardOffset: p.curveInnerInwardOffset,
     innerCurveGapDiff: p.innerCurveGapDiff,
     curveInwardOffset: p.curveInwardOffset,
+    curveGap: p.curveGap,
     curveDeepOffsetOuter: p.curveDeepOffsetOuter,
     curveDeepOffsetInner: p.curveDeepOffsetInner,
     rightCurveAnchorsLeft: p.rightCurveAnchorsLeft,
@@ -819,7 +848,7 @@ export function createLayoutMath(
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
     // fields are non-number. We use an explicit return type instead.
-    hasIntroOutro,                              // boolean
+    hasIntroOutro, // boolean
     // Fully dynamic — length matches the actual number of groups defined.
     groupYPositions: dynamicGroupYPositions as number[],
     groupHeights: dynamicGroupHeights as number[],
@@ -940,7 +969,8 @@ export function buildSurahTransforms(
       const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
         const groupY = groupYPositions[gIdx];
         const isPushedIn = group.isPushedIn ?? false;
-        const shrinkAmount = group.customShrink ?? (isPushedIn ? lm.g2Shrink : lm.outerShrink);
+        const shrinkAmount =
+          group.customShrink ?? (isPushedIn ? lm.g2Shrink : lm.outerShrink);
         const groupGapAmount = group.customGap ?? lm.s2Gap;
         const gInnerW = s2InnerW - shrinkAmount * 2;
         const gBaseX = s2BaseX + shrinkAmount;
@@ -948,6 +978,7 @@ export function buildSurahTransforms(
         const gHalfW = (gInnerW - lm.groupPad * 2 - groupGapAmount) / 2;
         const extraRowGap = group.extraRowGap ?? 0;
         const rightColXOffset = group.rightColXOffset ?? 0;
+        const leftColXOffset = group.leftColXOffset ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
         group.verseIds.forEach((verseId, i) => {
@@ -957,7 +988,10 @@ export function buildSurahTransforms(
           const rowOffset =
             rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
           verses[verseId] = {
-            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + groupGapAmount + rightColXOffset : 0),
+            x:
+              gBaseX +
+              lm.groupPad +
+              (isRightCol ? gHalfW + groupGapAmount + rightColXOffset : leftColXOffset),
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
             w: gHalfW,
@@ -997,6 +1031,12 @@ export function buildSurahTransforms(
           rowConnectors,
           topLabelConfig: group.topLabelConfig,
           rightColXOffset,
+          leftColXOffset,
+          backgroundTexture: group.backgroundTexture,
+          backgroundScaleX: group.backgroundScaleX,
+          backgroundScaleY: group.backgroundScaleY,
+          backgroundOffsetX: group.backgroundOffsetX,
+          backgroundOffsetY: group.backgroundOffsetY,
         };
       });
 
@@ -1025,8 +1065,8 @@ export function buildSurahTransforms(
         const bBox_Y = lm.g3Y + lm.boxExtOffset;
         const bBox_H = outerSectionH;
 
-        sectionTransform.topConnectorY    = tBox_Y;
-        sectionTransform.topConnectorH    = tBox_H;
+        sectionTransform.topConnectorY = tBox_Y;
+        sectionTransform.topConnectorH = tBox_H;
         sectionTransform.bottomConnectorY = bBox_Y;
         sectionTransform.bottomConnectorH = bBox_H;
         sectionTransform.introVerse = {
