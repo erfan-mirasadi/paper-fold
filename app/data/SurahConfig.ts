@@ -92,6 +92,11 @@ export interface AlakLayoutParams {
   groupRows?: number[];
   s2VerticalRowGap?: number;
   outerScale?: number;
+  curvePad?: number;
+  outerCurveXOffset?: number;
+  centerCurveXOffset?: number;
+  g2Shrink?: number;
+  outerShrink?: number;
 }
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
@@ -747,6 +752,7 @@ export function createLayoutMath(
     : lastGroupY - lastGroupH; // not rendered; safe sentinel
 
   return {
+    id: config.id,
     PAGE_WIDTH,
     PAGE_HEIGHT: config.dimensions.paperHeight,
     PW,
@@ -778,6 +784,7 @@ export function createLayoutMath(
     smallBoxH2: p.smallBoxH2,
     g2Scale: p.g2Scale,
     outerScale: p.outerScale ?? 0,
+    curvePad: p.curvePad,
     groupH,
     s2H,
 
@@ -950,11 +957,12 @@ export function buildSurahTransforms(
         const isPushedIn = group.isPushedIn ?? false;
         const scaleAmount =
           group.customScale ?? (isPushedIn ? lm.g2Scale : lm.outerScale);
-        const groupGapAmount = group.customGap ?? lm.s2Gap;
+        const groupGapAmount = group.xGap ?? lm.s2Gap;
         const gInnerW = s2InnerW - scaleAmount * 2;
         const gBaseX = s2BaseX + scaleAmount;
 
-        const gHalfW = (gInnerW - lm.groupPad * 2 - groupGapAmount) / 2;
+        const standardGHalfW = (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2;
+        const centerX = gBaseX + gInnerW / 2;
         const extraRowGap = group.extraRowGap ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
@@ -964,14 +972,16 @@ export function buildSurahTransforms(
           const rowIndex = Math.floor(i / 2);
           const rowOffset =
             rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
+            
+          const verseX = isRightCol 
+            ? centerX + groupGapAmount / 2 
+            : centerX - groupGapAmount / 2 - standardGHalfW;
+
           verses[verseId] = {
-            x:
-              gBaseX +
-              lm.groupPad +
-              (isRightCol ? gHalfW + groupGapAmount : 0),
+            x: verseX,
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
-            w: gHalfW,
+            w: standardGHalfW,
             h: lm.smallBoxH2,
           };
         });

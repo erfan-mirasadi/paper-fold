@@ -14,7 +14,7 @@ import {
   S2_FRAME_IMAGE,
 } from "../../../data/theme";
 import type { SectionTwoData, LayoutConfig } from "../../../data/SurahConfig";
-import { SectionTransforms } from "../../../data/schema";
+import { SectionTransforms, GroupTransforms } from "../../../data/schema";
 import { S2_LABEL_WIDTH, S2_LABEL_Y_OFFSET } from "../../../data/SurahConfig";
 import { useStoryStore } from "../../../stores/useStoryStore";
 
@@ -299,6 +299,10 @@ export function SectionTwo({
         hasIntroOutro={layout.hasIntroOutro}
       />
 
+      {/* ─── SVG OVERLAYS (config-driven, per-surah) ─────────────────────── */}
+      <SvgOverlays startX={startX} layout={layout} groups={groups} />
+
+
       {/* ─── SECTION LABELS ──────────────────────────────────────────────── */}
       {/*
         IMPORTANT NOTE ON SYMMETRY:
@@ -374,5 +378,94 @@ function DynamicBackground({
         toneMapped={false}
       />
     </mesh>
+  );
+}
+
+// ─── GENERIC SVG OVERLAY COMPONENT ──────────────────────────────────────────
+// Reads config.svgOverlays and renders each item anchored to its group.
+// Supports any surah — just define svgOverlays[] in the SurahLayoutConfig.
+
+function SingleSvgOverlay({
+  src,
+  posX,
+  posY,
+  scaleX,
+  scaleY,
+  rotationZ,
+  renderOrder,
+}: {
+  src: string;
+  posX: number;
+  posY: number;
+  scaleX: number;
+  scaleY: number;
+  rotationZ: number;
+  renderOrder: number;
+}) {
+  const tex = useTexture(src, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+  return (
+    <mesh
+      position={[posX, posY, -0.0001]}
+      scale={[scaleX, scaleY, 1]}
+      rotation={[0, 0, rotationZ]}
+      renderOrder={renderOrder}
+    >
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial
+        map={tex}
+        transparent
+        depthTest={false}
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+function SvgOverlays({
+  startX,
+  layout,
+  groups,
+}: {
+  startX: number;
+  layout: LayoutConfig;
+  groups: GroupTransforms[];
+}) {
+  const config = useStoryStore((state) => state.activeConfig);
+  const overlays = config.svgOverlays;
+
+  if (!overlays || overlays.length === 0) return null;
+
+  const centerX = startX + layout.sectionW / 2;
+
+  return (
+    <group>
+      {overlays.map((item, i) => {
+        // Resolve Y anchor
+        let anchorY = layout.s2Top - layout.s2H / 2; // fallback: section center
+        const g = groups[item.anchorGroupIndex ?? -1];
+        if (g) {
+          const edge = item.anchorEdge ?? "center";
+          if (edge === "top") anchorY = g.frameY;
+          else if (edge === "bottom") anchorY = g.frameY - g.frameH;
+          else anchorY = g.frameY - g.frameH / 2; // center
+        }
+
+        return (
+          <SingleSvgOverlay
+            key={i}
+            src={item.src}
+            posX={centerX + (item.offsetX ?? 0)}
+            posY={anchorY + (item.offsetY ?? 0)}
+            scaleX={item.scaleX ?? 1}
+            scaleY={item.scaleY ?? 1}
+            rotationZ={item.rotationZ ?? 0}
+            renderOrder={item.renderOrder ?? 3}
+          />
+        );
+      })}
+    </group>
   );
 }

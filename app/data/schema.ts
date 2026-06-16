@@ -107,7 +107,7 @@ export interface VerseBlockConfig {
   extraRowGap?: number;
   bgThemeKey?: keyof ThemeColors;
   customScale?: number;
-  customGap?: number;
+  xGap?: number;
   pushDown?: number;
   topLabelConfig?: {
     width?: number;
@@ -197,6 +197,31 @@ export interface SurahAssets {
   metallicVerseBorderSvg?: string;
 }
 
+// ---------------------------------------------------------------------------
+// SVG OVERLAY CONFIG — per-surah decorative SVG planes
+// ---------------------------------------------------------------------------
+
+export interface SvgOverlayItem {
+  /** Path to the SVG asset (relative to /public) */
+  src: string;
+  /** Which group index to anchor this overlay on (0-based). When not provided, anchors to the whole section center. */
+  anchorGroupIndex?: number;
+  /** Which edge of the anchor group to align to: 'top' | 'bottom' | 'center' */
+  anchorEdge?: "top" | "bottom" | "center";
+  /** Scale in X direction (world units per unit plane). Negative = flip horizontal. */
+  scaleX?: number;
+  /** Scale in Y direction (world units per unit plane). Negative = flip vertical. */
+  scaleY?: number;
+  /** Additional X offset in world units, applied after anchoring */
+  offsetX?: number;
+  /** Additional Y offset in world units, applied after anchoring */
+  offsetY?: number;
+  /** Z rotation in radians */
+  rotationZ?: number;
+  /** Three.js renderOrder (higher = on top). Default 3. */
+  renderOrder?: number;
+}
+
 export interface FoldState {
   direction: -1 | 0 | 1;
   angleFactor: number;
@@ -269,6 +294,8 @@ export interface SurahLayoutConfig<TParams = any> {
   animations: SurahAnimations;
   introMedia?: Record<string, IntroMediaItem>;
   introGuides?: Record<string, string>;
+  /** Optional per-surah SVG overlay planes rendered on top of the section */
+  svgOverlays?: SvgOverlayItem[];
 }
 
 // ----------------------------------------------------------------------------

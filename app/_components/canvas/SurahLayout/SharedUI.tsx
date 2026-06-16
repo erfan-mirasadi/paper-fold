@@ -299,6 +299,7 @@ interface TopLabelProps {
   fontSizeOverride?: number;
   shadow?: boolean;
   textOffsetY?: number;
+  textScaleOverride?: number;
 }
 
 export function TopLabel({
@@ -318,6 +319,7 @@ export function TopLabel({
   fontSizeOverride,
   shadow,
   textOffsetY = 0,
+  textScaleOverride,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
@@ -333,10 +335,10 @@ export function TopLabel({
   const isArabicText = /[\u0600-\u06FF]/.test(text);
   const fontToUse = isArabicText ? QURAN_FONT : LATIN_LABEL_FONT;
   const resolvedFontSize =
-    fontSizeOverride ??
+    (fontSizeOverride ??
     (isArabicText
       ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5
-      : TEXT_SIZES.TOP_LABEL * topLabelScale);
+      : TEXT_SIZES.TOP_LABEL * topLabelScale)) * (textScaleOverride ?? 1);
 
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>

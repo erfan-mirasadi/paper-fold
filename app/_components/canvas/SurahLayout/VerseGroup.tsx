@@ -130,6 +130,7 @@ export function VerseGroup({
           bgColor={config.styling.colors.paperBase}
           borderColor={config.styling.colors.s1InnerBorder}
           renderOrder={20}
+          textScaleOverride={topLabelConfig.textScaleOverride}
         />
       )}
       {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}

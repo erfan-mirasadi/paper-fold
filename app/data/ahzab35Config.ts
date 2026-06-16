@@ -13,7 +13,11 @@
  * curveColors: []         — no side brackets for now.
  */
 
-import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
+import type {
+  SurahLayoutConfig,
+  VerticalGroupsSectionConfig,
+  SvgOverlayItem,
+} from "./schema";
 import type { AlakLayoutParams } from "./SurahConfig";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
@@ -50,7 +54,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   dimensions: {
     paperWidth: 2,
-    paperHeight: 1.6,
+    paperHeight: 1.2,
     sceneCenterYOffset: 0.0,
     padding: 0.3,
     scrollPages: 2,
@@ -264,13 +268,69 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     boxExtOffset: 0.02,
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
-    verseTextScale: 1.5,
+    verseTextScale: 1.25,
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
 
     outerCurveXOffset: 0.004,
     centerCurveXOffset: -0.0015,
   },
+
+  // ---------------------------------------------------------------------------
+  // SVG OVERLAYS — decorative frames anchored to specific groups
+  // anchorGroupIndex: which group (0-based) to align to
+  // anchorEdge: 'top' | 'bottom' | 'center' — which edge of that group
+  // ---------------------------------------------------------------------------
+  svgOverlays: [
+    // ── Top frame  — anchored to Group 0 center
+    {
+      src: "/ahzab/frame-section.svg",
+      anchorGroupIndex: 0,
+      anchorEdge: "center",
+      scaleX: 1.55,
+      scaleY: 0.25,
+      offsetX: 0,
+      offsetY: 0,
+      rotationZ: 0,
+      renderOrder: 3,
+    },
+    // ── Bottom frame — anchored to Group 4 center, flipped Y
+    {
+      src: "/ahzab/frame-section.svg",
+      anchorGroupIndex: 4,
+      anchorEdge: "center",
+      scaleX: 1.55,
+      scaleY: -0.25,
+      offsetX: 0,
+      offsetY: 0.02, // Pulled UP closer to the bottom capsules
+      rotationZ: 0,
+      renderOrder: 3,
+    },
+    // ── Mid left bracket — anchored between Group 1–3, left side
+    {
+      src: "/Group 10.svg",
+      anchorGroupIndex: 2,
+      anchorEdge: "center",
+      scaleX: 0.53, // Taller to close the gaps
+      scaleY: 0.82, // Slightly thicker
+      offsetX: -0.43, // Pushed outward to align with top frame
+      offsetY: 0, // Shifted down to reach the bottom frame
+      rotationZ: Math.PI / 2,
+      renderOrder: 3,
+    },
+    // ── Mid right bracket — same SVG, flipped horizontally
+    {
+      src: "/Group 10.svg",
+      anchorGroupIndex: 2,
+      anchorEdge: "center",
+      scaleX: 0.53,
+      scaleY: -0.82,
+      offsetX: 0.43,
+      offsetY: 0,
+      rotationZ: Math.PI / 2,
+      renderOrder: 3,
+    },
+  ],
 
   sections: [
     {
@@ -286,17 +346,17 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: false,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
-          pushDown: -0.096, // negative value pushes the group UP
+          pushDown: -0.07, // negative value pushes the group UP
         },
         // ── Group 1 — Blue (1 row) ────────────────────────────────────────
         {
           verseIds: [4, 3],
           isPushedIn: false,
-          isCenter: false,
+          isCenter: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
           customScale: -0.07,
-          pushDown: -0.06,
+          pushDown: 0,
         },
         // ── Group 2 — Green / pushed in (2 rows) ─────────────────────────
         {
@@ -304,16 +364,18 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: true,
           isCenter: true,
           extraRowGap: 0.01,
+          xGap: 0.3,
           bgThemeKey: "s2Group3Bg",
         },
         // ── Group 3 — Blue (1 row) ────────────────────────────────────────
         {
           verseIds: [10, 9],
           isPushedIn: false,
-          isCenter: false,
+          isCenter: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
           customScale: -0.07,
+          // pushDown: 0.01,
         },
         // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
         {
@@ -323,12 +385,12 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
           customScale: 0.15,
-          pushDown: 0.15,
+          pushDown: 0.09,
           topLabelConfig: {
             width: 0.25,
-            height: 0.08,
-            yOffset: 0.05,
-            textOffsetY: -0.008,
+            height: 0.05,
+            yOffset: 0.04,
+            textScaleOverride: 0.75,
           },
         },
       ],
