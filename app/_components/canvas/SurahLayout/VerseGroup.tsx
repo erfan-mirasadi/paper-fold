@@ -1,7 +1,7 @@
 "use client";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { VerseBox, UiRect, TopLabel } from "./SharedUI";
+import { VerseBox, UiRect, TopLabel, CapsuleLabel } from "./SharedUI";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
@@ -228,24 +228,50 @@ export function VerseGroup({
         const finalTextScale =
           override?.textScaleOverride ?? finalVerseTextScale;
 
+        const hasTab = override?.hasCapsuleLabel;
+        const customTabText = override?.customCapsuleLabel;
+        const tabPos = override?.capsuleLabelPosition ?? "top";
+
+        const labelW = layout?.capsuleLabelW ?? 0.2;
+        const labelH = layout?.capsuleLabelH ?? 0.032;
+        const labelBorder = layout?.capsuleLabelBorderWidth ?? 0.0035;
+        const labelDrop = layout?.capsuleLabelDrop ?? 0.015;
+
+        const tabX = vt.x + vt.w / 2;
+        const tabY = tabPos === "top" ? vt.y + labelDrop : vt.y - vt.h - labelDrop;
+
         return (
-          <VerseBox
-            key={v.number}
-            x={vt.x}
-            y={vt.y}
-            z={vt.z}
-            w={vt.w}
-            h={vt.h}
-            verse={v.text}
-            number={v.number}
-            bg={finalBg}
-            border={finalBorder}
-            circleBorderCol={finalCircleBorder}
-            circleBg={finalCircleBg}
-            circleTextCol={finalCircleText}
-            isPill={true}
-            textScaleOverride={finalTextScale}
-          />
+          <group key={v.number}>
+            <VerseBox
+              x={vt.x}
+              y={vt.y}
+              z={vt.z}
+              w={vt.w}
+              h={vt.h}
+              verse={v.text}
+              number={v.number}
+              bg={finalBg}
+              border={finalBorder}
+              circleBorderCol={finalCircleBorder}
+              circleBg={finalCircleBg}
+              circleTextCol={finalCircleText}
+              isPill={true}
+              textScaleOverride={finalTextScale}
+            />
+            {hasTab && (
+              <CapsuleLabel
+                x={tabX}
+                y={tabY}
+                w={labelW}
+                h={labelH}
+                z={vt.z + 0.004}
+                borderWidth={labelBorder}
+                renderOrder={110}
+                customText={customTabText}
+                labelScale={0.85}
+              />
+            )}
+          </group>
         );
       })}
 

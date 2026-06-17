@@ -35,7 +35,7 @@ export interface VerseConfig {
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
   frameScaleLTR?: number;
-  anaAyetTab?: {
+  capsuleLabel?: {
     x: number;
     y: number;
     w: number;
@@ -135,19 +135,19 @@ export function buildVerseConfigs(
           hingeX = rawTransform.x - PAGE_WIDTH / 2 - expandW;
         }
 
-        // --- AnaAyetTab: only generated when the override declares it and the
-        //     section transforms supply the tab dimensions ---
-        const anaAyetTab =
+        // --- CapsuleLabel: only generated when the override declares it and the
+        // layout provides its dimensions.
+        const capsuleLabel =
           !isGridVerse &&
-          override?.hasAnaAyetTab &&
-          transforms.anaAyetTabW != null
+          override?.hasCapsuleLabel &&
+          transforms.capsuleLabelW != null
             ? {
-                x: transforms.anaAyetTabX! - (rawTransform.x - expandW),
-                y: transforms.anaAyetTabY! - (rawTransform.y + expandH),
-                w: transforms.anaAyetTabW!,
-                h: transforms.anaAyetTabH!,
-                borderWidth: transforms.anaAyetTabBorderWidth!,
-                labelDrop: transforms.anaAyetLabelDrop,
+                x: transforms.capsuleLabelX! - (rawTransform.x - expandW),
+                y: transforms.capsuleLabelY! - (rawTransform.y + expandH),
+                w: transforms.capsuleLabelW!,
+                h: transforms.capsuleLabelH!,
+                borderWidth: transforms.capsuleLabelBorderWidth!,
+                labelDrop: transforms.capsuleLabelDrop,
               }
             : undefined;
 
@@ -170,7 +170,7 @@ export function buildVerseConfigs(
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
           frameScaleLTR: override?.frameScaleLTR,
-          anaAyetTab,
+          capsuleLabel,
         });
       }
     } else if (sectionConfig.type === "verticalGroups") {

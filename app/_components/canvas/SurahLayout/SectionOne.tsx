@@ -1,5 +1,5 @@
 "use client";
-import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
+import { TopLabel, UiRect, VerseBox, CapsuleLabel } from "./SharedUI";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -198,7 +198,6 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
   const BW = 0.0055; // border width matching VerseMesh.bw
   const SVG_WIDTH_SCALE = 0.8;
   const SVG_HEIGHT_SCALE = 0.93;
-  const ANA_LABEL_PIN_OVERLAP = 0.0015;
 
   return (
     <group>
@@ -328,11 +327,12 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         // SVG frame overlay (generic — any verse with a customFrameSvg gets one)
         const svgUrl = override?.customFrameSvg;
 
-        // AnaAyetTab (generic — any verse with hasAnaAyetTab: true in its override)
-        const hasTab = override?.hasAnaAyetTab && t.anaAyetTabW != null;
-        const labelW = t.anaAyetTabW ?? 0;
-        const labelH = t.anaAyetTabH ?? 0;
-        const labelDrop = t.anaAyetLabelDrop ?? 0.015;
+        // CapsuleLabel (generic — any verse with hasCapsuleLabel: true in its override)
+        const hasCapsuleLabel = override?.hasCapsuleLabel;
+        const customTabText = override?.customCapsuleLabel;
+
+        const labelW = t.capsuleLabelW ?? 0.2;
+        const labelH = t.capsuleLabelH ?? 0.032;
 
         return (
           <group key={actualVerseId}>
@@ -375,16 +375,17 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
               );
             })()}
 
-            {/* Generic AnaAyetTab — rendered for any verse with hasAnaAyetTab: true */}
-            {hasTab && (
-              <AnaAyetTab
-                x={t.anaAyetTabX!}
-                y={t.anaAyetTabY!}
+            {/* Generic CapsuleLabel — rendered for any verse with hasCapsuleLabel: true */}
+            {hasCapsuleLabel && (
+              <CapsuleLabel
+                x={t.capsuleLabelX!}
+                y={t.capsuleLabelY!}
                 w={labelW}
                 h={labelH}
-                z={rawT.z + 0.004}
-                borderWidth={t.anaAyetTabBorderWidth}
-                renderOrder={110}
+                z={0.002}
+                borderWidth={t.capsuleLabelBorderWidth!}
+                renderOrder={100}
+                customText={customTabText}
               />
             )}
           </group>

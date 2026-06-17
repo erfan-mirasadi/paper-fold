@@ -79,10 +79,10 @@ export interface AlakLayoutParams {
   s2PadLeftRight: number;
   g2Scale: number;
   s1BorderWidth: number;
-  anaAyetTabW: number;
-  anaAyetTabH: number;
-  anaAyetTabBorderWidth: number;
-  anaAyetLabelDrop: number;
+  capsuleLabelW: number;
+  capsuleLabelH: number;
+  capsuleLabelBorderWidth: number;
+  capsuleLabelDrop: number;
   sgPad: number;
   sgBorderWidth: number;
   boxExtOffset: number;
@@ -238,7 +238,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: CAPSULE_BG_6_19,
       circleTextCol: S1_VERSE_NUMBER_TEXT,
       textColor: S1_VERSE_5_TEXT,
-      hasAnaAyetTab: true,
+      hasCapsuleLabel: true,
     },
     // ── Section 2 intro verse (6) ─────────────────────────────────────────
     6: {
@@ -428,10 +428,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     s2PadLeftRight: 0.035,
     g2Scale: 0.01,
     s1BorderWidth: 0,
-    anaAyetTabW: 0.2,
-    anaAyetTabH: 0.032,
-    anaAyetTabBorderWidth: 0.0035,
-    anaAyetLabelDrop: 0.015,
+    capsuleLabelW: 0.2,
+    capsuleLabelH: 0.032,
+    capsuleLabelBorderWidth: 0.0035,
+    capsuleLabelDrop: 0.015,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
     boxExtOffset: 0.02,
@@ -821,10 +821,10 @@ export function createLayoutMath(
     g2Shrink: p.g2Shrink,
     outerShrink: p.outerShrink ?? 0,
     s1BorderWidth: p.s1BorderWidth,
-    anaAyetTabW: p.anaAyetTabW,
-    anaAyetTabH: p.anaAyetTabH,
-    anaAyetTabBorderWidth: p.anaAyetTabBorderWidth,
-    anaAyetLabelDrop: p.anaAyetLabelDrop,
+    capsuleLabelW: p.capsuleLabelW,
+    capsuleLabelH: p.capsuleLabelH,
+    capsuleLabelBorderWidth: p.capsuleLabelBorderWidth,
+    capsuleLabelDrop: p.capsuleLabelDrop,
     sgPad: p.sgPad,
     sgBorderWidth: p.sgBorderWidth,
     boxExtOffset: p.boxExtOffset,
@@ -926,12 +926,12 @@ export function buildSurahTransforms(
           w: lm.innerW,
           h: lm.anaAyetH,
         },
-        anaAyetTabX: s1BaseX + lm.innerW / 2,
-        anaAyetTabY: anaAyetY + 0.015,
-        anaAyetTabW: lm.anaAyetTabW,
-        anaAyetTabH: lm.anaAyetTabH,
-        anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
-        anaAyetLabelDrop: lm.anaAyetLabelDrop,
+        capsuleLabelX: s1BaseX + lm.innerW / 2,
+        capsuleLabelY: anaAyetY + 0.015,
+        capsuleLabelW: lm.capsuleLabelW,
+        capsuleLabelH: lm.capsuleLabelH,
+        capsuleLabelBorderWidth: lm.capsuleLabelBorderWidth,
+        capsuleLabelDrop: lm.capsuleLabelDrop,
         borderWidth: lm.s1BorderWidth,
         labelPinY: lm.s1Top,
       });

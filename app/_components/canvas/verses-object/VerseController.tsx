@@ -300,7 +300,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
           customFrameSvg={config.customFrameSvg}
           frameScaleLTR={config.frameScaleLTR}
-          anaAyetTab={config.anaAyetTab}
+          capsuleLabel={config.capsuleLabel}
         />
       </a.group>
     </group>

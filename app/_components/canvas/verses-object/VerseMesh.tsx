@@ -10,7 +10,7 @@ import {
 import {
   VerseBox,
   RoundedShapeComponent,
-  AnaAyetTab,
+  CapsuleLabel,
 } from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
 import {
@@ -55,7 +55,7 @@ export interface VerseMeshProps {
   shadowRenderOrder?: number;
   customFrameSvg?: string;
   frameScaleLTR?: number;
-  anaAyetTab?: {
+  capsuleLabel?: {
     x: number;
     y: number;
     w: number;
@@ -145,7 +145,7 @@ export function VerseMesh({
   shadowRenderOrder,
   customFrameSvg,
   frameScaleLTR,
-  anaAyetTab,
+  capsuleLabel,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
@@ -407,13 +407,13 @@ export function VerseMesh({
                   </mesh>
                 </group>
 
-                {/* AnaAyetTab – inside the fold transform hierarchy */}
-                {anaAyetTab &&
+                {/* CapsuleLabel – inside the fold transform hierarchy */}
+                {capsuleLabel &&
                   (() => {
-                    const labelW = anaAyetTab.w;
-                    const labelH = anaAyetTab.h;
+                    const labelW = capsuleLabel.w;
+                    const labelH = capsuleLabel.h;
                     const ANA_LABEL_PIN_OVERLAP = 0.0015;
-                    const labelDrop = anaAyetTab.labelDrop ?? 0.015;
+                    const labelDrop = capsuleLabel.labelDrop ?? 0.015;
 
                     // Use the exact config coordinates passed by surahDataGenerator.
                     // The tab is a sibling to the brick group (not a child), so it does
@@ -421,15 +421,15 @@ export function VerseMesh({
                     // relative coordinates calculated in the generator perfectly.
                     return (
                       <group
-                        position={[anaAyetTab.x, anaAyetTab.y, 0.01 + 0.0025]}
+                        position={[capsuleLabel.x, capsuleLabel.y, 0.01 + 0.0025]}
                       >
-                        <AnaAyetTab
+                        <CapsuleLabel
                           x={0}
                           y={0}
                           w={labelW}
                           h={labelH}
                           z={0}
-                          borderWidth={anaAyetTab.borderWidth}
+                          borderWidth={capsuleLabel.borderWidth}
                           renderOrder={110}
                         />
                       </group>

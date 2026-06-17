@@ -391,7 +391,7 @@ export function TopLabel({
 }
 
 // ANA AYET TAB
-interface AnaAyetTabProps {
+interface CapsuleLabelProps {
   x: number;
   y: number;
   w: number;
@@ -400,8 +400,10 @@ interface AnaAyetTabProps {
   borderWidth?: number;
   renderOrder?: number;
   depthTest?: boolean;
+  customText?: string;
+  labelScale?: number;
 }
-export function AnaAyetTab({
+export function CapsuleLabel({
   x,
   y,
   w,
@@ -410,10 +412,12 @@ export function AnaAyetTab({
   borderWidth,
   renderOrder,
   depthTest = false,
-}: AnaAyetTabProps) {
+  customText,
+  labelScale = 1,
+}: CapsuleLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
-  const anaAyetScale = LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet;
+  const labelText = customText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
+  const capsuleLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   const radius = h / 2;
   const borderThickness = borderWidth ?? 0.004;
@@ -450,7 +454,7 @@ export function AnaAyetTab({
         <CanvasText
           text={labelText}
           font={LATIN_LABEL_FONT}
-          fontSize={TEXT_SIZES.ANA_AYET_TAB * anaAyetScale}
+          fontSize={TEXT_SIZES.CAPSULE_LABEL * capsuleLabelScale * labelScale}
           color={S1_ANA_LABEL_TEXT}
           width={w}
           height={h}

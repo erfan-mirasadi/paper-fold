@@ -89,7 +89,7 @@ export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
 export const TEXT_SIZES = {
   BISMILLAH: 0.066,
   TOP_LABEL: 0.027,
-  ANA_AYET_TAB: 0.027, // Increased from 0.023 to match TOP_LABEL size
+  CAPSULE_LABEL: 0.027, // Increased from 0.023 to match TOP_LABEL size
   VERSE_NUMBER: 0.028,
   VERSE_TEXT_SMALL: 0.038,
   VERSE_TEXT_BIG: 0.071,
@@ -102,21 +102,21 @@ export const LANGUAGE_TEXT_SCALE = {
     verseSmall: 1,
     verseBig: 1.05,
     topLabel: 1,
-    anaAyet: 1,
+    capsuleLabel: 1,
     labelWidth: 1,
   },
   en: {
     verseSmall: 0.67,
     verseBig: 0.5,
     topLabel: 1,
-    anaAyet: 1,
+    capsuleLabel: 1,
     labelWidth: 1.35,
   },
   tr: {
     verseSmall: 0.67,
     verseBig: 0.49,
     topLabel: 1,
-    anaAyet: 1,
+    capsuleLabel: 1,
     labelWidth: 1.35,
   },
 } as const;

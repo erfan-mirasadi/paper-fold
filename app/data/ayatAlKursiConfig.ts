@@ -201,10 +201,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     s1BorderWidth: 0,
 
     // --- Misc (carried over from Alak; not material for this layout) ---
-    anaAyetTabW: 0.2,
-    anaAyetTabH: 0.032,
-    anaAyetTabBorderWidth: 0.0035,
-    anaAyetLabelDrop: 0.015,
+    capsuleLabelW: 0.2,
+    capsuleLabelH: 0.032,
+    capsuleLabelBorderWidth: 0.0035,
+    capsuleLabelDrop: 0.015,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
     boxExtOffset: 0.02,

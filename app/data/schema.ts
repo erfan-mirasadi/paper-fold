@@ -94,7 +94,7 @@ export interface VerseBlockConfig {
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
-  anaAyetTab?: {
+  capsuleLabel?: {
     x: number;
     y: number;
     w: number;
@@ -187,8 +187,12 @@ export interface VerseOverrideConfig {
   circleTextCol?: string;
   /** Explicit hex color for the Arabic and Latin verse text */
   textColor?: string;
-  /** When true, an AnaAyetTab label is rendered above this verse in section and mesh views */
-  hasAnaAyetTab?: boolean;
+  /** When true, a CapsuleLabel is rendered above this verse in section and mesh views */
+  hasCapsuleLabel?: boolean;
+  /** Optional custom text to display in the CapsuleLabel instead of the default 'Ana Ayet' */
+  customCapsuleLabel?: string;
+  /** Position of the CapsuleLabel: 'top' (default) or 'bottom' */
+  capsuleLabelPosition?: "top" | "bottom";
   /** Override the verse text scale for this specific verse. */
   textScaleOverride?: number;
 }
@@ -371,12 +375,12 @@ export interface SectionTransforms {
   verses?: Record<number, ElementTransform>;
   rowConnectors?: RowConnectorTransform[];
   anaAyet?: ElementTransform;
-  anaAyetTabX?: number;
-  anaAyetTabY?: number;
-  anaAyetTabW?: number;
-  anaAyetTabH?: number;
-  anaAyetTabBorderWidth?: number;
-  anaAyetLabelDrop?: number;
+  capsuleLabelX?: number;
+  capsuleLabelY?: number;
+  capsuleLabelW?: number;
+  capsuleLabelH?: number;
+  capsuleLabelBorderWidth?: number;
+  capsuleLabelDrop?: number;
   labelPinY?: number;
   introVerse?: ElementTransform;
   outroVerse?: ElementTransform;

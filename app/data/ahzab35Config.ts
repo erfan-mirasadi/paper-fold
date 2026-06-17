@@ -96,6 +96,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
+      hasCapsuleLabel: true,
+      customCapsuleLabel: "İman",
+      capsuleLabelPosition: "top",
     },
     // ── Group 1 — Blue ───────────────────────────────────────────────────
     3: {
@@ -111,6 +114,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: BLUE_BG,
       circleBorderCol: BLUE_BORDER,
       circleTextCol: BLUE_BORDER,
+      hasCapsuleLabel: true,
+      customCapsuleLabel: "Zekat",
+      capsuleLabelPosition: "top",
     },
     // ── Group 2 — Green (pushed in) ──────────────────────────────────────
     5: {
@@ -126,6 +132,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
+      hasCapsuleLabel: true,
+      customCapsuleLabel: "İçki yasak",
+      capsuleLabelPosition: "top",
     },
     7: {
       bg: GREEN_BG,
@@ -140,6 +149,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
+      hasCapsuleLabel: true,
+      customCapsuleLabel: "Zina yasak",
+      capsuleLabelPosition: "bottom",
     },
     // ── Group 3 — Blue ───────────────────────────────────────────────────
     9: {
@@ -155,6 +167,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: BLUE_BG,
       circleBorderCol: BLUE_BORDER,
       circleTextCol: BLUE_BORDER,
+      hasCapsuleLabel: true,
+      customCapsuleLabel: "Namaz",
+      capsuleLabelPosition: "bottom",
     },
     // ── Group 4 — Yellow (dome text, compact) ───────────────────────────
     11: {
@@ -259,10 +274,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     s1BorderWidth: 0,
 
     // --- Misc ---
-    anaAyetTabW: 0.2,
-    anaAyetTabH: 0.032,
-    anaAyetTabBorderWidth: 0.0035,
-    anaAyetLabelDrop: 0.015,
+    capsuleLabelW: 0.16,
+    capsuleLabelH: 0.024,
+    capsuleLabelBorderWidth: 0.0035,
+    capsuleLabelDrop: 0.015,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
     boxExtOffset: 0.02,
