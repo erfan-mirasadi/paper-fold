@@ -305,33 +305,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   // anchorEdge: 'top' | 'bottom' | 'center' — which edge of that group
   // ---------------------------------------------------------------------------
   svgOverlays: [
-    // ── Top frame  — anchored to Group 0 center
-    {
-      src: "/ahzab/frame-section.svg",
-      anchorGroupIndex: 0,
-      anchorEdge: "center",
-      scaleX: 1.55,
-      scaleY: 0.25,
-      offsetX: 0,
-      offsetY: 0,
-      rotationZ: 0,
-      renderOrder: 3,
-    },
-    // ── Bottom frame — anchored to Group 4 center, flipped Y
-    {
-      src: "/ahzab/frame-section.svg",
-      anchorGroupIndex: 4,
-      anchorEdge: "center",
-      scaleX: 1.55,
-      scaleY: -0.25,
-      offsetX: 0,
-      offsetY: 0.02, // Pulled UP closer to the bottom capsules
-      rotationZ: 0,
-      renderOrder: 3,
-    },
     // ── Mid left bracket — anchored between Group 1–3, left side
     {
-      src: "/Group 10.svg",
+      src: "/ahzab/middle-section.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
       scaleX: 0.53, // Taller to close the gaps
@@ -343,7 +319,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
     // ── Mid right bracket — same SVG, flipped horizontally
     {
-      src: "/Group 10.svg",
+      src: "/ahzab/middle-section.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
       scaleX: 0.53,
@@ -359,6 +335,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     {
       id: "section2",
       type: "verticalGroups",
+      backgroundTexture: "/ayatalkursi/frame-section-1.svg",
+      backgroundScaleX: 1.25,
+      backgroundScaleY: 1.35,
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
       groups: [
