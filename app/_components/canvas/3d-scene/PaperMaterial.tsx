@@ -1,14 +1,19 @@
 "use client";
-import { memo, useEffect, useRef, useState, type FC } from "react";
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import {
   OrthographicCamera,
   RenderTexture,
   useTexture,
 } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import {
-  SurahLayout as PaperContent,
-} from "../SurahLayout/index";
+import { SurahLayout as PaperContent } from "../SurahLayout/index";
 import {
   ClampToEdgeWrapping,
   Color,
@@ -94,6 +99,13 @@ export interface TextureToggles {
   normal: boolean;
 }
 
+// ─── Public handle exposed via forwardRef ────────────────────────────────────
+// Non-primary panels read getMaterial() to grab the settled MeshStandardMaterial
+// and inject it into their own material slot — skipping their own RenderTexture.
+export interface PaperMaterialHandle {
+  getMaterial: () => MeshStandardMaterial | null;
+}
+
 interface PaperMaterialProps {
   toggles: TextureToggles;
   isFolded?: boolean;
@@ -104,11 +116,11 @@ function areTogglesEqual(a: TextureToggles, b: TextureToggles): boolean {
   return a.diffuse === b.diffuse && a.normal === b.normal;
 }
 
-const PaperMaterialComponent: FC<PaperMaterialProps> = ({
-  toggles,
-  isFolded = false,
-  onReady,
-}) => {
+// ─── Core implementation ─────────────────────────────────────────────────────
+const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
+  PaperMaterialHandle,
+  PaperMaterialProps
+> = ({ toggles, isFolded = false, onReady }, ref) => {
   const { gl, size } = useThree();
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
@@ -159,6 +171,17 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
 
   const matRef = useRef<MeshStandardMaterial>(null);
 
+  // ─── Expose the settled MeshStandardMaterial instance to the parent ──────
+  // SinglePaper reads this via sharedMatRef to inject the material into sibling
+  // panels without rendering a second RenderTexture scene for each panel.
+  useImperativeHandle(
+    ref,
+    () => ({
+      getMaterial: () => matRef.current,
+    }),
+    [],
+  );
+
   useEffect(() => {
     if (!settled) return;
     const t = setTimeout(() => {
@@ -196,13 +219,16 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
     texture.needsUpdate = true;
   });
 
-  const paperTextureNormal = useTexture(PAPER_TEXTURES.normalUrl, (texture) => {
-    texture.colorSpace = NoColorSpace;
-    texture.wrapS = RepeatWrapping;
-    texture.wrapT = RepeatWrapping;
-    texture.repeat.set(1, 1);
-    texture.needsUpdate = true;
-  });
+  const paperTextureNormal = useTexture(
+    PAPER_TEXTURES.normalUrl,
+    (texture) => {
+      texture.colorSpace = NoColorSpace;
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = RepeatWrapping;
+      texture.repeat.set(1, 1);
+      texture.needsUpdate = true;
+    },
+  );
 
   const paperTextureDiffuse = useTexture(
     PAPER_TEXTURES.diffuseUrl,
@@ -240,7 +266,7 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
       >
         <color attach="background" args={[PAGE_BG_COLOR]} />
 
-        {/* CRITICAL FIX: OrthographicCamera ensures Troika Text calculates SDF size correctly 
+        {/* CRITICAL FIX: OrthographicCamera ensures Troika Text calculates SDF size correctly
             and prevents perspective distortion on low DPR devices. */}
         <OrthographicCamera
           makeDefault
@@ -252,7 +278,9 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
         />
 
         {toggles.diffuse && (
-          <mesh position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, -10]}>
+          <mesh
+            position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, -10]}
+          >
             <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />
             <meshBasicMaterial
               map={paperTextureDiffuse}
@@ -314,7 +342,9 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
               position={[runtime.PAGE_WIDTH / 2, y, i * 0.01]}
               renderOrder={10}
             >
-              <planeGeometry args={[runtime.PAGE_WIDTH, CREASE_BAND_HEIGHT]} />
+              <planeGeometry
+                args={[runtime.PAGE_WIDTH, CREASE_BAND_HEIGHT]}
+              />
               <meshBasicMaterial
                 map={creaseNormalMap}
                 transparent={true}
@@ -328,7 +358,9 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
           <mesh
             position={[
               runtime.PAGE_WIDTH / 2,
-              (runtime.layoutMath.g1Y + (runtime.layoutMath.g3Y - runtime.layoutMath.groupH)) / 2,
+              (runtime.layoutMath.g1Y +
+                (runtime.layoutMath.g3Y - runtime.layoutMath.groupH)) /
+                2,
               0.62,
             ]}
             rotation={[0, 0, Math.PI / 2]}
@@ -336,7 +368,8 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
           >
             <planeGeometry
               args={[
-                runtime.layoutMath.g1Y - (runtime.layoutMath.g3Y - runtime.layoutMath.groupH),
+                runtime.layoutMath.g1Y -
+                  (runtime.layoutMath.g3Y - runtime.layoutMath.groupH),
                 CREASE_BAND_HEIGHT,
               ]}
             />
@@ -380,8 +413,12 @@ const PaperMaterialComponent: FC<PaperMaterialProps> = ({
   );
 };
 
+// ─── forwardRef wrapper — lets SinglePaper access the underlying material ────
+const PaperMaterialWithRef = forwardRef(PaperMaterialComponentFn);
+
+// ─── memo wrapper — skips re-renders when toggles/isFolded/onReady unchanged ─
 export const PaperMaterial = memo(
-  PaperMaterialComponent,
+  PaperMaterialWithRef,
   (prevProps, nextProps) =>
     prevProps.isFolded === nextProps.isFolded &&
     prevProps.onReady === nextProps.onReady &&

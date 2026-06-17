@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { PAGE_WIDTH, SURAH_DATA } from "../../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../../data/theme";
@@ -15,9 +15,80 @@ interface BismillahText3DProps {
   surfaceZ: number;
 }
 
-export function BismillahText3D({
-  surfaceZ,
-}: BismillahText3DProps) {
+// ─── Font tracking — mirrors CanvasText's fontsLoadedKey pattern ─────────────
+// Ensures the canvas is re-drawn after the QuranFont family is fully registered.
+function useFontsLoadedKey(): number {
+  const [key, setKey] = useState(0);
+  useEffect(() => {
+    let active = true;
+    const onFontsReady = () => {
+      document.fonts.ready.then(() => {
+        if (active) setTimeout(() => setKey((k) => k + 1), 100);
+      });
+    };
+    onFontsReady();
+    if ("fonts" in document) {
+      document.fonts.addEventListener("loadingdone", onFontsReady);
+      return () => {
+        active = false;
+        document.fonts.removeEventListener("loadingdone", onFontsReady);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  return key;
+}
+
+// ─── Shared depth texture factory ────────────────────────────────────────────
+// Creates ONE CanvasTexture that all depth-shadow layers will share.
+// Called inside useMemo so it only re-runs on text/size/font changes.
+//
+// NOTE: BismillahText3D uses Canvas 2D (not Three.js TextGeometry + Earcut),
+// so there is no triangulation blocking. The optimization here is preventing
+// 4× duplicate canvas allocations for layers that are visually identical.
+function createDepthCanvasTexture(
+  text: string,
+  fontSize: number,
+  maxWidth: number,
+  height: number,
+  color: string,
+): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+
+  const scaleFactor = 1024;
+  const dpr = 3; // matches CanvasText default resolution
+  const canvasW = Math.floor(maxWidth * scaleFactor * dpr);
+  const canvasH = Math.floor(height * scaleFactor * dpr);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  // "QuranFont" is the family name registered by PaperMaterial's preloadFontUrl.
+  // PaperMaterial is always mounted on the primary panel before BismillahText3D renders.
+  const scaledFontSize = fontSize * scaleFactor * dpr;
+  ctx.font = `normal normal ${scaledFontSize}px "QuranFont", Arial`;
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, canvasW / 2, canvasH / 2);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.anisotropy = 1;
+  return tex;
+}
+
+export function BismillahText3D({ surfaceZ }: BismillahText3DProps) {
   const isElevatedPhase = useElevatedStore((s) => s.phase === "elevated");
 
   const layers = 4;
@@ -42,9 +113,7 @@ export function BismillahText3D({
     };
 
     updateTheme();
-
     window.addEventListener("themeChange", updateTheme);
-
     const observer = new MutationObserver(updateTheme);
     if (typeof document !== "undefined") {
       observer.observe(document.documentElement, {
@@ -52,7 +121,6 @@ export function BismillahText3D({
         attributeFilter: ["class"],
       });
     }
-
     return () => {
       window.removeEventListener("themeChange", updateTheme);
       observer.disconnect();
@@ -60,14 +128,38 @@ export function BismillahText3D({
   }, []);
 
   const baseCanvasColor = "#FFFFFF";
-
-  const depthColors = useMemo(() => {
-    return Array.from({ length: layers }, () => baseCanvasColor);
-  }, [layers]);
-
   const bismillahText = SURAH_DATA.bismillah;
   const maxWidth = PAGE_WIDTH * 0.9;
-  const bismillahHeight = 0.14; // Tighter height for Bismillah
+  const bismillahHeight = 0.14;
+
+  // Track font load state so the canvas re-renders after QuranFont is ready.
+  const fontsLoadedKey = useFontsLoadedKey();
+
+  // 🚀 OPTIMIZATION: ONE CanvasTexture shared by ALL 4 depth shadow layers.
+  //
+  // Previously: 4 separate CanvasText components → 4 canvas allocations + 4 GPU texture
+  // uploads at mount, and all 4 re-created synchronously on every font-load event.
+  //
+  // Now: 1 canvas allocation → 1 GPU texture upload, shared across all 4 depth meshes.
+  // The 4 layers only differ in Z-offset (0.0006 step) and renderOrder — identical content.
+  const depthTexture = useMemo(() => {
+    if (fontsLoadedKey < 0) return null; // satisfies linter — fontsLoadedKey used as trigger
+    return createDepthCanvasTexture(
+      bismillahText,
+      TEXT_SIZES.BISMILLAH,
+      maxWidth,
+      bismillahHeight,
+      baseCanvasColor,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bismillahText, maxWidth, bismillahHeight, fontsLoadedKey]);
+
+  useEffect(() => {
+    // Dispose the old texture when a new one is created or on unmount.
+    return () => {
+      depthTexture?.dispose();
+    };
+  }, [depthTexture]);
 
   return (
     <group
@@ -77,38 +169,38 @@ export function BismillahText3D({
         surfaceZ + FRONT_CLEARANCE,
       ]}
     >
-      {depthColors.map((color, i) => {
-        const z = -(layers - i) * step;
+      {/*
+       * 🚀 OPTIMIZED: All 4 depth shadow layers share ONE CanvasTexture instance.
+       * Only position.z and renderOrder differ between layers — content is identical.
+       * This replaces 4 independent CanvasText components (4× canvas creation).
+       */}
+      {depthTexture &&
+        Array.from({ length: layers }, (_, i) => {
+          const z = -(layers - i) * step;
+          return (
+            <mesh
+              key={`bismillah-depth-${i}`}
+              renderOrder={baseRenderOrder + i}
+              position={[0, bismillahHeight / 2, z]}
+            >
+              <planeGeometry args={[maxWidth, bismillahHeight]} />
+              <meshStandardMaterial
+                map={depthTexture}
+                color="#000000"
+                metalness={0.95}
+                roughness={0.3}
+                envMapIntensity={1.6}
+                transparent
+                depthTest={true}
+                ref={(m) => {
+                  materialsRef.current[i] = m;
+                }}
+              />
+            </mesh>
+          );
+        })}
 
-        return (
-          <CanvasText
-            key={`bismillah-depth-${i}`}
-            text={bismillahText}
-            font={QURAN_FONT}
-            fontSize={TEXT_SIZES.BISMILLAH}
-            color={color}
-            textAlign="center"
-            verticalAlign="bottom"
-            width={maxWidth}
-            height={bismillahHeight}
-            position={[0, bismillahHeight / 2, z]}
-            renderOrder={baseRenderOrder + i}
-          >
-            <meshStandardMaterial
-              color="#000000"
-              metalness={0.95}
-              roughness={0.3}
-              envMapIntensity={1.6}
-              transparent
-              depthTest={true}
-              ref={(m) => {
-                materialsRef.current[i] = m;
-              }}
-            />
-          </CanvasText>
-        );
-      })}
-
+      {/* Front layer: separate CanvasText with its own premium physical material */}
       <CanvasText
         text={bismillahText}
         font={QURAN_FONT}

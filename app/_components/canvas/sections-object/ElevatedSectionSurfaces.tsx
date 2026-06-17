@@ -637,7 +637,11 @@ export function ElevatedSectionSurfaces() {
       isAllSectionsMode || !s1
         ? undefined
         : calculateSectionBounds(S1_ID, SURAH_TRANSFORMS, runtime.PAGE_WIDTH),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S1_ID, s1],
+    // 🚀 OPTIMIZATION: SURAH_TRANSFORMS is an object that may get a new reference
+    // even when its values are unchanged. Using PAGE_WIDTH + PAGE_HEIGHT as stable
+    // primitive proxies (transforms derive from these). !!s1 avoids object identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAllSectionsMode, runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT, S1_ID, !!s1],
   );
   const s2TopBounds = useMemo(
     () =>
@@ -648,7 +652,8 @@ export function ElevatedSectionSurfaces() {
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_TOP_ID, s2],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAllSectionsMode, runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT, S2_TOP_ID, !!s2],
   );
   const s2CenterBounds = useMemo(
     () =>
@@ -659,7 +664,8 @@ export function ElevatedSectionSurfaces() {
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_CENTER_ID, s2],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAllSectionsMode, runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT, S2_CENTER_ID, !!s2],
   );
   const s2BottomBounds = useMemo(
     () =>
@@ -670,7 +676,8 @@ export function ElevatedSectionSurfaces() {
             SURAH_TRANSFORMS,
             runtime.PAGE_WIDTH,
           ),
-    [isAllSectionsMode, SURAH_TRANSFORMS, runtime.PAGE_WIDTH, S2_BOTTOM_ID, s2],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAllSectionsMode, runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT, S2_BOTTOM_ID, !!s2],
   );
 
   const getConnectorColor = (groupIdx: number) => {
