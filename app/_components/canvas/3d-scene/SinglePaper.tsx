@@ -26,22 +26,37 @@ import { useFoldStore } from "../orchestrator/ScrollManager";
 
 const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;
-
 const PAGE_SEGMENTS = 80;
 
+// 🚀 OPTIMIZATION 1: متریال‌ها به صورت گلوبال یک بار ساخته می‌شوند
+// این کار جلوی فریز شدن موبایل برای کامپایل شیدرهای تکراری را کاملاً می‌گیرد
 const paperBaseColor = new Color(PAGE_BG_COLOR);
 const paperBackColor = new Color("#ffffff");
-const staticSideL = new MeshStandardMaterial({ color: paperBaseColor }); // side L
+
+const staticSideL = new MeshStandardMaterial({ color: paperBaseColor });
 const staticSideR = new MeshStandardMaterial({
   color: "#111",
   roughness: 1,
   metalness: 0,
   toneMapped: false,
-}); // side R
-const staticTopCap = new MeshStandardMaterial({ color: paperBaseColor }); // top cap
-const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor }); // bottom cap
+});
+const staticTopCap = new MeshStandardMaterial({ color: paperBaseColor });
+const staticBottomCap = new MeshStandardMaterial({ color: paperBaseColor });
+const sharedFrontMaterial = new MeshStandardMaterial({
+  color: paperBaseColor,
+  roughness: 0.8,
+});
+const sharedBackMaterial = new MeshBasicMaterial({ color: paperBackColor });
 
-// ── Define Cut Panel Structure ──
+const SHARED_MATERIALS = [
+  staticSideL,
+  staticSideR,
+  staticTopCap,
+  staticBottomCap,
+  sharedFrontMaterial,
+  sharedBackMaterial,
+];
+
 export interface PaperPanelConfig {
   id: string;
   w: number;
@@ -49,7 +64,7 @@ export interface PaperPanelConfig {
   offsetX: number;
   offsetY: number;
   isStatic?: boolean;
-  ignoreFolds?: number[]; // Indexes of folds that this panel should not react to
+  ignoreFolds?: number[];
 }
 
 function createPanelGeometry(
@@ -67,18 +82,14 @@ function createPanelGeometry(
     2,
     PAGE_SEGMENTS,
   );
-  // Map vertex positions based on offsetY so they are placed exactly in global coordinates
   pageGeometry.translate(0, -panelH / 2 - offsetY, 0);
 
-  // ── Core magic: Accurately mapping UVs so the texture doesn't break ──
   const uvs = pageGeometry.attributes.uv;
   for (let i = 0; i < uvs.count; i++) {
     const u = uvs.getX(i);
     const v = uvs.getY(i);
-
     const globalU = (u * panelW + offsetX) / fullW;
     const globalV = (v * panelH + (fullH - offsetY - panelH)) / fullH;
-
     uvs.setXY(i, globalU, globalV);
   }
 
@@ -86,15 +97,15 @@ function createPanelGeometry(
   const vertex = new Vector3();
   const skinIndexes: number[] = [];
   const skinWeights: number[] = [];
+  const globalSegmentHeight = fullH / PAGE_SEGMENTS;
 
   for (let i = 0; i < position.count; i++) {
     vertex.fromBufferAttribute(position, i);
     const distFromTop = -vertex.y;
-    // Use full height to construct a global skeleton
-    const globalSegmentHeight = fullH / PAGE_SEGMENTS;
     let skinIndex = Math.floor(distFromTop / globalSegmentHeight);
     skinIndex = Math.max(0, Math.min(skinIndex, PAGE_SEGMENTS - 1));
-    const skinWeight = (distFromTop % globalSegmentHeight) / globalSegmentHeight;
+    const skinWeight =
+      (distFromTop % globalSegmentHeight) / globalSegmentHeight;
     skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
     skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
   }
@@ -115,6 +126,7 @@ interface PaperPanelProps {
   panel: PaperPanelConfig;
   isFolded?: boolean;
   toggles?: TextureToggles;
+  globalFoldAngles: React.MutableRefObject<Float32Array | null>;
   onReady?: () => void;
 }
 
@@ -122,62 +134,48 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
   panel,
   isFolded,
   toggles,
+  globalFoldAngles,
   onReady,
 }) => {
   const runtime = useSurahLayoutRuntime();
   const group = useRef<Group>(null);
   const meshRef = useRef<any>(null);
 
-  const foldAnglesRef = useRef<Float32Array | null>(null);
-  if (
-    !foldAnglesRef.current ||
-    foldAnglesRef.current.length !== runtime.FOLD_Y_POSITIONS.length
-  ) {
-    foldAnglesRef.current = new Float32Array(runtime.FOLD_Y_POSITIONS.length);
-  }
+  // 🚀 OPTIMIZATION 2: استخراج مقادیر Primitive برای جلوگیری از باگ Reference Equality در useMemo
+  const { w, h, offsetX, offsetY, isStatic, ignoreFolds } = panel;
+  const { PAGE_WIDTH, PAGE_HEIGHT } = runtime;
 
   const foldContributionsRef = useRef(new Float32Array(PAGE_SEGMENTS + 1));
 
   const foldBonePositions = useMemo(() => {
-    const globalSegmentHeight = runtime.PAGE_HEIGHT / PAGE_SEGMENTS;
+    const globalSegmentHeight = PAGE_HEIGHT / PAGE_SEGMENTS;
     return runtime.FOLD_Y_POSITIONS.map((globalY) => {
       const distFromPanelTop = Math.abs(globalY);
-
       if (distFromPanelTop < 0) return 0;
-      if (distFromPanelTop > runtime.PAGE_HEIGHT) return PAGE_SEGMENTS;
-
+      if (distFromPanelTop > PAGE_HEIGHT) return PAGE_SEGMENTS;
       return distFromPanelTop / globalSegmentHeight;
     });
-  }, [runtime.FOLD_Y_POSITIONS, runtime.PAGE_HEIGHT]);
+  }, [runtime.FOLD_Y_POSITIONS, PAGE_HEIGHT]);
 
   const manualMesh = useMemo(() => {
     const pageGeometry = createPanelGeometry(
-      panel.w,
-      panel.h,
-      runtime.PAGE_WIDTH,
-      runtime.PAGE_HEIGHT,
-      panel.offsetX,
-      panel.offsetY,
+      w,
+      h,
+      PAGE_WIDTH,
+      PAGE_HEIGHT,
+      offsetX,
+      offsetY,
     );
 
-    const materials = [
-      staticSideL,
-      staticSideR,
-      staticTopCap,
-      staticBottomCap,
-      new MeshStandardMaterial({ color: paperBaseColor, roughness: 0.8 }),
-      new MeshBasicMaterial({ color: paperBackColor }),
-    ];
-
-    if (panel.isStatic) {
-      const mesh = new Mesh(pageGeometry, materials);
+    if (isStatic) {
+      const mesh = new Mesh(pageGeometry, SHARED_MATERIALS);
       mesh.castShadow = false;
       mesh.receiveShadow = false;
       mesh.frustumCulled = false;
       return mesh;
     }
 
-    const globalSegmentHeight = runtime.PAGE_HEIGHT / PAGE_SEGMENTS;
+    const globalSegmentHeight = PAGE_HEIGHT / PAGE_SEGMENTS;
     const bones: Bone[] = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
       const bone = new Bone();
@@ -187,53 +185,42 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
     }
     const skeleton = new Skeleton(bones);
 
-    const mesh = new SkinnedMesh(pageGeometry, materials);
+    const mesh = new SkinnedMesh(pageGeometry, SHARED_MATERIALS);
     mesh.castShadow = false;
     mesh.receiveShadow = false;
     mesh.frustumCulled = false;
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
     return mesh;
-  }, [panel, runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]);
+    // وابستگی‌ها کاملاً Primitive هستند، مش بی‌دلیل ساخته نمی‌شود
+  }, [w, h, offsetX, offsetY, isStatic, PAGE_WIDTH, PAGE_HEIGHT]);
 
   useEffect(() => {
     return () => {
       if (manualMesh) {
         manualMesh.geometry.dispose();
-        const mats = manualMesh.material as Material[];
-        if (Array.isArray(mats)) {
-          mats[4]?.dispose();
-          mats[5]?.dispose();
-        }
+        // ⛔ متریال‌ها اینجا Dispose نمی‌شوند چون گلوبال و مشترک هستند
       }
     };
   }, [manualMesh]);
 
   useFrame((_, delta) => {
     if (
-      panel.isStatic ||
+      isStatic ||
       !meshRef.current ||
       !group.current ||
-      !foldAnglesRef.current
+      !globalFoldAngles.current
     )
       return;
 
     const bones = (meshRef.current as SkinnedMesh).skeleton.bones;
-    const paperProgress = useFoldStore.getState().currentOffset;
-
-    const targetFoldAngles = foldAnglesRef.current;
+    const targetFoldAngles = globalFoldAngles.current;
     const foldContributions = foldContributionsRef.current;
 
-    writeFoldAnglesForScroll(
-      paperProgress,
-      runtime.foldSteps,
-      targetFoldAngles,
-    );
     foldContributions.fill(0, 0, bones.length);
 
     for (let foldIdx = 0; foldIdx < targetFoldAngles.length; foldIdx++) {
-      // ── Here the left and right panels exhibit different behaviors! ──
-      if (panel.ignoreFolds?.includes(foldIdx)) continue;
+      if (ignoreFolds?.includes(foldIdx)) continue;
 
       const totalAngle = targetFoldAngles[foldIdx];
       const rawBonePos = foldBonePositions[foldIdx];
@@ -258,12 +245,10 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
     }
   });
 
-  const posX = -runtime.PAGE_WIDTH / 2 + panel.offsetX + panel.w / 2;
-  // No need for Y shift in the group anymore, since vertices are translated with offsetY
-  const posY = 0;
+  const posX = -PAGE_WIDTH / 2 + offsetX + w / 2;
 
   return (
-    <group ref={group} position={[posX, posY, 0]}>
+    <group ref={group} position={[posX, 0, 0]}>
       <primitive object={manualMesh} ref={meshRef}>
         <PaperMaterial
           toggles={toggles}
@@ -291,11 +276,22 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   const lastActiveStage = useRef<number>(0);
   const hasInteracted = useRef(false);
 
+  // 🚀 OPTIMIZATION 3: محاسبه زاویه‌ها به صورت مشترک
+  // به جای اینکه 3 تا پنل جداگانه حساب کنن، اینجا ۱ بار حساب میشه و پاس داده میشه به پنل‌ها
+  const globalFoldAngles = useRef<Float32Array | null>(null);
+  if (
+    !globalFoldAngles.current ||
+    globalFoldAngles.current.length !== runtime.FOLD_Y_POSITIONS.length
+  ) {
+    globalFoldAngles.current = new Float32Array(
+      runtime.FOLD_Y_POSITIONS.length,
+    );
+  }
+
   useEffect(() => {
     foldSound.current = new Audio("/paper-fold.mp3");
-    if (foldSound.current) {
-      foldSound.current.volume = 1;
-    }
+    if (foldSound.current) foldSound.current.volume = 1;
+
     const onInteract = () => {
       hasInteracted.current = true;
     };
@@ -309,6 +305,14 @@ export const SinglePaper: FC<SinglePaperProps> = ({
 
   useFrame(() => {
     const paperProgress = useFoldStore.getState().currentOffset;
+
+    // محاسبه زاویه‌ها فقط یک‌بار انجام می‌شود
+    writeFoldAnglesForScroll(
+      paperProgress,
+      runtime.foldSteps,
+      globalFoldAngles.current!,
+    );
+
     const maxStageIndex =
       runtime.foldSteps.length > 0 ? runtime.foldSteps.length - 1 : 0;
     const currentStage = Math.round(paperProgress * maxStageIndex);
@@ -322,19 +326,27 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     }
   });
 
-  // Check if cut panels are defined for this surah?
+  // 🚀 OPTIMIZATION 4: مهم‌ترین بخش! قفل کردن آرایه پنل‌ها
+  // با این کار در رندرهای اضافی، آرایه پنل‌ها از نو ساخته نمی‌شود.
   const computePanels = (runtime.config.animations as any)?.computePanels;
-  const panels: PaperPanelConfig[] = computePanels
-    ? computePanels(runtime.layoutMath)
-    : [
-        {
-          id: "full-page",
-          w: runtime.PAGE_WIDTH,
-          h: runtime.PAGE_HEIGHT,
-          offsetX: 0,
-          offsetY: 0,
-        },
-      ];
+  const panels: PaperPanelConfig[] = useMemo(() => {
+    return computePanels
+      ? computePanels(runtime.layoutMath)
+      : [
+          {
+            id: "full-page",
+            w: runtime.PAGE_WIDTH,
+            h: runtime.PAGE_HEIGHT,
+            offsetX: 0,
+            offsetY: 0,
+          },
+        ];
+  }, [
+    computePanels,
+    runtime.layoutMath,
+    runtime.PAGE_WIDTH,
+    runtime.PAGE_HEIGHT,
+  ]);
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>
@@ -344,6 +356,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
           panel={panel}
           isFolded={isFolded}
           toggles={toggles}
+          globalFoldAngles={globalFoldAngles}
           onReady={idx === 0 ? onReady : undefined}
         />
       ))}

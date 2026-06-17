@@ -6,7 +6,7 @@ import {
   SpotLight,
 } from "@react-three/drei";
 import { a } from "@react-spring/three";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
 import { VersesRenderer } from "../verses-object/VersesRenderer";
@@ -29,41 +29,33 @@ interface ExperienceProps {
   onReady?: () => void;
 }
 
-export function Experience({
-  isFolded = false,
-  onReady,
-}: ExperienceProps) {
+export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const config = useStoryStore((state) => state.activeConfig);
   const hasIntro = config.features.hasIntro;
-  // Only show up to the point where ambient media ends (rawOffset ~0.34)
   const showSpotlight = useFoldStore((s) => hasIntro && s.rawOffset < 0.37);
   const { gl, scene, camera } = useThree();
 
-  // We track paper readiness
   const [paperReady, setPaperReady] = useState(false);
-
-  // Intercept the paper's onReady event
   const handlePaperReady = useCallback(() => {
     setPaperReady(true);
   }, []);
 
-  // Scene Readiness Management
   const readyFiredRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isMobile =
-    typeof window !== "undefined" &&
-    (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent,
-    ) ||
-      window.innerWidth < 768);
+  // 🚀 OPTIMIZATION: Memoize کردن Regex برای جلوگیری از درگیری CPU در هر رندر
+  const isMobile = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      ) || window.innerWidth < 768
+    );
+  }, []);
 
   useEffect(() => {
-    // We MUST wait for the paper to compile even in intro to avoid stutter when scene appears.
-    const isReady = paperReady;
-
-    if (isReady && !readyFiredRef.current) {
+    if (paperReady && !readyFiredRef.current) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(() => {
@@ -79,16 +71,16 @@ export function Experience({
     };
   }, [paperReady, onReady]);
 
-  // Background Compilation
   useEffect(() => {
     if (paperReady && useFoldStore.getState().isIntroActive && !isMobile) {
-      gl.compileAsync(scene, camera).catch(() => {});
+      // 🚀 OPTIMIZATION: دادنِ یک تنفسِ ۱۰۰ میلی‌ثانیه‌ای به ترد اصلی قبل از کامپایل شیدرها
+      const compileTimer = setTimeout(() => {
+        gl.compileAsync(scene, camera).catch(() => {});
+      }, 100);
+      return () => clearTimeout(compileTimer);
     }
   }, [paperReady, gl, scene, camera, isMobile]);
 
-  // Ensure the elevated store is in the correct state for the intro.
-  // restoreAllSections() is intentionally deferred until introHandoffProgress
-  // has reached 1 so the boolean flip never interrupts scroll-driven springs.
   useEffect(() => {
     const unsub = useFoldStore.subscribe((state, prevState) => {
       if (state.isIntroActive && !prevState.isIntroActive) {
@@ -106,7 +98,6 @@ export function Experience({
     if (e.delta > 2) return;
     const { hasDragged } = useDragState.getState();
     if (hasDragged) return;
-    // Dismiss elevated verse on background click
     useElevatedStore.getState().dismiss();
   }, []);
 
@@ -141,10 +132,7 @@ export function Experience({
           scale-y={paperFocusScale}
           scale-z={paperFocusScale}
         >
-          <SinglePaper
-            isFolded={isFolded}
-            onReady={handlePaperReady}
-          />
+          <SinglePaper isFolded={isFolded} onReady={handlePaperReady} />
         </a.group>
         {config.features.hasElevatedSections && (
           <>
@@ -156,8 +144,6 @@ export function Experience({
         <VersesRenderer />
       </a.group>
 
-      {/* Single centralized controller for all intro section animations.
-          Replaces ~28 individual useFrame callbacks with 1. */}
       {hasIntro && <IntroSectionAnimationController />}
 
       <mesh position={[0, 0, -5]} onClick={handleBackgroundClick}>
@@ -165,7 +151,6 @@ export function Experience({
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {/* Imported the dedicated IntroExperience component */}
       {hasIntro && <IntroExperience />}
 
       <DynamicControls />
@@ -173,17 +158,16 @@ export function Experience({
       <ambientLight intensity={1} />
       {showSpotlight && (
         <SpotLight
-          castShadow={!isMobile} // Disabled dynamic shadow maps on mobile to prevent extreme GPU overhead
+          castShadow={!isMobile}
           penumbra={1}
           distance={13}
           angle={0.65}
-          attenuation={7} // Controls how the light falls off
-          anglePower={5} // Controls the sharpness of the light cone
+          attenuation={7}
+          anglePower={5}
           intensity={0.001}
-          color="#ffddaa" // Warm, cinematic yellow/orange like your reference image
+          color="#ffddaa"
           position={[2.5, 3.5, 0]}
-          // depthBuffer={new Float32Array(100000000)}
-          volumetric={!isMobile} // This is the magic prop that creates the visible light beam! Disabled on mobile to prevent crashes.
+          volumetric={!isMobile}
         />
       )}
 
@@ -194,6 +178,7 @@ export function Experience({
   );
 }
 
+// ... DynamicControls remains the same
 function DynamicControls() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
