@@ -13,11 +13,7 @@
  * curveColors: []         — no side brackets for now.
  */
 
-import type {
-  SurahLayoutConfig,
-  VerticalGroupsSectionConfig,
-  SvgOverlayItem,
-} from "./schema";
+import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
 import type { AlakLayoutParams } from "./SurahConfig";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
@@ -414,43 +410,225 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   ],
 
   animations: {
-    computeFoldYPositions: (lm) => {
-      // 5 groups with 4 inter-group gaps → 4 fold positions, one between each group.
+    // @ts-ignore
+    computePanels: (lm: any) => {
       const positions = lm.groupYPositions as number[];
       const heights = lm.groupHeights as number[];
-      return Array.from({ length: 4 }, (_, i) => {
-        const botOfGroup = positions[i] - heights[i];
-        const topOfNext = positions[i + 1] ?? botOfGroup;
-        return (botOfGroup + topOfNext) / 2;
-      });
+
+      // Find the horizontal cut line
+      const g3Bot = positions[3] - heights[3];
+      const g4Top = positions[4] ?? g3Bot;
+      const cutYWorld = (g3Bot + g4Top) / 2;
+
+      const offsetY = Math.abs(cutYWorld);
+
+      return [
+        {
+          id: "left-panel",
+          w: lm.PAGE_WIDTH / 2,
+          h: offsetY,
+          offsetX: 0,
+          offsetY: 0,
+          // 👈 Left panel only reacts to left folds (5 to 9)
+          ignoreFolds: [0, 1, 2, 3, 4, 10, 11, 12, 13, 14],
+        },
+        {
+          id: "right-panel",
+          w: lm.PAGE_WIDTH / 2,
+          h: offsetY,
+          offsetX: lm.PAGE_WIDTH / 2,
+          offsetY: 0,
+          // 👈 Right panel only reacts to right folds (0 to 4)
+          ignoreFolds: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        },
+        {
+          id: "bottom-panel",
+          w: lm.PAGE_WIDTH,
+          h: lm.PAGE_HEIGHT - offsetY,
+          offsetX: 0,
+          offsetY: offsetY,
+          isStatic: false,
+          // 👈 Bottom panel only reacts to global/bottom folds (10 to 14)
+          ignoreFolds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        },
+      ];
     },
 
+    computeFoldYPositions: (lm) => {
+      const positions = lm.groupYPositions as number[];
+      const heights = lm.groupHeights as number[];
+
+      const baseFolds = [
+        (positions[0] -
+          heights[0] +
+          (positions[1] ?? positions[0] - heights[0])) /
+          2,
+        (positions[1] -
+          heights[1] +
+          (positions[2] ?? positions[1] - heights[1])) /
+          2,
+        positions[2] - heights[2] / 2, // 👈 Exactly the middle of the green group (since group 2 has two rows)
+        (positions[2] -
+          heights[2] +
+          (positions[3] ?? positions[2] - heights[2])) /
+          2,
+        (positions[3] -
+          heights[3] +
+          (positions[4] ?? positions[3] - heights[3])) /
+          2,
+      ];
+
+      // 👈 Here we return 15 folds (5 for right, 5 for left, 5 for bottom)
+      return [...baseFolds, ...baseFolds, ...baseFolds];
+    },
+
+    // 👈 Now in each step, we must have exactly 15 objects
+    // Index 0 to 4 = Right panel control
+    // Index 5 to 9 = Left panel control
+    // Index 10 to 14 = Bottom panel control
     foldSteps: [
       {
         id: "pre-start",
+        // 👈 First state: The entire paper is accordion-folded and the yellows overlap
         folds: [
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 0.8 },
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 0.8 },
+          // -- Right --
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
+          // -- Left --
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
+          // -- Bottom --
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "open-all",
+        // 👈 Everything opens and becomes flat
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "fold-right-side",
+        // 👈 Left stays flat, right folds into accordion state
+        folds: [
+          // -- Right folds --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
+          // -- Left stays static and open (angle zero) --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          // -- Bottom stays static and open (angle zero) --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "open-right-side",
+        // 👈 Right opens again until we reach left
+        folds: [
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "fold-left-side",
+        // 👈 Right stays flat, left starts accordion-folding
+        folds: [
+          // -- Right stays static --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          // -- Left folds into accordion state --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
+          // -- Bottom stays static on the ground and detaches! --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
         ],
       },
       {
         id: "end",
+        // 👈 Finally the entire paper becomes completely flat and open
         folds: [
           { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
           { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
         ],
       },
     ] as const,
 
     scrollTimeline: {
       intro: { start: 0, end: 10 },
-      ambient: { start: 10, end: 40 },
-      handoff: { start: 40, end: 55 },
-      story: { start: 55, end: 100 },
+      ambient: { start: 10, end: 30 },
+      handoff: { start: 30, end: 40 },
+      story: { start: 40, end: 100 },
     },
 
     scrollLock: {
