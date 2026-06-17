@@ -105,6 +105,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: BLUE_BG,
       circleBorderCol: BLUE_BORDER,
       circleTextCol: BLUE_BORDER,
+      expandW: -0.05,
+      expandH: 0.005,
     },
     4: {
       bg: BLUE_BG,
@@ -115,6 +117,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       hasCapsuleLabel: true,
       customCapsuleLabel: "Zekat",
       capsuleLabelPosition: "top",
+      expandW: -0.05,
+      expandH: 0.005,
     },
     // ── Group 2 — Green (pushed in) ──────────────────────────────────────
     5: {
@@ -158,6 +162,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: BLUE_BG,
       circleBorderCol: BLUE_BORDER,
       circleTextCol: BLUE_BORDER,
+      expandW: -0.05,
+      expandH: 0.005,
     },
     10: {
       bg: BLUE_BG,
@@ -168,6 +174,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       hasCapsuleLabel: true,
       customCapsuleLabel: "Namaz",
       capsuleLabelPosition: "bottom",
+      expandW: -0.05,
+      expandH: 0.005,
     },
     // ── Group 4 — Yellow (dome text, compact) ───────────────────────────
     11: {

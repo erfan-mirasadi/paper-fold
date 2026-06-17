@@ -132,9 +132,22 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
             setVerseRect(v.outroVerse, sTransform.outroVerse, false);
           v.groups.forEach((gConf, gIdx) => {
             const gTrans = sTransform.groups[gIdx];
-            gConf.verseIds.forEach((vId) =>
-              setVerseRect(vId, gTrans.verses[vId], true),
-            );
+            gConf.verseIds.forEach((vId) => {
+              const rawT = gTrans.verses[vId];
+              const ov = activeConfig.verseOverrides?.[vId];
+              const expandW = ov?.expandW ?? 0;
+              const expandH = ov?.expandH ?? 0;
+              setVerseRect(
+                vId,
+                {
+                  x: rawT.x - expandW,
+                  y: rawT.y + expandH,
+                  w: rawT.w + expandW * 2,
+                  h: rawT.h + expandH * 2,
+                },
+                ov?.isPill ?? true,
+              );
+            });
           });
 
           // s2_top

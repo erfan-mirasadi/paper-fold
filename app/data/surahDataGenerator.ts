@@ -208,6 +208,9 @@ export function buildVerseConfigs(
           if (!t) return;
 
           const override = runtime.config.verseOverrides?.[lookupNumber] ?? runtime.config.verseOverrides?.[v.number];
+          
+          const expandW = override?.expandW ?? 0;
+          const expandH = override?.expandH ?? 0;
 
           const isCenterGroup = gIdx === 1;
           const groupFallbackBorder = isCenterGroup 
@@ -226,17 +229,19 @@ export function buildVerseConfigs(
           const finalCircleTextCol = override?.circleTextCol ?? runtime.config.styling.colors.verseNumberText;
           const finalTextColor = override?.textColor;
 
-          const worldX = t.x - PAGE_WIDTH / 2;
+          const worldX = t.x - expandW - PAGE_WIDTH / 2;
+          const expandedW = t.w + expandW * 2;
+          const expandedH = t.h + expandH * 2;
           const direction = isRightCol ? "right" : "left";
-          const hingeX = isRightCol ? worldX : worldX + t.w;
+          const hingeX = isRightCol ? worldX : worldX + expandedW;
 
           configs.push({
             id: v.number,
             verse: v.text,
             number: v.number,
-            y: t.y,
-            w: t.w,
-            h: t.h,
+            y: t.y + expandH,
+            w: expandedW,
+            h: expandedH,
             hingeX,
             direction,
             bg: finalBg,

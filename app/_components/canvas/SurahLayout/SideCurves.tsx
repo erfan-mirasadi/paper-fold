@@ -68,6 +68,7 @@ function computeBrackets(
   hasIntroOutro: boolean,
   outerColors: CurveConfig[] = FALLBACK_OUTER_COLORS,
   centerColor: CurveConfig = FALLBACK_CENTER_COLOR,
+  verseOverrides?: Record<number, { expandW?: number }>,
 ): BracketSpec[] {
   if (groups.length === 0) return [];
 
@@ -75,9 +76,16 @@ function computeBrackets(
     if (!group || !group.verses) return {};
     const arr = Object.values(group.verses).sort((a, b) => a.x - b.x);
     if (arr.length === 0) return {};
+    // Find verse IDs for this group's first (leftmost) and last (rightmost) capsules.
+    const entries = Object.entries(group.verses) as [string, (typeof arr)[0]][];
+    const sortedEntries = entries.sort(([, a], [, b]) => a.x - b.x);
+    const leftEntry = sortedEntries[0];
+    const rightEntry = sortedEntries[sortedEntries.length - 1];
+    const leftExpandW = verseOverrides?.[Number(leftEntry[0])]?.expandW ?? 0;
+    const rightExpandW = verseOverrides?.[Number(rightEntry[0])]?.expandW ?? 0;
     return {
-      left: arr[0].x,
-      right: arr[arr.length - 1].x + arr[arr.length - 1].w,
+      left: leftEntry[1].x - leftExpandW,
+      right: rightEntry[1].x + rightEntry[1].w + rightExpandW,
     };
   };
 
@@ -316,6 +324,9 @@ export const SideCurves = ({
   const configColors = useStoryStore(
     (state) => state.activeConfig.styling.colors,
   );
+  const verseOverrides = useStoryStore(
+    (state) => state.activeConfig.verseOverrides,
+  );
   const configCurveColors = configColors.curveColors as
     | CurveConfig[]
     | undefined;
@@ -340,8 +351,8 @@ export const SideCurves = ({
 
   const brackets = useMemo(
     () =>
-      computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor),
-    [groups, layout, hasIntroOutro, outerColors, centerColor],
+      computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor, verseOverrides),
+    [groups, layout, hasIntroOutro, outerColors, centerColor, verseOverrides],
   );
 
   const totalLevels = brackets.length;

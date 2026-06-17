@@ -237,17 +237,25 @@ export function VerseGroup({
         const labelBorder = layout?.capsuleLabelBorderWidth ?? 0.0035;
         const labelDrop = layout?.capsuleLabelDrop ?? 0.015;
 
-        const tabX = vt.x + vt.w / 2;
-        const tabY = tabPos === "top" ? vt.y + labelDrop : vt.y - vt.h - labelDrop;
+        const expandW = override?.expandW ?? 0;
+        const expandH = override?.expandH ?? 0;
+
+        const finalW = vt.w + expandW * 2;
+        const finalH = vt.h + expandH * 2;
+        const finalX = vt.x - expandW;
+        const finalY = vt.y + expandH;
+
+        const tabX = finalX + finalW / 2;
+        const tabY = tabPos === "top" ? finalY + labelDrop : finalY - finalH - labelDrop;
 
         return (
           <group key={v.number}>
             <VerseBox
-              x={vt.x}
-              y={vt.y}
+              x={finalX}
+              y={finalY}
               z={vt.z}
-              w={vt.w}
-              h={vt.h}
+              w={finalW}
+              h={finalH}
               verse={v.text}
               number={v.number}
               bg={finalBg}
