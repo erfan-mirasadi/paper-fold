@@ -22,13 +22,13 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 // COLOR PALETTE — matches the hand-drawn sketch exactly
 // ---------------------------------------------------------------------------
 
-const YELLOW_BG = "#FDF4CA"; // Top & bottom groups (İman / dome)
+const YELLOW_BG = "#E5CFA4"; // Top & bottom groups (İman / dome)
 const YELLOW_BORDER = "#BE9E63";
 
-const BLUE_BG = "#CBE2EE"; // 2nd and 4th groups
+const BLUE_BG = "#CEE0E9"; // 2nd and 4th groups
 const BLUE_BORDER = "#7A9CAD";
 
-const GREEN_BG = "#DCE8DC"; // Center pushed-in group
+const GREEN_BG = "#eaf2db"; // Center pushed-in group
 const GREEN_BORDER = "#8FA88F";
 
 // ---------------------------------------------------------------------------
@@ -85,6 +85,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
+      textColor: "#A30000",
     },
     2: {
       bg: YELLOW_BG,
@@ -95,6 +96,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       hasCapsuleLabel: true,
       customCapsuleLabel: "İman",
       capsuleLabelPosition: "top",
+      textColor: "#A30000",
     },
     // ── Group 1 — Blue ───────────────────────────────────────────────────
     3: {
@@ -174,6 +176,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
+      textColor: "#A30000",
     },
     12: {
       bg: YELLOW_BG,
@@ -181,6 +184,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
+      textColor: "#A30000",
     },
   },
 

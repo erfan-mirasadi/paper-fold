@@ -257,6 +257,7 @@ export function VerseGroup({
               circleTextCol={finalCircleText}
               isPill={true}
               textScaleOverride={finalTextScale}
+              textColor={override?.textColor}
             />
             {hasTab && (
               <CapsuleLabel

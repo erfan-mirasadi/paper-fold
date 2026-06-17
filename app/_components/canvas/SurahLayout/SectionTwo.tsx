@@ -256,6 +256,7 @@ export function SectionTwo({
           circleTextCol={introOverride?.circleTextCol ?? introBorder}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
+          textColor={introOverride?.textColor}
         />
       )}
 
@@ -287,6 +288,7 @@ export function SectionTwo({
           circleTextCol={outroOverride?.circleTextCol ?? outroBorder}
           isPill={false}
           borderWidth={edgeVerseBorderWidth}
+          textColor={outroOverride?.textColor}
         />
       )}
 
