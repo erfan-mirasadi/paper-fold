@@ -53,7 +53,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     paperHeight: 1.2,
     sceneCenterYOffset: 0.0,
     padding: 0.3,
-    scrollPages: 2,
+    scrollPages: 5,
   },
 
   specialVerses: {
