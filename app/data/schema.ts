@@ -234,6 +234,7 @@ export interface FoldState {
 export interface FoldStoryStep {
   id: string;
   folds: FoldState[];
+  verticalFolds?: FoldState[];
 }
 
 export interface ScrollTimelineConfig {
