@@ -1,6 +1,6 @@
 "use client";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
-import { writeFoldAnglesForScroll, writeVerticalFoldAnglesForScroll } from "./FoldStory";
+import { writeFoldAnglesForScroll } from "./FoldStory";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { useEffect, useMemo, useRef, FC } from "react";
@@ -133,7 +133,6 @@ interface PaperPanelProps {
   isFolded?: boolean;
   toggles: TextureToggles;                              // required — fixes TS build error
   globalFoldAngles: React.MutableRefObject<Float32Array | null>;
-  globalVerticalFoldAngles: React.MutableRefObject<Float32Array | null>;
   onReady?: () => void;
   isPrimary?: boolean;                                  // only primary renders PaperMaterial
   sharedMatRef?: React.RefObject<PaperMaterialHandle | null>; // texture source for siblings
@@ -144,7 +143,6 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
   isFolded,
   toggles,
   globalFoldAngles,
-  globalVerticalFoldAngles,
   onReady,
   isPrimary = false,
   sharedMatRef,
@@ -156,7 +154,6 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
   // 🚀 OPTIMIZATION 2: Extract primitive values — stable deps for all useMemos below.
   const { w, h, offsetX, offsetY, isStatic, ignoreFolds } = panel;
   const { PAGE_WIDTH, PAGE_HEIGHT } = runtime;
-  const posX = -PAGE_WIDTH / 2 + offsetX + w / 2;
 
   // 🚀 OPTIMIZATION 3: Per-panel materials array (shallow copy of SHARED_MATERIALS).
   // Each panel independently owns slot 4 so the primary's PaperMaterial instance can
@@ -227,13 +224,6 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
     return mesh;
     // All deps are primitives — mesh is NEVER recreated on global state updates.
   }, [w, h, offsetX, offsetY, isStatic, PAGE_WIDTH, PAGE_HEIGHT, panelMaterials]);
-
-  const originalPositions = useMemo(() => {
-    return manualMesh.geometry.attributes.position.clone();
-  }, [manualMesh]);
-
-  const currentVAngle = useRef(0);
-  const lastAppliedVAngle = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -313,42 +303,9 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
         delta,
       );
     }
-
-    // Vertical fold — CPU vertex morphing
-    if (globalVerticalFoldAngles.current) {
-      const targetVAngle = globalVerticalFoldAngles.current[0] ?? 0;
-      
-      easing.damp(currentVAngle, "current", targetVAngle, easingFactor, delta);
-      
-      const diff = Math.abs(currentVAngle.current - (lastAppliedVAngle.current ?? -999));
-      if (diff > 0.0001) {
-        lastAppliedVAngle.current = currentVAngle.current;
-        const vAngle = currentVAngle.current;
-        const pos = manualMesh.geometry.attributes.position;
-        
-        for (let i = 0; i < pos.count; i++) {
-          const x = originalPositions.getX(i);
-          const y = originalPositions.getY(i);
-          const z = originalPositions.getZ(i);
-
-          const globalX = x + posX;
-          let angle = 0;
-          if (globalX > 0.001) angle = -vAngle;
-          else if (globalX < -0.001) angle = vAngle;
-
-          const s = Math.sin(angle);
-          const c = Math.cos(angle);
-
-          const newGlobalX = globalX * c + z * s;
-          const newGlobalZ = -globalX * s + z * c;
-
-          pos.setXYZ(i, newGlobalX - posX, y, newGlobalZ);
-        }
-        pos.needsUpdate = true;
-        manualMesh.geometry.computeVertexNormals();
-      }
-    }
   });
+
+  const posX = -PAGE_WIDTH / 2 + offsetX + w / 2;
 
   return (
     <group ref={group} position={[posX, 0, 0]}>
@@ -404,16 +361,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     );
   }
 
-  // Vertical fold angles — size = max verticalFolds count across all steps
-  const globalVerticalFoldAngles = useRef<Float32Array | null>(null);
-  const vertFoldCount = Math.max(
-    0,
-    ...runtime.foldSteps.map((s) => s.verticalFolds?.length ?? 0),
-  );
-  if (vertFoldCount > 0 && (!globalVerticalFoldAngles.current || globalVerticalFoldAngles.current.length !== vertFoldCount)) {
-    globalVerticalFoldAngles.current = new Float32Array(vertFoldCount);
-  }
-
   // 🚀 OPTIMIZATION 8: sharedMatRef holds the primary panel's PaperMaterialHandle.
   // Non-primary panels call getMaterial() to retrieve the settled MeshStandardMaterial
   // and inject it into their panelMaterials[4] slot — no RenderTexture needed.
@@ -443,15 +390,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
       runtime.foldSteps,
       globalFoldAngles.current!,
     );
-
-    // Vertical fold angles computed once and shared with all panels
-    if (globalVerticalFoldAngles.current) {
-      writeVerticalFoldAnglesForScroll(
-        paperProgress,
-        runtime.foldSteps,
-        globalVerticalFoldAngles.current,
-      );
-    }
 
     const maxStageIndex =
       runtime.foldSteps.length > 0 ? runtime.foldSteps.length - 1 : 0;
@@ -497,7 +435,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
           isFolded={isFolded}
           toggles={toggles}
           globalFoldAngles={globalFoldAngles}
-          globalVerticalFoldAngles={globalVerticalFoldAngles}
           onReady={idx === 0 ? onReady : undefined}
           isPrimary={idx === 0}
           sharedMatRef={sharedMatRef}

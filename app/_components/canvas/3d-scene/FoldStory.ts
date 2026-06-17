@@ -52,36 +52,6 @@ export const writeFoldAnglesForScroll = (
   }
 };
 
-export const writeVerticalFoldAnglesForScroll = (
-  offset: number,
-  foldSteps: readonly FoldStoryStep[],
-  target: Float32Array,
-) => {
-  const maxStageIndex = foldSteps.length - 1;
-  const clampedOffset = MathUtils.clamp(offset, 0, 1);
-  const rawStage = clampedOffset * maxStageIndex;
-  const fromIndex = Math.min(Math.floor(rawStage), maxStageIndex);
-  const toIndex = Math.min(fromIndex + 1, maxStageIndex);
-  const localT = fromIndex === maxStageIndex ? 0 : rawStage - fromIndex;
-
-  let easedT = 0;
-  if (localT > 0.05 && localT < 0.95) {
-    const normalized = (localT - 0.05) / 0.9;
-    easedT = normalized * normalized * (3 - 2 * normalized);
-  } else if (localT >= 0.95) {
-    easedT = 1;
-  }
-
-  const fromV = foldSteps[fromIndex].verticalFolds;
-  const toV = foldSteps[toIndex].verticalFolds;
-
-  for (let i = 0; i < target.length; i++) {
-    const fromAngle = fromV ? foldStateToAngle(fromV[i] ?? { direction: 1, angleFactor: 0 }) : 0;
-    const toAngle = toV ? foldStateToAngle(toV[i] ?? { direction: 1, angleFactor: 0 }) : 0;
-    target[i] = MathUtils.lerp(fromAngle, toAngle, easedT);
-  }
-};
-
 export const getOffsetForId = (
   id: string,
   foldSteps: readonly FoldStoryStep[],

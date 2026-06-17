@@ -53,7 +53,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     paperHeight: 1.2,
     sceneCenterYOffset: 0.0,
     padding: 0.3,
-    scrollPages: 6,
+    scrollPages: 5,
   },
 
   specialVerses: {
@@ -487,60 +487,6 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // Index 5 to 9 = Left panel control
     // Index 10 to 14 = Bottom panel control
     foldSteps: [
-      {
-        id: "book-closed",
-        folds: [
-          // -- Right --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          // -- Left --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          // -- Bottom --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-        ],
-        verticalFolds: [
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 0.5 },
-        ],
-      },
-      {
-        id: "book-open",
-        folds: [
-          // -- Right --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          // -- Left --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          // -- Bottom --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-        ],
-        verticalFolds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-        ],
-      },
       {
         id: "pre-start",
         // 👈 First state: The entire paper is accordion-folded and the yellows overlap
