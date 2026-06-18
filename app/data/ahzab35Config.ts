@@ -49,8 +49,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   dimensions: {
-    paperWidth: 2,
-    paperHeight: 1.2,
+    paperWidth: 1.8,
+    paperHeight: 1.6,
     sceneCenterYOffset: 0.0,
     padding: 0.3,
     scrollPages: 5,
@@ -307,26 +307,26 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   svgOverlays: [
     // ── Mid left bracket — anchored between Group 1–3, left side
     {
-      src: "/ahzab/middle-section.svg",
+      src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.53, // Taller to close the gaps
-      scaleY: 0.82, // Slightly thicker
-      offsetX: -0.43, // Pushed outward to align with top frame
-      offsetY: 0, // Shifted down to reach the bottom frame
-      rotationZ: Math.PI / 2,
+      scaleX: 0.6, // Taller to close the gaps
+      scaleY: 0.6, // Slightly thicker
+      offsetX: -0.32, // Pushed outward to align with top frame
+      offsetY: 0.008, // Shifted down to reach the bottom frame
+      rotationZ: 0,
       renderOrder: 3,
     },
     // ── Mid right bracket — same SVG, flipped horizontally
     {
-      src: "/ahzab/middle-section.svg",
+      src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.53,
-      scaleY: -0.82,
-      offsetX: 0.43,
-      offsetY: 0,
-      rotationZ: Math.PI / 2,
+      scaleX: 0.6,
+      scaleY: 0.6,
+      offsetX: 0.32,
+      offsetY: 0.008,
+      rotationZ: 0,
       renderOrder: 3,
     },
   ],
@@ -356,6 +356,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: false,
           isCenter: true,
           extraRowGap: 0,
+          xGap: 0.03,
           bgThemeKey: "s2Group2Bg",
           customScale: -0.07,
           pushDown: 0,
@@ -366,7 +367,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: true,
           isCenter: true,
           extraRowGap: 0.01,
-          xGap: 0.3,
+          xGap: 0.2,
           bgThemeKey: "s2Group3Bg",
         },
         // ── Group 3 — Blue (1 row) ────────────────────────────────────────
@@ -375,6 +376,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: false,
           isCenter: true,
           extraRowGap: 0,
+          xGap: 0.03,
           bgThemeKey: "s2Group2Bg",
           customScale: -0.07,
           // pushDown: 0.01,
@@ -384,15 +386,19 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [12, 11],
           isPushedIn: false,
           isCenter: true,
-          extraRowGap: 0,
+          xGap: 0.44, // Change this value to adjust the horizontal distance between the capsules!
           bgThemeKey: "s2Group1Bg",
-          customScale: 0.15,
+          customScale: 0.18,
           pushDown: 0.09,
           topLabelConfig: {
-            width: 0.25,
-            height: 0.05,
-            yOffset: 0.04,
-            textScaleOverride: 0.75,
+            width: 0.3,
+            height: 0.085,
+            yOffset: 0,
+            textScaleOverride: 1.0,
+            bgColor: YELLOW_BG,
+            borderColor: YELLOW_BORDER,
+            textColor: "#A30000",
+            xMultiplier: 1.0,
           },
         },
       ],

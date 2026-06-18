@@ -300,6 +300,8 @@ interface TopLabelProps {
   shadow?: boolean;
   textOffsetY?: number;
   textScaleOverride?: number;
+  textColor?: string;
+  xMultiplier?: number;
 }
 
 export function TopLabel({
@@ -320,6 +322,8 @@ export function TopLabel({
   shadow,
   textOffsetY = 0,
   textScaleOverride,
+  textColor,
+  xMultiplier,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
@@ -356,7 +360,7 @@ export function TopLabel({
           bottomOnly={partialBorder && bottomBorder}
           renderOrder={renderOrder}
           depthTest={depthTest}
-          xMultiplier={1.5}
+          xMultiplier={xMultiplier ?? 1.5}
         />
       )}
       <UiRect
@@ -370,14 +374,14 @@ export function TopLabel({
         topOnly={false}
         renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
         depthTest={depthTest}
-        xMultiplier={1.5}
+        xMultiplier={xMultiplier ?? 1.5}
       />
       <group position={[w / 2, -h / 2 + textOffsetY, 0.002]}>
         <CanvasText
           text={text}
           font={fontToUse}
           fontSize={resolvedFontSize}
-          color={TEXT_LABEL}
+          color={textColor || TEXT_LABEL}
           width={w}
           height={h}
           textAlign="center"

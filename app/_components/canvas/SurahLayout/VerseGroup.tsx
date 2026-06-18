@@ -127,8 +127,10 @@ export function VerseGroup({
           labelWidth={topLabelConfig.width || 0.3}
           labelHeight={topLabelConfig.height}
           partialBorder={false}
-          bgColor={config.styling.colors.paperBase}
-          borderColor={config.styling.colors.s1InnerBorder}
+          bgColor={topLabelConfig.bgColor || config.styling.colors.paperBase}
+          borderColor={topLabelConfig.borderColor || config.styling.colors.s1InnerBorder}
+          textColor={topLabelConfig.textColor}
+          xMultiplier={topLabelConfig.xMultiplier}
           renderOrder={20}
           textScaleOverride={topLabelConfig.textScaleOverride}
         />

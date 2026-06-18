@@ -114,6 +114,11 @@ export interface VerseBlockConfig {
     height?: number;
     yOffset?: number;
     textOffsetY?: number;
+    textScaleOverride?: number;
+    bgColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    xMultiplier?: number;
   };
   backgroundTexture?: string;
   backgroundScaleX?: number;
@@ -349,6 +354,11 @@ export interface GroupTransforms {
     height?: number;
     yOffset?: number;
     textOffsetY?: number;
+    textScaleOverride?: number;
+    bgColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    xMultiplier?: number;
   };
   backgroundTexture?: string;
   backgroundScaleX?: number;
