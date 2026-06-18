@@ -30,6 +30,8 @@ export interface CurveColorConfig {
   bowGap?: number;
   innerBowGap?: number;
   inwardOffset?: number;
+  /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
+  curveSide?: "symmetrical" | "left" | "right";
 }
 
 export interface ThemeColors {

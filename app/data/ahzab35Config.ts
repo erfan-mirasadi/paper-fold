@@ -235,10 +235,12 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           bowGap: 0.2,
           innerBowGap: 0.19,
           inwardOffset: 0.015,
+          curveSide: "left",
         },
         {
           color: GREEN_BORDER,
           fillColor: GREEN_BG,
+          curveSide: "left",
         },
       ],
     },
@@ -335,7 +337,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     {
       id: "section2",
       type: "verticalGroups",
-      backgroundTexture: "/ayatalkursi/frame-section-1.svg",
+      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
       backgroundScaleX: 1.25,
       backgroundScaleY: 1.35,
       // Horizontal connector bars between paired capsules are hidden.

@@ -37,6 +37,8 @@ export interface CurveConfig {
   bowGap?: number;
   innerBowGap?: number;
   inwardOffset?: number;
+  /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
+  curveSide?: "symmetrical" | "left" | "right";
 }
 
 interface BracketSpec extends CurveConfig {
@@ -46,10 +48,16 @@ interface BracketSpec extends CurveConfig {
   innerYBot: number;
   nestLevel: number;
   isCenter: boolean;
-  leftEdgeTop?: number;
-  rightEdgeTop?: number;
-  leftEdgeBot?: number;
-  rightEdgeBot?: number;
+  leftColLeftTop?: number;
+  leftColRightTop?: number;
+  leftColLeftBot?: number;
+  leftColRightBot?: number;
+  rightColLeftTop?: number;
+  rightColRightTop?: number;
+  rightColLeftBot?: number;
+  rightColRightBot?: number;
+  /** Inherited from CurveConfig */
+  curveSide?: "symmetrical" | "left" | "right";
 }
 
 const FALLBACK_OUTER_COLORS: CurveConfig[] = [
@@ -84,8 +92,10 @@ function computeBrackets(
     const leftExpandW = verseOverrides?.[Number(leftEntry[0])]?.expandW ?? 0;
     const rightExpandW = verseOverrides?.[Number(rightEntry[0])]?.expandW ?? 0;
     return {
-      left: leftEntry[1].x - leftExpandW,
-      right: rightEntry[1].x + rightEntry[1].w + rightExpandW,
+      leftColLeft: leftEntry[1].x - leftExpandW,
+      leftColRight: leftEntry[1].x + leftEntry[1].w + leftExpandW,
+      rightColLeft: rightEntry[1].x - rightExpandW,
+      rightColRight: rightEntry[1].x + rightEntry[1].w + rightExpandW,
     };
   };
 
@@ -168,10 +178,14 @@ function computeBrackets(
         innerYBot: gBot.frameY - gBot.frameH + pad + tipThickness,
         nestLevel: i,
         isCenter: false,
-        leftEdgeTop: topEdges.left,
-        rightEdgeTop: topEdges.right,
-        leftEdgeBot: botEdges.left,
-        rightEdgeBot: botEdges.right,
+        leftColLeftTop: topEdges.leftColLeft,
+        leftColRightTop: topEdges.leftColRight,
+        rightColLeftTop: topEdges.rightColLeft,
+        rightColRightTop: topEdges.rightColRight,
+        leftColLeftBot: botEdges.leftColLeft,
+        leftColRightBot: botEdges.leftColRight,
+        rightColLeftBot: botEdges.rightColLeft,
+        rightColRightBot: botEdges.rightColRight,
         ...outerColors[i],
       });
     }
@@ -186,10 +200,14 @@ function computeBrackets(
         innerYBot: centerGroup.frameY - centerGroup.frameH + pad + smallBoxH2,
         nestLevel: outerPairs,
         isCenter: true,
-        leftEdgeTop: centerEdges.left,
-        rightEdgeTop: centerEdges.right,
-        leftEdgeBot: centerEdges.left,
-        rightEdgeBot: centerEdges.right,
+        leftColLeftTop: centerEdges.leftColLeft,
+        leftColRightTop: centerEdges.leftColRight,
+        rightColLeftTop: centerEdges.rightColLeft,
+        rightColRightTop: centerEdges.rightColRight,
+        leftColLeftBot: centerEdges.leftColLeft,
+        leftColRightBot: centerEdges.leftColRight,
+        rightColLeftBot: centerEdges.rightColLeft,
+        rightColRightBot: centerEdges.rightColRight,
         ...centerColor,
       });
     }
@@ -373,45 +391,16 @@ export const SideCurves = ({
         const deepOffsetOuter = CURVE_DEEP_OFFSET_OUTER;
         const deepOffsetInner = CURVE_DEEP_OFFSET_INNER;
 
-        const leftEdgeTop = b.leftEdgeTop ?? baseStartX_L;
-        const leftEdgeBot = b.leftEdgeBot ?? baseStartX_L;
-        const rightEdgeTop = b.rightEdgeTop ?? baseStartX_R;
-        const rightEdgeBot = b.rightEdgeBot ?? baseStartX_R;
+        const leftColLeftTop = b.leftColLeftTop ?? baseStartX_L;
+        const leftColLeftBot = b.leftColLeftBot ?? baseStartX_L;
+        const rightColRightTop = b.rightColRightTop ?? baseStartX_R;
+        const rightColRightBot = b.rightColRightBot ?? baseStartX_R;
 
-        const minLeftX = Math.min(leftEdgeTop, leftEdgeBot);
-        const maxRightX = Math.max(rightEdgeTop, rightEdgeBot);
-
-        const outerCtrl_L = minLeftX - outerBow;
-        const innerCtrl_L = minLeftX - innerBow;
-
-        const outerCtrl_R = maxRightX + outerBow;
-        const innerCtrl_R = maxRightX + innerBow;
-
-        const outerTipTop_L = b.isCenter
-          ? leftEdgeTop + deepOffsetOuter
-          : leftEdgeTop + inwardOffset;
-        const outerTipBot_L = b.isCenter
-          ? leftEdgeBot + deepOffsetOuter
-          : leftEdgeBot + inwardOffset;
-        const innerTipTop_L = b.isCenter
-          ? leftEdgeTop + deepOffsetInner
-          : leftEdgeTop + inwardOffset + innerInwardOffset;
-        const innerTipBot_L = b.isCenter
-          ? leftEdgeBot + deepOffsetInner
-          : leftEdgeBot + inwardOffset + innerInwardOffset;
-
-        const outerTipTop_R = b.isCenter
-          ? rightEdgeTop - deepOffsetOuter
-          : rightEdgeTop - inwardOffset;
-        const outerTipBot_R = b.isCenter
-          ? rightEdgeBot - deepOffsetOuter
-          : rightEdgeBot - inwardOffset;
-        const innerTipTop_R = b.isCenter
-          ? rightEdgeTop - deepOffsetInner
-          : rightEdgeTop - inwardOffset - innerInwardOffset;
-        const innerTipBot_R = b.isCenter
-          ? rightEdgeBot - deepOffsetInner
-          : rightEdgeBot - inwardOffset - innerInwardOffset;
+        // Fallbacks for missing inner edges (e.g. for generic surahs if curveSide is used)
+        const leftColRightTop = b.leftColRightTop ?? (baseStartX_L + 0.4);
+        const leftColRightBot = b.leftColRightBot ?? (baseStartX_L + 0.4);
+        const rightColLeftTop = b.rightColLeftTop ?? (baseStartX_R - 0.4);
+        const rightColLeftBot = b.rightColLeftBot ?? (baseStartX_R - 0.4);
 
         const topDelta = idx === 0 ? borderDelta : 0;
         const botDelta = idx === 0 ? borderDelta : 0;
@@ -421,49 +410,74 @@ export const SideCurves = ({
         const yTopInner = b.innerYTop + topDelta;
         const yBotInner = b.innerYBot - botDelta;
 
-        const lOutPts = getSmoothCurvePoints(
-          outerTipTop_L,
-          outerCtrl_L,
-          outerTipBot_L,
-          yTopOuter,
-          yBotOuter,
-        );
-        const lInPts = getSmoothCurvePoints(
-          innerTipTop_L,
-          innerCtrl_L,
-          innerTipBot_L,
-          yTopInner,
-          yBotInner,
-        );
+        const buildCurve = (
+          edgeTop: number,
+          edgeBot: number,
+          bowDirection: -1 | 1
+        ) => {
+          const minX = Math.min(edgeTop, edgeBot);
+          const maxX = Math.max(edgeTop, edgeBot);
+          const ctrlOuter = bowDirection === -1 ? minX - outerBow : maxX + outerBow;
+          const ctrlInner = bowDirection === -1 ? minX - innerBow : maxX + innerBow;
 
-        const rOutPts = getSmoothCurvePoints(
-          outerTipTop_R,
-          outerCtrl_R,
-          outerTipBot_R,
-          yTopOuter,
-          yBotOuter,
-        );
-        const rInPts = getSmoothCurvePoints(
-          innerTipTop_R,
-          innerCtrl_R,
-          innerTipBot_R,
-          yTopInner,
-          yBotInner,
-        );
+          const sign = bowDirection === -1 ? 1 : -1;
+          const tipOuterTop = b.isCenter ? edgeTop + sign * deepOffsetOuter : edgeTop + sign * inwardOffset;
+          const tipOuterBot = b.isCenter ? edgeBot + sign * deepOffsetOuter : edgeBot + sign * inwardOffset;
+          const tipInnerTop = b.isCenter ? edgeTop + sign * deepOffsetInner : edgeTop + sign * (inwardOffset + innerInwardOffset);
+          const tipInnerBot = b.isCenter ? edgeBot + sign * deepOffsetInner : edgeBot + sign * (inwardOffset + innerInwardOffset);
+
+          const outPts = getSmoothCurvePoints(tipOuterTop, ctrlOuter, tipOuterBot, yTopOuter, yBotOuter);
+          const inPts = getSmoothCurvePoints(tipInnerTop, ctrlInner, tipInnerBot, yTopInner, yBotInner);
+          return { outPts, inPts };
+        };
+
+        let curve1AnchorTop, curve1AnchorBot, curve1Bow: -1 | 1;
+        let curve2AnchorTop, curve2AnchorBot, curve2Bow: -1 | 1;
+
+        const cSide = b.curveSide || "symmetrical";
+
+        if (cSide === "symmetrical") {
+          curve1AnchorTop = leftColLeftTop;
+          curve1AnchorBot = leftColLeftBot;
+          curve1Bow = -1;
+
+          curve2AnchorTop = rightColRightTop;
+          curve2AnchorBot = rightColRightBot;
+          curve2Bow = 1;
+        } else if (cSide === "left") {
+          curve1AnchorTop = leftColLeftTop;
+          curve1AnchorBot = leftColLeftBot;
+          curve1Bow = -1;
+
+          curve2AnchorTop = rightColLeftTop;
+          curve2AnchorBot = rightColLeftBot;
+          curve2Bow = -1;
+        } else {
+          curve1AnchorTop = leftColRightTop;
+          curve1AnchorBot = leftColRightBot;
+          curve1Bow = 1;
+
+          curve2AnchorTop = rightColRightTop;
+          curve2AnchorBot = rightColRightBot;
+          curve2Bow = 1;
+        }
+
+        const curve1 = buildCurve(curve1AnchorTop, curve1AnchorBot, curve1Bow);
+        const curve2 = buildCurve(curve2AnchorTop, curve2AnchorBot, curve2Bow);
 
         return (
           <Fragment key={idx}>
             <CurveComponent
-              outerPoints={lOutPts}
-              innerPoints={lInPts}
+              outerPoints={curve1.outPts}
+              innerPoints={curve1.inPts}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}
               lineWidth={configColors.curveLineWidth}
             />
             <CurveComponent
-              outerPoints={rOutPts}
-              innerPoints={rInPts}
+              outerPoints={curve2.outPts}
+              innerPoints={curve2.inPts}
               color={b.color}
               fillColor={b.fillColor}
               shouldHide={shouldHide}
