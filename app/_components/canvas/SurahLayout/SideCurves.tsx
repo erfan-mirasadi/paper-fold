@@ -39,6 +39,10 @@ export interface CurveConfig {
   inwardOffset?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
+  /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
+  drawInnerCurves?: boolean;
+  innerCurvesBowGap?: number;
+  innerCurvesInnerBowGap?: number;
 }
 
 interface BracketSpec extends CurveConfig {
@@ -369,7 +373,14 @@ export const SideCurves = ({
 
   const brackets = useMemo(
     () =>
-      computeBrackets(groups, layout, hasIntroOutro, outerColors, centerColor, verseOverrides),
+      computeBrackets(
+        groups,
+        layout,
+        hasIntroOutro,
+        outerColors,
+        centerColor,
+        verseOverrides,
+      ),
     [groups, layout, hasIntroOutro, outerColors, centerColor, verseOverrides],
   );
 
@@ -397,10 +408,10 @@ export const SideCurves = ({
         const rightColRightBot = b.rightColRightBot ?? baseStartX_R;
 
         // Fallbacks for missing inner edges (e.g. for generic surahs if curveSide is used)
-        const leftColRightTop = b.leftColRightTop ?? (baseStartX_L + 0.4);
-        const leftColRightBot = b.leftColRightBot ?? (baseStartX_L + 0.4);
-        const rightColLeftTop = b.rightColLeftTop ?? (baseStartX_R - 0.4);
-        const rightColLeftBot = b.rightColLeftBot ?? (baseStartX_R - 0.4);
+        const leftColRightTop = b.leftColRightTop ?? baseStartX_L + 0.4;
+        const leftColRightBot = b.leftColRightBot ?? baseStartX_L + 0.4;
+        const rightColLeftTop = b.rightColLeftTop ?? baseStartX_R - 0.4;
+        const rightColLeftBot = b.rightColLeftBot ?? baseStartX_R - 0.4;
 
         const topDelta = idx === 0 ? borderDelta : 0;
         const botDelta = idx === 0 ? borderDelta : 0;
@@ -413,21 +424,47 @@ export const SideCurves = ({
         const buildCurve = (
           edgeTop: number,
           edgeBot: number,
-          bowDirection: -1 | 1
+          bowDirection: -1 | 1,
+          customOuterBow?: number,
+          customInnerBow?: number,
         ) => {
+          const usedOuterBow = customOuterBow ?? outerBow;
+          const usedInnerBow = customInnerBow ?? innerBow;
           const minX = Math.min(edgeTop, edgeBot);
           const maxX = Math.max(edgeTop, edgeBot);
-          const ctrlOuter = bowDirection === -1 ? minX - outerBow : maxX + outerBow;
-          const ctrlInner = bowDirection === -1 ? minX - innerBow : maxX + innerBow;
+          const ctrlOuter =
+            bowDirection === -1 ? minX - usedOuterBow : maxX + usedOuterBow;
+          const ctrlInner =
+            bowDirection === -1 ? minX - usedInnerBow : maxX + usedInnerBow;
 
           const sign = bowDirection === -1 ? 1 : -1;
-          const tipOuterTop = b.isCenter ? edgeTop + sign * deepOffsetOuter : edgeTop + sign * inwardOffset;
-          const tipOuterBot = b.isCenter ? edgeBot + sign * deepOffsetOuter : edgeBot + sign * inwardOffset;
-          const tipInnerTop = b.isCenter ? edgeTop + sign * deepOffsetInner : edgeTop + sign * (inwardOffset + innerInwardOffset);
-          const tipInnerBot = b.isCenter ? edgeBot + sign * deepOffsetInner : edgeBot + sign * (inwardOffset + innerInwardOffset);
+          const tipOuterTop = b.isCenter
+            ? edgeTop + sign * deepOffsetOuter
+            : edgeTop + sign * inwardOffset;
+          const tipOuterBot = b.isCenter
+            ? edgeBot + sign * deepOffsetOuter
+            : edgeBot + sign * inwardOffset;
+          const tipInnerTop = b.isCenter
+            ? edgeTop + sign * deepOffsetInner
+            : edgeTop + sign * (inwardOffset + innerInwardOffset);
+          const tipInnerBot = b.isCenter
+            ? edgeBot + sign * deepOffsetInner
+            : edgeBot + sign * (inwardOffset + innerInwardOffset);
 
-          const outPts = getSmoothCurvePoints(tipOuterTop, ctrlOuter, tipOuterBot, yTopOuter, yBotOuter);
-          const inPts = getSmoothCurvePoints(tipInnerTop, ctrlInner, tipInnerBot, yTopInner, yBotInner);
+          const outPts = getSmoothCurvePoints(
+            tipOuterTop,
+            ctrlOuter,
+            tipOuterBot,
+            yTopOuter,
+            yBotOuter,
+          );
+          const inPts = getSmoothCurvePoints(
+            tipInnerTop,
+            ctrlInner,
+            tipInnerBot,
+            yTopInner,
+            yBotInner,
+          );
           return { outPts, inPts };
         };
 
@@ -465,6 +502,26 @@ export const SideCurves = ({
         const curve1 = buildCurve(curve1AnchorTop, curve1AnchorBot, curve1Bow);
         const curve2 = buildCurve(curve2AnchorTop, curve2AnchorBot, curve2Bow);
 
+        let innerCurve1, innerCurve2;
+        if (b.drawInnerCurves) {
+          const iOuterBow = b.innerCurvesBowGap ?? outerBow;
+          const iInnerBow = b.innerCurvesInnerBowGap ?? innerBow;
+          innerCurve1 = buildCurve(
+            leftColRightTop,
+            leftColRightBot,
+            1,
+            iOuterBow,
+            iInnerBow,
+          );
+          innerCurve2 = buildCurve(
+            rightColLeftTop,
+            rightColLeftBot,
+            -1,
+            iOuterBow,
+            iInnerBow,
+          );
+        }
+
         return (
           <Fragment key={idx}>
             <CurveComponent
@@ -483,6 +540,26 @@ export const SideCurves = ({
               shouldHide={shouldHide}
               lineWidth={configColors.curveLineWidth}
             />
+            {b.drawInnerCurves && innerCurve1 && (
+              <CurveComponent
+                outerPoints={innerCurve1.outPts}
+                innerPoints={innerCurve1.inPts}
+                color={b.color}
+                fillColor={b.fillColor}
+                shouldHide={shouldHide}
+                lineWidth={configColors.curveLineWidth}
+              />
+            )}
+            {b.drawInnerCurves && innerCurve2 && (
+              <CurveComponent
+                outerPoints={innerCurve2.outPts}
+                innerPoints={innerCurve2.inPts}
+                color={b.color}
+                fillColor={b.fillColor}
+                shouldHide={shouldHide}
+                lineWidth={configColors.curveLineWidth}
+              />
+            )}
           </Fragment>
         );
       })}

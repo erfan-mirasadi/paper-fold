@@ -32,6 +32,10 @@ export interface CurveColorConfig {
   inwardOffset?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
+  /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
+  drawInnerCurves?: boolean;
+  innerCurvesBowGap?: number;
+  innerCurvesInnerBowGap?: number;
 }
 
 export interface ThemeColors {

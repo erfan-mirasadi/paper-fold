@@ -340,9 +340,9 @@ export function TopLabel({
   const fontToUse = isArabicText ? QURAN_FONT : LATIN_LABEL_FONT;
   const resolvedFontSize =
     (fontSizeOverride ??
-    (isArabicText
-      ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5
-      : TEXT_SIZES.TOP_LABEL * topLabelScale)) * (textScaleOverride ?? 1);
+      (isArabicText
+        ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5
+        : TEXT_SIZES.TOP_LABEL * topLabelScale)) * (textScaleOverride ?? 1);
 
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
@@ -519,11 +519,14 @@ export const VerseBox = ({
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
-  const textScale = textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
+  const textScale =
+    textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
-  
+
   const activeStoryConfig = useStoryStore((s) => s.activeConfig);
-  const showVerseNumber = !(activeStoryConfig?.features?.hideVerseNumbers ?? false);
+  const showVerseNumber = !(
+    activeStoryConfig?.features?.hideVerseNumbers ?? false
+  );
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;
 
@@ -549,8 +552,10 @@ export const VerseBox = ({
 
   const safeMargin = 0.0;
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
-  const EXTRA_BIG_VERSE_PADDING = (!isPill && !isArabic) ? 0.07 : 0;
-  const centeredSidePadding = centerTextInCapsule ? numberSidePadding + EXTRA_BIG_VERSE_PADDING : 0;
+  const EXTRA_BIG_VERSE_PADDING = !isPill && !isArabic ? 0.07 : 0;
+  const centeredSidePadding = centerTextInCapsule
+    ? numberSidePadding + EXTRA_BIG_VERSE_PADDING
+    : 0;
   const textMaxW =
     (finalW -
       safeMargin * 2 -
