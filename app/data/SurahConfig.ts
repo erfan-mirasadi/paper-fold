@@ -468,8 +468,12 @@ export function buildSurahTransforms(
             ? centerX + groupGapAmount / 2 
             : centerX - groupGapAmount / 2 - standardGHalfW;
 
+          // Per-verse horizontal nudge — keyed by verseId (Arabic numbering).
+          // Positive xOffset → pushes right, negative → pushes left.
+          const verseXOffset = config.verseOverrides?.[verseId]?.xOffset ?? 0;
+
           verses[verseId] = {
-            x: verseX,
+            x: verseX + verseXOffset,
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
             w: standardGHalfW,

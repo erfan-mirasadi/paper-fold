@@ -79,6 +79,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   verseOverrides: {
     // ── Group 0 — Yellow (İman) ───────────────────────────────────────────
+    // Verse 1 is the RIGHT-side capsule (index 1 in verseIds [2,1]).
+    // xOffset: positive → pushes further right toward the paper edge.
     1: {
       bg: YELLOW_BG,
       border: YELLOW_BORDER,
@@ -86,6 +88,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
       textColor: "#A30000",
+      xOffset: 0.0, // Yellow: no extra push (short text fits naturally)
     },
     2: {
       bg: YELLOW_BG,
@@ -99,6 +102,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       textColor: "#A30000",
     },
     // ── Group 1 — Blue ───────────────────────────────────────────────────
+    // Verse 3 is the RIGHT-side capsule (index 1 in verseIds [4,3]).
     3: {
       bg: BLUE_BG,
       border: BLUE_BORDER,
@@ -107,6 +111,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: BLUE_BORDER,
       expandW: -0.05,
       expandH: 0.005,
+      xOffset: 0.11, // Blue right-side: push toward the right edge
     },
     4: {
       bg: BLUE_BG,
@@ -121,12 +126,14 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       expandH: 0.005,
     },
     // ── Group 2 — Green (pushed in) ──────────────────────────────────────
+    // Verses 5 and 7 are the RIGHT-side capsules (odd indices in [6,5,8,7]).
     5: {
       bg: GREEN_BG,
       border: GREEN_BORDER,
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
+      xOffset: 0.09, // Green right-side row 1: push right
     },
     6: {
       bg: GREEN_BG,
@@ -144,6 +151,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
+      xOffset: 0.09, // Green right-side row 2: push right
     },
     8: {
       bg: GREEN_BG,
@@ -156,6 +164,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       capsuleLabelPosition: "bottom",
     },
     // ── Group 3 — Blue ───────────────────────────────────────────────────
+    // Verse 9 is the RIGHT-side capsule (index 1 in verseIds [10,9]).
     9: {
       bg: BLUE_BG,
       border: BLUE_BORDER,
@@ -164,6 +173,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: BLUE_BORDER,
       expandW: -0.05,
       expandH: 0.005,
+      xOffset: 0.11, // Blue right-side: push toward the right edge
     },
     10: {
       bg: BLUE_BG,
@@ -178,6 +188,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       expandH: 0.005,
     },
     // ── Group 4 — Yellow (dome text, compact) ───────────────────────────
+    // Verse 11 is the RIGHT-side capsule (index 1 in verseIds [12,11]).
     11: {
       bg: YELLOW_BG,
       border: YELLOW_BORDER,
@@ -185,6 +196,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: YELLOW_BORDER,
       circleTextCol: YELLOW_BORDER,
       textColor: "#A30000",
+      xOffset: 0.0, // Yellow dome: no push (symmetric dome layout)
     },
     12: {
       bg: YELLOW_BG,
@@ -312,9 +324,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.6, // Taller to close the gaps
+      scaleX: 0.65, // Taller to close the gaps
       scaleY: 0.6, // Slightly thicker
-      offsetX: -0.32, // Pushed outward to align with top frame
+      offsetX: -0.36, // Pushed outward to align with top frame
       offsetY: 0.008, // Shifted down to reach the bottom frame
       rotationZ: 0,
       renderOrder: 3,
@@ -324,9 +336,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.6,
+      scaleX: 0.65,
       scaleY: 0.6,
-      offsetX: 0.32,
+      offsetX: 0.36,
       offsetY: 0.008,
       rotationZ: 0,
       renderOrder: 3,

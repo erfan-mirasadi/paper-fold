@@ -202,6 +202,14 @@ export interface VerseOverrideConfig {
   capsuleLabelPosition?: "top" | "bottom";
   /** Override the verse text scale for this specific verse. */
   textScaleOverride?: number;
+  /**
+   * Additional horizontal offset (in world units) applied to this verse's X
+   * position after the layout engine places it.
+   * Positive → moves right, Negative → moves left.
+   * Useful for pushing a short right-side verse further toward the paper edge
+   * so both sides appear visually balanced.
+   */
+  xOffset?: number;
 }
 
 export interface SurahAssets {
