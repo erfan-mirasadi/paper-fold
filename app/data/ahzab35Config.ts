@@ -235,10 +235,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group3Bg: GREEN_BG,
       curveColors: [
         {
-          color: "transparent",
+          color: "#A30000",
           fillColor: YELLOW_BG,
-          bowGap: 0.52, // reduced curve a little bit
-          innerBowGap: 0.555,
+          bowGap: 0.42, // reduced curve a little bit
+          innerBowGap: 0.455,
           inwardOffset: -0.04,
           drawInnerCurves: false,
           innerCurvesBowGap: 0.145,
@@ -246,19 +246,24 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           // How far apart the two curve lines are where they touch the yellow capsule.
           // Default is smallBoxH2 (0.085). Decrease to bring lines closer together.
           tipThickness: -0.14,
+          topAnchorXOffset: 0,
+          bottomAnchorXOffset: 0.2,
+          topAnchorYOffset: 0.011,
+          bottomAnchorYOffset: 0.011,
         },
         {
           color: BLUE_BORDER,
           fillColor: BLUE_BG,
           bowGap: 0.2,
           innerBowGap: 0.19,
-          inwardOffset: 0.015,
+          inwardOffset: 0.01,
           curveSide: "left",
         },
         {
           color: GREEN_BORDER,
           fillColor: GREEN_BG,
           curveSide: "left",
+          bottomAnchorYOffset: -0.011,
         },
       ],
     },
@@ -468,21 +473,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   animations: {
     // @ts-ignore
     computePanels: (lm: any) => {
-      const positions = lm.groupYPositions as number[];
-      const heights = lm.groupHeights as number[];
-
-      // Find the horizontal cut line
-      const g3Bot = positions[3] - heights[3];
-      const g4Top = positions[4] ?? g3Bot;
-      const cutYWorld = (g3Bot + g4Top) / 2;
-
-      const offsetY = Math.abs(cutYWorld);
-
       return [
         {
           id: "left-panel",
           w: lm.PAGE_WIDTH / 2,
-          h: offsetY,
+          h: lm.PAGE_HEIGHT,
           offsetX: 0,
           offsetY: 0,
           // 👈 Left panel only reacts to left folds (5 to 9)
@@ -491,21 +486,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           id: "right-panel",
           w: lm.PAGE_WIDTH / 2,
-          h: offsetY,
+          h: lm.PAGE_HEIGHT,
           offsetX: lm.PAGE_WIDTH / 2,
           offsetY: 0,
           // 👈 Right panel only reacts to right folds (0 to 4)
           ignoreFolds: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-        },
-        {
-          id: "bottom-panel",
-          w: lm.PAGE_WIDTH,
-          h: lm.PAGE_HEIGHT - offsetY,
-          offsetX: 0,
-          offsetY: offsetY,
-          isStatic: false,
-          // 👈 Bottom panel only reacts to global/bottom folds (10 to 14)
-          ignoreFolds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         },
       ];
     },
@@ -613,6 +598,30 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         ],
       },
       {
+        id: "fold-right-side-2",
+        // 👈 Left stays flat, right folds into accordion state
+        folds: [
+          // -- Right folds --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          // -- Left stays static and open (angle zero) --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          // -- Bottom stays static and open (angle zero) --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+        ],
+      },
+      {
         id: "open-right-side",
         // 👈 Right opens again until we reach left
         folds: [
@@ -649,6 +658,30 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
           { direction: 1, angleFactor: 0 },
+          // -- Bottom stays static on the ground and detaches! --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+        ],
+      },
+      {
+        id: "fold-left-side-2",
+        // 👈 Right stays flat, left starts accordion-folding
+        folds: [
+          // -- Right stays static --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
+          // -- Left folds into accordion state --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
           // -- Bottom stays static on the ground and detaches! --
           { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },

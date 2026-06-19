@@ -560,7 +560,7 @@ export const VerseBox = ({
   const SMALL_PILL_OFFSET = 0.002;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
-  const centerTextInCapsule = !isPill;
+  const centerTextInCapsule = !isPill || !showVerseNumber;
 
   // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
   const circleEnd = cx + cr;
@@ -573,15 +573,17 @@ export const VerseBox = ({
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
   const EXTRA_BIG_VERSE_PADDING = !isPill && !isArabic ? 0.07 : 0;
   const centeredSidePadding = centerTextInCapsule
-    ? numberSidePadding + EXTRA_BIG_VERSE_PADDING
+    ? (showVerseNumber ? numberSidePadding : 0.012) + EXTRA_BIG_VERSE_PADDING
     : 0;
-  const textMaxW =
-    (finalW -
-      safeMargin * 2 -
-      centeredSidePadding * 2 -
-      textPaddingX -
-      (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
-    nonArabicTextTighten;
+  const textMaxW = !showVerseNumber
+    ? finalW - 0.04
+    : (finalW -
+        safeMargin * 2 -
+        centeredSidePadding * 2 -
+        textPaddingX -
+        (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
+      nonArabicTextTighten;
+      
   const textX = centerTextInCapsule
     ? finalW / 2
     : isArabic
@@ -589,11 +591,13 @@ export const VerseBox = ({
       : safeMargin + textPaddingX;
 
   // Visual centering adjustments moved to SurahConfig.ts
-  const versePosX = isArabic
-    ? isPill
-      ? textX - SMALL_TEXT_SHIFT
-      : textX
-    : textX;
+  const versePosX = !showVerseNumber
+    ? finalW / 2
+    : isArabic
+      ? isPill
+        ? textX - SMALL_TEXT_SHIFT
+        : textX
+      : textX;
 
   const verticalShift = isArabic
     ? isPill

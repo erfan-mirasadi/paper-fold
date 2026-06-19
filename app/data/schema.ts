@@ -37,6 +37,10 @@ export interface CurveColorConfig {
   innerCurvesBowGap?: number;
   innerCurvesInnerBowGap?: number;
   tipThickness?: number;
+  topAnchorXOffset?: number;
+  bottomAnchorXOffset?: number;
+  topAnchorYOffset?: number;
+  bottomAnchorYOffset?: number;
 }
 
 export interface ThemeColors {

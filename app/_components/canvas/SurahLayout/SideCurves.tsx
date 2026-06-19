@@ -68,6 +68,10 @@ interface BracketSpec extends CurveConfig {
   rightColRightBot?: number;
   /** Inherited from CurveConfig */
   curveSide?: "symmetrical" | "left" | "right";
+  topAnchorXOffset?: number;
+  bottomAnchorXOffset?: number;
+  topAnchorYOffset?: number;
+  bottomAnchorYOffset?: number;
 }
 
 const FALLBACK_OUTER_COLORS: CurveConfig[] = [
@@ -432,13 +436,16 @@ export const SideCurves = ({
         const rightColLeftTop = b.rightColLeftTop ?? baseStartX_R - 0.4;
         const rightColLeftBot = b.rightColLeftBot ?? baseStartX_R - 0.4;
 
+        const topYOffset = b.topAnchorYOffset || 0;
+        const bottomYOffset = b.bottomAnchorYOffset || 0;
+
         const topDelta = idx === 0 ? borderDelta : 0;
         const botDelta = idx === 0 ? borderDelta : 0;
 
-        const yTopOuter = b.outerYTop + topDelta;
-        const yBotOuter = b.outerYBot - botDelta;
-        const yTopInner = b.innerYTop + topDelta;
-        const yBotInner = b.innerYBot - botDelta;
+        const yTopOuter = b.outerYTop + topDelta + topYOffset;
+        const yBotOuter = b.outerYBot - botDelta + bottomYOffset;
+        const yTopInner = b.innerYTop + topDelta + topYOffset;
+        const yBotInner = b.innerYBot - botDelta + bottomYOffset;
 
         const buildCurve = (
           edgeTop: number,
@@ -492,29 +499,32 @@ export const SideCurves = ({
 
         const cSide = b.curveSide || "symmetrical";
 
+        const topAnchorOffset = b.topAnchorXOffset || 0;
+        const bottomAnchorOffset = b.bottomAnchorXOffset || 0;
+
         if (cSide === "symmetrical") {
-          curve1AnchorTop = leftColLeftTop;
-          curve1AnchorBot = leftColLeftBot;
+          curve1AnchorTop = leftColLeftTop - topAnchorOffset;
+          curve1AnchorBot = leftColLeftBot - bottomAnchorOffset;
           curve1Bow = -1;
 
-          curve2AnchorTop = rightColRightTop;
-          curve2AnchorBot = rightColRightBot;
+          curve2AnchorTop = rightColRightTop + topAnchorOffset;
+          curve2AnchorBot = rightColRightBot + bottomAnchorOffset;
           curve2Bow = 1;
         } else if (cSide === "left") {
-          curve1AnchorTop = leftColLeftTop;
-          curve1AnchorBot = leftColLeftBot;
+          curve1AnchorTop = leftColLeftTop - topAnchorOffset;
+          curve1AnchorBot = leftColLeftBot - bottomAnchorOffset;
           curve1Bow = -1;
 
-          curve2AnchorTop = rightColLeftTop;
-          curve2AnchorBot = rightColLeftBot;
+          curve2AnchorTop = rightColLeftTop - topAnchorOffset;
+          curve2AnchorBot = rightColLeftBot - bottomAnchorOffset;
           curve2Bow = -1;
         } else {
-          curve1AnchorTop = leftColRightTop;
-          curve1AnchorBot = leftColRightBot;
+          curve1AnchorTop = leftColRightTop + topAnchorOffset;
+          curve1AnchorBot = leftColRightBot + bottomAnchorOffset;
           curve1Bow = 1;
 
-          curve2AnchorTop = rightColRightTop;
-          curve2AnchorBot = rightColRightBot;
+          curve2AnchorTop = rightColRightTop + topAnchorOffset;
+          curve2AnchorBot = rightColRightBot + bottomAnchorOffset;
           curve2Bow = 1;
         }
 
