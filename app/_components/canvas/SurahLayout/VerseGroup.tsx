@@ -57,7 +57,8 @@ export function VerseGroup({
 
   const activeTextData = useStoryStore.getState().activeTextData;
   const arabicGroups = activeTextData?.["ar"]?.section2?.colorGroups;
-  const textDataGroup = (groupIndex !== undefined && arabicGroups) ? arabicGroups[groupIndex] : group;
+  const textDataGroup =
+    groupIndex !== undefined && arabicGroups ? arabicGroups[groupIndex] : group;
   const topLabelText = textDataGroup?.topLabel;
   const topLabelConfig = (gt as any).topLabelConfig;
 
@@ -69,14 +70,19 @@ export function VerseGroup({
 
   const leftVerses: any[] = [];
   const rightVerses: any[] = [];
-  const versesArr = Object.values(gt.verses).sort((a: any, b: any) => a.x - b.x);
+  const versesArr = Object.values(gt.verses).sort(
+    (a: any, b: any) => a.x - b.x,
+  );
   const half = Math.floor(versesArr.length / 2);
   leftVerses.push(...versesArr.slice(0, half));
   rightVerses.push(...versesArr.slice(half));
 
   const getBounds = (verses: any[]) => {
     if (verses.length === 0) return null;
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
     for (const v of verses) {
       if (v.x < minX) minX = v.x;
       if (v.x + v.w > maxX) maxX = v.x + v.w;
@@ -128,9 +134,14 @@ export function VerseGroup({
           labelHeight={topLabelConfig.height}
           partialBorder={false}
           bgColor={topLabelConfig.bgColor || config.styling.colors.paperBase}
-          borderColor={topLabelConfig.borderColor || config.styling.colors.s1InnerBorder}
+          borderColor={
+            topLabelConfig.borderColor || config.styling.colors.s1InnerBorder
+          }
           textColor={topLabelConfig.textColor}
           xMultiplier={topLabelConfig.xMultiplier}
+          noBorder={topLabelConfig.noBorder}
+          shadow={topLabelConfig.shadow}
+          isSimpleText={topLabelConfig.isSimpleText}
           renderOrder={20}
           textScaleOverride={topLabelConfig.textScaleOverride}
         />
@@ -248,7 +259,8 @@ export function VerseGroup({
         const finalY = vt.y + expandH;
 
         const tabX = finalX + finalW / 2;
-        const tabY = tabPos === "top" ? finalY + labelDrop : finalY - finalH - labelDrop;
+        const tabY =
+          tabPos === "top" ? finalY + labelDrop : finalY - finalH - labelDrop;
 
         return (
           <group key={v.number}>
@@ -285,7 +297,6 @@ export function VerseGroup({
           </group>
         );
       })}
-
     </group>
   );
 }

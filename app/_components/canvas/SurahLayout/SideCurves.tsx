@@ -43,6 +43,12 @@ export interface CurveConfig {
   drawInnerCurves?: boolean;
   innerCurvesBowGap?: number;
   innerCurvesInnerBowGap?: number;
+  /**
+   * Controls how far apart the outer and inner curve lines are where they
+   * touch the capsule (in world units). Smaller = lines closer together (thinner bracket tip).
+   * Defaults to the layout's `smallBoxH2` value.
+   */
+  tipThickness?: number;
 }
 
 interface BracketSpec extends CurveConfig {
@@ -171,15 +177,20 @@ function computeBrackets(
       if (!gTop || !gBot) continue;
 
       const pad = layout.curvePad ?? groupPad;
-      const tipThickness = smallBoxH2;
+      const tipThickness = outerColors[i]?.tipThickness ?? smallBoxH2;
+      const halfTip = tipThickness / 2;
+      // Center the two lines symmetrically around the middle of each capsule edge.
+      // capsuleCenterTop = top of the top-group capsule's vertical midpoint
+      const capsuleCenterTop = gTop.frameY - pad - smallBoxH2 / 2;
+      const capsuleCenterBot = gBot.frameY - gBot.frameH + pad + smallBoxH2 / 2;
       const topEdges = getEdges(gTop);
       const botEdges = getEdges(gBot);
 
       brackets.push({
-        outerYTop: gTop.frameY - pad,
-        outerYBot: gBot.frameY - gBot.frameH + pad,
-        innerYTop: gTop.frameY - pad - tipThickness,
-        innerYBot: gBot.frameY - gBot.frameH + pad + tipThickness,
+        outerYTop: capsuleCenterTop + halfTip,
+        outerYBot: capsuleCenterBot - halfTip,
+        innerYTop: capsuleCenterTop - halfTip,
+        innerYBot: capsuleCenterBot + halfTip,
         nestLevel: i,
         isCenter: false,
         leftColLeftTop: topEdges.leftColLeft,
@@ -196,12 +207,17 @@ function computeBrackets(
 
     if (centerGroup) {
       const pad = groupPad;
+      const centerTipThickness = centerColor?.tipThickness ?? smallBoxH2;
+      const centerHalfTip = centerTipThickness / 2;
+      const centerCapsuleCenterTop = centerGroup.frameY - pad - smallBoxH2 / 2;
+      const centerCapsuleCenterBot =
+        centerGroup.frameY - centerGroup.frameH + pad + smallBoxH2 / 2;
       const centerEdges = getEdges(centerGroup);
       brackets.push({
-        outerYTop: centerGroup.frameY - pad,
-        outerYBot: centerGroup.frameY - centerGroup.frameH + pad,
-        innerYTop: centerGroup.frameY - pad - smallBoxH2,
-        innerYBot: centerGroup.frameY - centerGroup.frameH + pad + smallBoxH2,
+        outerYTop: centerCapsuleCenterTop + centerHalfTip,
+        outerYBot: centerCapsuleCenterBot - centerHalfTip,
+        innerYTop: centerCapsuleCenterTop - centerHalfTip,
+        innerYBot: centerCapsuleCenterBot + centerHalfTip,
         nestLevel: outerPairs,
         isCenter: true,
         leftColLeftTop: centerEdges.leftColLeft,
@@ -293,10 +309,11 @@ const CurveComponent = ({
   });
 
   const hasFill = fillColor !== "transparent" && fillColor !== "none";
+  const hasLine = color !== "transparent" && color !== "none";
 
   return (
     <group ref={groupRef} position={[0, 0, 0.0012]}>
-      <group position={[0, 0, 0.0012]} renderOrder={5}>
+      <group position={[0, 0, 0.0012]} renderOrder={5} visible={hasLine}>
         <Line
           ref={line1Ref}
           points={outerPoints}
@@ -389,7 +406,9 @@ export const SideCurves = ({
   return (
     <group position={[0, 0, 0.0025]} renderOrder={5}>
       {brackets.map((b, idx) => {
-        if (b.color === "transparent" || b.color === "none") return null;
+        const hasLine = b.color !== "transparent" && b.color !== "none";
+        const hasFill = b.fillColor !== "transparent" && b.fillColor !== "none";
+        if (!hasLine && !hasFill) return null;
 
         const bowMultiplier = totalLevels - b.nestLevel;
         const nestMultiplier = b.nestLevel + 1;

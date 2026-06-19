@@ -36,6 +36,7 @@ export interface CurveColorConfig {
   drawInnerCurves?: boolean;
   innerCurvesBowGap?: number;
   innerCurvesInnerBowGap?: number;
+  tipThickness?: number;
 }
 
 export interface ThemeColors {
@@ -70,7 +71,7 @@ export interface ThemeColors {
    */
   curveColors?: CurveColorConfig[];
   curveLineWidth?: number;
-  
+
   /**
    * Optional background colors for vertical sections (like Ayat Al Kursi).
    * Usually an array mapping to groups: e.g. [topColor, middleColor, bottomColor].

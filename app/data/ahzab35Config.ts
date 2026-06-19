@@ -49,10 +49,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   dimensions: {
-    paperWidth: 1.8,
+    paperWidth: 2.3,
     paperHeight: 1.6,
     sceneCenterYOffset: 0.0,
-    padding: 0.3,
+    padding: 0.38,
     scrollPages: 5,
   },
 
@@ -83,19 +83,19 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // xOffset: positive → pushes further right toward the paper edge.
     1: {
       bg: YELLOW_BG,
-      border: YELLOW_BORDER,
+      border: "#A30000",
       circleBg: YELLOW_BG,
-      circleBorderCol: YELLOW_BORDER,
-      circleTextCol: YELLOW_BORDER,
+      circleBorderCol: "#A30000",
+      circleTextCol: "#A30000",
       textColor: "#A30000",
       xOffset: 0.0, // Yellow: no extra push (short text fits naturally)
     },
     2: {
       bg: YELLOW_BG,
-      border: YELLOW_BORDER,
+      border: "#A30000",
       circleBg: YELLOW_BG,
-      circleBorderCol: YELLOW_BORDER,
-      circleTextCol: YELLOW_BORDER,
+      circleBorderCol: "#A30000",
+      circleTextCol: "#A30000",
       hasCapsuleLabel: true,
       customCapsuleLabel: "İman",
       capsuleLabelPosition: "top",
@@ -111,7 +111,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: BLUE_BORDER,
       expandW: -0.05,
       expandH: 0.005,
-      xOffset: 0.08, // Blue right-side: push toward the right edge
+      xOffset: 0.05, // Blue right-side: push toward the right edge
     },
     4: {
       bg: BLUE_BG,
@@ -133,7 +133,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      xOffset: 0.15, // Green right-side row 1: push right
+      xOffset: 0.1, // Green right-side row 1: push right
     },
     6: {
       bg: GREEN_BG,
@@ -151,7 +151,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      xOffset: 0.15, // Green right-side row 2: push right
+      xOffset: 0.1, // Green right-side row 2: push right
     },
     8: {
       bg: GREEN_BG,
@@ -173,7 +173,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: BLUE_BORDER,
       expandW: -0.05,
       expandH: 0.005,
-      xOffset: 0.08, // Blue right-side: push toward the right edge
+      xOffset: 0.05, // Blue right-side: push toward the right edge
     },
     10: {
       bg: BLUE_BG,
@@ -191,19 +191,19 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // Verse 11 is the RIGHT-side capsule (index 1 in verseIds [12,11]).
     11: {
       bg: YELLOW_BG,
-      border: YELLOW_BORDER,
+      border: "#A30000",
       circleBg: YELLOW_BG,
-      circleBorderCol: YELLOW_BORDER,
-      circleTextCol: YELLOW_BORDER,
+      circleBorderCol: "#A30000",
+      circleTextCol: "#A30000",
       textColor: "#A30000",
       xOffset: 0.0, // Yellow dome: no push (symmetric dome layout)
     },
     12: {
       bg: YELLOW_BG,
-      border: YELLOW_BORDER,
+      border: "#A30000",
       circleBg: YELLOW_BG,
-      circleBorderCol: YELLOW_BORDER,
-      circleTextCol: YELLOW_BORDER,
+      circleBorderCol: "#A30000",
+      circleTextCol: "#A30000",
       textColor: "#A30000",
     },
   },
@@ -235,14 +235,17 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group3Bg: GREEN_BG,
       curveColors: [
         {
-          color: YELLOW_BORDER,
-          fillColor: "#A30000",
-          bowGap: 0.2,
-          innerBowGap: 0.19,
-          inwardOffset: 0.02,
-          drawInnerCurves: true,
-          innerCurvesBowGap: 0.2,
-          innerCurvesInnerBowGap: 0.19,
+          color: "transparent",
+          fillColor: YELLOW_BG,
+          bowGap: 0.52, // reduced curve a little bit
+          innerBowGap: 0.555,
+          inwardOffset: -0.04,
+          drawInnerCurves: false,
+          innerCurvesBowGap: 0.145,
+          innerCurvesInnerBowGap: 0.12,
+          // How far apart the two curve lines are where they touch the yellow capsule.
+          // Default is smallBoxH2 (0.085). Decrease to bring lines closer together.
+          tipThickness: -0.14,
         },
         {
           color: BLUE_BORDER,
@@ -327,11 +330,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.65, // Taller to close the gaps
-      scaleY: 0.6, // Slightly thicker
-      offsetX: -0.4, // Pushed outward to align with top frame
-      offsetY: 0.008, // Shifted down to reach the bottom frame
-      rotationZ: 0,
+      scaleX: 0.64, // Taller to close the gaps
+      scaleY: 1, // Slightly thicker
+      offsetX: -0.47, // Pushed outward to align with top frame
+      offsetY: 0.004, // Shifted down to reach the bottom frame
+      rotationZ: Math.PI / 2,
       renderOrder: 3,
     },
     // ── Mid right bracket — same SVG, flipped horizontally
@@ -339,12 +342,48 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.65,
-      scaleY: 0.6,
-      offsetX: 0.4,
-      offsetY: 0.008,
-      rotationZ: 0,
+      scaleX: 0.64,
+      scaleY: 1,
+      offsetX: 0.47,
+      offsetY: 0.004,
+      rotationZ: -Math.PI / 2,
       renderOrder: 3,
+    },
+    // ── Top bracket — anchored to Group 0 (top yellow)
+    {
+      src: "/ahzab/bottom.svg",
+      anchorGroupIndex: 0,
+      anchorEdge: "center",
+      scaleX: 1.38,
+      scaleY: -0.34, // Flipped vertically
+      offsetX: 0,
+      offsetY: -0.04,
+      rotationZ: 0,
+      renderOrder: 10,
+    },
+    // ── Bottom bracket — anchored to Group 4 (yellow dome)
+    {
+      src: "/ahzab/bottom.svg",
+      anchorGroupIndex: 4,
+      anchorEdge: "center",
+      scaleX: 1.38,
+      scaleY: 0.34,
+      offsetX: 0,
+      offsetY: 0.065,
+      rotationZ: 0,
+      renderOrder: 10,
+    },
+    // ── Center vertical line
+    {
+      src: "/ahzab/center-line.svg",
+      anchorGroupIndex: 2,
+      anchorEdge: "center",
+      scaleX: 0.009, // very thin line
+      scaleY: 0.7, // span vertically across the groups
+      offsetX: 0,
+      offsetY: 0.004,
+      rotationZ: 0,
+      renderOrder: 2,
     },
   ],
 
@@ -354,7 +393,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       type: "verticalGroups",
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
       backgroundScaleX: 1.45,
-      backgroundScaleY: 1.35,
+      backgroundScaleY: 1.45,
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
       groups: [
@@ -364,9 +403,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: false,
           isCenter: false,
           extraRowGap: 0,
-          xGap: 0.3,
+          customScale: 0.1,
+          xGap: 0.1,
           bgThemeKey: "s2Group1Bg",
-          pushDown: -0.07, // negative value pushes the group UP
+          pushDown: -0.03, // negative value pushes the group UP
         },
         // ── Group 1 — Blue (1 row) ────────────────────────────────────────
         {
@@ -374,9 +414,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: false,
           isCenter: true,
           extraRowGap: 0,
-          xGap: 0.15,
+          xGap: 0.2,
           bgThemeKey: "s2Group2Bg",
-          customScale: -0.07,
+          customScale: 0.06,
           pushDown: 0,
         },
         // ── Group 2 — Green / pushed in (2 rows) ─────────────────────────
@@ -385,7 +425,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: true,
           isCenter: true,
           extraRowGap: 0.01,
-          xGap: 0.25,
+          xGap: 0.29,
+          customScale: 0.2,
           bgThemeKey: "s2Group3Bg",
         },
         // ── Group 3 — Blue (1 row) ────────────────────────────────────────
@@ -394,9 +435,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: false,
           isCenter: true,
           extraRowGap: 0,
-          xGap: 0.15,
+          xGap: 0.2,
           bgThemeKey: "s2Group2Bg",
-          customScale: -0.07,
+          customScale: 0.06,
           // pushDown: 0.01,
         },
         // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
@@ -404,19 +445,19 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [12, 11],
           isPushedIn: false,
           isCenter: true,
-          xGap: 0.44, // Change this value to adjust the horizontal distance between the capsules!
+          xGap: 0.1, // Change this value to adjust the horizontal distance between the capsules!
           bgThemeKey: "s2Group1Bg",
-          customScale: 0.18,
-          pushDown: 0.06,
+          customScale: 0.3,
+          pushDown: 0.05,
           topLabelConfig: {
             width: 0.3,
             height: 0.085,
-            yOffset: 0.03,
-            textScaleOverride: 1.0,
-            bgColor: YELLOW_BG,
-            borderColor: YELLOW_BORDER,
-            textColor: "#A30000",
+            yOffset: 0.032,
+            textScaleOverride: 1.35,
+            textColor: "#000000",
             xMultiplier: 1.0,
+            isSimpleText: true,
+            shadow: true,
           },
         },
       ],
@@ -688,7 +729,7 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "وَالصَّادِقِينَ وَالصَّادِقَاتِ" },
+          { number: 4, text: "وَالْمُتَصَدِّقِينَ وَالْمُتَصَدِّقَاتِ" },
           { number: 3, text: "وَالْقَانِتِينَ وَالْقَانِتَاتِ" },
         ],
       },
@@ -698,10 +739,10 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 6, text: "وَالْخَاشِعِينَ وَالْخَاشِعَاتِ" },
-          { number: 5, text: "وَالصَّابِرِينَ وَالصَّابِرَاتِ" },
-          { number: 8, text: "وَالصَّائِمِينَ وَالصَّائِمَاتِ" },
-          { number: 7, text: "وَالْمُتَصَدِّقِينَ وَالْمُتَصَدِّقَاتِ" },
+          { number: 6, text: "وَالصَّائِمِينَ وَالصَّائِمَاتِ" },
+          { number: 5, text: "وَالصَّادِقِينَ وَالصَّادِقَاتِ" },
+          { number: 8, text: "وَالْحَافِظِينَ فُرُوجَهُمْ وَالْحَافِظَاتِ" },
+          { number: 7, text: "وَالصَّابِرِينَ وَالصَّابِرَاتِ" },
         ],
       },
       // ── Group 3 — Blue ───────────────────────────────────────────────────
@@ -714,7 +755,7 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
             number: 10,
             text: "وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ",
           },
-          { number: 9, text: "وَالْحَافِظِينَ فُرُوجَهُمْ وَالْحَافِظَاتِ" },
+          { number: 9, text: "وَالْخَاشِعِينَ وَالْخَاشِعَاتِ" },
         ],
       },
       // ── Group 4 — Yellow / dome text ─────────────────────────────────────
@@ -766,7 +807,10 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "ve sadık erkekler ve sadık kadınlar" },
+          {
+            number: 4,
+            text: "ve sadaka veren erkekler ve sadaka veren kadınlar",
+          },
           { number: 3, text: "ve itaat eden erkekler ve itaat eden kadınlar" },
         ],
       },
@@ -777,13 +821,16 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 6,
-            text: "ve huşu içinde olan erkekler ve huşu içinde olan kadınlar",
+            text: "ve oruç tutan erkekler ve oruç tutan kadınlar",
           },
-          { number: 5, text: "ve sabreden erkekler ve sabreden kadınlar" },
-          { number: 8, text: "ve oruç tutan erkekler ve oruç tutan kadınlar" },
+          { number: 5, text: "ve sadık erkekler ve sadık kadınlar" },
+          {
+            number: 8,
+            text: "ve iffetlerini koruyan erkekler ve koruyan kadınlar",
+          },
           {
             number: 7,
-            text: "ve sadaka veren erkekler ve sadaka veren kadınlar",
+            text: "ve sabreden erkekler ve sabreden kadınlar",
           },
         ],
       },
@@ -798,7 +845,7 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
           },
           {
             number: 9,
-            text: "ve iffetlerini koruyan erkekler ve koruyan kadınlar",
+            text: "ve huşu içinde olan erkekler ve huşu içinde olan kadınlar",
           },
         ],
       },
@@ -846,7 +893,7 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "and truthful men and truthful women" },
+          { number: 4, text: "and charitable men and charitable women" },
           { number: 3, text: "and obedient men and obedient women" },
         ],
       },
@@ -857,11 +904,14 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 6,
-            text: "and humbly submissive men and humbly submissive women",
+            text: "and fasting men and fasting women",
           },
-          { number: 5, text: "and patient men and patient women" },
-          { number: 8, text: "and fasting men and fasting women" },
-          { number: 7, text: "and charitable men and charitable women" },
+          { number: 5, text: "and truthful men and truthful women" },
+          {
+            number: 8,
+            text: "and men who guard their private parts and women who do so",
+          },
+          { number: 7, text: "and patient men and patient women" },
         ],
       },
       {
@@ -875,7 +925,7 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
           },
           {
             number: 9,
-            text: "and men who guard their private parts and women who do so",
+            text: "and humbly submissive men and humbly submissive women",
           },
         ],
       },

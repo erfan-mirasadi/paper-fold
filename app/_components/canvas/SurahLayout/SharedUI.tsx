@@ -302,6 +302,7 @@ interface TopLabelProps {
   textScaleOverride?: number;
   textColor?: string;
   xMultiplier?: number;
+  isSimpleText?: boolean;
 }
 
 export function TopLabel({
@@ -324,6 +325,7 @@ export function TopLabel({
   textScaleOverride,
   textColor,
   xMultiplier,
+  isSimpleText,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
@@ -346,7 +348,7 @@ export function TopLabel({
 
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
-      {!noBorder && (
+      {!isSimpleText && !noBorder && (
         <UiRect
           x={-borderThickness}
           y={borderThickness}
@@ -363,20 +365,37 @@ export function TopLabel({
           xMultiplier={xMultiplier ?? 1.5}
         />
       )}
-      <UiRect
-        x={0}
-        y={0}
-        z={0.001}
-        w={w}
-        h={h}
-        radius={radius}
-        color={bgColor}
-        topOnly={false}
-        renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
-        depthTest={depthTest}
-        xMultiplier={xMultiplier ?? 1.5}
-      />
+      {!isSimpleText && (
+        <UiRect
+          x={0}
+          y={0}
+          z={0.001}
+          w={w}
+          h={h}
+          radius={radius}
+          color={bgColor}
+          topOnly={false}
+          renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+          depthTest={depthTest}
+          xMultiplier={xMultiplier ?? 1.5}
+        />
+      )}
       <group position={[w / 2, -h / 2 + textOffsetY, 0.002]}>
+        {isSimpleText && shadow !== false && (
+          <CanvasText
+            text={text}
+            font={fontToUse}
+            fontSize={resolvedFontSize}
+            color="rgba(0,0,0,0.4)"
+            width={w}
+            height={h}
+            textAlign="center"
+            fontWeight="bold"
+            renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+            depthTest={depthTest}
+            position={[0.0025, -0.0025, -0.001]}
+          />
+        )}
         <CanvasText
           text={text}
           font={fontToUse}
