@@ -76,8 +76,13 @@ function createDepthCanvasTexture(
   ctx.font = `normal normal ${scaledFontSize}px "QuranFont", Arial`;
   ctx.fillStyle = color;
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, canvasW / 2, canvasH / 2);
+  
+  // Replicate CanvasText's verticalAlign="bottom" math to ensure perfect overlap
+  ctx.textBaseline = "bottom";
+  const lineHeight = 1.2;
+  const startY = canvasH - (scaledFontSize * lineHeight) / 2;
+  
+  ctx.fillText(text, canvasW / 2, startY);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
