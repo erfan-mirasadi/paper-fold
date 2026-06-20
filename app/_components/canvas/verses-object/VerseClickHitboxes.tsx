@@ -139,22 +139,41 @@ function buildHitboxes(
       if (vConfig.introVerse) allVerseIds.unshift(vConfig.introVerse);
       if (vConfig.outroVerse) allVerseIds.push(vConfig.outroVerse);
 
+      const hasCustomSections = vConfig.customSections && vConfig.customSections.length > 0;
+
       vConfig.groups.forEach((group, gIdx) => {
         const gTransform = sTransform.groups[gIdx];
         // Individual verse hitboxes
         group.verseIds.forEach((vId) => {
           const vt = gTransform.verses[vId];
           if (!vt) return;
-          hitboxes.push({
-            key: `verse-${vId}`,
-            cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
-            cy: vt.y - vt.h / 2,
-            cz: zFront,
-            w: vt.w,
-            h: vt.h,
-            kind: "verse",
-            verseId: vId,
-          });
+
+          if (hasCustomSections) {
+            // Custom sections: clicking a verse elevates its entire custom section
+            const cs = vConfig.customSections!.find((c) => c.verseIds.includes(vId));
+            hitboxes.push({
+              key: `verse-${vId}`,
+              cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+              cy: vt.y - vt.h / 2,
+              cz: zFront,
+              w: vt.w,
+              h: vt.h,
+              kind: "section",
+              sectionId: cs?.id,
+              verseIds: cs?.verseIds ?? [vId],
+            });
+          } else {
+            hitboxes.push({
+              key: `verse-${vId}`,
+              cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+              cy: vt.y - vt.h / 2,
+              cz: zFront,
+              w: vt.w,
+              h: vt.h,
+              kind: "verse",
+              verseId: vId,
+            });
+          }
         });
       });
 
@@ -235,11 +254,12 @@ function buildHitboxes(
       }
 
       // Center group hollow + curve hitboxes (isCenter flag)
+      // Not created for custom sections — they use per-verse hitboxes only.
       const centerGroups = vConfig.groups
         .map((g, idx) => (g.isCenter ? { gTransform: sTransform.groups[idx], gIdx: idx } : null))
         .filter(Boolean) as { gTransform: any; gIdx: number }[];
 
-      if (centerGroups.length > 0) {
+      if (!hasCustomSections && centerGroups.length > 0) {
         const firstCenter = centerGroups[0]!;
         const lastCenter = centerGroups[centerGroups.length - 1]!;
         const centerId = resolveSectionId(firstCenter.gIdx);
@@ -343,6 +363,11 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
   }
 
   if (kind === "section" && Array.isArray(verseIds) && verseIds.length > 0) {
+    // In all-sections mode: background/label clicks don't toggle sections off.
+    // Only the return button can exit all-sections mode.
+    const isAllSectionsMode = useElevatedStore.getState().isAllSectionsMode;
+    if (isAllSectionsMode) return;
+
     const validSectionId = typeof sectionId === "string" ? sectionId : undefined;
 
     const allSelected = verseIds.every((id) => activeVerseIds.includes(id));

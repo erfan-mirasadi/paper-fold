@@ -51,6 +51,10 @@ function setBodyCursor(cursor: string) {
 
 /**
  * Ultra-lightweight drag hook for R3F objects.
+ *
+ * Snap-home behavior:
+ *  - If sectionBounds is provided: snaps back when dropped inside the section's bounds ✅
+ *  - If no sectionBounds: element stays wherever it is dropped (no full-page fallback) ✅
  */
 export function useElevatedDrag({
   enabled,
@@ -90,12 +94,6 @@ export function useElevatedDrag({
       if (!useStoryStore.getState().activeConfig.features.hasElevatedSections)
         return false;
       if (useFoldStore.getState().isIntroActive) return false;
-      const elevatedState = useElevatedStore.getState();
-      if (
-        elevatedState.phase === "elevated" &&
-        !elevatedState.isAllSectionsMode
-      )
-        return false;
       return true;
     };
 
@@ -155,26 +153,20 @@ export function useElevatedDrag({
       s.active = false;
       s.dragMarked = false;
 
+      // Snap-home: only if sectionBounds is provided and drop is within those bounds.
+      // No full-page fallback — without sectionBounds the element stays where dropped.
       let shouldSnapHome = false;
-      if (e.ray.intersectPlane(s.plane, _hit)) {
+      if (sectionBounds && e.ray.intersectPlane(s.plane, _hit)) {
         const surfacesRoot = e.eventObject.parent;
         if (surfacesRoot) {
           const localHit = surfacesRoot.worldToLocal(_hit.clone());
-          if (sectionBounds) {
-            const sx = sectionSpringX ? sectionSpringX.get() : 0;
-            const sy = sectionSpringY ? sectionSpringY.get() : 0;
-            shouldSnapHome =
-              localHit.x >= sectionBounds.minX + sx &&
-              localHit.x <= sectionBounds.maxX + sx &&
-              localHit.y >= sectionBounds.minY + sy &&
-              localHit.y <= sectionBounds.maxY + sy;
-          } else if (!isAllSectionsMode) {
-            shouldSnapHome =
-              localHit.x >= -runtime.PAGE_WIDTH / 2 &&
-              localHit.x <= runtime.PAGE_WIDTH / 2 &&
-              localHit.y <= 0 &&
-              localHit.y >= -runtime.PAGE_HEIGHT;
-          }
+          const sx = sectionSpringX ? sectionSpringX.get() : 0;
+          const sy = sectionSpringY ? sectionSpringY.get() : 0;
+          shouldSnapHome =
+            localHit.x >= sectionBounds.minX + sx &&
+            localHit.x <= sectionBounds.maxX + sx &&
+            localHit.y >= sectionBounds.minY + sy &&
+            localHit.y <= sectionBounds.maxY + sy;
         }
       }
 

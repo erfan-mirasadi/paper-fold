@@ -155,6 +155,17 @@ export interface GridSectionConfig {
   cameraTarget?: CameraTargetConfig;
 }
 
+/**
+ * Defines a custom section for drag/click/elevation that can span verses
+ * from multiple groups. Overrides the default per-group section mapping.
+ */
+export interface CustomSectionDef {
+  /** Unique section ID (e.g. "section2_right") */
+  id: string;
+  /** Verse IDs that belong to this section */
+  verseIds: number[];
+}
+
 export interface VerticalGroupsSectionConfig {
   id: string;
   type: "verticalGroups";
@@ -170,6 +181,13 @@ export interface VerticalGroupsSectionConfig {
    * - "unified": All groups share one section ID — drag moves everything together (AyatAlKursi).
    */
   groupElevation?: "unified" | "perGroup";
+  /**
+   * When provided, overrides the default group-based section mapping.
+   * Each custom section defines its own ID and verse list, allowing
+   * column-based or cross-group sections (e.g. Ahzab 35 left/right columns).
+   * Takes precedence over both "perGroup" and "unified" groupElevation.
+   */
+  customSections?: CustomSectionDef[];
   cameraTarget?: CameraTargetConfig;
   subCameraTargets?: {
     top?: CameraTargetConfig;
@@ -255,6 +273,12 @@ export interface SvgOverlayItem {
   rotationZ?: number;
   /** Three.js renderOrder (higher = on top). Default 3. */
   renderOrder?: number;
+  /**
+   * When set, this overlay is wrapped in a DraggableSectionGroup and
+   * moves with the specified custom section ID when dragged/elevated.
+   * When null or omitted, the overlay is static (glued to the background frame).
+   */
+  customSectionId?: string | null;
 }
 
 export interface FoldState {

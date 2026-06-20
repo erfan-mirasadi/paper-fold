@@ -191,13 +191,15 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const isSectionRaised = sectionId !== null && activeSectionIds.includes(sectionId);
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
-    const s2Groups = (
-      activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any
-    )?.groups;
-    if (s2Groups && sectionId.includes("_g")) {
+    const s2Config = activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any;
+
+    // When customSections is present, ALL verses use section-level drag
+    if (s2Config?.customSections?.length > 0) {
+      useSectionGroupDrag = true;
+    } else if (s2Config?.groups && sectionId.includes("_g")) {
       const idxStr = sectionId.split("_g")[1];
       const gIndex = parseInt(idxStr, 10);
-      const targetGroup = s2Groups[gIndex];
+      const targetGroup = s2Config.groups[gIndex];
       if (targetGroup) {
         // dragBehavior takes precedence: 'individual' overrides isCenter
         if (targetGroup.dragBehavior === "individual") {
@@ -217,31 +219,40 @@ export function VerseController({ config }: { config: VerseConfig }) {
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
+  // ── Parent section for custom-sections (Ahzab) ──────────────────────────
+  // Computed early so it can be used for both snap bounds and position offset.
+  const s2Config = activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any;
+  const hasCustomSections = Boolean(s2Config?.customSections?.length);
+  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  // parentSectionDrag: always track, used for snap and (in all-sections mode) position
+  const parentSectionDrag = hasCustomSections && s2Config?.id
+    ? dragEngine.sections[s2Config.id]
+    : null;
+
   // Static check: does this verse belong to a center/group-drag section?
-  // Used for bounds calc — must NOT be reactive to avoid stale useMemo.
   const isGroupDragType = useMemo(() => {
-    if (!sectionId || !sectionId.includes("_g")) return false;
-    const s2Groups = (
-      activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any
-    )?.groups;
-    if (!s2Groups) return false;
+    if (!sectionId) return false;
+    if (hasCustomSections) return true;
+    if (!sectionId.includes("_g")) return false;
     const idxStr = sectionId.split("_g")[1];
     const gIndex = parseInt(idxStr, 10);
-    const targetGroup = s2Groups[gIndex];
+    const targetGroup = s2Config?.groups?.[gIndex];
     if (!targetGroup) return false;
     if (targetGroup.dragBehavior === "individual") return false;
     return targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-  }, [sectionId, activeStoryConfig]);
+  }, [sectionId, hasCustomSections, s2Config]);
 
   const sectionBounds = useMemo(() => {
-    if (!sectionId || !runtime.SURAH_TRANSFORMS || isGroupDragType)
-      return undefined;
-    return calculateSectionBounds(
-      sectionId,
-      runtime.SURAH_TRANSFORMS,
-      runtime.PAGE_WIDTH,
-    );
-  }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH, isGroupDragType]);
+    if (!sectionId || !runtime.SURAH_TRANSFORMS) return undefined;
+    if (!hasCustomSections && isGroupDragType) return undefined;
+    if (hasCustomSections && s2Config?.id) {
+      // Custom section: snap zone = PARENT frame (much larger area).
+      // This means the user must throw the section clearly outside the frame to
+      // keep it there; releasing inside the frame snaps it back. Much better UX.
+      return calculateSectionBounds(s2Config.id, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH);
+    }
+    return calculateSectionBounds(sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH);
+  }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH, isGroupDragType, hasCustomSections, s2Config]);
 
   const dragBind = useElevatedDrag({
     enabled:
@@ -254,20 +265,36 @@ export function VerseController({ config }: { config: VerseConfig }) {
     dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
     dragSectionId: useSectionGroupDrag ? (sectionId ?? undefined) : undefined,
     sectionBounds,
-    sectionSpringX: sectionDrag?.x,
-    sectionSpringY: sectionDrag?.y,
+    // For custom sections: track the parent frame's spring for the snap zone offset
+    sectionSpringX: hasCustomSections ? parentSectionDrag?.x : sectionDrag?.x,
+    sectionSpringY: hasCustomSections ? parentSectionDrag?.y : sectionDrag?.y,
   });
 
+  // Position offset: only add parent spring when in all-sections mode
+  const activeParentSectionDrag = isAllSectionsMode ? parentSectionDrag : null;
+
   const dragX = to(
-    [leadVerseDrag.x, sectionDrag ? sectionDrag.x : leadVerseDrag.x],
-    (vx, sx) =>
-      vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0),
+    [
+      leadVerseDrag.x,
+      sectionDrag ? sectionDrag.x : leadVerseDrag.x,
+      activeParentSectionDrag ? activeParentSectionDrag.x : leadVerseDrag.x,
+    ],
+    (vx, sx, px) => {
+      const parentOffset = activeParentSectionDrag ? px : 0;
+      return vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0) + parentOffset;
+    },
   );
 
   const dragY = to(
-    [leadVerseDrag.y, sectionDrag ? sectionDrag.y : leadVerseDrag.y],
-    (vy, sy) =>
-      vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0),
+    [
+      leadVerseDrag.y,
+      sectionDrag ? sectionDrag.y : leadVerseDrag.y,
+      activeParentSectionDrag ? activeParentSectionDrag.y : leadVerseDrag.y,
+    ],
+    (vy, sy, py) => {
+      const parentOffset = activeParentSectionDrag ? py : 0;
+      return vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0) + parentOffset;
+    },
   );
 
   const introSectionMotionRef = useIntroSectionOffset(sectionId);

@@ -334,19 +334,20 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   // anchorEdge: 'top' | 'bottom' | 'center' — which edge of that group
   // ---------------------------------------------------------------------------
   svgOverlays: [
-    // ── Mid left bracket — anchored between Group 1–3, left side
+    // ── Mid left bracket — section2_left (verses 4,6,8,10)
     {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.65, // Taller to close the gaps
-      scaleY: 0.95, // Slightly thicker
-      offsetX: -0.45, // Pushed outward to align with top frame
-      offsetY: 0.004, // Shifted down to reach the bottom frame
+      scaleX: 0.65,
+      scaleY: 0.95,
+      offsetX: -0.45,
+      offsetY: 0.004,
       rotationZ: Math.PI / 2,
       renderOrder: 3,
+      customSectionId: "section2_left",
     },
-    // ── Mid right bracket — same SVG, flipped horizontally
+    // ── Mid right bracket — section2_right (verses 3,5,7,9)
     {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
@@ -357,21 +358,23 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       offsetY: 0.004,
       rotationZ: -Math.PI / 2,
       renderOrder: 3,
+      customSectionId: "section2_right",
     },
 
-    // ── Top bracket — anchored to Group 0 (top yellow)
+    // ── Top bracket — section2_top (verses 1,2)
     {
       src: "/ahzab/bottom.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
       scaleX: 1.365,
-      scaleY: -0.36, // Flipped vertically
+      scaleY: -0.36,
       offsetX: 0,
-      offsetY: -0.05, // Shifted down slightly to meet the frame
+      offsetY: -0.05,
       rotationZ: 0,
       renderOrder: 10,
+      customSectionId: "section2_top",
     },
-    // ── Bottom bracket — anchored to Group 4 (yellow dome)
+    // ── Bottom bracket — section2_bottom (verses 11,12)
     {
       src: "/ahzab/bottom.svg",
       anchorGroupIndex: 4,
@@ -382,34 +385,37 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       offsetY: 0.0765,
       rotationZ: 0,
       renderOrder: 10,
+      customSectionId: "section2_bottom",
     },
 
-    // ── Center vertical line
+    // ── Center vertical line — static, glued to background (no drag)
     {
       src: "/ahzab/center-line.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.009, // very thin line
-      scaleY: 0.7, // span vertically across the groups
+      scaleX: 0.009,
+      scaleY: 0.7,
       offsetX: 0,
       offsetY: 0.004,
       rotationZ: 0,
       renderOrder: 2,
+      customSectionId: null,
     },
 
-    // ── Arrow between verse 1 and 2 (Group 0)
+    // ── Arrow between verse 1 and 2 — section2_top
     {
       src: "/ahzab/arrow.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
-      scaleX: -0.08, // Point left (right-to-left)
-      scaleY: 0.02, // 5:1 aspect ratio
+      scaleX: -0.08,
+      scaleY: 0.02,
       offsetX: 0,
       offsetY: 0,
       rotationZ: 0,
       renderOrder: 10,
+      customSectionId: "section2_top",
     },
-    // ── Arrow from "أَعَدَّ اللَّهُ لَهُمْ" to right capsule
+    // ── Arrow from "أَعَدَّ اللَّهُ لَهُمْ" to right capsule — section2_bottom
     {
       src: "/ahzab/arrow.svg",
       anchorGroupIndex: 4,
@@ -445,6 +451,20 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
+
+      // ── Custom drag/click sections ─────────────────────────────────────
+      // Overrides the default per-group section mapping.
+      // Section 1 (top):         verses 1, 2       — İman (top yellow)
+      // Section 2 (middle right): verses 3, 5, 7, 9 — Right column
+      // Section 3 (middle left):  verses 4, 6, 8, 10 — Left column
+      // Section 4 (bottom):      verses 11, 12      — Dome (bottom yellow)
+      customSections: [
+        { id: "section2_top",    verseIds: [1, 2] },
+        { id: "section2_right",  verseIds: [3, 5, 7, 9] },
+        { id: "section2_left",   verseIds: [4, 6, 8, 10] },
+        { id: "section2_bottom", verseIds: [11, 12] },
+      ],
+
       groups: [
         // ── Group 0 — Yellow / İman (1 row) ──────────────────────────────
         {
@@ -456,6 +476,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           xGap: 0.1,
           bgThemeKey: "s2Group1Bg",
           pushDown: -0.008, // negative value pushes the group UP
+          dragBehavior: "group",
         },
         // ── Group 1 — Blue (1 row) ────────────────────────────────────────
         {
@@ -467,6 +488,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           bgThemeKey: "s2Group2Bg",
           customScale: 0.06,
           pushDown: 0,
+          dragBehavior: "group",
         },
         // ── Group 2 — Green / pushed in (2 rows) ─────────────────────────
         {
@@ -488,6 +510,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           xGap: 0.2,
           bgThemeKey: "s2Group2Bg",
           customScale: 0.06,
+          dragBehavior: "group",
           // pushDown: 0.01,
         },
         // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
@@ -499,6 +522,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           bgThemeKey: "s2Group1Bg",
           customScale: 0.3,
           pushDown: 0.025,
+          dragBehavior: "group",
           topLabelConfig: {
             width: 0.3,
             height: 0.085,

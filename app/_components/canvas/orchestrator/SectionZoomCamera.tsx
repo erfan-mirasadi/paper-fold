@@ -24,9 +24,15 @@ export function SectionZoomCamera() {
       } else if (section.type === "verticalGroups") {
         const s2 = section as VerticalGroupsSectionConfig;
         const defaultTarget = s2.cameraTarget;
+        const hasCustomSections = s2.customSections && s2.customSections.length > 0;
         const isUnified = s2.groupElevation === "unified";
-        
-        if (!isUnified && s2.subCameraTargets) {
+
+        if (hasCustomSections && defaultTarget) {
+          // Register default camera target for all custom section IDs
+          s2.customSections!.forEach((cs) => {
+            zoomTargets[cs.id] = defaultTarget;
+          });
+        } else if (!isUnified && s2.subCameraTargets) {
           // Map sub-camera targets to _g{idx} naming
           const subKeys = ["top", "center", "bottom"] as const;
           s2.groups.forEach((_, gIdx) => {
@@ -57,6 +63,15 @@ export function SectionZoomCamera() {
           if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
         } else if (section.type === "verticalGroups") {
           const s2 = section as VerticalGroupsSectionConfig;
+
+          // Custom sections: look up the verse's custom section ID
+          if (s2.customSections && s2.customSections.length > 0) {
+            for (const cs of s2.customSections) {
+              if (cs.verseIds.includes(vid)) return cs.id;
+            }
+            continue;
+          }
+
           const isUnified = s2.groupElevation === "unified";
           if (isUnified) {
             // Unified: all verses map to section ID

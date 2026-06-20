@@ -211,10 +211,15 @@ export function ElevatedSectionLabels() {
       });
     } else if (section.type === "verticalGroups") {
       const vConfig = section as VerticalGroupsSectionConfig;
+      const hasCustomSections = vConfig.customSections && vConfig.customSections.length > 0;
       const isUnified = vConfig.groupElevation === "unified";
       const lastGroupIdx = vConfig.groups.length - 1;
-      const topSectionId = isUnified ? vConfig.id : `${vConfig.id}_g0`;
-      const bottomSectionId = isUnified ? vConfig.id : `${vConfig.id}_g${lastGroupIdx}`;
+      const topSectionId = hasCustomSections
+        ? vConfig.customSections![0].id
+        : isUnified ? vConfig.id : `${vConfig.id}_g0`;
+      const bottomSectionId = hasCustomSections
+        ? vConfig.customSections![vConfig.customSections!.length - 1].id
+        : isUnified ? vConfig.id : `${vConfig.id}_g${lastGroupIdx}`;
 
       const topText = getLabelText(vConfig.topLabelKey);
       if (topText) {

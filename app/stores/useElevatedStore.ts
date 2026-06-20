@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getActiveStoryConfig } from "./useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig, SurahLayoutConfig } from "../data/schema";
+import { resetAllDrags } from "../utils/dragEngine";
 
 export type ElevatedPhase = "idle" | "elevated";
 export type ElevatedSectionId = string;
@@ -26,9 +27,14 @@ export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
       SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
     } else if (section.type === "verticalGroups") {
       const s2 = section as VerticalGroupsSectionConfig;
-      const isUnified = s2.groupElevation === "unified";
 
-      if (isUnified) {
+      if (s2.customSections && s2.customSections.length > 0) {
+        // ─── CUSTOM SECTIONS: Each custom section defines its own verse list ─
+        s2.customSections.forEach((cs) => {
+          SECTION_PRIORITY.push(cs.id);
+          SECTION_VERSE_IDS[cs.id] = [...cs.verseIds];
+        });
+      } else if (s2.groupElevation === "unified") {
         // ─── UNIFIED: All groups share one section ID ─────────────────────
         const sectionId = s2.id;
         SECTION_PRIORITY.push(sectionId);
@@ -291,6 +297,9 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     );
     if (!canShowAll) return;
 
+    // Reset all drag positions so sections start fresh each time
+    resetAllDrags();
+
     set({
       activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
       activeVerseIds: ALL_ELEVATED_VERSE_IDS,
@@ -303,6 +312,9 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   },
 
   forceShowAllSections: () => {
+    // Reset all drag positions so sections start fresh each time
+    resetAllDrags();
+
     set({
       activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
       activeVerseIds: ALL_ELEVATED_VERSE_IDS,

@@ -150,8 +150,16 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
             });
           });
 
-          const isUnified = v.groupElevation === "unified";
-          if (isUnified) {
+          if (v.customSections && v.customSections.length > 0) {
+            // CUSTOM SECTIONS: do NOT write section-level rect.
+            // Per-verse masking (uVerseRects) handles individual capsule cutouts.
+            // Section-level rects would create a large bounding box covering the whole
+            // column — which masks through the paper where there's no verse.
+            // Just advance secIdx to keep sectionMap indices aligned.
+            v.customSections.forEach(() => {
+              secIdx++; // slot stays as zeros → no section mask effect
+            });
+          } else if (v.groupElevation === "unified") {
             // ONE rect covering the whole section
             sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
             sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
@@ -354,7 +362,11 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         sectionMap[sec.id] = sIdx++;
       } else if (sec.type === "verticalGroups") {
         const v = sec as VerticalGroupsSectionConfig;
-        if (v.groupElevation === "unified") {
+        if (v.customSections && v.customSections.length > 0) {
+          v.customSections.forEach((cs) => {
+            sectionMap[cs.id] = sIdx++;
+          });
+        } else if (v.groupElevation === "unified") {
           sectionMap[sec.id] = sIdx++;
         } else {
           for (let i = 0; i < v.groups.length; i++) {

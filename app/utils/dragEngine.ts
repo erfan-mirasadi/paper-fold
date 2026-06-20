@@ -206,6 +206,22 @@ export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
       if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;
     } else if (sec.type === "verticalGroups") {
       const v = sec as VerticalGroupsSectionConfig;
+
+      // ── CUSTOM SECTIONS: check custom section mapping first ──────────
+      if (v.customSections && v.customSections.length > 0) {
+        for (const cs of v.customSections) {
+          if (cs.verseIds.includes(verseId)) return cs.id;
+        }
+        // Also check intro/outro verses — attach to first/last custom section
+        if (v.introVerse === verseId && v.customSections.length > 0) {
+          return v.customSections[0].id;
+        }
+        if (v.outroVerse === verseId && v.customSections.length > 0) {
+          return v.customSections[v.customSections.length - 1].id;
+        }
+        continue;
+      }
+
       const isUnified = v.groupElevation === "unified";
       const lastIdx = v.groups.length - 1;
       for (let i = 0; i <= lastIdx; i++) {
