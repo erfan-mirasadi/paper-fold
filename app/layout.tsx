@@ -72,6 +72,18 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`light ${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (window.location.hostname === 'localhost' && window.location.port === '3000') {
+                document.documentElement.classList.remove('light');
+                document.documentElement.classList.add('dark');
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="font-sans">
         <GrainOverlay />
         {children}

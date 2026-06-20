@@ -89,6 +89,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#A30000",
       textColor: "#A30000",
       xOffset: 0.0, // Yellow: no extra push (short text fits naturally)
+      textScaleOverride: 1.6,
     },
     2: {
       bg: YELLOW_BG,
@@ -100,6 +101,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       customCapsuleLabel: "İman",
       capsuleLabelPosition: "top",
       textColor: "#A30000",
+      textScaleOverride: 1.6,
     },
     // ── Group 1 — Blue ───────────────────────────────────────────────────
     // Verse 3 is the RIGHT-side capsule (index 1 in verseIds [4,3]).
@@ -111,7 +113,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: BLUE_BORDER,
       expandW: -0.05,
       expandH: 0.005,
-      xOffset: 0.05, // Blue right-side: push toward the right edge
+      xOffset: 0.04, // Blue right-side: push toward the right edge
     },
     4: {
       bg: BLUE_BG,
@@ -133,7 +135,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      xOffset: 0.1, // Green right-side row 1: push right
+      xOffset: 0.09, // Green right-side row 1: push right
     },
     6: {
       bg: GREEN_BG,
@@ -151,7 +153,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBg: GREEN_BG,
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
-      xOffset: 0.1, // Green right-side row 2: push right
+      xOffset: 0.09, // Green right-side row 2: push right
     },
     8: {
       bg: GREEN_BG,
@@ -173,7 +175,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: BLUE_BORDER,
       expandW: -0.05,
       expandH: 0.005,
-      xOffset: 0.05, // Blue right-side: push toward the right edge
+      xOffset: 0.04, // Blue right-side: push toward the right edge
     },
     10: {
       bg: BLUE_BG,
@@ -197,6 +199,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#A30000",
       textColor: "#A30000",
       xOffset: 0.0, // Yellow dome: no push (symmetric dome layout)
+      textScaleOverride: 1.6,
     },
     12: {
       bg: YELLOW_BG,
@@ -205,6 +208,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: "#A30000",
       circleTextCol: "#A30000",
       textColor: "#A30000",
+      textScaleOverride: 1.6,
     },
   },
 
@@ -237,19 +241,19 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           color: "#A30000",
           fillColor: YELLOW_BG,
-          bowGap: 0.42, // reduced curve a little bit
-          innerBowGap: 0.455,
-          inwardOffset: -0.04,
-          drawInnerCurves: false,
-          innerCurvesBowGap: 0.145,
-          innerCurvesInnerBowGap: 0.12,
+          bowGap: 0.315,
+          innerBowGap: 0.35,
+          inwardOffset: 0.04,
+          // drawInnerCurves: false,
+          // innerCurvesBowGap: 0.145,
+          // innerCurvesInnerBowGap: 0.12,
           // How far apart the two curve lines are where they touch the yellow capsule.
           // Default is smallBoxH2 (0.085). Decrease to bring lines closer together.
-          tipThickness: -0.14,
-          topAnchorXOffset: 0,
-          bottomAnchorXOffset: 0.2,
-          topAnchorYOffset: 0.011,
-          bottomAnchorYOffset: 0.011,
+          tipThickness: -0.16,
+          topAnchorXOffset: 0.021,
+          bottomAnchorXOffset: 0.22,
+          topAnchorYOffset: 0.003,
+          bottomAnchorYOffset: 0.023,
         },
         {
           color: BLUE_BORDER,
@@ -298,9 +302,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupPad: 0.012,
     groupPadBottom: 0.012,
     s2Gap: 0.12, // increase horizontal gap between left / right columns
-    s2VerticalRowGap: 0.008, // very small gap between the two green rows
+    s2VerticalRowGap: 0.004, // very small gap between the two green rows
     smallBoxH2: 0.085, // default height of each individual verse capsule
-    middleExtraGap: 0.0,
+    middleExtraGap: 0.015,
     s2PadLeftRight: 0.005, // push outward to the red borders
     g2Scale: 0.1, // indent the green group to fit the inward SVG border
     outerScale: 0.0,
@@ -310,7 +314,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     capsuleLabelW: 0.16,
     capsuleLabelH: 0.024,
     capsuleLabelBorderWidth: 0.0035,
-    capsuleLabelDrop: 0.015,
+    capsuleLabelDrop: 0.005,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
     boxExtOffset: 0.02,
@@ -335,9 +339,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.64, // Taller to close the gaps
-      scaleY: 1, // Slightly thicker
-      offsetX: -0.47, // Pushed outward to align with top frame
+      scaleX: 0.65, // Taller to close the gaps
+      scaleY: 0.95, // Slightly thicker
+      offsetX: -0.45, // Pushed outward to align with top frame
       offsetY: 0.004, // Shifted down to reach the bottom frame
       rotationZ: Math.PI / 2,
       renderOrder: 3,
@@ -347,22 +351,23 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.64,
-      scaleY: 1,
-      offsetX: 0.47,
+      scaleX: 0.65,
+      scaleY: 0.95,
+      offsetX: 0.45,
       offsetY: 0.004,
       rotationZ: -Math.PI / 2,
       renderOrder: 3,
     },
+
     // ── Top bracket — anchored to Group 0 (top yellow)
     {
       src: "/ahzab/bottom.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
-      scaleX: 1.38,
-      scaleY: -0.34, // Flipped vertically
+      scaleX: 1.365,
+      scaleY: -0.36, // Flipped vertically
       offsetX: 0,
-      offsetY: -0.04,
+      offsetY: -0.05, // Shifted down slightly to meet the frame
       rotationZ: 0,
       renderOrder: 10,
     },
@@ -371,13 +376,14 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/bottom.svg",
       anchorGroupIndex: 4,
       anchorEdge: "center",
-      scaleX: 1.38,
-      scaleY: 0.34,
+      scaleX: 1.365,
+      scaleY: 0.36,
       offsetX: 0,
-      offsetY: 0.065,
+      offsetY: 0.0765,
       rotationZ: 0,
       renderOrder: 10,
     },
+
     // ── Center vertical line
     {
       src: "/ahzab/center-line.svg",
@@ -390,6 +396,43 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       rotationZ: 0,
       renderOrder: 2,
     },
+
+    // ── Arrow between verse 1 and 2 (Group 0)
+    {
+      src: "/ahzab/arrow.svg",
+      anchorGroupIndex: 0,
+      anchorEdge: "center",
+      scaleX: -0.08, // Point left (right-to-left)
+      scaleY: 0.02, // 5:1 aspect ratio
+      offsetX: 0,
+      offsetY: 0,
+      rotationZ: 0,
+      renderOrder: 10,
+    },
+    // ── Arrow from "أَعَدَّ اللَّهُ لَهُمْ" to right capsule
+    {
+      src: "/ahzab/arrow.svg",
+      anchorGroupIndex: 4,
+      anchorEdge: "top",
+      scaleX: 0.07,
+      scaleY: 0.02,
+      offsetX: 0.135,
+      offsetY: 0.024,
+      rotationZ: -Math.PI / 6, // 30 degrees down-right
+      renderOrder: 10,
+    },
+    // ── Arrow from "أَعَدَّ اللَّهُ لَهُمْ" to left capsule
+    {
+      src: "/ahzab/arrow.svg",
+      anchorGroupIndex: 4,
+      anchorEdge: "top",
+      scaleX: 0.07,
+      scaleY: 0.02,
+      offsetX: -0.135,
+      offsetY: 0.024,
+      rotationZ: (-5 * Math.PI) / 6, // 150 degrees down-left
+      renderOrder: 10,
+    },
   ],
 
   sections: [
@@ -397,8 +440,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       id: "section2",
       type: "verticalGroups",
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 1.45,
-      backgroundScaleY: 1.45,
+      backgroundScaleX: 1.28,
+      backgroundScaleY: 1.3,
+
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
       groups: [
@@ -411,7 +455,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           customScale: 0.1,
           xGap: 0.1,
           bgThemeKey: "s2Group1Bg",
-          pushDown: -0.03, // negative value pushes the group UP
+          pushDown: -0.008, // negative value pushes the group UP
         },
         // ── Group 1 — Blue (1 row) ────────────────────────────────────────
         {
@@ -454,11 +498,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           xGap: 0.1, // Change this value to adjust the horizontal distance between the capsules!
           bgThemeKey: "s2Group1Bg",
           customScale: 0.3,
-          pushDown: 0.05,
+          pushDown: 0.025,
           topLabelConfig: {
             width: 0.3,
             height: 0.085,
-            yOffset: 0.032,
+            yOffset: 0.058,
             textScaleOverride: 1.35,
             textColor: "#000000",
             xMultiplier: 1.0,
@@ -534,23 +578,23 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         // 👈 First state: The entire paper is accordion-folded and the yellows overlap
         folds: [
           // -- Right --
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
-          { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
           // -- Left --
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
-          { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
           // -- Bottom --
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
-          { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
         ],
       },
       {
@@ -580,9 +624,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         folds: [
           // -- Right folds --
           { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
+          { direction: -1, angleFactor: -0.5 },
           { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
           { direction: 1, angleFactor: 0 },
           // -- Left stays static and open (angle zero) --
           { direction: 1, angleFactor: 0 },
@@ -603,11 +647,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         // 👈 Left stays flat, right folds into accordion state
         folds: [
           // -- Right folds --
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
           { direction: -1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
           // -- Left stays static and open (angle zero) --
           { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
@@ -622,42 +666,22 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           { direction: 1, angleFactor: 0 },
         ],
       },
-      {
-        id: "open-right-side",
-        // 👈 Right opens again until we reach left
-        folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-        ],
-      },
+
       {
         id: "fold-left-side",
         // 👈 Right stays flat, left starts accordion-folding
         folds: [
           // -- Right stays static --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          // -- Left folds into accordion state --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
+          // -- Left folds into accordion state --
+          { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: -0.5 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
           { direction: 1, angleFactor: 0 },
           // -- Bottom stays static on the ground and detaches! --
           { direction: 1, angleFactor: 0 },
@@ -672,17 +696,17 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         // 👈 Right stays flat, left starts accordion-folding
         folds: [
           // -- Right stays static --
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
           // -- Left folds into accordion state --
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 },
           { direction: -1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
           { direction: 1, angleFactor: 1 },
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
           // -- Bottom stays static on the ground and detaches! --
           { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
