@@ -11,14 +11,14 @@ import {
   introGuideMarkerDomId,
 } from "./introGuideAnchorLayout";
 
-/** Projects the `section2_center` intro HUD marker from the middle S2 verse group (no top label). */
-export function IntroCenterGuideReporter() {
+/** Projects the intro HUD marker from the middle S2 verse group (no top label). */
+export function IntroCenterGuideReporter({ sectionId }: { sectionId: string }) {
   const runtime = useSurahLayoutRuntime();
-  const anchor = introGuideCenterAnchorSceneLocal(runtime);
-  const introRef = useIntroSectionOffset("section2_center");
+  const anchor = introGuideCenterAnchorSceneLocal(runtime, sectionId);
+  const introRef = useIntroSectionOffset(sectionId);
 
   useEffect(() => {
-    const id = introGuideMarkerDomId("section2_center");
+    const id = introGuideMarkerDomId(sectionId);
     return () => {
       const el = document.getElementById(id);
       if (el) {
@@ -26,7 +26,7 @@ export function IntroCenterGuideReporter() {
         el.style.visibility = "hidden";
       }
     };
-  }, []);
+  }, [sectionId]);
 
   return (
     <group ref={introRef}>
@@ -35,7 +35,7 @@ export function IntroCenterGuideReporter() {
         addCanvasBoundingRectToClientCoords
         onFrameUpdate={(sx, sy, isOnScreen) => {
           const el = document.getElementById(
-            introGuideMarkerDomId("section2_center"),
+            introGuideMarkerDomId(sectionId),
           );
           if (!el) return;
 

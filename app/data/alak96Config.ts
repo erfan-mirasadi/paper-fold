@@ -113,7 +113,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
       },
     },
-    section2_top: {
+    section2_g0: {
       src: "/intro/section-2.mp4",
       isVideo: true,
       backgroundText: {
@@ -121,14 +121,14 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         title: "Tuğyan\n zulüm\ninkâr \nistiğna",
       },
     },
-    section2_center: {
+    section2_g1: {
       src: "/intro/section-3.mp4",
       isVideo: true,
       backgroundText: {
         title: "Dışarıdan bakanlara\n hitap",
       },
     },
-    section2_bottom: {
+    section2_g2: {
       src: "/intro/section-4.mp4",
       isVideo: true,
       backgroundText: {
@@ -139,9 +139,9 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
   introGuides: {
     section1: "Ana bölüm",
-    section2_top: "1. Açıklama bölümü",
-    section2_center: "Orta bölüm",
-    section2_bottom: "2. Açıklama bölümü",
+    section2_g0: "1. Açıklama bölümü",
+    section2_g1: "Orta bölüm",
+    section2_g2: "2. Açıklama bölümü",
   },
   assets: {},
   verseOverrides: {
@@ -388,6 +388,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [12, 11, 14, 13],
           isPushedIn: true,
           isCenter: true,
+          dragBehavior: "group",
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
         },
@@ -433,9 +434,9 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       "section1_step1",
       "section1_step2",
       "section1_step3",
-      "section2_top",
-      "section2_center",
-      "section2_bottom",
+      "section2_g0",
+      "section2_g1",
+      "section2_g2",
     ],
     computeFoldYPositions: (lm: any) => [
       lm.s2Top + 0.09 / 2, // 0.09 is gapBetweenS1andS2

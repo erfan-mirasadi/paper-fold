@@ -130,9 +130,18 @@ function buildHitboxes(
         });
       }
 
-      // Groups
+      // Groups — each group gets its own hitbox section ID matching _g{idx}
+      // (same naming as dragEngine and ElevatedSectionSurfaces).
+      // For unified mode, use section ID directly (no _g suffix).
+      const isUnified = vConfig.groupElevation === "unified";
+      const lastGroupIdx = vConfig.groups.length - 1;
+      const allVerseIds = vConfig.groups.flatMap((g) => g.verseIds);
+      if (vConfig.introVerse) allVerseIds.unshift(vConfig.introVerse);
+      if (vConfig.outroVerse) allVerseIds.push(vConfig.outroVerse);
+
       vConfig.groups.forEach((group, gIdx) => {
         const gTransform = sTransform.groups[gIdx];
+        // Individual verse hitboxes
         group.verseIds.forEach((vId) => {
           const vt = gTransform.verses[vId];
           if (!vt) return;
@@ -149,110 +158,106 @@ function buildHitboxes(
         });
       });
 
-      const topId = `${vConfig.id}_top`;
-      const centerId = `${vConfig.id}_center`;
-      const bottomId = `${vConfig.id}_bottom`;
+      // Build verse buckets for each group (intro/outro attach to first/last).
+      const groupVerseIds: number[][] = vConfig.groups.map((g) => [...g.verseIds]);
+      if (vConfig.introVerse) groupVerseIds[0].unshift(vConfig.introVerse);
+      if (vConfig.outroVerse) groupVerseIds[lastGroupIdx].push(vConfig.outroVerse);
 
-      const topVerseIds: number[] = [];
-      const centerVerseIds: number[] = [];
-      const bottomVerseIds: number[] = [];
+      // Helper: resolve section ID for a group index
+      const resolveSectionId = (gIdx: number) =>
+        isUnified ? vConfig.id : `${vConfig.id}_g${gIdx}`;
+      const resolveVerseIds = (gIdx: number) =>
+        isUnified ? allVerseIds : groupVerseIds[gIdx];
 
-      if (vConfig.introVerse) topVerseIds.push(vConfig.introVerse);
-
-      let centerStarted = false;
-      vConfig.groups.forEach((g) => {
-        if (g.isCenter) {
-          centerStarted = true;
-          centerVerseIds.push(...g.verseIds);
-        } else if (!centerStarted) {
-          topVerseIds.push(...g.verseIds);
-        } else {
-          bottomVerseIds.push(...g.verseIds);
-        }
-      });
-
-      if (vConfig.outroVerse) bottomVerseIds.push(vConfig.outroVerse);
-
-      // Top label
+      // ─── Section-level hitboxes ─────────────────────────────────────────
+      // Top label (first group's label key)
       if (vConfig.topLabelKey && sTransform.topLabelPinY) {
+        const topGroupId = resolveSectionId(0);
         hitboxes.push({
-          key: `section-${topId}-label`,
+          key: `section-${topGroupId}-label`,
           cx: 0,
           cy: sTransform.topLabelPinY,
           cz: zFront,
           w: LABEL_HITBOX.width,
           h: LABEL_HITBOX.height,
           kind: "section",
-          sectionId: topId,
-          verseIds: topVerseIds,
+          sectionId: topGroupId,
+          verseIds: resolveVerseIds(0),
         });
       }
 
-      // Top hollow
+      // Top hollow connector (belongs to first group)
       if (config.features.hasIntro && sTransform.topConnectorY !== undefined) {
+        const topGroupId = resolveSectionId(0);
         hitboxes.push({
-          key: `section-${topId}-hollow`,
+          key: `section-${topGroupId}-hollow`,
           cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
           cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
           cz: zSection,
           w: sTransform.connectorW,
           h: sTransform.topConnectorH,
           kind: "section",
-          sectionId: topId,
-          verseIds: topVerseIds,
+          sectionId: topGroupId,
+          verseIds: resolveVerseIds(0),
         });
       }
 
-      // Bottom label
+      // Bottom label (last group's label key)
       if (vConfig.bottomLabelKey && sTransform.bottomLabelPinY) {
+        const botGroupId = resolveSectionId(lastGroupIdx);
         hitboxes.push({
-          key: `section-${bottomId}-label`,
+          key: `section-${botGroupId}-label`,
           cx: 0,
           cy: sTransform.bottomLabelPinY,
           cz: zFront,
           w: LABEL_HITBOX.width,
           h: LABEL_HITBOX.height,
           kind: "section",
-          sectionId: bottomId,
-          verseIds: bottomVerseIds,
+          sectionId: botGroupId,
+          verseIds: resolveVerseIds(lastGroupIdx),
         });
       }
 
-      // Bottom hollow
+      // Bottom hollow connector (belongs to last group)
       if (config.features.hasIntro && sTransform.bottomConnectorY !== undefined) {
+        const botGroupId = resolveSectionId(lastGroupIdx);
         hitboxes.push({
-          key: `section-${bottomId}-hollow`,
+          key: `section-${botGroupId}-hollow`,
           cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
           cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
           cz: zSection,
           w: sTransform.connectorW,
           h: sTransform.bottomConnectorH,
           kind: "section",
-          sectionId: bottomId,
-          verseIds: bottomVerseIds,
+          sectionId: botGroupId,
+          verseIds: resolveVerseIds(lastGroupIdx),
         });
       }
 
-      // Center hollow
+      // Center group hollow + curve hitboxes (isCenter flag)
       const centerGroups = vConfig.groups
-        .map((g, idx) => (g.isCenter ? sTransform.groups[idx] : null))
-        .filter(Boolean);
+        .map((g, idx) => (g.isCenter ? { gTransform: sTransform.groups[idx], gIdx: idx } : null))
+        .filter(Boolean) as { gTransform: any; gIdx: number }[];
 
       if (centerGroups.length > 0) {
         const firstCenter = centerGroups[0]!;
         const lastCenter = centerGroups[centerGroups.length - 1]!;
+        const centerId = resolveSectionId(firstCenter.gIdx);
+        const centerVerseIds = isUnified
+          ? allVerseIds
+          : centerGroups.flatMap(({ gIdx }) => groupVerseIds[gIdx] ?? []);
 
-        const middleTop = firstCenter.frameY;
-        const middleBottom = lastCenter.frameY - lastCenter.frameH;
+        const middleTop = firstCenter.gTransform.frameY;
+        const middleBottom = lastCenter.gTransform.frameY - lastCenter.gTransform.frameH;
         const middleHeight = middleTop - middleBottom;
         const middleCenterY = (middleTop + middleBottom) / 2;
 
         hitboxes.push({
           key: `section-${centerId}-hollow`,
-          cx: firstCenter.frameX + firstCenter.frameW / 2 - PAGE_WIDTH / 2,
+          cx: firstCenter.gTransform.frameX + firstCenter.gTransform.frameW / 2 - PAGE_WIDTH / 2,
           cy: middleCenterY,
           cz: zSection,
-          w: firstCenter.frameW,
+          w: firstCenter.gTransform.frameW,
           h: middleHeight,
           kind: "section",
           sectionId: centerId,
@@ -260,8 +265,8 @@ function buildHitboxes(
         });
 
         if (config.features.hasIntro) {
-          const middleTopInner = firstCenter.frameY + 0.01;
-          const middleBottomInner = lastCenter.frameY - lastCenter.frameH - 0.01;
+          const middleTopInner = firstCenter.gTransform.frameY + 0.01;
+          const middleBottomInner = lastCenter.gTransform.frameY - lastCenter.gTransform.frameH - 0.01;
           const middleHeightInner = middleTopInner - middleBottomInner;
           const middleCenterYInner = (middleTopInner + middleBottomInner) / 2;
 

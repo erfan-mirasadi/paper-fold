@@ -33,20 +33,22 @@ export function introGuideAnchorInLabelLiftGroup(
 
 export function introGuideCenterAnchorSceneLocal(
   layout: RuntimeLayout,
+  sectionId: string,
 ): [number, number, number] {
-  const g = layout.SURAH_TRANSFORMS.sections[1]!.groups![1];
+  let index = 1;
+  const match = sectionId.match(/_g(\d+)$/);
+  if (match) {
+    index = parseInt(match[1], 10);
+  }
+
+  const groups = layout.SURAH_TRANSFORMS.sections[1]?.groups;
+  const g = groups?.[index] || groups?.[1];
+
   const x = layout.PAGE_WIDTH / 2; // Right edge of the frame
-  const y = g.frameY; // Top of the frame
+  const y = g ? g.frameY : 0; // Top of the frame
   const z = PAGE_DEPTH / 2 + 0.003;
   return [x, y, z];
 }
-
-export const INTRO_SECTION_GUIDE_ORDER: ElevatedSectionId[] = [
-  "section1",
-  "section2_top",
-  "section2_center",
-  "section2_bottom",
-];
 
 /** DOM id for `IntroSectionGuidesOverlay` rows (must match overlay markup). */
 export function introGuideMarkerDomId(sectionId: ElevatedSectionId): string {

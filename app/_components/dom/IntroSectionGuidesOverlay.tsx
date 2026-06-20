@@ -3,7 +3,6 @@
 import { useEffect, useRef, memo } from "react";
 import type { ElevatedSectionId } from "../../stores/useElevatedStore";
 import {
-  INTRO_SECTION_GUIDE_ORDER,
   introGuideMarkerDomId,
 } from "../canvas/intro/section-guides/introGuideAnchorLayout";
 import { useStoryStore } from "../../stores/useStoryStore";
@@ -32,6 +31,7 @@ export function IntroSectionGuidesOverlay() {
   }, []);
 
   const config = useStoryStore((state) => state.activeConfig);
+  const guideOrder = Object.keys(config.introGuides || {}) as ElevatedSectionId[];
 
   return (
     <div
@@ -42,7 +42,7 @@ export function IntroSectionGuidesOverlay() {
         overflow: "visible",
       }}
     >
-      {INTRO_SECTION_GUIDE_ORDER.map((id: ElevatedSectionId) => (
+      {guideOrder.map((id: ElevatedSectionId) => (
         <IntroGuideHudRow
           key={id}
           sectionId={id}
@@ -51,6 +51,7 @@ export function IntroSectionGuidesOverlay() {
           lineStroke={line}
           tipFill={tip}
           textColor={textColor}
+          orderList={guideOrder}
         />
       ))}
     </div>
@@ -64,6 +65,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   lineStroke,
   tipFill,
   textColor,
+  orderList,
 }: {
   sectionId: ElevatedSectionId;
   caption: string;
@@ -71,6 +73,7 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   lineStroke: string;
   tipFill: string;
   textColor: string;
+  orderList: ElevatedSectionId[];
 }) {
   const id = introGuideMarkerDomId(sectionId);
 
@@ -86,8 +89,8 @@ const IntroGuideHudRow = memo(function IntroGuideHudRow({
   const activeColor = "#ffffff";
 
   // Calculate row-specific progress constraints once
-  const index = INTRO_SECTION_GUIDE_ORDER.indexOf(sectionId);
-  const numSteps = INTRO_SECTION_GUIDE_ORDER.length;
+  const index = orderList.indexOf(sectionId);
+  const numSteps = orderList.length || 1;
   const startOffset = 0.35;
   const endOffset = 0.95;
   const usable = endOffset - startOffset;

@@ -211,11 +211,16 @@ export function ElevatedSectionLabels() {
       });
     } else if (section.type === "verticalGroups") {
       const vConfig = section as VerticalGroupsSectionConfig;
+      const isUnified = vConfig.groupElevation === "unified";
+      const lastGroupIdx = vConfig.groups.length - 1;
+      const topSectionId = isUnified ? vConfig.id : `${vConfig.id}_g0`;
+      const bottomSectionId = isUnified ? vConfig.id : `${vConfig.id}_g${lastGroupIdx}`;
+
       const topText = getLabelText(vConfig.topLabelKey);
       if (topText) {
         labelsToRender.push({
-          key: `${vConfig.id}_top`,
-          sectionId: `${vConfig.id}_top`,
+          key: `${vConfig.id}_top_label`,
+          sectionId: topSectionId,
           y: sTransform.topLabelPinY!,
           text: topText,
           bgColor: S2_TOP_LABEL_BG,
@@ -236,8 +241,8 @@ export function ElevatedSectionLabels() {
       const bottomText = getLabelText(vConfig.bottomLabelKey);
       if (bottomText) {
         labelsToRender.push({
-          key: `${vConfig.id}_bottom`,
-          sectionId: `${vConfig.id}_bottom`,
+          key: `${vConfig.id}_bottom_label`,
+          sectionId: bottomSectionId,
           y: sTransform.bottomLabelPinY!,
           text: bottomText,
           bgColor: S2_TOP_LABEL_BG,

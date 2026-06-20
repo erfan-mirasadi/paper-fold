@@ -102,6 +102,7 @@ export interface LayoutStyling {
 
 export interface VerseBlockConfig {
   verseIds: number[];
+  dragBehavior?: "group" | "pair" | "single" | "individual";
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
@@ -163,6 +164,12 @@ export interface VerticalGroupsSectionConfig {
   outroVerse?: number;
   introOutroBgThemeKey?: keyof ThemeColors;
   groups: VerseBlockConfig[];
+  /**
+   * Controls how groups are treated for drag/elevation:
+   * - "perGroup" (default): Each group gets its own section ID and drag spring (Alak).
+   * - "unified": All groups share one section ID — drag moves everything together (AyatAlKursi).
+   */
+  groupElevation?: "unified" | "perGroup";
   cameraTarget?: CameraTargetConfig;
   subCameraTargets?: {
     top?: CameraTargetConfig;

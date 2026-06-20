@@ -26,31 +26,34 @@ export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
       SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
     } else if (section.type === "verticalGroups") {
       const s2 = section as VerticalGroupsSectionConfig;
-      const topId = `${s2.id}_top`;
-      const centerId = `${s2.id}_center`;
-      const bottomId = `${s2.id}_bottom`;
-      
-      SECTION_PRIORITY.push(topId, centerId, bottomId);
-      
-      SECTION_VERSE_IDS[topId] = [];
-      SECTION_VERSE_IDS[centerId] = [];
-      SECTION_VERSE_IDS[bottomId] = [];
+      const isUnified = s2.groupElevation === "unified";
 
-      if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
+      if (isUnified) {
+        // ─── UNIFIED: All groups share one section ID ─────────────────────
+        const sectionId = s2.id;
+        SECTION_PRIORITY.push(sectionId);
+        const allVerseIds: number[] = [];
+        if (s2.introVerse) allVerseIds.push(s2.introVerse);
+        s2.groups.forEach((g) => allVerseIds.push(...g.verseIds));
+        if (s2.outroVerse) allVerseIds.push(s2.outroVerse);
+        SECTION_VERSE_IDS[sectionId] = allVerseIds;
+      } else {
+        // ─── PER-GROUP: Each group gets its own _g{idx} section ID ────────
+        s2.groups.forEach((g, gIdx) => {
+          const groupId = `${s2.id}_g${gIdx}`;
+          SECTION_PRIORITY.push(groupId);
+          SECTION_VERSE_IDS[groupId] = [...g.verseIds];
+        });
 
-      let centerStarted = false;
-      s2.groups.forEach((g) => {
-        if (g.isCenter) {
-          centerStarted = true;
-          SECTION_VERSE_IDS[centerId].push(...g.verseIds);
-        } else if (!centerStarted) {
-          SECTION_VERSE_IDS[topId].push(...g.verseIds);
-        } else {
-          SECTION_VERSE_IDS[bottomId].push(...g.verseIds);
+        // Intro verse belongs to the first group; outro to the last.
+        if (s2.introVerse) {
+          SECTION_VERSE_IDS[`${s2.id}_g0`].unshift(s2.introVerse);
         }
-      });
-
-      if (s2.outroVerse) SECTION_VERSE_IDS[bottomId].push(s2.outroVerse);
+        if (s2.outroVerse) {
+          const lastIdx = s2.groups.length - 1;
+          SECTION_VERSE_IDS[`${s2.id}_g${lastIdx}`].push(s2.outroVerse);
+        }
+      }
     }
   });
 

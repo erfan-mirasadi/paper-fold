@@ -150,29 +150,38 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
             });
           });
 
-          // s2_top
-          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-          sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
-          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] =
-            sTransform.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
-          secIdx++;
+          const isUnified = v.groupElevation === "unified";
+          if (isUnified) {
+            // ONE rect covering the whole section
+            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+            sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
+            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+            sRects[secIdx * 4 + 3] =
+              sTransform.shiftedTop - sTransform.shiftedBot + PAD + exp * 2;
+            secIdx++;
+          } else {
+            // Per-group rects using fold positions
+            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+            sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
+            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+            sRects[secIdx * 4 + 3] =
+              sTransform.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
+            secIdx++;
 
-          // s2_center
-          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-          sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
-          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] =
-            FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
-          secIdx++;
+            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+            sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
+            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+            sRects[secIdx * 4 + 3] =
+              FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
+            secIdx++;
 
-          // s2_bottom
-          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-          sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
-          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] =
-            FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
-          secIdx++;
+            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+            sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
+            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+            sRects[secIdx * 4 + 3] =
+              FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
+            secIdx++;
+          }
         }
       });
 
@@ -344,9 +353,14 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       if (sec.type === "gridWithAnaAyet") {
         sectionMap[sec.id] = sIdx++;
       } else if (sec.type === "verticalGroups") {
-        sectionMap[`${sec.id}_top`] = sIdx++;
-        sectionMap[`${sec.id}_center`] = sIdx++;
-        sectionMap[`${sec.id}_bottom`] = sIdx++;
+        const v = sec as VerticalGroupsSectionConfig;
+        if (v.groupElevation === "unified") {
+          sectionMap[sec.id] = sIdx++;
+        } else {
+          for (let i = 0; i < v.groups.length; i++) {
+            sectionMap[`${sec.id}_g${i}`] = sIdx++;
+          }
+        }
       }
     });
 

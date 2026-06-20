@@ -36,7 +36,10 @@ const SECTION_SURFACE_SHADOW_MOTION = {
 } as const;
 
 /** Dynamic verse pair lead: the smaller ID of the two paired verses. */
-function getLeadVerseId(configId: number, pairings: Record<number, number> | undefined) {
+function getLeadVerseId(
+  configId: number,
+  pairings: Record<number, number> | undefined,
+) {
   const pairedVerseId = pairings?.[configId];
   return pairedVerseId ? Math.min(configId, pairedVerseId) : configId;
 }
@@ -50,34 +53,12 @@ import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { SurahLayoutConfig } from "../../../data/schema";
 
-type ShadowSurfaceSectionId = string;
-
-function getShadowSurfaceSectionId(
-  verseId: number,
-  storyConfig: SurahLayoutConfig<any>
-): ShadowSurfaceSectionId | null {
-  const S1_ID = storyConfig.sections[0]?.id;
-  const S2_ID = storyConfig.sections[1]?.id;
-  // If there is no section 2, no shadow surface mapping is possible.
-  if (!S1_ID || !S2_ID) return null;
-  const S2_TOP_ID = `${S2_ID}_top`;
-  const S2_BOTTOM_ID = `${S2_ID}_bottom`;
-
-  if (verseId >= 1 && verseId <= 5) return S1_ID;
-  if (verseId >= 6 && verseId <= 10) return S2_TOP_ID;
-  if (verseId >= 15 && verseId <= 19) return S2_BOTTOM_ID;
-  return null;
-}
-
 export function VerseController({ config }: { config: VerseConfig }) {
   const activeStoryConfig = useStoryStore((state) => state.activeConfig);
-  const S1_ID = activeStoryConfig.sections[0]?.id ?? "section1";
-  const S2_ID = activeStoryConfig.sections[1]?.id ?? "__no_s2__";
-  const S2_CENTER_ID = `${S2_ID}_center`;
-  
+
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
-  
+
   let finalVerseTextScale = runtime.layoutMath.verseTextScale;
   if (activeStoryConfig.id === "ayatalkursi" && activeLanguage !== "ar") {
     finalVerseTextScale = undefined; // Drop scaling for translations so it uses smaller defaults
@@ -92,7 +73,17 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const isOpen = group?.isOpen ?? false;
   const hasEverOpened = group?.hasEverOpened ?? false;
 
-  const isMiddleGroup = group?.id === "g_11_12_13_14";
+  const middleFoldVerses = activeStoryConfig.specialVerses?.middleFoldVerses;
+  const isMiddleFoldCandidate = middleFoldVerses
+    ? middleFoldVerses.left.includes(config.id) ||
+      middleFoldVerses.right.includes(config.id)
+    : false;
+
+  const isMiddleGroup =
+    group && middleFoldVerses
+      ? middleFoldVerses.left.some((id) => group.verseIds.includes(id)) ||
+        middleFoldVerses.right.some((id) => group.verseIds.includes(id))
+      : false;
   const middleHorizontalFolded = usePopUpStore(
     (state) => state.middleHorizontalFolded,
   );
@@ -104,10 +95,15 @@ export function VerseController({ config }: { config: VerseConfig }) {
     state.activeVerseIds.includes(config.id),
   );
   const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
-  const isCenterSectionRaised = activeSectionIds.includes(S2_CENTER_ID);
+  const sectionId = getVerseSectionId(config.id);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
-  const shadowSurfaceSectionId = getShadowSurfaceSectionId(config.id, activeStoryConfig);
+  // ✅ FIXED: Prevent applying the entire section's surface shadow to individual middle fold verses
+  let shadowSurfaceSectionId = getVerseSectionId(config.id);
+  if (isMiddleFoldCandidate) {
+    shadowSurfaceSectionId = null;
+  }
+
   const isSectionSurfaceRaised =
     shadowSurfaceSectionId !== null &&
     activeSectionIds.includes(shadowSurfaceSectionId);
@@ -123,8 +119,6 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const hasVisibleElevationHistory = hasEverBeenElevated || isElevated;
 
   const verticalFold = useFoldAnimation(isOpen);
-
-  const sectionId = getVerseSectionId(config.id);
 
   const {
     liftZ,
@@ -145,21 +139,23 @@ export function VerseController({ config }: { config: VerseConfig }) {
     config: SECTION_SURFACE_SHADOW_MOTION.spring,
   });
 
-  const isMiddleTopRow = config.id === 11 || config.id === 12;
-  const isMiddleBottomRow = config.id === 13 || config.id === 14;
-  const isMiddleFoldCandidate =
-    config.id === 11 ||
-    config.id === 12 ||
-    config.id === 13 ||
-    config.id === 14;
   const isMiddleLeftColumn =
-    isMiddleFoldCandidate && config.direction === "left";
+    isMiddleFoldCandidate && middleFoldVerses?.left.includes(config.id);
   const isMiddleRightColumn =
-    isMiddleFoldCandidate && config.direction === "right";
+    isMiddleFoldCandidate && middleFoldVerses?.right.includes(config.id);
+  // Approximation for top vs bottom row if there are 4 middle fold verses (2 top, 2 bottom)
+  const isMiddleTopRow =
+    isMiddleFoldCandidate &&
+    middleFoldVerses &&
+    (config.id === Math.min(...middleFoldVerses.left) ||
+      config.id === Math.min(...middleFoldVerses.right));
+  const isMiddleBottomRow = isMiddleFoldCandidate && !isMiddleTopRow;
   const isHorizontalFoldActive =
     (middleHorizontalFoldedValue === "left" && isMiddleLeftColumn) ||
     (middleHorizontalFoldedValue === "right" && isMiddleRightColumn);
-  const foldVisibility = useFoldAnimation(isOpen || isHorizontalFoldActive);
+  const foldVisibility = useFoldAnimation(
+    (isOpen || isHorizontalFoldActive) === true,
+  );
 
   const foldProgress = foldVisibility.foldProgress;
   const shadowGlobalOpacity = foldVisibility.shadowGlobalOpacity;
@@ -174,9 +170,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const rotRight = verticalFold.rotRight;
   const horizontalDirection: 1 | -1 = isMiddleTopRow ? 1 : -1;
   const { horizontalTiltX, horizontalLiftZ } = useMiddleHorizontalFoldAnimation(
-    isHorizontalFoldActive,
+    isHorizontalFoldActive === true,
     horizontalDirection,
-    isMiddleFoldCandidate,
+    isMiddleFoldCandidate === true,
   );
   const middleGapHalf = runtime.layoutMath.s2Gap / 2;
   const horizontalPivotOffsetY = isMiddleTopRow
@@ -185,12 +181,34 @@ export function VerseController({ config }: { config: VerseConfig }) {
       ? middleGapHalf
       : 0;
 
-  const leadVerseId = getLeadVerseId(config.id, activeStoryConfig.specialVerses?.versePairings);
+  const leadVerseId = getLeadVerseId(
+    config.id,
+    activeStoryConfig.specialVerses?.versePairings,
+  );
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
-  const useSectionGroupDrag =
-    isCenterSectionRaised && sectionId === S2_CENTER_ID && sectionDrag !== null;
+  const isSectionRaised = sectionId !== null && activeSectionIds.includes(sectionId);
+  let useSectionGroupDrag = false;
+  if (sectionId && sectionDrag && isSectionRaised) {
+    const s2Groups = (
+      activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any
+    )?.groups;
+    if (s2Groups && sectionId.includes("_g")) {
+      const idxStr = sectionId.split("_g")[1];
+      const gIndex = parseInt(idxStr, 10);
+      const targetGroup = s2Groups[gIndex];
+      if (targetGroup) {
+        // dragBehavior takes precedence: 'individual' overrides isCenter
+        if (targetGroup.dragBehavior === "individual") {
+          useSectionGroupDrag = false;
+        } else {
+          useSectionGroupDrag =
+            targetGroup.dragBehavior === "group" || targetGroup.isCenter;
+        }
+      }
+    }
+  }
 
   const isVerseSeparated = useDragState((s) =>
     s.draggedVerseIds.includes(leadVerseId),
@@ -199,15 +217,31 @@ export function VerseController({ config }: { config: VerseConfig }) {
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
+  // Static check: does this verse belong to a center/group-drag section?
+  // Used for bounds calc — must NOT be reactive to avoid stale useMemo.
+  const isGroupDragType = useMemo(() => {
+    if (!sectionId || !sectionId.includes("_g")) return false;
+    const s2Groups = (
+      activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any
+    )?.groups;
+    if (!s2Groups) return false;
+    const idxStr = sectionId.split("_g")[1];
+    const gIndex = parseInt(idxStr, 10);
+    const targetGroup = s2Groups[gIndex];
+    if (!targetGroup) return false;
+    if (targetGroup.dragBehavior === "individual") return false;
+    return targetGroup.dragBehavior === "group" || targetGroup.isCenter;
+  }, [sectionId, activeStoryConfig]);
+
   const sectionBounds = useMemo(() => {
-    if (!sectionId || !runtime.SURAH_TRANSFORMS || sectionId === S2_CENTER_ID)
+    if (!sectionId || !runtime.SURAH_TRANSFORMS || isGroupDragType)
       return undefined;
     return calculateSectionBounds(
       sectionId,
       runtime.SURAH_TRANSFORMS,
       runtime.PAGE_WIDTH,
     );
-  }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
+  }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH, isGroupDragType]);
 
   const dragBind = useElevatedDrag({
     enabled:
@@ -218,7 +252,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     springY:
       useSectionGroupDrag && sectionDrag ? sectionDrag.y : leadVerseDrag.y,
     dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
-    dragSectionId: useSectionGroupDrag ? S2_CENTER_ID : undefined,
+    dragSectionId: useSectionGroupDrag ? (sectionId ?? undefined) : undefined,
     sectionBounds,
     sectionSpringX: sectionDrag?.x,
     sectionSpringY: sectionDrag?.y,

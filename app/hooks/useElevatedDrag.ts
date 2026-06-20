@@ -87,10 +87,15 @@ export function useElevatedDrag({
     if (!enabled) return EMPTY_DRAG_BINDINGS;
 
     const isDragAllowed = () => {
-      if (!useStoryStore.getState().activeConfig.features.hasElevatedSections) return false;
+      if (!useStoryStore.getState().activeConfig.features.hasElevatedSections)
+        return false;
       if (useFoldStore.getState().isIntroActive) return false;
       const elevatedState = useElevatedStore.getState();
-      if (elevatedState.phase === "elevated" && !elevatedState.isAllSectionsMode) return false;
+      if (
+        elevatedState.phase === "elevated" &&
+        !elevatedState.isAllSectionsMode
+      )
+        return false;
       return true;
     };
 

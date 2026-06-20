@@ -35,7 +35,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   features: {
     hasIntro: false,
     hasElevatedSections: true,
-    hasPopUps: false,
+    hasPopUps: true,
     hideVerseNumbers: true,
   },
 
@@ -50,7 +50,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   specialVerses: {
     // The single fold sits between the top group and the pushed-in middle group.
     // Verses flanking that crease are 1/2 (top) and 3/4 (middle top row).
-    middleFoldVerses: { left: [4, 6], right: [3, 5] },
+    // No middleFoldVerses — all pairs fold as normal V-shape popups
     versePairings: {
       1: 2,
       2: 1,
@@ -223,6 +223,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
       backgroundScaleX: 1.15,
       backgroundScaleY: 1.25,
+      groupElevation: "unified",
       // No topLabelKey / bottomLabelKey / introVerse / outroVerse — clean slate.
       groups: [
         // ── Top group: 2 verses side-by-side (NOT pushed in) ─────────────
@@ -238,6 +239,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [4, 3, 6, 5], // [left-row1=4, right-row1=3, left-row2=6, right-row2=5]
           isPushedIn: true,
           isCenter: true,
+          dragBehavior: "individual",
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
         },

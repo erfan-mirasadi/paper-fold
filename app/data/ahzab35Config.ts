@@ -429,6 +429,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [6, 5, 8, 7],
           isPushedIn: true,
           isCenter: true,
+          dragBehavior: "group",
           extraRowGap: 0.01,
           xGap: 0.29,
           customScale: 0.2,

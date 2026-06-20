@@ -381,12 +381,26 @@ export const SideCurves = ({
     ? (configCurveColors[configCurveColors.length - 1] ?? FALLBACK_CENTER_COLOR)
     : FALLBACK_CENTER_COLOR;
 
+  const activeConfig = useStoryStore((s) => s.activeConfig);
+
+  // Build set of section-1 popup group IDs so we can exclude them from hide logic
+  const s1GroupIds = useMemo(() => {
+    const s1Sec = activeConfig.sections.find((s) => s.type === "gridWithAnaAyet");
+    if (!s1Sec) return new Set<string>();
+    const s1Verses = [...(s1Sec as any).verses, (s1Sec as any).anaAyet];
+    return new Set(
+      popUpGroups
+        .filter((g) => g.verseIds.every((id) => s1Verses.includes(id)))
+        .map((g) => g.id),
+    );
+  }, [activeConfig, popUpGroups]);
+
+  const s2SectionId = activeConfig.sections.find((s) => s.type === "verticalGroups")?.id;
   const shouldHide =
-    popUpGroups.some((g) => g.isOpen && g.id !== "g_1_2" && g.id !== "g_3_4") ||
+    popUpGroups.some((g) => g.isOpen && !s1GroupIds.has(g.id)) ||
     (!isAllSectionsMode &&
-      (activeSectionIds.includes("s2_top") ||
-        activeSectionIds.includes("s2_center") ||
-        activeSectionIds.includes("s2_bottom")));
+      activeSectionIds.some((id) =>
+        s2SectionId && (id === s2SectionId || id.startsWith(`${s2SectionId}_g`))));
 
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
   const baseStartX_L = startX + layout.s2Pad - 0.005;
