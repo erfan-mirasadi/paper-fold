@@ -27,10 +27,12 @@ export function SectionZoomCamera() {
         const hasCustomSections = s2.customSections && s2.customSections.length > 0;
         const isUnified = s2.groupElevation === "unified";
 
-        if (hasCustomSections && defaultTarget) {
-          // Register default camera target for all custom section IDs
+        if (hasCustomSections) {
+          // Register camera target for custom section IDs (fallback to defaultTarget)
           s2.customSections!.forEach((cs) => {
-            zoomTargets[cs.id] = defaultTarget;
+            if (cs.cameraTarget || defaultTarget) {
+              zoomTargets[cs.id] = cs.cameraTarget ?? defaultTarget!;
+            }
           });
         } else if (!isUnified && s2.subCameraTargets) {
           // Map sub-camera targets to _g{idx} naming

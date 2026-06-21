@@ -459,10 +459,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       // Section 3 (middle left):  verses 4, 6, 8, 10 — Left column
       // Section 4 (bottom):      verses 11, 12      — Dome (bottom yellow)
       customSections: [
-        { id: "section2_top",    verseIds: [1, 2] },
-        { id: "section2_right",  verseIds: [3, 5, 7, 9] },
-        { id: "section2_left",   verseIds: [4, 6, 8, 10] },
-        { id: "section2_bottom", verseIds: [11, 12] },
+        { id: "section2_top",    verseIds: [1, 2], cameraTarget: { y: 1.7, fov: 22.5, tilt: -1.3 } },
+        { id: "section2_right",  verseIds: [3, 5, 7, 9], cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 } },
+        { id: "section2_left",   verseIds: [4, 6, 8, 10], cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 } },
+        { id: "section2_bottom", verseIds: [11, 12], cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 } },
       ],
 
       groups: [

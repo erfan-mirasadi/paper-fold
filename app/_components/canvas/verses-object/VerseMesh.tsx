@@ -62,6 +62,7 @@ export interface VerseMeshProps {
     h: number;
     borderWidth: number;
     labelDrop?: number;
+    customText?: string;
   };
 }
 
@@ -412,13 +413,9 @@ export function VerseMesh({
                   (() => {
                     const labelW = capsuleLabel.w;
                     const labelH = capsuleLabel.h;
-                    const ANA_LABEL_PIN_OVERLAP = 0.0015;
-                    const labelDrop = capsuleLabel.labelDrop ?? 0.015;
+                    // capsuleLabel.x / .y are in fold-group local space, derived by
+                    // surahDataGenerator to mirror exactly what VerseGroup.tsx does on paper.
 
-                    // Use the exact config coordinates passed by surahDataGenerator.
-                    // The tab is a sibling to the brick group (not a child), so it does
-                    // NOT inherit the [outerLeft, outerTop] offsets. We can use the native
-                    // relative coordinates calculated in the generator perfectly.
                     return (
                       <group
                         position={[capsuleLabel.x, capsuleLabel.y, 0.01 + 0.0025]}
@@ -431,6 +428,8 @@ export function VerseMesh({
                           z={0}
                           borderWidth={capsuleLabel.borderWidth}
                           renderOrder={110}
+                          customText={capsuleLabel.customText}
+                          labelScale={0.85}
                         />
                       </group>
                     );

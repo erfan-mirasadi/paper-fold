@@ -43,6 +43,7 @@ export interface VerseConfig {
     h: number;
     borderWidth: number;
     labelDrop?: number;
+    customText?: string;
   };
 }
 
@@ -150,6 +151,7 @@ export function buildVerseConfigs(
                 h: transforms.capsuleLabelH!,
                 borderWidth: transforms.capsuleLabelBorderWidth!,
                 labelDrop: transforms.capsuleLabelDrop,
+                customText: override?.customCapsuleLabel,
               }
             : undefined;
 
@@ -239,6 +241,43 @@ export function buildVerseConfigs(
           const direction = isRightCol ? "right" : "left";
           const hingeX = isRightCol ? worldX : worldX + expandedW;
 
+          const capsuleLabelW = runtime.layoutMath.capsuleLabelW ?? 0.2;
+          const capsuleLabelH = runtime.layoutMath.capsuleLabelH ?? 0.032;
+          const capsuleLabelBorderWidth = runtime.layoutMath.capsuleLabelBorderWidth ?? 0.0035;
+          const capsuleLabelDrop = runtime.layoutMath.capsuleLabelDrop ?? 0.015;
+
+          let capsuleLabel;
+          if (override?.hasCapsuleLabel) {
+            const isTop = override.capsuleLabelPosition !== "bottom";
+
+            // Mirror exactly what VerseGroup.tsx does on the static paper:
+            //   tabX = finalX + finalW / 2  (center of capsule, world space)
+            //   tabY = isTop ? finalY + labelDrop : finalY - finalH - labelDrop
+            //
+            // In VerseMesh the fold-group is placed at position-y = config.y = finalY.
+            // So local space Y = world Y - finalY:
+            //   top:    localY = (finalY + labelDrop) - finalY = +labelDrop
+            //   bottom: localY = (finalY - expandedH - labelDrop) - finalY = -expandedH - labelDrop
+            //
+            // X: CapsuleLabel uses x as its horizontal center (it renders at x - w/2).
+            //   direction="right": hinge is left edge, capsule center = +expandedW / 2
+            //   direction="left":  hinge is right edge, capsule center = -expandedW / 2
+
+            const capsuleCenterX = direction === "right" ? expandedW / 2 : -expandedW / 2;
+            const yTop    = capsuleLabelDrop;
+            const yBottom = -expandedH - capsuleLabelDrop;
+
+            capsuleLabel = {
+               x: capsuleCenterX,
+               y: isTop ? yTop : yBottom,
+               w: capsuleLabelW,
+               h: capsuleLabelH,
+               borderWidth: capsuleLabelBorderWidth,
+               labelDrop: capsuleLabelDrop,
+               customText: override.customCapsuleLabel,
+            };
+          }
+
           configs.push({
             id: v.number,
             verse: v.text,
@@ -255,6 +294,7 @@ export function buildVerseConfigs(
             circleTextCol: finalCircleTextCol,
             textColor: finalTextColor,
             textScaleOverride,
+            capsuleLabel,
           });
         });
       });

@@ -164,6 +164,8 @@ export interface CustomSectionDef {
   id: string;
   /** Verse IDs that belong to this section */
   verseIds: number[];
+  /** Optional specific camera target for this custom section */
+  cameraTarget?: CameraTargetConfig;
 }
 
 export interface VerticalGroupsSectionConfig {
