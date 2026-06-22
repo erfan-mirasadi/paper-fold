@@ -60,8 +60,8 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   let finalVerseTextScale = config.textScaleOverride ?? runtime.layoutMath.verseTextScale;
-  if (activeStoryConfig.id === "ayatalkursi" && activeLanguage !== "ar") {
-    finalVerseTextScale = config.textScaleOverride ?? undefined; // Drop scaling for translations so it uses smaller defaults
+  if ((activeStoryConfig.id === "ayatalkursi" || activeStoryConfig.id === "ahzab35") && activeLanguage !== "ar") {
+    finalVerseTextScale = undefined; // Drop scaling for translations so it uses smaller defaults
   }
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;

@@ -30,7 +30,7 @@ export function VerseGroup({
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   let finalVerseTextScale = layout?.verseTextScale;
-  if (config.id === "ayatalkursi" && activeLanguage !== "ar") {
+  if ((config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar") {
     finalVerseTextScale = undefined;
   }
 
@@ -55,11 +55,7 @@ export function VerseGroup({
   ) as VerticalGroupsSectionConfig | undefined;
   const hideConnectors = sectionConfig?.hideRowConnectors ?? false;
 
-  const activeTextData = useStoryStore.getState().activeTextData;
-  const arabicGroups = activeTextData?.["ar"]?.section2?.colorGroups;
-  const textDataGroup =
-    groupIndex !== undefined && arabicGroups ? arabicGroups[groupIndex] : group;
-  const topLabelText = textDataGroup?.topLabel;
+  const topLabelText = group.topLabel;
   const topLabelConfig = (gt as any).topLabelConfig;
 
   const bgTex = (gt as any).backgroundTexture;
@@ -143,7 +139,11 @@ export function VerseGroup({
           shadow={topLabelConfig.shadow}
           isSimpleText={topLabelConfig.isSimpleText}
           renderOrder={20}
-          textScaleOverride={topLabelConfig.textScaleOverride}
+          textScaleOverride={
+            (config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar"
+              ? undefined
+              : topLabelConfig.textScaleOverride
+          }
         />
       )}
       {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}
@@ -238,11 +238,17 @@ export function VerseGroup({
         const finalCircleText =
           override?.circleTextCol ?? config.styling.colors.verseNumberText;
 
-        const finalTextScale =
+        let finalTextScale =
           override?.textScaleOverride ?? finalVerseTextScale;
+        if ((config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar") {
+          finalTextScale = undefined;
+        }
 
         const hasTab = override?.hasCapsuleLabel;
-        const customTabText = override?.customCapsuleLabel;
+        let customTabText = override?.customCapsuleLabel;
+        if (customTabText && typeof customTabText !== "string") {
+          customTabText = customTabText[activeLanguage] || customTabText.ar || Object.values(customTabText)[0];
+        }
         const tabPos = override?.capsuleLabelPosition ?? "top";
 
         const labelW = layout?.capsuleLabelW ?? 0.2;

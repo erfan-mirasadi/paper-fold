@@ -98,7 +98,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: "#A30000",
       circleTextCol: "#A30000",
       hasCapsuleLabel: true,
-      customCapsuleLabel: "İman",
+      customCapsuleLabel: {
+        ar: "İman",
+        tr: "İman",
+        en: "Faith",
+      },
       capsuleLabelPosition: "top",
       textColor: "#A30000",
       textScaleOverride: 1.6,
@@ -122,7 +126,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: BLUE_BORDER,
       circleTextCol: BLUE_BORDER,
       hasCapsuleLabel: true,
-      customCapsuleLabel: "Zekat",
+      customCapsuleLabel: {
+        ar: "Zekat",
+        tr: "Zekat",
+        en: "Charity",
+      },
       capsuleLabelPosition: "top",
       expandW: -0.05,
       expandH: 0.005,
@@ -144,7 +152,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
       hasCapsuleLabel: true,
-      customCapsuleLabel: "İçki yasak",
+      customCapsuleLabel: {
+        ar: "İçki yasak",
+        tr: "İçki yasak",
+        en: "No Intoxicants",
+      },
       capsuleLabelPosition: "top",
     },
     7: {
@@ -162,7 +174,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: GREEN_BORDER,
       circleTextCol: GREEN_BORDER,
       hasCapsuleLabel: true,
-      customCapsuleLabel: "Zina yasak",
+      customCapsuleLabel: {
+        ar: "Zina yasak",
+        tr: "Zina yasak",
+        en: "No Adultery",
+      },
       capsuleLabelPosition: "bottom",
     },
     // ── Group 3 — Blue ───────────────────────────────────────────────────
@@ -184,7 +200,11 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: BLUE_BORDER,
       circleTextCol: BLUE_BORDER,
       hasCapsuleLabel: true,
-      customCapsuleLabel: "Namaz",
+      customCapsuleLabel: {
+        ar: "Namaz",
+        tr: "Namaz",
+        en: "Prayer",
+      },
       capsuleLabelPosition: "bottom",
       expandW: -0.05,
       expandH: 0.005,
@@ -422,7 +442,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       anchorEdge: "top",
       scaleX: 0.07,
       scaleY: 0.02,
-      offsetX: 0.135,
+      offsetX: 0.045,
       offsetY: 0.024,
       rotationZ: -Math.PI / 6, // 30 degrees down-right
       renderOrder: 10,
@@ -434,7 +454,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       anchorEdge: "top",
       scaleX: 0.07,
       scaleY: 0.02,
-      offsetX: -0.135,
+      offsetX: -0.045,
       offsetY: 0.024,
       rotationZ: (-5 * Math.PI) / 6, // 150 degrees down-left
       renderOrder: 10,
@@ -459,10 +479,26 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       // Section 3 (middle left):  verses 4, 6, 8, 10 — Left column
       // Section 4 (bottom):      verses 11, 12      — Dome (bottom yellow)
       customSections: [
-        { id: "section2_top",    verseIds: [1, 2], cameraTarget: { y: 1.7, fov: 22.5, tilt: -1.3 } },
-        { id: "section2_right",  verseIds: [3, 5, 7, 9], cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 } },
-        { id: "section2_left",   verseIds: [4, 6, 8, 10], cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 } },
-        { id: "section2_bottom", verseIds: [11, 12], cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 } },
+        {
+          id: "section2_top",
+          verseIds: [1, 2],
+          cameraTarget: { y: 1.7, fov: 22.5, tilt: -1.3 },
+        },
+        {
+          id: "section2_right",
+          verseIds: [3, 5, 7, 9],
+          cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
+        },
+        {
+          id: "section2_left",
+          verseIds: [4, 6, 8, 10],
+          cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
+        },
+        {
+          id: "section2_bottom",
+          verseIds: [11, 12],
+          cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
+        },
       ],
 
       groups: [
@@ -893,7 +929,7 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
             number: 4,
             text: "ve sadaka veren erkekler ve sadaka veren kadınlar",
           },
-          { number: 3, text: "ve itaat eden erkekler ve itaat eden kadınlar" },
+          { number: 3, text: "ve itaatkâr erkekler ve itaatkâr kadınlar" },
         ],
       },
       {
@@ -905,7 +941,10 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
             number: 6,
             text: "ve oruç tutan erkekler ve oruç tutan kadınlar",
           },
-          { number: 5, text: "ve sadık erkekler ve sadık kadınlar" },
+          {
+            number: 5,
+            text: "ve doğru sözlü erkekler ve doğru sözlü kadınlar",
+          },
           {
             number: 8,
             text: "ve iffetlerini koruyan erkekler ve koruyan kadınlar",
@@ -923,11 +962,11 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 10,
-            text: "ve Allah'ı çok zikreden erkekler ve zikreden kadınlar",
+            text: "ve Allah'ı çokça anan erkekler ve anan kadınlar",
           },
           {
             number: 9,
-            text: "ve huşu içinde olan erkekler ve huşu içinde olan kadınlar",
+            text: "ve Allah'a gönülden saygı duyan erkekler ve saygı duyan kadınlar",
           },
         ],
       },
@@ -935,9 +974,10 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
+        topLabel: "Allah onlar için hazırlamıştır",
         verses: [
           { number: 12, text: "ve büyük bir mükâfat" },
-          { number: 11, text: "mağfiret" },
+          { number: 11, text: "bir bağışlanma" },
         ],
       },
     ],
@@ -966,7 +1006,7 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "and believing men and believing women" },
+          { number: 2, text: "and the believing men and believing women" },
           { number: 1, text: "Indeed, the Muslim men and Muslim women" },
         ],
       },
@@ -975,8 +1015,8 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "and charitable men and charitable women" },
-          { number: 3, text: "and obedient men and obedient women" },
+          { number: 4, text: "and the charitable men and charitable women" },
+          { number: 3, text: "and the obedient men and obedient women" },
         ],
       },
       {
@@ -986,14 +1026,14 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 6,
-            text: "and fasting men and fasting women",
+            text: "and the fasting men and fasting women",
           },
-          { number: 5, text: "and truthful men and truthful women" },
+          { number: 5, text: "and the truthful men and truthful women" },
           {
             number: 8,
-            text: "and men who guard their private parts and women who do so",
+            text: "and the men who guard their private parts and the women who do so",
           },
-          { number: 7, text: "and patient men and patient women" },
+          { number: 7, text: "and the patient men and patient women" },
         ],
       },
       {
@@ -1003,11 +1043,11 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 10,
-            text: "and men who remember Allah often and women who do so",
+            text: "and the men who remember Allah often and the women who do so",
           },
           {
             number: 9,
-            text: "and humbly submissive men and humbly submissive women",
+            text: "and the humble men and humble women",
           },
         ],
       },
@@ -1015,6 +1055,7 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
+        topLabel: "Allah has prepared for them",
         verses: [
           { number: 12, text: "and a great reward" },
           { number: 11, text: "forgiveness" },

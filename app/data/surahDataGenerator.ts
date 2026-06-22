@@ -47,6 +47,12 @@ export interface VerseConfig {
   };
 }
 
+function getTranslatedLabel(label: string | Record<string, string> | undefined, lang: string) {
+  if (!label) return undefined;
+  if (typeof label === "string") return label;
+  return label[lang] || label.ar || Object.values(label)[0];
+}
+
 export function buildVerseConfigs(
   surahData: SurahDataShape,
   arabicData: SurahDataShape,
@@ -151,7 +157,7 @@ export function buildVerseConfigs(
                 h: transforms.capsuleLabelH!,
                 borderWidth: transforms.capsuleLabelBorderWidth!,
                 labelDrop: transforms.capsuleLabelDrop,
-                customText: override?.customCapsuleLabel,
+                customText: getTranslatedLabel(override?.customCapsuleLabel, runtime.activeLanguage),
               }
             : undefined;
 
@@ -274,7 +280,7 @@ export function buildVerseConfigs(
                h: capsuleLabelH,
                borderWidth: capsuleLabelBorderWidth,
                labelDrop: capsuleLabelDrop,
-               customText: override.customCapsuleLabel,
+               customText: getTranslatedLabel(override.customCapsuleLabel, runtime.activeLanguage),
             };
           }
 

@@ -233,7 +233,7 @@ export interface VerseOverrideConfig {
   /** When true, a CapsuleLabel is rendered above this verse in section and mesh views */
   hasCapsuleLabel?: boolean;
   /** Optional custom text to display in the CapsuleLabel instead of the default 'Ana Ayet' */
-  customCapsuleLabel?: string;
+  customCapsuleLabel?: string | Record<string, string>;
   /** Position of the CapsuleLabel: 'top' (default) or 'bottom' */
   capsuleLabelPosition?: "top" | "bottom";
   /** Override the verse text scale for this specific verse. */
