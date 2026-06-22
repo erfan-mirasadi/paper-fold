@@ -701,8 +701,8 @@ function DynamicElevatedGroup({
           solidColor="transparent"
           texturePath={vertConfig.backgroundTexture}
           solidScale={[
-            vertConfig.backgroundScaleX ?? 1,
-            vertConfig.backgroundScaleY ?? 1,
+            1,
+            1,
             1,
           ]}
           imageScale={[
@@ -726,7 +726,7 @@ function DynamicElevatedGroup({
           h={s2.topConnectorH}
           solidColor={S2_FRAME_BG_COLOR}
           texturePath={bgTex}
-          solidScale={[bgScaleX, bgScaleY, 1]}
+          solidScale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
           imageScale={[bgScaleX, bgScaleY, 1]}
           solidXOffset={S2_TOP_SOLID_X_OFFSET}
           solidYOffset={S2_TOP_SOLID_Y_OFFSET}
@@ -794,8 +794,8 @@ function DynamicElevatedGroup({
             solidColor={S2_FRAME_BG_COLOR}
             texturePath={bgTex}
             solidScale={[
-              vertConfig?.backgroundScaleX ?? S2_BOTTOM_SOLID_SCALE_X,
-              vertConfig?.backgroundScaleY ?? S2_BOTTOM_SOLID_SCALE_Y,
+              S2_BOTTOM_SOLID_SCALE_X,
+              S2_BOTTOM_SOLID_SCALE_Y,
               1,
             ]}
             imageScale={[
@@ -834,8 +834,8 @@ function DynamicElevatedGroup({
             solidColor="transparent"
             texturePath={vertConfig.backgroundTexture}
             solidScale={[
-              vertConfig.backgroundScaleX ?? 1,
-              vertConfig.backgroundScaleY ?? 1,
+              1,
+              1,
               1,
             ]}
             imageScale={[

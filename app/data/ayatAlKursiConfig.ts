@@ -191,7 +191,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupGap: 0.025,
     groupPad: 0.012,
     groupPadBottom: 0.012,
-    s2Gap: 0.12, // the huge horizontal gap you asked for!
+    s2Gap: 0.06, // reduced horizontal gap
     s2VerticalRowGap: 0.046, // the vertical gap between rows in the same group!
     smallBoxH2: 0.085, // height of each individual verse capsule
     middleExtraGap: 0.007,

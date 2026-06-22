@@ -423,7 +423,7 @@ interface CapsuleLabelProps {
   borderWidth?: number;
   renderOrder?: number;
   depthTest?: boolean;
-  customText?: string;
+  customText?: string | Record<string, string>;
   labelScale?: number;
 }
 export function CapsuleLabel({
@@ -439,7 +439,15 @@ export function CapsuleLabel({
   labelScale = 1,
 }: CapsuleLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const labelText = customText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
+
+  let resolvedCustomText: string | undefined;
+  if (typeof customText === "object" && customText !== null) {
+    resolvedCustomText = customText[activeLanguage] || customText["ar"];
+  } else {
+    resolvedCustomText = customText;
+  }
+
+  const labelText = resolvedCustomText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   const capsuleLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   const radius = h / 2;
