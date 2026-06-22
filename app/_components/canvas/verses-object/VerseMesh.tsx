@@ -87,11 +87,11 @@ function BorderSvg({
 
   const activeLanguage = useSurahLanguageStore.getState().activeLanguage;
   const isArabic = activeLanguage === "ar";
-  
+
   const widthScale = 0.8;
   const heightScale = 0.93;
-  
-  const frameScaleMult = (!isArabic && frameScaleLTR) ? frameScaleLTR : 1.0;
+
+  const frameScaleMult = !isArabic && frameScaleLTR ? frameScaleLTR : 1.0;
 
   const renderW = w * widthScale * frameScaleMult;
   const renderH = h * heightScale * frameScaleMult;
@@ -418,7 +418,11 @@ export function VerseMesh({
 
                     return (
                       <group
-                        position={[capsuleLabel.x, capsuleLabel.y, 0.01 + 0.0025]}
+                        position={[
+                          capsuleLabel.x,
+                          capsuleLabel.y,
+                          0.01 + 0.0025,
+                        ]}
                       >
                         <CapsuleLabel
                           x={0}
@@ -429,7 +433,6 @@ export function VerseMesh({
                           borderWidth={capsuleLabel.borderWidth}
                           renderOrder={110}
                           customText={capsuleLabel.customText}
-                          labelScale={0.85}
                         />
                       </group>
                     );

@@ -297,7 +297,6 @@ export function VerseGroup({
                 borderWidth={labelBorder}
                 renderOrder={110}
                 customText={customTabText}
-                labelScale={0.85}
               />
             )}
           </group>

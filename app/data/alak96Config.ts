@@ -297,9 +297,24 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
        * Index 3   = center bracket (green).
        */
       curveColors: [
-        { color: BLUE_THEME, fillColor: CAPSULE_BG_6_19 },
-        { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
-        { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
+        {
+          color: BLUE_THEME,
+          fillColor: CAPSULE_BG_6_19,
+          topAnchorXOffset: 0.01,
+          bottomAnchorXOffset: 0.01,
+        },
+        {
+          color: MAROON_THEME,
+          fillColor: CAPSULE_BG_7_8_17_18,
+          topAnchorXOffset: 0.009,
+          bottomAnchorXOffset: 0.009,
+        },
+        {
+          color: MAROON_THEME,
+          fillColor: CAPSULE_BG_9_10_15_16,
+          topAnchorXOffset: 0.008,
+          bottomAnchorXOffset: 0.008,
+        },
         { color: GREEN_THEME, fillColor: CAPSULE_BG_12_14 },
       ],
     },

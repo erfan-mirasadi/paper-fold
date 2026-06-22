@@ -47,7 +47,10 @@ export interface VerseConfig {
   };
 }
 
-function getTranslatedLabel(label: string | Record<string, string> | undefined, lang: string) {
+function getTranslatedLabel(
+  label: string | Record<string, string> | undefined,
+  lang: string,
+) {
   if (!label) return undefined;
   if (typeof label === "string") return label;
   return label[lang] || label.ar || Object.values(label)[0];
@@ -95,8 +98,12 @@ export function buildVerseConfigs(
         let actualVerseId = vId;
         if (isGridVerse) {
           const arabicVerseNumber = gridConfig.verses[gridIdx];
-          const currentLanguageVerseNumber = surahData.section1.gridVerses[gridIdx]?.number;
-          if (currentLanguageVerseNumber !== undefined && currentLanguageVerseNumber !== arabicVerseNumber) {
+          const currentLanguageVerseNumber =
+            surahData.section1.gridVerses[gridIdx]?.number;
+          if (
+            currentLanguageVerseNumber !== undefined &&
+            currentLanguageVerseNumber !== arabicVerseNumber
+          ) {
             lookupNumber = arabicVerseNumber;
             actualVerseId = currentLanguageVerseNumber;
           }
@@ -157,7 +164,10 @@ export function buildVerseConfigs(
                 h: transforms.capsuleLabelH!,
                 borderWidth: transforms.capsuleLabelBorderWidth!,
                 labelDrop: transforms.capsuleLabelDrop,
-                customText: getTranslatedLabel(override?.customCapsuleLabel, runtime.activeLanguage),
+                customText: getTranslatedLabel(
+                  override?.customCapsuleLabel,
+                  runtime.activeLanguage,
+                ),
               }
             : undefined;
 
@@ -218,14 +228,16 @@ export function buildVerseConfigs(
           const t = transforms.groups![gIdx].verses[lookupNumber];
           if (!t) return;
 
-          const override = runtime.config.verseOverrides?.[lookupNumber] ?? runtime.config.verseOverrides?.[v.number];
-          
+          const override =
+            runtime.config.verseOverrides?.[lookupNumber] ??
+            runtime.config.verseOverrides?.[v.number];
+
           const expandW = override?.expandW ?? 0;
           const expandH = override?.expandH ?? 0;
 
           const isCenterGroup = gIdx === 1;
-          const groupFallbackBorder = isCenterGroup 
-            ? runtime.config.styling.colors.greenTheme 
+          const groupFallbackBorder = isCenterGroup
+            ? runtime.config.styling.colors.greenTheme
             : runtime.config.styling.colors.maroonTheme;
 
           const finalBg =
@@ -237,7 +249,9 @@ export function buildVerseConfigs(
           const finalBorder = override?.border ?? groupFallbackBorder;
           const finalCircleBg = override?.circleBg ?? finalBg;
           const finalCircleBorderCol = override?.circleBorderCol ?? finalBorder;
-          const finalCircleTextCol = override?.circleTextCol ?? runtime.config.styling.colors.verseNumberText;
+          const finalCircleTextCol =
+            override?.circleTextCol ??
+            runtime.config.styling.colors.verseNumberText;
           const finalTextColor = override?.textColor;
           const textScaleOverride = override?.textScaleOverride;
 
@@ -249,7 +263,8 @@ export function buildVerseConfigs(
 
           const capsuleLabelW = runtime.layoutMath.capsuleLabelW ?? 0.2;
           const capsuleLabelH = runtime.layoutMath.capsuleLabelH ?? 0.032;
-          const capsuleLabelBorderWidth = runtime.layoutMath.capsuleLabelBorderWidth ?? 0.0035;
+          const capsuleLabelBorderWidth =
+            runtime.layoutMath.capsuleLabelBorderWidth ?? 0.0035;
           const capsuleLabelDrop = runtime.layoutMath.capsuleLabelDrop ?? 0.015;
 
           let capsuleLabel;
@@ -269,18 +284,22 @@ export function buildVerseConfigs(
             //   direction="right": hinge is left edge, capsule center = +expandedW / 2
             //   direction="left":  hinge is right edge, capsule center = -expandedW / 2
 
-            const capsuleCenterX = direction === "right" ? expandedW / 2 : -expandedW / 2;
-            const yTop    = capsuleLabelDrop;
+            const capsuleCenterX =
+              direction === "right" ? expandedW / 2 : -expandedW / 2;
+            const yTop = capsuleLabelDrop;
             const yBottom = -expandedH - capsuleLabelDrop;
 
             capsuleLabel = {
-               x: capsuleCenterX,
-               y: isTop ? yTop : yBottom,
-               w: capsuleLabelW,
-               h: capsuleLabelH,
-               borderWidth: capsuleLabelBorderWidth,
-               labelDrop: capsuleLabelDrop,
-               customText: getTranslatedLabel(override.customCapsuleLabel, runtime.activeLanguage),
+              x: capsuleCenterX,
+              y: isTop ? yTop : yBottom,
+              w: capsuleLabelW,
+              h: capsuleLabelH,
+              borderWidth: capsuleLabelBorderWidth,
+              labelDrop: capsuleLabelDrop,
+              customText: getTranslatedLabel(
+                override.customCapsuleLabel,
+                runtime.activeLanguage,
+              ),
             };
           }
 
