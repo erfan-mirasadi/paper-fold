@@ -92,8 +92,7 @@ export interface LayoutStyling {
   s1NeonConfig?: any;
   elevatedSectionRadii: {
     base: number;
-    scallopX: number;
-    scallopY: number;
+
     outer: number;
     innerA: number;
     innerB: number;

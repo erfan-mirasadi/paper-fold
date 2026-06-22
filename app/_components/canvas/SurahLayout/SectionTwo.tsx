@@ -27,8 +27,8 @@ interface SectionTwoProps {
   isFolded?: boolean;
 }
 
-export const S2_TOP_SOLID_SCALE_X = 1.02;
-export const S2_TOP_SOLID_SCALE_Y = 1;
+export const S2_TOP_SOLID_SCALE_X = 0.9;
+export const S2_TOP_SOLID_SCALE_Y = 0.9;
 export const S2_TOP_SOLID_X_OFFSET = 0;
 export const S2_TOP_SOLID_Y_OFFSET = 0.003;
 
@@ -37,8 +37,8 @@ export const S2_TOP_IMAGE_SCALE_Y = 1.15;
 export const S2_TOP_IMAGE_X_OFFSET = 0;
 export const S2_TOP_IMAGE_Y_OFFSET = 0.025;
 
-export const S2_BOTTOM_SOLID_SCALE_X = 1.02;
-export const S2_BOTTOM_SOLID_SCALE_Y = 1;
+export const S2_BOTTOM_SOLID_SCALE_X = 0.9;
+export const S2_BOTTOM_SOLID_SCALE_Y = 0.9;
 export const S2_BOTTOM_SOLID_X_OFFSET = 0;
 export const S2_BOTTOM_SOLID_Y_OFFSET = -0.003;
 

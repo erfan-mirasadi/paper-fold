@@ -5,9 +5,6 @@ import { useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RoundedShapeComponent } from "../SurahLayout/SharedUI";
 import {
-  ScallopedCenteredShape,
-  SCALLOP_RADIUS_X,
-  SCALLOP_RADIUS_Y,
   S1_SOLID_SCALE_X,
   S1_SOLID_SCALE_Y,
   S1_SOLID_Y_OFFSET,
@@ -348,7 +345,6 @@ interface ElevatedSvgFrameProps {
   shadowStrength?: number;
   suppressShadow?: boolean;
   zOffset?: number;
-  scallopPosition?: "top" | "bottom" | "both" | "none";
 }
 
 function ElevatedSvgFrame({
@@ -367,7 +363,6 @@ function ElevatedSvgFrame({
   shadowStrength = 1,
   suppressShadow = false,
   zOffset = 0,
-  scallopPosition = "none",
 }: ElevatedSvgFrameProps) {
   const runtime = useSurahLayoutRuntime();
   const PAGE_WIDTH = runtime.PAGE_WIDTH;
@@ -426,14 +421,7 @@ function ElevatedSvgFrame({
 
       {/* Solid background */}
       <a.mesh position={[0, solidYOffset, -0.001]}>
-        <ScallopedCenteredShape
-          w={w * solidScale[0]}
-          h={h * solidScale[1]}
-          radius={0.039}
-          radiusX={SCALLOP_RADIUS_X}
-          radiusY={SCALLOP_RADIUS_Y}
-          position={scallopPosition}
-        />
+        <planeGeometry args={[w * solidScale[0], h * solidScale[1]]} />
         <a.meshBasicMaterial
           color={solidColor}
           transparent
@@ -681,8 +669,8 @@ function DynamicElevatedGroup({
 
   // خواندن تکسچرها و ابعاد از تنظیمات احزاب و آیتالکرسی
   const bgTex = vertConfig?.backgroundTexture || S2_FRAME_IMAGE;
-  const bgScaleX = vertConfig?.backgroundScaleX ?? S2_TOP_SOLID_SCALE_X;
-  const bgScaleY = vertConfig?.backgroundScaleY ?? S2_TOP_SOLID_SCALE_Y;
+  const bgScaleX = vertConfig?.backgroundScaleX ?? S2_TOP_IMAGE_SCALE_X;
+  const bgScaleY = vertConfig?.backgroundScaleY ?? S2_TOP_IMAGE_SCALE_Y;
 
   // ── Paper mode: NO frame for custom sections (Ahzab) ─────────────────────
   // Custom sections (hasCustomSections) show no frame in paper mode — only verses
@@ -714,7 +702,6 @@ function DynamicElevatedGroup({
           shadow={false}
           suppressShadow={isIntroActive && !isActive}
           zOffset={-0.002}
-          scallopPosition="none"
         />
       )}
       {/* شرط hasIntro حذف شد تا در احزاب هم دیده شود */}
@@ -736,7 +723,6 @@ function DynamicElevatedGroup({
           shadow
           shadowStrength={0.8}
           suppressShadow={isIntroActive && !isActive}
-          scallopPosition="none"
         />
       )}
 
@@ -811,7 +797,6 @@ function DynamicElevatedGroup({
             shadow
             shadowStrength={0.8}
             suppressShadow={isIntroActive && !isActive}
-            scallopPosition="none"
           />
         )}
     </group>
@@ -847,7 +832,6 @@ function DynamicElevatedGroup({
             shadow={false}
             suppressShadow={false}
             zOffset={-0.002}
-            scallopPosition="none"
           />
         </group>
       );
@@ -1065,7 +1049,7 @@ export function ElevatedSectionSurfaces() {
                 h={s1.frameH}
                 solidColor={S1_FRAME_BG_COLOR}
                 texturePath={S1_FRAME_IMAGE}
-                solidScale={[1, S1_SOLID_SCALE_Y, 1]}
+                solidScale={[S1_SOLID_SCALE_X, S1_SOLID_SCALE_Y, 1]}
                 imageScale={[S1_IMAGE_SCALE, S1_IMAGE_SCALE, 1]}
                 solidYOffset={S1_SOLID_Y_OFFSET}
                 imageYOffset={S1_IMAGE_Y_OFFSET}
@@ -1074,7 +1058,6 @@ export function ElevatedSectionSurfaces() {
                 shadowStrength={0.6}
                 suppressShadow={isIntroActive && !s1Active}
                 zOffset={0.001}
-                scallopPosition="top"
               />
               {s1.rowConnectors?.map((rc: RowConnectorTransform, i: number) => (
                 <ElevatedLayer

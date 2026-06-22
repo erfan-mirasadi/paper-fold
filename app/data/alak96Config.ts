@@ -309,8 +309,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     oppositeVerseConnectorRadius: 0.05,
     elevatedSectionRadii: {
       base: 0.039,
-      scallopX: 0.015, // SCALLOP_RADIUS_X
-      scallopY: 0.015, // SCALLOP_RADIUS_Y
+
       outer: 0.025,
       innerA: 0.023,
       innerB: 0.022,

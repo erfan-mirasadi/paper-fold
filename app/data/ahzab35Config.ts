@@ -300,8 +300,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     oppositeVerseConnectorRadius: 0.05,
     elevatedSectionRadii: {
       base: 0.039,
-      scallopX: 0.015,
-      scallopY: 0.015,
+
       outer: 0.025,
       innerA: 0.023,
       innerB: 0.022,
