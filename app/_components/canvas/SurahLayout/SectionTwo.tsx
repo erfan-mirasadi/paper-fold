@@ -360,8 +360,8 @@ function DynamicBackground({
   return (
     <mesh
       position={[
-        startX + layout.sectionW / 2,
-        layout.s2Top - layout.s2H / 2,
+        startX + layout.sectionW / 2 + ((layout as any).s2BackgroundOffsetX ?? 0),
+        layout.s2Top - layout.s2H / 2 + ((layout as any).s2BackgroundOffsetY ?? 0),
         -0.001,
       ]}
       scale={[

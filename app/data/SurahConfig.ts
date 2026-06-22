@@ -294,6 +294,16 @@ export function createLayoutMath(
         | VerticalGroupsSectionConfig
         | undefined
     )?.backgroundScaleY,
+    s2BackgroundOffsetX: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundOffsetX,
+    s2BackgroundOffsetY: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundOffsetY,
 
     v6Y,
     g1Y: baseG1Y,

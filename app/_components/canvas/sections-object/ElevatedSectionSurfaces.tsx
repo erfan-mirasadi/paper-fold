@@ -698,6 +698,8 @@ function DynamicElevatedGroup({
             vertConfig.backgroundScaleY ?? 1,
             1,
           ]}
+          imageXOffset={vertConfig.backgroundOffsetX ?? 0}
+          imageYOffset={vertConfig.backgroundOffsetY ?? 0}
           spring={spring}
           shadow={false}
           suppressShadow={isIntroActive && !isActive}
@@ -828,6 +830,8 @@ function DynamicElevatedGroup({
               vertConfig.backgroundScaleY ?? 1,
               1,
             ]}
+            imageXOffset={vertConfig.backgroundOffsetX ?? 0}
+            imageYOffset={vertConfig.backgroundOffsetY ?? 0}
             spring={spring}
             shadow={false}
             suppressShadow={false}

@@ -218,7 +218,7 @@ function SurahViewerInner({
   return (
     <main
       style={{
-        width: "100vw",
+        width: "100%",
         minHeight: "100dvh",
         backgroundColor: "var(--page-bg)",
         transition: "background-color 0.5s ease",
