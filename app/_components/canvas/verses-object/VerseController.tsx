@@ -270,17 +270,14 @@ export function VerseController({ config }: { config: VerseConfig }) {
     sectionSpringY: hasCustomSections ? parentSectionDrag?.y : sectionDrag?.y,
   });
 
-  // Position offset: only add parent spring when in all-sections mode
-  const activeParentSectionDrag = isAllSectionsMode ? parentSectionDrag : null;
-
   const dragX = to(
     [
       leadVerseDrag.x,
       sectionDrag ? sectionDrag.x : leadVerseDrag.x,
-      activeParentSectionDrag ? activeParentSectionDrag.x : leadVerseDrag.x,
+      parentSectionDrag ? parentSectionDrag.x : leadVerseDrag.x,
     ],
     (vx, sx, px) => {
-      const parentOffset = activeParentSectionDrag ? px : 0;
+      const parentOffset = parentSectionDrag ? px : 0;
       return vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0) + parentOffset;
     },
   );
@@ -289,10 +286,10 @@ export function VerseController({ config }: { config: VerseConfig }) {
     [
       leadVerseDrag.y,
       sectionDrag ? sectionDrag.y : leadVerseDrag.y,
-      activeParentSectionDrag ? activeParentSectionDrag.y : leadVerseDrag.y,
+      parentSectionDrag ? parentSectionDrag.y : leadVerseDrag.y,
     ],
     (vy, sy, py) => {
-      const parentOffset = activeParentSectionDrag ? py : 0;
+      const parentOffset = parentSectionDrag ? py : 0;
       return vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0) + parentOffset;
     },
   );
