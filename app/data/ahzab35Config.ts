@@ -90,6 +90,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       textColor: "#A30000",
       xOffset: 0.0, // Yellow: no extra push (short text fits naturally)
       textScaleOverride: 1.6,
+      expandH: 0.008,
     },
     2: {
       bg: YELLOW_BG,
@@ -106,6 +107,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       capsuleLabelPosition: "top",
       textColor: "#A30000",
       textScaleOverride: 1.6,
+      expandH: 0.008,
     },
     // ── Group 1 — Blue ───────────────────────────────────────────────────
     // Verse 3 is the RIGHT-side capsule (index 1 in verseIds [4,3]).
@@ -280,8 +282,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           fillColor: BLUE_BG,
           bowGap: 0.2,
           innerBowGap: 0.19,
-          inwardOffset: 0.01,
+          inwardOffset: 0.03,
           curveSide: "left",
+          tipThickness: 0.1,
         },
         {
           color: GREEN_BORDER,
@@ -324,7 +327,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     s2Gap: 0.12, // increase horizontal gap between left / right columns
     s2VerticalRowGap: 0.004, // very small gap between the two green rows
     smallBoxH2: 0.085, // default height of each individual verse capsule
-    middleExtraGap: 0.015,
+    middleExtraGap: -0.01,
     s2PadLeftRight: 0.005, // push outward to the red borders
     g2Scale: 0.1, // indent the green group to fit the inward SVG border
     outerScale: 0.0,
@@ -359,9 +362,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.65,
-      scaleY: 0.95,
-      offsetX: -0.45,
+      scaleX: 0.73,
+      scaleY: 0.99,
+      offsetX: -0.46,
       offsetY: 0.004,
       rotationZ: Math.PI / 2,
       renderOrder: 3,
@@ -372,9 +375,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       src: "/ahzab/middle.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 0.65,
-      scaleY: 0.95,
-      offsetX: 0.45,
+      scaleX: 0.73,
+      scaleY: 0.99,
+      offsetX: 0.46,
       offsetY: 0.004,
       rotationZ: -Math.PI / 2,
       renderOrder: 3,
@@ -402,7 +405,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       scaleX: 1.365,
       scaleY: 0.36,
       offsetX: 0,
-      offsetY: 0.0765,
+      offsetY: 0.0755,
       rotationZ: 0,
       renderOrder: 10,
       customSectionId: "section2_bottom",
@@ -418,46 +421,48 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       offsetX: 0,
       offsetY: 0.004,
       rotationZ: 0,
-      renderOrder: 2,
+      renderOrder: 4,
       customSectionId: null,
     },
 
     // ── Arrow between verse 1 and 2 — section2_top
     {
-      src: "/ahzab/arrow.svg",
+      src: "/ahzab/arrows.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
-      scaleX: -0.08,
-      scaleY: 0.02,
+      scaleX: 0.08,
+      scaleY: 0.07,
       offsetX: 0,
       offsetY: 0,
-      rotationZ: 0,
+      rotationZ: -Math.PI / 2 + 0.4,
       renderOrder: 10,
       customSectionId: "section2_top",
     },
     // ── Arrow from "أَعَدَّ اللَّهُ لَهُمْ" to right capsule — section2_bottom
     {
-      src: "/ahzab/arrow.svg",
+      src: "/ahzab/arrows.svg",
       anchorGroupIndex: 4,
       anchorEdge: "top",
-      scaleX: 0.07,
-      scaleY: 0.02,
+      scaleX: -0.07,
+      scaleY: 0.07,
       offsetX: 0.045,
-      offsetY: 0.024,
-      rotationZ: -Math.PI / 6, // 30 degrees down-right
+      offsetY: -0.01,
+      rotationZ: 290 - 0.5, // opposite of -290
       renderOrder: 10,
+      customSectionId: "section2_bottom",
     },
     // ── Arrow from "أَعَدَّ اللَّهُ لَهُمْ" to left capsule
     {
-      src: "/ahzab/arrow.svg",
+      src: "/ahzab/arrows.svg",
       anchorGroupIndex: 4,
       anchorEdge: "top",
       scaleX: 0.07,
-      scaleY: 0.02,
+      scaleY: 0.07,
       offsetX: -0.045,
-      offsetY: 0.024,
-      rotationZ: (-5 * Math.PI) / 6, // 150 degrees down-left
+      offsetY: -0.01,
+      rotationZ: -(290 - 0.5), // Mirrored rotation from the right arrow
       renderOrder: 10,
+      customSectionId: "section2_bottom",
     },
   ],
 
@@ -466,8 +471,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       id: "section2",
       type: "verticalGroups",
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 1.28,
-      backgroundScaleY: 1.3,
+      backgroundScaleX: 1.3,
+      backgroundScaleY: 1.45,
 
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,
@@ -511,7 +516,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           customScale: 0.1,
           xGap: 0.1,
           bgThemeKey: "s2Group1Bg",
-          pushDown: -0.008, // negative value pushes the group UP
+          pushDown: -0.075, // negative value pushes the group UP
           dragBehavior: "group",
         },
         // ── Group 1 — Blue (1 row) ────────────────────────────────────────
@@ -554,15 +559,15 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [12, 11],
           isPushedIn: false,
           isCenter: true,
-          xGap: 0.1, // Change this value to adjust the horizontal distance between the capsules!
+          xGap: 0.15, // Change this value to adjust the horizontal distance between the capsules!
           bgThemeKey: "s2Group1Bg",
           customScale: 0.3,
-          pushDown: 0.025,
+          pushDown: 0.09,
           dragBehavior: "group",
           topLabelConfig: {
             width: 0.3,
             height: 0.085,
-            yOffset: 0.058,
+            yOffset: 0.025,
             textScaleOverride: 1.35,
             textColor: "#000000",
             xMultiplier: 1.0,
