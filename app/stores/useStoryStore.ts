@@ -24,7 +24,15 @@ const INITIAL_TEXT_DATA: Record<SurahLanguage, SurahDataShape> = {
 export const useStoryStore = create<StoryState>((set) => ({
   activeConfig: ALAK_LAYOUT_CONFIG,
   activeTextData: INITIAL_TEXT_DATA,
-  setActiveStory: (config, textData) => set({ activeConfig: config, activeTextData: textData }),
+  setActiveStory: (config, textData) => {
+    // Clean up drag engine state before switching stories to prevent
+    // stale SpringValues and drag markers from leaking across surah navigations.
+    // Lazy import avoids a circular dependency (dragEngine → useStoryStore → dragEngine).
+    import("../utils/dragEngine").then(({ resetDragEngineForStory }) => {
+      resetDragEngineForStory();
+    });
+    set({ activeConfig: config, activeTextData: textData });
+  },
 }));
 
 export const getActiveStoryConfig = () => useStoryStore.getState().activeConfig;

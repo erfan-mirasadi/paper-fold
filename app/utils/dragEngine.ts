@@ -194,7 +194,11 @@ export function resetAllDrags() {
   useDragState.getState().reset();
 }
 
-/** Helper to resolve verse -> section map */
+/** Helper to resolve verse -> section map.
+ *  Intro verse attaches to the first group (_g0);
+ *  outro verse attaches to the last group (_g{last}).
+ *  This guarantees intro/outro verses move with their section when dragged.
+ */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
   for (const sec of getActiveStoryConfig().sections) {
     if (sec.type === "gridWithAnaAyet") {
@@ -202,10 +206,59 @@ export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
       if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;
     } else if (sec.type === "verticalGroups") {
       const v = sec as VerticalGroupsSectionConfig;
-      if (v.introVerse === verseId || (v.groups[0] && v.groups[0].verseIds.includes(verseId))) return `${v.id}_top`;
-      if (v.groups[1] && v.groups[1].verseIds.includes(verseId)) return `${v.id}_center`;
-      if (v.outroVerse === verseId || (v.groups[2] && v.groups[2].verseIds.includes(verseId))) return `${v.id}_bottom`;
+
+      // ── CUSTOM SECTIONS: check custom section mapping first ──────────
+      if (v.customSections && v.customSections.length > 0) {
+        for (const cs of v.customSections) {
+          if (cs.verseIds.includes(verseId)) return cs.id;
+        }
+        // Also check intro/outro verses — attach to first/last custom section
+        if (v.introVerse === verseId && v.customSections.length > 0) {
+          return v.customSections[0].id;
+        }
+        if (v.outroVerse === verseId && v.customSections.length > 0) {
+          return v.customSections[v.customSections.length - 1].id;
+        }
+        continue;
+      }
+
+      const isUnified = v.groupElevation === "unified";
+      const lastIdx = v.groups.length - 1;
+      for (let i = 0; i <= lastIdx; i++) {
+        const group = v.groups[i];
+        const isIntroMatch = i === 0 && v.introVerse === verseId;
+        const isOutroMatch = i === lastIdx && v.outroVerse === verseId;
+        if (group.verseIds.includes(verseId) || isIntroMatch || isOutroMatch) {
+          return isUnified ? v.id : `${v.id}_g${i}`;
+        }
+      }
     }
   }
   return null;
+}
+
+/**
+ * Call when switching to a new surah to wipe all stale spring values and
+ * drag markers. Prevents leaked SpringValues accumulating across navigations.
+ */
+export function resetDragEngineForStory() {
+  // Stop and zero-out all existing springs
+  Object.values(dynamicSectionsTarget).forEach((s) => {
+    s.x.stop();
+    s.y.stop();
+  });
+  Object.values(dynamicVersesTarget).forEach((v) => {
+    v.x.stop();
+    v.y.stop();
+  });
+  // Clear the proxy backing stores so IDs from the old surah don't linger
+  for (const key of Object.keys(dynamicSectionsTarget)) {
+    delete dynamicSectionsTarget[key];
+  }
+  for (const key of Object.keys(dynamicVersesTarget)) {
+    delete (dynamicVersesTarget as any)[key];
+  }
+  draggedVerseIds.clear();
+  draggedSectionIds.clear();
+  useDragState.getState().reset();
 }

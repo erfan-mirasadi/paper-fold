@@ -211,44 +211,60 @@ export function ElevatedSectionLabels() {
       });
     } else if (section.type === "verticalGroups") {
       const vConfig = section as VerticalGroupsSectionConfig;
-      labelsToRender.push({
-        key: `${vConfig.id}_top`,
-        sectionId: `${vConfig.id}_top`,
-        y: sTransform.topLabelPinY!,
-        text: getLabelText(vConfig.topLabelKey),
-        bgColor: S2_TOP_LABEL_BG,
-        borderColor: S2_TOP_LABEL_BORDER,
-        partialBorder: true,
-        delayMs: 95,
-        liftHeight: LABEL_ELEVATION_HEIGHT,
-        tension: 90,
-        friction: 23,
-        zBaseOffset: 0.0022,
-        labelZ: 0.00035,
-        renderOrder: 240,
-        depthTest: true,
-        showInIntro: false,
-      });
+      const hasCustomSections = vConfig.customSections && vConfig.customSections.length > 0;
+      const isUnified = vConfig.groupElevation === "unified";
+      const lastGroupIdx = vConfig.groups.length - 1;
+      const topSectionId = hasCustomSections
+        ? vConfig.customSections![0].id
+        : isUnified ? vConfig.id : `${vConfig.id}_g0`;
+      const bottomSectionId = hasCustomSections
+        ? vConfig.customSections![vConfig.customSections!.length - 1].id
+        : isUnified ? vConfig.id : `${vConfig.id}_g${lastGroupIdx}`;
 
-      labelsToRender.push({
-        key: `${vConfig.id}_bottom`,
-        sectionId: `${vConfig.id}_bottom`,
-        y: sTransform.bottomLabelPinY!,
-        text: getLabelText(vConfig.bottomLabelKey),
-        bgColor: S2_TOP_LABEL_BG,
-        borderColor: S2_TOP_LABEL_BORDER,
-        partialBorder: true,
-        bottomBorder: true,
-        delayMs: 130,
-        liftHeight: LABEL_ELEVATION_HEIGHT,
-        tension: 84,
-        friction: 22,
-        zBaseOffset: 0.0022,
-        labelZ: 0.00035,
-        renderOrder: 240,
-        depthTest: true,
-        showInIntro: false,
-      });
+      const topText = getLabelText(vConfig.topLabelKey);
+      if (topText) {
+        labelsToRender.push({
+          key: `${vConfig.id}_top_label`,
+          sectionId: topSectionId,
+          y: sTransform.topLabelPinY!,
+          text: topText,
+          bgColor: S2_TOP_LABEL_BG,
+          borderColor: S2_TOP_LABEL_BORDER,
+          partialBorder: true,
+          delayMs: 95,
+          liftHeight: LABEL_ELEVATION_HEIGHT,
+          tension: 90,
+          friction: 23,
+          zBaseOffset: 0.0022,
+          labelZ: 0.00035,
+          renderOrder: 240,
+          depthTest: true,
+          showInIntro: false,
+        });
+      }
+
+      const bottomText = getLabelText(vConfig.bottomLabelKey);
+      if (bottomText) {
+        labelsToRender.push({
+          key: `${vConfig.id}_bottom_label`,
+          sectionId: bottomSectionId,
+          y: sTransform.bottomLabelPinY!,
+          text: bottomText,
+          bgColor: S2_TOP_LABEL_BG,
+          borderColor: S2_TOP_LABEL_BORDER,
+          partialBorder: true,
+          bottomBorder: true,
+          delayMs: 130,
+          liftHeight: LABEL_ELEVATION_HEIGHT,
+          tension: 84,
+          friction: 22,
+          zBaseOffset: 0.0022,
+          labelZ: 0.00035,
+          renderOrder: 240,
+          depthTest: true,
+          showInIntro: false,
+        });
+      }
     }
   });
 

@@ -24,6 +24,25 @@ export interface LayoutDimensions {
   scrollPages: number;
 }
 
+export interface CurveColorConfig {
+  color: string;
+  fillColor: string;
+  bowGap?: number;
+  innerBowGap?: number;
+  inwardOffset?: number;
+  /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
+  curveSide?: "symmetrical" | "left" | "right";
+  /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
+  drawInnerCurves?: boolean;
+  innerCurvesBowGap?: number;
+  innerCurvesInnerBowGap?: number;
+  tipThickness?: number;
+  topAnchorXOffset?: number;
+  bottomAnchorXOffset?: number;
+  topAnchorYOffset?: number;
+  bottomAnchorYOffset?: number;
+}
+
 export interface ThemeColors {
   paperBase: string;
   shadow: string;
@@ -54,8 +73,9 @@ export interface ThemeColors {
    * The last entry is always the center (inner) bracket.
    * Provide one entry per bracket (outer brackets first, center last).
    */
-  curveColors?: Array<{ color: string; fillColor: string }>;
-  
+  curveColors?: CurveColorConfig[];
+  curveLineWidth?: number;
+
   /**
    * Optional background colors for vertical sections (like Ayat Al Kursi).
    * Usually an array mapping to groups: e.g. [topColor, middleColor, bottomColor].
@@ -72,8 +92,7 @@ export interface LayoutStyling {
   s1NeonConfig?: any;
   elevatedSectionRadii: {
     base: number;
-    scallopX: number;
-    scallopY: number;
+
     outer: number;
     innerA: number;
     innerB: number;
@@ -82,10 +101,11 @@ export interface LayoutStyling {
 
 export interface VerseBlockConfig {
   verseIds: number[];
+  dragBehavior?: "group" | "pair" | "single" | "individual";
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
-  anaAyetTab?: {
+  capsuleLabel?: {
     x: number;
     y: number;
     w: number;
@@ -97,6 +117,25 @@ export interface VerseBlockConfig {
   isCenter?: boolean;
   extraRowGap?: number;
   bgThemeKey?: keyof ThemeColors;
+  customScale?: number;
+  xGap?: number;
+  pushDown?: number;
+  topLabelConfig?: {
+    width?: number;
+    height?: number;
+    yOffset?: number;
+    textOffsetY?: number;
+    textScaleOverride?: number;
+    bgColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    xMultiplier?: number;
+  };
+  backgroundTexture?: string;
+  backgroundScaleX?: number;
+  backgroundScaleY?: number;
+  backgroundOffsetX?: number;
+  backgroundOffsetY?: number;
 }
 
 export interface CameraTargetConfig {
@@ -115,6 +154,19 @@ export interface GridSectionConfig {
   cameraTarget?: CameraTargetConfig;
 }
 
+/**
+ * Defines a custom section for drag/click/elevation that can span verses
+ * from multiple groups. Overrides the default per-group section mapping.
+ */
+export interface CustomSectionDef {
+  /** Unique section ID (e.g. "section2_right") */
+  id: string;
+  /** Verse IDs that belong to this section */
+  verseIds: number[];
+  /** Optional specific camera target for this custom section */
+  cameraTarget?: CameraTargetConfig;
+}
+
 export interface VerticalGroupsSectionConfig {
   id: string;
   type: "verticalGroups";
@@ -124,6 +176,19 @@ export interface VerticalGroupsSectionConfig {
   outroVerse?: number;
   introOutroBgThemeKey?: keyof ThemeColors;
   groups: VerseBlockConfig[];
+  /**
+   * Controls how groups are treated for drag/elevation:
+   * - "perGroup" (default): Each group gets its own section ID and drag spring (Alak).
+   * - "unified": All groups share one section ID — drag moves everything together (AyatAlKursi).
+   */
+  groupElevation?: "unified" | "perGroup";
+  /**
+   * When provided, overrides the default group-based section mapping.
+   * Each custom section defines its own ID and verse list, allowing
+   * column-based or cross-group sections (e.g. Ahzab 35 left/right columns).
+   * Takes precedence over both "perGroup" and "unified" groupElevation.
+   */
+  customSections?: CustomSectionDef[];
   cameraTarget?: CameraTargetConfig;
   subCameraTargets?: {
     top?: CameraTargetConfig;
@@ -133,6 +198,8 @@ export interface VerticalGroupsSectionConfig {
   backgroundTexture?: string;
   backgroundScaleX?: number;
   backgroundScaleY?: number;
+  /** When true, the horizontal row-connector bars between paired capsules are hidden. */
+  hideRowConnectors?: boolean;
 }
 
 export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
@@ -162,12 +229,57 @@ export interface VerseOverrideConfig {
   circleTextCol?: string;
   /** Explicit hex color for the Arabic and Latin verse text */
   textColor?: string;
-  /** When true, an AnaAyetTab label is rendered above this verse in section and mesh views */
-  hasAnaAyetTab?: boolean;
+  /** When true, a CapsuleLabel is rendered above this verse in section and mesh views */
+  hasCapsuleLabel?: boolean;
+  /** Optional custom text to display in the CapsuleLabel instead of the default 'Ana Ayet' */
+  customCapsuleLabel?: string | Record<string, string>;
+  /** Position of the CapsuleLabel: 'top' (default) or 'bottom' */
+  capsuleLabelPosition?: "top" | "bottom";
+  /** Override the verse text scale for this specific verse. */
+  textScaleOverride?: number;
+  /**
+   * Additional horizontal offset (in world units) applied to this verse's X
+   * position after the layout engine places it.
+   * Positive → moves right, Negative → moves left.
+   * Useful for pushing a short right-side verse further toward the paper edge
+   * so both sides appear visually balanced.
+   */
+  xOffset?: number;
 }
 
 export interface SurahAssets {
   metallicVerseBorderSvg?: string;
+}
+
+// ---------------------------------------------------------------------------
+// SVG OVERLAY CONFIG — per-surah decorative SVG planes
+// ---------------------------------------------------------------------------
+
+export interface SvgOverlayItem {
+  /** Path to the SVG asset (relative to /public) */
+  src: string;
+  /** Which group index to anchor this overlay on (0-based). When not provided, anchors to the whole section center. */
+  anchorGroupIndex?: number;
+  /** Which edge of the anchor group to align to: 'top' | 'bottom' | 'center' */
+  anchorEdge?: "top" | "bottom" | "center";
+  /** Scale in X direction (world units per unit plane). Negative = flip horizontal. */
+  scaleX?: number;
+  /** Scale in Y direction (world units per unit plane). Negative = flip vertical. */
+  scaleY?: number;
+  /** Additional X offset in world units, applied after anchoring */
+  offsetX?: number;
+  /** Additional Y offset in world units, applied after anchoring */
+  offsetY?: number;
+  /** Z rotation in radians */
+  rotationZ?: number;
+  /** Three.js renderOrder (higher = on top). Default 3. */
+  renderOrder?: number;
+  /**
+   * When set, this overlay is wrapped in a DraggableSectionGroup and
+   * moves with the specified custom section ID when dragged/elevated.
+   * When null or omitted, the overlay is static (glued to the background frame).
+   */
+  customSectionId?: string | null;
 }
 
 export interface FoldState {
@@ -242,6 +354,8 @@ export interface SurahLayoutConfig<TParams = any> {
   animations: SurahAnimations;
   introMedia?: Record<string, IntroMediaItem>;
   introGuides?: Record<string, string>;
+  /** Optional per-surah SVG overlay planes rendered on top of the section */
+  svgOverlays?: SvgOverlayItem[];
 }
 
 // ----------------------------------------------------------------------------
@@ -265,6 +379,8 @@ export interface BracketSpec {
   isCenter: boolean;
   color: string;
   fillColor: string;
+  scaleTop?: number;
+  scaleBot?: number;
 }
 
 export interface RowConnectorTransform {
@@ -284,6 +400,22 @@ export interface GroupTransforms {
   isCenter: boolean;
   verses: Record<number, ElementTransform>;
   rowConnectors: RowConnectorTransform[];
+  topLabelConfig?: {
+    width?: number;
+    height?: number;
+    yOffset?: number;
+    textOffsetY?: number;
+    textScaleOverride?: number;
+    bgColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    xMultiplier?: number;
+  };
+  backgroundTexture?: string;
+  backgroundScaleX?: number;
+  backgroundScaleY?: number;
+  backgroundOffsetX?: number;
+  backgroundOffsetY?: number;
 }
 
 export interface SectionTransforms {
@@ -304,12 +436,12 @@ export interface SectionTransforms {
   verses?: Record<number, ElementTransform>;
   rowConnectors?: RowConnectorTransform[];
   anaAyet?: ElementTransform;
-  anaAyetTabX?: number;
-  anaAyetTabY?: number;
-  anaAyetTabW?: number;
-  anaAyetTabH?: number;
-  anaAyetTabBorderWidth?: number;
-  anaAyetLabelDrop?: number;
+  capsuleLabelX?: number;
+  capsuleLabelY?: number;
+  capsuleLabelW?: number;
+  capsuleLabelH?: number;
+  capsuleLabelBorderWidth?: number;
+  capsuleLabelDrop?: number;
   labelPinY?: number;
   introVerse?: ElementTransform;
   outroVerse?: ElementTransform;

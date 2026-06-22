@@ -207,13 +207,14 @@ export function ScrollManager() {
 
       let scrollAmbientMediaId: string | null = null;
       if (ambientProgress >= 0 && handoffProgress === 0) {
-        const keys = runtime.config.animations
-          .ambientMediaKeys as string[];
-        // Distribute the items across the ambient progress (0 to 1)
-        let index = Math.floor(ambientProgress * keys.length);
-        if (index >= keys.length) index = keys.length - 1;
-        if (ambientProgress > 0 || introProgress >= 1) {
-          scrollAmbientMediaId = keys[index];
+        const keys = runtime.config.animations.ambientMediaKeys as string[] | undefined;
+        if (keys && keys.length > 0) {
+          // Distribute the items across the ambient progress (0 to 1)
+          let index = Math.floor(ambientProgress * keys.length);
+          if (index >= keys.length) index = keys.length - 1;
+          if (ambientProgress > 0 || introProgress >= 1) {
+            scrollAmbientMediaId = keys[index];
+          }
         }
       }
 

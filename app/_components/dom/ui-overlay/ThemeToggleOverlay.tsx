@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { OverlayButton } from "./OverlayButton";
 
@@ -12,8 +12,8 @@ function SunIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="20"
-      height="20"
+      width="22"
+      height="22"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.35"
@@ -31,8 +31,8 @@ function MoonIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="20"
-      height="20"
+      width="22"
+      height="22"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.35"
@@ -82,9 +82,33 @@ export function ThemeToggleOverlay({ onToggle }: ThemeToggleOverlayProps) {
       <OverlayButton
         onClick={handleToggle}
         aria-label={isDarkMode ? "Gunduz moduna gec" : "Gece moduna gec"}
-        className="w-14 h-14"
+        className="w-14 h-14 relative"
       >
-        {isDarkMode ? <MoonIcon /> : <SunIcon />}
+        <AnimatePresence mode="wait" initial={false}>
+          {isDarkMode ? (
+            <motion.div
+              key="moon"
+              initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+              transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <MoonIcon />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="sun"
+              initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+              transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <SunIcon />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </OverlayButton>
     </motion.div>
   );

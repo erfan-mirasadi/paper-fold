@@ -31,18 +31,29 @@ export interface VerseConfig {
   circleBg: string;
   circleTextCol: string;
   textColor?: string;
+  textScaleOverride?: number;
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
   frameScaleLTR?: number;
-  anaAyetTab?: {
+  capsuleLabel?: {
     x: number;
     y: number;
     w: number;
     h: number;
     borderWidth: number;
     labelDrop?: number;
+    customText?: string;
   };
+}
+
+function getTranslatedLabel(
+  label: string | Record<string, string> | undefined,
+  lang: string,
+) {
+  if (!label) return undefined;
+  if (typeof label === "string") return label;
+  return label[lang] || label.ar || Object.values(label)[0];
 }
 
 export function buildVerseConfigs(
@@ -87,8 +98,12 @@ export function buildVerseConfigs(
         let actualVerseId = vId;
         if (isGridVerse) {
           const arabicVerseNumber = gridConfig.verses[gridIdx];
-          const currentLanguageVerseNumber = surahData.section1.gridVerses[gridIdx]?.number;
-          if (currentLanguageVerseNumber !== undefined && currentLanguageVerseNumber !== arabicVerseNumber) {
+          const currentLanguageVerseNumber =
+            surahData.section1.gridVerses[gridIdx]?.number;
+          if (
+            currentLanguageVerseNumber !== undefined &&
+            currentLanguageVerseNumber !== arabicVerseNumber
+          ) {
             lookupNumber = arabicVerseNumber;
             actualVerseId = currentLanguageVerseNumber;
           }
@@ -120,6 +135,7 @@ export function buildVerseConfigs(
         const circleTextCol =
           override?.circleTextCol ?? override?.border ?? S1_VERSE_NUMBER_BORDER;
         const textColor = override?.textColor;
+        const textScaleOverride = override?.textScaleOverride;
 
         // --- Hinge and fold direction ---
         let direction: "left" | "right";
@@ -135,19 +151,23 @@ export function buildVerseConfigs(
           hingeX = rawTransform.x - PAGE_WIDTH / 2 - expandW;
         }
 
-        // --- AnaAyetTab: only generated when the override declares it and the
-        //     section transforms supply the tab dimensions ---
-        const anaAyetTab =
+        // --- CapsuleLabel: only generated when the override declares it and the
+        // layout provides its dimensions.
+        const capsuleLabel =
           !isGridVerse &&
-          override?.hasAnaAyetTab &&
-          transforms.anaAyetTabW != null
+          override?.hasCapsuleLabel &&
+          transforms.capsuleLabelW != null
             ? {
-                x: transforms.anaAyetTabX! - (rawTransform.x - expandW),
-                y: transforms.anaAyetTabY! - (rawTransform.y + expandH),
-                w: transforms.anaAyetTabW!,
-                h: transforms.anaAyetTabH!,
-                borderWidth: transforms.anaAyetTabBorderWidth!,
-                labelDrop: transforms.anaAyetLabelDrop,
+                x: transforms.capsuleLabelX! - (rawTransform.x - expandW),
+                y: transforms.capsuleLabelY! - (rawTransform.y + expandH),
+                w: transforms.capsuleLabelW!,
+                h: transforms.capsuleLabelH!,
+                borderWidth: transforms.capsuleLabelBorderWidth!,
+                labelDrop: transforms.capsuleLabelDrop,
+                customText: getTranslatedLabel(
+                  override?.customCapsuleLabel,
+                  runtime.activeLanguage,
+                ),
               }
             : undefined;
 
@@ -166,11 +186,12 @@ export function buildVerseConfigs(
           circleBg,
           circleTextCol,
           textColor,
+          textScaleOverride,
           isPill,
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
           frameScaleLTR: override?.frameScaleLTR,
-          anaAyetTab,
+          capsuleLabel,
         });
       }
     } else if (sectionConfig.type === "verticalGroups") {
@@ -207,11 +228,16 @@ export function buildVerseConfigs(
           const t = transforms.groups![gIdx].verses[lookupNumber];
           if (!t) return;
 
-          const override = runtime.config.verseOverrides?.[lookupNumber] ?? runtime.config.verseOverrides?.[v.number];
+          const override =
+            runtime.config.verseOverrides?.[lookupNumber] ??
+            runtime.config.verseOverrides?.[v.number];
+
+          const expandW = override?.expandW ?? 0;
+          const expandH = override?.expandH ?? 0;
 
           const isCenterGroup = gIdx === 1;
-          const groupFallbackBorder = isCenterGroup 
-            ? runtime.config.styling.colors.greenTheme 
+          const groupFallbackBorder = isCenterGroup
+            ? runtime.config.styling.colors.greenTheme
             : runtime.config.styling.colors.maroonTheme;
 
           const finalBg =
@@ -223,20 +249,67 @@ export function buildVerseConfigs(
           const finalBorder = override?.border ?? groupFallbackBorder;
           const finalCircleBg = override?.circleBg ?? finalBg;
           const finalCircleBorderCol = override?.circleBorderCol ?? finalBorder;
-          const finalCircleTextCol = override?.circleTextCol ?? runtime.config.styling.colors.verseNumberText;
+          const finalCircleTextCol =
+            override?.circleTextCol ??
+            runtime.config.styling.colors.verseNumberText;
           const finalTextColor = override?.textColor;
+          const textScaleOverride = override?.textScaleOverride;
 
-          const worldX = t.x - PAGE_WIDTH / 2;
+          const worldX = t.x - expandW - PAGE_WIDTH / 2;
+          const expandedW = t.w + expandW * 2;
+          const expandedH = t.h + expandH * 2;
           const direction = isRightCol ? "right" : "left";
-          const hingeX = isRightCol ? worldX : worldX + t.w;
+          const hingeX = isRightCol ? worldX : worldX + expandedW;
+
+          const capsuleLabelW = runtime.layoutMath.capsuleLabelW ?? 0.2;
+          const capsuleLabelH = runtime.layoutMath.capsuleLabelH ?? 0.032;
+          const capsuleLabelBorderWidth =
+            runtime.layoutMath.capsuleLabelBorderWidth ?? 0.0035;
+          const capsuleLabelDrop = runtime.layoutMath.capsuleLabelDrop ?? 0.015;
+
+          let capsuleLabel;
+          if (override?.hasCapsuleLabel) {
+            const isTop = override.capsuleLabelPosition !== "bottom";
+
+            // Mirror exactly what VerseGroup.tsx does on the static paper:
+            //   tabX = finalX + finalW / 2  (center of capsule, world space)
+            //   tabY = isTop ? finalY + labelDrop : finalY - finalH - labelDrop
+            //
+            // In VerseMesh the fold-group is placed at position-y = config.y = finalY.
+            // So local space Y = world Y - finalY:
+            //   top:    localY = (finalY + labelDrop) - finalY = +labelDrop
+            //   bottom: localY = (finalY - expandedH - labelDrop) - finalY = -expandedH - labelDrop
+            //
+            // X: CapsuleLabel uses x as its horizontal center (it renders at x - w/2).
+            //   direction="right": hinge is left edge, capsule center = +expandedW / 2
+            //   direction="left":  hinge is right edge, capsule center = -expandedW / 2
+
+            const capsuleCenterX =
+              direction === "right" ? expandedW / 2 : -expandedW / 2;
+            const yTop = capsuleLabelDrop;
+            const yBottom = -expandedH - capsuleLabelDrop;
+
+            capsuleLabel = {
+              x: capsuleCenterX,
+              y: isTop ? yTop : yBottom,
+              w: capsuleLabelW,
+              h: capsuleLabelH,
+              borderWidth: capsuleLabelBorderWidth,
+              labelDrop: capsuleLabelDrop,
+              customText: getTranslatedLabel(
+                override.customCapsuleLabel,
+                runtime.activeLanguage,
+              ),
+            };
+          }
 
           configs.push({
             id: v.number,
             verse: v.text,
             number: v.number,
-            y: t.y,
-            w: t.w,
-            h: t.h,
+            y: t.y + expandH,
+            w: expandedW,
+            h: expandedH,
             hingeX,
             direction,
             bg: finalBg,
@@ -245,6 +318,8 @@ export function buildVerseConfigs(
             circleBg: finalCircleBg,
             circleTextCol: finalCircleTextCol,
             textColor: finalTextColor,
+            textScaleOverride,
+            capsuleLabel,
           });
         });
       });

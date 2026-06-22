@@ -11,7 +11,10 @@ import {
 } from "../data/SurahConfig";
 import { useStoryStore } from "../stores/useStoryStore";
 
-export function getPageWidthForLanguage(language: SurahLanguage, basePageWidth: number) {
+export function getPageWidthForLanguage(language: SurahLanguage, basePageWidth: number, configId?: string) {
+  if (configId === "ahzab35") {
+    return basePageWidth;
+  }
   return basePageWidth + (language === "en" || language === "tr" ? 0.3 : 0);
 }
 
@@ -20,8 +23,8 @@ export function useSurahLayoutRuntime() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
 
   const pageWidth = useMemo(
-    () => getPageWidthForLanguage(activeLanguage, activeConfig.dimensions.paperWidth),
-    [activeLanguage, activeConfig.dimensions.paperWidth],
+    () => getPageWidthForLanguage(activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.id),
+    [activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.id],
   );
 
   const layout = useMemo(() => createLayoutMath(activeConfig, pageWidth), [activeConfig, pageWidth]);

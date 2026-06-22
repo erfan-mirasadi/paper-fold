@@ -11,20 +11,8 @@ import type {
   SectionTransforms,
 } from "./schema";
 import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
-import {
-  S1_VERSE_NUMBER_BG,
-  S1_VERSE_NUMBER_BORDER,
-  S1_VERSE_NUMBER_TEXT,
-  S1_VERSE_5_TEXT,
-  BLUE_THEME,
-  MAROON_THEME,
-  GREEN_THEME,
-  CAPSULE_BG_6_19,
-  CAPSULE_BG_7_8_17_18,
-  CAPSULE_BG_9_10_15_16,
-  CAPSULE_BG_12_14,
-  S2_VERSE_NUMBER_TEXT,
-} from "./theme";
+import { ALAK_LAYOUT_CONFIG } from "./alak96Config";
+export { ALAK_LAYOUT_CONFIG };
 
 export interface Verse {
   number: number;
@@ -34,6 +22,7 @@ export interface Verse {
 export interface ColorGroup {
   verses: Verse[];
   verseBg?: string;
+  topLabel?: string;
   isPushedIn?: boolean;
   isCenter?: boolean;
   extraRowGap?: number;
@@ -76,12 +65,12 @@ export interface AlakLayoutParams {
   smallBoxH2: number;
   middleExtraGap: number;
   s2PadLeftRight: number;
-  g2Shrink: number;
+  g2Scale: number;
   s1BorderWidth: number;
-  anaAyetTabW: number;
-  anaAyetTabH: number;
-  anaAyetTabBorderWidth: number;
-  anaAyetLabelDrop: number;
+  capsuleLabelW: number;
+  capsuleLabelH: number;
+  capsuleLabelBorderWidth: number;
+  capsuleLabelDrop: number;
   sgPad: number;
   sgBorderWidth: number;
   boxExtOffset: number;
@@ -89,501 +78,15 @@ export interface AlakLayoutParams {
   labelHitboxWidth: number;
   verseTextScale?: number;
   groupRows?: number[];
+  s2VerticalRowGap?: number;
+  outerScale?: number;
+  curvePad?: number;
   outerCurveXOffset?: number;
   centerCurveXOffset?: number;
+  g2Shrink?: number;
   outerShrink?: number;
-  s2VerticalRowGap?: number;
 }
 
-export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
-  id: "alak",
-  title: "ALAK SURESİ",
-  heroTitle: "Alak",
-  heroSubtitle: "suresi",
-  features: {
-    hasIntro: true,
-    hasElevatedSections: true,
-    hasPopUps: true,
-  },
-  dimensions: {
-    paperWidth: 1.54,
-    paperHeight: 1.78,
-    sceneCenterYOffset: -0.045,
-    padding: 0.29,
-    scrollPages: 6,
-  },
-  specialVerses: {
-    middleFoldVerses: { left: [12, 14], right: [11, 13] },
-    versePairings: {
-      1: 2, 2: 1,
-      3: 4, 4: 3,
-      7: 8, 8: 7,
-      9: 10, 10: 9,
-      11: 12, 12: 11,
-      13: 14, 14: 13,
-      15: 16, 16: 15,
-      17: 18, 18: 17,
-    },
-  },
-  introMedia: {
-    section1_start: {
-      src: "",
-      isVideo: false,
-      backgroundText: {
-        title: "İkra!",
-        arabicHollowText: "اقرأ",
-        titleSize: "text-[16vw] md:text-[12vw]",
-        groupId: "oku_intro",
-        isZoomed: false,
-      },
-    },
-    section1_zoom: {
-      src: "",
-      isVideo: false,
-      backgroundText: {
-        title: "İkra!",
-        arabicHollowText: "اقرأ",
-        titleSize: "text-[16vw] md:text-[12vw]",
-        groupId: "oku_intro",
-        isZoomed: true,
-      },
-    },
-    section1: {
-      src: "",
-      isVideo: false,
-      backgroundText: {
-        title: "İnsanlara oku!",
-        titleSize: "text-[11vw] md:text-[8.5vw] leading-[1.05]",
-      },
-    },
-    section1_step1: {
-      src: "",
-      isVideo: false,
-      backgroundText: {
-        title:
-          "Alak suresi, insanlığın ufkunda doğan İlahi bir güneş gibi\nMuhammed aleyhisselama peygamberlik tacının giydirildiğini\nbütün cihana ilan etmiş ve müjdelemiştir",
-        titleSize: "text-[5.5vw] md:text-[3.5vw] leading-[1.2]",
-      },
-    },
-    section1_step2: {
-      src: "/intro/section-1.mp4",
-      isVideo: true,
-      backgroundText: {
-        caption: "Muhkem",
-        title: "Tebliğ\nirşad vazifesinin \ntarifi tebliği",
-      },
-    },
-    section1_step3: {
-      src: "/intro/section-1.mp4",
-      isVideo: true,
-      backgroundText: {
-        caption: "Muhkem",
-        title: "Risâlet makamının rütbesinin\nvazifesinin dünyaya ilânı",
-      },
-    },
-    section2_top: {
-      src: "/intro/section-2.mp4",
-      isVideo: true,
-      backgroundText: {
-        caption: "Ebu cehil'in dünyası",
-        title: "Tuğyan\n zulüm\ninkâr \nistiğna",
-      },
-    },
-    section2_center: {
-      src: "/intro/section-3.mp4",
-      isVideo: true,
-      backgroundText: {
-        title: "Dışarıdan bakanlara\n hitap",
-      },
-    },
-    section2_bottom: {
-      src: "/intro/section-4.mp4",
-      isVideo: true,
-      backgroundText: {
-        caption: "Ebu cehil'in ahireti",
-        title: "Tuğyanın\n zulmün\n inkârın \nkarşılığı",
-      },
-    },
-  },
-  introGuides: {
-    section1: "Ana bölüm",
-    section2_top: "1. Açıklama bölümü",
-    section2_center: "Orta bölüm",
-    section2_bottom: "2. Açıklama bölümü",
-  },
-  assets: {},
-  verseOverrides: {
-    // ── Section 1 verse 5 ─────────────────────────────────────────────────
-    5: {
-      customFrameSvg: "/Group 11.svg",
-      expandW: 0.035,
-      expandH: 0.01,
-      frameScaleLTR: 1.1,
-      isPill: false,
-      bg: CAPSULE_BG_6_19,
-      border: CAPSULE_BG_6_19,
-      circleBorderCol: S1_VERSE_NUMBER_BORDER,
-      circleBg: CAPSULE_BG_6_19,
-      circleTextCol: S1_VERSE_NUMBER_TEXT,
-      textColor: S1_VERSE_5_TEXT,
-      hasAnaAyetTab: true,
-    },
-    // ── Section 2 intro verse (6) ─────────────────────────────────────────
-    6: {
-      bg: CAPSULE_BG_6_19,
-      border: BLUE_THEME,
-      circleBorderCol: BLUE_THEME,
-      circleBg: CAPSULE_BG_6_19,
-      circleTextCol: BLUE_THEME,
-    },
-    // ── Group 1 outer rows (7, 8) ─────────────────────────────────────────
-    7: {
-      bg: CAPSULE_BG_7_8_17_18,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: MAROON_THEME,
-    },
-    8: {
-      bg: CAPSULE_BG_7_8_17_18,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: MAROON_THEME,
-    },
-    // ── Group 1 inner rows (9, 10) ────────────────────────────────────────
-    9: {
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
-    },
-    10: {
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
-    },
-    // ── Group 2 center (11, 12, 13, 14) ──────────────────────────────────
-    11: {
-      bg: CAPSULE_BG_12_14,
-      border: GREEN_THEME,
-      circleBorderCol: GREEN_THEME,
-      circleBg: CAPSULE_BG_12_14,
-      circleTextCol: GREEN_THEME,
-    },
-    12: {
-      bg: CAPSULE_BG_12_14,
-      border: GREEN_THEME,
-      circleBorderCol: GREEN_THEME,
-      circleBg: CAPSULE_BG_12_14,
-      circleTextCol: GREEN_THEME,
-    },
-    13: {
-      bg: CAPSULE_BG_12_14,
-      border: GREEN_THEME,
-      circleBorderCol: GREEN_THEME,
-      circleBg: CAPSULE_BG_12_14,
-      circleTextCol: GREEN_THEME,
-    },
-    14: {
-      bg: CAPSULE_BG_12_14,
-      border: GREEN_THEME,
-      circleBorderCol: GREEN_THEME,
-      circleBg: CAPSULE_BG_12_14,
-      circleTextCol: GREEN_THEME,
-    },
-    // ── Group 3 inner rows (15, 16) ───────────────────────────────────────
-    15: {
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
-    },
-    16: {
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
-    },
-    // ── Group 3 outer rows (17, 18) ───────────────────────────────────────
-    17: {
-      bg: CAPSULE_BG_7_8_17_18,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: MAROON_THEME,
-    },
-    18: {
-      bg: CAPSULE_BG_7_8_17_18,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_7_8_17_18,
-      circleTextCol: MAROON_THEME,
-    },
-    // ── Section 2 outro verse (19) ────────────────────────────────────────
-    19: {
-      bg: CAPSULE_BG_6_19,
-      border: BLUE_THEME,
-      circleBorderCol: BLUE_THEME,
-      circleBg: CAPSULE_BG_6_19,
-      circleTextCol: BLUE_THEME,
-    },
-  },
-  styling: {
-    colors: {
-      paperBase: "#E4DFCA",
-      shadow: "#000000",
-      backface: "#e8e4d8",
-      textDark: "#333333", // Assuming some dark hex
-      textLabel: "#555555", // Assuming some label hex
-      circleBorder: "#bbbbbb",
-      verseNumberText: "#222222",
-      s1AnaLabelBg: "#ffffff",
-      s1AnaLabelText: "#000000",
-      s1AnaLabelBorder: "#dddddd",
-      s2FrameBg: "#f4f4f4",
-      boarderFrame: "#ffffff",
-      boarderHalo: "#ADADAD",
-      innerCard: "#eeeeee",
-      sectionBgTexture: "#fcfcfc",
-      hollowConnectorInnerBg: "#e3e3e3",
-      maroonTheme: MAROON_THEME,
-      greenTheme: GREEN_THEME,
-      s1InnerBorder: "#cccccc",
-      s2IntroOutroBg: BLUE_THEME,
-      s2Group1Bg: MAROON_THEME,
-      s2Group2Bg: GREEN_THEME,
-      s2Group3Bg: MAROON_THEME,
-      /**
-       * Bracket color sequence for SideCurves, outermost → center.
-       * Index 0–2 = outer brackets (blue → maroon → maroon).
-       * Index 3   = center bracket (green).
-       */
-      curveColors: [
-        { color: BLUE_THEME,   fillColor: CAPSULE_BG_6_19 },
-        { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
-        { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
-        { color: GREEN_THEME,  fillColor: CAPSULE_BG_12_14 },
-      ],
-    },
-    capsuleBorderWidth: 0.0039,
-    circleBorderWidth: 0.0035,
-    verseRadius: 0.04,
-    oppositeVerseConnectorRadius: 0.05,
-    elevatedSectionRadii: {
-      base: 0.039,
-      scallopX: 0.015, // SCALLOP_RADIUS_X
-      scallopY: 0.015, // SCALLOP_RADIUS_Y
-      outer: 0.025,
-      innerA: 0.023,
-      innerB: 0.022,
-    },
-    s1NeonConfig: {
-      haloPad: 0.014,
-      haloZ: -0.001,
-      haloOpacity: 0.36,
-      haloEmissiveIntensity: 4.2,
-      outerHaloPad: 0.026,
-      outerHaloOpacity: 0.16,
-      outerHaloEmissiveIntensity: 2.4,
-      topLabelGapWidth: 0.425,
-      topLabelGapPadding: 0.01,
-      topLabelGapHeight: 0.058,
-      topLabelGapYOffset: 0.022,
-    },
-  },
-  params: {
-    s1Top: -0.06,
-    s1Pad: 0.045,
-    gap: 0.02,
-    s1AnaGap: 0.05,
-    smallBoxH: 0.07,
-    anaAyetH: 0.132,
-    gapBetweenS1andS2: 0.09,
-    s2VerticalPad: 0.054,
-    bigBoxH: 0.125,
-    groupGap: 0.035,
-    groupPad: 0.012,
-    groupPadBottom: 0.012,
-    s2Gap: 0.02,
-    smallBoxH2: 0.075,
-    middleExtraGap: 0.03,
-    s2PadLeftRight: 0.035,
-    g2Shrink: 0.01,
-    s1BorderWidth: 0,
-    anaAyetTabW: 0.2,
-    anaAyetTabH: 0.032,
-    anaAyetTabBorderWidth: 0.0035,
-    anaAyetLabelDrop: 0.015,
-    sgPad: 0.03,
-    sgBorderWidth: 0.006,
-    boxExtOffset: 0.02,
-    extraRowGap: 0.01,
-    labelHitboxWidth: 0.43,
-  },
-  sections: [
-    {
-      id: "section1",
-      type: "gridWithAnaAyet",
-      labelKey: "section1Label",
-      verses: [2, 1, 4, 3],
-      anaAyet: 5,
-      bgThemeKey: "s1InnerBorder",
-      cameraTarget: { y: 2, fov: 20, tilt: -1.3 },
-    } as GridSectionConfig,
-    {
-      id: "section2",
-      type: "verticalGroups",
-      topLabelKey: "section2TopLabel",
-      bottomLabelKey: "section2BottomLabel",
-      introVerse: 6,
-      outroVerse: 19,
-      introOutroBgThemeKey: "s2IntroOutroBg",
-      groups: [
-        {
-          verseIds: [8, 7, 10, 9],
-          isPushedIn: false,
-          isCenter: false,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group1Bg",
-        },
-        {
-          verseIds: [12, 11, 14, 13],
-          isPushedIn: true,
-          isCenter: true,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group2Bg",
-        },
-        {
-          verseIds: [16, 15, 18, 17],
-          isPushedIn: false,
-          isCenter: false,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group3Bg",
-        },
-      ],
-      subCameraTargets: {
-        top: { y: 1.4, fov: 25, tilt: -1.3 },
-        center: { y: 1, fov: 30, tilt: -1.5 },
-        bottom: { y: 0.7, fov: 35, tilt: -1.5 },
-      },
-    } as VerticalGroupsSectionConfig,
-  ],
-  animations: {
-    introCamera: {
-      introPosition: [-1.221, 0.343, 2.756],
-      introTarget: [0.492, 0.176, 1.237],
-      scrollOffset: [0.5, 1.5, 0],
-      targetFollow: 1,
-      allowOrbit: false,
-      handoffDurationMs: 800,
-    },
-    scrollTimeline: {
-      intro: { start: 0, end: 15 },
-      ambient: { start: 15, end: 50 },
-      handoff: { start: 50, end: 60 },
-      story: { start: 60, end: 100 },
-    },
-    scrollLock: {
-      lockPositionPercentage: 0.6,
-      effortRequired: 3000,
-      grabRangePixels: 50,
-    },
-    ambientMediaKeys: [
-      "section1_start",
-      "section1_zoom",
-      "section1",
-      "section1_step1",
-      "section1_step2",
-      "section1_step3",
-      "section2_top",
-      "section2_center",
-      "section2_bottom",
-    ],
-    computeFoldYPositions: (lm) => [
-      lm.s2Top + 0.09 / 2, // 0.09 is gapBetweenS1andS2
-      lm.v6Y - lm.bigBoxH - lm.groupGap / 2,
-      lm.g1Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-      lm.g1Y - lm.groupH - (lm.groupGap + 0.033) / 2,
-      lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-      lm.g2Y - lm.groupH - (lm.groupGap + 0.033) / 2,
-      lm.g3Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2,
-      lm.g3Y - lm.groupH - lm.groupGap / 2,
-    ],
-    foldSteps: [
-      {
-        id: "pre-start",
-        folds: [
-          { direction: 1, angleFactor: 0.93 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: +1, angleFactor: -1 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: -1 },
-        ],
-      },
-      {
-        id: "start",
-        folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: +1, angleFactor: -1 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: -1 },
-        ],
-      },
-      {
-        id: "outer-open",
-        folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: -1 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 1 },
-          { direction: -1, angleFactor: 0 },
-        ],
-      },
-      {
-        id: "inner-open",
-        folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: -1, angleFactor: 1 },
-          { direction: -1, angleFactor: -1 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-        ],
-      },
-      {
-        id: "end",
-        folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-        ],
-      },
-    ],
-  },
-};
 
 // ----------------------------------------------------------------------------
 // LEGACY CONSTANTS & COMPATIBILITY LAYER
@@ -646,24 +149,38 @@ export function createLayoutMath(
 
   const groupH = getGroupH(2);
 
-  const g0H = getGroupH(p.groupRows?.[0] ?? 2);
-  const g1H = getGroupH(p.groupRows?.[1] ?? 2);
-  const g2H = getGroupH(p.groupRows?.[2] ?? 2);
-  const totalGroupsH = g0H + g1H + g2H;
+  // ── Dynamic group heights — driven by the actual groupRows array length ──
+  // groupRows[i] specifies how many rows of capsules group i contains.
+  // Any group not listed in groupRows defaults to 2 rows (backward-compat).
+  const numGroups = p.groupRows ? p.groupRows.length : 3;
+  const dynamicGroupHeights: number[] = Array.from(
+    { length: numGroups },
+    (_, i) => getGroupH(p.groupRows?.[i] ?? 2),
+  );
+
+  // Legacy aliases kept for backward-compatibility with Alak / Ayat al-Kursi.
+  const g0H = dynamicGroupHeights[0] ?? getGroupH(2);
+  const g1H = dynamicGroupHeights[1] ?? getGroupH(2);
+  const g2H = dynamicGroupHeights[2] ?? getGroupH(2);
+
+  const totalGroupsH = dynamicGroupHeights.reduce((sum, h) => sum + h, 0);
 
   // When hasIntro is false there are no intro/outro verse boxes, so the two
   // bigBoxH slots and their two flanking groupGaps are collapsed to zero.
   // When hasIntro is true the formula is mathematically identical to before.
   const hasIntroOutro = config.features.hasIntro;
 
+  // Number of inter-group gaps = numGroups - 1 (minimum 0).
+  const interGroupGaps = Math.max(0, numGroups - 1);
+
   const s2H = hasIntroOutro
     ? p.s2VerticalPad * 2 +
       p.bigBoxH * 2 +
-      p.groupGap * 4 +
+      p.groupGap * (interGroupGaps + 2) + // gaps between groups + 2 flanking
       totalGroupsH +
       p.middleExtraGap * 2
     : p.s2VerticalPad * 2 +
-      p.groupGap * 2 +          // the 2 gaps *between* the 3 groups
+      p.groupGap * interGroupGaps + // gaps *between* groups
       totalGroupsH +
       p.middleExtraGap * 2;
 
@@ -675,28 +192,58 @@ export function createLayoutMath(
   //   hasS1 === true  → Alak path (identical to original formula)
   //   hasS1 === false → center the block vertically on the paper
   const s2Top = hasS1
-    ? p.s1Top - s1H - p.gapBetweenS1andS2   // Alak: unchanged
-    // Ayat al-Kursi: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
-    // Shift up by s2H/2 so the block straddles that center symmetrically.
-    : -(config.dimensions.paperHeight / 2) + (s2H / 2) + config.dimensions.sceneCenterYOffset;
+    ? p.s1Top - s1H - p.gapBetweenS1andS2 // Alak: unchanged
+    : // Ayat al-Kursi / Ahzab: camera lives in 0 → -PAGE_HEIGHT, center is -(height/2).
+      // Shift up by s2H/2 so the block straddles that center symmetrically.
+      -(config.dimensions.paperHeight / 2) +
+      s2H / 2 +
+      config.dimensions.sceneCenterYOffset;
 
   // --- Element Y Positions ---
   // v6Y marks the intro-verse top; when there is no intro verse the groups
   // start immediately after s2VerticalPad (same anchor, no bigBoxH shift).
   const v6Y = s2Top - p.s2VerticalPad;
   const baseG1Y = hasIntroOutro
-    ? v6Y - p.bigBoxH - p.groupGap          // Alak: identical to original
-    : v6Y;                                   // Ayat al-Kursi: groups slide up
+    ? v6Y - p.bigBoxH - p.groupGap // Alak: identical to original
+    : v6Y; // Ayat al-Kursi / Ahzab: groups slide up
 
-  const baseG2Y = baseG1Y - g0H - (p.groupGap + p.middleExtraGap);
-  const baseG3Y = baseG2Y - g1H - (p.groupGap + p.middleExtraGap);
+  // Build all group Y positions dynamically.
+  // groupYPositions[0] = baseG1Y; each subsequent group steps down by the
+  // previous group's height + the inter-group gap (with middleExtraGap).
+  const dynamicGroupYPositions: number[] = [];
+  dynamicGroupYPositions[0] = baseG1Y;
+  const s2Config = config.sections.find((s) => s.type === "verticalGroups") as
+    | VerticalGroupsSectionConfig
+    | undefined;
+  const s2Groups = s2Config?.groups ?? [];
+  for (let i = 1; i < numGroups; i++) {
+    const pushDown = s2Groups[i]?.pushDown ?? 0;
+    dynamicGroupYPositions[i] =
+      dynamicGroupYPositions[i - 1] -
+      dynamicGroupHeights[i - 1] -
+      (p.groupGap + p.middleExtraGap) -
+      pushDown;
+  }
+
+  // Allow independent vertical shifting for the very first group
+  if (s2Groups[0]?.pushDown) {
+    dynamicGroupYPositions[0] -= s2Groups[0].pushDown;
+  }
+
+  // Legacy aliases for Alak / Ayat al-Kursi backward compatibility.
+  const baseG2Y = dynamicGroupYPositions[1] ?? baseG1Y;
+  const baseG3Y = dynamicGroupYPositions[2] ?? baseG2Y;
+
   // v19Y position is always computed (keeps type consistent) but only rendered
   // when hasIntro is true.
+  const lastGroupY = dynamicGroupYPositions[numGroups - 1] ?? baseG1Y;
+  const lastGroupH = dynamicGroupHeights[numGroups - 1] ?? g0H;
   const baseV19Y = hasIntroOutro
-    ? baseG3Y - g2H - p.groupGap
-    : baseG3Y - g2H;                      // not rendered; safe sentinel
+    ? lastGroupY - lastGroupH - p.groupGap
+    : lastGroupY - lastGroupH; // not rendered; safe sentinel
 
   return {
+    id: config.id,
     PAGE_WIDTH,
     PAGE_HEIGHT: config.dimensions.paperHeight,
     PW,
@@ -726,12 +273,27 @@ export function createLayoutMath(
     groupPad: p.groupPad,
     s2Gap: p.s2Gap,
     smallBoxH2: p.smallBoxH2,
+    g2Scale: p.g2Scale,
+    outerScale: p.outerScale ?? 0,
+    curvePad: p.curvePad,
     groupH,
     s2H,
 
-    s2BackgroundTexture: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundTexture,
-    s2BackgroundScaleX: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleX,
-    s2BackgroundScaleY: (config.sections.find((s) => s.type === "verticalGroups") as VerticalGroupsSectionConfig | undefined)?.backgroundScaleY,
+    s2BackgroundTexture: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundTexture,
+    s2BackgroundScaleX: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundScaleX,
+    s2BackgroundScaleY: (
+      config.sections.find((s) => s.type === "verticalGroups") as
+        | VerticalGroupsSectionConfig
+        | undefined
+    )?.backgroundScaleY,
 
     v6Y,
     g1Y: baseG1Y,
@@ -742,31 +304,31 @@ export function createLayoutMath(
     baseG3Y,
 
     groupInnerW: CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2,
-    groupInnerHalfW: (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
+    groupInnerHalfW:
+      (CONTENT_W - p.s2PadLeftRight * 2 - p.groupPad * 2 - p.s2Gap) / 2,
 
     s2PadLeftRight: p.s2PadLeftRight,
     s2VerticalRowGap: p.s2VerticalRowGap ?? p.s2Gap,
     g2Shrink: p.g2Shrink,
     outerShrink: p.outerShrink ?? 0,
     s1BorderWidth: p.s1BorderWidth,
-    anaAyetTabW: p.anaAyetTabW,
-    anaAyetTabH: p.anaAyetTabH,
-    anaAyetTabBorderWidth: p.anaAyetTabBorderWidth,
-    anaAyetLabelDrop: p.anaAyetLabelDrop,
+    capsuleLabelW: p.capsuleLabelW,
+    capsuleLabelH: p.capsuleLabelH,
+    capsuleLabelBorderWidth: p.capsuleLabelBorderWidth,
+    capsuleLabelDrop: p.capsuleLabelDrop,
     sgPad: p.sgPad,
     sgBorderWidth: p.sgBorderWidth,
     boxExtOffset: p.boxExtOffset,
     extraRowGap: p.extraRowGap,
     verseTextScale: p.verseTextScale ?? undefined,
-    outerCurveXOffset: p.outerCurveXOffset ?? 0,
-    centerCurveXOffset: p.centerCurveXOffset ?? 0,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new
     // fields are non-number. We use an explicit return type instead.
-    hasIntroOutro,                              // boolean
-    groupYPositions: [baseG1Y, baseG2Y, baseG3Y] as [number, number, number],
-    groupHeights: [g0H, g1H, g2H] as [number, number, number],
+    hasIntroOutro, // boolean
+    // Fully dynamic — length matches the actual number of groups defined.
+    groupYPositions: dynamicGroupYPositions as number[],
+    groupHeights: dynamicGroupHeights as number[],
   };
 }
 
@@ -855,12 +417,12 @@ export function buildSurahTransforms(
           w: lm.innerW,
           h: lm.anaAyetH,
         },
-        anaAyetTabX: s1BaseX + lm.innerW / 2,
-        anaAyetTabY: anaAyetY + 0.015,
-        anaAyetTabW: lm.anaAyetTabW,
-        anaAyetTabH: lm.anaAyetTabH,
-        anaAyetTabBorderWidth: lm.anaAyetTabBorderWidth,
-        anaAyetLabelDrop: lm.anaAyetLabelDrop,
+        capsuleLabelX: s1BaseX + lm.innerW / 2,
+        capsuleLabelY: anaAyetY + 0.015,
+        capsuleLabelW: lm.capsuleLabelW,
+        capsuleLabelH: lm.capsuleLabelH,
+        capsuleLabelBorderWidth: lm.capsuleLabelBorderWidth,
+        capsuleLabelDrop: lm.capsuleLabelDrop,
         borderWidth: lm.s1BorderWidth,
         labelPinY: lm.s1Top,
       });
@@ -884,31 +446,45 @@ export function buildSurahTransforms(
       const groups: GroupTransforms[] = s2Config.groups.map((group, gIdx) => {
         const groupY = groupYPositions[gIdx];
         const isPushedIn = group.isPushedIn ?? false;
-        const shrinkAmount = isPushedIn ? lm.g2Shrink : lm.outerShrink;
-        const gInnerW = s2InnerW - shrinkAmount * 2;
-        const gBaseX = s2BaseX + shrinkAmount;
+        const scaleAmount =
+          group.customScale ?? (isPushedIn ? lm.g2Scale : lm.outerScale);
+        const groupGapAmount = group.xGap ?? lm.s2Gap;
+        const gInnerW = s2InnerW - scaleAmount * 2;
+        const gBaseX = s2BaseX + scaleAmount;
 
-        const gHalfW = (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2;
+        const standardGHalfW = (gInnerW - lm.groupPad * 2 - lm.s2Gap) / 2;
+        const centerX = gBaseX + gInnerW / 2;
         const extraRowGap = group.extraRowGap ?? 0;
 
         const verses: Record<number, ElementTransform> = {};
         group.verseIds.forEach((verseId, i) => {
           const isRightCol = i % 2 !== 0;
-          const isSecondRow = i >= 2;
-          const rowOffset = isSecondRow
-            ? lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap
-            : 0;
+          // Dynamic row index: each pair of capsules (left+right) occupies one row.
+          const rowIndex = Math.floor(i / 2);
+          const rowOffset =
+            rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
+            
+          const verseX = isRightCol 
+            ? centerX + groupGapAmount / 2 
+            : centerX - groupGapAmount / 2 - standardGHalfW;
+
+          // Per-verse horizontal nudge — keyed by verseId (Arabic numbering).
+          // Positive xOffset → pushes right, negative → pushes left.
+          const verseXOffset = config.verseOverrides?.[verseId]?.xOffset ?? 0;
+
           verses[verseId] = {
-            x: gBaseX + lm.groupPad + (isRightCol ? gHalfW + lm.s2Gap : 0),
+            x: verseX + verseXOffset,
             y: groupY - lm.groupPad - rowOffset,
             z: 0.003,
-            w: gHalfW,
+            w: standardGHalfW,
             h: lm.smallBoxH2,
           };
         });
 
+        // Dynamic row connectors — one per row (pair of capsules).
+        const numRows = Math.ceil(group.verseIds.length / 2);
         const rowConnectors: RowConnectorTransform[] = [];
-        for (let r = 0; r < 2; r++) {
+        for (let r = 0; r < numRows; r++) {
           const leftV = verses[group.verseIds[r * 2]];
           const rightV = verses[group.verseIds[r * 2 + 1]];
           if (leftV && rightV) {
@@ -935,6 +511,12 @@ export function buildSurahTransforms(
           isCenter: group.isCenter ?? false,
           verses,
           rowConnectors,
+          topLabelConfig: group.topLabelConfig,
+          backgroundTexture: group.backgroundTexture,
+          backgroundScaleX: group.backgroundScaleX,
+          backgroundScaleY: group.backgroundScaleY,
+          backgroundOffsetX: group.backgroundOffsetX,
+          backgroundOffsetY: group.backgroundOffsetY,
         };
       });
 
@@ -963,8 +545,8 @@ export function buildSurahTransforms(
         const bBox_Y = lm.g3Y + lm.boxExtOffset;
         const bBox_H = outerSectionH;
 
-        sectionTransform.topConnectorY    = tBox_Y;
-        sectionTransform.topConnectorH    = tBox_H;
+        sectionTransform.topConnectorY = tBox_Y;
+        sectionTransform.topConnectorH = tBox_H;
         sectionTransform.bottomConnectorY = bBox_Y;
         sectionTransform.bottomConnectorH = bBox_H;
         sectionTransform.introVerse = {

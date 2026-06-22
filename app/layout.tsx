@@ -58,7 +58,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#000000",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -70,8 +70,20 @@ export default function RootLayout({
     <html
       lang="tr"
       suppressHydrationWarning
-      className={`dark ${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} h-full antialiased`}
+      className={`light ${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (window.location.hostname === 'localhost' && window.location.port === '3000') {
+                document.documentElement.classList.remove('light');
+                document.documentElement.classList.add('dark');
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="font-sans">
         <GrainOverlay />
         {children}

@@ -288,6 +288,7 @@ interface TopLabelProps {
   z?: number;
   text: string;
   labelWidth?: number;
+  labelHeight?: number;
   partialBorder?: boolean;
   borderColor?: string;
   bottomBorder?: boolean;
@@ -297,6 +298,11 @@ interface TopLabelProps {
   depthTest?: boolean;
   fontSizeOverride?: number;
   shadow?: boolean;
+  textOffsetY?: number;
+  textScaleOverride?: number;
+  textColor?: string;
+  xMultiplier?: number;
+  isSimpleText?: boolean;
 }
 
 export function TopLabel({
@@ -305,6 +311,7 @@ export function TopLabel({
   z = 0,
   text,
   labelWidth = TOP_LABEL_WIDTH,
+  labelHeight,
   partialBorder = false,
   borderColor = HOLLOW_BORDER_COLOR,
   bottomBorder = false,
@@ -314,13 +321,18 @@ export function TopLabel({
   depthTest = false,
   fontSizeOverride,
   shadow,
+  textOffsetY = 0,
+  textScaleOverride,
+  textColor,
+  xMultiplier,
+  isSimpleText,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
   const labelWidthScale = LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1;
 
   const w = labelWidth * labelWidthScale;
-  const h = 0.046;
+  const h = labelHeight ?? 0.046;
   const radius = h / 2;
 
   const groupRef = useRef<THREE.Group>(null);
@@ -329,14 +341,14 @@ export function TopLabel({
   const isArabicText = /[\u0600-\u06FF]/.test(text);
   const fontToUse = isArabicText ? QURAN_FONT : LATIN_LABEL_FONT;
   const resolvedFontSize =
-    fontSizeOverride ??
-    (isArabicText
-      ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5
-      : TEXT_SIZES.TOP_LABEL * topLabelScale);
+    (fontSizeOverride ??
+      (isArabicText
+        ? TEXT_SIZES.TOP_LABEL * topLabelScale * 1.5
+        : TEXT_SIZES.TOP_LABEL * topLabelScale)) * (textScaleOverride ?? 1);
 
   return (
     <group position={[x - w / 2, y + h / 2, z]} ref={groupRef}>
-      {!noBorder && (
+      {!isSimpleText && !noBorder && (
         <UiRect
           x={-borderThickness}
           y={borderThickness}
@@ -350,28 +362,45 @@ export function TopLabel({
           bottomOnly={partialBorder && bottomBorder}
           renderOrder={renderOrder}
           depthTest={depthTest}
-          xMultiplier={1.5}
+          xMultiplier={xMultiplier ?? 1.5}
         />
       )}
-      <UiRect
-        x={0}
-        y={0}
-        z={0.001}
-        w={w}
-        h={h}
-        radius={radius}
-        color={bgColor}
-        topOnly={false}
-        renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
-        depthTest={depthTest}
-        xMultiplier={1.5}
-      />
-      <group position={[w / 2, -h / 2, 0.002]}>
+      {!isSimpleText && (
+        <UiRect
+          x={0}
+          y={0}
+          z={0.001}
+          w={w}
+          h={h}
+          radius={radius}
+          color={bgColor}
+          topOnly={false}
+          renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+          depthTest={depthTest}
+          xMultiplier={xMultiplier ?? 1.5}
+        />
+      )}
+      <group position={[w / 2, -h / 2 + textOffsetY, 0.002]}>
+        {isSimpleText && shadow !== false && (
+          <CanvasText
+            text={text}
+            font={fontToUse}
+            fontSize={resolvedFontSize}
+            color="rgba(0,0,0,0.4)"
+            width={w}
+            height={h}
+            textAlign="center"
+            fontWeight="bold"
+            renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+            depthTest={depthTest}
+            position={[0.0025, -0.0025, -0.001]}
+          />
+        )}
         <CanvasText
           text={text}
           font={fontToUse}
           fontSize={resolvedFontSize}
-          color={TEXT_LABEL}
+          color={textColor || TEXT_LABEL}
           width={w}
           height={h}
           textAlign="center"
@@ -385,7 +414,7 @@ export function TopLabel({
 }
 
 // ANA AYET TAB
-interface AnaAyetTabProps {
+interface CapsuleLabelProps {
   x: number;
   y: number;
   w: number;
@@ -394,8 +423,10 @@ interface AnaAyetTabProps {
   borderWidth?: number;
   renderOrder?: number;
   depthTest?: boolean;
+  customText?: string | Record<string, string>;
+  labelScale?: number;
 }
-export function AnaAyetTab({
+export function CapsuleLabel({
   x,
   y,
   w,
@@ -404,10 +435,20 @@ export function AnaAyetTab({
   borderWidth,
   renderOrder,
   depthTest = false,
-}: AnaAyetTabProps) {
+  customText,
+  labelScale = 1,
+}: CapsuleLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const labelText = ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
-  const anaAyetScale = LANGUAGE_TEXT_SCALE[activeLanguage].anaAyet;
+
+  let resolvedCustomText: string | undefined;
+  if (typeof customText === "object" && customText !== null) {
+    resolvedCustomText = customText[activeLanguage] || customText["ar"];
+  } else {
+    resolvedCustomText = customText;
+  }
+
+  const labelText = resolvedCustomText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
+  const capsuleLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   const radius = h / 2;
   const borderThickness = borderWidth ?? 0.004;
@@ -444,7 +485,7 @@ export function AnaAyetTab({
         <CanvasText
           text={labelText}
           font={LATIN_LABEL_FONT}
-          fontSize={TEXT_SIZES.ANA_AYET_TAB * anaAyetScale}
+          fontSize={TEXT_SIZES.CAPSULE_LABEL * capsuleLabelScale * labelScale}
           color={S1_ANA_LABEL_TEXT}
           width={w}
           height={h}
@@ -505,11 +546,14 @@ export const VerseBox = ({
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
-  const textScale = textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
+  const textScale =
+    textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
-  
+
   const activeStoryConfig = useStoryStore((s) => s.activeConfig);
-  const showVerseNumber = !(activeStoryConfig?.features?.hideVerseNumbers ?? false);
+  const showVerseNumber = !(
+    activeStoryConfig?.features?.hideVerseNumbers ?? false
+  );
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;
 
@@ -524,7 +568,7 @@ export const VerseBox = ({
   const SMALL_PILL_OFFSET = 0.002;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
-  const centerTextInCapsule = !isPill;
+  const centerTextInCapsule = !isPill || !showVerseNumber;
 
   // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
   const circleEnd = cx + cr;
@@ -535,15 +579,19 @@ export const VerseBox = ({
 
   const safeMargin = 0.0;
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
-  const EXTRA_BIG_VERSE_PADDING = (!isPill && !isArabic) ? 0.07 : 0;
-  const centeredSidePadding = centerTextInCapsule ? numberSidePadding + EXTRA_BIG_VERSE_PADDING : 0;
-  const textMaxW =
-    (finalW -
-      safeMargin * 2 -
-      centeredSidePadding * 2 -
-      textPaddingX -
-      (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
-    nonArabicTextTighten;
+  const EXTRA_BIG_VERSE_PADDING = !isPill && !isArabic ? 0.07 : 0;
+  const centeredSidePadding = centerTextInCapsule
+    ? (showVerseNumber ? numberSidePadding : 0.012) + EXTRA_BIG_VERSE_PADDING
+    : 0;
+  const textMaxW = !showVerseNumber
+    ? finalW - 0.04
+    : (finalW -
+        safeMargin * 2 -
+        centeredSidePadding * 2 -
+        textPaddingX -
+        (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
+      nonArabicTextTighten;
+      
   const textX = centerTextInCapsule
     ? finalW / 2
     : isArabic
@@ -551,11 +599,13 @@ export const VerseBox = ({
       : safeMargin + textPaddingX;
 
   // Visual centering adjustments moved to SurahConfig.ts
-  const versePosX = isArabic
-    ? isPill
-      ? textX - SMALL_TEXT_SHIFT
-      : textX
-    : textX;
+  const versePosX = !showVerseNumber
+    ? finalW / 2
+    : isArabic
+      ? isPill
+        ? textX - SMALL_TEXT_SHIFT
+        : textX
+      : textX;
 
   const verticalShift = isArabic
     ? isPill

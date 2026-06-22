@@ -130,139 +130,195 @@ function buildHitboxes(
         });
       }
 
-      // Groups
+      // Groups — each group gets its own hitbox section ID matching _g{idx}
+      // (same naming as dragEngine and ElevatedSectionSurfaces).
+      // For unified mode, use section ID directly (no _g suffix).
+      const isUnified = vConfig.groupElevation === "unified";
+      const lastGroupIdx = vConfig.groups.length - 1;
+      const allVerseIds = vConfig.groups.flatMap((g) => g.verseIds);
+      if (vConfig.introVerse) allVerseIds.unshift(vConfig.introVerse);
+      if (vConfig.outroVerse) allVerseIds.push(vConfig.outroVerse);
+
+      const hasCustomSections = vConfig.customSections && vConfig.customSections.length > 0;
+
       vConfig.groups.forEach((group, gIdx) => {
         const gTransform = sTransform.groups[gIdx];
+        // Individual verse hitboxes
         group.verseIds.forEach((vId) => {
           const vt = gTransform.verses[vId];
           if (!vt) return;
-          hitboxes.push({
-            key: `verse-${vId}`,
-            cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
-            cy: vt.y - vt.h / 2,
-            cz: zFront,
-            w: vt.w,
-            h: vt.h,
-            kind: "verse",
-            verseId: vId,
-          });
+
+          if (hasCustomSections) {
+            // Custom sections: clicking a verse elevates its entire custom section
+            const cs = vConfig.customSections!.find((c) => c.verseIds.includes(vId));
+            hitboxes.push({
+              key: `verse-${vId}`,
+              cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+              cy: vt.y - vt.h / 2,
+              cz: zFront,
+              w: vt.w,
+              h: vt.h,
+              kind: "section",
+              sectionId: cs?.id,
+              verseIds: cs?.verseIds ?? [vId],
+            });
+          } else {
+            hitboxes.push({
+              key: `verse-${vId}`,
+              cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+              cy: vt.y - vt.h / 2,
+              cz: zFront,
+              w: vt.w,
+              h: vt.h,
+              kind: "verse",
+              verseId: vId,
+            });
+          }
         });
       });
 
-      const topId = `${vConfig.id}_top`;
-      const centerId = `${vConfig.id}_center`;
-      const bottomId = `${vConfig.id}_bottom`;
+      // Build verse buckets for each group (intro/outro attach to first/last).
+      const groupVerseIds: number[][] = vConfig.groups.map((g) => [...g.verseIds]);
+      if (vConfig.introVerse) groupVerseIds[0].unshift(vConfig.introVerse);
+      if (vConfig.outroVerse) groupVerseIds[lastGroupIdx].push(vConfig.outroVerse);
 
-      const topVerseIds: number[] = [];
-      if (vConfig.introVerse) topVerseIds.push(vConfig.introVerse);
-      if (vConfig.groups[0]) topVerseIds.push(...vConfig.groups[0].verseIds);
+      // Helper: resolve section ID for a group index
+      const resolveSectionId = (gIdx: number) =>
+        isUnified ? vConfig.id : `${vConfig.id}_g${gIdx}`;
+      const resolveVerseIds = (gIdx: number) =>
+        isUnified ? allVerseIds : groupVerseIds[gIdx];
 
-      const centerVerseIds = vConfig.groups[1] ? [...vConfig.groups[1].verseIds] : [];
+      // ─── Section-level hitboxes ─────────────────────────────────────────
+      // Top label (first group's label key)
+      if (vConfig.topLabelKey && sTransform.topLabelPinY) {
+        const topGroupId = resolveSectionId(0);
+        hitboxes.push({
+          key: `section-${topGroupId}-label`,
+          cx: 0,
+          cy: sTransform.topLabelPinY,
+          cz: zFront,
+          w: LABEL_HITBOX.width,
+          h: LABEL_HITBOX.height,
+          kind: "section",
+          sectionId: topGroupId,
+          verseIds: resolveVerseIds(0),
+        });
+      }
 
-      const bottomVerseIds: number[] = [];
-      if (vConfig.groups[2]) bottomVerseIds.push(...vConfig.groups[2].verseIds);
-      if (vConfig.outroVerse) bottomVerseIds.push(vConfig.outroVerse);
+      // Top hollow connector (belongs to first group)
+      if (config.features.hasIntro && sTransform.topConnectorY !== undefined) {
+        const topGroupId = resolveSectionId(0);
+        hitboxes.push({
+          key: `section-${topGroupId}-hollow`,
+          cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+          cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
+          cz: zSection,
+          w: sTransform.connectorW,
+          h: sTransform.topConnectorH,
+          kind: "section",
+          sectionId: topGroupId,
+          verseIds: resolveVerseIds(0),
+        });
+      }
 
-      // Top label
-      hitboxes.push({
-        key: `section-${topId}-label`,
-        cx: 0,
-        cy: sTransform.topLabelPinY,
-        cz: zFront,
-        w: LABEL_HITBOX.width,
-        h: LABEL_HITBOX.height,
-        kind: "section",
-        sectionId: topId,
-        verseIds: topVerseIds,
-      });
+      // Bottom label (last group's label key)
+      if (vConfig.bottomLabelKey && sTransform.bottomLabelPinY) {
+        const botGroupId = resolveSectionId(lastGroupIdx);
+        hitboxes.push({
+          key: `section-${botGroupId}-label`,
+          cx: 0,
+          cy: sTransform.bottomLabelPinY,
+          cz: zFront,
+          w: LABEL_HITBOX.width,
+          h: LABEL_HITBOX.height,
+          kind: "section",
+          sectionId: botGroupId,
+          verseIds: resolveVerseIds(lastGroupIdx),
+        });
+      }
 
-      // Top hollow
-      hitboxes.push({
-        key: `section-${topId}-hollow`,
-        cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
-        cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
-        cz: zSection,
-        w: sTransform.connectorW,
-        h: sTransform.topConnectorH,
-        kind: "section",
-        sectionId: topId,
-        verseIds: topVerseIds,
-      });
+      // Bottom hollow connector (belongs to last group)
+      if (config.features.hasIntro && sTransform.bottomConnectorY !== undefined) {
+        const botGroupId = resolveSectionId(lastGroupIdx);
+        hitboxes.push({
+          key: `section-${botGroupId}-hollow`,
+          cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+          cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
+          cz: zSection,
+          w: sTransform.connectorW,
+          h: sTransform.bottomConnectorH,
+          kind: "section",
+          sectionId: botGroupId,
+          verseIds: resolveVerseIds(lastGroupIdx),
+        });
+      }
 
-      // Bottom label
-      hitboxes.push({
-        key: `section-${bottomId}-label`,
-        cx: 0,
-        cy: sTransform.bottomLabelPinY,
-        cz: zFront,
-        w: LABEL_HITBOX.width,
-        h: LABEL_HITBOX.height,
-        kind: "section",
-        sectionId: bottomId,
-        verseIds: bottomVerseIds,
-      });
+      // Center group hollow + curve hitboxes (isCenter flag)
+      // Not created for custom sections — they use per-verse hitboxes only.
+      const centerGroups = vConfig.groups
+        .map((g, idx) => (g.isCenter ? { gTransform: sTransform.groups[idx], gIdx: idx } : null))
+        .filter(Boolean) as { gTransform: any; gIdx: number }[];
 
-      // Bottom hollow
-      hitboxes.push({
-        key: `section-${bottomId}-hollow`,
-        cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
-        cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
-        cz: zSection,
-        w: sTransform.connectorW,
-        h: sTransform.bottomConnectorH,
-        kind: "section",
-        sectionId: bottomId,
-        verseIds: bottomVerseIds,
-      });
+      if (!hasCustomSections && centerGroups.length > 0) {
+        const firstCenter = centerGroups[0]!;
+        const lastCenter = centerGroups[centerGroups.length - 1]!;
+        const centerId = resolveSectionId(firstCenter.gIdx);
+        const centerVerseIds = isUnified
+          ? allVerseIds
+          : centerGroups.flatMap(({ gIdx }) => groupVerseIds[gIdx] ?? []);
 
-      // Center hollow
-      const middleGroup = sTransform.groups[1];
-      if (middleGroup) {
+        const middleTop = firstCenter.gTransform.frameY;
+        const middleBottom = lastCenter.gTransform.frameY - lastCenter.gTransform.frameH;
+        const middleHeight = middleTop - middleBottom;
+        const middleCenterY = (middleTop + middleBottom) / 2;
+
         hitboxes.push({
           key: `section-${centerId}-hollow`,
-          cx: middleGroup.frameX + middleGroup.frameW / 2 - PAGE_WIDTH / 2,
-          cy: middleGroup.frameY - middleGroup.frameH / 2,
+          cx: firstCenter.gTransform.frameX + firstCenter.gTransform.frameW / 2 - PAGE_WIDTH / 2,
+          cy: middleCenterY,
           cz: zSection,
-          w: middleGroup.frameW,
-          h: middleGroup.frameH,
+          w: firstCenter.gTransform.frameW,
+          h: middleHeight,
           kind: "section",
           sectionId: centerId,
           verseIds: centerVerseIds,
         });
 
-        const middleTop = middleGroup.frameY + 0.01;
-        const middleBottom = middleGroup.frameY - middleGroup.frameH - 0.01;
-        const middleHeight = middleTop - middleBottom;
-        const middleCenterY = (middleTop + middleBottom) / 2;
+        if (config.features.hasIntro) {
+          const middleTopInner = firstCenter.gTransform.frameY + 0.01;
+          const middleBottomInner = lastCenter.gTransform.frameY - lastCenter.gTransform.frameH - 0.01;
+          const middleHeightInner = middleTopInner - middleBottomInner;
+          const middleCenterYInner = (middleTopInner + middleBottomInner) / 2;
 
-        const curveZoneW = 0.31;
-        const leftCurveX = sTransform.baseX - 0.33;
-        const rightCurveX = sTransform.baseX + sTransform.innerW + 0.02;
+          const curveZoneW = 0.31;
+          const leftCurveX = sTransform.baseX - 0.33;
+          const rightCurveX = sTransform.baseX + sTransform.innerW + 0.02;
 
-        hitboxes.push(
-          {
-            key: `section-${centerId}-curves-left`,
-            cx: leftCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
-            cy: middleCenterY,
-            cz: zFront,
-            w: curveZoneW,
-            h: middleHeight,
-            kind: "section",
-            sectionId: centerId,
-            verseIds: centerVerseIds,
-          },
-          {
-            key: `section-${centerId}-curves-right`,
-            cx: rightCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
-            cy: middleCenterY,
-            cz: zFront,
-            w: curveZoneW,
-            h: middleHeight,
-            kind: "section",
-            sectionId: centerId,
-            verseIds: centerVerseIds,
-          },
-        );
+          hitboxes.push(
+            {
+              key: `section-${centerId}-curves-left`,
+              cx: leftCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
+              cy: middleCenterYInner,
+              cz: zFront,
+              w: curveZoneW,
+              h: middleHeightInner,
+              kind: "section",
+              sectionId: centerId,
+              verseIds: centerVerseIds,
+            },
+            {
+              key: `section-${centerId}-curves-right`,
+              cx: rightCurveX + curveZoneW / 2 - PAGE_WIDTH / 2,
+              cy: middleCenterYInner,
+              cz: zFront,
+              w: curveZoneW,
+              h: middleHeightInner,
+              kind: "section",
+              sectionId: centerId,
+              verseIds: centerVerseIds,
+            },
+          );
+        }
       }
     }
   });
@@ -275,6 +331,9 @@ const canUseElevatedInteraction = (
   verseId?: number,
   verseIds?: number[],
 ) => {
+  const activeConfig = useStoryStore.getState().activeConfig;
+  if (!activeConfig.features.hasElevatedSections) return false;
+
   const unlocked = useElevatedStore.getState().unlockedVerseIds;
   if (kind === "verse" && typeof verseId === "number") {
     return unlocked.includes(verseId);
@@ -304,6 +363,11 @@ const handleClick = (e: ThreeEvent<MouseEvent>) => {
   }
 
   if (kind === "section" && Array.isArray(verseIds) && verseIds.length > 0) {
+    // In all-sections mode: background/label clicks don't toggle sections off.
+    // Only the return button can exit all-sections mode.
+    const isAllSectionsMode = useElevatedStore.getState().isAllSectionsMode;
+    if (isAllSectionsMode) return;
+
     const validSectionId = typeof sectionId === "string" ? sectionId : undefined;
 
     const allSelected = verseIds.every((id) => activeVerseIds.includes(id));

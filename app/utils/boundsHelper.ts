@@ -1,5 +1,5 @@
 import { SurahTransforms } from "../data/SurahConfig";
-import { SectionTransforms, RowConnectorTransform } from "../data/schema";
+import { SectionTransforms, VerticalGroupsSectionConfig, GridSectionConfig } from "../data/schema";
 import { getActiveStoryConfig } from "../stores/useStoryStore";
 
 export type SectionBounds = {
@@ -16,88 +16,148 @@ export function calculateSectionBounds(
   transforms: SurahTransforms,
   pageWidth: number,
 ): SectionBounds {
-  const s1 = transforms.sections[0] as Required<SectionTransforms>;
-  const s2 = transforms.sections[1] as Required<SectionTransforms> | undefined;
+  const config = getActiveStoryConfig();
 
-  const S1_ID = getActiveStoryConfig().sections[0]?.id ?? "section1";
-  const S2_ID = getActiveStoryConfig().sections[1]?.id ?? "__no_s2__";
-  const S2_TOP_ID = `${S2_ID}_top`;
-  const S2_CENTER_ID = `${S2_ID}_center`;
-  const S2_BOTTOM_ID = `${S2_ID}_bottom`;
+  // ── Check each section in the config ────────────────────────────────────
+  for (let secIdx = 0; secIdx < config.sections.length; secIdx++) {
+    const sec = config.sections[secIdx];
+    const sTransform = transforms.sections[secIdx] as Required<SectionTransforms>;
 
-  // Guard: if section 2 does not exist, fall straight to default (full-screen bounds).
-  if (!s2) {
-    if (sectionId === S1_ID) {
-      return {
-        minX: s1.frameX - pageWidth / 2 - BOUNDS_PAD,
-        maxX: s1.frameX - pageWidth / 2 + s1.frameW + BOUNDS_PAD,
-        maxY: s1.frameY + BOUNDS_PAD,
-        minY: s1.frameY - s1.frameH - BOUNDS_PAD,
-      };
-    }
-    return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
-  }
-
-  switch (sectionId) {
-    case S1_ID:
-      return {
-        minX: s1.frameX - pageWidth / 2 - BOUNDS_PAD,
-        maxX: s1.frameX - pageWidth / 2 + s1.frameW + BOUNDS_PAD,
-        maxY: s1.frameY + BOUNDS_PAD,
-        minY: s1.frameY - s1.frameH - BOUNDS_PAD,
-      };
-    case S2_TOP_ID: {
-      const outerY = s2.topConnectorY;
-      const outerH = s2.topConnectorH;
-      const outerX = s2.connectorX - s2.borderWidth;
-      const outerW = s2.connectorW + s2.borderWidth * 2;
-      const rcs = s2.groups[0].rowConnectors;
-      const rcMinY =
-        rcs.length > 0
-          ? Math.min(...rcs.map((rc: RowConnectorTransform) => rc.y - rc.h))
-          : outerY - outerH;
-
-      return {
-        minX: outerX - pageWidth / 2 - BOUNDS_PAD,
-        maxX: outerX - pageWidth / 2 + outerW + BOUNDS_PAD,
-        maxY: outerY + BOUNDS_PAD,
-        minY: Math.min(outerY - outerH, rcMinY) - BOUNDS_PAD,
-      };
-    }
-    case S2_CENTER_ID: {
-      const rcs = s2.groups[1].rowConnectors;
-      if (rcs.length === 0) {
-        return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
+    // ── gridWithAnaAyet: simple frame bounds ──────────────────────────────
+    if (sec.type === "gridWithAnaAyet") {
+      if (sectionId === sec.id) {
+        return {
+          minX: sTransform.frameX - pageWidth / 2 - BOUNDS_PAD,
+          maxX: sTransform.frameX - pageWidth / 2 + sTransform.frameW + BOUNDS_PAD,
+          maxY: sTransform.frameY + BOUNDS_PAD,
+          minY: sTransform.frameY - sTransform.frameH - BOUNDS_PAD,
+        };
       }
-      const topY = Math.max(...rcs.map((rc: RowConnectorTransform) => rc.y));
-      const botY = Math.min(...rcs.map((rc: RowConnectorTransform) => rc.y - rc.h));
-      const leftX = Math.min(...rcs.map((rc: RowConnectorTransform) => rc.x));
-      const rightX = Math.max(...rcs.map((rc: RowConnectorTransform) => rc.x + rc.w));
-
-      return {
-        minX: leftX - pageWidth / 2 - BOUNDS_PAD,
-        maxX: rightX - pageWidth / 2 + BOUNDS_PAD,
-        maxY: topY + BOUNDS_PAD,
-        minY: botY - BOUNDS_PAD,
-      };
     }
-    case S2_BOTTOM_ID: {
-      const outerY = s2.bottomConnectorY;
-      const outerH = s2.bottomConnectorH;
-      const outerX = s2.connectorX - s2.borderWidth;
-      const outerW = s2.connectorW + s2.borderWidth * 2;
-      const rcs = s2.groups[2].rowConnectors;
-      const rcMaxY =
-        rcs.length > 0 ? Math.max(...rcs.map((rc: RowConnectorTransform) => rc.y)) : outerY;
 
-      return {
-        minX: outerX - pageWidth / 2 - BOUNDS_PAD,
-        maxX: outerX - pageWidth / 2 + outerW + BOUNDS_PAD,
-        maxY: Math.max(outerY, rcMaxY) + BOUNDS_PAD,
-        minY: outerY - outerH - BOUNDS_PAD,
-      };
+    // ── verticalGroups ────────────────────────────────────────────────────
+    if (sec.type === "verticalGroups") {
+      const vSec = sec as VerticalGroupsSectionConfig;
+
+      // ── CUSTOM SECTIONS: bounds from union of verse transforms ────────
+      if (vSec.customSections && vSec.customSections.length > 0) {
+        const cs = vSec.customSections.find((c) => c.id === sectionId);
+        if (cs) {
+          let minX = Infinity, maxX = -Infinity;
+          let minY = Infinity, maxY = -Infinity;
+          const groups = sTransform.groups || [];
+
+          // Find all verse transforms across groups for this custom section
+          for (const group of groups) {
+            for (const vId of cs.verseIds) {
+              const vt = group.verses?.[vId];
+              if (!vt) continue;
+              minX = Math.min(minX, vt.x);
+              maxX = Math.max(maxX, vt.x + vt.w);
+              minY = Math.min(minY, vt.y - vt.h);
+              maxY = Math.max(maxY, vt.y);
+            }
+          }
+
+          if (minX !== Infinity) {
+            return {
+              minX: minX - pageWidth / 2 - BOUNDS_PAD,
+              maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
+              maxY: maxY + BOUNDS_PAD,
+              minY: minY - BOUNDS_PAD,
+            };
+          }
+        }
+
+        // Parent section ID → return the whole frame bounds encompassing all groups.
+        // Used by custom-section verses so they snap to the parent frame area (not their
+        // own tight verse bounds), giving a much more forgiving drag-and-release feel.
+        if (sectionId === sec.id) {
+          let minX = Infinity, maxX = -Infinity;
+          let minY = Infinity, maxY = -Infinity;
+          const groups = sTransform.groups || [];
+          for (const group of groups) {
+            minX = Math.min(minX, group.frameX);
+            maxX = Math.max(maxX, group.frameX + group.frameW);
+            minY = Math.min(minY, group.frameY - group.frameH);
+            maxY = Math.max(maxY, group.frameY);
+          }
+          if (minX !== Infinity) {
+            return {
+              minX: minX - pageWidth / 2 - BOUNDS_PAD,
+              maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
+              maxY: maxY + BOUNDS_PAD,
+              minY: minY - BOUNDS_PAD,
+            };
+          }
+        }
+
+        continue;
+      }
+
+      const isUnified = vSec.groupElevation === "unified";
+
+      if (isUnified) {
+        // UNIFIED: sectionId is the raw section ID (e.g., "section2")
+        if (sectionId === sec.id) {
+          // Combine bounds from ALL groups
+          let minX = Infinity, maxX = -Infinity;
+          let minY = Infinity, maxY = -Infinity;
+
+          const groups = sTransform.groups || [];
+          groups.forEach((group) => {
+            minX = Math.min(minX, group.frameX);
+            maxX = Math.max(maxX, group.frameX + group.frameW);
+            minY = Math.min(minY, group.frameY - group.frameH);
+            maxY = Math.max(maxY, group.frameY);
+
+            if (group.rowConnectors) {
+              group.rowConnectors.forEach((rc: any) => {
+                minX = Math.min(minX, rc.x);
+                maxX = Math.max(maxX, rc.x + rc.w);
+                minY = Math.min(minY, rc.y - rc.h);
+                maxY = Math.max(maxY, rc.y);
+              });
+            }
+          });
+
+          return {
+            minX: minX - pageWidth / 2 - BOUNDS_PAD,
+            maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
+            maxY: maxY + BOUNDS_PAD,
+            minY: minY - BOUNDS_PAD,
+          };
+        }
+      } else {
+        // PER-GROUP: sectionId is "{sectionId}_g{idx}"
+        if (sectionId.startsWith(`${sec.id}_g`)) {
+          const index = parseInt(sectionId.split("_g")[1], 10);
+          const groups = sTransform.groups || [];
+          const group = groups[index];
+          if (!group) return undefined as any;
+
+          let minX = group.frameX;
+          let maxX = group.frameX + group.frameW;
+          let minY = group.frameY - group.frameH;
+          let maxY = group.frameY;
+
+          if (group.rowConnectors && group.rowConnectors.length > 0) {
+            minX = Math.min(minX, ...group.rowConnectors.map((rc: any) => rc.x));
+            maxX = Math.max(maxX, ...group.rowConnectors.map((rc: any) => rc.x + rc.w));
+            minY = Math.min(minY, ...group.rowConnectors.map((rc: any) => rc.y - rc.h));
+            maxY = Math.max(maxY, ...group.rowConnectors.map((rc: any) => rc.y));
+          }
+
+          return {
+            minX: minX - pageWidth / 2 - BOUNDS_PAD,
+            maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
+            maxY: maxY + BOUNDS_PAD,
+            minY: minY - BOUNDS_PAD,
+          };
+        }
+      }
     }
-    default:
-      return { minX: -10, maxX: 10, minY: -10, maxY: 10 };
   }
+
+  return undefined as any;
 }

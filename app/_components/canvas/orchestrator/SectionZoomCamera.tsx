@@ -24,24 +24,34 @@ export function SectionZoomCamera() {
       } else if (section.type === "verticalGroups") {
         const s2 = section as VerticalGroupsSectionConfig;
         const defaultTarget = s2.cameraTarget;
-        
-        if (s2.subCameraTargets) {
-          if (s2.subCameraTargets.top || defaultTarget) {
-            zoomTargets[`${s2.id}_top`] = (s2.subCameraTargets.top ?? defaultTarget)!;
-          }
-          if (s2.subCameraTargets.center || defaultTarget) {
-            zoomTargets[`${s2.id}_center`] = (s2.subCameraTargets.center ?? defaultTarget)!;
-          }
-          if (s2.subCameraTargets.bottom || defaultTarget) {
-            zoomTargets[`${s2.id}_bottom`] = (s2.subCameraTargets.bottom ?? defaultTarget)!;
-          }
-        } else if (defaultTarget) {
-          // Fallback to section's main camera target if no sub targets are defined
-          zoomTargets[`${s2.id}_top`] = defaultTarget;
-          zoomTargets[`${s2.id}_center`] = defaultTarget;
-          zoomTargets[`${s2.id}_bottom`] = defaultTarget;
+        const hasCustomSections = s2.customSections && s2.customSections.length > 0;
+        const isUnified = s2.groupElevation === "unified";
+
+        if (hasCustomSections) {
+          // Register camera target for custom section IDs (fallback to defaultTarget)
+          s2.customSections!.forEach((cs) => {
+            if (cs.cameraTarget || defaultTarget) {
+              zoomTargets[cs.id] = cs.cameraTarget ?? defaultTarget!;
+            }
+          });
+        } else if (!isUnified && s2.subCameraTargets) {
+          // Map sub-camera targets to _g{idx} naming
+          const subKeys = ["top", "center", "bottom"] as const;
+          s2.groups.forEach((_, gIdx) => {
+            const subKey = subKeys[gIdx]; // top=g0, center=g1, bottom=g2
+            const groupTarget = subKey ? s2.subCameraTargets?.[subKey] : undefined;
+            if (groupTarget || defaultTarget) {
+              zoomTargets[`${s2.id}_g${gIdx}`] = (groupTarget ?? defaultTarget)!;
+            }
+          });
+        } else if (!isUnified && defaultTarget) {
+          // Fallback: per-group entries with same target
+          s2.groups.forEach((_, gIdx) => {
+            zoomTargets[`${s2.id}_g${gIdx}`] = defaultTarget;
+          });
         }
         
+        // Always register section-level target (used by unified and as fallback)
         if (defaultTarget) {
           zoomTargets[s2.id] = defaultTarget;
         }
@@ -55,12 +65,29 @@ export function SectionZoomCamera() {
           if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
         } else if (section.type === "verticalGroups") {
           const s2 = section as VerticalGroupsSectionConfig;
-          if (s2.subCameraTargets) {
-            if (s2.introVerse === vid) return `${s2.id}_top`;
-            if (s2.outroVerse === vid) return `${s2.id}_bottom`;
-            if (s2.groups[0]?.verseIds.includes(vid)) return `${s2.id}_top`;
-            if (s2.groups[1]?.verseIds.includes(vid)) return `${s2.id}_center`;
-            if (s2.groups[2]?.verseIds.includes(vid)) return `${s2.id}_bottom`;
+
+          // Custom sections: look up the verse's custom section ID
+          if (s2.customSections && s2.customSections.length > 0) {
+            for (const cs of s2.customSections) {
+              if (cs.verseIds.includes(vid)) return cs.id;
+            }
+            continue;
+          }
+
+          const isUnified = s2.groupElevation === "unified";
+          if (isUnified) {
+            // Unified: all verses map to section ID
+            if (s2.introVerse === vid || s2.outroVerse === vid) return s2.id;
+            for (const group of s2.groups) {
+              if (group.verseIds.includes(vid)) return s2.id;
+            }
+          } else if (s2.subCameraTargets) {
+            if (s2.introVerse === vid) return `${s2.id}_g0`;
+            const lastIdx = s2.groups.length - 1;
+            if (s2.outroVerse === vid) return `${s2.id}_g${lastIdx}`;
+            for (let i = 0; i < s2.groups.length; i++) {
+              if (s2.groups[i].verseIds.includes(vid)) return `${s2.id}_g${i}`;
+            }
           } else {
             if (s2.introVerse === vid) return s2.id;
             if (s2.outroVerse === vid) return s2.id;

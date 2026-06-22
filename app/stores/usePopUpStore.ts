@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getActiveStoryConfig } from "./useStoryStore";
 
 export type PopUpGroup = {
   id: string;
@@ -9,21 +10,113 @@ export type PopUpGroup = {
 
 export type MiddleHorizontalColumn = "left" | "right";
 
-const INITIAL_POPUP_GROUPS: PopUpGroup[] = [
-  { id: "g_1_2", verseIds: [1, 2], isOpen: false, hasEverOpened: false },
-  { id: "g_3_4", verseIds: [3, 4], isOpen: false, hasEverOpened: false },
-  { id: "g_5_6", verseIds: [5, 6], isOpen: false, hasEverOpened: false },
-  { id: "g_7_8", verseIds: [7, 8], isOpen: false, hasEverOpened: false },
-  { id: "g_9_10", verseIds: [9, 10], isOpen: false, hasEverOpened: false },
-  {
-    id: "g_11_12_13_14",
-    verseIds: [11, 12, 13, 14],
-    isOpen: false,
-    hasEverOpened: false,
-  },
-  { id: "g_15_16", verseIds: [15, 16], isOpen: false, hasEverOpened: false },
-  { id: "g_17_18", verseIds: [17, 18], isOpen: false, hasEverOpened: false },
-];
+let INITIAL_POPUP_GROUPS: PopUpGroup[] = [];
+let DYNAMIC_MIDDLE_GROUP_ID = "g_11_12_13_14";
+
+export function initPopUpStoreForStory(config: any) {
+  const pairings = config.specialVerses?.versePairings || {};
+  const middleFolds = config.specialVerses?.middleFoldVerses || { left: [], right: [] };
+  const middleVerseIds = [...middleFolds.left, ...middleFolds.right].sort((a, b) => a - b);
+  DYNAMIC_MIDDLE_GROUP_ID = middleVerseIds.length > 0 ? `g_${middleVerseIds.join("_")}` : "g_11_12_13_14";
+
+  const allVerseIds = config.sections.flatMap((sec: any) => {
+    if (sec.type === "gridWithAnaAyet") return [...sec.verses, sec.anaAyet];
+    if (sec.type === "verticalGroups") {
+      let ids: number[] = [];
+      sec.groups.forEach((g: any) => ids.push(...g.verseIds));
+      if (sec.introVerse) ids.push(sec.introVerse);
+      if (sec.outroVerse) ids.push(sec.outroVerse);
+      return ids;
+    }
+    return [];
+  });
+
+  const uniqueVerses = Array.from(new Set(allVerseIds as number[])).sort((a, b) => a - b);
+  const groups: PopUpGroup[] = [];
+  const processed = new Set<number>();
+
+  // ─── Detect anaAyet↔introVerse boundary ────────────────────────────────
+  // These two verses fold together in popups (like old g_5_6) but are NOT
+  // drag-paired — they only share a popup group.
+  let anaAyetId: number | null = null;
+  let introVerseId: number | null = null;
+  let outroVerseId: number | null = null;
+  for (const sec of config.sections) {
+    if (sec.type === "gridWithAnaAyet" && sec.anaAyet) anaAyetId = sec.anaAyet;
+    if (sec.type === "verticalGroups") {
+      if (sec.introVerse) introVerseId = sec.introVerse;
+      if (sec.outroVerse) outroVerseId = sec.outroVerse;
+    }
+  }
+  // Build the anaAyet+introVerse popup pair (e.g. [5,6])
+  const bridgeGroupIds: number[] = [];
+  if (anaAyetId !== null && introVerseId !== null) {
+    bridgeGroupIds.push(anaAyetId, introVerseId);
+  }
+
+  for (const v of uniqueVerses) {
+    if (processed.has(v)) continue;
+
+    // 1. Middle fold group (e.g. g_11_12_13_14)
+    if (middleVerseIds.includes(v)) {
+      groups.push({
+        id: DYNAMIC_MIDDLE_GROUP_ID,
+        verseIds: [...middleVerseIds],
+        isOpen: false,
+        hasEverOpened: false,
+      });
+      middleVerseIds.forEach(id => processed.add(id));
+      continue;
+    }
+
+    // 2. anaAyet+introVerse bridge group (e.g. g_5_6)
+    if (bridgeGroupIds.includes(v)) {
+      const sorted = [...bridgeGroupIds].sort((a, b) => a - b);
+      groups.push({
+        id: `g_${sorted.join("_")}`,
+        verseIds: sorted,
+        isOpen: false,
+        hasEverOpened: false,
+      });
+      bridgeGroupIds.forEach(id => processed.add(id));
+      continue;
+    }
+
+    // 3. Skip solo outroVerse — old code didn't include it in popup groups
+    if (v === outroVerseId) {
+      processed.add(v);
+      continue;
+    }
+
+    // 4. Verse pairing (drag pairs that also fold together)
+    const paired = pairings[v];
+    if (paired !== undefined && !processed.has(paired)) {
+      groups.push({
+        id: `g_${Math.min(v, paired)}_${Math.max(v, paired)}`,
+        verseIds: [v, paired],
+        isOpen: false,
+        hasEverOpened: false,
+      });
+      processed.add(v);
+      processed.add(paired);
+    } else {
+      // 5. Solo verse
+      groups.push({
+        id: `g_${v}`,
+        verseIds: [v],
+        isOpen: false,
+        hasEverOpened: false,
+      });
+      processed.add(v);
+    }
+  }
+  
+  INITIAL_POPUP_GROUPS = groups;
+  usePopUpStore.setState({ 
+    popUpGroups: INITIAL_POPUP_GROUPS,
+    unlockedGroupIds: getUnlockedPopUpGroups(0)
+  });
+}
 
 interface PopUpStoreState {
   popUpGroups: PopUpGroup[];
@@ -45,20 +138,12 @@ interface PopUpStoreState {
 }
 
 export function getUnlockedPopUpGroups(offset: number): string[] {
-  if (offset >= 0.9)
-    return [
-      "g_1_2",
-      "g_3_4",
-      "g_5_6",
-      "g_7_8",
-      "g_9_10",
-      "g_11_12_13_14",
-      "g_15_16",
-      "g_17_18",
-    ];
-  if (offset >= 0.75) return ["g_1_2", "g_3_4", "g_5_6", "g_7_8", "g_9_10"];
-  if (offset >= 0.5) return ["g_1_2", "g_3_4", "g_5_6", "g_7_8"];
-  return ["g_1_2", "g_3_4", "g_5_6"];
+  const total = INITIAL_POPUP_GROUPS.length;
+  if (total === 0) return [];
+  if (offset >= 0.9) return INITIAL_POPUP_GROUPS.map(g => g.id);
+  if (offset >= 0.75) return INITIAL_POPUP_GROUPS.slice(0, Math.ceil(total * 0.75)).map(g => g.id);
+  if (offset >= 0.5) return INITIAL_POPUP_GROUPS.slice(0, Math.ceil(total * 0.5)).map(g => g.id);
+  return INITIAL_POPUP_GROUPS.slice(0, Math.ceil(total * 0.3)).map(g => g.id);
 }
 
 export const usePopUpStore = create<PopUpStoreState>((set) => ({
@@ -74,7 +159,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       if (!state.unlockedGroupIds.includes(id)) return state;
 
       let anyClosed = false;
-      const isMiddleGroup = id === "g_11_12_13_14";
+      const isMiddleGroup = id === DYNAMIC_MIDDLE_GROUP_ID;
       const newGroups = state.popUpGroups.map((g) => {
         if (g.id === id) {
           const newState = !g.isOpen;
@@ -118,7 +203,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
 
   toggleMiddleHorizontalFold: () =>
     set((state) => {
-      const middleGroupId = "g_11_12_13_14";
+      const middleGroupId = DYNAMIC_MIDDLE_GROUP_ID;
       const nextHorizontalFolded = state.middleHorizontalFolded
         ? null
         : (state.hoveredMiddleColumn ?? "left");
@@ -143,7 +228,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
 
   setHoveredGroupId: (id, column = null) =>
     set((state) => {
-      const nextColumn = id === "g_11_12_13_14" ? column : null;
+      const nextColumn = id === DYNAMIC_MIDDLE_GROUP_ID ? column : null;
       if (
         state.hoveredGroupId === id &&
         state.hoveredMiddleColumn === nextColumn
@@ -176,7 +261,7 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       if (!hoveredGroupId) return state;
       if (!state.unlockedGroupIds.includes(hoveredGroupId)) return state;
 
-      const isMiddleGroup = hoveredGroupId === "g_11_12_13_14";
+      const isMiddleGroup = hoveredGroupId === DYNAMIC_MIDDLE_GROUP_ID;
       const nextMiddleHorizontalFolded =
         isMiddleGroup && direction === "up" ? state.hoveredMiddleColumn : null;
 
@@ -245,13 +330,13 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
         unlockedGroupIds: nextUnlocked,
         popUpGroups: newGroups,
         popUpAllOpen: anyOpen,
-        middleHorizontalFolded: nextUnlocked.includes("g_11_12_13_14")
+        middleHorizontalFolded: nextUnlocked.includes(DYNAMIC_MIDDLE_GROUP_ID)
           ? state.middleHorizontalFolded
           : null,
         hoveredGroupId: nextUnlocked.includes(state.hoveredGroupId ?? "")
           ? state.hoveredGroupId
           : null,
-        hoveredMiddleColumn: nextUnlocked.includes("g_11_12_13_14")
+        hoveredMiddleColumn: nextUnlocked.includes(DYNAMIC_MIDDLE_GROUP_ID)
           ? state.hoveredMiddleColumn
           : null,
       };
@@ -267,3 +352,5 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
       hoveredMiddleColumn: null,
     }),
 }));
+
+initPopUpStoreForStory(getActiveStoryConfig());

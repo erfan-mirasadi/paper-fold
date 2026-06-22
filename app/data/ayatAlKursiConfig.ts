@@ -34,8 +34,8 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   features: {
     hasIntro: false,
-    hasElevatedSections: false,
-    hasPopUps: false,
+    hasElevatedSections: true,
+    hasPopUps: true,
     hideVerseNumbers: true,
   },
 
@@ -44,13 +44,13 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     paperHeight: 0.9,
     sceneCenterYOffset: 0.0,
     padding: 0.26,
-    scrollPages: 2,
+    scrollPages: 1.5,
   },
 
   specialVerses: {
     // The single fold sits between the top group and the pushed-in middle group.
     // Verses flanking that crease are 1/2 (top) and 3/4 (middle top row).
-    middleFoldVerses: { left: [4, 6], right: [3, 5] },
+    // No middleFoldVerses — all pairs fold as normal V-shape popups
     versePairings: {
       1: 2,
       2: 1,
@@ -155,8 +155,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     oppositeVerseConnectorRadius: 0.05,
     elevatedSectionRadii: {
       base: 0.039,
-      scallopX: 0.015,
-      scallopY: 0.015,
+
       outer: 0.025,
       innerA: 0.023,
       innerB: 0.022,
@@ -191,20 +190,20 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupGap: 0.025,
     groupPad: 0.012,
     groupPadBottom: 0.012,
-    s2Gap: 0.12, // the huge horizontal gap you asked for!
+    s2Gap: 0.06, // reduced horizontal gap
     s2VerticalRowGap: 0.046, // the vertical gap between rows in the same group!
     smallBoxH2: 0.085, // height of each individual verse capsule
     middleExtraGap: 0.007,
     s2PadLeftRight: 0.028,
-    g2Shrink: 0.0,
-    outerShrink: 0.05,
+    g2Scale: 0.0,
+    outerScale: 0.05,
     s1BorderWidth: 0,
 
     // --- Misc (carried over from Alak; not material for this layout) ---
-    anaAyetTabW: 0.2,
-    anaAyetTabH: 0.032,
-    anaAyetTabBorderWidth: 0.0035,
-    anaAyetLabelDrop: 0.015,
+    capsuleLabelW: 0.2,
+    capsuleLabelH: 0.032,
+    capsuleLabelBorderWidth: 0.0035,
+    capsuleLabelDrop: 0.015,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
     boxExtOffset: 0.02,
@@ -223,6 +222,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
       backgroundScaleX: 1.15,
       backgroundScaleY: 1.25,
+      groupElevation: "unified",
       // No topLabelKey / bottomLabelKey / introVerse / outroVerse — clean slate.
       groups: [
         // ── Top group: 2 verses side-by-side (NOT pushed in) ─────────────
@@ -238,6 +238,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [4, 3, 6, 5], // [left-row1=4, right-row1=3, left-row2=6, right-row2=5]
           isPushedIn: true,
           isCenter: true,
+          dragBehavior: "individual",
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
         },
@@ -407,7 +408,10 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           { number: 2, text: "Neither drowsiness overtakes Him nor sleep." },
-          { number: 1, text: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence." },
+          {
+            number: 1,
+            text: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence.",
+          },
         ],
       },
       {
@@ -415,10 +419,22 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "Who is it that can intercede with Him except by His permission?" },
-          { number: 3, text: "To Him belongs whatever is in the heavens and whatever is on the earth." },
-          { number: 6, text: "and they encompass not a thing of His knowledge except for what He wills." },
-          { number: 5, text: "He knows what is [presently] before them and what will be after them," },
+          {
+            number: 4,
+            text: "Who is it that can intercede with Him except by His permission?",
+          },
+          {
+            number: 3,
+            text: "To Him belongs whatever is in the heavens and whatever is on the earth.",
+          },
+          {
+            number: 6,
+            text: "and they encompass not a thing of His knowledge except for what He wills.",
+          },
+          {
+            number: 5,
+            text: "He knows what is [presently] before them and what will be after them,",
+          },
         ],
       },
       {
@@ -426,8 +442,14 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "and their preservation tires Him not. And He is the Most High, the Most Great." },
-          { number: 7, text: "His Kursi extends over the heavens and the earth," },
+          {
+            number: 8,
+            text: "and their preservation tires Him not. And He is the Most High, the Most Great.",
+          },
+          {
+            number: 7,
+            text: "His Kursi extends over the heavens and the earth,",
+          },
         ],
       },
     ],
@@ -456,8 +478,14 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "O'nu ne bir uyuklama tutabilir, ne de bir uyku." },
-          { number: 1, text: "Allah, kendisinden başka hiçbir ilâh bulunmayandır. Diridir, kayyumdur." },
+          {
+            number: 2,
+            text: "O'nu ne bir uyuklama tutabilir, ne de bir uyku.",
+          },
+          {
+            number: 1,
+            text: "Allah, kendisinden başka hiçbir ilâh bulunmayandır. Diridir, kayyumdur.",
+          },
         ],
       },
       {
@@ -465,10 +493,19 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "İzni olmaksızın O'nun katında şefaatte bulunacak kimdir?" },
+          {
+            number: 4,
+            text: "İzni olmaksızın O'nun katında şefaatte bulunacak kimdir?",
+          },
           { number: 3, text: "Göklerdeki her şey, yerdeki her şey O'nundur." },
-          { number: 6, text: "Onlar O'nun ilminden, kendisinin dilediği kadarından başka bir şey kavrayamazlar." },
-          { number: 5, text: "O, kullarının önlerindekileri ve arkalarındakileri bilir." },
+          {
+            number: 6,
+            text: "Onlar O'nun ilminden, kendisinin dilediği kadarından başka bir şey kavrayamazlar.",
+          },
+          {
+            number: 5,
+            text: "O, kullarının önlerindekileri ve arkalarındakileri bilir.",
+          },
         ],
       },
       {
@@ -476,8 +513,14 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, yücedir, büyüktür." },
-          { number: 7, text: "O'nun kürsüsü bütün gökleri ve yeri kaplayıp kuşatmıştır." },
+          {
+            number: 8,
+            text: "Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, yücedir, büyüktür.",
+          },
+          {
+            number: 7,
+            text: "O'nun kürsüsü bütün gökleri ve yeri kaplayıp kuşatmıştır.",
+          },
         ],
       },
     ],

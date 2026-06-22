@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getActiveStoryConfig } from "./useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig, SurahLayoutConfig } from "../data/schema";
+import { resetAllDrags } from "../utils/dragEngine";
 
 export type ElevatedPhase = "idle" | "elevated";
 export type ElevatedSectionId = string;
@@ -26,22 +27,39 @@ export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
       SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
     } else if (section.type === "verticalGroups") {
       const s2 = section as VerticalGroupsSectionConfig;
-      const topId = `${s2.id}_top`;
-      const centerId = `${s2.id}_center`;
-      const bottomId = `${s2.id}_bottom`;
-      
-      SECTION_PRIORITY.push(topId, centerId, bottomId);
-      
-      SECTION_VERSE_IDS[topId] = [];
-      if (s2.introVerse) SECTION_VERSE_IDS[topId].push(s2.introVerse);
-      if (s2.groups[0]) SECTION_VERSE_IDS[topId].push(...s2.groups[0].verseIds);
 
-      SECTION_VERSE_IDS[centerId] = [];
-      if (s2.groups[1]) SECTION_VERSE_IDS[centerId].push(...s2.groups[1].verseIds);
+      if (s2.customSections && s2.customSections.length > 0) {
+        // ─── CUSTOM SECTIONS: Each custom section defines its own verse list ─
+        s2.customSections.forEach((cs) => {
+          SECTION_PRIORITY.push(cs.id);
+          SECTION_VERSE_IDS[cs.id] = [...cs.verseIds];
+        });
+      } else if (s2.groupElevation === "unified") {
+        // ─── UNIFIED: All groups share one section ID ─────────────────────
+        const sectionId = s2.id;
+        SECTION_PRIORITY.push(sectionId);
+        const allVerseIds: number[] = [];
+        if (s2.introVerse) allVerseIds.push(s2.introVerse);
+        s2.groups.forEach((g) => allVerseIds.push(...g.verseIds));
+        if (s2.outroVerse) allVerseIds.push(s2.outroVerse);
+        SECTION_VERSE_IDS[sectionId] = allVerseIds;
+      } else {
+        // ─── PER-GROUP: Each group gets its own _g{idx} section ID ────────
+        s2.groups.forEach((g, gIdx) => {
+          const groupId = `${s2.id}_g${gIdx}`;
+          SECTION_PRIORITY.push(groupId);
+          SECTION_VERSE_IDS[groupId] = [...g.verseIds];
+        });
 
-      SECTION_VERSE_IDS[bottomId] = [];
-      if (s2.groups[2]) SECTION_VERSE_IDS[bottomId].push(...s2.groups[2].verseIds);
-      if (s2.outroVerse) SECTION_VERSE_IDS[bottomId].push(s2.outroVerse);
+        // Intro verse belongs to the first group; outro to the last.
+        if (s2.introVerse) {
+          SECTION_VERSE_IDS[`${s2.id}_g0`].unshift(s2.introVerse);
+        }
+        if (s2.outroVerse) {
+          const lastIdx = s2.groups.length - 1;
+          SECTION_VERSE_IDS[`${s2.id}_g${lastIdx}`].push(s2.outroVerse);
+        }
+      }
     }
   });
 
@@ -279,6 +297,9 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
     );
     if (!canShowAll) return;
 
+    // Reset all drag positions so sections start fresh each time
+    resetAllDrags();
+
     set({
       activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
       activeVerseIds: ALL_ELEVATED_VERSE_IDS,
@@ -291,6 +312,9 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   },
 
   forceShowAllSections: () => {
+    // Reset all drag positions so sections start fresh each time
+    resetAllDrags();
+
     set({
       activeVerseId: ALL_ELEVATED_VERSE_IDS[0],
       activeVerseIds: ALL_ELEVATED_VERSE_IDS,

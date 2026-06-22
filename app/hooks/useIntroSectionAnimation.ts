@@ -33,9 +33,9 @@ const getS1Id = (): string =>
   getActiveStoryConfig().sections[0]?.id ?? "section1";
 const getS2Id = (): string =>
   getActiveStoryConfig().sections[1]?.id ?? "section2";
-const getS2TopId = (): string => `${getS2Id()}_top`;
-const getS2CenterId = (): string => `${getS2Id()}_center`;
-const getS2BotId = (): string => `${getS2Id()}_bottom`;
+const getS2TopId = (): string => `${getS2Id()}_g0`;
+const getS2CenterId = (): string => `${getS2Id()}_g1`;
+const getS2BotId = (): string => `${getS2Id()}_g2`;
 
 /** Returns the four canonical ElevatedSectionIds for the current config. */
 function getSessionIds(): ElevatedSectionId[] {

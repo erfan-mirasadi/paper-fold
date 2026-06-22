@@ -45,7 +45,21 @@ export function PopUpHoverSensors({
   const isFoldedMainPaper = useFoldStore(
     (s) => !s.isIntroActive && s.currentOffset < 0.98,
   );
-  const activeConfigId = useStoryStore((s) => s.activeConfig.id);
+  const activeConfig = useStoryStore((s) => s.activeConfig);
+  const middleFoldVerses = activeConfig.specialVerses?.middleFoldVerses;
+  const middleFoldGroupVerseIds = middleFoldVerses
+    ? [...middleFoldVerses.left, ...middleFoldVerses.right].sort((a, b) => a - b)
+    : [];
+  const dynamicMiddleGroupId = middleFoldGroupVerseIds.length > 0
+    ? `g_${middleFoldGroupVerseIds.join("_")}`
+    : null;
+
+  // Build set of verse IDs that should skip hover sensors (anaAyet + introVerse boundary)
+  const skipGroupVerseIds = new Set<number>();
+  activeConfig.sections.forEach((sec: any) => {
+    if (sec.type === "gridWithAnaAyet" && sec.anaAyet) skipGroupVerseIds.add(sec.anaAyet);
+    if (sec.type === "verticalGroups" && sec.introVerse) skipGroupVerseIds.add(sec.introVerse);
+  });
 
   useEffect(() => {
     return () => {
@@ -53,12 +67,14 @@ export function PopUpHoverSensors({
     };
   }, []);
 
-  if (isIntroActive || isFoldedMainPaper) return null;
+  if (isIntroActive || isFoldedMainPaper || !activeConfig.features.hasPopUps) return null;
 
   return (
     <>
       {groups.map((group) => {
-        if (group.id === "g_5_6" && activeConfigId === "alak") return null;
+        // Skip hover sensor for groups that bridge anaAyet↔introVerse boundary
+        const allInSkipSet = group.verseIds.every((id) => skipGroupVerseIds.has(id));
+        if (allInSkipSet) return null;
 
         const versesInGroup = versesConfig.filter((config) =>
           group.verseIds.includes(config.id),
@@ -87,7 +103,7 @@ export function PopUpHoverSensors({
         const centerX = (minX + maxX) / 2;
         const centerY = (minY + maxY) / 2;
 
-        const isMiddleGroup = group.id === "g_11_12_13_14";
+        const isMiddleGroup = dynamicMiddleGroupId !== null && group.id === dynamicMiddleGroupId;
         const resolveColumn = (x: number) => (x <= centerX ? "left" : "right");
 
         return (

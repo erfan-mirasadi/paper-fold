@@ -1,5 +1,5 @@
 "use client";
-import { TopLabel, UiRect, VerseBox, AnaAyetTab } from "./SharedUI";
+import { TopLabel, UiRect, VerseBox, CapsuleLabel } from "./SharedUI";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -30,104 +30,11 @@ interface SectionOneProps {
   isFolded?: boolean;
 }
 
-export const SCALLOP_RADIUS_X = 0.053;
-export const SCALLOP_RADIUS_Y = 0.03;
-export const S1_SOLID_SCALE_X = 1.065;
-export const S1_SOLID_SCALE_Y = 0.965;
+export const S1_SOLID_SCALE_X = 0.9;
+export const S1_SOLID_SCALE_Y = 0.9;
 export const S1_SOLID_Y_OFFSET = -0.005;
 export const S1_IMAGE_SCALE = 1.1;
 export const S1_IMAGE_Y_OFFSET = 0.01;
-
-export function ScallopedCenteredShape({
-  w,
-  h,
-  radius,
-  radiusX = radius,
-  radiusY = radius,
-  position = "top",
-}: {
-  w: number;
-  h: number;
-  radius: number;
-  radiusX?: number;
-  radiusY?: number;
-  position?: "top" | "bottom" | "both" | "none";
-}) {
-  const shape = useMemo(() => {
-    const s = new THREE.Shape();
-    const halfW = w / 2;
-    const halfH = h / 2;
-
-    if (position === "none") {
-      s.moveTo(-halfW, -halfH);
-      s.lineTo(-halfW, halfH);
-      s.lineTo(halfW, halfH);
-      s.lineTo(halfW, -halfH);
-      s.lineTo(-halfW, -halfH);
-      return s;
-    }
-
-    if (position === "bottom" || position === "both") {
-      s.moveTo(-halfW, -halfH + radiusY);
-    } else {
-      s.moveTo(-halfW, -halfH);
-    }
-
-    // Top-Left corner
-    if (position === "top" || position === "both") {
-      s.lineTo(-halfW, halfH - radiusY);
-      s.absellipse(-halfW, halfH, radiusX, radiusY, -Math.PI / 2, 0, false, 0);
-    } else {
-      s.lineTo(-halfW, halfH);
-    }
-
-    // Top-Right corner
-    if (position === "top" || position === "both") {
-      s.lineTo(halfW - radiusX, halfH);
-      s.absellipse(
-        halfW,
-        halfH,
-        radiusX,
-        radiusY,
-        Math.PI,
-        Math.PI * 1.5,
-        false,
-        0,
-      );
-    } else {
-      s.lineTo(halfW, halfH);
-    }
-
-    // Bottom-Right corner
-    if (position === "bottom" || position === "both") {
-      s.lineTo(halfW, -halfH + radiusY);
-      s.absellipse(
-        halfW,
-        -halfH,
-        radiusX,
-        radiusY,
-        Math.PI / 2,
-        Math.PI,
-        false,
-        0,
-      );
-    } else {
-      s.lineTo(halfW, -halfH);
-    }
-
-    // Bottom-Left corner
-    if (position === "bottom" || position === "both") {
-      s.lineTo(-halfW + radiusX, -halfH);
-      s.absellipse(-halfW, -halfH, radiusX, radiusY, 0, Math.PI / 2, false, 0);
-    } else {
-      s.lineTo(-halfW, -halfH);
-    }
-
-    return s;
-  }, [w, h, radius, radiusX, radiusY, position]);
-
-  return <shapeGeometry args={[shape]} />;
-}
 
 /** Generic SVG overlay — used for any verse that has a customFrameSvg override */
 function SvgFrameOverlay({
@@ -198,7 +105,6 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
   const BW = 0.0055; // border width matching VerseMesh.bw
   const SVG_WIDTH_SCALE = 0.8;
   const SVG_HEIGHT_SCALE = 0.93;
-  const ANA_LABEL_PIN_OVERLAP = 0.0015;
 
   return (
     <group>
@@ -212,14 +118,7 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
           ]}
           renderOrder={1}
         >
-          <ScallopedCenteredShape
-            w={t.frameW * S1_SOLID_SCALE_X}
-            h={t.frameH * S1_SOLID_SCALE_Y}
-            radius={0.039}
-            radiusX={SCALLOP_RADIUS_X}
-            radiusY={SCALLOP_RADIUS_Y}
-            position="top"
-          />
+          <planeGeometry args={[t.frameW * S1_SOLID_SCALE_X, t.frameH * S1_SOLID_SCALE_Y]} />
           <meshBasicMaterial
             color={S1_FRAME_BG_COLOR}
             toneMapped={false}
@@ -328,11 +227,12 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
         // SVG frame overlay (generic — any verse with a customFrameSvg gets one)
         const svgUrl = override?.customFrameSvg;
 
-        // AnaAyetTab (generic — any verse with hasAnaAyetTab: true in its override)
-        const hasTab = override?.hasAnaAyetTab && t.anaAyetTabW != null;
-        const labelW = t.anaAyetTabW ?? 0;
-        const labelH = t.anaAyetTabH ?? 0;
-        const labelDrop = t.anaAyetLabelDrop ?? 0.015;
+        // CapsuleLabel (generic — any verse with hasCapsuleLabel: true in its override)
+        const hasCapsuleLabel = override?.hasCapsuleLabel;
+        const customTabText = override?.customCapsuleLabel;
+
+        const labelW = t.capsuleLabelW ?? 0.2;
+        const labelH = t.capsuleLabelH ?? 0.032;
 
         return (
           <group key={actualVerseId}>
@@ -375,16 +275,17 @@ export function SectionOne({ data, transforms, PW }: SectionOneProps) {
               );
             })()}
 
-            {/* Generic AnaAyetTab — rendered for any verse with hasAnaAyetTab: true */}
-            {hasTab && (
-              <AnaAyetTab
-                x={t.anaAyetTabX!}
-                y={t.anaAyetTabY!}
+            {/* Generic CapsuleLabel — rendered for any verse with hasCapsuleLabel: true */}
+            {hasCapsuleLabel && (
+              <CapsuleLabel
+                x={t.capsuleLabelX!}
+                y={t.capsuleLabelY!}
                 w={labelW}
                 h={labelH}
-                z={rawT.z + 0.004}
-                borderWidth={t.anaAyetTabBorderWidth}
-                renderOrder={110}
+                z={0.002}
+                borderWidth={t.capsuleLabelBorderWidth!}
+                renderOrder={100}
+                customText={customTabText}
               />
             )}
           </group>

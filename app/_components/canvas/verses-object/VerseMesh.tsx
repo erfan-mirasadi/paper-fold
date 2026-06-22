@@ -10,7 +10,7 @@ import {
 import {
   VerseBox,
   RoundedShapeComponent,
-  AnaAyetTab,
+  CapsuleLabel,
 } from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
 import {
@@ -55,13 +55,14 @@ export interface VerseMeshProps {
   shadowRenderOrder?: number;
   customFrameSvg?: string;
   frameScaleLTR?: number;
-  anaAyetTab?: {
+  capsuleLabel?: {
     x: number;
     y: number;
     w: number;
     h: number;
     borderWidth: number;
     labelDrop?: number;
+    customText?: string;
   };
 }
 
@@ -86,11 +87,11 @@ function BorderSvg({
 
   const activeLanguage = useSurahLanguageStore.getState().activeLanguage;
   const isArabic = activeLanguage === "ar";
-  
+
   const widthScale = 0.8;
   const heightScale = 0.93;
-  
-  const frameScaleMult = (!isArabic && frameScaleLTR) ? frameScaleLTR : 1.0;
+
+  const frameScaleMult = !isArabic && frameScaleLTR ? frameScaleLTR : 1.0;
 
   const renderW = w * widthScale * frameScaleMult;
   const renderH = h * heightScale * frameScaleMult;
@@ -145,7 +146,7 @@ export function VerseMesh({
   shadowRenderOrder,
   customFrameSvg,
   frameScaleLTR,
-  anaAyetTab,
+  capsuleLabel,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
@@ -407,30 +408,31 @@ export function VerseMesh({
                   </mesh>
                 </group>
 
-                {/* AnaAyetTab – inside the fold transform hierarchy */}
-                {anaAyetTab &&
+                {/* CapsuleLabel – inside the fold transform hierarchy */}
+                {capsuleLabel &&
                   (() => {
-                    const labelW = anaAyetTab.w;
-                    const labelH = anaAyetTab.h;
-                    const ANA_LABEL_PIN_OVERLAP = 0.0015;
-                    const labelDrop = anaAyetTab.labelDrop ?? 0.015;
+                    const labelW = capsuleLabel.w;
+                    const labelH = capsuleLabel.h;
+                    // capsuleLabel.x / .y are in fold-group local space, derived by
+                    // surahDataGenerator to mirror exactly what VerseGroup.tsx does on paper.
 
-                    // Use the exact config coordinates passed by surahDataGenerator.
-                    // The tab is a sibling to the brick group (not a child), so it does
-                    // NOT inherit the [outerLeft, outerTop] offsets. We can use the native
-                    // relative coordinates calculated in the generator perfectly.
                     return (
                       <group
-                        position={[anaAyetTab.x, anaAyetTab.y, 0.01 + 0.0025]}
+                        position={[
+                          capsuleLabel.x,
+                          capsuleLabel.y,
+                          0.01 + 0.0025,
+                        ]}
                       >
-                        <AnaAyetTab
+                        <CapsuleLabel
                           x={0}
                           y={0}
                           w={labelW}
                           h={labelH}
                           z={0}
-                          borderWidth={anaAyetTab.borderWidth}
+                          borderWidth={capsuleLabel.borderWidth}
                           renderOrder={110}
+                          customText={capsuleLabel.customText}
                         />
                       </group>
                     );

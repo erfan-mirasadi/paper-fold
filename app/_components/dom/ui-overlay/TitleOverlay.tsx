@@ -18,15 +18,17 @@ export function TitleOverlay() {
   const paddingX = "clamp(24px, 3vw, 40px)";
   const fontSize = "clamp(18px, 2.4vw, 28px)";
 
+  const isShort = (activeConfig.dimensions?.paperHeight ?? 2) < 1.4;
+
   return (
     <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, x: isShort ? "-50%" : -10, y: isShort ? -10 : 0 }}
+      animate={{ opacity: 1, x: isShort ? "-50%" : 0, y: 0 }}
       transition={{ type: "spring", stiffness: 170, damping: 22 }}
       className="fixed z-100 pointer-events-auto"
       style={{
         top: insetY,
-        left: insetX,
+        left: isShort ? "50%" : insetX,
       }}
     >
       <OverlayButton
