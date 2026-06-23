@@ -147,6 +147,7 @@ export function VerseMesh({
   customFrameSvg,
   frameScaleLTR,
   capsuleLabel,
+  baseRenderOrder,
 }: VerseMeshProps) {
   const normalizeLiftProgress = (lift: number) => {
     const ratio = lift / ELEVATE_TIMING.liftHeight;
@@ -273,7 +274,7 @@ export function VerseMesh({
         toneMapped: false,
       },
       front: {
-        color: paperBaseColor,
+        color: border,
         transparent: true,
         depthTest: true,
         depthWrite: true,
@@ -282,7 +283,7 @@ export function VerseMesh({
         envMapIntensity: 0.5,
       },
       back: {
-        color: paperBaseColor,
+        color: border,
         transparent: true,
         depthTest: true,
         depthWrite: true,
@@ -294,7 +295,10 @@ export function VerseMesh({
         envMapIntensity: 0.5,
       },
     };
-  }, []);
+  }, [border]);
+  const combinedOpacity = to([opacity, elevateOpacity], (o1, o2) =>
+    Math.max(o1, o2),
+  );
 
   return (
     <a.group
@@ -303,7 +307,7 @@ export function VerseMesh({
       position-z={to([zBaseOffset, zOffset, liftZ], (b, z, l) => b + z + l)}
       visible={to(
         [opacity, elevateOpacity],
-        (o1, o2) => Math.max(o1, o2) > 0.01,
+        (o1, o2) => Math.max(o1, o2) > 0.0001,
       )}
     >
       <a.group position-y={horizontalPivotOffsetY}>
@@ -312,7 +316,7 @@ export function VerseMesh({
             <a.mesh
               position-x={shadowXOffset}
               position-y={shadowYOffset}
-              renderOrder={shadowRenderOrder ?? 90}
+              renderOrder={shadowRenderOrder ?? (baseRenderOrder !== undefined ? baseRenderOrder - 2 : 90)}
               position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
                 const surfaceProgress =
                   normalizeSurfaceLiftProgress(surfaceLift);
@@ -335,7 +339,7 @@ export function VerseMesh({
             <a.group rotation-x={tiltX} scale={scale}>
               <a.group rotation-y={rotValue} position-z={zOffset}>
                 <group position={[brickGroupXOffset, outerTop, 0]}>
-                  <mesh position={[0, 0, -0.008]} renderOrder={100}>
+                  <mesh position={[0, 0, -0.008]} renderOrder={baseRenderOrder !== undefined ? baseRenderOrder - 1 : 100}>
                     <extrudeGeometry args={[shape, extrudeSettings]} />
                     <a.meshStandardMaterial
                       {...materialsProps.front}
@@ -356,56 +360,32 @@ export function VerseMesh({
                     />
                   )}
 
-                  <mesh
-                    position={[outerW / 2, -outerH / 2, 0.002]}
+                  <a.group 
+                    position={[alignX, alignY, 0.002]}
                     renderOrder={101}
                   >
-                    <planeGeometry args={[outerW, outerH]} />
-                    <a.meshStandardMaterial
-                      {...materialsProps.back}
-                      opacity={to([opacity, elevateOpacity], (o1, o2) =>
-                        Math.max(o1, o2),
-                      )}
-                    >
-                      <RenderTexture
-                        attach="map"
-                        width={512}
-                        height={256}
-                        frames={8}
-                      >
-                        <OrthographicCamera
-                          makeDefault
-                          manual
-                          left={0}
-                          right={outerW}
-                          top={0}
-                          bottom={-outerH}
-                          position={[0, 0, 10]}
-                        />
-                        <group position={[alignX, alignY, 0]}>
-                          <VerseBox
-                            x={0}
-                            y={0}
-                            z={0}
-                            w={w}
-                            h={h}
-                            verse={verse}
-                            number={number}
-                            bg={bg}
-                            border={border}
-                            circleBorderCol={circleBorderCol}
-                            circleBg={circleBg}
-                            circleTextCol={circleTextCol}
-                            textColor={textColor}
-                            textScaleOverride={textScaleOverride}
-                            isPill={isPill}
-                            shadow={false}
-                            verseTextEnterDurationMs={0}
-                          />
-                        </group>
-                      </RenderTexture>
-                    </a.meshStandardMaterial>
-                  </mesh>
+                    <VerseBox
+                      x={0}
+                      y={0}
+                      z={0}
+                      w={w}
+                      h={h}
+                      verse={verse}
+                      number={number}
+                      bg={bg}
+                      border={border}
+                      circleBorderCol={circleBorderCol}
+                      circleBg={circleBg}
+                      circleTextCol={circleTextCol}
+                      textColor={textColor}
+                      textScaleOverride={textScaleOverride}
+                      isPill={isPill}
+                      shadow={false}
+                      verseTextEnterDurationMs={0}
+                      opacity={combinedOpacity}
+                      baseRenderOrder={baseRenderOrder}
+                    />
+                  </a.group>
                 </group>
 
                 {/* CapsuleLabel – inside the fold transform hierarchy */}
@@ -431,8 +411,9 @@ export function VerseMesh({
                           h={labelH}
                           z={0}
                           borderWidth={capsuleLabel.borderWidth}
-                          renderOrder={110}
                           customText={capsuleLabel.customText}
+                          opacity={combinedOpacity}
+                          renderOrder={baseRenderOrder !== undefined ? baseRenderOrder + 5 : 106}
                         />
                       </group>
                     );

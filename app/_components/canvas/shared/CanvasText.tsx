@@ -1,4 +1,5 @@
 "use client";
+import { a } from "@react-spring/three";
 import { cloneElement, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
@@ -21,6 +22,7 @@ interface CanvasTextProps {
   fontWeight?: string | number;
   fontStyle?: string;
   depthTest?: boolean;
+  opacity?: any;
   children?: React.ReactNode;
 }
 
@@ -41,6 +43,7 @@ export function CanvasText({
   fontWeight = "normal",
   fontStyle = "normal",
   depthTest = false,
+  opacity,
   children,
 }: CanvasTextProps) {
   const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
@@ -175,7 +178,7 @@ export function CanvasText({
   if (!texture) return null;
 
   return (
-    <mesh renderOrder={renderOrder} position={position}>
+    <mesh position={position} renderOrder={renderOrder}>
       <planeGeometry args={[width, height]} />
       {children ? (
         cloneElement(
@@ -185,12 +188,14 @@ export function CanvasText({
           },
         )
       ) : (
-        <meshBasicMaterial
+        <a.meshBasicMaterial
           map={texture}
           color="#ffffff"
           transparent={true}
           toneMapped={false}
-          depthTest={depthTest}
+          depthTest={depthTest ?? true}
+          depthWrite={false}
+          opacity={opacity ?? 1}
         />
       )}
     </mesh>

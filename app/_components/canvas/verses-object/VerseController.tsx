@@ -215,6 +215,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const isVerseSeparated = useDragState((s) =>
     s.draggedVerseIds.includes(leadVerseId),
   );
+
+  const animatedLiftZ = to([liftZ], (l) => l + (isVerseSeparated ? 0.015 : 0));
+  const dynamicRenderOrder = isVerseSeparated ? 1000 + config.id * 10 : 100 + config.id * 10;
   const separationOffset = useDragState(
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
@@ -334,7 +337,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           shadowGlobalOpacity={shadowGlobalOpacity}
           zOffset={zOffset}
           opacity={opacity}
-          liftZ={liftZ}
+          liftZ={animatedLiftZ}
           surfaceLiftZ={surfaceLiftZ}
           tiltX={tiltX}
           horizontalTiltX={horizontalTiltX}
@@ -359,6 +362,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           customFrameSvg={config.customFrameSvg}
           frameScaleLTR={config.frameScaleLTR}
           capsuleLabel={config.capsuleLabel}
+          baseRenderOrder={dynamicRenderOrder}
         />
       </a.group>
     </group>

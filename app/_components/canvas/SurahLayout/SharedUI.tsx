@@ -1,4 +1,5 @@
 "use client";
+import { a } from "@react-spring/three";
 
 import { useTexture } from "@react-three/drei";
 import { useMemo, useRef } from "react";
@@ -111,7 +112,7 @@ interface UiRectProps {
   renderOrder?: number;
   topOnly?: boolean;
   bottomOnly?: boolean;
-  opacity?: number;
+  opacity?: any;
   transparent?: boolean;
   emissive?: string;
   emissiveIntensity?: number;
@@ -126,7 +127,7 @@ interface TexturedMaterialProps {
   useEmissive: boolean;
   depthTest: boolean;
   transparent: boolean;
-  opacity: number;
+  opacity: any;
   toneMapped: boolean;
   emissive: string;
   emissiveIntensity: number;
@@ -157,10 +158,11 @@ function TexturedMaterial({
 
   if (useEmissive) {
     return (
-      <meshStandardMaterial
+      <a.meshStandardMaterial
         map={fittedTexture}
         color="#ffffff"
         depthTest={depthTest}
+        depthWrite={false}
         transparent={transparent}
         opacity={opacity}
         toneMapped={toneMapped}
@@ -173,10 +175,11 @@ function TexturedMaterial({
   }
 
   return (
-    <meshBasicMaterial
+    <a.meshBasicMaterial
       map={fittedTexture}
       color="#ffffff"
       depthTest={depthTest}
+      depthWrite={false}
       transparent={transparent}
       opacity={opacity}
       toneMapped={toneMapped}
@@ -224,11 +227,12 @@ export const UiRect = ({
             bottomOnly={bottomOnly}
             xMultiplier={xMultiplier}
           />
-          <meshBasicMaterial
+          <a.meshBasicMaterial
             color={SHADOW_BLACK}
             transparent
-            opacity={renderOrder != null ? 0.32 : 0.12}
+            opacity={opacity !== undefined ? opacity : 0.32}
             depthTest={depthTest}
+            depthWrite={false}
           />
         </mesh>
       )}
@@ -256,9 +260,10 @@ export const UiRect = ({
             emissiveIntensity={emissiveIntensity ?? 1}
           />
         ) : useEmissiveMaterial ? (
-          <meshStandardMaterial
+          <a.meshStandardMaterial
             color={finalColor}
             depthTest={depthTest}
+            depthWrite={false}
             transparent={resolvedTransparent}
             opacity={resolvedOpacity}
             emissive={emissive || "#000000"}
@@ -268,9 +273,10 @@ export const UiRect = ({
             toneMapped={toneMapped ?? false}
           />
         ) : (
-          <meshBasicMaterial
+          <a.meshBasicMaterial
             color={finalColor}
             depthTest={depthTest}
+            depthWrite={false}
             transparent={resolvedTransparent}
             opacity={resolvedOpacity}
             toneMapped={toneMapped}
@@ -425,6 +431,7 @@ interface CapsuleLabelProps {
   depthTest?: boolean;
   customText?: string | Record<string, string>;
   labelScale?: number;
+  opacity?: any;
 }
 export function CapsuleLabel({
   x,
@@ -437,6 +444,7 @@ export function CapsuleLabel({
   depthTest = false,
   customText,
   labelScale = 1,
+  opacity,
 }: CapsuleLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
 
@@ -466,6 +474,7 @@ export function CapsuleLabel({
         shadow={false}
         renderOrder={renderOrder}
         depthTest={depthTest}
+        opacity={opacity}
         xMultiplier={1.5}
       />
       <UiRect
@@ -476,8 +485,9 @@ export function CapsuleLabel({
         h={h}
         radius={radius}
         color={S1_ANA_LABEL_BG}
-        renderOrder={renderOrder != null ? renderOrder + 1 : undefined}
+        renderOrder={renderOrder}
         depthTest={depthTest}
+        opacity={opacity}
         xMultiplier={1.5}
       />
 
@@ -491,8 +501,9 @@ export function CapsuleLabel({
           height={h}
           textAlign="center"
           fontWeight="bold"
-          renderOrder={renderOrder != null ? renderOrder + 2 : undefined}
+          renderOrder={renderOrder}
           depthTest={depthTest}
+          opacity={opacity}
         />
       </group>
     </group>
@@ -518,9 +529,11 @@ interface VerseBoxProps {
   bgOpacity?: number;
   textColor?: string;
   /** 0 avoids capturing invisible text inside finite-frame RenderTextures. */
-  verseTextEnterDurationMs?: number;
   textOffsetY?: number;
   textScaleOverride?: number;
+  opacity?: any;
+  baseRenderOrder?: number;
+  hideBackground?: boolean;
 }
 export const VerseBox = ({
   x,
@@ -542,6 +555,9 @@ export const VerseBox = ({
   textColor,
   textOffsetY = 0,
   textScaleOverride,
+  opacity,
+  baseRenderOrder,
+  hideBackground = false,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -613,9 +629,15 @@ export const VerseBox = ({
       : BIG_VERSE_VERTICAL_SHIFT
     : 0;
 
+  const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
+
+  // 👈 بازگردانی رنگ شمارههای بخش اول علق
+  const isAlakS1 = activeStoryConfig.id === "alak" && Number(number) <= 5;
+  const finalCircleTextCol = circleTextCol ?? (isAlakS1 ? S1_VERSE_NUMBER_TEXT : S2_VERSE_NUMBER_TEXT);
+
   return (
     <group position={[finalX, y, z]}>
-      {/* Outer border */}
+      {/* 1. حاشیه (عمیقترین لایه z=0) */}
       <UiRect
         x={-bw}
         y={bw}
@@ -625,9 +647,11 @@ export const VerseBox = ({
         radius={rad + bw}
         color={border}
         shadow={shadow}
-        renderOrder={10}
+        depthTest={true}
+        opacity={opacity}
+        renderOrder={zOrder}
       />
-      {/* Inner fill */}
+      {/* 2. پسزمینه (1 میلیمتر بالاتر z=0.001) */}
       <UiRect
         x={0}
         y={0}
@@ -636,52 +660,58 @@ export const VerseBox = ({
         h={h}
         radius={rad}
         color={bg}
-        renderOrder={11}
-        opacity={bgOpacity}
+        depthTest={true}
+        opacity={opacity !== undefined ? opacity : bgOpacity}
+        renderOrder={zOrder + 1}
       />
 
-      {/* Verse number circle (Arabic only) */}
+      {/* 3. دایرهها (z=0.002 و z=0.003) */}
       {showVerseNumber && (
         <group position={[cx, -h / 2, 0.002]}>
-          <mesh renderOrder={12}>
+          <mesh renderOrder={zOrder + 2}>
             <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
-            <meshBasicMaterial
+            <a.meshBasicMaterial
               color={circleBg ?? bg}
-              depthTest={false}
-              transparent={true}
-              opacity={0.999}
+              depthTest={true}
+              depthWrite={false}
+              transparent
+              opacity={opacity ?? 0.999}
             />
           </mesh>
-          <mesh position={[0, 0, -0.001]} renderOrder={12}>
+          <mesh position={[0, 0, -0.001]} renderOrder={zOrder + 2}>
             <circleGeometry args={[cr, 48]} />
-            <meshBasicMaterial
+            <a.meshBasicMaterial
               color={circleBorderCol ?? border ?? CIRCLE_BORDER}
-              depthTest={false}
-              transparent={true}
-              opacity={0.999}
+              depthTest={true}
+              depthWrite={false}
+              transparent
+              opacity={opacity ?? 0.999}
             />
           </mesh>
-          <group position={[0, 0, 0.001]}>
+          <group position={[0, 0, 0.002]}>
             <CanvasText
               text={String(number)}
               font={LATIN_LABEL_FONT}
               fontSize={TEXT_SIZES.VERSE_NUMBER}
-              color={circleTextCol ?? S2_VERSE_NUMBER_TEXT}
+              color={finalCircleTextCol}
               width={cr * 2}
               height={cr * 2}
               textAlign="center"
               fontWeight="bold"
-              renderOrder={13}
+              depthTest={true}
+              opacity={opacity}
+              renderOrder={zOrder + 3}
             />
           </group>
         </group>
       )}
 
+      {/* 4. متن عربی یا انگلیسی (بالاترین لایه z=0.005) */}
       <group
         position={[
           textAlign === "center" ? versePosX : versePosX + textMaxW / 2,
           -h / 2 + verticalShift + textOffsetY,
-          0.002,
+          0.005,
         ]}
       >
         <CanvasText
@@ -697,7 +727,9 @@ export const VerseBox = ({
           textAlign={textAlign}
           width={textMaxW}
           height={h}
-          renderOrder={14}
+          depthTest={true}
+          opacity={opacity}
+          renderOrder={zOrder + 4}
         />
       </group>
     </group>

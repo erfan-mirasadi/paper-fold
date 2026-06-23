@@ -16,7 +16,7 @@ export const ELEVATE_TIMING = {
   /** Scale factor when elevated (subtle zoom). */
   liftScale: 1.015,
   appearDelayZAndOpacity: 0,
-  hideDelayZAndOpacity: 690,
+  hideDelayZAndOpacity: 0,
 };
 
 export const SECTION_ELEVATION_HEIGHT = 0.205;
@@ -97,13 +97,8 @@ export function useElevateAnimation(
     from: {
       opacity: 0,
     },
-    config: springConfig,
-    delay: actuallyElevated
-      ? ELEVATE_TIMING.appearDelayZAndOpacity
-      : isIntroActive || sectionId === "s1" || !justLeftIntro
-        ? ELEVATE_TIMING.hideDelayZAndOpacity
-        : 0,
-    /** Avoid stacking with Troika text fade-in inside RenderTexture (double dim). */
+    config: actuallyElevated ? springConfig : { duration: 150 },
+    delay: actuallyElevated ? 0 : 800,
     immediate: actuallyElevated || (justLeftIntro && sectionId !== "s1"),
   });
 
