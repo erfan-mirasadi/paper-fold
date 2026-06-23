@@ -7,6 +7,7 @@ import {
   markVerseDragged,
   unmarkVerseDragged,
   unmarkSectionDragged,
+  dockElement,
   useDragState,
 } from "../utils/dragEngine";
 import {
@@ -52,9 +53,15 @@ function setBodyCursor(cursor: string) {
 /**
  * Ultra-lightweight drag hook for R3F objects.
  *
- * Snap-home behavior:
- *  - If sectionBounds is provided: snaps back when dropped inside the section's bounds ✅
- *  - If no sectionBounds: element stays wherever it is dropped (no full-page fallback) ✅
+ * Snap-home detection uses ONLY spring displacement values — zero 3D math,
+ * zero worldToLocal, zero ray intersection for bounds. 100% reliable.
+ *
+ * snapMode:
+ *  "page"    → Paper mode drag. Snap back if the element's center (rest + spring) is within the page.
+ *              Requires sectionBounds to know the element's original center position.
+ *  "section" → Snap back if spring displacement is within 60% of the section frame size.
+ *              For individual verse drags (both paper and all-sections mode).
+ *  undefined → No snap (stays wherever dropped).
  */
 export function useElevatedDrag({
   enabled,
@@ -63,17 +70,24 @@ export function useElevatedDrag({
   dragVerseId,
   dragSectionId,
   sectionBounds,
-  sectionSpringX,
-  sectionSpringY,
+  snapMode,
 }: {
   enabled: boolean;
   springX: SpringValue<number>;
   springY: SpringValue<number>;
   dragVerseId?: number;
   dragSectionId?: ElevatedSectionId;
+  /**
+   * "page" mode: section's resting bounds (to compute original center).
+   * "section" mode: section frame bounds (to compute snap threshold from frame size).
+   */
   sectionBounds?: SectionBounds;
-  sectionSpringX?: SpringValue<number>;
-  sectionSpringY?: SpringValue<number>;
+  /**
+   * "page"    → Snap if section center (rest center + springX) is within the page width.
+   * "section" → Snap if |springX| < sectionWidth * 0.6 (verse hasn't left its frame).
+   * undefined → No snap; element stays where dropped.
+   */
+  snapMode?: "page" | "section";
 }) {
   const ref = useRef({
     active: false,
@@ -157,21 +171,37 @@ export function useElevatedDrag({
       s.active = false;
       s.dragMarked = false;
 
-      // Snap-home: only if sectionBounds is provided and drop is within those bounds.
-      // No full-page fallback — without sectionBounds the element stays where dropped.
+      // ── Snap-home: pure spring value comparison, no coordinate transforms ──
+      // springX.get() is the element's displacement from its resting position.
+      // This is always valid regardless of camera angle or scene hierarchy.
       let shouldSnapHome = false;
-      if (sectionBounds && e.ray.intersectPlane(s.plane, _hit)) {
-        const surfacesRoot = e.eventObject.parent;
-        if (surfacesRoot) {
-          const localHit = surfacesRoot.worldToLocal(_hit.clone());
-          const sx = sectionSpringX ? sectionSpringX.get() : 0;
-          const sy = sectionSpringY ? sectionSpringY.get() : 0;
-          shouldSnapHome =
-            localHit.x >= sectionBounds.minX + sx &&
-            localHit.x <= sectionBounds.maxX + sx &&
-            localHit.y >= sectionBounds.minY + sy &&
-            localHit.y <= sectionBounds.maxY + sy;
+
+      if (snapMode === "page") {
+        // Section/element drag in paper mode:
+        // Check if the element's ACTUAL center (original position + spring displacement)
+        // is still within the page. This correctly handles sections not centered on page.
+        const halfPage = runtime.PAGE_WIDTH / 2;
+        let shouldSnap: boolean;
+        if (sectionBounds) {
+          // Use the section's original center for an accurate on-page check
+          const origCenterX = (sectionBounds.minX + sectionBounds.maxX) / 2;
+          shouldSnap = Math.abs(origCenterX + springX.get()) < halfPage;
+        } else {
+          // Fallback: just check displacement directly
+          shouldSnap = Math.abs(springX.get()) < halfPage;
         }
+        shouldSnapHome = shouldSnap;
+      } else if (snapMode === "section" && sectionBounds) {
+        // Individual verse drag in all-sections mode:
+        // springX/Y here is the verse's OWN spring (leadVerseDrag), which is the
+        // displacement of this verse RELATIVE to its section's resting position.
+        // (The section's own spring offset is handled separately in the position formula.)
+        // So we just check: has the verse moved outside its section frame?
+        const sectionWidth = sectionBounds.maxX - sectionBounds.minX;
+        const sectionHeight = sectionBounds.maxY - sectionBounds.minY;
+        shouldSnapHome =
+          Math.abs(springX.get()) <= sectionWidth * 0.6 &&
+          Math.abs(springY.get()) <= sectionHeight * 0.6;
       }
 
       if (shouldSnapHome) {
@@ -180,7 +210,10 @@ export function useElevatedDrag({
         if (typeof dragVerseId === "number") unmarkVerseDragged(dragVerseId);
         if (dragSectionId) unmarkSectionDragged(dragSectionId);
       } else if (shouldDockPaper) {
-        useDragState.getState().dockPaper();
+        // Use dockElement instead of dockPaper: properly cleans draggedSectionIds/Ids
+        // so that when user re-drags the docked element back to paper, state is fresh
+        // and unmarkSectionDragged will correctly reset hasDragged → camera restores.
+        dockElement(dragSectionId, typeof dragVerseId === "number" ? dragVerseId : undefined);
       }
 
       try {
@@ -214,8 +247,7 @@ export function useElevatedDrag({
     dragVerseId,
     dragSectionId,
     sectionBounds,
-    sectionSpringX,
-    sectionSpringY,
+    snapMode,
     runtime,
   ]);
 }

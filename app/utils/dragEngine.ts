@@ -155,7 +155,8 @@ export function markVerseDragged(verseId: number) {
 }
 
 export function markSectionDragged(sectionId: ElevatedSectionId) {
-  if (draggedSectionIds.has(sectionId)) return;
+  // Always re-mark even if already in the Set, to ensure state is fresh.
+  // This handles the case where the section was docked and dragged again.
   draggedSectionIds.add(sectionId);
   useDragState.getState().markSectionDragged(sectionId);
 }
@@ -175,9 +176,40 @@ export function unmarkVerseDragged(verseId: number) {
 }
 
 export function unmarkSectionDragged(sectionId: ElevatedSectionId) {
-  if (!draggedSectionIds.has(sectionId)) return;
+  // Remove from Set regardless (handles docked sections being re-dragged back)
   draggedSectionIds.delete(sectionId);
   useDragState.getState().unmarkSectionDragged(sectionId);
+}
+
+/**
+ * Called when a section/verse is docked (not snapped back).
+ * Removes from the "actively dragging" sets so re-dragging works correctly,
+ * while keeping isPaperDocked=true for camera zoom-out.
+ */
+export function dockElement(
+  sectionId?: ElevatedSectionId,
+  verseId?: number,
+) {
+  // Remove from active drag tracking (so next drag works cleanly)
+  if (sectionId) draggedSectionIds.delete(sectionId);
+  if (typeof verseId === "number") draggedVerseIds.delete(verseId);
+
+  // Mark paper as docked and clear hasDragged
+  // isPaperDocked keeps camera zoomed out; hasDragged resets so spring checks work
+  useDragState.setState((state) => {
+    const stillDraggingSections = state.draggedSectionIds.filter(
+      (id) => id !== sectionId,
+    );
+    const stillDraggingVerses = state.draggedVerseIds.filter(
+      (id) => id !== verseId,
+    );
+    return {
+      draggedSectionIds: stillDraggingSections,
+      draggedVerseIds: stillDraggingVerses,
+      hasDragged: stillDraggingSections.length > 0 || stillDraggingVerses.length > 0,
+      isPaperDocked: true,
+    };
+  });
 }
 
 export function resetAllDrags() {

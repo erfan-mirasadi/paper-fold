@@ -245,17 +245,37 @@ export function VerseController({ config }: { config: VerseConfig }) {
     return targetGroup.dragBehavior === "group" || targetGroup.isCenter;
   }, [sectionId, hasCustomSections, s2Config]);
 
+  // ── Snap mode + bounds ────────────────────────────────────────────────────
+  //
+  // Paper mode + group/section drag (useSectionGroupDrag=true):
+  //   → "page": snap back if section hasn't moved outside the page.
+  //
+  // All-sections mode + individual verse drag (useSectionGroupDrag=false):
+  //   → "section": snap verse back if it hasn't moved outside its section frame.
+  //   springX here = leadVerseDrag.x (verse's own displacement from its section-relative rest).
+  //
+  // All other cases (all-sections + group drag, paper + individual):
+  //   → undefined: element stays wherever dropped.
+
+  const snapMode: "page" | "section" | undefined = useMemo(() => {
+    // Paper mode + section/group drag → snap back to page if section center is on paper
+    if (!isAllSectionsMode && useSectionGroupDrag) return "page";
+    // Individual verse drag (paper or all-sections mode) → snap back to section frame
+    if (!useSectionGroupDrag) return "section";
+    // All-sections mode + group drag → section placed freely (no auto snap)
+    return undefined;
+  }, [isAllSectionsMode, useSectionGroupDrag]);
+
+  // sectionBounds only needed for "section" snap (individual verse in all-sections mode)
   const sectionBounds = useMemo(() => {
+    if (snapMode !== "section") return undefined;
     if (!sectionId || !runtime.SURAH_TRANSFORMS) return undefined;
-    if (!hasCustomSections && isGroupDragType) return undefined;
     if (hasCustomSections && s2Config?.id) {
-      // Custom section: snap zone = PARENT frame (much larger area).
-      // This means the user must throw the section clearly outside the frame to
-      // keep it there; releasing inside the frame snaps it back. Much better UX.
+      // For custom sections (Ahzab), snap zone = parent section frame
       return calculateSectionBounds(s2Config.id, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH);
     }
     return calculateSectionBounds(sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH);
-  }, [sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH, isGroupDragType, hasCustomSections, s2Config]);
+  }, [snapMode, sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH, hasCustomSections, s2Config]);
 
   const dragBind = useElevatedDrag({
     enabled:
@@ -268,9 +288,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     dragVerseId: useSectionGroupDrag ? undefined : leadVerseId,
     dragSectionId: useSectionGroupDrag ? (sectionId ?? undefined) : undefined,
     sectionBounds,
-    // For custom sections: track the parent frame's spring for the snap zone offset
-    sectionSpringX: hasCustomSections ? parentSectionDrag?.x : sectionDrag?.x,
-    sectionSpringY: hasCustomSections ? parentSectionDrag?.y : sectionDrag?.y,
+    snapMode,
   });
 
   const dragX = to(

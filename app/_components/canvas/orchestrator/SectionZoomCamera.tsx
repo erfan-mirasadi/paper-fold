@@ -132,8 +132,10 @@ export function SectionZoomCamera() {
       targetSectionId = getSectionIdForVerse(activeVerseIds[0]);
     }
 
-    // 3. If a section is active and we are NOT in all sections mode, zoom to it
-    // Unless it's currently being dragged or is docked outside the page
+    // 3. Zoom into the active section when elevated and NOT dragging/docked.
+    // hasDragged=true → camera zooms out so user can see the full paper to drop outside.
+    // isPaperDocked=true → stays zoomed out (section is docked outside the page).
+    // Both reset to false when section snaps back → camera automatically zooms in again.
     const shouldZoomOut = hasDragged || isPaperDocked;
     if (phase === "elevated" && !isAllSectionsMode && targetSectionId && !shouldZoomOut) {
       const zoomCoords = zoomTargets[targetSectionId];
