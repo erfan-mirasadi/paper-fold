@@ -134,18 +134,6 @@ export default function SurahViewer() {
     };
   }, [isSceneReady]);
 
-  const handleThemeToggle = () => {
-    if (typeof document !== "undefined") {
-      const isDark = document.documentElement.classList.contains("dark");
-      if (isDark) {
-        document.documentElement.classList.remove("dark");
-      } else {
-        document.documentElement.classList.add("dark");
-      }
-      window.dispatchEvent(new Event("themeChange"));
-    }
-  };
-
   const handleSceneReady = useCallback(() => {
     setIsSceneReady(true);
   }, []);
@@ -161,7 +149,6 @@ export default function SurahViewer() {
         mountMainOverlays={mountMainOverlays}
         scrollPages={scrollPages}
         canvasWrapperRef={canvasWrapperRef}
-        handleThemeToggle={handleThemeToggle}
         handleSceneReady={handleSceneReady}
       />
     </LenisProvider>
@@ -177,7 +164,6 @@ interface InnerProps {
   mountMainOverlays: boolean;
   scrollPages: number;
   canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
-  handleThemeToggle: () => void;
   handleSceneReady: () => void;
 }
 
@@ -190,7 +176,6 @@ function SurahViewerInner({
   mountMainOverlays,
   scrollPages,
   canvasWrapperRef,
-  handleThemeToggle,
   handleSceneReady,
 }: InnerProps) {
   const lenis = useLenis();
@@ -318,7 +303,7 @@ function SurahViewerInner({
 
           <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-100 flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none">
             <HomeButtonOverlay />
-            <ThemeToggleOverlay onToggle={handleThemeToggle} />
+            <ThemeToggleOverlay />
             <LanguageSwitchOverlay />
             {mountMainOverlays && (
               <AnimatePresence>

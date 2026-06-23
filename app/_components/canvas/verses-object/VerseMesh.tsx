@@ -64,6 +64,7 @@ export interface VerseMeshProps {
     labelDrop?: number;
     customText?: string;
   };
+  baseRenderOrder?: number;
 }
 
 function BorderSvg({
@@ -73,6 +74,7 @@ function BorderSvg({
   opacity,
   elevateOpacity,
   frameScaleLTR,
+  baseRenderOrder,
 }: {
   w: number;
   h: number;
@@ -80,6 +82,7 @@ function BorderSvg({
   opacity: any;
   elevateOpacity: SpringValue<number>;
   frameScaleLTR?: number;
+  baseRenderOrder?: number;
 }) {
   const texture = useTexture(assetUrl, (t: any) => {
     t.colorSpace = THREE.SRGBColorSpace;
@@ -95,9 +98,11 @@ function BorderSvg({
 
   const renderW = w * widthScale * frameScaleMult;
   const renderH = h * heightScale * frameScaleMult;
+  
+  const zOrder = baseRenderOrder !== undefined ? baseRenderOrder + 2 : 102;
 
   return (
-    <mesh position={[w / 2, -h / 2, 0.01]} renderOrder={102}>
+    <mesh position={[w / 2, -h / 2, 0.01]} renderOrder={zOrder}>
       <planeGeometry args={[renderW, renderH]} />
       <a.meshBasicMaterial
         map={texture as any}
@@ -365,6 +370,7 @@ export function VerseMesh({
                       opacity={opacity}
                       elevateOpacity={elevateOpacity}
                       frameScaleLTR={frameScaleLTR}
+                      baseRenderOrder={baseRenderOrder}
                     />
                   )}
 
@@ -386,7 +392,6 @@ export function VerseMesh({
                       textScaleOverride={textScaleOverride}
                       isPill={isPill}
                       shadow={false}
-                      verseTextEnterDurationMs={0}
                       opacity={combinedOpacity}
                       baseRenderOrder={baseRenderOrder}
                     />

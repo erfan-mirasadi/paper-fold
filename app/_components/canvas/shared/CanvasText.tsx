@@ -189,13 +189,15 @@ export function CanvasText({
         )
       ) : (
         <a.meshBasicMaterial
-          map={texture}
-          color="#ffffff"
-          transparent={true}
-          toneMapped={false}
-          depthTest={depthTest ?? true}
-          depthWrite={false}
-          opacity={opacity ?? 1}
+          {...({
+            map: texture as any,
+            color: "#ffffff",
+            transparent: true,
+            toneMapped: false,
+            depthTest: depthTest ?? true,
+            depthWrite: false,
+            opacity: opacity ?? 1,
+          } as any)}
         />
       )}
     </mesh>

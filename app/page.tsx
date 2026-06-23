@@ -64,7 +64,7 @@ export default function MenuPage() {
       />
 
       {/* ── Content Container ── */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center pt-64 pb-0">
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center pt-16 md:pt-32 pb-0">
         {/* Header */}
         <header className="text-center mb-6 flex flex-col items-center px-6">
           <h1
@@ -73,7 +73,7 @@ export default function MenuPage() {
               color: "var(--home-title)",
               textShadow: "var(--home-shadow)",
             }}
-            className="text-[2.5rem] leading-[1.1] md:text-6xl lg:text-7xl font-normal tracking-[-0.02em] mb-24 transition-all duration-700"
+            className="text-[2.5rem] leading-[1.1] md:text-6xl lg:text-7xl font-normal tracking-[-0.02em] mb-12 md:mb-24 transition-all duration-700"
           >
             QuranPatterns
           </h1>

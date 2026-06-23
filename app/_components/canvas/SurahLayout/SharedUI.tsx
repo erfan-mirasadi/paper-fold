@@ -22,6 +22,7 @@ import {
   S1_TOP_LABEL_BORDER,
   S1_TOP_LABEL_BG,
   S1_ANA_LABEL_BORDER,
+  S1_VERSE_NUMBER_TEXT,
 } from "../../../data/theme";
 export * from "../../../data/theme";
 import {
@@ -159,7 +160,7 @@ function TexturedMaterial({
   if (useEmissive) {
     return (
       <a.meshStandardMaterial
-        map={fittedTexture}
+        map={fittedTexture as any}
         color="#ffffff"
         depthTest={depthTest}
         depthWrite={false}
@@ -176,7 +177,7 @@ function TexturedMaterial({
 
   return (
     <a.meshBasicMaterial
-      map={fittedTexture}
+      map={fittedTexture as any}
       color="#ffffff"
       depthTest={depthTest}
       depthWrite={false}
@@ -455,7 +456,8 @@ export function CapsuleLabel({
     resolvedCustomText = customText;
   }
 
-  const labelText = resolvedCustomText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
+  const labelText =
+    resolvedCustomText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
   const capsuleLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   const radius = h / 2;
@@ -607,7 +609,7 @@ export const VerseBox = ({
         textPaddingX -
         (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
       nonArabicTextTighten;
-      
+
   const textX = centerTextInCapsule
     ? finalW / 2
     : isArabic
@@ -633,7 +635,8 @@ export const VerseBox = ({
 
   // 👈 بازگردانی رنگ شمارههای بخش اول علق
   const isAlakS1 = activeStoryConfig.id === "alak" && Number(number) <= 5;
-  const finalCircleTextCol = circleTextCol ?? (isAlakS1 ? S1_VERSE_NUMBER_TEXT : S2_VERSE_NUMBER_TEXT);
+  const finalCircleTextCol =
+    circleTextCol ?? (isAlakS1 ? S1_VERSE_NUMBER_TEXT : S2_VERSE_NUMBER_TEXT);
 
   return (
     <group position={[finalX, y, z]}>

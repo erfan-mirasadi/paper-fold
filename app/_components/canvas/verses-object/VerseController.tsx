@@ -337,7 +337,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           shadowGlobalOpacity={shadowGlobalOpacity}
           zOffset={zOffset}
           opacity={opacity}
-          liftZ={animatedLiftZ}
+          liftZ={animatedLiftZ as any}
           surfaceLiftZ={surfaceLiftZ}
           tiltX={tiltX}
           horizontalTiltX={horizontalTiltX}
