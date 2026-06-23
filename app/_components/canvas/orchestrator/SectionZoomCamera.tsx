@@ -4,6 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
+import { useDragState } from "../../../utils/dragEngine";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { GridSectionConfig, VerticalGroupsSectionConfig, CameraTargetConfig } from "../../../data/schema";
 
@@ -107,6 +108,7 @@ export function SectionZoomCamera() {
     const isIntroActive = useFoldStore.getState().isIntroActive;
     const { phase, isAllSectionsMode, activeSectionId, activeVerseIds } =
       useElevatedStore.getState();
+    const { hasDragged, isPaperDocked } = useDragState.getState();
 
     // 1. If we are in intro and NOT elevated, do nothing here so IntroCameraScrollController can handle it.
     if (isIntroActive && phase === "idle") return;
@@ -131,7 +133,9 @@ export function SectionZoomCamera() {
     }
 
     // 3. If a section is active and we are NOT in all sections mode, zoom to it
-    if (phase === "elevated" && !isAllSectionsMode && targetSectionId) {
+    // Unless it's currently being dragged or is docked outside the page
+    const shouldZoomOut = hasDragged || isPaperDocked;
+    if (phase === "elevated" && !isAllSectionsMode && targetSectionId && !shouldZoomOut) {
       const zoomCoords = zoomTargets[targetSectionId];
       if (zoomCoords) {
         targetCamY = zoomCoords.y;

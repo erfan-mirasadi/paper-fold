@@ -97,7 +97,6 @@ export function AllSectionsOverlay() {
                 : "Show all elevated sections"
             }
             onClick={handleClick}
-            onPointerDown={(e) => e.preventDefault()}
             className="w-14 h-14"
           >
             {isAllSectionsMode ? <RestoreIcon /> : <StackIcon />}

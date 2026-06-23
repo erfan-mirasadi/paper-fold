@@ -125,6 +125,10 @@ export function useElevatedDrag({
       if (!e.ray.intersectPlane(s.plane, _hit)) return;
       _delta.subVectors(_hit, s.startWorld);
       _delta.applyQuaternion(s.invQuat);
+
+      // Require a minimum movement distance before treating it as a drag
+      if (!s.dragMarked && _delta.lengthSq() < 0.0002) return;
+
       springX.start(s.startSpringX + _delta.x, { immediate: true });
       springY.start(s.startSpringY + _delta.y, { immediate: true });
 
