@@ -316,7 +316,10 @@ export function VerseMesh({
             <a.mesh
               position-x={shadowXOffset}
               position-y={shadowYOffset}
-              renderOrder={shadowRenderOrder ?? (baseRenderOrder !== undefined ? baseRenderOrder - 2 : 90)}
+              renderOrder={
+                shadowRenderOrder ??
+                (baseRenderOrder !== undefined ? baseRenderOrder - 2 : 90)
+              }
               position-z={to([liftZ, surfaceLiftZ], (lift, surfaceLift) => {
                 const surfaceProgress =
                   normalizeSurfaceLiftProgress(surfaceLift);
@@ -339,7 +342,12 @@ export function VerseMesh({
             <a.group rotation-x={tiltX} scale={scale}>
               <a.group rotation-y={rotValue} position-z={zOffset}>
                 <group position={[brickGroupXOffset, outerTop, 0]}>
-                  <mesh position={[0, 0, -0.008]} renderOrder={baseRenderOrder !== undefined ? baseRenderOrder - 1 : 100}>
+                  <mesh
+                    position={[0, 0, -0.008]}
+                    renderOrder={
+                      baseRenderOrder !== undefined ? baseRenderOrder - 1 : 100
+                    }
+                  >
                     <extrudeGeometry args={[shape, extrudeSettings]} />
                     <a.meshStandardMaterial
                       {...materialsProps.front}
@@ -360,10 +368,7 @@ export function VerseMesh({
                     />
                   )}
 
-                  <a.group 
-                    position={[alignX, alignY, 0.002]}
-                    renderOrder={101}
-                  >
+                  <a.group position={[alignX, alignY, 0.002]} renderOrder={101}>
                     <VerseBox
                       x={0}
                       y={0}
@@ -413,7 +418,11 @@ export function VerseMesh({
                           borderWidth={capsuleLabel.borderWidth}
                           customText={capsuleLabel.customText}
                           opacity={combinedOpacity}
-                          renderOrder={baseRenderOrder !== undefined ? baseRenderOrder + 5 : 106}
+                          renderOrder={
+                            baseRenderOrder !== undefined
+                              ? baseRenderOrder + 5
+                              : 106
+                          }
                         />
                       </group>
                     );
