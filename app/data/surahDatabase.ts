@@ -32,6 +32,11 @@ import {
   AHZAB_35_TEXT_DATA,
 } from "./ahzab35Config";
 
+import {
+  IHLAS_112_CONFIG,
+  IHLAS_112_TEXT_DATA,
+} from "./ihlas112Config";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -83,6 +88,14 @@ const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
     reference: "Ahzab 35",
     config: AHZAB_35_CONFIG,
     textData: AHZAB_35_TEXT_DATA,
+  },
+  {
+    id: "ihlas112",
+    displayName: "İhlas",
+    arabicName: "الإخلاص",
+    reference: "İhlas 112",
+    config: IHLAS_112_CONFIG,
+    textData: IHLAS_112_TEXT_DATA,
   },
 ] as const;
 

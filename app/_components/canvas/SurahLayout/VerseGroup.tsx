@@ -30,7 +30,7 @@ export function VerseGroup({
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   let finalVerseTextScale = layout?.verseTextScale;
-  if ((config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar") {
+  if ((config.id === "ayatalkursi" || config.id === "ahzab35" || config.id === "ihlas112") && activeLanguage !== "ar") {
     finalVerseTextScale = undefined;
   }
 
@@ -240,7 +240,7 @@ export function VerseGroup({
 
         let finalTextScale =
           override?.textScaleOverride ?? finalVerseTextScale;
-        if ((config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar") {
+        if ((config.id === "ayatalkursi" || config.id === "ahzab35" || config.id === "ihlas112") && activeLanguage !== "ar") {
           finalTextScale = undefined;
         }
 

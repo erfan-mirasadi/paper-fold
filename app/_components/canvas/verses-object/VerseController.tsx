@@ -60,7 +60,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   let finalVerseTextScale = config.textScaleOverride ?? runtime.layoutMath.verseTextScale;
-  if ((activeStoryConfig.id === "ayatalkursi" || activeStoryConfig.id === "ahzab35") && activeLanguage !== "ar") {
+  if ((activeStoryConfig.id === "ayatalkursi" || activeStoryConfig.id === "ahzab35" || activeStoryConfig.id === "ihlas112") && activeLanguage !== "ar") {
     finalVerseTextScale = undefined; // Drop scaling for translations so it uses smaller defaults
   }
 

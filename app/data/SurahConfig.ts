@@ -466,17 +466,23 @@ export function buildSurahTransforms(
         const centerX = gBaseX + gInnerW / 2;
         const extraRowGap = group.extraRowGap ?? 0;
 
+        const numCols = group.columns ?? 2;
         const verses: Record<number, ElementTransform> = {};
         group.verseIds.forEach((verseId, i) => {
-          const isRightCol = i % 2 !== 0;
+          const isRightCol = numCols === 2 ? i % 2 !== 0 : false;
           // Dynamic row index: each pair of capsules (left+right) occupies one row.
-          const rowIndex = Math.floor(i / 2);
+          const rowIndex = Math.floor(i / numCols);
           const rowOffset =
             rowIndex * (lm.smallBoxH2 + lm.s2VerticalRowGap + extraRowGap);
             
-          const verseX = isRightCol 
-            ? centerX + groupGapAmount / 2 
-            : centerX - groupGapAmount / 2 - standardGHalfW;
+          let verseX;
+          if (numCols === 1) {
+            verseX = centerX - standardGHalfW / 2;
+          } else {
+            verseX = isRightCol 
+              ? centerX + groupGapAmount / 2 
+              : centerX - groupGapAmount / 2 - standardGHalfW;
+          }
 
           // Per-verse horizontal nudge — keyed by verseId (Arabic numbering).
           // Positive xOffset → pushes right, negative → pushes left.
@@ -491,12 +497,13 @@ export function buildSurahTransforms(
           };
         });
 
-        // Dynamic row connectors — one per row (pair of capsules).
-        const numRows = Math.ceil(group.verseIds.length / 2);
+        // Dynamic row connectors — one per row (pair of capsules), only if 2 columns
+        const numRows = Math.ceil(group.verseIds.length / numCols);
         const rowConnectors: RowConnectorTransform[] = [];
-        for (let r = 0; r < numRows; r++) {
-          const leftV = verses[group.verseIds[r * 2]];
-          const rightV = verses[group.verseIds[r * 2 + 1]];
+        if (numCols === 2) {
+          for (let r = 0; r < numRows; r++) {
+            const leftV = verses[group.verseIds[r * 2]];
+            const rightV = verses[group.verseIds[r * 2 + 1]];
           if (leftV && rightV) {
             rowConnectors.push({
               x: leftV.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
@@ -509,6 +516,7 @@ export function buildSurahTransforms(
                 OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
               h: leftV.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
             });
+            }
           }
         }
 

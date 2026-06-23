@@ -101,6 +101,7 @@ export interface LayoutStyling {
 
 export interface VerseBlockConfig {
   verseIds: number[];
+  columns?: number;
   dragBehavior?: "group" | "pair" | "single" | "individual";
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
