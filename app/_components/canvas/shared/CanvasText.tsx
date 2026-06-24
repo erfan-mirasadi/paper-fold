@@ -54,7 +54,6 @@ export function CanvasText({
     const handleFontsReady = () => {
       document.fonts.ready.then(() => {
         if (active) {
-          // Small delay ensures the browser has fully registered the new FontFaces
           setTimeout(() => setFontsLoadedKey((k) => k + 1), 100);
         }
       });
@@ -76,31 +75,42 @@ export function CanvasText({
   }, []);
 
   const texture = useMemo(() => {
-    // Force re-run when fonts are loaded
-    if (fontsLoadedKey < 0) return null; // Use the variable to satisfy the linter
+    if (fontsLoadedKey < 0) return null; 
     const canvas = document.createElement("canvas");
 
-    // 1. تشخیص دیوایس:
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-    // 👈 1. ضریب رو همون 1024 نگه دار تا متنها مثل تیغ شارپ بمونن
+    // 🚀 ضریب پایه برای حفظ کیفیت بالا
     const scaleFactor = 1024; 
-
-    // 3. رو موبایل dpr رو نذار روی 3 بمونه، سقفش رو بذار 2.
     const dpr = isMobile ? Math.min(resolution, 2) : resolution;
 
-    const w = width * scaleFactor * dpr;
-    const h = height * scaleFactor * dpr;
-    canvas.width = w;
-    canvas.height = h;
+    let targetW = width * scaleFactor * dpr;
+    let targetH = height * scaleFactor * dpr;
+    let activeScaleFactor = scaleFactor * dpr;
+
+    // 🚀 سقف امنیتی VRAM با حفظ دقیق نسبت تصویر (بدون کشآمدگی)
+    const MAX_TEX_SIZE = isMobile ? 2048 : 4096;
+    const maxDim = Math.max(targetW, targetH);
+
+    if (maxDim > MAX_TEX_SIZE) {
+      const ratio = MAX_TEX_SIZE / maxDim;
+      targetW *= ratio;
+      targetH *= ratio;
+      activeScaleFactor *= ratio; // مقیاس فونت هم متناسب باهاش کوچیک میشه
+    }
+
+    // 🚀 اِعمال ابعاد دقیق بدون هیچ رُند کردنی
+    canvas.width = targetW;
+    canvas.height = targetH;
+    
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, targetW, targetH);
 
-    // Font names match what we registered in PaperMaterial.tsx
     const fontName = font === QURAN_FONT ? "QuranFont" : "LatinFont";
-    const scaledFontSize = fontSize * scaleFactor * dpr;
+    const scaledFontSize = fontSize * activeScaleFactor; 
+    
     ctx.font = `${fontStyle} ${fontWeight} ${scaledFontSize}px "${fontName}", Arial`;
     ctx.fillStyle = color;
     ctx.textAlign = textAlign;
@@ -111,12 +121,11 @@ export function CanvasText({
           ? "bottom"
           : "middle";
 
-    const x = textAlign === "center" ? w / 2 : textAlign === "right" ? w : 0;
+    const x = textAlign === "center" ? targetW / 2 : textAlign === "right" ? targetW : 0;
     const y =
-      verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
+      verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? targetH : targetH / 2;
 
-    // Split into lines if it exceeds maxWidth
-    const finalMaxWidth = (maxWidth || width) * scaleFactor * dpr;
+    const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
     const words = text.split(" ");
     const lines = [];
     let currentLine = "";
@@ -136,11 +145,11 @@ export function CanvasText({
     const totalHeight = lines.length * scaledFontSize * lineHeight;
     let startY = y;
     if (verticalAlign === "middle") {
-      startY = (h - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
+      startY = (targetH - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
     } else if (verticalAlign === "top") {
       startY = (scaledFontSize * lineHeight) / 2;
     } else {
-      startY = h - totalHeight + (scaledFontSize * lineHeight) / 2;
+      startY = targetH - totalHeight + (scaledFontSize * lineHeight) / 2;
     }
 
     lines.forEach((line) => {
@@ -151,32 +160,16 @@ export function CanvasText({
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
-    // 👈 2. جادوی ضدِ فلیکر: Mipmap حتماً باید روشن باشه!
+    // 🚀 نهایت کیفیت وکتور بدون چشمک زدن
     tex.generateMipmaps = true; 
-    
-    // 👈 3. این فیلتر لبهها رو نرم میکنه و جلوی چشمک زدن رو میگیره
     tex.minFilter = THREE.LinearMipmapLinearFilter; 
     tex.magFilter = THREE.LinearFilter;
-    
-    // 👈 4. روشن کردن آنیزوتروپی برای وقتی که کاغذ کجه و به متن نگاه میکنیم
     tex.anisotropy = isMobile ? 4 : 8; 
 
     return tex;
   }, [
-    text,
-    font,
-    fontSize,
-    color,
-    textAlign,
-    verticalAlign,
-    width,
-    height,
-    resolution,
-    maxWidth,
-    lineHeight,
-    fontsLoadedKey,
-    fontWeight,
-    fontStyle,
+    text, font, fontSize, color, textAlign, verticalAlign, width, height, resolution,
+    maxWidth, lineHeight, fontsLoadedKey, fontWeight, fontStyle,
   ]);
 
   useEffect(() => {

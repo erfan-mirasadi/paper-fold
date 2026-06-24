@@ -145,8 +145,9 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const renderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
   const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
 
-  const colorSamples = isSmallViewport ? 1 : 4;
-  const normalSamples = 1;
+  // 🚀 1. مقادیر قانونی و استاندارد:
+  const colorSamples = isSmallViewport ? 0 : 4;
+  const normalSamples = 0; // نرمال مپ هیچ نیازی به Sample نداره! صفر بودنش VRAM رو نجات میده.
 
   const normalTexW = Math.min(renderTexWidth, 1024);
   const normalTexHeight = Math.min(renderTexHeight, 1024);
@@ -311,8 +312,8 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
           height={normalTexHeight}
           frames={1}
           samples={normalSamples}
-          depthBuffer={false}
-          stencilBuffer={false}
+          depthBuffer={false}   // 🚀 2. این دو خط حافظه رم کارت گرافیک رو آزاد میکنن
+          stencilBuffer={false} // 🚀
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera
