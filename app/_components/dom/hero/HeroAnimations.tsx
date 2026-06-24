@@ -27,7 +27,7 @@ export function AnimatedMountains() {
 
 export function AnimatedHeader() {
   return (
-    <header className="text-center mb-16 md:mb-20 flex flex-col items-center px-6">
+    <header className="text-center flex flex-col items-center px-6" style={{ marginBottom: 'clamp(24px, 5vh, 64px)' }}>
       <motion.h1
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -35,8 +35,10 @@ export function AnimatedHeader() {
         style={{
           fontFamily: "var(--font-cormorant), serif",
           textShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          fontSize: "clamp(2rem, 5vw, 5rem)",
+          marginBottom: "clamp(16px, 2.5vh, 40px)",
         }}
-        className="text-[2.5rem] leading-[1.1] md:text-6xl lg:text-7xl font-normal tracking-[-0.02em] text-[#F4F1EA] mb-8 md:mb-10"
+        className="leading-[1.1] font-normal tracking-[-0.02em] text-[#F4F1EA]"
       >
         QuranPatterns
       </motion.h1>
@@ -44,6 +46,7 @@ export function AnimatedHeader() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7, duration: 1, ease: "easeOut" }}
+        style={{ marginTop: 'clamp(20px, 3.5vh, 48px)' }}
       >
         <Image
           src="/hero/Logomark.png"
@@ -60,15 +63,16 @@ export function AnimatedHeader() {
 export function AnimatedCarouselSection({ children, title }: { children: React.ReactNode; title?: string }) {
   return (
     <motion.div
-      className="w-full flex flex-col items-center mt-[10vh] md:mt-[15vh]"
+      className="w-full flex flex-col items-center"
+      style={{ marginTop: 'clamp(60px, 18vh, 220px)' }}
       initial={{ y: 40, scale: 0.95 }}
       animate={{ y: 0, scale: 1 }}
       transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
     >
       {title && (
         <motion.h2
-          style={{ fontFamily: "var(--font-cormorant), serif" }}
-          className="text-xl md:text-3xl font-medium text-[#D2E1D7] drop-shadow-md mb-8 text-center"
+          style={{ fontFamily: "var(--font-cormorant), serif", marginBottom: "clamp(16px, 2.5vh, 32px)" }}
+          className="text-xl md:text-3xl font-medium text-[#D2E1D7] drop-shadow-md text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}

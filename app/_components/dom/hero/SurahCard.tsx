@@ -50,10 +50,12 @@ export function SurahCard({ surah, index }: SurahCardProps) {
       style={{
         textDecoration: "none",
         borderRadius: "1.1rem",
-        padding: "1.6rem 1.75rem",
+        padding: "clamp(1rem, 2vh, 1.6rem) clamp(1rem, 1.5vw, 1.75rem)",
         background: accent.bg,
         border: `1px solid ${accent.border}`,
         cursor: "pointer",
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
       }}
     >
       {/* Top gradient stripe */}

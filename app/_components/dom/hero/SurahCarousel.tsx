@@ -111,7 +111,8 @@ export function SurahCarousel({ children }: { children: React.ReactNode }) {
       {/* Scroll Container */}
       <div 
         ref={scrollRef}
-        className="w-full flex gap-4 md:gap-8 overflow-x-auto py-6 px-14 md:px-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="w-full flex gap-4 md:gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{ paddingTop: 'clamp(12px, 2vh, 24px)', paddingBottom: 'clamp(12px, 2vh, 24px)', paddingLeft: 'clamp(40px, 6vw, 96px)', paddingRight: 'clamp(40px, 6vw, 96px)' }}
       >
         {duplicatedChildren.map((child, index) => (
           <div 
@@ -119,7 +120,8 @@ export function SurahCarousel({ children }: { children: React.ReactNode }) {
             ref={(el) => {
               itemRefs.current[index] = el;
             }}
-            className="min-w-[260px] md:min-w-[340px] w-[75vw] max-w-[340px] flex-shrink-0 transition-transform duration-300 hover:scale-[1.02]"
+            className="flex-shrink-0 transition-transform duration-300 hover:scale-[1.02]"
+            style={{ minWidth: 'clamp(220px, 22vw, 340px)', width: 'clamp(220px, 22vw, 340px)', maxWidth: '340px' }}
           >
             {child}
           </div>

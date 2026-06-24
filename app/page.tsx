@@ -46,7 +46,7 @@ export default function MenuPage() {
       <AnimatedMountains />
 
       {/* ── Content Container ── */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-start pt-[15vh] md:pt-[20vh] pb-12">
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-start" style={{ paddingTop: 'clamp(40px, 12vh, 160px)', paddingBottom: 'clamp(16px, 3vh, 48px)' }}>
         {/* Header */}
         <AnimatedHeader />
 
