@@ -1,18 +1,8 @@
 "use client";
 
-/**
- * SurahCard — interactive card linking to a Surah visualization.
- * Must be a Client Component because it uses mouse event handlers.
- *
- * NOTE: Only plain serializable display data is passed as props — the full
- * SurahEntry (which contains functions like computeFoldYPositions) must NOT
- * cross the Server → Client boundary.
- */
-
 import Link from "next/link";
-import { useState } from "react";
+import { motion } from "framer-motion";
 
-/** Serializable subset of SurahEntry safe to pass across the RSC boundary */
 export interface SurahCardData {
   id: string;
   displayName: string;
@@ -39,6 +29,8 @@ const ACCENTS = [
   },
 ];
 
+const MotionLink = motion.create(Link);
+
 interface SurahCardProps {
   surah: SurahCardData;
   index: number;
@@ -46,35 +38,24 @@ interface SurahCardProps {
 
 export function SurahCard({ surah, index }: SurahCardProps) {
   const accent = ACCENTS[index % ACCENTS.length];
-  const [hovered, setHovered] = useState(false);
 
   return (
-    <Link
+    <MotionLink
       href={`/surahs/${surah.id}`}
       id={`surah-link-${surah.id}`}
+      className="group block relative overflow-hidden transition-[transform,box-shadow] duration-[280ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1 hover:scale-[1.015] shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.14)]"
+      initial={{ opacity: 0, backdropFilter: "blur(0px)", WebkitBackdropFilter: "blur(0px)" }}
+      animate={{ opacity: 1, backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}
+      transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
       style={{
-        display: "block",
         textDecoration: "none",
         borderRadius: "1.1rem",
         padding: "1.6rem 1.75rem",
         background: accent.bg,
         border: `1px solid ${accent.border}`,
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        boxShadow: hovered
-          ? "0 12px 40px rgba(0,0,0,0.14)"
-          : "0 4px 24px rgba(0,0,0,0.08)",
-        transform: hovered ? "translateY(-4px) scale(1.015)" : "none",
-        transition:
-          "transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s ease",
         cursor: "pointer",
-        position: "relative",
-        overflow: "hidden",
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
-
       {/* Top gradient stripe */}
       <div
         aria-hidden="true"
@@ -115,6 +96,7 @@ export function SurahCard({ surah, index }: SurahCardProps) {
 
         <span
           aria-hidden="true"
+          className="transition-transform duration-[250ms] ease-out group-hover:scale-125"
           style={{
             width: "8px",
             height: "8px",
@@ -123,8 +105,6 @@ export function SurahCard({ surah, index }: SurahCardProps) {
             marginTop: "0.35rem",
             flexShrink: 0,
             boxShadow: `0 0 0 3px ${accent.border}`,
-            transition: "transform 0.25s ease, box-shadow 0.25s ease",
-            transform: hovered ? "scale(1.25)" : "scale(1)",
           }}
         />
       </div>
@@ -161,17 +141,11 @@ export function SurahCard({ surah, index }: SurahCardProps) {
 
       {/* CTA */}
       <div
+        className="flex items-center gap-2 font-semibold tracking-[0.08em] uppercase transition-all duration-[250ms] ease-in-out group-hover:gap-3"
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
           color: accent.dot,
           fontFamily: "var(--font-manrope), sans-serif",
           fontSize: "0.8rem",
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          transition: "gap 0.25s ease",
         }}
       >
         <span>Open</span>
@@ -192,6 +166,6 @@ export function SurahCard({ surah, index }: SurahCardProps) {
           />
         </svg>
       </div>
-    </Link>
+    </MotionLink>
   );
 }

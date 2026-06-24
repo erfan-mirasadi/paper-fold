@@ -1,16 +1,25 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { SurahCard, type SurahCardData } from "./SurahCard";
+import React, { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
-export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
+export function SurahCarousel({ children }: { children: React.ReactNode }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Convert children to an array
+  const childrenArray = React.Children.toArray(children);
+  const originalLength = childrenArray.length;
+
   // Duplicate items 4 times to ensure enough content for a seamless loop
-  const duplicatedSurahs = [...surahs, ...surahs, ...surahs, ...surahs];
+  const duplicatedChildren = [
+    ...childrenArray,
+    ...childrenArray,
+    ...childrenArray,
+    ...childrenArray,
+  ];
 
   const handleInteraction = () => {
     setIsPaused(true);
@@ -44,14 +53,14 @@ export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
 
     const animateScroll = () => {
       if (
-        surahs.length > 0 &&
+        originalLength > 0 &&
         scrollRef.current &&
         itemRefs.current[0] &&
-        itemRefs.current[surahs.length]
+        itemRefs.current[originalLength]
       ) {
         // The exact width of one original set of items
         const setWidth =
-          itemRefs.current[surahs.length]!.offsetLeft -
+          itemRefs.current[originalLength]!.offsetLeft -
           itemRefs.current[0]!.offsetLeft;
 
         currentScroll += 0.5; // Speed of continuous scroll (0.5px per frame = 30px/sec)
@@ -75,7 +84,7 @@ export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
     animationFrameId = requestAnimationFrame(animateScroll);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isPaused, surahs.length]);
+  }, [isPaused, originalLength]);
 
   return (
     <div 
@@ -86,44 +95,50 @@ export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
       onTouchEnd={handleInteraction}
     >
       {/* Left Arrow */}
-      <button 
+      <motion.button 
         onClick={scrollLeft}
         className="flex absolute left-2 md:left-4 z-20 p-2 md:p-4 bg-black/40 hover:bg-black/80 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all transform hover:-translate-x-1"
         aria-label="Previous Surahs"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
       >
         <svg className="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 18l-6-6 6-6" />
         </svg>
-      </button>
+      </motion.button>
 
       {/* Scroll Container */}
       <div 
         ref={scrollRef}
         className="w-full flex gap-4 md:gap-8 overflow-x-auto py-6 px-14 md:px-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
-        {duplicatedSurahs.map((surah, index) => (
+        {duplicatedChildren.map((child, index) => (
           <div 
-            key={`${surah.id}-${index}`}
+            key={index}
             ref={(el) => {
               itemRefs.current[index] = el;
             }}
             className="min-w-[260px] md:min-w-[340px] w-[75vw] max-w-[340px] flex-shrink-0 transition-transform duration-300 hover:scale-[1.02]"
           >
-            <SurahCard surah={surah} index={index} />
+            {child}
           </div>
         ))}
       </div>
 
       {/* Right Arrow */}
-      <button 
+      <motion.button 
         onClick={scrollRight}
         className="flex absolute right-2 md:right-4 z-20 p-2 md:p-4 bg-black/40 hover:bg-black/80 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all transform hover:translate-x-1"
         aria-label="Next Surahs"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
       >
         <svg className="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 18l6-6-6-6" />
         </svg>
-      </button>
+      </motion.button>
     </div>
   );
 }
