@@ -97,14 +97,18 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group3Bg: "transparent",
       curveColors: [
         {
-          color: "#E89B42", // Orange
+          color: YELLOW_BORDER,
           fillColor: YELLOW_BG,
-          curveSide: "left",
+          curveSide: "symmetrical",
+          topAnchorXOffset: -0.02,
+          bottomAnchorXOffset: -0.02,
         },
         {
-          color: "#2C8D47", // Green
+          color: BLUE_BORDER,
           fillColor: BLUE_BG,
-          curveSide: "left",
+          curveSide: "symmetrical",
+          topAnchorXOffset: -0.02,
+          bottomAnchorXOffset: -0.02,
         },
         {
           color: "transparent", // Dummy center color to prevent rendering on single verse
@@ -134,7 +138,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     gapBetweenS1andS2: 0.01,
     s2VerticalPad: 0.02,
     bigBoxH: 0.07,
-    groupGap: 0.04,
+    groupGap: 0.025,
     groupPad: 0.012,
     groupPadBottom: 0.012,
     s2Gap: 0.12,

@@ -299,3 +299,14 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
     bottomLabel: "Five-verse 2nd Explanation Section",
   } satisfies SectionTwoData,
 };
+
+// ---------------------------------------------------------------------------
+// Aggregated text data (Record<SurahLanguage, SurahDataShape>)
+// ---------------------------------------------------------------------------
+import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+
+export const ALAK_TEXT_DATA: Record<SurahLanguage, SurahDataShape> = {
+  ar: SURAH_DATA_ARABIC,
+  en: SURAH_DATA_ENGLISH,
+  tr: SURAH_DATA_TURKISH,
+};

@@ -15,27 +15,17 @@ import type { SurahLayoutConfig } from "./schema";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import type { SurahDataShape } from "./surahData";
 
-import { ALAK_LAYOUT_CONFIG } from "./SurahConfig";
-import {
-  SURAH_DATA_ARABIC,
-  SURAH_DATA_ENGLISH,
-  SURAH_DATA_TURKISH,
-} from "./surahData";
+import { ALAK_LAYOUT_CONFIG } from "./alak96Config";
+import { ALAK_TEXT_DATA } from "./surahData";
 
 import {
   AYAT_AL_KURSI_CONFIG,
   AYAT_AL_KURSI_TEXT_DATA,
 } from "./ayatAlKursiConfig";
 
-import {
-  AHZAB_35_CONFIG,
-  AHZAB_35_TEXT_DATA,
-} from "./ahzab35Config";
+import { AHZAB_35_CONFIG, AHZAB_35_TEXT_DATA } from "./ahzab35Config";
 
-import {
-  IHLAS_112_CONFIG,
-  IHLAS_112_TEXT_DATA,
-} from "./ihlas112Config";
+import { IHLAS_112_CONFIG, IHLAS_112_TEXT_DATA } from "./ihlas112Config";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -63,37 +53,33 @@ export interface SurahEntry {
 const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
   {
     id: "alak",
-    displayName: "Al-Alaq",
+    displayName: "Al-Alak",
     arabicName: "العَلَق",
-    reference: "Surah 96",
+    reference: "Al-Alak 96",
     config: ALAK_LAYOUT_CONFIG,
-    textData: {
-      ar: SURAH_DATA_ARABIC,
-      en: SURAH_DATA_ENGLISH,
-      tr: SURAH_DATA_TURKISH,
-    },
+    textData: ALAK_TEXT_DATA,
   },
   {
     id: "ayatalkursi",
     displayName: "Ayat al-Kursi",
     arabicName: "آيَة الكُرْسِي",
-    reference: "Bakara 255",
+    reference: "Al-Bakara 255",
     config: AYAT_AL_KURSI_CONFIG,
     textData: AYAT_AL_KURSI_TEXT_DATA,
   },
   {
     id: "ahzab35",
     displayName: "Al-Ahzab 35",
-    arabicName: "الأحزاب ٣٥",
-    reference: "Ahzab 35",
+    arabicName: "الأحزاب",
+    reference: "Al-Ahzab 35",
     config: AHZAB_35_CONFIG,
     textData: AHZAB_35_TEXT_DATA,
   },
   {
     id: "ihlas112",
-    displayName: "İhlas",
+    displayName: "Al-İhlas",
     arabicName: "الإخلاص",
-    reference: "İhlas 112",
+    reference: "Al-İhlas 112",
     config: IHLAS_112_CONFIG,
     textData: IHLAS_112_TEXT_DATA,
   },
