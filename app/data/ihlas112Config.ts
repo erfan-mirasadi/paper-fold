@@ -10,7 +10,7 @@ const BLUE_BORDER = "#7A9CAD";
 
 export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "ihlas112",
-  title: "Ihlas Suresi",
+  title: "İhlas Suresi",
   heroTitle: "İhlas Suresi",
   heroSubtitle: "Ihlas Suresi 112",
 
