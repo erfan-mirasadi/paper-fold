@@ -147,7 +147,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   verseOverrides: {
     // ── Section 1 verse 5 ─────────────────────────────────────────────────
     5: {
-      customFrameSvg: "/Group 11.svg",
+      customFrameSvg: "/alak/Group 11.svg",
       expandW: 0.035,
       expandH: 0.01,
       frameScaleLTR: 1.1,

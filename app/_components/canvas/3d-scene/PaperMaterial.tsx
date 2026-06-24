@@ -83,8 +83,8 @@ function usePageTextFontsReady() {
 }
 
 export const PAPER_TEXTURES = {
-  normalUrl: "/Paper-Texture-7_normal.png",
-  diffuseUrl: "/Folded-PaperTextures-001.jpg",
+  normalUrl: "/paper-material/Paper-Texture-7_normal.png",
+  diffuseUrl: "/paper-material/Folded-PaperTextures-001.jpg",
 } as const;
 
 export const PAPER_MATERIAL_CONFIG = {
@@ -210,7 +210,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     return () => window.clearTimeout(t);
   }, [settled, onReady]);
 
-  const creaseNormalMap = useTexture("/crease-normal-1.png", (texture) => {
+  const creaseNormalMap = useTexture("/paper-material/crease-normal-1.png", (texture) => {
     texture.colorSpace = NoColorSpace;
     texture.wrapS = RepeatWrapping;
     texture.wrapT = ClampToEdgeWrapping;
@@ -241,7 +241,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     },
   );
 
-  const frameTexture = useTexture("/grunge-frame-3.png", (texture) => {
+  const frameTexture = useTexture("/paper-material/grunge-frame-3.png", (texture) => {
     texture.colorSpace = SRGBColorSpace;
     texture.needsUpdate = true;
   });
