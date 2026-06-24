@@ -59,8 +59,8 @@ export function SurahCard({ surah, index }: SurahCardProps) {
         padding: "1.6rem 1.75rem",
         background: accent.bg,
         border: `1px solid ${accent.border}`,
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
         boxShadow: hovered
           ? "0 12px 40px rgba(0,0,0,0.14)"
           : "0 4px 24px rgba(0,0,0,0.08)",
@@ -74,6 +74,7 @@ export function SurahCard({ surah, index }: SurahCardProps) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+
       {/* Top gradient stripe */}
       <div
         aria-hidden="true"
