@@ -44,8 +44,8 @@ export function SurahCard({ surah, index }: SurahCardProps) {
       href={`/surahs/${surah.id}`}
       id={`surah-link-${surah.id}`}
       className="group block relative overflow-hidden transition-[transform,box-shadow] duration-[280ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1 hover:scale-[1.015] shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.14)]"
-      initial={{ opacity: 0, backdropFilter: "blur(0px)", WebkitBackdropFilter: "blur(0px)" }}
-      animate={{ opacity: 1, backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}
+      initial={{ opacity: 0, backdropFilter: "blur(0px)", WebkitBackdropFilter: "blur(0px)" } as any}
+      animate={{ opacity: 1, backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" } as any}
       transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
       style={{
         textDecoration: "none",
