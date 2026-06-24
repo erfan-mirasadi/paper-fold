@@ -156,7 +156,8 @@ export function CameraViewController() {
       return;
     }
 
-    const ease = 1 - Math.exp(-ROTATE_RESPONSE * Math.max(delta, 0.001));
+    const safeDelta = Math.min(delta, 0.1);
+    const ease = 1 - Math.exp(-ROTATE_RESPONSE * Math.max(safeDelta, 0.001));
     const easedTheta = diff * ease;
 
     setOrbitAngles(

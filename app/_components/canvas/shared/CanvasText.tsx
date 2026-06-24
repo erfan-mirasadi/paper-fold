@@ -83,8 +83,8 @@ export function CanvasText({
     // 1. تشخیص دیوایس:
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-    // 2. روی موبایل ضریب رو نصف کن. متن SDF بازم شارپ میمونه ولی مصرف رم 4 برابر کمتر میشه!
-    const scaleFactor = isMobile ? 512 : 1024; 
+    // 👈 1. ضریب رو همون 1024 نگه دار تا متنها مثل تیغ شارپ بمونن
+    const scaleFactor = 1024; 
 
     // 3. رو موبایل dpr رو نذار روی 3 بمونه، سقفش رو بذار 2.
     const dpr = isMobile ? Math.min(resolution, 2) : resolution;
@@ -151,10 +151,15 @@ export function CanvasText({
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
-    tex.generateMipmaps = false;
-    tex.minFilter = THREE.LinearFilter;
+    // 👈 2. جادوی ضدِ فلیکر: Mipmap حتماً باید روشن باشه!
+    tex.generateMipmaps = true; 
+    
+    // 👈 3. این فیلتر لبهها رو نرم میکنه و جلوی چشمک زدن رو میگیره
+    tex.minFilter = THREE.LinearMipmapLinearFilter; 
     tex.magFilter = THREE.LinearFilter;
-    tex.anisotropy = 1;
+    
+    // 👈 4. روشن کردن آنیزوتروپی برای وقتی که کاغذ کجه و به متن نگاه میکنیم
+    tex.anisotropy = isMobile ? 4 : 8; 
 
     return tex;
   }, [

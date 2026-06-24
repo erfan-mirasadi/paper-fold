@@ -17,7 +17,6 @@ import { useDragState } from "../../../utils/dragEngine";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { VerseClickHitboxes } from "../verses-object/VerseClickHitboxes";
 import { useFoldStore } from "../orchestrator/ScrollManager";
-import { IntroExperience } from "../intro/IntroExperience";
 import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollController";
 import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
@@ -151,7 +150,9 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {hasIntro && <IntroExperience />}
+      <group name="intro-scene" visible={useFoldStore.getState().isIntroActive}>
+         {/* اگر کامپوننتی برای Intro داشتی اینجا میذاری */}
+      </group>
 
       <DynamicControls />
 
