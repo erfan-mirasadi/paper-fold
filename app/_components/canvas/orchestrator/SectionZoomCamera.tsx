@@ -103,11 +103,20 @@ export function SectionZoomCamera() {
 
     return { zoomTargets, getSectionIdForVerse };
   }, [config.sections]);
+
+  const activeSectionId = useElevatedStore((s) => s.activeSectionId);
+  const activeVerseIds = useElevatedStore((s) => s.activeVerseIds);
+
+  const fallbackSectionId = useMemo(() => {
+    if (activeSectionId) return activeSectionId;
+    if (activeVerseIds.length > 0) return getSectionIdForVerse(activeVerseIds[0]);
+    return null;
+  }, [activeSectionId, activeVerseIds, getSectionIdForVerse]);
+
   useFrame((state) => {
     // 1. Only run zoom logic when in paper mode
     const isIntroActive = useFoldStore.getState().isIntroActive;
-    const { phase, isAllSectionsMode, activeSectionId, activeVerseIds } =
-      useElevatedStore.getState();
+    const { phase, isAllSectionsMode } = useElevatedStore.getState();
     const { hasDragged, isPaperDocked } = useDragState.getState();
 
     // 1. If we are in intro and NOT elevated, do nothing here so IntroCameraScrollController can handle it.
@@ -127,10 +136,7 @@ export function SectionZoomCamera() {
     let lookAtY = defTY;
 
     // Infer section if we only clicked a verse and activeSectionId is null
-    let targetSectionId = activeSectionId;
-    if (!targetSectionId && activeVerseIds.length > 0) {
-      targetSectionId = getSectionIdForVerse(activeVerseIds[0]);
-    }
+    let targetSectionId = fallbackSectionId;
 
     // 3. Zoom into the active section when elevated and NOT dragging/docked.
     // hasDragged=true → camera zooms out so user can see the full paper to drop outside.
