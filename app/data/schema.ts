@@ -201,6 +201,8 @@ export interface VerticalGroupsSectionConfig {
   backgroundScaleY?: number;
   backgroundOffsetX?: number;
   backgroundOffsetY?: number;
+  backgroundSolidScaleX?: number;
+  backgroundSolidScaleY?: number;
   /** When true, the horizontal row-connector bars between paired capsules are hidden. */
   hideRowConnectors?: boolean;
 }

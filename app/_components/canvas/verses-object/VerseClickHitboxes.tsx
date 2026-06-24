@@ -149,19 +149,32 @@ function buildHitboxes(
           if (!vt) return;
 
           if (hasCustomSections) {
-            // Custom sections: clicking a verse elevates its entire custom section
-            const cs = vConfig.customSections!.find((c) => c.verseIds.includes(vId));
-            hitboxes.push({
-              key: `verse-${vId}`,
-              cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
-              cy: vt.y - vt.h / 2,
-              cz: zFront,
-              w: vt.w,
-              h: vt.h,
-              kind: "section",
-              sectionId: cs?.id,
-              verseIds: cs?.verseIds ?? [vId],
-            });
+            if (group.dragBehavior === "individual") {
+              hitboxes.push({
+                key: `verse-${vId}`,
+                cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+                cy: vt.y - vt.h / 2,
+                cz: zFront,
+                w: vt.w,
+                h: vt.h,
+                kind: "verse",
+                verseId: vId,
+              });
+            } else {
+              // Custom sections: clicking a verse elevates its entire custom section
+              const cs = vConfig.customSections!.find((c) => c.verseIds.includes(vId));
+              hitboxes.push({
+                key: `verse-${vId}`,
+                cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+                cy: vt.y - vt.h / 2,
+                cz: zFront,
+                w: vt.w,
+                h: vt.h,
+                kind: "section",
+                sectionId: cs?.id,
+                verseIds: cs?.verseIds ?? [vId],
+              });
+            }
           } else {
             hitboxes.push({
               key: `verse-${vId}`,

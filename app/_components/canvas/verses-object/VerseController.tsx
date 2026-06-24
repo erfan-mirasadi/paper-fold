@@ -193,21 +193,33 @@ export function VerseController({ config }: { config: VerseConfig }) {
   if (sectionId && sectionDrag && isSectionRaised) {
     const s2Config = activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any;
 
-    // When customSections is present, ALL verses use section-level drag
+    let targetGroup: any = null;
+    if (s2Config?.groups) {
+      if (sectionId.includes("_g")) {
+        const idxStr = sectionId.split("_g")[1];
+        const gIndex = parseInt(idxStr, 10);
+        targetGroup = s2Config.groups[gIndex];
+      } else {
+        targetGroup = s2Config.groups.find((g: any) =>
+          g.verseIds?.includes(leadVerseId),
+        );
+      }
+    }
+
+    // When customSections is present, evaluate its drag mode
     if (s2Config?.customSections?.length > 0) {
-      useSectionGroupDrag = true;
-    } else if (s2Config?.groups && sectionId.includes("_g")) {
-      const idxStr = sectionId.split("_g")[1];
-      const gIndex = parseInt(idxStr, 10);
-      const targetGroup = s2Config.groups[gIndex];
-      if (targetGroup) {
-        // dragBehavior takes precedence: 'individual' overrides isCenter
-        if (targetGroup.dragBehavior === "individual") {
-          useSectionGroupDrag = false;
-        } else {
-          useSectionGroupDrag =
-            targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-        }
+      if (targetGroup?.dragBehavior === "individual") {
+        useSectionGroupDrag = false;
+      } else {
+        useSectionGroupDrag = true;
+      }
+    } else if (targetGroup) {
+      // dragBehavior takes precedence: 'individual' overrides isCenter
+      if (targetGroup.dragBehavior === "individual") {
+        useSectionGroupDrag = false;
+      } else {
+        useSectionGroupDrag =
+          targetGroup.dragBehavior === "group" || targetGroup.isCenter;
       }
     }
   }
@@ -235,15 +247,29 @@ export function VerseController({ config }: { config: VerseConfig }) {
   // Static check: does this verse belong to a center/group-drag section?
   const isGroupDragType = useMemo(() => {
     if (!sectionId) return false;
-    if (hasCustomSections) return true;
-    if (!sectionId.includes("_g")) return false;
-    const idxStr = sectionId.split("_g")[1];
-    const gIndex = parseInt(idxStr, 10);
-    const targetGroup = s2Config?.groups?.[gIndex];
+
+    let targetGroup: any = null;
+    if (s2Config?.groups) {
+      if (sectionId.includes("_g")) {
+        const idxStr = sectionId.split("_g")[1];
+        const gIndex = parseInt(idxStr, 10);
+        targetGroup = s2Config.groups[gIndex];
+      } else {
+        targetGroup = s2Config.groups.find((g: any) =>
+          g.verseIds?.includes(leadVerseId),
+        );
+      }
+    }
+
+    if (hasCustomSections) {
+      if (targetGroup?.dragBehavior === "individual") return false;
+      return true;
+    }
+
     if (!targetGroup) return false;
     if (targetGroup.dragBehavior === "individual") return false;
     return targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-  }, [sectionId, hasCustomSections, s2Config]);
+  }, [sectionId, hasCustomSections, s2Config, leadVerseId]);
 
   // ── Snap mode + bounds ────────────────────────────────────────────────────
   //

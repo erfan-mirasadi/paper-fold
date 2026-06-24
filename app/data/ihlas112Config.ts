@@ -23,9 +23,9 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   dimensions: {
     paperWidth: 1.5,
-    paperHeight: 1,
+    paperHeight: 1.1,
     sceneCenterYOffset: 0.0,
-    padding: 0.1,
+    padding: 0.2,
     scrollPages: 1.5,
   },
 
@@ -139,7 +139,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupPadBottom: 0.012,
     s2Gap: 0.12,
     s2VerticalRowGap: 0.02,
-    smallBoxH2: 0.1,
+    smallBoxH2: 0.12,
     middleExtraGap: 0,
     s2PadLeftRight: 0.005,
     g2Scale: 0.0,
@@ -164,16 +164,19 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     {
       id: "section2",
       type: "verticalGroups",
-      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 1,
-      backgroundScaleY: 1.2,
+      backgroundTexture: "/ihlas/frame-section.svg",
+      backgroundScaleX: 1.3,
+      backgroundScaleY: 1.4,
       backgroundOffsetY: 0.0,
+      backgroundSolidScaleX: 0.87,
+      backgroundSolidScaleY: 0.85,
+
       hideRowConnectors: true,
       customSections: [
         {
           id: "section2_main",
           verseIds: [1, 2, 3, 4],
-          cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
+          cameraTarget: { y: 1.4, fov: 27.5, tilt: -1.4 },
         },
       ],
       groups: [
