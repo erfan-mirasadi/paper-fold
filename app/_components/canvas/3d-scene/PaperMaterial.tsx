@@ -145,8 +145,11 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const renderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
   const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
 
-  const colorSamples = isSmallViewport ? 2 : 4;
-  const normalSamples = isSmallViewport ? 1 : 2;
+  const colorSamples = isSmallViewport ? 1 : 4;
+  const normalSamples = 1;
+
+  const normalTexW = Math.min(renderTexWidth, 1024);
+  const normalTexHeight = Math.min(renderTexHeight, 1024);
   const renderTextureKey = [
     activeLanguage,
     fontsReady ? "fonts-ready" : "fonts-loading",
@@ -219,16 +222,13 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     texture.needsUpdate = true;
   });
 
-  const paperTextureNormal = useTexture(
-    PAPER_TEXTURES.normalUrl,
-    (texture) => {
-      texture.colorSpace = NoColorSpace;
-      texture.wrapS = RepeatWrapping;
-      texture.wrapT = RepeatWrapping;
-      texture.repeat.set(1, 1);
-      texture.needsUpdate = true;
-    },
-  );
+  const paperTextureNormal = useTexture(PAPER_TEXTURES.normalUrl, (texture) => {
+    texture.colorSpace = NoColorSpace;
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
+    texture.repeat.set(1, 1);
+    texture.needsUpdate = true;
+  });
 
   const paperTextureDiffuse = useTexture(
     PAPER_TEXTURES.diffuseUrl,
@@ -307,10 +307,12 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
       {toggles.normal && (
         <RenderTexture
           attach="normalMap"
-          width={renderTexWidth}
-          height={renderTexHeight}
+          width={normalTexW}
+          height={normalTexHeight}
           frames={1}
           samples={normalSamples}
+          depthBuffer={false}
+          stencilBuffer={false}
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera
@@ -342,9 +344,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
               position={[runtime.PAGE_WIDTH / 2, y, i * 0.01]}
               renderOrder={10}
             >
-              <planeGeometry
-                args={[runtime.PAGE_WIDTH, CREASE_BAND_HEIGHT]}
-              />
+              <planeGeometry args={[runtime.PAGE_WIDTH, CREASE_BAND_HEIGHT]} />
               <meshBasicMaterial
                 map={creaseNormalMap}
                 transparent={true}

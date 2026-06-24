@@ -156,6 +156,23 @@ export function ScrollManager() {
     }
   }, [runtime.config, lenis]);
 
+  useEffect(() => {
+    if (!lenis) return;
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [lenis]);
+
   const clearPendingWork = () => {
     if (frameIdRef.current !== null) {
       cancelAnimationFrame(frameIdRef.current);

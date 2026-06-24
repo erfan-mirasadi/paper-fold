@@ -154,8 +154,13 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
       {hasIntro && <IntroExperience />}
 
       <DynamicControls />
-      <Environment preset="apartment" />
-      <ambientLight intensity={1} />
+
+      {/* 1. انعکاس محیطی برای طبیعی شدن جنس کاغذ (خیلی مهمه!) */}
+      <Environment preset="apartment" environmentIntensity={1} />
+
+      {/* 1. نور محیطی رو کم کن تا سایهها بتونن شکل بگیرن */}
+      <ambientLight intensity={0.8} />
+
       {showSpotlight && (
         <SpotLight
           castShadow={!isMobile}
@@ -171,6 +176,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         />
       )}
 
+      {/* 3. این همون نوریه که به چروکها زاویه میده و خط تا رو سهبعدی میکنه! (از کامنت درش بیار) */}
       {!isAllSectionsMode && (
         <directionalLight position={[0, 4.2, -2]} intensity={1} />
       )}

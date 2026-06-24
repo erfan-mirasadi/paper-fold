@@ -353,4 +353,4 @@ export const usePopUpStore = create<PopUpStoreState>((set) => ({
     }),
 }));
 
-initPopUpStoreForStory(getActiveStoryConfig());
+

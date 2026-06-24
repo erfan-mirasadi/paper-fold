@@ -272,6 +272,8 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
     )
       return;
 
+    const safeDelta = Math.min(delta, 0.1);
+
     const bones = (meshRef.current as SkinnedMesh).skeleton.bones;
     const targetFoldAngles = globalFoldAngles.current;
     const foldContributions = foldContributionsRef.current;
@@ -300,7 +302,7 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
         "x",
         foldContributions[i],
         easingFactor,
-        delta,
+        safeDelta,
       );
     }
   });

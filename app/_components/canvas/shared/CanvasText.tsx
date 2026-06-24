@@ -80,10 +80,15 @@ export function CanvasText({
     if (fontsLoadedKey < 0) return null; // Use the variable to satisfy the linter
     const canvas = document.createElement("canvas");
 
-    // Decreased scaleFactor to save VRAM and improve performance
-    const scaleFactor = 1024;
+    // 1. تشخیص دیوایس:
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-    const dpr = resolution;
+    // 2. روی موبایل ضریب رو نصف کن. متن SDF بازم شارپ میمونه ولی مصرف رم 4 برابر کمتر میشه!
+    const scaleFactor = isMobile ? 512 : 1024; 
+
+    // 3. رو موبایل dpr رو نذار روی 3 بمونه، سقفش رو بذار 2.
+    const dpr = isMobile ? Math.min(resolution, 2) : resolution;
+
     const w = width * scaleFactor * dpr;
     const h = height * scaleFactor * dpr;
     canvas.width = w;

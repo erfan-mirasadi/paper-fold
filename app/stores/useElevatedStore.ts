@@ -351,5 +351,4 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
   },
 }));
 
-// Initial setup
-initElevatedStoreForStory(getActiveStoryConfig());
+
