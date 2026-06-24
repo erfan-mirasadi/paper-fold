@@ -5,8 +5,12 @@ import { SurahCard, type SurahCardData } from "./SurahCard";
 
 export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Duplicate items 4 times to ensure enough content for a seamless loop
+  const duplicatedSurahs = [...surahs, ...surahs, ...surahs, ...surahs];
 
   const handleInteraction = () => {
     setIsPaused(true);
@@ -19,41 +23,59 @@ export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
   const scrollLeft = () => {
     handleInteraction();
     if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      if (scrollLeft <= 10) {
-        scrollRef.current.scrollTo({ left: scrollWidth, behavior: "smooth" });
-      } else {
-        scrollRef.current.scrollBy({ left: -clientWidth, behavior: "smooth" });
-      }
+      const step = scrollRef.current.clientWidth * 0.8;
+      scrollRef.current.scrollBy({ left: -step, behavior: "smooth" });
     }
   };
 
   const scrollRight = () => {
     handleInteraction();
     if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      if (scrollLeft + clientWidth >= scrollWidth - 10) {
-        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        scrollRef.current.scrollBy({ left: clientWidth, behavior: "smooth" });
-      }
+      const step = scrollRef.current.clientWidth * 0.8;
+      scrollRef.current.scrollBy({ left: step, behavior: "smooth" });
     }
   };
 
   useEffect(() => {
     if (isPaused) return;
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        if (scrollLeft + clientWidth >= scrollWidth - 10) {
-          scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+
+    let animationFrameId: number;
+    let currentScroll = scrollRef.current ? scrollRef.current.scrollLeft : 0;
+
+    const animateScroll = () => {
+      if (
+        surahs.length > 0 &&
+        scrollRef.current &&
+        itemRefs.current[0] &&
+        itemRefs.current[surahs.length]
+      ) {
+        // The exact width of one original set of items
+        const setWidth =
+          itemRefs.current[surahs.length]!.offsetLeft -
+          itemRefs.current[0]!.offsetLeft;
+
+        currentScroll += 0.5; // Speed of continuous scroll (0.5px per frame = 30px/sec)
+
+        // Sync if user manually scrolled (allow 2px buffer for floats)
+        if (Math.abs(scrollRef.current.scrollLeft - currentScroll) > 2) {
+          currentScroll = scrollRef.current.scrollLeft;
         } else {
-          scrollRef.current.scrollBy({ left: clientWidth, behavior: "smooth" });
+          scrollRef.current.scrollLeft = currentScroll;
+        }
+
+        // Seamless infinite loop!
+        if (currentScroll >= setWidth) {
+          currentScroll -= setWidth;
+          scrollRef.current.scrollLeft = currentScroll;
         }
       }
-    }, 3500); // Slightly longer since it moves more items
-    return () => clearInterval(interval);
-  }, [isPaused]);
+      animationFrameId = requestAnimationFrame(animateScroll);
+    };
+
+    animationFrameId = requestAnimationFrame(animateScroll);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isPaused, surahs.length]);
 
   return (
     <div 
@@ -77,10 +99,16 @@ export function SurahCarousel({ surahs }: { surahs: SurahCardData[] }) {
       {/* Scroll Container */}
       <div 
         ref={scrollRef}
-        className="w-full flex gap-4 md:gap-8 overflow-x-auto snap-x snap-mandatory py-6 px-14 md:px-24 scroll-pl-14 md:scroll-pl-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+        className="w-full flex gap-4 md:gap-8 overflow-x-auto py-6 px-14 md:px-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
-        {surahs.map((surah, index) => (
-          <div key={surah.id} className="min-w-[260px] md:min-w-[340px] w-[75vw] max-w-[340px] snap-start flex-shrink-0 transition-transform duration-300 hover:scale-[1.02]">
+        {duplicatedSurahs.map((surah, index) => (
+          <div 
+            key={`${surah.id}-${index}`}
+            ref={(el) => {
+              itemRefs.current[index] = el;
+            }}
+            className="min-w-[260px] md:min-w-[340px] w-[75vw] max-w-[340px] flex-shrink-0 transition-transform duration-300 hover:scale-[1.02]"
+          >
             <SurahCard surah={surah} index={index} />
           </div>
         ))}
