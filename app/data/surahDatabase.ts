@@ -69,7 +69,7 @@ const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
   },
   {
     id: "ahzab35",
-    displayName: "Al-Ahzab 35",
+    displayName: "Al-Ahzab",
     arabicName: "الأحزاب",
     reference: "Al-Ahzab 35",
     config: AHZAB_35_CONFIG,
