@@ -159,6 +159,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
     verseTextScale: 1.6,
+    translationVerseTextScale: 1.1,
     groupRows: [1, 1, 1, 1],
   },
 
@@ -169,7 +170,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       id: "section2",
       type: "verticalGroups",
       backgroundTexture: "/ihlas/frame-section-3.svg",
-      backgroundScaleX: 1.25,
+      backgroundScaleX: 1.2,
       backgroundScaleY: 1.4,
       backgroundOffsetY: 0.0,
       backgroundSolidScaleX: 0.87,

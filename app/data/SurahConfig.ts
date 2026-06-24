@@ -77,6 +77,7 @@ export interface AlakLayoutParams {
   extraRowGap: number;
   labelHitboxWidth: number;
   verseTextScale?: number;
+  translationVerseTextScale?: number | null;
   groupRows?: number[];
   s2VerticalRowGap?: number;
   outerScale?: number;
@@ -331,6 +332,7 @@ export function createLayoutMath(
     boxExtOffset: p.boxExtOffset,
     extraRowGap: p.extraRowGap,
     verseTextScale: p.verseTextScale ?? undefined,
+    translationVerseTextScale: p.translationVerseTextScale,
 
     // ── Dynamic layout metadata consumed by SideCurves & SectionTwo ──────
     // NOTE: satisfies Record<string, number> is removed because these new

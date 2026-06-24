@@ -30,8 +30,13 @@ export function VerseGroup({
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   let finalVerseTextScale = layout?.verseTextScale;
-  if ((config.id === "ayatalkursi" || config.id === "ahzab35" || config.id === "ihlas112") && activeLanguage !== "ar") {
-    finalVerseTextScale = undefined;
+  if (activeLanguage !== "ar") {
+    if (layout?.translationVerseTextScale !== undefined) {
+      finalVerseTextScale =
+        layout.translationVerseTextScale === null
+          ? undefined
+          : layout.translationVerseTextScale;
+    }
   }
 
   // ── Group-level fallback border color from config.styling.colors ──────────
@@ -240,8 +245,17 @@ export function VerseGroup({
 
         let finalTextScale =
           override?.textScaleOverride ?? finalVerseTextScale;
-        if ((config.id === "ayatalkursi" || config.id === "ahzab35" || config.id === "ihlas112") && activeLanguage !== "ar") {
-          finalTextScale = undefined;
+        if (activeLanguage !== "ar") {
+          // If translationVerseTextScale is null, drop it.
+          // Wait, if it's null, finalVerseTextScale is ALREADY undefined from the outer loop!
+          // But override?.textScaleOverride might be set. If the config dictates translation scale should be dropped, we do it here too:
+          if (layout?.translationVerseTextScale !== undefined) {
+            if (layout.translationVerseTextScale === null) {
+              finalTextScale = undefined;
+            } else if (!override?.textScaleOverride) {
+               // We already handled it in finalVerseTextScale, so just let it use finalTextScale as is.
+            }
+          }
         }
 
         const hasTab = override?.hasCapsuleLabel;

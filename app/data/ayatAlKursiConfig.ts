@@ -210,6 +210,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     extraRowGap: 0.01,
     labelHitboxWidth: 0.43,
     verseTextScale: 1.35,
+    translationVerseTextScale: null,
     groupRows: [1, 2, 1],
     outerCurveXOffset: 0.07,
     centerCurveXOffset: -0.02,

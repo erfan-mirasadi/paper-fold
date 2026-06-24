@@ -343,6 +343,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
     verseTextScale: 1.25,
+    translationVerseTextScale: null,
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
     groupRows: [1, 1, 2, 1, 1],
 

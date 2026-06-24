@@ -49,19 +49,22 @@ const ZERO_OFFSET = { x: 0, y: 0 };
 import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
-
 import { useStoryStore } from "../../../stores/useStoryStore";
-import { SurahLayoutConfig } from "../../../data/schema";
-
 export function VerseController({ config }: { config: VerseConfig }) {
   const activeStoryConfig = useStoryStore((state) => state.activeConfig);
 
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
-  let finalVerseTextScale = config.textScaleOverride ?? runtime.layoutMath.verseTextScale;
-  if ((activeStoryConfig.id === "ayatalkursi" || activeStoryConfig.id === "ahzab35" || activeStoryConfig.id === "ihlas112") && activeLanguage !== "ar") {
-    finalVerseTextScale = undefined; // Drop scaling for translations so it uses smaller defaults
+  let finalVerseTextScale =
+    config.textScaleOverride ?? runtime.layoutMath.verseTextScale;
+  if (activeLanguage !== "ar") {
+    if (runtime.layoutMath.translationVerseTextScale !== undefined) {
+      finalVerseTextScale =
+        runtime.layoutMath.translationVerseTextScale === null
+          ? undefined
+          : runtime.layoutMath.translationVerseTextScale;
+    }
   }
 
   const zBaseOffset = PAGE_DEPTH / 2 + 0.002;
@@ -188,10 +191,13 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
-  const isSectionRaised = sectionId !== null && activeSectionIds.includes(sectionId);
+  const isSectionRaised =
+    sectionId !== null && activeSectionIds.includes(sectionId);
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
-    const s2Config = activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any;
+    const s2Config = activeStoryConfig.sections.find(
+      (s) => s.type === "verticalGroups",
+    ) as any;
 
     let targetGroup: any = null;
     if (s2Config?.groups) {
@@ -229,20 +235,23 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
 
   const animatedLiftZ = to([liftZ], (l) => l + (isVerseSeparated ? 0.015 : 0));
-  const dynamicRenderOrder = isVerseSeparated ? 1000 + config.id * 10 : 100 + config.id * 10;
+  const dynamicRenderOrder = isVerseSeparated
+    ? 1000 + config.id * 10
+    : 100 + config.id * 10;
   const separationOffset = useDragState(
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
   // ── Parent section for custom-sections (Ahzab) ──────────────────────────
   // Computed early so it can be used for both snap bounds and position offset.
-  const s2Config = activeStoryConfig.sections.find((s) => s.type === "verticalGroups") as any;
+  const s2Config = activeStoryConfig.sections.find(
+    (s) => s.type === "verticalGroups",
+  ) as any;
   const hasCustomSections = Boolean(s2Config?.customSections?.length);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   // parentSectionDrag: always track, used for snap and (in all-sections mode) position
-  const parentSectionDrag = hasCustomSections && s2Config?.id
-    ? dragEngine.sections[s2Config.id]
-    : null;
+  const parentSectionDrag =
+    hasCustomSections && s2Config?.id ? dragEngine.sections[s2Config.id] : null;
 
   // Static check: does this verse belong to a center/group-drag section?
   const isGroupDragType = useMemo(() => {
@@ -298,10 +307,25 @@ export function VerseController({ config }: { config: VerseConfig }) {
     if (!sectionId || !runtime.SURAH_TRANSFORMS) return undefined;
     if (hasCustomSections && s2Config?.id) {
       // For custom sections (Ahzab), snap zone = parent section frame
-      return calculateSectionBounds(s2Config.id, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH);
+      return calculateSectionBounds(
+        s2Config.id,
+        runtime.SURAH_TRANSFORMS,
+        runtime.PAGE_WIDTH,
+      );
     }
-    return calculateSectionBounds(sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH);
-  }, [snapMode, sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH, hasCustomSections, s2Config]);
+    return calculateSectionBounds(
+      sectionId,
+      runtime.SURAH_TRANSFORMS,
+      runtime.PAGE_WIDTH,
+    );
+  }, [
+    snapMode,
+    sectionId,
+    runtime.SURAH_TRANSFORMS,
+    runtime.PAGE_WIDTH,
+    hasCustomSections,
+    s2Config,
+  ]);
 
   const dragBind = useElevatedDrag({
     enabled:
@@ -325,7 +349,11 @@ export function VerseController({ config }: { config: VerseConfig }) {
     ],
     (vx, sx, px) => {
       const parentOffset = parentSectionDrag ? px : 0;
-      return vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0) + parentOffset;
+      return (
+        vx +
+        (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0) +
+        parentOffset
+      );
     },
   );
 
@@ -337,7 +365,11 @@ export function VerseController({ config }: { config: VerseConfig }) {
     ],
     (vy, sy, py) => {
       const parentOffset = parentSectionDrag ? py : 0;
-      return vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0) + parentOffset;
+      return (
+        vy +
+        (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0) +
+        parentOffset
+      );
     },
   );
 

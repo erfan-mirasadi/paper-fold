@@ -77,9 +77,9 @@ const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
   },
   {
     id: "ihlas112",
-    displayName: "Al-İhlas",
+    displayName: "Al-Ikhlas",
     arabicName: "الإخلاص",
-    reference: "Al-İhlas 112",
+    reference: "Al-Ikhlas 112",
     config: IHLAS_112_CONFIG,
     textData: IHLAS_112_TEXT_DATA,
   },
