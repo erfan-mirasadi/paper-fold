@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { SurahCarousel } from "./SurahCarousel";
-import { ThemeToggleOverlay } from "./ui-overlay/ThemeToggleOverlay";
-import { LanguageSwitchOverlay } from "./ui-overlay/LanguageSwitchOverlay";
+import { ThemeToggleOverlay } from "../ui-overlay/ThemeToggleOverlay";
+import { LanguageSwitchOverlay } from "../ui-overlay/LanguageSwitchOverlay";
 import type { SurahCardData } from "./SurahCard";
 
 export function HomePageClient({ surahs }: { surahs: SurahCardData[] }) {
@@ -51,13 +51,11 @@ export function HomePageClient({ surahs }: { surahs: SurahCardData[] }) {
       {/* ── Content Container ── */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-start pt-[15vh] md:pt-[20vh] pb-12">
         {/* Header */}
-        <motion.header
-          className="text-center mb-16 md:mb-20 flex flex-col items-center px-6"
-          initial={{ y: -60, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
-        >
-          <h1
+        <header className="text-center mb-16 md:mb-20 flex flex-col items-center px-6">
+          <motion.h1
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
             style={{
               fontFamily: "var(--font-cormorant), serif",
               textShadow: "0 4px 12px rgba(0,0,0,0.5)",
@@ -65,15 +63,21 @@ export function HomePageClient({ surahs }: { surahs: SurahCardData[] }) {
             className="text-[2.5rem] leading-[1.1] md:text-6xl lg:text-7xl font-normal tracking-[-0.02em] text-[#F4F1EA] mb-8 md:mb-10"
           >
             QuranPatterns
-          </h1>
-          <Image
-            src="/hero/Logomark.png"
-            alt="Logo"
-            width={32}
-            height={32}
-            className="w-6 h-6 md:w-8 md:h-8 drop-shadow-md opacity-80"
-          />
-        </motion.header>
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 1, ease: "easeOut" }}
+          >
+            <Image
+              src="/hero/Logomark.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="w-6 h-6 md:w-8 md:h-8 drop-shadow-md opacity-80"
+            />
+          </motion.div>
+        </header>
 
         {/* Subtitle & Carousel Area */}
         <motion.div

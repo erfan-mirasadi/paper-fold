@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getAllSurahs } from "./data/surahDatabase";
-import { HomePageClient } from "./_components/dom/HomePageClient";
+import { HomePageClient } from "./_components/dom/hero/HomePageClient";
 
 export const metadata: Metadata = {
   title: "Quran Patterns",
