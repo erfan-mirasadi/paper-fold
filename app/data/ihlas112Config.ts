@@ -22,8 +22,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   dimensions: {
-    paperWidth: 1.5,
-    paperHeight: 1.1,
+    paperWidth: 1.54,
+    paperHeight: 1,
     sceneCenterYOffset: 0.0,
     padding: 0.2,
     scrollPages: 1.5,
@@ -169,9 +169,9 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     {
       id: "section2",
       type: "verticalGroups",
-      backgroundTexture: "/ihlas/frame-section-3.svg",
-      backgroundScaleX: 1.2,
-      backgroundScaleY: 1.4,
+      backgroundTexture: "/ayatalkursi/frame-section-1.svg",
+      backgroundScaleX: 1.1,
+      backgroundScaleY: 1.1,
       backgroundOffsetY: 0.0,
       backgroundSolidScaleX: 0.87,
       backgroundSolidScaleY: 0.85,

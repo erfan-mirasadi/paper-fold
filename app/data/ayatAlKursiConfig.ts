@@ -40,10 +40,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   dimensions: {
-    paperWidth: 2.104,
+    paperWidth: 1.54,
     paperHeight: 0.9,
     sceneCenterYOffset: 0.0,
-    padding: 0.26,
+    padding: 0.15,
     scrollPages: 1.5,
   },
 
@@ -209,7 +209,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     boxExtOffset: 0.02,
     extraRowGap: 0.01,
     labelHitboxWidth: 0.43,
-    verseTextScale: 1.35,
+    verseTextScale: 1.14,
     translationVerseTextScale: null,
     groupRows: [1, 2, 1],
     outerCurveXOffset: 0.07,
