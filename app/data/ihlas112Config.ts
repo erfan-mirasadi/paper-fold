@@ -169,7 +169,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     {
       id: "section2",
       type: "verticalGroups",
-      backgroundTexture: "/ayatalkursi/frame-section-1.svg",
+      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
       backgroundScaleX: 1.1,
       backgroundScaleY: 1.1,
       backgroundOffsetY: 0.0,
