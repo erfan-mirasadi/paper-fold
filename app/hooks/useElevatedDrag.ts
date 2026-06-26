@@ -108,6 +108,7 @@ export function useElevatedDrag({
       if (!useStoryStore.getState().activeConfig.features.hasElevatedSections)
         return false;
       if (useFoldStore.getState().isIntroActive) return false;
+      if (useFoldStore.getState().currentOffset < 0.98) return false;
       return true;
     };
 
