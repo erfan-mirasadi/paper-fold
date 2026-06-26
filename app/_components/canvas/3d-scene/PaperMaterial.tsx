@@ -27,6 +27,7 @@ import {
 } from "three";
 import { usePaperMasking } from "../../../hooks/usePaperMasking";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
+import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
   LATIN_VERSE_FONT,
@@ -129,12 +130,14 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     ? NORMAL_SCALE_ENABLED
     : NORMAL_SCALE_DISABLED;
 
-  // Mobile GPUs (especially iOS Safari) are sensitive to large offscreen render targets.
-  // Clamp render texture size to device limits and use a smaller multiplier on small viewports.
-  const isSmallViewport = size.width <= 820 || size.height <= 820;
+  // 🎯 GPU-BASED quality scaling — NOT screen-size based.
+  // A large 4K display with a weak GPU gets lower quality.
+  // A small phone with a powerful GPU gets full quality.
+  const tier = detectGpuTier();
   const maxTextureSize = gl.capabilities.maxTextureSize || 4096;
 
-  const targetMultiplier = isSmallViewport ? 1 : 2;
+  // Multiplier: high=2× (up to 4K tex), medium=1.5×, low=1× (base resolution)
+  const targetMultiplier = tier === "high" ? 2 : tier === "medium" ? 1.5 : 1;
   const targetW = BASE_RENDER_TEX_WIDTH * targetMultiplier;
   const targetH = BASE_RENDER_TEX_HEIGHT * targetMultiplier;
 
@@ -145,8 +148,8 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const renderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
   const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
 
-  // 🚀 1. مقادیر قانونی و استاندارد:
-  const colorSamples = isSmallViewport ? 0 : 4;
+  // 🚀 1. MSAA samples based on GPU tier (not screen size):
+  const colorSamples = tier === "low" ? 0 : tier === "medium" ? 2 : 4;
   const normalSamples = 0; // نرمال مپ هیچ نیازی به Sample نداره! صفر بودنش VRAM رو نجات میده.
 
   const normalTexW = Math.min(renderTexWidth, 1024);

@@ -43,13 +43,12 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   const readyFiredRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 🚀 OPTIMIZATION: Memoize کردن Regex برای جلوگیری از درگیری CPU در هر رندر
+  // ✏️ isMobile = سنجش بر اساس هویت دستگاه (UserAgent) — نه عرض صفحه.
+  // برای کیفیت گرافیکی از gpuTier استفاده میشه.
   const isMobile = useMemo(() => {
     if (typeof window === "undefined") return false;
-    return (
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      ) || window.innerWidth < 768
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
     );
   }, []);
 

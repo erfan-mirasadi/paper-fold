@@ -4,6 +4,7 @@ import { cloneElement, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
 import { QURAN_FONT } from "../../../data/theme";
+import { detectGpuTier } from "../../../utils/gpuTier";
 
 interface CanvasTextProps {
   text: string;
@@ -78,18 +79,20 @@ export function CanvasText({
     if (fontsLoadedKey < 0) return null;
     const canvas = document.createElement("canvas");
 
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    // 🎯 GPU-BASED quality scaling — NOT screen-size based.
+    const tier = detectGpuTier();
 
     // ضریب پایه برای حفظ کیفیت بالا
     const scaleFactor = 1024;
-    const dpr = isMobile ? Math.min(resolution, 2) : resolution;
+    // resolution (DPR) هم بالا بریم تا متن كیف بمونه; GPU tier سقف رو تعیین میکنه
+    const dpr = resolution;
 
     let targetW = width * scaleFactor * dpr;
     let targetH = height * scaleFactor * dpr;
     let activeScaleFactor = scaleFactor * dpr;
 
-    // سقف امنیتی VRAM با حفظ دقیق نسبت تصویر (بدون کش‌آمدگی)
-    const MAX_TEX_SIZE = isMobile ? 2048 : 4096;
+    // سقف امنیتی VRAM بر اساس توان GPU (نه اندازه صفحه)
+    const MAX_TEX_SIZE = tier === "high" ? 8192 : tier === "medium" ? 4096 : 2048;
     const maxDim = Math.max(targetW, targetH);
 
     if (maxDim > MAX_TEX_SIZE) {
@@ -168,7 +171,7 @@ export function CanvasText({
     tex.generateMipmaps = true;
     tex.minFilter = THREE.LinearMipmapLinearFilter;
     tex.magFilter = THREE.LinearFilter;
-    tex.anisotropy = isMobile ? 4 : 8;
+    tex.anisotropy = tier === "low" ? 4 : tier === "medium" ? 8 : 16;
 
     return tex;
   }, [

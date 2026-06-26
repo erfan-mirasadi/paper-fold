@@ -6,6 +6,7 @@ import { PAGE_WIDTH, SURAH_DATA } from "../../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../../data/theme";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { CanvasText } from "../shared/CanvasText";
+import { detectGpuTier } from "../../../utils/gpuTier";
 
 const TOP_EDGE_OFFSET = -0.02;
 const MANUAL_DOWN_SHIFT = -0.0008;
@@ -59,8 +60,25 @@ function createDepthCanvasTexture(
 
   const scaleFactor = 1024;
   const dpr = 3; // matches CanvasText default resolution
-  const canvasW = Math.floor(maxWidth * scaleFactor * dpr);
-  const canvasH = Math.floor(height * scaleFactor * dpr);
+
+  // 🎯 GPU-BASED size cap — same logic as CanvasText
+  const tier = detectGpuTier();
+  const MAX_TEX_SIZE = tier === "high" ? 8192 : tier === "medium" ? 4096 : 2048;
+
+  let canvasW = maxWidth * scaleFactor * dpr;
+  let canvasH = height * scaleFactor * dpr;
+  let activeScaleFactor = scaleFactor * dpr;
+
+  const maxDim = Math.max(canvasW, canvasH);
+  if (maxDim > MAX_TEX_SIZE) {
+    const ratio = MAX_TEX_SIZE / maxDim;
+    canvasW *= ratio;
+    canvasH *= ratio;
+    activeScaleFactor *= ratio;
+  }
+
+  canvasW = Math.floor(canvasW);
+  canvasH = Math.floor(canvasH);
 
   const canvas = document.createElement("canvas");
   canvas.width = canvasW;
@@ -72,7 +90,7 @@ function createDepthCanvasTexture(
 
   // "QuranFont" is the family name registered by PaperMaterial's preloadFontUrl.
   // PaperMaterial is always mounted on the primary panel before BismillahText3D renders.
-  const scaledFontSize = fontSize * scaleFactor * dpr;
+  const scaledFontSize = fontSize * activeScaleFactor;
   ctx.font = `normal normal ${scaledFontSize}px "QuranFont", Arial`;
   ctx.fillStyle = color;
   ctx.textAlign = "center";
