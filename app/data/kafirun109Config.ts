@@ -5,25 +5,25 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
 const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (Top and Bottom groups)
 const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
-const CENTER_GROUP_BG = "#CBE2EE"; // Blue/Grey (Middle group)
-const CENTER_GROUP_BORDER = "#7A9CAD"; // Lighter slate blue border
+const CENTER_GROUP_BG = "#eaf2db"; // Green (Middle group)
+const CENTER_GROUP_BORDER = "#5E7367"; // Dark Green border
 
 export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "kafirun109",
-  title: "Kâfirûn 109",
-  heroTitle: "Kafirûn",
-  heroSubtitle: "suresi",
+  title: "Kafirun Suresi",
+  heroTitle: "Kafirun",
+  heroSubtitle: "Suresi",
 
   features: {
     hasIntro: false,
     hasElevatedSections: true,
     hasPopUps: false,
-    hideVerseNumbers: true,
+    hideVerseNumbers: false,
   },
 
   dimensions: {
     paperWidth: 1.54,
-    paperHeight: 0.9,
+    paperHeight: 0.8,
     sceneCenterYOffset: 0.0,
     padding: 0.15,
     scrollPages: 1.5,
@@ -44,26 +44,31 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: OUTER_GROUP_BORDER,
       circleBg: OUTER_GROUP_BG,
       circleTextCol: OUTER_GROUP_BORDER,
+      textColor: "#A30000",
     },
     2: {
+      bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
     },
     3: {
+      bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
     },
     4: {
+      bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
     },
     5: {
+      bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
       circleBg: CENTER_GROUP_BG,
@@ -74,6 +79,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: OUTER_GROUP_BORDER,
       circleBg: OUTER_GROUP_BG,
       circleTextCol: OUTER_GROUP_BORDER,
+      textColor: "#A30000",
     },
   },
 
@@ -96,11 +102,11 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       sectionBgTexture: "#fcfcfc",
       hollowConnectorInnerBg: "#FAF7F2", // No connector filling background (matches paper)
       maroonTheme: OUTER_GROUP_BG,
-      greenTheme: CENTER_GROUP_BG,
+      greenTheme: CENTER_GROUP_BORDER,
       s1InnerBorder: "#cccccc",
       s2IntroOutroBg: "#C4963B",
       s2Group1Bg: OUTER_GROUP_BG,
-      s2Group2Bg: CENTER_GROUP_BG,
+      s2Group2Bg: CENTER_GROUP_BORDER,
       s2Group3Bg: OUTER_GROUP_BG,
 
       sectionBackgrounds: ["#DCE8DC", "#EDD8DF", "#DCE8DC"],
@@ -141,10 +147,10 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupGap: 0.025,
     groupPad: 0.012,
     groupPadBottom: 0.012,
-    s2Gap: 0.02,
-    s2VerticalRowGap: 0.046,
+    s2Gap: 0.005,
+    s2VerticalRowGap: 0.022,
     smallBoxH2: 0.085,
-    middleExtraGap: 0.007,
+    middleExtraGap: 0,
     s2PadLeftRight: 0.028,
     g2Scale: 0.02,
     outerScale: -0.11,
@@ -159,8 +165,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     boxExtOffset: 0.02,
     extraRowGap: 0.01,
     labelHitboxWidth: 0.43,
-    verseTextScale: 1.14,
-    translationVerseTextScale: null,
+    verseTextScale: 1.2,
+    translationVerseTextScale: 0.8,
     groupRows: [1, 2, 1],
     outerCurveXOffset: 0.07, // Reverted offset
     centerCurveXOffset: -0.02,
