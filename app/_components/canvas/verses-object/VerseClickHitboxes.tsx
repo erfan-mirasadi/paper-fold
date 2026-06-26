@@ -13,6 +13,8 @@ import {
   type ElevatedSectionId,
 } from "../../../stores/useElevatedStore";
 import { useDragState } from "../../../utils/dragEngine";
+import { getFoldAnglesForScroll } from "../3d-scene/FoldStory";
+import { useFoldStore } from "../orchestrator/ScrollManager";
 
 const hitBoxMaterial = new MeshBasicMaterial({
   transparent: true,
@@ -357,47 +359,66 @@ const canUseElevatedInteraction = (
   return false;
 };
 
-const handleClick = (e: ThreeEvent<MouseEvent>) => {
-  const { kind, verseId, verseIds, sectionId } = e.object.userData;
-  if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
-
-  e.stopPropagation();
-  if (e.delta > 2) return;
-
-  const { activeVerseIds } = useElevatedStore.getState();
-  const { draggedVerseIds, draggedSectionIds } = useDragState.getState();
-
-  if (kind === "verse" && typeof verseId === "number") {
-    const isActive = activeVerseIds.includes(verseId);
-    const isDragged = draggedVerseIds.includes(verseId);
-    if (isActive && isDragged) return;
-    useElevatedStore.getState().elevateVerse(verseId);
-    return;
-  }
-
-  if (kind === "section" && Array.isArray(verseIds) && verseIds.length > 0) {
-    // In all-sections mode: background/label clicks don't toggle sections off.
-    // Only the return button can exit all-sections mode.
-    const isAllSectionsMode = useElevatedStore.getState().isAllSectionsMode;
-    if (isAllSectionsMode) return;
-
-    const validSectionId = typeof sectionId === "string" ? sectionId : undefined;
-
-    const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
-    const isDragged = validSectionId
-      ? draggedSectionIds.includes(validSectionId)
-      : false;
-
-    if (allSelected && isDragged) return;
-
-    useElevatedStore.getState().elevateVerses(verseIds, validSectionId);
-  }
-};
-
 export function VerseClickHitboxes() {
   const runtime = useSurahLayoutRuntime();
   const config = useStoryStore(state => state.activeConfig);
   const hitboxes = useMemo(() => buildHitboxes(runtime, config), [runtime, config]);
+
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    const { kind, verseId, verseIds, sectionId } = e.object.userData;
+    if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
+
+    // When the paper is folded, hitboxes below the folded part remain active in the empty space.
+    // We reject clicks that hit these "invisible" hitboxes below the current visual paper edge.
+    const offset = useFoldStore.getState().currentOffset;
+    const angles = getFoldAnglesForScroll(offset, runtime.foldSteps);
+    
+    let lowestVisibleY = -Infinity;
+    for (let i = 0; i < angles.length; i++) {
+      if (Math.abs(angles[i]) > 0.1) {
+        lowestVisibleY = runtime.FOLD_Y_POSITIONS[i];
+        break;
+      }
+    }
+
+    // Hitbox's local Y position is exactly its cy coordinate, matching the fold positions.
+    // A small buffer (0.2) allows clicking just on the edge.
+    if (e.object.position.y < lowestVisibleY - 0.2) {
+      return;
+    }
+
+    e.stopPropagation();
+    if (e.delta > 2) return;
+
+    const { activeVerseIds } = useElevatedStore.getState();
+    const { draggedVerseIds, draggedSectionIds } = useDragState.getState();
+
+    if (kind === "verse" && typeof verseId === "number") {
+      const isActive = activeVerseIds.includes(verseId);
+      const isDragged = draggedVerseIds.includes(verseId);
+      if (isActive && isDragged) return;
+      useElevatedStore.getState().elevateVerse(verseId);
+      return;
+    }
+
+    if (kind === "section" && Array.isArray(verseIds) && verseIds.length > 0) {
+      // In all-sections mode: background/label clicks don't toggle sections off.
+      // Only the return button can exit all-sections mode.
+      const isAllSectionsMode = useElevatedStore.getState().isAllSectionsMode;
+      if (isAllSectionsMode) return;
+
+      const validSectionId = typeof sectionId === "string" ? sectionId : undefined;
+
+      const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
+      const isDragged = validSectionId
+        ? draggedSectionIds.includes(validSectionId)
+        : false;
+
+      if (allSelected && isDragged) return;
+
+      useElevatedStore.getState().elevateVerses(verseIds, validSectionId);
+    }
+  };
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>

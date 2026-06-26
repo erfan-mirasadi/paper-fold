@@ -209,7 +209,7 @@ function DynamicControls() {
 
   return (
     <OrbitControls
-      enabled={true}
+      enabled={enableInteractions}
       makeDefault={true}
       enableRotate={enableInteractions}
       enableZoom={enableInteractions}

@@ -324,19 +324,28 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "Say, O disbelievers," }],
+        verses: [{ number: 1, text: "Say, O you who do not believe (in my religion)!" }],
       },
       {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 3, text: "Nor are you worshippers of what I worship." },
-          { number: 2, text: "I do not worship what you worship." },
-          { number: 5, text: "Nor will you be worshippers of what I worship." },
+          {
+            number: 3,
+            text: "You also do not worship the Allah I worship",
+          },
+          {
+            number: 2,
+            text: "I (did not worship), do not worship what you worship",
+          },
+          {
+            number: 5,
+            text: "You also are not worshippers of the Allah I worship",
+          },
           {
             number: 4,
-            text: "Nor will I be a worshipper of what you worship.",
+            text: "I am not going to worship what you worship",
           },
         ],
       },
@@ -347,7 +356,7 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 6,
-            text: "For you is your religion, and for me is my religion.",
+            text: "Your religion is for you, my religion is for me !",
           },
         ],
       },
@@ -372,19 +381,28 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "De ki: Ey kâfirler!" }],
+        verses: [{ number: 1, text: "De ki, Ey (benim dinime) inanmayanlar!" }],
       },
       {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 3, text: "Siz de benim taptığıma tapıcılar değilsiniz." },
-          { number: 2, text: "Ben sizin taptıklarınıza tapmam." },
-          { number: 5, text: "Siz de benim taptığıma tapacak değilsiniz." },
+          {
+            number: 3,
+            text: "Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz",
+          },
+          {
+            number: 2,
+            text: "Ben sizin taptıklarınıza (tapmadım), tapmıyorum",
+          },
+          {
+            number: 5,
+            text: "Siz de benim ibadet ettiğim Allah'a ibadet edici değilsiz",
+          },
           {
             number: 4,
-            text: "Ben asla sizin taptıklarınıza tapacak değilim.",
+            text: "Ben sizin taptıklarınıza tapacak değilim",
           },
         ],
       },
@@ -392,9 +410,7 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [
-          { number: 6, text: "Sizin dininiz size, benim dinim banadır." },
-        ],
+        verses: [{ number: 6, text: "Sizin dininiz size, benim dinim bana !" }],
       },
     ],
     outroVerse: { number: 0, text: "" },
