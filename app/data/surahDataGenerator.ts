@@ -319,6 +319,7 @@ export function buildVerseConfigs(
             circleTextCol: finalCircleTextCol,
             textColor: finalTextColor,
             textScaleOverride,
+            isPill: override?.isPill,
             capsuleLabel,
           });
         });

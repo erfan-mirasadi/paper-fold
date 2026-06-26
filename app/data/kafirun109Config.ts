@@ -40,6 +40,10 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   verseOverrides: {
     1: {
+      isPill: false,
+      expandW: 0.2,
+      expandH: 0.018,
+      textScaleOverride: 0.85,
       border: OUTER_GROUP_BORDER,
       circleBorderCol: OUTER_GROUP_BORDER,
       circleBg: OUTER_GROUP_BG,
@@ -75,6 +79,10 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: CENTER_GROUP_BORDER,
     },
     6: {
+      isPill: false,
+      expandW: 0.2,
+      expandH: 0.018,
+      textScaleOverride: 0.85,
       border: OUTER_GROUP_BORDER,
       circleBorderCol: OUTER_GROUP_BORDER,
       circleBg: OUTER_GROUP_BG,
@@ -115,8 +123,9 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
         {
           color: OUTER_GROUP_BORDER,
           fillColor: OUTER_GROUP_BG,
-          bowGap: 0.45,
-          innerBowGap: 0.44,
+          bowGap: 0.15,
+          innerBowGap: 0.14,
+          tipThickness: 0.121, // smallBoxH2 (0.085) + 2×expandH (0.018) — full rect height
         },
         { color: CENTER_GROUP_BORDER, fillColor: CENTER_GROUP_BG },
       ],
@@ -212,10 +221,16 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   animations: {
     computeFoldYPositions: (lm) => {
-      const fold1 = (lm.g1Y - lm.groupHeights[0] + lm.g2Y) / 2;
+      // Verse 1 (g1) has expandH = 0.018. It expands downwards by 0.018.
+      // So its actual bottom is lower. We should shift fold1 down by 0.018 to keep it centered.
+      const fold1 = (lm.g1Y - lm.groupHeights[0] + lm.g2Y) / 2 - 0.008;
+
       const fold2 =
         lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2VerticalRowGap / 2;
-      const fold3 = (lm.g2Y - lm.groupHeights[1] + lm.g3Y) / 2;
+
+      // Verse 6 (g3) has expandH = 0.018. It expands upwards by 0.018.
+      // So its actual top is higher. We should shift fold3 up by 0.018 to keep it centered.
+      const fold3 = (lm.g2Y - lm.groupHeights[1] + lm.g3Y) / 2 + 0.008;
 
       return [fold1, fold2, fold3];
     },

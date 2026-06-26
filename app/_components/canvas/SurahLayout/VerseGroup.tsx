@@ -297,7 +297,7 @@ export function VerseGroup({
               circleBorderCol={finalCircleBorder}
               circleBg={finalCircleBg}
               circleTextCol={finalCircleText}
-              isPill={true}
+              isPill={override?.isPill ?? true}
               textScaleOverride={finalTextScale}
               textColor={override?.textColor}
             />
