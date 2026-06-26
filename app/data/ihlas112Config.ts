@@ -40,6 +40,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#000000",
       textColor: "#000000",
       expandW: 0.1,
+      isPill: false,
+      textScaleOverride: 0.9,
     },
     2: {
       bg: BLUE_BG,
@@ -67,6 +69,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#000000",
       textColor: "#000000",
       expandW: 0.1,
+      isPill: false,
+      textScaleOverride: 0.9,
     },
   },
 
@@ -205,6 +209,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isPushedIn: true,
           isCenter: true,
           dragBehavior: "individual",
+          pushDown: -0.03,
         },
         {
           verseIds: [4],
