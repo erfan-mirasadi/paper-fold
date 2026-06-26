@@ -75,20 +75,20 @@ export function CanvasText({
   }, []);
 
   const texture = useMemo(() => {
-    if (fontsLoadedKey < 0) return null; 
+    if (fontsLoadedKey < 0) return null;
     const canvas = document.createElement("canvas");
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-    // 🚀 ضریب پایه برای حفظ کیفیت بالا
-    const scaleFactor = 1024; 
+    // ضریب پایه برای حفظ کیفیت بالا
+    const scaleFactor = 1024;
     const dpr = isMobile ? Math.min(resolution, 2) : resolution;
 
     let targetW = width * scaleFactor * dpr;
     let targetH = height * scaleFactor * dpr;
     let activeScaleFactor = scaleFactor * dpr;
 
-    // 🚀 سقف امنیتی VRAM با حفظ دقیق نسبت تصویر (بدون کشآمدگی)
+    // سقف امنیتی VRAM با حفظ دقیق نسبت تصویر (بدون کش‌آمدگی)
     const MAX_TEX_SIZE = isMobile ? 2048 : 4096;
     const maxDim = Math.max(targetW, targetH);
 
@@ -96,21 +96,25 @@ export function CanvasText({
       const ratio = MAX_TEX_SIZE / maxDim;
       targetW *= ratio;
       targetH *= ratio;
-      activeScaleFactor *= ratio; // مقیاس فونت هم متناسب باهاش کوچیک میشه
+      activeScaleFactor *= ratio; // مقیاس فونت هم متناسب باهاش کوچیک میشه تا دفرمه نشه
     }
 
-    // 🚀 اِعمال ابعاد دقیق بدون هیچ رُند کردنی
-    canvas.width = targetW;
-    canvas.height = targetH;
-    
+    // مقادیر کانوِس حتماً باید عدد صحیح (رُند) باشن تا WebGL ارور نده
+    const w = Math.round(targetW);
+    const h = Math.round(targetH);
+    canvas.width = w;
+    canvas.height = h;
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    ctx.clearRect(0, 0, targetW, targetH);
+    ctx.clearRect(0, 0, w, h);
 
     const fontName = font === QURAN_FONT ? "QuranFont" : "LatinFont";
-    const scaledFontSize = fontSize * activeScaleFactor; 
-    
+
+    // جادوی حل مشکل کش‌آمدگی متن: فقط از activeScaleFactor استفاده می‌کنیم
+    const scaledFontSize = fontSize * activeScaleFactor;
+
     ctx.font = `${fontStyle} ${fontWeight} ${scaledFontSize}px "${fontName}", Arial`;
     ctx.fillStyle = color;
     ctx.textAlign = textAlign;
@@ -121,9 +125,9 @@ export function CanvasText({
           ? "bottom"
           : "middle";
 
-    const x = textAlign === "center" ? targetW / 2 : textAlign === "right" ? targetW : 0;
+    const x = textAlign === "center" ? w / 2 : textAlign === "right" ? w : 0;
     const y =
-      verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? targetH : targetH / 2;
+      verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
 
     const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
     const words = text.split(" ");
@@ -145,11 +149,11 @@ export function CanvasText({
     const totalHeight = lines.length * scaledFontSize * lineHeight;
     let startY = y;
     if (verticalAlign === "middle") {
-      startY = (targetH - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
+      startY = (h - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
     } else if (verticalAlign === "top") {
       startY = (scaledFontSize * lineHeight) / 2;
     } else {
-      startY = targetH - totalHeight + (scaledFontSize * lineHeight) / 2;
+      startY = h - totalHeight + (scaledFontSize * lineHeight) / 2;
     }
 
     lines.forEach((line) => {
@@ -160,16 +164,28 @@ export function CanvasText({
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
-    // 🚀 نهایت کیفیت وکتور بدون چشمک زدن
-    tex.generateMipmaps = true; 
-    tex.minFilter = THREE.LinearMipmapLinearFilter; 
+    // نهایت کیفیت وکتور بدون فلیکر زدن لبه‌ها
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
     tex.magFilter = THREE.LinearFilter;
-    tex.anisotropy = isMobile ? 4 : 8; 
+    tex.anisotropy = isMobile ? 4 : 8;
 
     return tex;
   }, [
-    text, font, fontSize, color, textAlign, verticalAlign, width, height, resolution,
-    maxWidth, lineHeight, fontsLoadedKey, fontWeight, fontStyle,
+    text,
+    font,
+    fontSize,
+    color,
+    textAlign,
+    verticalAlign,
+    width,
+    height,
+    resolution,
+    maxWidth,
+    lineHeight,
+    fontsLoadedKey,
+    fontWeight,
+    fontStyle,
   ]);
 
   useEffect(() => {
