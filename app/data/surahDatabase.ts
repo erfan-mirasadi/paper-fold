@@ -27,6 +27,8 @@ import { AHZAB_35_CONFIG, AHZAB_35_TEXT_DATA } from "./ahzab35Config";
 
 import { IHLAS_112_CONFIG, IHLAS_112_TEXT_DATA } from "./ihlas112Config";
 
+import { KAFIRUN_109_CONFIG, KAFIRUN_109_TEXT_DATA } from "./kafirun109Config";
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -82,6 +84,14 @@ const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
     reference: "Al-Ikhlas 112",
     config: IHLAS_112_CONFIG,
     textData: IHLAS_112_TEXT_DATA,
+  },
+  {
+    id: "kafirun109",
+    displayName: "Al-Kafirun",
+    arabicName: "الكافرون",
+    reference: "Al-Kafirun 109",
+    config: KAFIRUN_109_CONFIG,
+    textData: KAFIRUN_109_TEXT_DATA,
   },
 ] as const;
 

@@ -12,7 +12,7 @@ import {
 import { useStoryStore } from "../stores/useStoryStore";
 
 export function getPageWidthForLanguage(language: SurahLanguage, basePageWidth: number, configId?: string) {
-  if (configId === "ahzab35") {
+  if (configId === "ahzab35" || configId === "kafirun109") {
     return basePageWidth;
   }
   return basePageWidth + (language === "en" || language === "tr" ? 0.3 : 0);
