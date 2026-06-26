@@ -249,7 +249,9 @@ export function VerseGroup({
           // If translationVerseTextScale is null, drop it.
           // Wait, if it's null, finalVerseTextScale is ALREADY undefined from the outer loop!
           // But override?.textScaleOverride might be set. If the config dictates translation scale should be dropped, we do it here too:
-          if (layout?.translationVerseTextScale !== undefined) {
+          if (override?.translationTextScaleOverride !== undefined) {
+            finalTextScale = override.translationTextScaleOverride;
+          } else if (layout?.translationVerseTextScale !== undefined) {
             if (layout.translationVerseTextScale === null) {
               finalTextScale = undefined;
             } else if (!override?.textScaleOverride) {

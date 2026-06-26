@@ -242,6 +242,8 @@ export interface VerseOverrideConfig {
   capsuleLabelPosition?: "top" | "bottom";
   /** Override the verse text scale for this specific verse. */
   textScaleOverride?: number;
+  /** Override the verse text scale for translations (English, Turkish, etc.) */
+  translationTextScaleOverride?: number;
   /**
    * Additional horizontal offset (in world units) applied to this verse's X
    * position after the layout engine places it.

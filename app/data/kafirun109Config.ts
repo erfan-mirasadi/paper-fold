@@ -43,7 +43,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       isPill: false,
       expandW: 0.2,
       expandH: 0.018,
-      textScaleOverride: 0.85,
+      textScaleOverride: 0.9,
+      translationTextScaleOverride: 0.6,
       border: OUTER_GROUP_BORDER,
       circleBorderCol: OUTER_GROUP_BORDER,
       circleBg: OUTER_GROUP_BG,
@@ -82,7 +83,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       isPill: false,
       expandW: 0.2,
       expandH: 0.018,
-      textScaleOverride: 0.85,
+      textScaleOverride: 0.9,
+      translationTextScaleOverride: 0.6,
       border: OUTER_GROUP_BORDER,
       circleBorderCol: OUTER_GROUP_BORDER,
       circleBg: OUTER_GROUP_BG,
@@ -324,7 +326,12 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "Say, O you who do not believe (in my religion)!" }],
+        verses: [
+          {
+            number: 1,
+            text: "Say, O you who do not believe (in my religion)!",
+          },
+        ],
       },
       {
         isPushedIn: true,
