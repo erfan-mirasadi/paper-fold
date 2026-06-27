@@ -342,7 +342,7 @@ export function ScrollManager() {
       lenis.off("scroll", handleSync);
       window.removeEventListener("resize", handleResize);
     };
-  }, [lenis, syncCurrentOffset, LOCK_CONFIG]);
+  }, [lenis, syncCurrentOffset, LOCK_CONFIG, runtime.config.features.hasIntro]);
 
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const elevatedPhase = useElevatedStore((s) => s.phase);
@@ -547,6 +547,7 @@ export function ScrollManager() {
     syncCurrentOffset,
     LOCK_CONFIG,
     SCROLL_TIMELINE,
+    runtime.config.features.hasIntro,
   ]);
 
   useEffect(() => {

@@ -326,26 +326,28 @@ export const IHLAS_112_TEXT_EN: SurahDataShape = {
         isPushedIn: false,
         isCenter: true,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "Say, He is Allah, the One." }],
+        verses: [{ number: 1, text: "Say, He is Allah, the One" }],
       },
       {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
-        verses: [{ number: 2, text: "Allah, the Eternal Refuge." }],
+        verses: [{ number: 2, text: "Allah is Samet :" }],
       },
       {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
-        verses: [{ number: 3, text: "He neither begets nor is born." }],
+        verses: [
+          { number: 3, text: "He has not begotten and has not been begotten" },
+        ],
       },
       {
         isPushedIn: false,
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "And there is nothing comparable to Him." },
+          { number: 4, text: "And nothing is equal and equivalent to Him" },
         ],
       },
     ],
@@ -369,7 +371,7 @@ export const IHLAS_112_TEXT_TR: SurahDataShape = {
         isPushedIn: false,
         isCenter: true,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "Söyle, O Allah tek'tir." }],
+        verses: [{ number: 1, text: "Söyle, O Allah tek'tir" }],
       },
       {
         isPushedIn: true,
@@ -381,14 +383,14 @@ export const IHLAS_112_TEXT_TR: SurahDataShape = {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
-        verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır." }],
+        verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır" }],
       },
       {
         isPushedIn: false,
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir." },
+          { number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" },
         ],
       },
     ],

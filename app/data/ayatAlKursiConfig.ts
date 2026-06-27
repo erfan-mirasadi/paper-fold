@@ -408,10 +408,10 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "Neither drowsiness overtakes Him nor sleep." },
+          { number: 2, text: "He never slumbers or sleeps." },
           {
             number: 1,
-            text: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence.",
+            text: "Allah! (He has no equal or partner). He is the Ever-Living, the Sustainer.",
           },
         ],
       },
@@ -422,19 +422,19 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 4,
-            text: "Who is it that can intercede with Him except by His permission?",
+            text: "Without His permission, who can intercede and have a say in His presence?",
           },
           {
             number: 3,
-            text: "To Him belongs whatever is in the heavens and whatever is on the earth.",
+            text: "Whatever is in the heavens and on the earth belongs to Him.",
           },
           {
             number: 6,
-            text: "and they encompass not a thing of His knowledge except for what He wills.",
+            text: "Unless Allah wills, have they grasped anything from His knowledge to know the past and the future?",
           },
           {
             number: 5,
-            text: "He knows what is [presently] before them and what will be after them,",
+            text: "Only Allah knows their future and their past.",
           },
         ],
       },
@@ -445,11 +445,11 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 8,
-            text: "and their preservation tires Him not. And He is the Most High, the Most Great.",
+            text: "Protecting both of them is not burdensome to Him. He is the Most High and the Most Great.",
           },
           {
             number: 7,
-            text: "His Kursi extends over the heavens and the earth,",
+            text: "His throne, His sovereignty is as wide as the heavens and the earth.",
           },
         ],
       },
@@ -481,11 +481,11 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 2,
-            text: "O'nu ne bir uyuklama tutabilir, ne de bir uyku.",
+            text: "O hiç uyuklamaz ve uyumaz.",
           },
           {
             number: 1,
-            text: "Allah, kendisinden başka hiçbir ilâh bulunmayandır. Diridir, kayyumdur.",
+            text: "Allah! (Onun eşi ortağı yoktur). Hay ve Kayyumdur.",
           },
         ],
       },
@@ -496,16 +496,16 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 4,
-            text: "İzni olmaksızın O'nun katında şefaatte bulunacak kimdir?",
+            text: "Onun izni olmadan kim onun huzurunda şefaatçi ve söz sahibi olabilir ki?",
           },
-          { number: 3, text: "Göklerdeki her şey, yerdeki her şey O'nundur." },
+          { number: 3, text: "Göklerde ve yerde ne varsa Onundur." },
           {
             number: 6,
-            text: "Onlar O'nun ilminden, kendisinin dilediği kadarından başka bir şey kavrayamazlar.",
+            text: "Allah dilemeden, Onun ilminden bir şeyler mi kapmışlar ki geçmişi ve geleceği bilsinler?",
           },
           {
             number: 5,
-            text: "O, kullarının önlerindekileri ve arkalarındakileri bilir.",
+            text: "Yalnızca Allah onların geleceklerini de geçmişlerini bilmektedir.",
           },
         ],
       },
@@ -516,11 +516,11 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 8,
-            text: "Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, yücedir, büyüktür.",
+            text: "O ikisini korumak Ona ağır gelmez. O, Yüce ve Büyüktür.",
           },
           {
             number: 7,
-            text: "O'nun kürsüsü bütün gökleri ve yeri kaplayıp kuşatmıştır.",
+            text: "Onun tahtı, hakimiyeti gökler ve yer genişliğindedir.",
           },
         ],
       },

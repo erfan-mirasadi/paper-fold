@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { SectionTransforms } from "../../../data/schema";
 import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
-import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import {
   GridSectionConfig,
@@ -12,10 +11,7 @@ import {
 } from "../../../data/schema";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
-import {
-  useElevatedStore,
-  type ElevatedSectionId,
-} from "../../../stores/useElevatedStore";
+import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useDragState } from "../../../utils/dragEngine";
 import { getFoldAnglesForScroll } from "../3d-scene/FoldStory";
 import { useFoldStore } from "../orchestrator/ScrollManager";
@@ -401,7 +397,7 @@ export function VerseClickHitboxes() {
 
     const offset = useFoldStore.getState().currentOffset;
     const phase = useElevatedStore.getState().phase;
-    const isPaperFolded = offset < 1;
+    const isPaperFolded = offset < 0.98;
 
     // Delegate to background mesh if we are already zoomed in
     if (isPaperFolded && phase === "elevated") {
@@ -466,7 +462,7 @@ export function VerseClickHitboxes() {
 
     const { currentOffset } = useFoldStore.getState();
     const { phase } = useElevatedStore.getState();
-    const isPaperFolded = currentOffset < 1;
+    const isPaperFolded = currentOffset < 0.98;
 
     // Let the global cursor style handle "zoom-out" anywhere on the screen
     if (isPaperFolded && phase === "elevated") {
