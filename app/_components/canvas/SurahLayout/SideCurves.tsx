@@ -4,7 +4,7 @@ import { Line } from "@react-three/drei";
 import { useMemo, useRef, useEffect, Fragment } from "react";
 import * as THREE from "three";
 import {
-  BLUE_THEME,
+  ORANGE_THEME,
   MAROON_THEME,
   GREEN_THEME,
   CAPSULE_BG_7_8_17_18,
@@ -75,7 +75,7 @@ interface BracketSpec extends CurveConfig {
 }
 
 const FALLBACK_OUTER_COLORS: CurveConfig[] = [
-  { color: BLUE_THEME, fillColor: CAPSULE_BG_6_19 },
+  { color: ORANGE_THEME, fillColor: CAPSULE_BG_6_19 },
   { color: MAROON_THEME, fillColor: CAPSULE_BG_7_8_17_18 },
   { color: MAROON_THEME, fillColor: CAPSULE_BG_9_10_15_16 },
 ];

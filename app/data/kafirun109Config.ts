@@ -2,6 +2,7 @@ import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
 import type { AlakLayoutParams } from "./SurahConfig";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+import { CAPSULE_BG_6_19, ORANGE_THEME } from "./theme";
 
 const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (Top and Bottom groups)
 const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
@@ -46,10 +47,11 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       expandH: 0.018,
       textScaleOverride: 0.9,
       translationTextScaleOverride: 0.6,
-      border: OUTER_GROUP_BORDER,
-      circleBorderCol: OUTER_GROUP_BORDER,
-      circleBg: OUTER_GROUP_BG,
-      circleTextCol: OUTER_GROUP_BORDER,
+      bg: CAPSULE_BG_6_19,
+      border: ORANGE_THEME,
+      circleBorderCol: ORANGE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: ORANGE_THEME,
       textColor: "#A30000",
     },
     2: {
@@ -86,10 +88,11 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       expandH: 0.018,
       textScaleOverride: 0.9,
       translationTextScaleOverride: 0.6,
-      border: OUTER_GROUP_BORDER,
-      circleBorderCol: OUTER_GROUP_BORDER,
-      circleBg: OUTER_GROUP_BG,
-      circleTextCol: OUTER_GROUP_BORDER,
+      bg: CAPSULE_BG_6_19,
+      border: ORANGE_THEME,
+      circleBorderCol: ORANGE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: ORANGE_THEME,
       textColor: "#A30000",
     },
   },
@@ -124,8 +127,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
       curveColors: [
         {
-          color: OUTER_GROUP_BORDER,
-          fillColor: OUTER_GROUP_BG,
+          color: ORANGE_THEME,
+          fillColor: CAPSULE_BG_6_19,
           bowGap: 0.15,
           innerBowGap: 0.14,
           tipThickness: 0.121, // smallBoxH2 (0.085) + 2×expandH (0.018) — full rect height

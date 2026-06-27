@@ -9,7 +9,7 @@ import {
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
   S1_VERSE_5_TEXT,
-  BLUE_THEME,
+  ORANGE_THEME,
   MAROON_THEME,
   GREEN_THEME,
   CAPSULE_BG_6_19,
@@ -163,10 +163,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // ── Section 2 intro verse (6) ─────────────────────────────────────────
     6: {
       bg: CAPSULE_BG_6_19,
-      border: BLUE_THEME,
-      circleBorderCol: BLUE_THEME,
+      border: ORANGE_THEME,
+      circleBorderCol: ORANGE_THEME,
       circleBg: CAPSULE_BG_6_19,
-      circleTextCol: BLUE_THEME,
+      circleTextCol: ORANGE_THEME,
     },
     // ── Group 1 outer rows (7, 8) ─────────────────────────────────────────
     7: {
@@ -260,10 +260,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     // ── Section 2 outro verse (19) ────────────────────────────────────────
     19: {
       bg: CAPSULE_BG_6_19,
-      border: BLUE_THEME,
-      circleBorderCol: BLUE_THEME,
+      border: ORANGE_THEME,
+      circleBorderCol: ORANGE_THEME,
       circleBg: CAPSULE_BG_6_19,
-      circleTextCol: BLUE_THEME,
+      circleTextCol: ORANGE_THEME,
     },
   },
   styling: {
@@ -287,7 +287,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       maroonTheme: MAROON_THEME,
       greenTheme: GREEN_THEME,
       s1InnerBorder: "#cccccc",
-      s2IntroOutroBg: BLUE_THEME,
+      s2IntroOutroBg: ORANGE_THEME,
       s2Group1Bg: MAROON_THEME,
       s2Group2Bg: GREEN_THEME,
       s2Group3Bg: MAROON_THEME,
@@ -298,7 +298,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
        */
       curveColors: [
         {
-          color: BLUE_THEME,
+          color: ORANGE_THEME,
           fillColor: CAPSULE_BG_6_19,
           topAnchorXOffset: 0.01,
           bottomAnchorXOffset: 0.01,

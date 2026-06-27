@@ -8,7 +8,7 @@ import {
   CAPSULE_BG_12_14,
   MAROON_THEME,
   GREEN_THEME,
-  BLUE_THEME,
+  ORANGE_THEME,
   CAPSULE_BG_6_19,
 } from "./theme";
 import { SurahDataShape } from "./surahData";
@@ -215,10 +215,10 @@ export function buildVerseConfigs(
           hingeX: introT.x - PAGE_WIDTH / 2,
           direction: "right",
           bg: CAPSULE_BG_6_19,
-          border: BLUE_THEME,
-          circleBorderCol: BLUE_THEME,
+          border: ORANGE_THEME,
+          circleBorderCol: ORANGE_THEME,
           circleBg: CAPSULE_BG_6_19,
-          circleTextCol: BLUE_THEME,
+          circleTextCol: ORANGE_THEME,
           isPill: false,
         });
       }
@@ -348,10 +348,10 @@ export function buildVerseConfigs(
           hingeX: outroT.x - PAGE_WIDTH / 2,
           direction: "right",
           bg: CAPSULE_BG_6_19,
-          border: BLUE_THEME,
-          circleBorderCol: BLUE_THEME,
+          border: ORANGE_THEME,
+          circleBorderCol: ORANGE_THEME,
           circleBg: CAPSULE_BG_6_19,
-          circleTextCol: BLUE_THEME,
+          circleTextCol: ORANGE_THEME,
           isPill: false,
         });
       }

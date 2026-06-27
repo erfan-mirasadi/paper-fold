@@ -683,7 +683,7 @@ function DynamicElevatedGroup({
 
   const innerContent = (
     <group>
-      {groupIndex === 0 && vertConfig?.backgroundTexture && (
+      {groupIndex === 0 && vertConfig?.backgroundTexture && (isAllSectionsMode || vertConfig?.groupElevation === "unified") && (
         <ElevatedSvgFrame
           centerX={s2.frameX + s2.frameW / 2}
           centerY={(s2.shiftedTop ?? 0) - (s2.shiftedH ?? 0) / 2}
