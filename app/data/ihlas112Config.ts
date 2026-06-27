@@ -7,6 +7,8 @@ const YELLOW_BG = "#E5CFA4";
 const YELLOW_BORDER = "#BE9E63";
 const BLUE_BG = "#CEE0E9";
 const BLUE_BORDER = "#7A9CAD";
+const GREEN_BG = "#eaf2db";
+const GREEN_BORDER = "#5E7367";
 
 export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   id: "ihlas112",
@@ -45,22 +47,22 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       translationTextScaleOverride: 0.65,
     },
     2: {
-      bg: BLUE_BG,
-      border: BLUE_BORDER,
-      circleBg: BLUE_BG,
-      circleBorderCol: BLUE_BORDER,
+      bg: GREEN_BG,
+      border: GREEN_BORDER,
+      circleBg: GREEN_BG,
+      circleBorderCol: GREEN_BORDER,
       circleTextCol: "#000000",
       textColor: "#000000",
-      expandW: 0.1,
+      expandW: 0.05,
     },
     3: {
-      bg: BLUE_BG,
-      border: BLUE_BORDER,
-      circleBg: BLUE_BG,
-      circleBorderCol: BLUE_BORDER,
+      bg: GREEN_BG,
+      border: GREEN_BORDER,
+      circleBg: GREEN_BG,
+      circleBorderCol: GREEN_BORDER,
       circleTextCol: "#000000",
       textColor: "#000000",
-      expandW: 0.1,
+      expandW: 0.05,
     },
     4: {
       bg: YELLOW_BG,
@@ -95,7 +97,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       sectionBgTexture: "#fcfcfc",
       hollowConnectorInnerBg: "#e3e3e3",
       maroonTheme: YELLOW_BORDER,
-      greenTheme: BLUE_BORDER,
+      greenTheme: GREEN_BORDER,
       s1InnerBorder: "#cccccc",
       s2IntroOutroBg: YELLOW_BG,
       s2Group1Bg: "transparent",
@@ -106,12 +108,14 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           color: YELLOW_BORDER,
           fillColor: YELLOW_BG,
           curveSide: "symmetrical",
-          topAnchorXOffset: -0.02,
-          bottomAnchorXOffset: -0.02,
+          bowGap: 0.25,
+          innerBowGap: 0.24,
+          topAnchorXOffset: 0.0,
+          bottomAnchorXOffset: 0.0,
         },
         {
-          color: BLUE_BORDER,
-          fillColor: BLUE_BG,
+          color: GREEN_BORDER,
+          fillColor: GREEN_BG,
           curveSide: "symmetrical",
           topAnchorXOffset: -0.02,
           bottomAnchorXOffset: -0.02,

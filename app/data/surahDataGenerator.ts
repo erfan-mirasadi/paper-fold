@@ -32,6 +32,7 @@ export interface VerseConfig {
   circleTextCol: string;
   textColor?: string;
   textScaleOverride?: number;
+  translationTextScaleOverride?: number | null;
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
@@ -136,6 +137,7 @@ export function buildVerseConfigs(
           override?.circleTextCol ?? override?.border ?? S1_VERSE_NUMBER_BORDER;
         const textColor = override?.textColor;
         const textScaleOverride = override?.textScaleOverride;
+        const translationTextScaleOverride = override?.translationTextScaleOverride;
 
         // --- Hinge and fold direction ---
         let direction: "left" | "right";
@@ -187,6 +189,7 @@ export function buildVerseConfigs(
           circleTextCol,
           textColor,
           textScaleOverride,
+          translationTextScaleOverride,
           isPill,
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
@@ -254,6 +257,7 @@ export function buildVerseConfigs(
             runtime.config.styling.colors.verseNumberText;
           const finalTextColor = override?.textColor;
           const textScaleOverride = override?.textScaleOverride;
+          const translationTextScaleOverride = override?.translationTextScaleOverride;
 
           const worldX = t.x - expandW - PAGE_WIDTH / 2;
           const expandedW = t.w + expandW * 2;
@@ -319,6 +323,7 @@ export function buildVerseConfigs(
             circleTextCol: finalCircleTextCol,
             textColor: finalTextColor,
             textScaleOverride,
+            translationTextScaleOverride,
             isPill: override?.isPill,
             capsuleLabel,
           });

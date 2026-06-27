@@ -59,7 +59,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   let finalVerseTextScale =
     config.textScaleOverride ?? runtime.layoutMath.verseTextScale;
   if (activeLanguage !== "ar") {
-    if (runtime.layoutMath.translationVerseTextScale !== undefined) {
+    if (config.translationTextScaleOverride !== undefined) {
+      finalVerseTextScale = config.translationTextScaleOverride === null ? undefined : config.translationTextScaleOverride;
+    } else if (runtime.layoutMath.translationVerseTextScale !== undefined) {
       finalVerseTextScale =
         runtime.layoutMath.translationVerseTextScale === null
           ? undefined
