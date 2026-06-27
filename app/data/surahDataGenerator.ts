@@ -33,6 +33,7 @@ export interface VerseConfig {
   textColor?: string;
   textScaleOverride?: number;
   translationTextScaleOverride?: number | null;
+  translationTextAlign?: "left" | "center" | "right";
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
@@ -138,6 +139,7 @@ export function buildVerseConfigs(
         const textColor = override?.textColor;
         const textScaleOverride = override?.textScaleOverride;
         const translationTextScaleOverride = override?.translationTextScaleOverride;
+        const translationTextAlign = override?.translationTextAlign;
 
         // --- Hinge and fold direction ---
         let direction: "left" | "right";
@@ -190,6 +192,7 @@ export function buildVerseConfigs(
           textColor,
           textScaleOverride,
           translationTextScaleOverride,
+          translationTextAlign,
           isPill,
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
@@ -258,6 +261,7 @@ export function buildVerseConfigs(
           const finalTextColor = override?.textColor;
           const textScaleOverride = override?.textScaleOverride;
           const translationTextScaleOverride = override?.translationTextScaleOverride;
+          const translationTextAlign = override?.translationTextAlign;
 
           const worldX = t.x - expandW - PAGE_WIDTH / 2;
           const expandedW = t.w + expandW * 2;
@@ -324,6 +328,7 @@ export function buildVerseConfigs(
             textColor: finalTextColor,
             textScaleOverride,
             translationTextScaleOverride,
+            translationTextAlign,
             isPill: override?.isPill,
             capsuleLabel,
           });

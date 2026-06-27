@@ -103,6 +103,7 @@ export interface VerseBlockConfig {
   verseIds: number[];
   columns?: number;
   dragBehavior?: "group" | "pair" | "single" | "individual";
+  disablePopUp?: boolean;
   isPill?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
@@ -244,6 +245,8 @@ export interface VerseOverrideConfig {
   textScaleOverride?: number;
   /** Override the verse text scale for translations (English, Turkish, etc.) */
   translationTextScaleOverride?: number;
+  /** Override the translation text alignment */
+  translationTextAlign?: "left" | "center" | "right";
   /**
    * Additional horizontal offset (in world units) applied to this verse's X
    * position after the layout engine places it.

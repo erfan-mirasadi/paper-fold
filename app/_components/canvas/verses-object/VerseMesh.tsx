@@ -2,11 +2,7 @@
 import * as THREE from "three";
 import { useMemo } from "react";
 import { a, SpringValue, to } from "@react-spring/three";
-import {
-  RenderTexture,
-  OrthographicCamera,
-  useTexture,
-} from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import {
   VerseBox,
   RoundedShapeComponent,
@@ -51,6 +47,7 @@ export interface VerseMeshProps {
   circleTextCol: string;
   textColor?: string;
   textScaleOverride?: number;
+  translationTextAlign?: "left" | "center" | "right";
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
   customFrameSvg?: string;
@@ -98,7 +95,7 @@ function BorderSvg({
 
   const renderW = w * widthScale * frameScaleMult;
   const renderH = h * heightScale * frameScaleMult;
-  
+
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder + 2 : 102;
 
   return (
@@ -147,6 +144,7 @@ export function VerseMesh({
   circleTextCol,
   textColor,
   textScaleOverride,
+  translationTextAlign,
   suppressShadow = false,
   shadowRenderOrder,
   customFrameSvg,
@@ -390,6 +388,7 @@ export function VerseMesh({
                       circleTextCol={circleTextCol}
                       textColor={textColor}
                       textScaleOverride={textScaleOverride}
+                      textAlignOverride={translationTextAlign}
                       isPill={isPill}
                       shadow={false}
                       opacity={combinedOpacity}

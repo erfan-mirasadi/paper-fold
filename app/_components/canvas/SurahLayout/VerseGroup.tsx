@@ -302,6 +302,7 @@ export function VerseGroup({
               isPill={override?.isPill ?? true}
               textScaleOverride={finalTextScale}
               textColor={override?.textColor}
+              textAlignOverride={override?.translationTextAlign}
             />
             {hasTab && (
               <CapsuleLabel

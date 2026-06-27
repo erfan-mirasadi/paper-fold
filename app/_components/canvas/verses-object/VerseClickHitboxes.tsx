@@ -469,21 +469,17 @@ export function VerseClickHitboxes() {
       return;
     }
 
-    e.stopPropagation();
-
     if (isPaperFolded) {
+      e.stopPropagation();
       // Paper has folds → magnifier cursor
       document.body.style.cursor = "zoom-in";
-    } else {
-      // Paper fully open → pointer (hand) cursor
-      document.body.style.cursor = "pointer";
     }
   };
 
   const handlePointerOut = () => {
     // Only reset if we set it — avoid fighting with drag cursors
     const cur = document.body.style.cursor;
-    if (cur === "zoom-in" || cur === "zoom-out" || cur === "pointer") {
+    if (cur === "zoom-in" || cur === "zoom-out") {
       document.body.style.cursor = "";
     }
   };

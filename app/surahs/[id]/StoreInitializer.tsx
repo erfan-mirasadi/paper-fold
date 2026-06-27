@@ -25,7 +25,7 @@ import { initElevatedStoreForStory } from "@/app/stores/useElevatedStore";
 import { useCameraStore } from "@/app/stores/useCameraStore";
 import { useCameraViewStore } from "@/app/stores/useCameraViewStore";
 import { useTafsirStore } from "@/app/stores/useTafsirStore";
-import { usePopUpStore } from "@/app/stores/usePopUpStore";
+import { usePopUpStore, initPopUpStoreForStory } from "@/app/stores/usePopUpStore";
 
 interface StoreInitializerProps {
   /** The Surah route id — the ONLY prop that crosses the RSC boundary. */
@@ -52,6 +52,7 @@ export function StoreInitializer({ id }: StoreInitializerProps): null {
       useCameraViewStore.setState({ requestedView: null, selectedView: "default", continuousOffset: null });
       useTafsirStore.setState({ tafsirActiveId: null, tafsirAnchorPos: { x: -9999, y: -9999 } });
       usePopUpStore.getState().reset();
+      initPopUpStoreForStory(entry.config);
     }
 
     initialized.current = true;

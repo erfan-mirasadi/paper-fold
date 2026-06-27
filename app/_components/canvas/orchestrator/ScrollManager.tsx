@@ -347,12 +347,16 @@ export function ScrollManager() {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const elevatedPhase = useElevatedStore((s) => s.phase);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
-  const currentOffset = useFoldStore((s) => s.currentOffset);
+  // Use a stable boolean instead of the raw float so the scroll-lock effect
+  // only re-runs when the paper actually crosses the open/folded threshold,
+  // not on every scroll tick. A per-frame re-run would call lenis.start()
+  // every frame and override PopUpHoverScrollController's lenis.stop().
+  const isPaperFullyOpen = useFoldStore((s) => s.currentOffset >= 0.98);
 
   useEffect(() => {
     if (!lenis) return;
 
-    const isPaperFolded = currentOffset < 1;
+    const isPaperFolded = !isPaperFullyOpen;
 
     // Lock scroll when:
     // 1. All sections mode (paper hidden) AND not in intro
@@ -543,7 +547,7 @@ export function ScrollManager() {
     isAllSectionsMode,
     elevatedPhase,
     isIntroActive,
-    currentOffset,
+    isPaperFullyOpen,
     syncCurrentOffset,
     LOCK_CONFIG,
     SCROLL_TIMELINE,

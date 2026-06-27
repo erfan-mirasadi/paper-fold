@@ -536,6 +536,7 @@ interface VerseBoxProps {
   opacity?: any;
   baseRenderOrder?: number;
   hideBackground?: boolean;
+  textAlignOverride?: "left" | "center" | "right";
 }
 export const VerseBox = ({
   x,
@@ -560,6 +561,7 @@ export const VerseBox = ({
   opacity,
   baseRenderOrder,
   hideBackground = false,
+  textAlignOverride,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -586,7 +588,8 @@ export const VerseBox = ({
   const SMALL_PILL_OFFSET = 0.002;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
 
-  const centerTextInCapsule = !isPill || !showVerseNumber;
+  const isTranslationCenterOverride = !isArabic && textAlignOverride === "center";
+  const centerTextInCapsule = !isPill || !showVerseNumber || isTranslationCenterOverride;
 
   // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
   const circleEnd = cx + cr;

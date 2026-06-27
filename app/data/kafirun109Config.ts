@@ -17,7 +17,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   features: {
     hasIntro: false,
     hasElevatedSections: true,
-    hasPopUps: false,
+    hasPopUps: true,
     hideVerseNumbers: false,
   },
 
@@ -30,6 +30,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   },
 
   specialVerses: {
+    middleFoldVerses: { left: [3, 5], right: [2, 4] },
     versePairings: {
       2: 3,
       3: 2,
@@ -190,13 +191,13 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
       backgroundScaleX: 1.15,
       backgroundScaleY: 1.25,
-      groupElevation: "unified",
       groups: [
         {
           verseIds: [1],
           columns: 1, // Make it a single column
           isPushedIn: false,
           isCenter: false,
+          disablePopUp: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group1Bg",
         },
@@ -204,7 +205,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [3, 2, 5, 4], // mapping according to image
           isPushedIn: true,
           isCenter: true,
-          dragBehavior: "individual",
+          dragBehavior: "group",
           extraRowGap: 0,
           bgThemeKey: "s2Group2Bg",
         },
@@ -213,6 +214,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           columns: 1, // Make it a single column
           isPushedIn: false,
           isCenter: false,
+          disablePopUp: true,
           extraRowGap: 0,
           bgThemeKey: "s2Group3Bg",
         },

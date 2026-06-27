@@ -5,8 +5,8 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
 const YELLOW_BG = "#E5CFA4";
 const YELLOW_BORDER = "#BE9E63";
-const BLUE_BG = "#CEE0E9";
-const BLUE_BORDER = "#7A9CAD";
+// const BLUE_BG = "#CEE0E9";
+// const BLUE_BORDER = "#7A9CAD";
 const GREEN_BG = "#eaf2db";
 const GREEN_BORDER = "#5E7367";
 
@@ -54,6 +54,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#000000",
       textColor: "#000000",
       expandW: 0.05,
+      translationTextAlign: "center",
     },
     3: {
       bg: GREEN_BG,
@@ -63,6 +64,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#000000",
       textColor: "#000000",
       expandW: 0.05,
+      translationTextAlign: "center",
     },
     4: {
       bg: YELLOW_BG,
