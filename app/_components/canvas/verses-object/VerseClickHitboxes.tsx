@@ -5,7 +5,11 @@ import { ThreeEvent } from "@react-three/fiber";
 import { MeshBasicMaterial, PlaneGeometry } from "three";
 import { SURAH_DATA_ARABIC } from "../../../data/surahData";
 import { useStoryStore } from "../../../stores/useStoryStore";
-import { GridSectionConfig, VerticalGroupsSectionConfig, SurahLayoutConfig } from "../../../data/schema";
+import {
+  GridSectionConfig,
+  VerticalGroupsSectionConfig,
+  SurahLayoutConfig,
+} from "../../../data/schema";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import {
@@ -22,6 +26,11 @@ const hitBoxMaterial = new MeshBasicMaterial({
   depthWrite: false,
 });
 const hitBoxGeom = new PlaneGeometry(1, 1);
+
+// Padding multiplier for verse hitboxes so the clickable area covers
+// the full capsule, not just the verse text bounding box.
+const VERSE_HITBOX_PAD_W = 1.14;
+const VERSE_HITBOX_PAD_H = 1.3;
 
 interface VerseHitbox {
   key: string;
@@ -43,7 +52,7 @@ const LABEL_HITBOX = {
 
 function buildHitboxes(
   runtime: ReturnType<typeof useSurahLayoutRuntime>,
-  config: SurahLayoutConfig<any>
+  config: SurahLayoutConfig<any>,
 ): VerseHitbox[] {
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;
@@ -52,11 +61,13 @@ function buildHitboxes(
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
   config.sections.forEach((sectionConfig, idx) => {
-    const sTransform = SURAH_TRANSFORMS.sections[idx] as Required<SectionTransforms>;
-    
+    const sTransform = SURAH_TRANSFORMS.sections[
+      idx
+    ] as Required<SectionTransforms>;
+
     if (sectionConfig.type === "gridWithAnaAyet") {
       const gConfig = sectionConfig as GridSectionConfig;
-      
+
       // Add verses hitboxes
       gConfig.verses.forEach((vId) => {
         const vt = sTransform.verses[vId];
@@ -66,8 +77,8 @@ function buildHitboxes(
           cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
           cy: vt.y - vt.h / 2,
           cz: zFront,
-          w: vt.w,
-          h: vt.h,
+          w: vt.w * VERSE_HITBOX_PAD_W,
+          h: vt.h * VERSE_HITBOX_PAD_H,
           kind: "verse",
           verseId: vId,
         });
@@ -80,8 +91,8 @@ function buildHitboxes(
         cx: anaAyet.x + anaAyet.w / 2 - PAGE_WIDTH / 2,
         cy: anaAyet.y - anaAyet.h / 2,
         cz: zFront,
-        w: anaAyet.w,
-        h: anaAyet.h,
+        w: anaAyet.w * VERSE_HITBOX_PAD_W,
+        h: anaAyet.h * VERSE_HITBOX_PAD_H,
         kind: "verse",
         verseId: gConfig.anaAyet,
       });
@@ -98,7 +109,6 @@ function buildHitboxes(
         sectionId: gConfig.id,
         verseIds: [...gConfig.verses, gConfig.anaAyet],
       });
-
     } else if (sectionConfig.type === "verticalGroups") {
       const vConfig = sectionConfig as VerticalGroupsSectionConfig;
 
@@ -110,8 +120,8 @@ function buildHitboxes(
           cx: intro.x + intro.w / 2 - PAGE_WIDTH / 2,
           cy: intro.y - intro.h / 2,
           cz: zFront,
-          w: intro.w,
-          h: intro.h,
+          w: intro.w * VERSE_HITBOX_PAD_W,
+          h: intro.h * VERSE_HITBOX_PAD_H,
           kind: "verse",
           verseId: vConfig.introVerse,
         });
@@ -125,8 +135,8 @@ function buildHitboxes(
           cx: outro.x + outro.w / 2 - PAGE_WIDTH / 2,
           cy: outro.y - outro.h / 2,
           cz: zFront,
-          w: outro.w,
-          h: outro.h,
+          w: outro.w * VERSE_HITBOX_PAD_W,
+          h: outro.h * VERSE_HITBOX_PAD_H,
           kind: "verse",
           verseId: vConfig.outroVerse,
         });
@@ -141,7 +151,8 @@ function buildHitboxes(
       if (vConfig.introVerse) allVerseIds.unshift(vConfig.introVerse);
       if (vConfig.outroVerse) allVerseIds.push(vConfig.outroVerse);
 
-      const hasCustomSections = vConfig.customSections && vConfig.customSections.length > 0;
+      const hasCustomSections =
+        vConfig.customSections && vConfig.customSections.length > 0;
 
       vConfig.groups.forEach((group, gIdx) => {
         const gTransform = sTransform.groups[gIdx];
@@ -157,21 +168,23 @@ function buildHitboxes(
                 cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
                 cy: vt.y - vt.h / 2,
                 cz: zFront,
-                w: vt.w,
-                h: vt.h,
+                w: vt.w * VERSE_HITBOX_PAD_W,
+                h: vt.h * VERSE_HITBOX_PAD_H,
                 kind: "verse",
                 verseId: vId,
               });
             } else {
               // Custom sections: clicking a verse elevates its entire custom section
-              const cs = vConfig.customSections!.find((c) => c.verseIds.includes(vId));
+              const cs = vConfig.customSections!.find((c) =>
+                c.verseIds.includes(vId),
+              );
               hitboxes.push({
                 key: `verse-${vId}`,
                 cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
                 cy: vt.y - vt.h / 2,
                 cz: zFront,
-                w: vt.w,
-                h: vt.h,
+                w: vt.w * VERSE_HITBOX_PAD_W,
+                h: vt.h * VERSE_HITBOX_PAD_H,
                 kind: "section",
                 sectionId: cs?.id,
                 verseIds: cs?.verseIds ?? [vId],
@@ -183,8 +196,8 @@ function buildHitboxes(
               cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
               cy: vt.y - vt.h / 2,
               cz: zFront,
-              w: vt.w,
-              h: vt.h,
+              w: vt.w * VERSE_HITBOX_PAD_W,
+              h: vt.h * VERSE_HITBOX_PAD_H,
               kind: "verse",
               verseId: vId,
             });
@@ -193,9 +206,12 @@ function buildHitboxes(
       });
 
       // Build verse buckets for each group (intro/outro attach to first/last).
-      const groupVerseIds: number[][] = vConfig.groups.map((g) => [...g.verseIds]);
+      const groupVerseIds: number[][] = vConfig.groups.map((g) => [
+        ...g.verseIds,
+      ]);
       if (vConfig.introVerse) groupVerseIds[0].unshift(vConfig.introVerse);
-      if (vConfig.outroVerse) groupVerseIds[lastGroupIdx].push(vConfig.outroVerse);
+      if (vConfig.outroVerse)
+        groupVerseIds[lastGroupIdx].push(vConfig.outroVerse);
 
       // Helper: resolve section ID for a group index
       const resolveSectionId = (gIdx: number) =>
@@ -225,7 +241,8 @@ function buildHitboxes(
         const topGroupId = resolveSectionId(0);
         hitboxes.push({
           key: `section-${topGroupId}-hollow`,
-          cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+          cx:
+            sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
           cy: sTransform.topConnectorY - sTransform.topConnectorH / 2,
           cz: zSection,
           w: sTransform.connectorW,
@@ -253,11 +270,15 @@ function buildHitboxes(
       }
 
       // Bottom hollow connector (belongs to last group)
-      if (config.features.hasIntro && sTransform.bottomConnectorY !== undefined) {
+      if (
+        config.features.hasIntro &&
+        sTransform.bottomConnectorY !== undefined
+      ) {
         const botGroupId = resolveSectionId(lastGroupIdx);
         hitboxes.push({
           key: `section-${botGroupId}-hollow`,
-          cx: sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
+          cx:
+            sTransform.connectorX + sTransform.connectorW / 2 - PAGE_WIDTH / 2,
           cy: sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2,
           cz: zSection,
           w: sTransform.connectorW,
@@ -271,7 +292,9 @@ function buildHitboxes(
       // Center group hollow + curve hitboxes (isCenter flag)
       // Not created for custom sections — they use per-verse hitboxes only.
       const centerGroups = vConfig.groups
-        .map((g, idx) => (g.isCenter ? { gTransform: sTransform.groups[idx], gIdx: idx } : null))
+        .map((g, idx) =>
+          g.isCenter ? { gTransform: sTransform.groups[idx], gIdx: idx } : null,
+        )
         .filter(Boolean) as { gTransform: any; gIdx: number }[];
 
       if (!hasCustomSections && centerGroups.length > 0) {
@@ -283,13 +306,17 @@ function buildHitboxes(
           : centerGroups.flatMap(({ gIdx }) => groupVerseIds[gIdx] ?? []);
 
         const middleTop = firstCenter.gTransform.frameY;
-        const middleBottom = lastCenter.gTransform.frameY - lastCenter.gTransform.frameH;
+        const middleBottom =
+          lastCenter.gTransform.frameY - lastCenter.gTransform.frameH;
         const middleHeight = middleTop - middleBottom;
         const middleCenterY = (middleTop + middleBottom) / 2;
 
         hitboxes.push({
           key: `section-${centerId}-hollow`,
-          cx: firstCenter.gTransform.frameX + firstCenter.gTransform.frameW / 2 - PAGE_WIDTH / 2,
+          cx:
+            firstCenter.gTransform.frameX +
+            firstCenter.gTransform.frameW / 2 -
+            PAGE_WIDTH / 2,
           cy: middleCenterY,
           cz: zSection,
           w: firstCenter.gTransform.frameW,
@@ -301,7 +328,8 @@ function buildHitboxes(
 
         if (config.features.hasIntro) {
           const middleTopInner = firstCenter.gTransform.frameY + 0.01;
-          const middleBottomInner = lastCenter.gTransform.frameY - lastCenter.gTransform.frameH - 0.01;
+          const middleBottomInner =
+            lastCenter.gTransform.frameY - lastCenter.gTransform.frameH - 0.01;
           const middleHeightInner = middleTopInner - middleBottomInner;
           const middleCenterYInner = (middleTopInner + middleBottomInner) / 2;
 
@@ -361,34 +389,45 @@ const canUseElevatedInteraction = (
 
 export function VerseClickHitboxes() {
   const runtime = useSurahLayoutRuntime();
-  const config = useStoryStore(state => state.activeConfig);
-  const hitboxes = useMemo(() => buildHitboxes(runtime, config), [runtime, config]);
+  const config = useStoryStore((state) => state.activeConfig);
+  const hitboxes = useMemo(
+    () => buildHitboxes(runtime, config),
+    [runtime, config],
+  );
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     const { kind, verseId, verseIds, sectionId } = e.object.userData;
     if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
 
+    const offset = useFoldStore.getState().currentOffset;
+    const phase = useElevatedStore.getState().phase;
+    const isPaperFolded = offset < 1;
+
+    // Delegate to background mesh if we are already zoomed in
+    if (isPaperFolded && phase === "elevated") {
+      return;
+    }
+
     // When the paper is folded, hitboxes below the folded part remain active in the empty space.
     // We reject clicks that hit these "invisible" hitboxes below the current visual paper edge.
-    const offset = useFoldStore.getState().currentOffset;
     const angles = getFoldAnglesForScroll(offset, runtime.foldSteps);
-    
+
     let lowestVisibleY = -Infinity;
     for (let i = 0; i < angles.length; i++) {
-      if (Math.abs(angles[i]) > 0.1) {
+      if (Math.abs(angles[i]) > 1.5) {
         lowestVisibleY = runtime.FOLD_Y_POSITIONS[i];
         break;
       }
     }
 
     // Hitbox's local Y position is exactly its cy coordinate, matching the fold positions.
-    // A small buffer (0.2) allows clicking just on the edge.
-    if (e.object.position.y < lowestVisibleY - 0.2) {
+    // A larger buffer (0.5) allows clicking on slightly folded sections
+    if (e.object.position.y < lowestVisibleY - 0.5) {
       return;
     }
 
+    if (e.delta > 10) return;
     e.stopPropagation();
-    if (e.delta > 2) return;
 
     const { activeVerseIds } = useElevatedStore.getState();
     const { draggedVerseIds, draggedSectionIds } = useDragState.getState();
@@ -407,7 +446,8 @@ export function VerseClickHitboxes() {
       const isAllSectionsMode = useElevatedStore.getState().isAllSectionsMode;
       if (isAllSectionsMode) return;
 
-      const validSectionId = typeof sectionId === "string" ? sectionId : undefined;
+      const validSectionId =
+        typeof sectionId === "string" ? sectionId : undefined;
 
       const allSelected = verseIds.every((id) => activeVerseIds.includes(id));
       const isDragged = validSectionId
@@ -417,6 +457,38 @@ export function VerseClickHitboxes() {
       if (allSelected && isDragged) return;
 
       useElevatedStore.getState().elevateVerses(verseIds, validSectionId);
+    }
+  };
+
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+    const { kind, verseId, verseIds } = e.object.userData;
+    if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
+
+    const { currentOffset } = useFoldStore.getState();
+    const { phase } = useElevatedStore.getState();
+    const isPaperFolded = currentOffset < 1;
+
+    // Let the global cursor style handle "zoom-out" anywhere on the screen
+    if (isPaperFolded && phase === "elevated") {
+      return;
+    }
+
+    e.stopPropagation();
+
+    if (isPaperFolded) {
+      // Paper has folds → magnifier cursor
+      document.body.style.cursor = "zoom-in";
+    } else {
+      // Paper fully open → pointer (hand) cursor
+      document.body.style.cursor = "pointer";
+    }
+  };
+
+  const handlePointerOut = () => {
+    // Only reset if we set it — avoid fighting with drag cursors
+    const cur = document.body.style.cursor;
+    if (cur === "zoom-in" || cur === "zoom-out" || cur === "pointer") {
+      document.body.style.cursor = "";
     }
   };
 
@@ -434,6 +506,8 @@ export function VerseClickHitboxes() {
             verseIds: hb.verseIds,
           }}
           onClick={handleClick}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
           geometry={hitBoxGeom}
           material={hitBoxMaterial}
         />

@@ -342,11 +342,17 @@ export function ScrollManager() {
   }, [lenis, syncCurrentOffset, LOCK_CONFIG]);
 
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const elevatedPhase = useElevatedStore((s) => s.phase);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const currentOffset = useFoldStore((s) => s.currentOffset);
 
   useEffect(() => {
     if (!lenis) return;
 
+    const isPaperFolded = currentOffset < 1;
+
+    // Lock scroll when:
+    // 1. All sections mode (paper hidden) AND not in intro
     const shouldLockScroll = isAllSectionsMode && !isIntroActive;
 
     if (shouldLockScroll) {
@@ -533,7 +539,7 @@ export function ScrollManager() {
       });
       window.removeEventListener("keydown", handleKey, { capture: true });
     };
-  }, [lenis, isAllSectionsMode, isIntroActive, syncCurrentOffset, LOCK_CONFIG, SCROLL_TIMELINE]);
+  }, [lenis, isAllSectionsMode, elevatedPhase, isIntroActive, currentOffset, syncCurrentOffset, LOCK_CONFIG, SCROLL_TIMELINE]);
 
   useEffect(() => {
     if (!targetStageId || !lenis) return;

@@ -188,7 +188,7 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
             activeVerseId: newActive[0] ?? null,
             activeVerseIds: newActive,
             activeSectionIds: nextSectionIds,
-            isAllSectionsMode: hasAllSections(nextSectionIds),
+            isAllSectionsMode: false,
             activeSectionId: pickActiveSectionId(
               nextSectionIds,
               null,
@@ -230,7 +230,6 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       activeVerseId: nextIds[0] ?? null,
       activeVerseIds: nextIds,
       activeSectionIds: nextSectionIds,
-      isAllSectionsMode: hasAllSections(nextSectionIds),
       activeSectionId: pickActiveSectionId(
         nextSectionIds,
         null,
@@ -279,7 +278,6 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       activeVerseId: nextIds[0] ?? null,
       activeVerseIds: nextIds,
       activeSectionIds: nextSectionIds,
-      isAllSectionsMode: hasAllSections(nextSectionIds),
       activeSectionId: pickActiveSectionId(
         nextSectionIds,
         sectionId,

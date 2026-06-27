@@ -388,7 +388,9 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "De ki, Ey (benim dinime) inanmayanlar!" }],
+        verses: [
+          { number: 1, text: "De ki, Ey (benim dinime) inanmayanlar !" },
+        ],
       },
       {
         isPushedIn: true,

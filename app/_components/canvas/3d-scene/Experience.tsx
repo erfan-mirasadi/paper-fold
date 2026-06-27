@@ -91,11 +91,45 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
     return unsub;
   }, []);
 
+  useEffect(() => {
+    const updateCursor = () => {
+      const { phase, isAllSectionsMode } = useElevatedStore.getState();
+      const { currentOffset, isIntroActive } = useFoldStore.getState();
+      const isPaperFolded = currentOffset < 0.98;
+
+      if (isPaperFolded && phase === "elevated" && !isIntroActive && !isAllSectionsMode) {
+        document.body.style.cursor = "zoom-out";
+      } else {
+        if (document.body.style.cursor === "zoom-out") {
+          document.body.style.cursor = "";
+        }
+      }
+    };
+
+    const unsubElevated = useElevatedStore.subscribe(updateCursor);
+    const unsubFold = useFoldStore.subscribe(updateCursor);
+    
+    updateCursor();
+    return () => {
+      unsubElevated();
+      unsubFold();
+    };
+  }, []);
+
   const handleBackgroundClick = useCallback((e: ThreeEvent<MouseEvent>) => {
-    if (useFoldStore.getState().isIntroActive) return;
-    if (e.delta > 2) return;
+    const { currentOffset } = useFoldStore.getState();
+    const isPaperFolded = currentOffset < 0.98;
+    const { phase } = useElevatedStore.getState();
+
+    // When paper has folds: only allow background click if zoomed in (to zoom out)
+    if (isPaperFolded && phase !== "elevated") return;
+    // When paper is open and idle: nothing to dismiss
+    if (!isPaperFolded && phase === "idle") return;
+
+    if (e.delta > 10) return;
     const { hasDragged } = useDragState.getState();
     if (hasDragged) return;
+
     useElevatedStore.getState().dismiss();
   }, []);
 
@@ -150,7 +184,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
       </mesh>
 
       <group name="intro-scene" visible={useFoldStore.getState().isIntroActive}>
-         {/* اگر کامپوننتی برای Intro داشتی اینجا میذاری */}
+        {/* اگر کامپوننتی برای Intro داشتی اینجا میذاری */}
       </group>
 
       <DynamicControls />
