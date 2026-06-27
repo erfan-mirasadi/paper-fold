@@ -85,17 +85,18 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   resetTransition: () => set({ targetStageId: null, isTransitioning: false }),
   isInstantSkip: false,
   setInstantSkip: (v) => set({ isInstantSkip: v }),
-  resetForStory: (config) => set({
-    isIntroActive: config.features.hasIntro,
-    introProgress: config.features.hasIntro ? 0 : 1,
-    introHandoffProgress: config.features.hasIntro ? 0 : 1,
-    ambientProgress: config.features.hasIntro ? 0 : 1,
-    barrierProgress: 0,
-    currentOffset: 0,
-    rawOffset: 0,
-    targetStageId: null,
-    isTransitioning: false,
-  }),
+  resetForStory: (config) =>
+    set({
+      isIntroActive: config.features.hasIntro,
+      introProgress: config.features.hasIntro ? 0 : 1,
+      introHandoffProgress: config.features.hasIntro ? 0 : 1,
+      ambientProgress: config.features.hasIntro ? 0 : 1,
+      barrierProgress: 0,
+      currentOffset: 0,
+      rawOffset: 0,
+      targetStageId: null,
+      isTransitioning: false,
+    }),
 }));
 
 const getBandProgress = (
@@ -158,7 +159,7 @@ export function ScrollManager() {
 
   useEffect(() => {
     if (!lenis) return;
-    
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         lenis.stop();
@@ -166,7 +167,7 @@ export function ScrollManager() {
         lenis.start();
       }
     };
-    
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -224,7 +225,9 @@ export function ScrollManager() {
 
       let scrollAmbientMediaId: string | null = null;
       if (ambientProgress >= 0 && handoffProgress === 0) {
-        const keys = runtime.config.animations.ambientMediaKeys as string[] | undefined;
+        const keys = runtime.config.animations.ambientMediaKeys as
+          | string[]
+          | undefined;
         if (keys && keys.length > 0) {
           // Distribute the items across the ambient progress (0 to 1)
           let index = Math.floor(ambientProgress * keys.length);
@@ -353,20 +356,16 @@ export function ScrollManager() {
 
     // Lock scroll when:
     // 1. All sections mode (paper hidden) AND not in intro
-    const shouldLockScroll = isAllSectionsMode && !isIntroActive;
+    // 2. Paper still has folds AND user has zoomed into a section
+    const shouldLockScroll =
+      !isIntroActive &&
+      (isAllSectionsMode || (isPaperFolded && elevatedPhase === "elevated"));
 
     if (shouldLockScroll) {
       lenis.stop();
     } else {
       lenis.start();
     }
-
-    const preventDefault = (e: Event) => {
-      if (shouldLockScroll) {
-        e.preventDefault();
-      }
-    };
-
     const handleKey = (e: KeyboardEvent) => {
       if (shouldLockScroll) {
         const keys = [
@@ -539,7 +538,16 @@ export function ScrollManager() {
       });
       window.removeEventListener("keydown", handleKey, { capture: true });
     };
-  }, [lenis, isAllSectionsMode, elevatedPhase, isIntroActive, currentOffset, syncCurrentOffset, LOCK_CONFIG, SCROLL_TIMELINE]);
+  }, [
+    lenis,
+    isAllSectionsMode,
+    elevatedPhase,
+    isIntroActive,
+    currentOffset,
+    syncCurrentOffset,
+    LOCK_CONFIG,
+    SCROLL_TIMELINE,
+  ]);
 
   useEffect(() => {
     if (!targetStageId || !lenis) return;
@@ -685,7 +693,14 @@ export function ScrollManager() {
       }
       clearPendingWork();
     };
-  }, [targetStageId, transitionToken, lenis, setCurrentOffset, runtime, SCROLL_TIMELINE]);
+  }, [
+    targetStageId,
+    transitionToken,
+    lenis,
+    setCurrentOffset,
+    runtime,
+    SCROLL_TIMELINE,
+  ]);
 
   useEffect(
     () => () => {
