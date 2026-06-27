@@ -751,12 +751,25 @@ function DynamicElevatedGroup({
       {!hideConnectors &&
         groupTransforms.rowConnectors?.map((rc: any, j: number) => {
           const rcColor = getConnectorColor(groupIndex);
+          
+          const verseIds = vertConfig?.groups[groupIndex]?.verseIds;
+          const leftVId = verseIds?.[j * 2];
+          const rightVId = verseIds?.[j * 2 + 1];
+          
+          const rowLeftOverride = leftVId ? config.verseOverrides?.[leftVId] : undefined;
+          const rowRightOverride = rightVId ? config.verseOverrides?.[rightVId] : undefined;
+          
+          const leftExpandW = rowLeftOverride?.expandW ?? 0;
+          const rightExpandW = rowRightOverride?.expandW ?? 0;
+          const finalRcX = rc.x - leftExpandW;
+          const finalRcW = rc.w + leftExpandW + rightExpandW;
+
           return (
             <ElevatedLayer
               key={`${groupId}-rc-${j}`}
-              x={rc.x}
+              x={finalRcX}
               y={rc.y}
-              w={rc.w}
+              w={finalRcW}
               h={rc.h}
               radius={OPPOSITE_VERSE_CONNECTOR.radius}
               color={rcColor}

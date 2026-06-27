@@ -162,15 +162,21 @@ export function VerseGroup({
           // Per-row connector color — derive from the left verse in this row so
           // each row pair tracks its own hue when overrides differ per row.
           const rowLeftOverride = config.verseOverrides?.[leftV.number];
+          const rowRightOverride = config.verseOverrides?.[rightV.number];
           const rowBorderColor = rowLeftOverride?.border ?? groupFallbackBorder;
+
+          const leftExpandW = rowLeftOverride?.expandW ?? 0;
+          const rightExpandW = rowRightOverride?.expandW ?? 0;
+          const finalRcX = rc.x - leftExpandW;
+          const finalRcW = rc.w + leftExpandW + rightExpandW;
 
           return (
             <group key={`connector-${i}`}>
               <UiRect
-                x={rc.x}
+                x={finalRcX}
                 y={rc.y}
                 z={rc.z}
-                w={rc.w}
+                w={finalRcW}
                 h={rc.h}
                 radius={OPPOSITE_VERSE_CONNECTOR.radius}
                 color={rowBorderColor}
