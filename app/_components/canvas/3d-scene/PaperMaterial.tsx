@@ -359,6 +359,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
             </mesh>
           ))}
 
+          {/* VERTICAL CREASE LINES COMMENTED OUT
           <mesh
             position={[
               runtime.PAGE_WIDTH / 2,
@@ -411,6 +412,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
               toneMapped={false}
             />
           </mesh>
+          */}
         </RenderTexture>
       )}
     </meshStandardMaterial>
