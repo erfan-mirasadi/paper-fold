@@ -190,7 +190,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
       <DynamicControls />
 
       {/* 1. انعکاس محیطی برای طبیعی شدن جنس کاغذ (خیلی مهمه!) */}
-      <Environment preset="apartment" environmentIntensity={1} />
+      <Environment files="/hdri/lebombo_1k.hdr" environmentIntensity={1} />
 
       {/* 1. نور محیطی رو کم کن تا سایهها بتونن شکل بگیرن */}
       <ambientLight intensity={0.8} />

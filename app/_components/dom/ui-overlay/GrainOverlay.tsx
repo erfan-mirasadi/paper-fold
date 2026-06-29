@@ -33,7 +33,7 @@ export default function GrainOverlay({
         
         .grain-overflow {
           /* Put a transparent PNG with black specks here */
-          background-image: url('/noise.png');
+          background-image: url('/noise.webp');
           background-repeat: repeat;
           background-size: 300px;
           /* Toggling between steps(1) for jumping effect and linear for smooth sliding */
