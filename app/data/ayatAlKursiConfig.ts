@@ -408,11 +408,11 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         isCenter: false,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "He never slumbers or sleeps." },
           {
             number: 1,
             text: "Allah! (He has no equal or partner). He is the Ever-Living, the Sustainer.",
           },
+          { number: 2, text: "He never slumbers or sleeps." },
         ],
       },
       {
@@ -421,20 +421,20 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           {
-            number: 4,
-            text: "Without His permission, who can intercede and have a say in His presence?",
-          },
-          {
             number: 3,
             text: "Whatever is in the heavens and on the earth belongs to Him.",
           },
           {
-            number: 6,
-            text: "Unless Allah wills, have they grasped anything from His knowledge to know the past and the future?",
+            number: 4,
+            text: "Without His permission, who can intercede and have a say in His presence?",
           },
           {
             number: 5,
             text: "Only Allah knows their future and their past.",
+          },
+          {
+            number: 6,
+            text: "Unless Allah wills, have they grasped anything from His knowledge to know the past and the future?",
           },
         ],
       },
@@ -444,12 +444,12 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           {
-            number: 8,
-            text: "Protecting both of them is not burdensome to Him. He is the Most High and the Most Great.",
-          },
-          {
             number: 7,
             text: "His throne, His sovereignty is as wide as the heavens and the earth.",
+          },
+          {
+            number: 8,
+            text: "Protecting both of them is not burdensome to Him. He is the Most High and the Most Great.",
           },
         ],
       },
@@ -480,12 +480,12 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           {
-            number: 2,
-            text: "O hiç uyuklamaz ve uyumaz.",
-          },
-          {
             number: 1,
             text: "Allah! (Onun eşi ortağı yoktur). Hay ve Kayyumdur.",
+          },
+          {
+            number: 2,
+            text: "O hiç uyuklamaz ve uyumaz.",
           },
         ],
       },
@@ -494,18 +494,18 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
+          { number: 3, text: "Göklerde ve yerde ne varsa Onundur." },
           {
             number: 4,
             text: "Onun izni olmadan kim onun huzurunda şefaatçi ve söz sahibi olabilir ki?",
           },
-          { number: 3, text: "Göklerde ve yerde ne varsa Onundur." },
-          {
-            number: 6,
-            text: "Allah dilemeden, Onun ilminden bir şeyler mi kapmışlar ki geçmişi ve geleceği bilsinler?",
-          },
           {
             number: 5,
             text: "Yalnızca Allah onların geleceklerini de geçmişlerini bilmektedir.",
+          },
+          {
+            number: 6,
+            text: "Allah dilemeden, Onun ilminden bir şeyler mi kapmışlar ki geçmişi ve geleceği bilsinler?",
           },
         ],
       },
@@ -515,12 +515,12 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           {
-            number: 8,
-            text: "O ikisini korumak Ona ağır gelmez. O, Yüce ve Büyüktür.",
-          },
-          {
             number: 7,
             text: "Onun tahtı, hakimiyeti gökler ve yer genişliğindedir.",
+          },
+          {
+            number: 8,
+            text: "O ikisini korumak Ona ağır gelmez. O, Yüce ve Büyüktür.",
           },
         ],
       },

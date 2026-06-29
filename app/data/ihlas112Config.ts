@@ -25,8 +25,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   dimensions: {
     paperWidth: 1.54,
-    paperHeight: 1,
-    sceneCenterYOffset: 0.0,
+    paperHeight: 1.78,
+    sceneCenterYOffset: -0.045,
     padding: 0.2,
     scrollPages: 1.5,
   },

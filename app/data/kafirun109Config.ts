@@ -24,8 +24,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   dimensions: {
     paperWidth: 1.54,
-    paperHeight: 0.8,
-    sceneCenterYOffset: 0.0,
+    paperHeight: 1.78,
+    sceneCenterYOffset: -0.045,
     padding: 0.15,
     scrollPages: 1.5,
   },
@@ -349,20 +349,20 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           {
-            number: 3,
-            text: "You also do not worship the Allah I worship",
-          },
-          {
             number: 2,
             text: "I (did not worship), do not worship what you worship",
           },
           {
-            number: 5,
-            text: "You also are not worshippers of the Allah I worship",
+            number: 3,
+            text: "You also do not worship the Allah I worship",
           },
           {
             number: 4,
             text: "I am not going to worship what you worship",
+          },
+          {
+            number: 5,
+            text: "You also are not worshippers of the Allah I worship",
           },
         ],
       },
@@ -408,20 +408,20 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         extraRowGap: 0,
         verses: [
           {
-            number: 3,
-            text: "Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz",
-          },
-          {
             number: 2,
             text: "Ben sizin taptıklarınıza (tapmadım), tapmıyorum",
           },
           {
-            number: 5,
-            text: "Siz de benim ibadet ettiğim Allah'a ibadet edici değilsiz",
+            number: 3,
+            text: "Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz",
           },
           {
             number: 4,
             text: "Ben sizin taptıklarınıza tapacak değilim",
+          },
+          {
+            number: 5,
+            text: "Siz de benim ibadet ettiğim Allah'a ibadet edici değilsiz",
           },
         ],
       },
