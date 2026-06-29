@@ -100,9 +100,6 @@ export interface TextureToggles {
   normal: boolean;
 }
 
-// ─── Public handle exposed via forwardRef ────────────────────────────────────
-// Non-primary panels read getMaterial() to grab the settled MeshStandardMaterial
-// and inject it into their own material slot — skipping their own RenderTexture.
 export interface PaperMaterialHandle {
   getMaterial: () => MeshStandardMaterial | null;
 }
@@ -117,7 +114,6 @@ function areTogglesEqual(a: TextureToggles, b: TextureToggles): boolean {
   return a.diffuse === b.diffuse && a.normal === b.normal;
 }
 
-// ─── Core implementation ─────────────────────────────────────────────────────
 const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   PaperMaterialHandle,
   PaperMaterialProps
@@ -130,13 +126,9 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     ? NORMAL_SCALE_ENABLED
     : NORMAL_SCALE_DISABLED;
 
-  // 🎯 GPU-BASED quality scaling — NOT screen-size based.
-  // A large 4K display with a weak GPU gets lower quality.
-  // A small phone with a powerful GPU gets full quality.
   const tier = detectGpuTier();
   const maxTextureSize = gl.capabilities.maxTextureSize || 4096;
 
-  // Multiplier: high=2× (up to 4K tex), medium=1.5×, low=1× (base resolution)
   const targetMultiplier = tier === "high" ? 2 : tier === "medium" ? 1.5 : 1;
   const targetW = BASE_RENDER_TEX_WIDTH * targetMultiplier;
   const targetH = BASE_RENDER_TEX_HEIGHT * targetMultiplier;
@@ -148,12 +140,12 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const renderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
   const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
 
-  // 🚀 1. MSAA samples based on GPU tier (not screen size):
   const colorSamples = tier === "low" ? 0 : tier === "medium" ? 2 : 4;
-  const normalSamples = 0; // نرمال مپ هیچ نیازی به Sample نداره! صفر بودنش VRAM رو نجات میده.
+  const normalSamples = 0; 
 
   const normalTexW = Math.min(renderTexWidth, 1024);
   const normalTexHeight = Math.min(renderTexHeight, 1024);
+
   const renderTextureKey = [
     activeLanguage,
     fontsReady ? "fonts-ready" : "fonts-loading",
@@ -162,6 +154,41 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   ].join("-");
 
   const [settledKey, setSettledKey] = useState<string | null>(null);
+  
+  // استیت بیدارباش فقط برای باز کردن فریمها
+  const [isWakingUp, setIsWakingUp] = useState(false);
+
+  useEffect(() => {
+    let hiddenTime = 0;
+
+    const handleWakeUp = () => {
+      setIsWakingUp(true);
+      setTimeout(() => setIsWakingUp(false), 800);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenTime = Date.now();
+      } else if (document.visibilityState === "visible") {
+        const timeAway = Date.now() - hiddenTime;
+        // 5 minutes = 5 * 60 * 1000 ms
+        if (hiddenTime > 0 && timeAway >= 5 * 60 * 1000) {
+          handleWakeUp();
+        }
+        hiddenTime = 0;
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    const canvas = gl.domElement;
+    if (canvas) canvas.addEventListener("webglcontextrestored", handleWakeUp);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (canvas) canvas.removeEventListener("webglcontextrestored", handleWakeUp);
+    };
+  }, [gl]);
 
   useEffect(() => {
     if (!fontsReady) return;
@@ -173,14 +200,12 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   }, [fontsReady, renderTextureKey]);
 
   const settled = fontsReady && settledKey === renderTextureKey;
-
-  const mapFrames = settled ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
+  
+  // اگر در حال بیدار شدن باشیم، فریمها روی بینهایت میرن تا دوباره نقاشی بشن
+  const mapFrames = (settled && !isWakingUp) ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
 
   const matRef = useRef<MeshStandardMaterial>(null);
 
-  // ─── Expose the settled MeshStandardMaterial instance to the parent ──────
-  // SinglePaper reads this via sharedMatRef to inject the material into sibling
-  // panels without rendering a second RenderTexture scene for each panel.
   useImperativeHandle(
     ref,
     () => ({
@@ -214,17 +239,20 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     return () => window.clearTimeout(t);
   }, [settled, onReady]);
 
-  const creaseNormalMap = useTexture("/paper-material/crease-normal-1.png", (texture) => {
-    texture.colorSpace = NoColorSpace;
-    texture.wrapS = RepeatWrapping;
-    texture.wrapT = ClampToEdgeWrapping;
-    texture.minFilter = LinearFilter;
-    texture.magFilter = LinearFilter;
-    texture.generateMipmaps = false;
-    texture.repeat.set(5, 0.9);
-    texture.offset.set(0, 0.05);
-    texture.needsUpdate = true;
-  });
+  const creaseNormalMap = useTexture(
+    "/paper-material/crease-normal-1.png",
+    (texture) => {
+      texture.colorSpace = NoColorSpace;
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = ClampToEdgeWrapping;
+      texture.minFilter = LinearFilter;
+      texture.magFilter = LinearFilter;
+      texture.generateMipmaps = false;
+      texture.repeat.set(5, 0.9);
+      texture.offset.set(0, 0.05);
+      texture.needsUpdate = true;
+    },
+  );
 
   const paperTextureNormal = useTexture(PAPER_TEXTURES.normalUrl, (texture) => {
     texture.colorSpace = NoColorSpace;
@@ -245,10 +273,13 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     },
   );
 
-  const frameTexture = useTexture("/paper-material/grunge-frame-3.png", (texture) => {
-    texture.colorSpace = SRGBColorSpace;
-    texture.needsUpdate = true;
-  });
+  const frameTexture = useTexture(
+    "/paper-material/grunge-frame-3.png",
+    (texture) => {
+      texture.colorSpace = SRGBColorSpace;
+      texture.needsUpdate = true;
+    },
+  );
 
   const { onBeforeCompile } = usePaperMasking(paperTextureDiffuse);
 
@@ -270,8 +301,6 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
       >
         <color attach="background" args={[PAGE_BG_COLOR]} />
 
-        {/* CRITICAL FIX: OrthographicCamera ensures Troika Text calculates SDF size correctly
-            and prevents perspective distortion on low DPR devices. */}
         <OrthographicCamera
           makeDefault
           left={0}
@@ -313,10 +342,10 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
           attach="normalMap"
           width={normalTexW}
           height={normalTexHeight}
-          frames={1}
+          frames={mapFrames}
           samples={normalSamples}
-          depthBuffer={false}   // 🚀 2. این دو خط حافظه رم کارت گرافیک رو آزاد میکنن
-          stencilBuffer={false} // 🚀
+          depthBuffer={false}
+          stencilBuffer={false} 
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera
@@ -358,71 +387,14 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
               />
             </mesh>
           ))}
-
-          {/* VERTICAL CREASE LINES COMMENTED OUT
-          <mesh
-            position={[
-              runtime.PAGE_WIDTH / 2,
-              (runtime.layoutMath.g1Y +
-                (runtime.layoutMath.g3Y - runtime.layoutMath.groupH)) /
-                2,
-              0.62,
-            ]}
-            rotation={[0, 0, Math.PI / 2]}
-            renderOrder={10}
-          >
-            <planeGeometry
-              args={[
-                runtime.layoutMath.g1Y -
-                  (runtime.layoutMath.g3Y - runtime.layoutMath.groupH),
-                CREASE_BAND_HEIGHT,
-              ]}
-            />
-            <meshBasicMaterial
-              map={creaseNormalMap}
-              transparent={true}
-              opacity={CREASE_NORMAL_OPACITY}
-              depthTest={false}
-              toneMapped={false}
-            />
-          </mesh>
-
-          <mesh
-            position={[
-              runtime.PAGE_WIDTH / 2,
-              runtime.layoutMath.s1Top -
-                runtime.layoutMath.s1Pad -
-                (runtime.layoutMath.smallBoxH + runtime.layoutMath.gap / 2),
-              0.62,
-            ]}
-            rotation={[0, 0, Math.PI / 2]}
-            renderOrder={10}
-          >
-            <planeGeometry
-              args={[
-                runtime.layoutMath.smallBoxH * 2 + runtime.layoutMath.gap,
-                CREASE_BAND_HEIGHT,
-              ]}
-            />
-            <meshBasicMaterial
-              map={creaseNormalMap}
-              transparent={true}
-              opacity={CREASE_NORMAL_OPACITY}
-              depthTest={false}
-              toneMapped={false}
-            />
-          </mesh>
-          */}
         </RenderTexture>
       )}
     </meshStandardMaterial>
   );
 };
 
-// ─── forwardRef wrapper — lets SinglePaper access the underlying material ────
 const PaperMaterialWithRef = forwardRef(PaperMaterialComponentFn);
 
-// ─── memo wrapper — skips re-renders when toggles/isFolded/onReady unchanged ─
 export const PaperMaterial = memo(
   PaperMaterialWithRef,
   (prevProps, nextProps) =>

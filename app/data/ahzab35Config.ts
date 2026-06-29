@@ -317,17 +317,17 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   params: {
     // --- Section 1 (stub — not rendered) ---
-    s1Top: 0.5,
-    s1Pad: 0.01,
-    gap: 0.01,
-    s1AnaGap: 0.01,
-    smallBoxH: 0.04,
-    anaAyetH: 0.04,
-    gapBetweenS1andS2: 0.01,
+    // s1Top: 0,
+    // s1Pad: 0,
+    // gap: 0.01,
+    // s1AnaGap: 0.01,
+    // smallBoxH: 0.04,
+    // anaAyetH: 0.04,
+    // gapBetweenS1andS2: 0.01,
 
     // --- Section 2 ---
-    s2VerticalPad: 0.02,
-    bigBoxH: 0.07,
+    s2VerticalPad: 0,
+    bigBoxH: 0,
     groupGap: 0.035,
     groupPad: 0.012,
     groupPadBottom: 0.012,
@@ -347,7 +347,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     capsuleLabelDrop: 0.005,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
-    boxExtOffset: 0.02,
+    // boxExtOffset: 0.02,
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
@@ -478,7 +478,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       type: "verticalGroups",
       backgroundTexture: "/ahzab/section-frame.svg",
       backgroundScaleX: 1.47,
-      backgroundScaleY: 1.33,
+      backgroundScaleY: 1.41,
       backgroundOffsetY: 0.025,
 
       // Horizontal connector bars between paired capsules are hidden.
