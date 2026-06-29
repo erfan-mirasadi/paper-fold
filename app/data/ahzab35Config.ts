@@ -225,7 +225,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: "#A30000",
       textColor: "#A30000",
       xOffset: 0.0, // Yellow dome: no push (symmetric dome layout)
-      expandW: 0.11,
+      expandH: -0.003,
+      expandW: 0,
     },
     12: {
       bg: YELLOW_BG,
@@ -234,7 +235,8 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleBorderCol: "#A30000",
       circleTextCol: "#A30000",
       textColor: "#A30000",
-      expandW: 0.11,
+      expandH: -0.003,
+      expandW: 0,
     },
   },
 
@@ -277,7 +279,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           // Default is smallBoxH2 (0.085). Decrease to bring lines closer together.
           tipThickness: -0.13,
           topAnchorXOffset: 0.061,
-          bottomAnchorXOffset: 0.165,
+          bottomAnchorXOffset: 0.09,
           topAnchorYOffset: 0.003,
           bottomAnchorYOffset: 0.033,
         },
@@ -564,9 +566,9 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           verseIds: [12, 11],
           isPushedIn: false,
           isCenter: true,
-          xGap: 0.39, // Change this value to adjust the horizontal distance between the capsules!
+          xGap: 0.16, // Change this value to adjust the horizontal distance between the capsules!
           bgThemeKey: "s2Group1Bg",
-          customScale: 0.3,
+          customScale: 0,
           pushDown: 0.08,
           dragBehavior: "group",
           topLabelConfig: {
