@@ -359,7 +359,6 @@ export const SideCurves = ({
   hasIntroOutro,
 }: any) => {
   const popUpGroups = usePopUpStore((state) => state.popUpGroups);
-  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const isAllSectionsMode = useElevatedStore(
     (state) => state.isAllSectionsMode,
   );
@@ -382,6 +381,13 @@ export const SideCurves = ({
     : FALLBACK_CENTER_COLOR;
 
   const activeConfig = useStoryStore((s) => s.activeConfig);
+  const s2SectionId = activeConfig.sections.find((s) => s.type === "verticalGroups")?.id;
+
+  const hasActiveS2Section = useElevatedStore((state) => 
+    state.activeSectionIds.some((id) =>
+      s2SectionId && (id === s2SectionId || id.startsWith(`${s2SectionId}_g`))
+    )
+  );
 
   // Build set of section-1 popup group IDs so we can exclude them from hide logic
   const s1GroupIds = useMemo(() => {
@@ -395,12 +401,9 @@ export const SideCurves = ({
     );
   }, [activeConfig, popUpGroups]);
 
-  const s2SectionId = activeConfig.sections.find((s) => s.type === "verticalGroups")?.id;
   const shouldHide =
     popUpGroups.some((g) => g.isOpen && !s1GroupIds.has(g.id)) ||
-    (!isAllSectionsMode &&
-      activeSectionIds.some((id) =>
-        s2SectionId && (id === s2SectionId || id.startsWith(`${s2SectionId}_g`))));
+    (!isAllSectionsMode && hasActiveS2Section);
 
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
   const baseStartX_L = startX + layout.s2Pad - 0.005;

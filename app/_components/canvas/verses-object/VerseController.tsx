@@ -99,7 +99,6 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const isElevated = useElevatedStore((state) =>
     state.activeVerseIds.includes(config.id),
   );
-  const activeSectionIds = useElevatedStore((state) => state.activeSectionIds);
   const sectionId = getVerseSectionId(config.id);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
@@ -109,9 +108,10 @@ export function VerseController({ config }: { config: VerseConfig }) {
     shadowSurfaceSectionId = null;
   }
 
-  const isSectionSurfaceRaised =
+  const isSectionSurfaceRaised = useElevatedStore((state) =>
     shadowSurfaceSectionId !== null &&
-    activeSectionIds.includes(shadowSurfaceSectionId);
+    state.activeSectionIds.includes(shadowSurfaceSectionId)
+  );
   const [hasEverBeenElevated, setHasEverBeenElevated] = useState(isElevated);
   useEffect(() => {
     if (!isElevated) return;
@@ -193,8 +193,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
-  const isSectionRaised =
-    sectionId !== null && activeSectionIds.includes(sectionId);
+  const isSectionRaised = useElevatedStore((state) =>
+    sectionId !== null && state.activeSectionIds.includes(sectionId)
+  );
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
     const s2Config = activeStoryConfig.sections.find(
