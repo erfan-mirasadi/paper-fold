@@ -317,13 +317,13 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   params: {
     // --- Section 1 (stub — not rendered) ---
-    // s1Top: 0,
-    // s1Pad: 0,
-    // gap: 0.01,
-    // s1AnaGap: 0.01,
-    // smallBoxH: 0.04,
-    // anaAyetH: 0.04,
-    // gapBetweenS1andS2: 0.01,
+    s1Top: 0,
+    s1Pad: 0,
+    gap: 0.01,
+    s1AnaGap: 0.01,
+    smallBoxH: 0.04,
+    anaAyetH: 0.04,
+    gapBetweenS1andS2: 0.01,
 
     // --- Section 2 ---
     s2VerticalPad: 0,
@@ -347,7 +347,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     capsuleLabelDrop: 0.005,
     sgPad: 0.03,
     sgBorderWidth: 0.006,
-    // boxExtOffset: 0.02,
+    boxExtOffset: 0.02,
     extraRowGap: 0.0,
     labelHitboxWidth: 0.43,
     // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
