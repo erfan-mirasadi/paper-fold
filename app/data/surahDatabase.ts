@@ -1,39 +1,12 @@
-/**
- * surahDatabase.ts — Mock database / content layer
- *
- * This module is the single source of truth for which Surahs are available.
- * It is intentionally a plain module (no async I/O) so it can be called
- * safely inside Next.js Server Components with zero overhead.
- *
- * Usage (Server Component):
- *   import { getSurahData } from "@/app/data/surahDatabase";
- *   const data = getSurahData(params.id);
- *   if (!data) notFound();
- */
-
 import type { SurahLayoutConfig } from "./schema";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import type { SurahDataShape } from "./surahData";
-
-import { ALAK_LAYOUT_CONFIG } from "./alak96Config";
-import { ALAK_TEXT_DATA } from "./surahData";
-
-import {
-  AYAT_AL_KURSI_CONFIG,
-  AYAT_AL_KURSI_TEXT_DATA,
-} from "./ayatAlKursiConfig";
-
-import { AHZAB_35_CONFIG, AHZAB_35_TEXT_DATA } from "./ahzab35Config";
-
-import { IHLAS_112_CONFIG, IHLAS_112_TEXT_DATA } from "./ihlas112Config";
-
-import { KAFIRUN_109_CONFIG, KAFIRUN_109_TEXT_DATA } from "./kafirun109Config";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export interface SurahEntry {
+export interface SurahMeta {
   /** Canonical slug — matches the dynamic route [id] segment */
   id: string;
   /** Human-readable display name (shown in the menu) */
@@ -42,6 +15,9 @@ export interface SurahEntry {
   arabicName: string;
   /** Surah / verse reference (e.g. "Bakara 255") */
   reference: string;
+}
+
+export interface SurahEntry extends SurahMeta {
   /** Layout & animation config injected into useStoryStore */
   config: SurahLayoutConfig<any>;
   /** Multi-language text data injected into useStoryStore */
@@ -52,52 +28,42 @@ export interface SurahEntry {
 // Registry — add new Surahs here as the project grows
 // ---------------------------------------------------------------------------
 
-const SURAH_REGISTRY: ReadonlyArray<SurahEntry> = [
+const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
   {
     id: "alak",
     displayName: "Al-Alak",
     arabicName: "العَلَق",
     reference: "Al-Alak 96",
-    config: ALAK_LAYOUT_CONFIG,
-    textData: ALAK_TEXT_DATA,
   },
   {
     id: "ayatalkursi",
     displayName: "Ayat al-Kursi",
     arabicName: "آيَة الكُرْسِي",
     reference: "Al-Bakara 255",
-    config: AYAT_AL_KURSI_CONFIG,
-    textData: AYAT_AL_KURSI_TEXT_DATA,
   },
   {
     id: "ahzab35",
     displayName: "Al-Ahzab",
     arabicName: "الأحزاب",
     reference: "Al-Ahzab 35",
-    config: AHZAB_35_CONFIG,
-    textData: AHZAB_35_TEXT_DATA,
   },
   {
     id: "ihlas112",
     displayName: "Al-Ikhlas",
     arabicName: "الإخلاص",
     reference: "Al-Ikhlas 112",
-    config: IHLAS_112_CONFIG,
-    textData: IHLAS_112_TEXT_DATA,
   },
   {
     id: "kafirun109",
     displayName: "Al-Kafirun",
     arabicName: "الكافرون",
     reference: "Al-Kafirun 109",
-    config: KAFIRUN_109_CONFIG,
-    textData: KAFIRUN_109_TEXT_DATA,
   },
 ] as const;
 
 // Pre-built lookup map for O(1) access by id
-const REGISTRY_MAP = new Map<string, SurahEntry>(
-  SURAH_REGISTRY.map((entry) => [entry.id, entry]),
+const META_REGISTRY_MAP = new Map<string, SurahMeta>(
+  SURAH_META_REGISTRY.map((meta) => [meta.id, meta]),
 );
 
 // ---------------------------------------------------------------------------
@@ -105,18 +71,73 @@ const REGISTRY_MAP = new Map<string, SurahEntry>(
 // ---------------------------------------------------------------------------
 
 /**
- * Retrieve a single Surah's config and text data by its route id.
- *
- * Returns `null` when the id is unknown — callers should invoke `notFound()`
- * from `next/navigation` in that case.
+ * Retrieve a single Surah's lightweight metadata by its route id.
+ * Safe to call synchronously on the server or client for routing/SEO.
  */
-export function getSurahData(id: string): SurahEntry | null {
-  return REGISTRY_MAP.get(id) ?? null;
+export function getSurahMeta(id: string): SurahMeta | null {
+  return META_REGISTRY_MAP.get(id) ?? null;
 }
 
 /**
  * Returns the full ordered list of available Surahs (for menu pages, sitemaps, etc.)
  */
-export function getAllSurahs(): ReadonlyArray<SurahEntry> {
-  return SURAH_REGISTRY;
+export function getAllSurahs(): ReadonlyArray<SurahMeta> {
+  return SURAH_META_REGISTRY;
+}
+
+/**
+ * Asynchronously fetch the heavy config and text data for a specific Surah.
+ * Uses dynamic imports to code-split the data per route, preventing giant bundle sizes.
+ */
+export async function getSurahDataAsync(id: string): Promise<SurahEntry | null> {
+  const meta = getSurahMeta(id);
+  if (!meta) return null;
+
+  switch (id) {
+    case "alak": {
+      const [configModule, dataModule] = await Promise.all([
+        import("./alak96Config"),
+        import("./surahData")
+      ]);
+      return {
+        ...meta,
+        config: configModule.ALAK_LAYOUT_CONFIG,
+        textData: dataModule.ALAK_TEXT_DATA,
+      };
+    }
+    case "ayatalkursi": {
+      const module = await import("./ayatAlKursiConfig");
+      return {
+        ...meta,
+        config: module.AYAT_AL_KURSI_CONFIG,
+        textData: module.AYAT_AL_KURSI_TEXT_DATA,
+      };
+    }
+    case "ahzab35": {
+      const module = await import("./ahzab35Config");
+      return {
+        ...meta,
+        config: module.AHZAB_35_CONFIG,
+        textData: module.AHZAB_35_TEXT_DATA,
+      };
+    }
+    case "ihlas112": {
+      const module = await import("./ihlas112Config");
+      return {
+        ...meta,
+        config: module.IHLAS_112_CONFIG,
+        textData: module.IHLAS_112_TEXT_DATA,
+      };
+    }
+    case "kafirun109": {
+      const module = await import("./kafirun109Config");
+      return {
+        ...meta,
+        config: module.KAFIRUN_109_CONFIG,
+        textData: module.KAFIRUN_109_TEXT_DATA,
+      };
+    }
+    default:
+      return null;
+  }
 }

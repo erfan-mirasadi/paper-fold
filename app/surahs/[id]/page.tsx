@@ -16,9 +16,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { getSurahData } from "@/app/data/surahDatabase";
+import { getSurahMeta } from "@/app/data/surahDatabase";
 import { StoreInitializer } from "./StoreInitializer";
-import SurahViewer from "./SurahViewer";
 
 // ---------------------------------------------------------------------------
 // Dynamic metadata (SEO)
@@ -30,15 +29,15 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const entry = getSurahData(id);
+  const meta = getSurahMeta(id);
 
-  if (!entry) {
+  if (!meta) {
     return { title: "Not Found | Quran Fold" };
   }
 
   return {
-    title: `${entry.displayName} (${entry.arabicName}) | Quran Fold`,
-    description: `Interactive 3D folded-paper visualization of ${entry.displayName} — ${entry.reference}.`,
+    title: `${meta.displayName} (${meta.arabicName}) | Quran Fold`,
+    description: `Interactive 3D folded-paper visualization of ${meta.displayName} — ${meta.reference}.`,
   };
 }
 
@@ -50,23 +49,21 @@ export default async function SurahPage({ params }: PageProps) {
   const { id } = await params;
 
   // Validate on the server — unknown id → Next.js 404 page.
-  // The full entry object (with functions) is NOT passed to any Client Component.
-  const entry = getSurahData(id);
-  if (!entry) {
+  // We use the lightweight metadata registry.
+  const meta = getSurahMeta(id);
+  if (!meta) {
     notFound();
   }
 
   return (
     <>
       {/*
-       * Only the primitive string `id` crosses the RSC boundary.
-       * StoreInitializer resolves the full config on the client side.
-       * It MUST render before SurahViewer so the store is seeded first.
+       * StoreInitializer dynamically imports the huge Surah config on the client,
+       * preventing all Surahs from being bundled into the initial page load.
+       * It shows the SiteLoadingOverlay while fetching the chunk,
+       * and then seamlessly renders the SurahViewer once the store is seeded.
        */}
       <StoreInitializer id={id} />
-
-      {/* Full 3D canvas experience — reads from the already-seeded store */}
-      <SurahViewer />
     </>
   );
 }

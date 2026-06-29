@@ -1,25 +1,24 @@
 "use client";
 
 /**
- * StoreInitializer — synchronously seeds useStoryStore before any canvas render.
+ * StoreInitializer (ClientSurahLoader) — dynamically loads heavy Surah configurations.
  *
- * IMPORTANT — RSC boundary rule:
- *   Functions (like computeFoldYPositions) cannot be serialized across the
- *   Server → Client boundary. We therefore accept only the plain string `id`
- *   as a prop, and resolve the full config + textData entirely on the CLIENT
- *   by calling getSurahData(id) from the client-side module registry.
- *   This keeps all function references inside the client bundle.
+ * IMPORTANT — Bundle Splitting & Code-Splitting Rule:
+ *   Instead of importing all Surahs at the top level and causing a massive bundle size,
+ *   we fetch the config and text data for the specific route asynchronously via
+ *   `getSurahDataAsync(id)`.
  *
- * Pattern: useRef guard executed during the first render pass (before return).
- * This guarantees that by the time SurahViewer reads useStoryStore, the correct
- * config is already in place — zero hydration flash, zero re-renders.
- *
- * This component renders null and is purely side-effectful.
+ * Pattern: We conditionally render `<SiteLoadingOverlay />` while the fetch is pending.
+ * Once the config is retrieved, we synchronously seed all Zustand stores, set `isLoaded`
+ * to true, and render `<SurahViewer />`. Because `<SurahViewer />` mounts ONLY AFTER
+ * the store has been seeded, there is zero hydration flash and zero layout shift.
  */
 
-import { useRef } from "react";
+import { useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+
 import { useStoryStore } from "@/app/stores/useStoryStore";
-import { getSurahData } from "@/app/data/surahDatabase";
+import { getSurahDataAsync } from "@/app/data/surahDatabase";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { initElevatedStoreForStory } from "@/app/stores/useElevatedStore";
 import { useCameraStore } from "@/app/stores/useCameraStore";
@@ -28,27 +27,32 @@ import { useTafsirStore } from "@/app/stores/useTafsirStore";
 import { usePopUpStore, initPopUpStoreForStory } from "@/app/stores/usePopUpStore";
 import { cleanupIntroAnimations } from "@/app/hooks/useIntroSectionAnimation";
 
+import { SiteLoadingOverlay } from "@/app/_components/dom/ui-overlay/SiteLoadingOverlay";
+import SurahViewer from "./SurahViewer";
+
 interface StoreInitializerProps {
-  /** The Surah route id — the ONLY prop that crosses the RSC boundary. */
+  /** The Surah route id */
   id: string;
 }
 
-export function StoreInitializer({ id }: StoreInitializerProps): null {
-  const initialized = useRef(false);
-  
-  // 🚨 FIX BUG 2: خواندن ID فعلی از استور برای مچگیری از HMR
-  const currentStoreId = useStoryStore.getState().activeConfig?.id;
+export function StoreInitializer({ id }: StoreInitializerProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [currentId, setCurrentId] = useState(id);
 
-  // اگر دفعه اول است، یا HMR باعث شده استور ریست شود و آیدیها فرق کنند:
-  if (!initialized.current || currentStoreId !== id) {
-    // Look up the full config (including function references) on the CLIENT side.
-    // getSurahData is a pure synchronous lookup — safe to call during render.
-    const entry = getSurahData(id);
+  // If the user navigates to a new Surah, immediately revert to the loading state
+  if (id !== currentId) {
+    setCurrentId(id);
+    setIsLoaded(false);
+  }
 
-    if (entry) {
-      // Synchronous Zustand mutation during render — intentional pattern.
-      // Using getState().action() avoids triggering a React state update,
-      // which would cause "Cannot update a component while rendering" warnings.
+  useEffect(() => {
+    let active = true;
+
+    // Fetch the chunk asynchronously
+    getSurahDataAsync(id).then((entry) => {
+      if (!active || !entry) return;
+
+      // Seed all stores synchronously once data is available
       cleanupIntroAnimations();
       useStoryStore.getState().setActiveStory(entry.config, entry.textData);
       useFoldStore.getState().resetForStory(entry.config);
@@ -59,10 +63,24 @@ export function StoreInitializer({ id }: StoreInitializerProps): null {
       useTafsirStore.setState({ tafsirActiveId: null, tafsirAnchorPos: { x: -9999, y: -9999 } });
       usePopUpStore.getState().reset();
       initPopUpStoreForStory(entry.config);
-    }
 
-    initialized.current = true;
-  }
+      // Unblock the rendering of SurahViewer
+      setIsLoaded(true);
+    });
 
-  return null;
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  return (
+    <>
+      <AnimatePresence>
+        {!isLoaded && <SiteLoadingOverlay key="surah-chunk-loader" />}
+      </AnimatePresence>
+
+      {/* Full 3D canvas experience — only mounts once store is fully seeded */}
+      {isLoaded && <SurahViewer />}
+    </>
+  );
 }
