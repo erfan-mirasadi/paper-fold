@@ -380,6 +380,11 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     return () => {
       window.removeEventListener("pointerdown", onInteract);
       window.removeEventListener("keydown", onInteract);
+      if (foldSound.current) {
+        foldSound.current.pause();
+        foldSound.current.src = "";
+        foldSound.current = null;
+      }
     };
   }, []);
 

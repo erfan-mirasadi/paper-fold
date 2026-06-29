@@ -160,6 +160,15 @@ const _liveTransforms: Record<string, Transform7> = {};
 /** Group refs registered by consumers — the controller applies transforms to all of them. */
 const _registeredGroups: Record<string, Set<RefObject<Group | null>>> = {};
 
+// Flush stale references to prevent memory leaks
+export function cleanupIntroAnimations() {
+  for (const key in _liveTransforms) delete _liveTransforms[key];
+  for (const key in _registeredGroups) {
+    _registeredGroups[key].clear();
+    delete _registeredGroups[key];
+  }
+}
+
 /** Ensure entries exist for all current session section ids. */
 function ensureSessionEntries() {
   for (const sid of getSessionIds()) {

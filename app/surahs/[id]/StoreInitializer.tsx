@@ -26,6 +26,7 @@ import { useCameraStore } from "@/app/stores/useCameraStore";
 import { useCameraViewStore } from "@/app/stores/useCameraViewStore";
 import { useTafsirStore } from "@/app/stores/useTafsirStore";
 import { usePopUpStore, initPopUpStoreForStory } from "@/app/stores/usePopUpStore";
+import { cleanupIntroAnimations } from "@/app/hooks/useIntroSectionAnimation";
 
 interface StoreInitializerProps {
   /** The Surah route id — the ONLY prop that crosses the RSC boundary. */
@@ -48,6 +49,7 @@ export function StoreInitializer({ id }: StoreInitializerProps): null {
       // Synchronous Zustand mutation during render — intentional pattern.
       // Using getState().action() avoids triggering a React state update,
       // which would cause "Cannot update a component while rendering" warnings.
+      cleanupIntroAnimations();
       useStoryStore.getState().setActiveStory(entry.config, entry.textData);
       useFoldStore.getState().resetForStory(entry.config);
       initElevatedStoreForStory(entry.config);
