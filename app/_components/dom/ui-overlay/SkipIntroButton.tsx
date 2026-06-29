@@ -6,6 +6,8 @@ import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { useState } from "react";
 import { OverlayButton } from "./OverlayButton";
+import { useElevatedStore } from "../../../stores/useElevatedStore";
+import { resetAllDrags } from "../../../utils/dragEngine";
 
 export function SkipIntroButton() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
@@ -18,22 +20,28 @@ export function SkipIntroButton() {
     useFoldStore.getState().setActiveAmbientMediaId(null);
     useFoldStore.getState().setInstantSkip(true);
 
-    // Wait for the fade-out curtain to be visible before doing the messy jump
     setTimeout(() => {
-      // Read story.start dynamically from the active config (not hardcoded 0.6)
       const activeConfig = useStoryStore.getState().activeConfig;
       const storyStartPct =
         activeConfig.animations.scrollTimeline?.story.start ?? 60;
       const storyStartOffset = storyStartPct / 100;
 
-      lenis.scrollTo(lenis.limit * storyStartOffset, { immediate: true });
+      // 🚨 FIX BUG 3b: اضافه کردن 2 پیکسل برای اطمینان صد در صد از رد شدن از مرز ریاضیاتی
+      lenis.scrollTo(lenis.limit * storyStartOffset + 2, { immediate: true });
 
-      // Directly set isIntroActive=false immediately after scroll —
-      // don't rely on the scroll event firing before setInstantSkip(false) is called.
-      // This prevents the 2-second wait in SurahViewer's subscription.
-      useFoldStore.setState({ isIntroActive: false });
+      // 🚨 FIX BUG 3c: فورسِ آنیِ تمام متغیرها (جلوگیری از باگ فریمهای میانی)
+      useFoldStore.setState({ 
+        isIntroActive: false,
+        introHandoffProgress: 1,
+        introProgress: 1,
+        ambientProgress: 1,
+        rawOffset: storyStartOffset,
+      });
 
-      // Lift the curtain after a short pause to let the canvas settle
+      // 🚨 دستور مستقیم برای خواباندن تمام سکشنها روی کاغذ زیر پرده سیاه!
+      useElevatedStore.getState().restoreAllSections();
+      resetAllDrags();
+
       setTimeout(() => {
         setIsSkipping(false);
         useFoldStore.getState().setInstantSkip(false);

@@ -196,30 +196,39 @@ export function ScrollManager() {
       // Intro band -> camera-only scroll.
       // Handoff band -> smooth camera blend to base before story begins.
       const hasIntro = runtime.config.features.hasIntro;
-      const introActive = hasIntro
+      let introActive = hasIntro
         ? rawOffset < SCROLL_TIMELINE.story.start / 100
         : false;
-      const introProgress = hasIntro
+      let introProgress = hasIntro
         ? getBandProgress(
             rawOffset,
             SCROLL_TIMELINE.intro.start,
             SCROLL_TIMELINE.intro.end,
           )
         : 1;
-      const ambientProgress = hasIntro
+      let ambientProgress = hasIntro
         ? getBandProgress(
             rawOffset,
             SCROLL_TIMELINE.ambient.start,
             SCROLL_TIMELINE.ambient.end,
           )
         : 1;
-      const handoffProgress = hasIntro
+      let handoffProgress = hasIntro
         ? getBandProgress(
             rawOffset,
             SCROLL_TIMELINE.handoff.start,
             SCROLL_TIMELINE.handoff.end,
           )
         : 1;
+
+      // 🚨 FIX BUG 1: Lock the progress states if the barrier is armed!
+
+      if (isScrollUpLockedRef.current && !isAnimatingUpRef.current) {
+        introActive = false;
+        introProgress = 1;
+        ambientProgress = 1;
+        handoffProgress = 1;
+      }
       // getStoryOffsetForRaw already handles hasIntro internally
       const storyOffset = getStoryOffsetForRaw(rawOffset, runtime.config);
 

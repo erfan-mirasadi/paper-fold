@@ -24,7 +24,8 @@ const computeTargets = (
   allSections: boolean,
   barrierProgress: number,
 ) => {
-  if (introNowActive || handoff < 1) {
+  // 🚨 FIX BUG 3a: به جای 1 از 0.999 استفاده کن تا خطای پیکسلیِ اعشاری نادیده گرفته بشه
+  if (introNowActive || handoff < 0.999) {
     // Delay paper animation to the second half of the handoff so intro sections
     // are seen moving and stacking below each other first.
     let t = Math.max(0, (handoff - 0.5) * 2);

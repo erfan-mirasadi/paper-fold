@@ -34,8 +34,12 @@ interface StoreInitializerProps {
 
 export function StoreInitializer({ id }: StoreInitializerProps): null {
   const initialized = useRef(false);
+  
+  // 🚨 FIX BUG 2: خواندن ID فعلی از استور برای مچگیری از HMR
+  const currentStoreId = useStoryStore.getState().activeConfig?.id;
 
-  if (!initialized.current) {
+  // اگر دفعه اول است، یا HMR باعث شده استور ریست شود و آیدیها فرق کنند:
+  if (!initialized.current || currentStoreId !== id) {
     // Look up the full config (including function references) on the CLIENT side.
     // getSurahData is a pure synchronous lookup — safe to call during render.
     const entry = getSurahData(id);
