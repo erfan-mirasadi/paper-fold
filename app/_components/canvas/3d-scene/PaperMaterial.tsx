@@ -141,7 +141,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
 
   const colorSamples = tier === "low" ? 0 : tier === "medium" ? 2 : 4;
-  const normalSamples = 0; 
+  const normalSamples = 0;
 
   const normalTexW = Math.min(renderTexWidth, 1024);
   const normalTexHeight = Math.min(renderTexHeight, 1024);
@@ -154,7 +154,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   ].join("-");
 
   const [settledKey, setSettledKey] = useState<string | null>(null);
-  
+
   // استیت بیدارباش فقط برای باز کردن فریمها
   const [isWakingUp, setIsWakingUp] = useState(false);
 
@@ -186,7 +186,8 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 
     return () => {
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      if (canvas) canvas.removeEventListener("webglcontextrestored", handleWakeUp);
+      if (canvas)
+        canvas.removeEventListener("webglcontextrestored", handleWakeUp);
     };
   }, [gl]);
 
@@ -200,9 +201,10 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   }, [fontsReady, renderTextureKey]);
 
   const settled = fontsReady && settledKey === renderTextureKey;
-  
+
   // اگر در حال بیدار شدن باشیم، فریمها روی بینهایت میرن تا دوباره نقاشی بشن
-  const mapFrames = (settled && !isWakingUp) ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
+  const mapFrames =
+    settled && !isWakingUp ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
 
   const matRef = useRef<MeshStandardMaterial>(null);
 
@@ -274,7 +276,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   );
 
   const frameTexture = useTexture(
-    "/paper-material/grunge-frame-3.png",
+    "/paper-material/grunge-frame-3.webp",
     (texture) => {
       texture.colorSpace = SRGBColorSpace;
       texture.needsUpdate = true;
@@ -345,7 +347,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
           frames={mapFrames}
           samples={normalSamples}
           depthBuffer={false}
-          stencilBuffer={false} 
+          stencilBuffer={false}
         >
           <color attach="background" args={["#8080ff"]} />
           <OrthographicCamera

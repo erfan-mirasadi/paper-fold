@@ -7,6 +7,7 @@ import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
+  display: "swap",
 });
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -73,8 +74,6 @@ export default function RootLayout({
       className={`light ${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} h-full antialiased`}
     >
       <head>
-        <link rel="preload" href="/fonts/FiraSansCondensed-Medium.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

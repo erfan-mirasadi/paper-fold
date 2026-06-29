@@ -79,9 +79,9 @@ export const WHITE_VERSE_BG = "#ffffff";
 // ----------------------------------------------------------------------------
 // 7. GLOBAL FONT PATH
 // ----------------------------------------------------------------------------
-export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.ttf";
-export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
-export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.ttf";
+export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.woff2";
+export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.woff2";
+export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.woff2";
 
 // ----------------------------------------------------------------------------
 // 8. GLOBAL TEXT SIZES
