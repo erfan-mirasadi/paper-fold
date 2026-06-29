@@ -41,8 +41,8 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
   dimensions: {
     paperWidth: 1.54,
-    paperHeight: 0.9,
-    sceneCenterYOffset: 0.0,
+    paperHeight: 1.78,
+    sceneCenterYOffset: -0.045,
     padding: 0.15,
     scrollPages: 1.5,
   },
