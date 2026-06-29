@@ -142,7 +142,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group3Bg: OUTER_GROUP_BG, // yellow — bottom group (symmetrical)
 
       // The background rectangles for the paper, echoing the hand-drawn sections
-      sectionBackgrounds: ["#DCE8DC", "#EDD8DF", "#DCE8DC"],
+      // sectionBackgrounds: ["#DCE8DC", "#EDD8DF", "#DCE8DC"],
 
       curveColors: [
         { color: OUTER_GROUP_BORDER, fillColor: OUTER_GROUP_BG }, // Outer curves (top/bottom)
@@ -191,12 +191,12 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     groupPad: 0.012,
     groupPadBottom: 0.012,
     s2Gap: 0.02, // matching alak96Config.ts
-    s2VerticalRowGap: 0.046, // the vertical gap between rows in the same group!
-    smallBoxH2: 0.085, // height of each individual verse capsule
+    s2VerticalRowGap: 0.02, // the vertical gap between rows in the same group!
+    smallBoxH2: 0.075, // height of each individual verse capsule
     middleExtraGap: 0.007,
-    s2PadLeftRight: 0.028,
-    g2Scale: 0.0,
-    outerScale: 0.05,
+    s2PadLeftRight: 0.08,
+    g2Scale: 0.01,
+    outerScale: 0.0,
     s1BorderWidth: 0,
 
     // --- Misc (carried over from Alak; not material for this layout) ---
@@ -209,7 +209,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     boxExtOffset: 0.02,
     extraRowGap: 0.01,
     labelHitboxWidth: 0.43,
-    verseTextScale: 1.14,
+    verseTextScale: 1.0,
     translationVerseTextScale: null,
     groupRows: [1, 2, 1],
     outerCurveXOffset: 0.07,
@@ -221,8 +221,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       id: "section2",
       type: "verticalGroups",
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 1.15,
-      backgroundScaleY: 1.25,
+      backgroundScaleX: 0.9,
+      backgroundScaleY: 1.1,
+      backgroundSolidScaleX: 0.6,
+      backgroundSolidScaleY: 1,
       groupElevation: "unified",
       // No topLabelKey / bottomLabelKey / introVerse / outroVerse — clean slate.
       groups: [

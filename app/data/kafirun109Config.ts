@@ -26,7 +26,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     paperWidth: 1.54,
     paperHeight: 1.78,
     sceneCenterYOffset: -0.045,
-    padding: 0.15,
+    padding: 0.29,
     scrollPages: 1.5,
   },
 
@@ -43,8 +43,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
   verseOverrides: {
     1: {
       isPill: false,
-      expandW: 0.10125,
-      expandH: 0.02,
+      expandW: 0.2,
+      expandH: 0.028,
       textScaleOverride: 0.9,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
@@ -55,7 +55,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       textColor: "#A30000",
     },
     2: {
-      expandW: -0.025,
       bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
@@ -63,7 +62,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: CENTER_GROUP_BORDER,
     },
     3: {
-      expandW: -0.025,
       bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
@@ -71,7 +69,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: CENTER_GROUP_BORDER,
     },
     4: {
-      expandW: -0.025,
       bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
@@ -79,7 +76,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       circleTextCol: CENTER_GROUP_BORDER,
     },
     5: {
-      expandW: -0.025,
       bg: CENTER_GROUP_BG,
       border: CENTER_GROUP_BORDER,
       circleBorderCol: CENTER_GROUP_BORDER,
@@ -88,8 +84,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
     6: {
       isPill: false,
-      expandW: 0.10125,
-      expandH: 0.02,
+      expandW: 0.2,
+      expandH: 0.028,
       textScaleOverride: 0.9,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
@@ -127,15 +123,17 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group2Bg: CENTER_GROUP_BORDER,
       s2Group3Bg: OUTER_GROUP_BG,
 
-      sectionBackgrounds: ["#DCE8DC", "#EDD8DF", "#DCE8DC"],
-
       curveColors: [
         {
           color: ORANGE_THEME,
           fillColor: CAPSULE_BG_6_19,
           bowGap: 0.25,
           innerBowGap: 0.24,
-          tipThickness: 0.125, // smallBoxH2 (0.085) + 2×expandH (0.02) — full rect height
+          tipThickness: 0.135,
+          topAnchorXOffset: -0.01,
+          topAnchorYOffset: -0.001,
+          bottomAnchorYOffset: 0.001,
+          bottomAnchorXOffset: -0.01,
         },
         { color: CENTER_GROUP_BORDER, fillColor: CENTER_GROUP_BG },
       ],
@@ -163,15 +161,14 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
 
     s2VerticalPad: 0.02,
     bigBoxH: 0.07,
-    groupGap: 0.025,
+    groupGap: 0.06,
     groupPad: 0.012,
     groupPadBottom: 0.012,
-    s2Gap: 0.005,
-    s2VerticalRowGap: 0.022,
-    smallBoxH2: 0.085,
+    s2Gap: 0.02,
+    smallBoxH2: 0.075,
     middleExtraGap: 0,
     s2PadLeftRight: 0.028,
-    g2Scale: 0.02,
+    g2Scale: 0.01,
     outerScale: -0.11,
     s1BorderWidth: 0,
 
@@ -184,8 +181,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     boxExtOffset: 0.02,
     extraRowGap: 0.01,
     labelHitboxWidth: 0.43,
-    verseTextScale: 1.2,
-    translationVerseTextScale: 0.8,
     groupRows: [1, 2, 1],
     outerCurveXOffset: 0.07, // Reverted offset
     centerCurveXOffset: -0.02,
@@ -196,7 +191,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       id: "section2",
       type: "verticalGroups",
       backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 1.15,
+      backgroundScaleX: 1.1,
       backgroundScaleY: 1.25,
       groups: [
         {
@@ -214,7 +209,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           isCenter: true,
           dragBehavior: "group",
           extraRowGap: 0,
-          xGap: -0.045,
           bgThemeKey: "s2Group2Bg",
         },
         {
@@ -237,8 +231,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       // So its actual bottom is lower. We should shift fold1 down by 0.01 to keep it centered.
       const fold1 = (lm.g1Y - lm.groupHeights[0] + lm.g2Y) / 2 - 0.01;
 
-      const fold2 =
-        lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2VerticalRowGap / 2;
+      const fold2 = lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2;
 
       // Verse 6 (g3) has expandH = 0.02. It expands upwards by 0.02.
       // So its actual top is higher. We should shift fold3 up by 0.01 to keep it centered.

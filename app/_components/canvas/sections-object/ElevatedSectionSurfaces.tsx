@@ -692,8 +692,8 @@ function DynamicElevatedGroup({
           solidColor="transparent"
           texturePath={vertConfig.backgroundTexture}
           solidScale={[
-            1,
-            1,
+            vertConfig.backgroundSolidScaleX ?? 1,
+            vertConfig.backgroundSolidScaleY ?? 1,
             1,
           ]}
           imageScale={[
