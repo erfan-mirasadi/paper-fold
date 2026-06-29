@@ -479,7 +479,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       backgroundTexture: "/ahzab/section-frame.svg",
       backgroundScaleX: 1.47,
       backgroundScaleY: 1.33,
-      backgroundOffsetY: 0.04,
+      backgroundOffsetY: 0.025,
 
       // Horizontal connector bars between paired capsules are hidden.
       hideRowConnectors: true,

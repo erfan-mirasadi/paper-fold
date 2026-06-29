@@ -179,11 +179,11 @@ export function createLayoutMath(
       p.bigBoxH * 2 +
       p.groupGap * (interGroupGaps + 2) + // gaps between groups + 2 flanking
       totalGroupsH +
-      p.middleExtraGap * 2
+      p.middleExtraGap * interGroupGaps
     : p.s2VerticalPad * 2 +
       p.groupGap * interGroupGaps + // gaps *between* groups
       totalGroupsH +
-      p.middleExtraGap * 2;
+      p.middleExtraGap * interGroupGaps;
 
   // Detect whether a gridWithAnaAyet (Section 1) is part of this config.
   // If not, we center s2 on the paper rather than chaining from s1Top.
