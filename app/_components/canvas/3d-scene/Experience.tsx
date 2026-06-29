@@ -8,6 +8,7 @@ import {
 import { a } from "@react-spring/three";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
+import { Perf } from "r3f-perf";
 import { SinglePaper } from "./SinglePaper";
 import { VersesRenderer } from "../verses-object/VersesRenderer";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
@@ -97,7 +98,12 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
       const { currentOffset, isIntroActive } = useFoldStore.getState();
       const isPaperFolded = currentOffset < 0.98;
 
-      if (isPaperFolded && phase === "elevated" && !isIntroActive && !isAllSectionsMode) {
+      if (
+        isPaperFolded &&
+        phase === "elevated" &&
+        !isIntroActive &&
+        !isAllSectionsMode
+      ) {
         document.body.style.cursor = "zoom-out";
       } else {
         if (document.body.style.cursor === "zoom-out") {
@@ -108,7 +114,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
 
     const unsubElevated = useElevatedStore.subscribe(updateCursor);
     const unsubFold = useFoldStore.subscribe(updateCursor);
-    
+
     updateCursor();
     return () => {
       unsubElevated();
@@ -143,6 +149,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
 
   return (
     <>
+      {process.env.NODE_ENV === "development" && <Perf position="top-left" />}
       <PerspectiveCamera
         makeDefault
         position={CAMERA_CONFIG.initialCamera.position}
@@ -183,16 +190,14 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      <group name="intro-scene" visible={useFoldStore.getState().isIntroActive}>
-        {/* اگر کامپوننتی برای Intro داشتی اینجا میذاری */}
-      </group>
+      <group
+        name="intro-scene"
+        visible={useFoldStore.getState().isIntroActive}
+      ></group>
 
       <DynamicControls />
 
-      {/* 1. انعکاس محیطی برای طبیعی شدن جنس کاغذ (خیلی مهمه!) */}
       <Environment files="/hdri/lebombo_1k.hdr" environmentIntensity={1} />
-
-      {/* 1. نور محیطی رو کم کن تا سایهها بتونن شکل بگیرن */}
       <ambientLight intensity={0.8} />
 
       {showSpotlight && (
@@ -209,8 +214,6 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
           volumetric={!isMobile}
         />
       )}
-
-      {/* 3. این همون نوریه که به چروکها زاویه میده و خط تا رو سهبعدی میکنه! (از کامنت درش بیار) */}
       {!isAllSectionsMode && (
         <directionalLight position={[0, 4.2, -2]} intensity={1} />
       )}
