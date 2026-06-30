@@ -66,7 +66,7 @@ export function buildVerseConfigs(
   const configs: VerseConfig[] = [];
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  runtime.config.sections.forEach((sectionConfig, sectionIdx) => {
+  runtime.config.sections?.forEach((sectionConfig, sectionIdx) => {
     const transforms = SURAH_TRANSFORMS.sections[sectionIdx];
     if (!transforms) return;
 
@@ -269,11 +269,11 @@ export function buildVerseConfigs(
           const direction = isRightCol ? "right" : "left";
           const hingeX = isRightCol ? worldX : worldX + expandedW;
 
-          const capsuleLabelW = runtime.layoutMath.capsuleLabelW ?? 0.2;
-          const capsuleLabelH = runtime.layoutMath.capsuleLabelH ?? 0.032;
+          const capsuleLabelW = (runtime.layoutMath as any).capsuleLabelW ?? 0.2;
+          const capsuleLabelH = (runtime.layoutMath as any).capsuleLabelH ?? 0.032;
           const capsuleLabelBorderWidth =
-            runtime.layoutMath.capsuleLabelBorderWidth ?? 0.0035;
-          const capsuleLabelDrop = runtime.layoutMath.capsuleLabelDrop ?? 0.015;
+            (runtime.layoutMath as any).capsuleLabelBorderWidth ?? 0.0035;
+          const capsuleLabelDrop = (runtime.layoutMath as any).capsuleLabelDrop ?? 0.015;
 
           let capsuleLabel;
           if (override?.hasCapsuleLabel) {

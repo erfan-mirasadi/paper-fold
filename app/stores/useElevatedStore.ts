@@ -19,7 +19,7 @@ export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
   SECTION_VERSE_IDS = {};
   SECTION_PRIORITY = [];
 
-  config.sections.forEach((section: any) => {
+  config.sections?.forEach((section: any) => {
     if (section.type === "gridWithAnaAyet") {
       const s1 = section as GridSectionConfig;
       const id = s1.id;

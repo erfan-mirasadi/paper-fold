@@ -55,7 +55,7 @@ export function VerseGroup({
 
   // ── Row connector visibility ───────────────────────────────────────────────
   // Read hideRowConnectors from the verticalGroups section config.
-  const sectionConfig = config.sections.find(
+  const sectionConfig = config.sections?.find(
     (s) => s.type === "verticalGroups",
   ) as VerticalGroupsSectionConfig | undefined;
   const hideConnectors = sectionConfig?.hideRowConnectors ?? false;

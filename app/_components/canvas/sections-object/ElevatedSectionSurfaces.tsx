@@ -10,8 +10,6 @@ import {
   S1_SOLID_Y_OFFSET,
   S1_IMAGE_SCALE,
   S1_IMAGE_Y_OFFSET,
-} from "../SurahLayout/SectionOne";
-import {
   S2_TOP_SOLID_SCALE_X,
   S2_TOP_SOLID_SCALE_Y,
   S2_TOP_SOLID_X_OFFSET,
@@ -28,7 +26,7 @@ import {
   S2_BOTTOM_IMAGE_SCALE_Y,
   S2_BOTTOM_IMAGE_X_OFFSET,
   S2_BOTTOM_IMAGE_Y_OFFSET,
-} from "../SurahLayout/SectionTwo";
+} from "../SurahLayout/BlockRenderer";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
@@ -138,14 +136,14 @@ function useSectionSurfaceSpring(
     delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
       : isIntroActive ||
-          sectionId === useStoryStore.getState().activeConfig.sections[0].id ||
+          sectionId === useStoryStore.getState().activeConfig.sections?.[0]?.id ||
           !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
     immediate:
       actuallyActive ||
       (justLeftIntro &&
-        sectionId !== useStoryStore.getState().activeConfig.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
+        sectionId !== useStoryStore.getState().activeConfig.sections?.[0]?.id), // Snap to 0 instantly ONLY when leaving the intro!
     config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -181,7 +179,7 @@ export function useHandoffOpacity(
       const targetOpacity =
         state.isIntroActive &&
         sectionId &&
-        sectionId !== useStoryStore.getState().activeConfig.sections[0].id
+        sectionId !== useStoryStore.getState().activeConfig.sections?.[0]?.id
           ? 1 - state.introHandoffProgress
           : 1;
 
@@ -917,8 +915,8 @@ export function ElevatedSectionSurfaces() {
   });
 
   const config = useStoryStore((state) => state.activeConfig);
-  const gridConfig = config.sections.find((s) => s.type === "gridWithAnaAyet");
-  const vertConfig = config.sections.find((s) => s.type === "verticalGroups");
+  const gridConfig = config.sections?.find((s) => s.type === "gridWithAnaAyet");
+  const vertConfig = config.sections?.find((s) => s.type === "verticalGroups");
 
   const S1_ID = gridConfig?.id ?? "__no_s1__";
   const S2_ID = vertConfig?.id ?? "__no_s2__";
@@ -932,12 +930,12 @@ export function ElevatedSectionSurfaces() {
     opacity: useHandoffOpacity(s1BaseSpring.opacity, S1_ID),
   };
 
-  const gridConfigIndex = config.sections.findIndex(
+  const gridConfigIndex = config.sections?.findIndex(
     (s) => s.type === "gridWithAnaAyet",
-  );
-  const vertConfigIndex = config.sections.findIndex(
+  ) ?? -1;
+  const vertConfigIndex = config.sections?.findIndex(
     (s) => s.type === "verticalGroups",
-  );
+  ) ?? -1;
 
   const s1 =
     gridConfigIndex >= 0

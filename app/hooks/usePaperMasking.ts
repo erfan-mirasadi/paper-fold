@@ -78,7 +78,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       const exp = MASK_CONFIG.sectionExpand;
       let secIdx = 0;
 
-      activeConfig.sections.forEach((sec, idx) => {
+      activeConfig.sections?.forEach((sec, idx) => {
         const sTransform = SURAH_TRANSFORMS.sections[
           idx
         ] as Required<SectionTransforms>;
@@ -196,7 +196,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       const verseColorKeys = new Array<keyof ThemeColors | undefined>(VERSE_ARR_SIZE);
       const verseIsSection1 = new Array<boolean>(VERSE_ARR_SIZE).fill(false);
 
-      activeConfig.sections.forEach((sec) => {
+      activeConfig.sections?.forEach((sec) => {
         if (sec.type === "gridWithAnaAyet") {
           const g = sec as GridSectionConfig;
           g.verses.forEach((v) => {
@@ -357,7 +357,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
     const sectionMap: Record<string, number> = {};
     let sIdx = 0;
-    activeConfig.sections.forEach((sec) => {
+    activeConfig.sections?.forEach((sec) => {
       if (sec.type === "gridWithAnaAyet") {
         sectionMap[sec.id] = sIdx++;
       } else if (sec.type === "verticalGroups") {

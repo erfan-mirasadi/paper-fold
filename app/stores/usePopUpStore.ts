@@ -19,7 +19,7 @@ export function initPopUpStoreForStory(config: any) {
   const middleVerseIds = [...middleFolds.left, ...middleFolds.right].sort((a, b) => a - b);
   DYNAMIC_MIDDLE_GROUP_ID = middleVerseIds.length > 0 ? `g_${middleVerseIds.join("_")}` : "g_11_12_13_14";
 
-  const allVerseIds = config.sections.flatMap((sec: any) => {
+  const allVerseIds = config.sections?.flatMap((sec: any) => {
     if (sec.type === "gridWithAnaAyet") return [...sec.verses, sec.anaAyet];
     if (sec.type === "verticalGroups") {
       let ids: number[] = [];

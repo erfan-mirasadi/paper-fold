@@ -381,7 +381,7 @@ export const SideCurves = ({
     : FALLBACK_CENTER_COLOR;
 
   const activeConfig = useStoryStore((s) => s.activeConfig);
-  const s2SectionId = activeConfig.sections.find((s) => s.type === "verticalGroups")?.id;
+  const s2SectionId = activeConfig.sections?.find((s) => s.type === "verticalGroups")?.id;
 
   const hasActiveS2Section = useElevatedStore((state) => 
     state.activeSectionIds.some((id) =>
@@ -391,7 +391,7 @@ export const SideCurves = ({
 
   // Build set of section-1 popup group IDs so we can exclude them from hide logic
   const s1GroupIds = useMemo(() => {
-    const s1Sec = activeConfig.sections.find((s) => s.type === "gridWithAnaAyet");
+    const s1Sec = activeConfig.sections?.find((s) => s.type === "gridWithAnaAyet");
     if (!s1Sec) return new Set<string>();
     const s1Verses = [...(s1Sec as any).verses, (s1Sec as any).anaAyet];
     return new Set(

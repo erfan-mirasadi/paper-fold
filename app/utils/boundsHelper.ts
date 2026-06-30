@@ -19,8 +19,8 @@ export function calculateSectionBounds(
   const config = getActiveStoryConfig();
 
   // ── Check each section in the config ────────────────────────────────────
-  for (let secIdx = 0; secIdx < config.sections.length; secIdx++) {
-    const sec = config.sections[secIdx];
+  for (let secIdx = 0; secIdx < (config.sections ?? []).length; secIdx++) {
+    const sec = (config.sections ?? [])[secIdx];
     const sTransform = transforms.sections[secIdx] as Required<SectionTransforms>;
 
     // ── gridWithAnaAyet: simple frame bounds ──────────────────────────────

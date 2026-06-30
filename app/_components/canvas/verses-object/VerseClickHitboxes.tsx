@@ -56,7 +56,7 @@ function buildHitboxes(
 
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  config.sections.forEach((sectionConfig, idx) => {
+  config.sections?.forEach((sectionConfig, idx) => {
     const sTransform = SURAH_TRANSFORMS.sections[
       idx
     ] as Required<SectionTransforms>;

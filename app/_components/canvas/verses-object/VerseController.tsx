@@ -179,7 +179,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     horizontalDirection,
     isMiddleFoldCandidate === true,
   );
-  const middleGapHalf = runtime.layoutMath.s2Gap / 2;
+  const middleGapHalf = (runtime.layoutMath as any).s2Gap / 2;
   const horizontalPivotOffsetY = isMiddleTopRow
     ? -(config.h + middleGapHalf)
     : isMiddleBottomRow
@@ -198,7 +198,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
-    const s2Config = activeStoryConfig.sections.find(
+    const s2Config = activeStoryConfig.sections?.find(
       (s) => s.type === "verticalGroups",
     ) as any;
 
@@ -247,7 +247,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
 
   // ── Parent section for custom-sections (Ahzab) ──────────────────────────
   // Computed early so it can be used for both snap bounds and position offset.
-  const s2Config = activeStoryConfig.sections.find(
+  const s2Config = activeStoryConfig.sections?.find(
     (s) => s.type === "verticalGroups",
   ) as any;
   const hasCustomSections = Boolean(s2Config?.customSections?.length);

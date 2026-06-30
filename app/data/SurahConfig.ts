@@ -3,6 +3,8 @@ import {
   SectionConfig,
   GridSectionConfig,
   VerticalGroupsSectionConfig,
+  type LayoutBlock,
+  type SurahGlobalSettings,
 } from "./schema";
 import type {
   ElementTransform,
@@ -118,13 +120,468 @@ export const SMALL_VERSE_VERTICAL_SHIFT = -0.005;
 export const S1_NEON_CONFIG = ALAK_LAYOUT_CONFIG.styling.s1NeonConfig;
 
 // ----------------------------------------------------------------------------
-// SECTION: LAYOUT MATH ENGINE
+// SECTION: LAYOUT MATH ENGINE — BLOCK-BASED (new) + LEGACY (backward compat)
 // ----------------------------------------------------------------------------
+
+// ── BLOCK ENGINE HELPERS ────────────────────────────────────────────────────
+
+/**
+ * Compute the rendered height of a single LayoutBlock.
+ *
+ * Height = blockPadding(top) + rows * capsuleH + (rows-1) * rowGap + blockPadding(bottom)
+ *
+ * For `type: 'spacer'`, the height is just `block.fixedHeight`.
+ * For `type: 'grid'`, we also include the anaAyet row + an extra gap.
+ */
+function computeBlockHeight(
+  block: LayoutBlock,
+  gs: SurahGlobalSettings,
+): number {
+  if (block.type === 'spacer') {
+    return block.fixedHeight ?? 0;
+  }
+
+  const capH = block.capsuleHeight ?? gs.capsuleHeight;
+  const rGap = block.rowGap ?? gs.rowGap;
+  const bPad = block.blockPadding ?? gs.blockPadding;
+  const cols = block.columns ?? 2;
+  const verseIds = block.verseIds ?? [];
+  const numRows = cols > 0 ? Math.ceil(verseIds.length / cols) : 0;
+
+  let height = bPad * 2 + numRows * capH + Math.max(0, numRows - 1) * rGap;
+
+  if (block.type === 'grid' && block.anaAyetId !== undefined) {
+    // Add the AnaAyet row below the grid, separated by an extra rowGap
+    const anaH = block.fixedHeight ?? capH * 1.8; // AnaAyet is taller
+    height += rGap + anaH;
+  }
+
+  return height;
+}
+
+// ── BLOCK-BASED LayoutConfig shape ──────────────────────────────────────────
+
+export interface BlockLayoutConfig {
+  /** Engine mode discriminant */
+  mode: 'blocks';
+  id: string;
+  PAGE_WIDTH: number;
+  PAGE_HEIGHT: number;
+  PW: number;
+  PADDING: number;
+  CONTENT_W: number;
+  START_X: number;
+  sectionW: number;
+
+  /** Y of the TOP edge of the entire content stack (highest Y value). */
+  contentStartY: number;
+  /** Total height of all blocks + gaps. */
+  totalContentH: number;
+
+  /** Per-block metadata, in config order. */
+  blockMeta: Array<{
+    id: string;
+    /** Y of the TOP edge of this block's frame. */
+    frameY: number;
+    /** Full frame height (including blockPadding). */
+    frameH: number;
+    /** Y of the first capsule row top edge (= frameY - blockPadding). */
+    contentY: number;
+  }>;
+
+  // Sizing scalars consumed by VerseGroup / SideCurves
+  capsuleHeight: number;
+  columnGap: number;
+  rowGap: number;
+  blockGap: number;
+  sectionPadX: number;
+  blockPadding: number;
+  sectionBorderWidth: number;
+  verseTextScale?: number;
+  translationVerseTextScale?: number | null;
+
+  // SideCurves / DynamicBackground compatibility
+  s2Top: number;    // alias for contentStartY
+  s2H: number;      // alias for totalContentH
+  s2BackgroundTexture?: string;
+  s2BackgroundScaleX?: number;
+  s2BackgroundScaleY?: number;
+  s2BackgroundOffsetX?: number;
+  s2BackgroundOffsetY?: number;
+  hasIntroOutro: false;
+
+  // groupYPositions / groupHeights: parallel arrays for SideCurves & computeFoldYPositions
+  groupYPositions: number[];
+  groupHeights: number[];
+}
+
+// ── NEW BLOCK-BASED ENGINE ──────────────────────────────────────────────────
+
+/**
+ * NEW: Block-based layout math engine.
+ *
+ * Algorithm (4 passes):
+ *   Pass 1 — Compute height of each block.
+ *   Pass 2 — Sum all heights + blockGaps → `totalContentH`.
+ *   Pass 3 — Derive `contentStartY` so the stack is perfectly centred.
+ *   Pass 4 — Walk blocks top-to-bottom, assigning frameY for each.
+ *
+ * Returns a `BlockLayoutConfig` that is consumed by `buildBlockTransforms`.
+ */
+export function createBlockLayoutMath(
+  config: SurahLayoutConfig<any>,
+  dynamicPageWidth: number,
+): BlockLayoutConfig {
+  const gs = config.globalSettings!;
+  const blocks = config.blocks ?? [];
+  const PAGE_WIDTH = dynamicPageWidth;
+  const PADDING = config.dimensions.padding;
+  const CONTENT_W = PAGE_WIDTH - PADDING * 2;
+  const START_X = PADDING;
+  const sectionW = CONTENT_W;
+  const PH = config.dimensions.paperHeight;
+  const sceneCenterYOffset = config.dimensions.sceneCenterYOffset;
+
+  // ── Pass 1: block heights ──────────────────────────────────────────────
+  const blockHeights = blocks.map((b) => computeBlockHeight(b, gs));
+
+  // ── Pass 2: total content height ─────────────────────────────────────
+  const numGaps = Math.max(0, blocks.length - 1);
+  const totalContentH =
+    blockHeights.reduce((sum, h) => sum + h, 0) + numGaps * gs.blockGap;
+
+  // ── Pass 3: vertical centering ───────────────────────────────────────
+  // The 3D scene y-axis: y=0 is the paper top, y=-PH is the paper bottom.
+  // Paper vertical center = -(PH/2) + sceneCenterYOffset.
+  // We want the content block centre to sit at that point.
+  //   contentCenter = contentStartY - totalContentH / 2
+  //   ⟹ contentStartY = paperCenter + totalContentH / 2
+  const paperCenter = -(PH / 2) + sceneCenterYOffset;
+  const contentStartY = paperCenter + totalContentH / 2;
+
+  // ── Pass 4: per-block Y positions ────────────────────────────────────
+  const blockMeta: BlockLayoutConfig['blockMeta'] = [];
+  let cursorY = contentStartY; // walks downward
+
+  for (let i = 0; i < blocks.length; i++) {
+    const frameH = blockHeights[i];
+    const frameY = cursorY;          // top edge of this block
+    const bPad = blocks[i].blockPadding ?? gs.blockPadding;
+    const contentY = frameY - bPad; // top edge of first capsule row
+
+    blockMeta.push({ id: blocks[i].id, frameY, frameH, contentY });
+
+    cursorY -= frameH;
+    if (i < blocks.length - 1) cursorY -= gs.blockGap;
+  }
+
+  // ── Compatibility arrays for SideCurves & computeFoldYPositions ───────
+  const groupYPositions = blockMeta.map((m) => m.frameY);
+  const groupHeights    = blockMeta.map((m) => m.frameH);
+
+  // ── Background texture from the first block that declares one ─────────
+  const bgBlock = blocks.find((b) => b.backgroundTexture);
+
+  return {
+    mode: 'blocks',
+    id: config.id,
+    PAGE_WIDTH,
+    PAGE_HEIGHT: PH,
+    PW: PAGE_WIDTH,
+    PADDING,
+    CONTENT_W,
+    START_X,
+    sectionW,
+
+    contentStartY,
+    totalContentH,
+    blockMeta,
+
+    capsuleHeight:      gs.capsuleHeight,
+    columnGap:          gs.columnGap,
+    rowGap:             gs.rowGap,
+    blockGap:           gs.blockGap,
+    sectionPadX:        gs.sectionPadX,
+    blockPadding:       gs.blockPadding,
+    sectionBorderWidth: gs.sectionBorderWidth,
+    verseTextScale:     gs.verseTextScale,
+    translationVerseTextScale: gs.translationVerseTextScale,
+
+    // SideCurves / DynamicBackground compat aliases
+    s2Top: contentStartY,
+    s2H:   totalContentH,
+    s2BackgroundTexture:  bgBlock?.backgroundTexture,
+    s2BackgroundScaleX:   bgBlock?.backgroundScaleX,
+    s2BackgroundScaleY:   bgBlock?.backgroundScaleY,
+    s2BackgroundOffsetX:  bgBlock?.backgroundOffsetX,
+    s2BackgroundOffsetY:  bgBlock?.backgroundOffsetY,
+    hasIntroOutro: false,
+
+    groupYPositions,
+    groupHeights,
+  };
+}
+
+// ── BLOCK-BASED TRANSFORM BUILDER ───────────────────────────────────────────
+
+export interface BlockSurahTransforms {
+  mode: 'blocks';
+  sections: SectionTransforms[]; // one entry per LayoutBlock
+}
+
+/**
+ * NEW: Builds concrete world-space transforms for every verse in every block.
+ *
+ * For each `LayoutBlock`:
+ *  - `group`  → emits a `SectionTransforms` with `groups[0]` containing
+ *               per-verse `ElementTransform` records and row-connector rects.
+ *  - `grid`   → emits the Alak-style `SectionTransforms` with `verses` +
+ *               `anaAyet` + `rowConnectors`.
+ *  - `spacer` → emits an empty `SectionTransforms` (no verses).
+ *
+ * The shape of `SectionTransforms` / `GroupTransforms` is UNCHANGED so that
+ * `SectionOne`, `SectionTwo`, `VerseGroup`, `SideCurves` need zero edits.
+ */
+export function buildBlockTransforms(
+  lm: BlockLayoutConfig,
+  startX: number,
+  config: SurahLayoutConfig<any>,
+): BlockSurahTransforms {
+  const gs = config.globalSettings!;
+  const blocks = config.blocks ?? [];
+  const sections: SectionTransforms[] = [];
+
+  // Mirror shift for the outer section frame (cosmetic, same as legacy)
+  const S2_MIRROR_SHIFT = 0.015;
+  const shiftedTop = lm.contentStartY - S2_MIRROR_SHIFT;
+  const shiftedBot = lm.contentStartY - lm.totalContentH + S2_MIRROR_SHIFT;
+  const shiftedH   = lm.totalContentH - 2 * S2_MIRROR_SHIFT;
+
+  const bw   = gs.sectionBorderWidth;
+  const connX = startX - gs.sectionPadX * 0.5; // slight outward extension
+  const connW = lm.sectionW + gs.sectionPadX;
+
+  for (let bIdx = 0; bIdx < blocks.length; bIdx++) {
+    const block  = blocks[bIdx];
+    const meta   = lm.blockMeta[bIdx];
+    const capH   = block.capsuleHeight   ?? gs.capsuleHeight;
+    const rGap   = block.rowGap          ?? gs.rowGap;
+    const bPad   = block.blockPadding    ?? gs.blockPadding;
+    const colGap = gs.columnGap;
+    const cols   = block.columns ?? 2;
+    const inset  = block.horizontalInset ?? 0;
+
+    // ── Section-level geometry (horizontal) ───────────────────────────────
+    const sectionInnerW = lm.sectionW - gs.sectionPadX * 2;
+    const blockInnerW   = sectionInnerW - inset * 2;
+    const blockBaseX    = startX + gs.sectionPadX + inset;
+
+    // Width of a single capsule column
+    const colW = cols === 1
+      ? blockInnerW - bPad * 2
+      : (blockInnerW - bPad * 2 - colGap) / 2;
+
+    const centerX = blockBaseX + blockInnerW / 2;
+
+    if (block.type === 'spacer') {
+      // Spacer emits no verse transforms — just a structural placeholder.
+      sections.push({
+        frameX: startX,
+        frameY: meta.frameY,
+        frameW: lm.sectionW,
+        frameH: meta.frameH,
+        shiftedTop,
+        shiftedBot,
+        shiftedH,
+        connectorX: connX,
+        connectorW: connW,
+        borderWidth: bw,
+        groups: [],
+      });
+      continue;
+    }
+
+    if (block.type === 'grid') {
+      // ── ALAK-style grid block ────────────────────────────────────────
+      // verseIds are in display order: [left0, right0, left1, right1, ...]
+      const verseIds = block.verseIds ?? [];
+      const anaAyetId = block.anaAyetId;
+      const gridCapH = block.capsuleHeight ?? gs.capsuleHeight;
+      const gridGap  = block.rowGap ?? gs.rowGap;
+      const gridPad  = block.blockPadding ?? gs.blockPadding;
+
+      const gridInnerW  = lm.sectionW - gridPad * 2;
+      const gridHalfW   = (gridInnerW - colGap) / 2;
+      const gridBaseX   = startX + gridPad;
+      const gridContentY = meta.frameY - gridPad;
+
+      const verseTransforms: Record<number, ElementTransform> = {};
+      verseIds.forEach((vId, i) => {
+        const isRight  = i % 2 !== 0;
+        const row      = Math.floor(i / 2);
+        verseTransforms[vId] = {
+          x: isRight ? gridBaseX + gridHalfW + colGap : gridBaseX,
+          y: gridContentY - row * (gridCapH + gridGap),
+          z: 0.002,
+          w: gridHalfW,
+          h: gridCapH,
+        };
+      });
+
+      // Row connectors
+      const numGridRows = Math.ceil(verseIds.length / 2);
+      const gridConnectors: RowConnectorTransform[] = [];
+      for (let r = 0; r < numGridRows; r++) {
+        const lv = verseTransforms[verseIds[r * 2]];
+        const rv = verseTransforms[verseIds[r * 2 + 1]];
+        if (lv && rv) {
+          gridConnectors.push({
+            x: lv.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+            y: lv.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+            z: 0.0015,
+            w: rv.x + rv.w - lv.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+            h: lv.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+          });
+        }
+      }
+
+      // AnaAyet transform (below the grid rows)
+      let anaAyetTransform: ElementTransform | undefined;
+      if (anaAyetId !== undefined) {
+        const anaH = block.fixedHeight ?? gridCapH * 1.8;
+        const lastRowY = gridContentY - Math.max(0, numGridRows - 1) * (gridCapH + gridGap) - gridCapH;
+        anaAyetTransform = {
+          x: gridBaseX,
+          y: lastRowY - gridGap,
+          z: 0.002,
+          w: gridInnerW,
+          h: anaH,
+        };
+      }
+
+      const anaAyetFrame = anaAyetTransform;
+      sections.push({
+        frameX: startX,
+        frameY: meta.frameY,
+        frameW: lm.sectionW,
+        frameH: meta.frameH,
+        borderWidth: block.fixedHeight ?? 0, // s1BorderWidth compat
+        labelPinY: meta.frameY,
+        verses: verseTransforms,
+        rowConnectors: gridConnectors,
+        ...(anaAyetFrame !== undefined ? {
+          anaAyet: anaAyetFrame,
+          capsuleLabelX: gridBaseX + gridInnerW / 2,
+          capsuleLabelY: anaAyetFrame.y + 0.015,
+          capsuleLabelW: 0.2,
+          capsuleLabelH: 0.032,
+          capsuleLabelBorderWidth: 0.0035,
+          capsuleLabelDrop: 0.015,
+        } : {}),
+        shiftedTop,
+        shiftedBot,
+        shiftedH,
+        groups: [],
+      });
+      continue;
+    }
+
+    // ── GROUP block (the common case) ────────────────────────────────────
+    const verseIds = block.verseIds ?? [];
+    const verses: Record<number, ElementTransform> = {};
+
+    verseIds.forEach((vId, i) => {
+      const isRight  = cols === 2 ? i % 2 !== 0 : false;
+      const row      = Math.floor(i / cols);
+      const rowOffset = row * (capH + rGap);
+
+      let vx: number;
+      if (cols === 1) {
+        vx = centerX - colW / 2;
+      } else {
+        vx = isRight
+          ? centerX + colGap / 2
+          : centerX - colGap / 2 - colW;
+      }
+
+      // Per-verse xOffset nudge from verseOverrides
+      const xOffset = config.verseOverrides?.[vId]?.xOffset ?? 0;
+
+      verses[vId] = {
+        x: vx + xOffset,
+        y: meta.contentY - rowOffset,
+        z: 0.003,
+        w: colW,
+        h: capH,
+      };
+    });
+
+    // Row connectors (only for 2-col blocks)
+    const numRows = Math.ceil(verseIds.length / cols);
+    const rowConnectors: RowConnectorTransform[] = [];
+    if (cols === 2 && !(block.hideRowConnectors)) {
+      for (let r = 0; r < numRows; r++) {
+        const lv = verses[verseIds[r * 2]];
+        const rv = verses[verseIds[r * 2 + 1]];
+        if (lv && rv) {
+          rowConnectors.push({
+            x: lv.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
+            y: lv.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+            z: 0.0025,
+            w: rv.x + rv.w - lv.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
+            h: lv.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+          });
+        }
+      }
+    }
+
+    const groupT: GroupTransforms = {
+      frameX: blockBaseX,
+      frameY: meta.frameY,
+      frameW: blockInnerW,
+      frameH: meta.frameH,
+      isPushedIn: (block.horizontalInset ?? 0) > 0,
+      isCenter:   block.isCenter ?? false,
+      verses,
+      rowConnectors,
+      topLabelConfig: block.topLabelConfig,
+      backgroundTexture:  block.backgroundTexture,
+      backgroundScaleX:   block.backgroundScaleX,
+      backgroundScaleY:   block.backgroundScaleY,
+      backgroundOffsetX:  block.backgroundOffsetX,
+      backgroundOffsetY:  block.backgroundOffsetY,
+    };
+
+    sections.push({
+      frameX: startX,
+      frameY: meta.frameY,
+      frameW: lm.sectionW,
+      frameH: meta.frameH,
+      shiftedTop,
+      shiftedBot,
+      shiftedH,
+      connectorX: connX,
+      connectorW: connW,
+      borderWidth: bw,
+      topLabelPinY:    shiftedTop,
+      bottomLabelPinY: shiftedBot,
+      innerW: sectionInnerW,
+      baseX:  startX + gs.sectionPadX,
+      groups: [groupT],
+    });
+  }
+
+  return { mode: 'blocks', sections };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// LEGACY ENGINE — unchanged, preserved for configs not yet migrated to `blocks`
+// ────────────────────────────────────────────────────────────────────────────
 export function createLayoutMath(
   config: SurahLayoutConfig<AlakLayoutParams>,
   dynamicPageWidth: number,
 ) {
-  const p = config.params;
+  const p = config.params!;
   const PAGE_WIDTH = dynamicPageWidth;
   const PW = PAGE_WIDTH;
   const PADDING = config.dimensions.padding;
@@ -187,7 +644,7 @@ export function createLayoutMath(
 
   // Detect whether a gridWithAnaAyet (Section 1) is part of this config.
   // If not, we center s2 on the paper rather than chaining from s1Top.
-  const hasS1 = config.sections.some((s) => s.type === "gridWithAnaAyet");
+  const hasS1 = config.sections?.some((s) => s.type === "gridWithAnaAyet");
 
   // s2Top: the Y coordinate of the top of the vertical-groups block.
   //   hasS1 === true  → Alak path (identical to original formula)
@@ -213,7 +670,7 @@ export function createLayoutMath(
   // previous group's height + the inter-group gap (with middleExtraGap).
   const dynamicGroupYPositions: number[] = [];
   dynamicGroupYPositions[0] = baseG1Y;
-  const s2Config = config.sections.find((s) => s.type === "verticalGroups") as
+  const s2Config = config.sections?.find((s) => s.type === "verticalGroups") as
     | VerticalGroupsSectionConfig
     | undefined;
   const s2Groups = s2Config?.groups ?? [];
@@ -281,27 +738,27 @@ export function createLayoutMath(
     s2H,
 
     s2BackgroundTexture: (
-      config.sections.find((s) => s.type === "verticalGroups") as
+      config.sections?.find((s) => s.type === "verticalGroups") as
         | VerticalGroupsSectionConfig
         | undefined
     )?.backgroundTexture,
     s2BackgroundScaleX: (
-      config.sections.find((s) => s.type === "verticalGroups") as
+      config.sections?.find((s) => s.type === "verticalGroups") as
         | VerticalGroupsSectionConfig
         | undefined
     )?.backgroundScaleX,
     s2BackgroundScaleY: (
-      config.sections.find((s) => s.type === "verticalGroups") as
+      config.sections?.find((s) => s.type === "verticalGroups") as
         | VerticalGroupsSectionConfig
         | undefined
     )?.backgroundScaleY,
     s2BackgroundOffsetX: (
-      config.sections.find((s) => s.type === "verticalGroups") as
+      config.sections?.find((s) => s.type === "verticalGroups") as
         | VerticalGroupsSectionConfig
         | undefined
     )?.backgroundOffsetX,
     s2BackgroundOffsetY: (
-      config.sections.find((s) => s.type === "verticalGroups") as
+      config.sections?.find((s) => s.type === "verticalGroups") as
         | VerticalGroupsSectionConfig
         | undefined
     )?.backgroundOffsetY,
@@ -371,7 +828,7 @@ export function buildSurahTransforms(
   const sections: SectionTransforms[] = [];
 
   // Build transforms for each section dynamically based on its type
-  config.sections.forEach((section) => {
+  (config.sections ?? []).forEach((section) => {
     if (section.type === "gridWithAnaAyet") {
       const s1Config = section as GridSectionConfig;
       const s1BaseX = startX + lm.s1Pad;

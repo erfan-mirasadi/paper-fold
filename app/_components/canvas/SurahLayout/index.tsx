@@ -1,6 +1,6 @@
 "use client";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { SurahSection } from "./SurahSection";
+import { BlockRenderer } from "./BlockRenderer";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import {
@@ -75,23 +75,15 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
       {/* Outer decorative card border */}
       {/* <Boarder PW={runtime.PW} PAGE_HEIGHT={runtime.PAGE_HEIGHT} /> */}
       
-      {/* Render sections dynamically */}
-      {config.sections.map((sectionConfig, idx) => {
-        const transforms = runtime.SURAH_TRANSFORMS.sections[idx];
-        if (!transforms) return null;
-        return (
-          <SurahSection
-            key={sectionConfig.id}
-            sectionConfig={sectionConfig}
-            transforms={transforms}
-            surahData={surahData}
-            layoutMath={runtime.layoutMath}
-            startX={runtime.START_X}
-            PW={runtime.PW}
-            isFolded={isFolded}
-          />
-        );
-      })}
+      {/* Render all blocks/sections through the unified BlockRenderer */}
+      <BlockRenderer
+        sections={runtime.SURAH_TRANSFORMS.sections}
+        layout={runtime.layoutMath}
+        surahData={surahData}
+        startX={runtime.START_X}
+        PW={runtime.PW}
+        isFolded={isFolded}
+      />
     </>
   );
 }

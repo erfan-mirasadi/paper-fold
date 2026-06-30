@@ -16,7 +16,7 @@ export function SectionZoomCamera() {
   const { zoomTargets, getSectionIdForVerse } = useMemo(() => {
     const zoomTargets: Record<string, CameraTargetConfig> = {};
 
-    config.sections.forEach((section) => {
+    config.sections?.forEach((section) => {
       if (section.type === "gridWithAnaAyet") {
         const s1 = section as GridSectionConfig;
         if (s1.cameraTarget) {
@@ -60,7 +60,7 @@ export function SectionZoomCamera() {
     });
 
     const getSectionIdForVerse = (vid: number): string | null => {
-      for (const section of config.sections) {
+      for (const section of (config.sections ?? [])) {
         if (section.type === "gridWithAnaAyet") {
           const s1 = section as GridSectionConfig;
           if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;

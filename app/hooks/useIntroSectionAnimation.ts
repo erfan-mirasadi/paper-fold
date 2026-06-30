@@ -30,9 +30,9 @@ const deg = (d: number): number => (d * Math.PI) / 180;
 // Section IDs are read lazily (at call-time) so module evaluation never
 // crashes when the active config has fewer than 2 sections (e.g. Ayat al-Kursi).
 const getS1Id = (): string =>
-  getActiveStoryConfig().sections[0]?.id ?? "section1";
+  getActiveStoryConfig().sections?.[0]?.id ?? "section1";
 const getS2Id = (): string =>
-  getActiveStoryConfig().sections[1]?.id ?? "section2";
+  getActiveStoryConfig().sections?.[1]?.id ?? "section2";
 const getS2TopId = (): string => `${getS2Id()}_g0`;
 const getS2CenterId = (): string => `${getS2Id()}_g1`;
 const getS2BotId = (): string => `${getS2Id()}_g2`;

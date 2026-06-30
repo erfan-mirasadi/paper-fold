@@ -56,7 +56,7 @@ export function PopUpHoverSensors({
 
   // Build set of verse IDs that should skip hover sensors (anaAyet + introVerse boundary, and disabled popups)
   const skipGroupVerseIds = new Set<number>();
-  activeConfig.sections.forEach((sec: any) => {
+  activeConfig.sections?.forEach((sec: any) => {
     if (sec.type === "gridWithAnaAyet" && sec.anaAyet) skipGroupVerseIds.add(sec.anaAyet);
     if (sec.type === "verticalGroups") {
       if (sec.introVerse) skipGroupVerseIds.add(sec.introVerse);

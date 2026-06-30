@@ -187,7 +187,7 @@ export function ElevatedSectionLabels() {
 
   const labelsToRender: Array<AnimatedLabelProps & { key: string; showInIntro: boolean }> = [];
 
-  config.sections.forEach((section, idx) => {
+  config.sections?.forEach((section, idx) => {
     const sTransform = SURAH_TRANSFORMS.sections[idx]!;
     if (section.type === "gridWithAnaAyet") {
       const gConfig = section as GridSectionConfig;

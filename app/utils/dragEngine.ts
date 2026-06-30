@@ -232,7 +232,7 @@ export function resetAllDrags() {
  *  This guarantees intro/outro verses move with their section when dragged.
  */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
-  for (const sec of getActiveStoryConfig().sections) {
+  for (const sec of getActiveStoryConfig().sections ?? []) {
     if (sec.type === "gridWithAnaAyet") {
       const g = sec as GridSectionConfig;
       if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;
