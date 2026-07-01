@@ -1,7 +1,13 @@
 "use client";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { VerseBox, UiRect, TopLabel, CapsuleLabel } from "./SharedUI";
+import {
+  VerseBox,
+  UiRect,
+  TopLabel,
+  CapsuleLabel,
+  SplitVerseCapsules,
+} from "./SharedUI";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
@@ -288,24 +294,43 @@ export function VerseGroup({
 
         return (
           <group key={v.number}>
-            <VerseBox
-              x={finalX}
-              y={finalY}
-              z={vt.z}
-              w={finalW}
-              h={finalH}
-              verse={v.text}
-              number={v.number}
-              bg={finalBg}
-              border={finalBorder}
-              circleBorderCol={finalCircleBorder}
-              circleBg={finalCircleBg}
-              circleTextCol={finalCircleText}
-              isPill={override?.isPill ?? true}
-              textScaleOverride={finalTextScale}
-              textColor={override?.textColor}
-              textAlignOverride={override?.translationTextAlign}
-            />
+            {v.splitTexts ? (
+              <SplitVerseCapsules
+                x={finalX}
+                y={finalY}
+                z={vt.z}
+                w={finalW}
+                h={finalH}
+                texts={v.splitTexts}
+                number={v.number}
+                bg={finalBg}
+                border={finalBorder}
+                circleBorderCol={finalCircleBorder}
+                circleBg={finalCircleBg}
+                circleTextCol={finalCircleText}
+                textScaleOverride={finalTextScale}
+                textColor={override?.textColor}
+              />
+            ) : (
+              <VerseBox
+                x={finalX}
+                y={finalY}
+                z={vt.z}
+                w={finalW}
+                h={finalH}
+                verse={v.text}
+                number={v.number}
+                bg={finalBg}
+                border={finalBorder}
+                circleBorderCol={finalCircleBorder}
+                circleBg={finalCircleBg}
+                circleTextCol={finalCircleText}
+                isPill={override?.isPill ?? true}
+                textScaleOverride={finalTextScale}
+                textColor={override?.textColor}
+                textAlignOverride={override?.translationTextAlign}
+              />
+            )}
             {hasTab && (
               <CapsuleLabel
                 x={tabX}

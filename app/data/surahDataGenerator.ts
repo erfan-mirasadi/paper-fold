@@ -19,6 +19,9 @@ import { GridSectionConfig, VerticalGroupsSectionConfig } from "./schema";
 export interface VerseConfig {
   id: number;
   verse: string;
+  /** See `Verse.splitTexts` in SurahConfig.ts — renders as two capsules
+   * sharing one number badge instead of a single numbered capsule. */
+  splitTexts?: [string, string];
   number: number;
   y: number;
   w: number;
@@ -165,6 +168,7 @@ export function buildVerseConfigs(
         configs.push({
           id: v.number,
           verse: v.text,
+          splitTexts: v.splitTexts,
           number: v.number,
           y: t.y + expandH,
           w: expandedW,

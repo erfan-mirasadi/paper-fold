@@ -19,6 +19,16 @@ export { ALAK_LAYOUT_CONFIG };
 export interface Verse {
   number: number;
   text: string;
+  /**
+   * When set, this verse renders as TWO side-by-side capsules sharing a
+   * single verse-number badge (instead of one capsule with its own number).
+   * Order is RTL reading order: [nearNumberText, farFromNumberText] — index 0
+   * sits closest to the shared number badge (read second), index 1 sits
+   * furthest away (read first). `text` above is kept as the full combined
+   * string and stays the fallback for any renderer that doesn't know about
+   * `splitTexts` (e.g. languages that don't set it).
+   */
+  splitTexts?: [string, string];
 }
 
 export interface ColorGroup {

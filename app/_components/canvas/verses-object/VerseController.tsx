@@ -429,6 +429,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           isPill={config.isPill !== false}
           backfaceColor={backfaceColor}
           verse={config.verse}
+          splitTexts={config.splitTexts}
           number={config.number}
           bg={config.bg}
           border={config.border}

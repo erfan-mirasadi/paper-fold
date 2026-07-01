@@ -115,8 +115,10 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT, // red text
     },
     6: {
+      // Centered solo on its own row now (see blocks below) — height matches
+      // v3/v4 exactly (no expandH) so the whole 3/4/6/7 cluster reads as one
+      // consistent capsule size.
       expandW: 0.0442, // synced with v3&v4, then /1.1
-      expandH: 0.018, // Ayat al-Kursi capsule size, slightly taller
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -124,13 +126,19 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     7: {
-      expandW: 0.0442, // synced with v3&v4, then /1.1
-      expandH: 0.018, // Ayat al-Kursi capsule size, slightly taller
+      // Renders as TWO capsules sharing one number badge (see `splitTexts` on
+      // the verse-7 text entries below) — expandW reuses the same "big pill"
+      // width as verses 1/2/5 so it's wide enough to hold both capsules;
+      // height matches v3/v4 exactly (no expandH), same reasoning as v6.
+      expandW: 0.2875,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
+      // Badge fill matches the hollow-connector backdrop (= border color);
+      // badge ring + text match the capsules' own background, so it reads as
+      // a "cut-out" of the connector rather than a floating mismatched circle.
+      circleBg: MAROON_THEME,
+      circleBorderCol: CAPSULE_BG_9_10_15_16,
+      circleTextCol: CAPSULE_BG_9_10_15_16,
     },
   },
   styling: {
@@ -275,18 +283,24 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
+    // Verse 6 (row 0) sits centered above verse 7 (row 1, rendered as two
+    // capsules sharing one number badge — see `splitTexts` below). Kept as
+    // ONE block (columns:1 → 2 stacked rows) rather than two separate
+    // blocks: SideCurves' bracket pairing mirrors `groups[i]` with
+    // `groups[lastIdx-i]`, so splitting this into an extra block shifts
+    // every later index and breaks the "2↔5" curve — same verseIds count,
+    // same 5-group shape, curve pairing stays untouched.
     {
       id: "section2_g4",
       type: "group",
-      verseIds: [7, 6],
-      columns: 2,
+      verseIds: [6, 7],
+      columns: 1,
       horizontalInset: 0,
       isCenter: false,
-      // colGapForPosition = targetVisualGap + 2*expandW = 0.02 + 2*0.0442 = 0.108
-      // so the visual gap between capsules 7 & 6 matches kafirun's middle section.
-      columnGap: 0.108,
-      // Negative nudge → pulls 7-6 pair closer to verse 5 above it.
-      verticalNudge: -0.03,
+      // Tight row gap — pulls verse 7 close under verse 6.
+      rowGap: 0.024,
+      // Negative nudge → pulls the 6/7 stack closer to verse 5 above it.
+      verticalNudge: -0.04,
       dragBehavior: "pair",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -315,9 +329,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: 1.09,
-      scaleY: 0.45,
+      scaleY: 0.48,
       offsetX: 0,
-      offsetY: -0.105,
+      offsetY: -0.125,
       renderOrder: 3,
       customSectionId: "section2_v234",
     },
@@ -326,9 +340,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 3,
       anchorEdge: "top",
       scaleX: 1.09,
-      scaleY: 0.45,
+      scaleY: 0.48,
       offsetX: 0,
-      offsetY: -0.105,
+      offsetY: -0.165,
       renderOrder: 3,
       customSectionId: "section2_v567",
     },
@@ -356,37 +370,68 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
   ],
   animations: {
     computeFoldYPositions: (lm) => {
-      const fold1 =
+      // ── fold0: midpoint between g0 (v1) and g1 (v2) ─────────────────────
+      const fold0 =
         (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
         2;
-      const fold2 =
+
+      // ── fold1: midpoint between g1 (v2) and g2 (v4,3) ───────────────────
+      const fold1 =
         (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
         2;
-      const fold3 =
-        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) /
-        2;
+
+      // ── fold2 & fold3: two creases between g2 (v4,3) and g3 (v5) ────────
+      // Divide the gap into 4 equal parts and pick the 2 interior quarter-points.
+      const g2Bottom = lm.groupYPositions[2] - lm.groupHeights[2];
+      const g3Top = lm.groupYPositions[3];
+      const fold2 = g2Bottom * (3 / 4) + g3Top * (1 / 4); // 1/4 down
+      const fold3 = g2Bottom * (1 / 4) + g3Top * (3 / 4); // 3/4 down
+
+      // ── fold4: midpoint between g3 (v5) and g4 (v6,7) ───────────────────
       const fold4 =
         (lm.groupYPositions[3] - lm.groupHeights[3] + lm.groupYPositions[4]) /
         2;
-      return [fold1, fold2, fold3, fold4];
+
+      // ── fold5: crease between verse 6 and verse 7 inside g4 ─────────────
+      const g4ContentY = lm.blockMeta[4].contentY;
+      const capH = lm.capsuleHeight; // 0.075
+      const rg4 = 0.024; // g4's custom rowGap (section2_g4)
+      const fold5 = g4ContentY - capH - rg4 / 2;
+
+      return [fold0, fold1, fold2, fold3, fold4, fold5];
     },
     foldSteps: [
       {
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0.5 },
-          { direction: 1, angleFactor: 1 },
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
+          { direction: 1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3 (flat)
+          { direction: -1, angleFactor: 1.1 }, // fold2: 1st crease v4,3↔v5
+          { direction: 1, angleFactor: 0.5 }, // fold3: 2nd crease v4,3↔v5
+          { direction: 1, angleFactor: 1 }, // fold4: v5 ↔ v6,7
+          { direction: 1, angleFactor: 0 }, // fold5: v6 ↔ v7
+        ],
+      },
+      {
+        id: "start",
+        folds: [
+          { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
+          { direction: 1, angleFactor: 0 }, // fold1: v2 ↔ v4,3 (flat)
+          { direction: -1, angleFactor: 0 }, // fold2: 1st crease v4,3↔v5
+          { direction: 1, angleFactor: 0 }, // fold3: 2nd crease v4,3↔v5
+          { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6,7
+          { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
         ],
       },
       {
         id: "end",
         folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 }, // fold0
+          { direction: 1, angleFactor: 0 }, // fold1
+          { direction: -1, angleFactor: 0 }, // fold2
+          { direction: 1, angleFactor: 0 }, // fold3
+          { direction: 1, angleFactor: 0 }, // fold4
+          { direction: -1, angleFactor: 0 }, // fold5
         ],
       },
     ],
@@ -442,6 +487,11 @@ export const FATIHA_1_TEXT_AR: SurahDataShape = {
           {
             number: 7,
             text: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+            // RTL order: [nearNumberText, farFromNumberText].
+            splitTexts: [
+              "غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+              "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ",
+            ],
           },
         ],
       },
