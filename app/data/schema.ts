@@ -14,6 +14,13 @@ export interface SurahFeatures {
   hasElevatedSections: boolean;
   hasPopUps: boolean;
   hideVerseNumbers?: boolean;
+  /**
+   * When true, the floating 3D bismillah text overlay is NOT rendered on the
+   * paper surface for this surah. Use for surahs (e.g. Fatiha) where the
+   * bismillah is already part of the verse content and the 3D overlay would
+   * duplicate it.
+   */
+  hideBismillah3D?: boolean;
 }
 
 export interface LayoutDimensions {

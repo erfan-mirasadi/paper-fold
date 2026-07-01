@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx next *)",
-      "Bash(grep -n \"const sectionMap: Record<string, number> = {};\" app/hooks/usePaperMasking.ts)"
+      "Bash(grep -n \"const sectionMap: Record<string, number> = {};\" app/hooks/usePaperMasking.ts)",
+      "Bash(xargs -I{} echo {})",
+      "Bash(node fatiha_check.mjs)"
     ]
   }
 }
