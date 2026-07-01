@@ -219,6 +219,13 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     framePad: 0.1,
   },
 
+  sectionBackground: {
+    texture: "/fatiha/all-section-bg.svg",
+    scaleX: 1.2,
+    scaleY: 1.15,
+    offsetY: -0.114,
+  },
+
   // Section-wide resting-state background is intentionally omitted here —
   // Fatiha renders 3 independent section frames instead of one whole-stack
   // frame, via `svgOverlays` below (the same mechanism ahzab35Config.ts
@@ -279,7 +286,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // +CLUSTER_SHIFT cancels the cascade from g1's nudge, so 5-6-7 stay
       // centered and only 2-3-4 shift upward.
       // +0.04 compensates the cascade from g2's -0.04 nudge.
-      verticalNudge: CLUSTER_SHIFT + 0.27,
+      verticalNudge: CLUSTER_SHIFT + 0.17,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -315,7 +322,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       src: "/fatiha/bismillah-frame-2.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
-      scaleX: 1.1,
+      scaleX: 1.15,
       scaleY: 0.22, // preserve the svg's native aspect
       offsetX: 0,
       offsetY: 0,
@@ -325,7 +332,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     {
       // Spans down through section2_g2's frame too (blockPadding*2 +
       // capsuleHeight, twice, + blockGap = 0.115 + 0.06 + 0.115 = 0.29).
-      src: "/fatiha/bismillah-frame-2.svg",
+      src: "/fatiha/bismillah-frame-3.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: 1.09,
@@ -336,7 +343,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       customSectionId: "section2_v234",
     },
     {
-      src: "/fatiha/bismillah-frame-2.svg",
+      src: "/fatiha/bismillah-frame-3.svg",
       anchorGroupIndex: 3,
       anchorEdge: "top",
       scaleX: 1.09,

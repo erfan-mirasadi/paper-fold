@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5384.11 1453.39" width="5384.11" height="1453.39">
+  <defs>
+    <linearGradient id="gold_gradient" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#968428"/>
+      <stop offset="0.5" stop-color="#CDC577"/>
+      <stop offset="1" stop-color="#968428"/>
+    </linearGradient>
+  </defs>
+  <g id="Outline_Banner_Label" data-name="Outline / Banner Label">
+    <g id="Retro_Decorative_Plaque_Border" data-name="Retro Decorative Plaque Border">
+      <path d="M5029.25,120.27v-7.76H354.86v7.76c0,129.35-105.24,234.58-234.59,234.58h-7.76v743.67h7.76c129.35,0,234.59,105.23,234.59,234.59v7.76h4674.38v-7.76c0-129.36,105.24-234.59,234.59-234.59h7.76V354.85h-7.76c-129.35,0-234.59-105.23-234.59-234.58Z" fill="#D9C7CA"/>
+      <path d="M5029.25,120.27v-7.76H354.86v7.76c0,129.35-105.24,234.58-234.59,234.58h-7.76v743.67h7.76c129.35,0,234.59,105.23,234.59,234.59v7.76h4674.38v-7.76c0-129.36,105.24-234.59,234.59-234.59h7.76V354.85h-7.76c-129.35,0-234.59-105.23-234.59-234.58ZM5256.08,1083.13c-131.77,4.03-238.2,110.46-242.23,242.23H370.26c-4.03-131.77-110.47-238.2-242.23-242.23V370.26c131.77-4.03,238.2-110.46,242.23-242.23h4643.59c4.03,131.76,110.47,238.2,242.23,242.23v712.87Z" fill="url(#gold_gradient)"/>
+    </g>
+  </g>
+</svg>
