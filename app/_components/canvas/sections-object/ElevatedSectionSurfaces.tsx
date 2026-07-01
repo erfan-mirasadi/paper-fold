@@ -51,6 +51,10 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../../../stores/useElevatedStore";
+import {
+  getSectionIdForVerseId,
+  getIntroGridSectionId,
+} from "../../../utils/sectionResolver";
 import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
@@ -136,14 +140,14 @@ function useSectionSurfaceSpring(
     delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
       : isIntroActive ||
-          sectionId === useStoryStore.getState().activeConfig.sections?.[0]?.id ||
+          sectionId === getIntroGridSectionId(useStoryStore.getState().activeConfig) ||
           !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
     immediate:
       actuallyActive ||
       (justLeftIntro &&
-        sectionId !== useStoryStore.getState().activeConfig.sections?.[0]?.id), // Snap to 0 instantly ONLY when leaving the intro!
+        sectionId !== getIntroGridSectionId(useStoryStore.getState().activeConfig)), // Snap to 0 instantly ONLY when leaving the intro!
     config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -179,7 +183,7 @@ export function useHandoffOpacity(
       const targetOpacity =
         state.isIntroActive &&
         sectionId &&
-        sectionId !== useStoryStore.getState().activeConfig.sections?.[0]?.id
+        sectionId !== getIntroGridSectionId(useStoryStore.getState().activeConfig)
           ? 1 - state.introHandoffProgress
           : 1;
 
@@ -603,6 +607,171 @@ function DraggableElevatedSvgOverlay({ overlay, s2, groupTransforms, parentSecti
         groupTransforms={groupTransforms}
       />
     </a.group>
+  );
+}
+
+// ─── Block-engine elevated surface (Kafirun, Ihlas, etc.) ───────────────
+// Mirrors DynamicElevatedGroup's role for the new `config.blocks` schema:
+// renders the lifted background plate / row connectors for a single block
+// and wraps it in the same draggable handle used by the legacy engine.
+// `sectionId` is resolved via the shared verse->section reverse index so
+// cross-block customSections (e.g. Ihlas' single zone spanning 4 blocks)
+// are honored automatically — multiple blocks may share the same sectionId
+// and therefore the same drag spring, same pattern as legacy "unified" mode.
+function DynamicElevatedBlock({
+  block,
+  blockIndex,
+  sTransform,
+  config,
+}: any) {
+  const sectionId =
+    getSectionIdForVerseId(block.verseIds?.[0] ?? -1) ?? block.id;
+
+  const isActive = useElevatedStore((s) =>
+    s.activeSectionIds.includes(sectionId),
+  );
+  const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const runtime = useSurahLayoutRuntime();
+
+  const baseSpring = useSectionSurfaceSpring(isActive, sectionId);
+  const spring = {
+    ...baseSpring,
+    opacity: useHandoffOpacity(baseSpring.opacity, sectionId),
+  };
+
+  const bounds = useMemo(
+    () =>
+      isAllSectionsMode
+        ? undefined
+        : calculateSectionBounds(
+            sectionId,
+            runtime.SURAH_TRANSFORMS,
+            runtime.PAGE_WIDTH,
+          ),
+    [isAllSectionsMode, runtime.PAGE_WIDTH, sectionId, runtime.SURAH_TRANSFORMS],
+  );
+
+  const group = sTransform.groups?.[0];
+  const frame = group
+    ? { x: group.frameX, y: group.frameY, w: group.frameW, h: group.frameH }
+    : {
+        x: sTransform.frameX,
+        y: sTransform.frameY ?? 0,
+        w: sTransform.frameW,
+        h: sTransform.frameH ?? 0,
+      };
+
+  // Section-wide background (config.sectionBackground) is a resting-state-only
+  // decoration (rendered by BlockRenderer). On paper, elevating a section must
+  // NEVER bring it along — only the all-sections overview shows it, rendered
+  // exactly ONCE (at block index 0, mirroring legacy's `groupIndex === 0`
+  // check) and sized to the OVERALL section frame — every block's SectionTransforms
+  // shares the same frameX/frameW/shiftedTop/shiftedH (computed once for the
+  // whole block stack in buildBlockTransforms), so block 0's own sTransform
+  // already covers the whole surah, not just its own bounds.
+  const sectionBgFrame =
+    isAllSectionsMode &&
+    !block.backgroundTexture &&
+    config.sectionBackground &&
+    blockIndex === 0
+      ? {
+          x: sTransform.frameX + sTransform.frameW / 2,
+          y: (sTransform.shiftedTop ?? 0) - (sTransform.shiftedH ?? 0) / 2,
+          w: sTransform.frameW,
+          h: sTransform.shiftedH ?? 0,
+        }
+      : null;
+
+  const rowConnectors: RowConnectorTransform[] =
+    group?.rowConnectors ?? sTransform.rowConnectors ?? [];
+
+  const firstVerseId = block.verseIds?.[0];
+  const override =
+    firstVerseId !== undefined ? config.verseOverrides?.[firstVerseId] : undefined;
+  const connectorColor =
+    override?.border ??
+    (block.isCenter
+      ? (config.styling.colors.greenTheme ?? "#000000")
+      : (config.styling.colors.maroonTheme ?? "#000000"));
+
+  return (
+    <DraggableSectionGroup
+      sectionId={sectionId}
+      isActive={isActive}
+      sectionBounds={bounds}
+    >
+      <group>
+        {sectionBgFrame && (
+          <ElevatedSvgFrame
+            centerX={sectionBgFrame.x}
+            centerY={sectionBgFrame.y}
+            w={sectionBgFrame.w}
+            h={sectionBgFrame.h}
+            solidColor="transparent"
+            texturePath={config.sectionBackground.texture}
+            solidScale={[
+              config.sectionBackground.solidScaleX ?? 1,
+              config.sectionBackground.solidScaleY ?? 1,
+              1,
+            ]}
+            imageScale={[
+              config.sectionBackground.scaleX ?? 1,
+              config.sectionBackground.scaleY ?? 1,
+              1,
+            ]}
+            imageXOffset={config.sectionBackground.offsetX ?? 0}
+            imageYOffset={config.sectionBackground.offsetY ?? 0}
+            spring={spring}
+            shadow
+            shadowStrength={0.6}
+            suppressShadow={isIntroActive && !isActive}
+          />
+        )}
+        {block.backgroundTexture && (
+          <ElevatedSvgFrame
+            centerX={frame.x + frame.w / 2}
+            centerY={frame.y - frame.h / 2}
+            w={frame.w}
+            h={frame.h}
+            solidColor="transparent"
+            texturePath={block.backgroundTexture}
+            solidScale={[
+              block.backgroundSolidScaleX ?? 1,
+              block.backgroundSolidScaleY ?? 1,
+              1,
+            ]}
+            imageScale={[
+              block.backgroundScaleX ?? 1,
+              block.backgroundScaleY ?? 1,
+              1,
+            ]}
+            imageXOffset={block.backgroundOffsetX ?? 0}
+            imageYOffset={block.backgroundOffsetY ?? 0}
+            spring={spring}
+            shadow
+            shadowStrength={0.6}
+            suppressShadow={isIntroActive && !isActive}
+          />
+        )}
+
+        {!block.hideRowConnectors &&
+          rowConnectors.map((rc: RowConnectorTransform, j: number) => (
+            <ElevatedLayer
+              key={`${sectionId}-rc-${blockIndex}-${j}`}
+              x={rc.x}
+              y={rc.y}
+              w={rc.w}
+              h={rc.h}
+              radius={OPPOSITE_VERSE_CONNECTOR.radius}
+              color={connectorColor}
+              spring={spring}
+              zOffset={0.0025}
+              renderOrder={3}
+            />
+          ))}
+      </group>
+    </DraggableSectionGroup>
   );
 }
 
@@ -1137,6 +1306,53 @@ export function ElevatedSectionSurfaces() {
                 topConnector={topConnector}
                 bottomConnector={bottomConnector}
                 parentSectionId={S2_ID}
+              />
+            );
+          })}
+        </>
+      )}
+
+      {/* ─── NEW: block-based configs (Kafirun, Ihlas, Ayat al-Kursi, Fatiha, Ahzab) ─── */}
+      {config.blocks && config.blocks.length > 0 && (
+        <>
+          {/* SVG overlays with customSectionId — each in its own drag group
+              (all-sections mode only). Mirrors the legacy branch above. */}
+          {config.svgOverlays
+            ?.filter((overlay: any) => overlay.customSectionId != null)
+            .map((overlay: any, idx: number) => {
+              const gIdx = overlay.anchorGroupIndex ?? 0;
+              const blockSection = SURAH_TRANSFORMS.sections[gIdx] as
+                | Required<SectionTransforms>
+                | undefined;
+              const groupTransforms = blockSection?.groups?.[0];
+              const anyBlockSection = SURAH_TRANSFORMS.sections[0] as
+                | Required<SectionTransforms>
+                | undefined;
+              if (!groupTransforms || !anyBlockSection) return null;
+              return (
+                <DraggableElevatedSvgOverlay
+                  key={`custom-overlay-${idx}`}
+                  overlay={overlay}
+                  s2={anyBlockSection}
+                  groupTransforms={groupTransforms}
+                  parentSectionId={null}
+                />
+              );
+            })}
+
+          {config.blocks.map((block, idx) => {
+            if (block.type === "spacer") return null;
+            const sTransform = SURAH_TRANSFORMS.sections[idx] as
+              | Required<SectionTransforms>
+              | undefined;
+            if (!sTransform) return null;
+            return (
+              <DynamicElevatedBlock
+                key={`block-${block.id}`}
+                block={block}
+                blockIndex={idx}
+                sTransform={sTransform}
+                config={config}
               />
             );
           })}

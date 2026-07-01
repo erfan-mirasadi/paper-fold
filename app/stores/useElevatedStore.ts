@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import { getActiveStoryConfig } from "./useStoryStore";
-import { GridSectionConfig, VerticalGroupsSectionConfig, SurahLayoutConfig } from "../data/schema";
+import { SurahLayoutConfig } from "../data/schema";
 import { resetAllDrags } from "../utils/dragEngine";
+import {
+  initSectionResolverForStory,
+  getSectionPriority,
+  getSectionVerseIds,
+  getAllSectionVerseIds,
+} from "../utils/sectionResolver";
 
 export type ElevatedPhase = "idle" | "elevated";
 export type ElevatedSectionId = string;
@@ -11,61 +17,17 @@ export const ELEVATED_SCROLL_UNLOCK_THRESHOLD = 0.9;
 /** Delay used to sync base section reappearance with elevated return animation. */
 export const ELEVATED_RETURN_SYNC_MS = 480;
 
-let SECTION_VERSE_IDS: Record<string, number[]> = {};
 let SECTION_PRIORITY: string[] = [];
 let ALL_ELEVATED_VERSE_IDS: number[] = [];
 
 export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
-  SECTION_VERSE_IDS = {};
-  SECTION_PRIORITY = [];
-
-  config.sections?.forEach((section: any) => {
-    if (section.type === "gridWithAnaAyet") {
-      const s1 = section as GridSectionConfig;
-      const id = s1.id;
-      SECTION_PRIORITY.push(id);
-      SECTION_VERSE_IDS[id] = [...s1.verses, s1.anaAyet];
-    } else if (section.type === "verticalGroups") {
-      const s2 = section as VerticalGroupsSectionConfig;
-
-      if (s2.customSections && s2.customSections.length > 0) {
-        // ─── CUSTOM SECTIONS: Each custom section defines its own verse list ─
-        s2.customSections.forEach((cs) => {
-          SECTION_PRIORITY.push(cs.id);
-          SECTION_VERSE_IDS[cs.id] = [...cs.verseIds];
-        });
-      } else if (s2.groupElevation === "unified") {
-        // ─── UNIFIED: All groups share one section ID ─────────────────────
-        const sectionId = s2.id;
-        SECTION_PRIORITY.push(sectionId);
-        const allVerseIds: number[] = [];
-        if (s2.introVerse) allVerseIds.push(s2.introVerse);
-        s2.groups.forEach((g) => allVerseIds.push(...g.verseIds));
-        if (s2.outroVerse) allVerseIds.push(s2.outroVerse);
-        SECTION_VERSE_IDS[sectionId] = allVerseIds;
-      } else {
-        // ─── PER-GROUP: Each group gets its own _g{idx} section ID ────────
-        s2.groups.forEach((g, gIdx) => {
-          const groupId = `${s2.id}_g${gIdx}`;
-          SECTION_PRIORITY.push(groupId);
-          SECTION_VERSE_IDS[groupId] = [...g.verseIds];
-        });
-
-        // Intro verse belongs to the first group; outro to the last.
-        if (s2.introVerse) {
-          SECTION_VERSE_IDS[`${s2.id}_g0`].unshift(s2.introVerse);
-        }
-        if (s2.outroVerse) {
-          const lastIdx = s2.groups.length - 1;
-          SECTION_VERSE_IDS[`${s2.id}_g${lastIdx}`].push(s2.outroVerse);
-        }
-      }
-    }
-  });
-
-  ALL_ELEVATED_VERSE_IDS = SECTION_PRIORITY.flatMap(
-    (sectionId) => SECTION_VERSE_IDS[sectionId],
-  );
+  // All engine-specific (blocks vs legacy sections) traversal lives in the
+  // shared resolver so dragEngine/boundsHelper/hitboxes/elevated-surfaces
+  // stay in sync with this store without importing it directly (avoids a
+  // circular import between this store and dragEngine).
+  initSectionResolverForStory(config);
+  SECTION_PRIORITY = getSectionPriority();
+  ALL_ELEVATED_VERSE_IDS = getAllSectionVerseIds();
 
   // Reset store if it's already created
   if (useElevatedStore) {
@@ -90,7 +52,7 @@ function hasWholeSection(
   verseSet: Set<number>,
   sectionId: ElevatedSectionId,
 ): boolean {
-  return SECTION_VERSE_IDS[sectionId].every((id) => verseSet.has(id));
+  return getSectionVerseIds(sectionId).every((id) => verseSet.has(id));
 }
 
 function resolveSectionIds(verseIds: number[]): ElevatedSectionId[] {

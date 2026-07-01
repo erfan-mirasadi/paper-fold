@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next *)",
+      "Bash(grep -n \"const sectionMap: Record<string, number> = {};\" app/hooks/usePaperMasking.ts)"
+    ]
+  }
+}

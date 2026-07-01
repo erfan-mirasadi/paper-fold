@@ -22,6 +22,13 @@ export interface LayoutDimensions {
   sceneCenterYOffset: number;
   padding: number;
   scrollPages: number;
+  /**
+   * When true, the paper does NOT widen for English/Turkish translations
+   * (which normally need extra horizontal room for longer text). Set this
+   * for surahs whose layout is already wide enough or tuned per-language
+   * separately. Defaults to false (paper widens as usual).
+   */
+  fixedWidthAcrossLanguages?: boolean;
 }
 
 export interface CurveColorConfig {
@@ -113,6 +120,20 @@ export interface SurahGlobalSettings {
   /** Border width of the outer section connector/frame. (was `sgBorderWidth`) */
   sectionBorderWidth: number;
 
+  /**
+   * Horizontal padding of the outer section connector/frame, independent of
+   * `sectionPadX` (which pads the group content). Falls back to
+   * `sectionPadX * 0.5` when omitted. (was the always-0.03 `sgPad`)
+   */
+  connectorPad?: number;
+
+  /**
+   * Vertical padding added around the whole block stack's decorative outer
+   * frame (`shiftedTop`/`shiftedBot`/`shiftedH`), beyond the content itself.
+   * Defaults to 0 (frame hugs the content tightly). (was `s2VerticalPad`)
+   */
+  framePad?: number;
+
   /** Optional uniform scale for Arabic verse text. */
   verseTextScale?: number;
 
@@ -120,11 +141,14 @@ export interface SurahGlobalSettings {
   translationVerseTextScale?: number | null;
 
   /**
-   * Controls how blocks are treated for drag/elevation:
-   * - "perBlock" (default): Each block gets its own section ID and drag spring.
-   * - "unified": All blocks share one section ID — drag moves everything together.
+   * Sizing for the small pill-shaped label rendered above/below a verse when
+   * `verseOverrides[id].hasCapsuleLabel` is set (e.g. Ahzab's "İman"/"Zekat"
+   * tags). Falls back to generic defaults (0.2/0.032/0.0035/0.015) when omitted.
    */
-  groupElevation?: "unified" | "perBlock";
+  capsuleLabelW?: number;
+  capsuleLabelH?: number;
+  capsuleLabelBorderWidth?: number;
+  capsuleLabelDrop?: number;
 }
 
 /**
@@ -178,17 +202,54 @@ export interface LayoutBlock {
   rowGap?: number;
 
   /**
+   * Additional row gap applied ONLY to the within-block row offset (between
+   * capsule rows), NOT to the block's overall frame height. Mirrors the
+   * legacy `extraRowGap` field exactly — a deliberate decoupling where extra
+   * spacing nudges later rows down without expanding the frame to match.
+   */
+  extraRowGap?: number;
+
+  /**
+   * Override the horizontal gap between the two columns for this block only.
+   * Falls back to `globalSettings.columnGap`. (was per-group `xGap`)
+   */
+  columnGap?: number;
+
+  /**
    * Override internal top/bottom padding for this block only.
    * Falls back to `globalSettings.blockPadding`.
    */
   blockPadding?: number;
 
   /**
+   * Explicit row count for this block, overriding the value inferred from
+   * `ceil(verseIds.length / columns)`. Use when a block needs reserved
+   * vertical space beyond what its verses alone would occupy. (was `groupRows[i]`)
+   */
+  rows?: number;
+
+  /**
+   * Manual vertical nudge (world units) applied to this block's frameY
+   * after the auto-centering pass. Positive moves down, negative moves up.
+   * Cascades to all subsequent blocks, same as the legacy `pushDown` field.
+   */
+  verticalNudge?: number;
+
+  /**
    * Signed horizontal inset from the section edge (world units).
    * Positive = pushed in (narrower), Negative = pushed out (wider).
-   * Replaces the boolean `isPushedIn` flag. Defaults to 0.
+   * Defaults to 0.
    */
   horizontalInset?: number;
+
+  /**
+   * Explicit override for the "is this the pushed-in/center group" flag used
+   * by SideCurves to pick the innermost bracket (`isCenter && isPushedIn`).
+   * Defaults to `horizontalInset > 0` when omitted — only needed when a
+   * block has a positive `horizontalInset` (e.g. a decorative scale offset)
+   * without being the semantic "center" group.
+   */
+  isPushedIn?: boolean;
 
   /**
    * Fixed height in world units for `type: 'spacer'` or
@@ -235,6 +296,10 @@ export interface LayoutBlock {
   backgroundScaleY?: number;
   backgroundOffsetX?: number;
   backgroundOffsetY?: number;
+  /** Scale of the solid color quad rendered behind the background texture. */
+  backgroundSolidScaleX?: number;
+  /** Scale of the solid color quad rendered behind the background texture. */
+  backgroundSolidScaleY?: number;
 
   // ── LABELS ───────────────────────────────────────────────────────────────
 
@@ -294,6 +359,9 @@ export interface VerseBlockConfig {
     borderColor?: string;
     textColor?: string;
     xMultiplier?: number;
+    isSimpleText?: boolean;
+    shadow?: boolean;
+    noBorder?: boolean;
   };
   backgroundTexture?: string;
   backgroundScaleX?: number;
@@ -308,7 +376,7 @@ export interface CameraTargetConfig {
   tilt: number;
 }
 
-/** @deprecated Use `LayoutBlock` with `type: 'grid'` instead. */
+/** @deprecated Alak-96-only legacy type. Every other surah uses `LayoutBlock` with `type: 'grid'` instead. */
 export interface GridSectionConfig {
   id: string;
   type: "gridWithAnaAyet";
@@ -333,7 +401,7 @@ export interface CustomSectionDef {
   cameraTarget?: CameraTargetConfig;
 }
 
-/** @deprecated Use a flat `blocks: LayoutBlock[]` array instead. */
+/** @deprecated Alak-96-only legacy type. Every other surah uses a flat `blocks: LayoutBlock[]` array instead. */
 export interface VerticalGroupsSectionConfig {
   id: string;
   type: "verticalGroups";
@@ -346,7 +414,7 @@ export interface VerticalGroupsSectionConfig {
   /**
    * Controls how groups are treated for drag/elevation:
    * - "perGroup" (default): Each group gets its own section ID and drag spring (Alak).
-   * - "unified": All groups share one section ID — drag moves everything together (AyatAlKursi).
+   * - "unified": All groups share one section ID — drag moves everything together.
    */
   groupElevation?: "unified" | "perGroup";
   /**
@@ -374,7 +442,7 @@ export interface VerticalGroupsSectionConfig {
   svgOverlays?: SvgOverlayItem[];
 }
 
-/** @deprecated Use `LayoutBlock` union type instead. */
+/** @deprecated Alak-96-only legacy type. Every other surah uses the `LayoutBlock` union type instead. */
 export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
 
 export interface SpecialVerses {
@@ -426,6 +494,22 @@ export interface VerseOverrideConfig {
 
 export interface SurahAssets {
   metallicVerseBorderSvg?: string;
+}
+
+/**
+ * Section-wide background texture, independent of any single block's own
+ * frame. Renders behind the whole block stack (the outer resting-state
+ * frame), as opposed to `LayoutBlock.backgroundTexture` which renders a
+ * decorative frame scoped to just that one block's own bounds.
+ */
+export interface SectionBackgroundConfig {
+  texture: string;
+  scaleX?: number;
+  scaleY?: number;
+  offsetX?: number;
+  offsetY?: number;
+  solidScaleX?: number;
+  solidScaleY?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -548,17 +632,15 @@ export interface SurahLayoutConfig<TParams = any> {
    */
   customSections?: CustomSectionDef[];
 
-  // ── DEPRECATED LEGACY SCHEMA (kept for backward compat during migration) ──
-  /**
-   * @deprecated Use `globalSettings: SurahGlobalSettings` instead.
-   * Will be removed after Step 3 migration.
-   */
+  // ── ALAK-ONLY LEGACY SCHEMA — DO NOT USE FOR NEW SURAHS ───────────────────
+  // Only app/data/alak96Config.ts sets these two fields. Every other surah
+  // uses `globalSettings` + `blocks` above. See SurahConfig.ts's "ALAK-ONLY
+  // ENGINE" comment for why Alak alone keeps this richer (grid+intro/outro)
+  // shape instead of being migrated to `blocks`.
+  /** @deprecated Alak-96-only. Use `globalSettings: SurahGlobalSettings` for new surahs. */
   params?: TParams;
 
-  /**
-   * @deprecated Use `blocks: LayoutBlock[]` instead.
-   * Will be removed after Step 3 migration.
-   */
+  /** @deprecated Alak-96-only. Use `blocks: LayoutBlock[]` for new surahs. */
   sections?: SectionConfig[];
 
   animations: SurahAnimations;
@@ -566,6 +648,14 @@ export interface SurahLayoutConfig<TParams = any> {
   introGuides?: Record<string, string>;
   /** Optional per-surah SVG overlay planes rendered on top of the section */
   svgOverlays?: SvgOverlayItem[];
+
+  /**
+   * Section-wide resting-state background, independent of any block's own
+   * frame. When omitted, the engine falls back to the first block that
+   * declares `backgroundTexture` (back-compat for Ihlas/Kafirun-style configs
+   * where a single block's frame doubles as the whole section's background).
+   */
+  sectionBackground?: SectionBackgroundConfig;
 }
 
 // ----------------------------------------------------------------------------
@@ -620,6 +710,9 @@ export interface GroupTransforms {
     borderColor?: string;
     textColor?: string;
     xMultiplier?: number;
+    isSimpleText?: boolean;
+    shadow?: boolean;
+    noBorder?: boolean;
   };
   backgroundTexture?: string;
   backgroundScaleX?: number;

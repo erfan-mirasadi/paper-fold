@@ -16,6 +16,44 @@ export function SectionZoomCamera() {
   const { zoomTargets, getSectionIdForVerse } = useMemo(() => {
     const zoomTargets: Record<string, CameraTargetConfig> = {};
 
+    // ── NEW: block-based configs ───────────────────────────────────────────
+    if (config.blocks && config.blocks.length > 0) {
+      if (config.customSections && config.customSections.length > 0) {
+        // Register the custom section camera target (falls back to the first block with one)
+        const fallback = config.blocks.find((b: any) => b.cameraTarget)?.cameraTarget;
+        config.customSections.forEach((cs: any) => {
+          const target = cs.cameraTarget ?? fallback;
+          if (target) zoomTargets[cs.id] = target;
+        });
+      } else {
+        // "perBlock" elevation (Fatiha, Kafirun): mirrors legacy's per-group
+        // fallback — blocks without their own `cameraTarget` reuse the first
+        // block's target (matching legacy's "Fallback: per-group entries
+        // with same target" behavior), instead of never zooming at all.
+        const fallback = config.blocks.find((b: any) => b.cameraTarget)?.cameraTarget;
+        config.blocks.forEach((block: any) => {
+          if (block.type === 'spacer' || !block.verseIds?.length) return;
+          const target = block.cameraTarget ?? fallback;
+          if (target) zoomTargets[block.id] = target;
+        });
+      }
+
+      const getSectionIdForVerse = (vid: number): string | null => {
+        if (config.customSections && config.customSections.length > 0) {
+          for (const cs of config.customSections) {
+            if (cs.verseIds.includes(vid)) return cs.id;
+          }
+        }
+        for (const block of (config.blocks ?? [])) {
+          if (block.verseIds?.includes(vid)) return block.id;
+        }
+        return null;
+      };
+
+      return { zoomTargets, getSectionIdForVerse };
+    }
+
+    // ── LEGACY: sections-based configs ──────────────────────────────────
     config.sections?.forEach((section) => {
       if (section.type === "gridWithAnaAyet") {
         const s1 = section as GridSectionConfig;
@@ -102,7 +140,7 @@ export function SectionZoomCamera() {
     };
 
     return { zoomTargets, getSectionIdForVerse };
-  }, [config.sections]);
+  }, [config.sections, config.blocks, config.customSections]);
 
   const activeSectionId = useElevatedStore((s) => s.activeSectionId);
   const activeVerseIds = useElevatedStore((s) => s.activeVerseIds);

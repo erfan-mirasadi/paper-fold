@@ -44,6 +44,56 @@ function getLeadVerseId(
   return pairedVerseId ? Math.min(configId, pairedVerseId) : configId;
 }
 
+/**
+ * Resolves the drag-behavior info ("group" vs "individual" vs custom-section)
+ * for whichever block/group a verse belongs to, engine-agnostic.
+ */
+function resolveSectionDragInfo(
+  config: any,
+  sectionId: string | null,
+  leadVerseId: number,
+): { dragBehavior?: string; isCenter?: boolean; hasCustomSections: boolean } {
+  if (config.blocks && config.blocks.length > 0) {
+    // Drag behavior is a per-block property, found by verse membership —
+    // independent of which elevation section id the verse resolves to
+    // (a cross-block customSection can span verses from several blocks).
+    const block = config.blocks.find((b: any) => b.verseIds?.includes(leadVerseId));
+    return {
+      dragBehavior: block?.dragBehavior,
+      isCenter: block?.isCenter,
+      hasCustomSections: Boolean(config.customSections?.length),
+    };
+  }
+
+  const s2Config = config.sections?.find((s: any) => s.type === "verticalGroups");
+  const hasCustomSections = Boolean(s2Config?.customSections?.length);
+  let targetGroup: any = null;
+  if (s2Config?.groups) {
+    if (sectionId?.includes("_g")) {
+      const idxStr = sectionId.split("_g")[1];
+      const gIndex = parseInt(idxStr, 10);
+      targetGroup = s2Config.groups[gIndex];
+    } else {
+      targetGroup = s2Config.groups.find((g: any) => g.verseIds?.includes(leadVerseId));
+    }
+  }
+  return {
+    dragBehavior: targetGroup?.dragBehavior,
+    isCenter: targetGroup?.isCenter,
+    hasCustomSections,
+  };
+}
+
+function shouldUseGroupDrag(info: {
+  dragBehavior?: string;
+  isCenter?: boolean;
+  hasCustomSections: boolean;
+}): boolean {
+  if (info.dragBehavior === "individual") return false;
+  if (info.hasCustomSections) return true;
+  return info.dragBehavior === "group" || !!info.isCenter;
+}
+
 const ZERO_OFFSET = { x: 0, y: 0 };
 
 import { usePopUpStore } from "../../../stores/usePopUpStore";
@@ -198,39 +248,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
-    const s2Config = activeStoryConfig.sections?.find(
-      (s) => s.type === "verticalGroups",
-    ) as any;
-
-    let targetGroup: any = null;
-    if (s2Config?.groups) {
-      if (sectionId.includes("_g")) {
-        const idxStr = sectionId.split("_g")[1];
-        const gIndex = parseInt(idxStr, 10);
-        targetGroup = s2Config.groups[gIndex];
-      } else {
-        targetGroup = s2Config.groups.find((g: any) =>
-          g.verseIds?.includes(leadVerseId),
-        );
-      }
-    }
-
-    // When customSections is present, evaluate its drag mode
-    if (s2Config?.customSections?.length > 0) {
-      if (targetGroup?.dragBehavior === "individual") {
-        useSectionGroupDrag = false;
-      } else {
-        useSectionGroupDrag = true;
-      }
-    } else if (targetGroup) {
-      // dragBehavior takes precedence: 'individual' overrides isCenter
-      if (targetGroup.dragBehavior === "individual") {
-        useSectionGroupDrag = false;
-      } else {
-        useSectionGroupDrag =
-          targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-      }
-    }
+    useSectionGroupDrag = shouldUseGroupDrag(
+      resolveSectionDragInfo(activeStoryConfig, sectionId, leadVerseId),
+    );
   }
 
   const isVerseSeparated = useDragState((s) =>
@@ -259,29 +279,10 @@ export function VerseController({ config }: { config: VerseConfig }) {
   // Static check: does this verse belong to a center/group-drag section?
   const isGroupDragType = useMemo(() => {
     if (!sectionId) return false;
-
-    let targetGroup: any = null;
-    if (s2Config?.groups) {
-      if (sectionId.includes("_g")) {
-        const idxStr = sectionId.split("_g")[1];
-        const gIndex = parseInt(idxStr, 10);
-        targetGroup = s2Config.groups[gIndex];
-      } else {
-        targetGroup = s2Config.groups.find((g: any) =>
-          g.verseIds?.includes(leadVerseId),
-        );
-      }
-    }
-
-    if (hasCustomSections) {
-      if (targetGroup?.dragBehavior === "individual") return false;
-      return true;
-    }
-
-    if (!targetGroup) return false;
-    if (targetGroup.dragBehavior === "individual") return false;
-    return targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-  }, [sectionId, hasCustomSections, s2Config, leadVerseId]);
+    return shouldUseGroupDrag(
+      resolveSectionDragInfo(activeStoryConfig, sectionId, leadVerseId),
+    );
+  }, [sectionId, activeStoryConfig, leadVerseId]);
 
   // ── Snap mode + bounds ────────────────────────────────────────────────────
   //

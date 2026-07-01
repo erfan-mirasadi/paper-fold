@@ -146,7 +146,7 @@ function computeBlockHeight(
   const bPad = block.blockPadding ?? gs.blockPadding;
   const cols = block.columns ?? 2;
   const verseIds = block.verseIds ?? [];
-  const numRows = cols > 0 ? Math.ceil(verseIds.length / cols) : 0;
+  const numRows = block.rows ?? (cols > 0 ? Math.ceil(verseIds.length / cols) : 0);
 
   let height = bPad * 2 + numRows * capH + Math.max(0, numRows - 1) * rGap;
 
@@ -199,6 +199,10 @@ export interface BlockLayoutConfig {
   sectionBorderWidth: number;
   verseTextScale?: number;
   translationVerseTextScale?: number | null;
+  capsuleLabelW?: number;
+  capsuleLabelH?: number;
+  capsuleLabelBorderWidth?: number;
+  capsuleLabelDrop?: number;
 
   // SideCurves / DynamicBackground compatibility
   s2Top: number;    // alias for contentStartY
@@ -213,6 +217,16 @@ export interface BlockLayoutConfig {
   // groupYPositions / groupHeights: parallel arrays for SideCurves & computeFoldYPositions
   groupYPositions: number[];
   groupHeights: number[];
+
+  // ── SideCurves compatibility aliases ────────────────────────────────────
+  // SideCurves.computeBrackets() destructures these from `layout` by name.
+  // They map 1:1 to globalSettings values so no NaN ever reaches Three.js.
+  smallBoxH2: number;   // = gs.capsuleHeight
+  groupPad:   number;   // = gs.blockPadding
+  s2Gap:      number;   // = gs.columnGap (used as a generic spacing reference)
+  curvePad:   number;   // = gs.blockPadding (bracket placement pad)
+  innerW:     number;   // = sectionW - sectionPadX*2
+  baseX:      number;   // = START_X + sectionPadX
 }
 
 // ── NEW BLOCK-BASED ENGINE ──────────────────────────────────────────────────
@@ -264,8 +278,18 @@ export function createBlockLayoutMath(
   let cursorY = contentStartY; // walks downward
 
   for (let i = 0; i < blocks.length; i++) {
+    const nudge = blocks[i].verticalNudge ?? 0;
     const frameH = blockHeights[i];
-    const frameY = cursorY;          // top edge of this block
+    let frameY: number;
+    if (i === 0) {
+      // Legacy quirk, preserved exactly: block 0's nudge is isolated and does
+      // NOT cascade to later blocks (it's applied as a post-hoc adjustment
+      // after every other block's position was already computed).
+      frameY = cursorY - nudge;
+    } else {
+      cursorY -= nudge; // manual offset, cascades to later blocks
+      frameY = cursorY;
+    }
     const bPad = blocks[i].blockPadding ?? gs.blockPadding;
     const contentY = frameY - bPad; // top edge of first capsule row
 
@@ -279,7 +303,10 @@ export function createBlockLayoutMath(
   const groupYPositions = blockMeta.map((m) => m.frameY);
   const groupHeights    = blockMeta.map((m) => m.frameH);
 
-  // ── Background texture from the first block that declares one ─────────
+  // ── Section-wide background: explicit `sectionBackground` wins; falls back
+  // to the first block that declares its own `backgroundTexture` (back-compat
+  // for configs where one block's frame doubles as the section background).
+  const sectionBg = config.sectionBackground;
   const bgBlock = blocks.find((b) => b.backgroundTexture);
 
   return {
@@ -306,16 +333,30 @@ export function createBlockLayoutMath(
     sectionBorderWidth: gs.sectionBorderWidth,
     verseTextScale:     gs.verseTextScale,
     translationVerseTextScale: gs.translationVerseTextScale,
+    capsuleLabelW:      gs.capsuleLabelW,
+    capsuleLabelH:      gs.capsuleLabelH,
+    capsuleLabelBorderWidth: gs.capsuleLabelBorderWidth,
+    capsuleLabelDrop:   gs.capsuleLabelDrop,
 
     // SideCurves / DynamicBackground compat aliases
     s2Top: contentStartY,
     s2H:   totalContentH,
-    s2BackgroundTexture:  bgBlock?.backgroundTexture,
-    s2BackgroundScaleX:   bgBlock?.backgroundScaleX,
-    s2BackgroundScaleY:   bgBlock?.backgroundScaleY,
-    s2BackgroundOffsetX:  bgBlock?.backgroundOffsetX,
-    s2BackgroundOffsetY:  bgBlock?.backgroundOffsetY,
+    s2BackgroundTexture:  sectionBg?.texture ?? bgBlock?.backgroundTexture,
+    s2BackgroundScaleX:   sectionBg?.scaleX ?? bgBlock?.backgroundScaleX,
+    s2BackgroundScaleY:   sectionBg?.scaleY ?? bgBlock?.backgroundScaleY,
+    s2BackgroundOffsetX:  sectionBg?.offsetX ?? bgBlock?.backgroundOffsetX,
+    s2BackgroundOffsetY:  sectionBg?.offsetY ?? bgBlock?.backgroundOffsetY,
     hasIntroOutro: false,
+
+    // ── SideCurves field aliases ────────────────────────────────────────
+    // computeBrackets() destructures these from `layout` by name.
+    // Map them from globalSettings so no NaN reaches SideCurves.
+    smallBoxH2: gs.capsuleHeight,          // height of one capsule
+    groupPad:   gs.blockPadding,           // top/bottom padding inside a frame
+    s2Gap:      gs.columnGap,              // horizontal gap (used as spacing ref)
+    curvePad:   gs.blockPadding,           // same as groupPad for bracket placement
+    innerW:     sectionW - gs.sectionPadX * 2,
+    baseX:      START_X + gs.sectionPadX,
 
     groupYPositions,
     groupHeights,
@@ -353,13 +394,23 @@ export function buildBlockTransforms(
 
   // Mirror shift for the outer section frame (cosmetic, same as legacy)
   const S2_MIRROR_SHIFT = 0.015;
-  const shiftedTop = lm.contentStartY - S2_MIRROR_SHIFT;
-  const shiftedBot = lm.contentStartY - lm.totalContentH + S2_MIRROR_SHIFT;
-  const shiftedH   = lm.totalContentH - 2 * S2_MIRROR_SHIFT;
+  const framePad = gs.framePad ?? 0;
+  const shiftedTop = lm.contentStartY + framePad - S2_MIRROR_SHIFT;
+  const shiftedBot = lm.contentStartY - lm.totalContentH - framePad + S2_MIRROR_SHIFT;
+  const shiftedH   = lm.totalContentH + framePad * 2 - 2 * S2_MIRROR_SHIFT;
 
   const bw   = gs.sectionBorderWidth;
-  const connX = startX - gs.sectionPadX * 0.5; // slight outward extension
-  const connW = lm.sectionW + gs.sectionPadX;
+  // connectorPad mirrors the legacy independent `sgPad` field exactly (baseX -
+  // pad, innerW + pad*2). When omitted, falls back to the original block-engine
+  // expression byte-for-bit so already-migrated configs (Ihlas/Kafirun) are untouched.
+  const connX =
+    gs.connectorPad !== undefined
+      ? startX + gs.sectionPadX - gs.connectorPad
+      : startX - gs.sectionPadX * 0.5;
+  const connW =
+    gs.connectorPad !== undefined
+      ? lm.sectionW - gs.sectionPadX * 2 + gs.connectorPad * 2
+      : lm.sectionW + gs.sectionPadX;
 
   for (let bIdx = 0; bIdx < blocks.length; bIdx++) {
     const block  = blocks[bIdx];
@@ -367,7 +418,11 @@ export function buildBlockTransforms(
     const capH   = block.capsuleHeight   ?? gs.capsuleHeight;
     const rGap   = block.rowGap          ?? gs.rowGap;
     const bPad   = block.blockPadding    ?? gs.blockPadding;
+    // colGap (width calc) mirrors legacy `standardGHalfW`, which always uses the
+    // GLOBAL gap — only the X-position offset uses a per-block override (xGap).
+    // This decoupling is a deliberate legacy quirk, preserved exactly.
     const colGap = gs.columnGap;
+    const colGapForPosition = block.columnGap ?? gs.columnGap;
     const cols   = block.columns ?? 2;
     const inset  = block.horizontalInset ?? 0;
 
@@ -376,10 +431,12 @@ export function buildBlockTransforms(
     const blockInnerW   = sectionInnerW - inset * 2;
     const blockBaseX    = startX + gs.sectionPadX + inset;
 
-    // Width of a single capsule column
-    const colW = cols === 1
-      ? blockInnerW - bPad * 2
-      : (blockInnerW - bPad * 2 - colGap) / 2;
+    // Width of a single capsule column.
+    // IMPORTANT: mirrors legacy `standardGHalfW = (gInnerW - groupPad*2 - s2Gap) / 2`.
+    // Even for columns:1, the base width is the half-column size so that
+    // verseOverrides.expandW (e.g. 0.2) does the full-width stretching — exactly
+    // as in the legacy engine. Using full blockInnerW here would double-count expandW.
+    const colW = (blockInnerW - bPad * 2 - colGap) / 2;
 
     const centerX = blockBaseX + blockInnerW / 2;
 
@@ -493,15 +550,15 @@ export function buildBlockTransforms(
     verseIds.forEach((vId, i) => {
       const isRight  = cols === 2 ? i % 2 !== 0 : false;
       const row      = Math.floor(i / cols);
-      const rowOffset = row * (capH + rGap);
+      const rowOffset = row * (capH + rGap + (block.extraRowGap ?? 0));
 
       let vx: number;
       if (cols === 1) {
         vx = centerX - colW / 2;
       } else {
         vx = isRight
-          ? centerX + colGap / 2
-          : centerX - colGap / 2 - colW;
+          ? centerX + colGapForPosition / 2
+          : centerX - colGapForPosition / 2 - colW;
       }
 
       // Per-verse xOffset nudge from verseOverrides
@@ -540,7 +597,7 @@ export function buildBlockTransforms(
       frameY: meta.frameY,
       frameW: blockInnerW,
       frameH: meta.frameH,
-      isPushedIn: (block.horizontalInset ?? 0) > 0,
+      isPushedIn: block.isPushedIn ?? (block.horizontalInset ?? 0) > 0,
       isCenter:   block.isCenter ?? false,
       verses,
       rowConnectors,
@@ -575,7 +632,17 @@ export function buildBlockTransforms(
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// LEGACY ENGINE — unchanged, preserved for configs not yet migrated to `blocks`
+// ALAK-ONLY ENGINE — every other surah (Fatiha, Ayat al-Kursi, Ahzab, Ihlas,
+// Kafirun) runs on the `blocks` engine above, which is the standard for all
+// future surahs. Alak 96 is the one deliberate exception: it's the only surah
+// with a grid+anaAyet header (Section 1) plus full-width intro/outro verses
+// and decorative top/bottom connector frames around the group stack — a
+// richer shape than the flat `LayoutBlock[]` model (and its renderer in
+// ElevatedSectionSurfaces.tsx) currently supports. Rather than rewrite Alak's
+// battle-tested, pixel-tuned renderer to chase architectural purity, this
+// engine is kept alive scoped to Alak alone. Do not add new surahs here —
+// use `blocks` + `globalSettings` instead (see ihlas112Config.ts for a
+// minimal example).
 // ────────────────────────────────────────────────────────────────────────────
 export function createLayoutMath(
   config: SurahLayoutConfig<AlakLayoutParams>,

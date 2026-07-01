@@ -12,6 +12,7 @@ import {
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { PAGE_DEPTH } from "../3d-scene/SinglePaper";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
+import { getSectionIdForVerseId, getSectionVerseIds } from "../../../utils/sectionResolver";
 import { useDragState } from "../../../utils/dragEngine";
 import { getFoldAnglesForScroll } from "../3d-scene/FoldStory";
 import { useFoldStore } from "../orchestrator/ScrollManager";
@@ -56,6 +57,106 @@ function buildHitboxes(
 
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
+  // ── NEW: block-based configs ────────────────────────────────────────────
+  if (config.blocks && config.blocks.length > 0) {
+    config.blocks.forEach((block, idx) => {
+      if (block.type === "spacer") return;
+      const sTransform = SURAH_TRANSFORMS.sections[idx] as
+        | Required<SectionTransforms>
+        | undefined;
+      if (!sTransform) return;
+
+      const verseMap =
+        block.type === "grid" ? sTransform.verses : sTransform.groups?.[0]?.verses;
+
+      // Individual verse hitboxes.
+      // When this block belongs to a customSection (and isn't dragBehavior
+      // "individual"), clicking any single verse must elevate the WHOLE
+      // custom section at once — matching the legacy behavior where such
+      // hitboxes carry `kind: "section"` + the full section's verseIds, not
+      // just the one clicked verse. Without this, `elevateVerse(vId)` only
+      // ever adds that one verse (+ its fold pair) to activeVerseIds, which
+      // can never satisfy the "all verses present" check that activates a
+      // multi-verse custom section — so the section never actually elevates.
+      const hasCustomSections = Boolean(config.customSections?.length);
+      (block.verseIds ?? []).forEach((vId) => {
+        const vt = verseMap?.[vId];
+        if (!vt) return;
+        const base = {
+          key: `verse-${vId}`,
+          cx: vt.x + vt.w / 2 - PAGE_WIDTH / 2,
+          cy: vt.y - vt.h / 2,
+          cz: zFront,
+          w: vt.w * VERSE_HITBOX_PAD_W,
+          h: vt.h * VERSE_HITBOX_PAD_H,
+        };
+        if (hasCustomSections && block.dragBehavior !== "individual") {
+          const sectionId = getSectionIdForVerseId(vId) ?? block.id;
+          const sectionVerseIds = getSectionVerseIds(sectionId);
+          hitboxes.push({
+            ...base,
+            kind: "section",
+            sectionId,
+            verseIds: sectionVerseIds.length > 0 ? sectionVerseIds : [vId],
+          });
+        } else {
+          hitboxes.push({ ...base, kind: "verse", verseId: vId });
+        }
+      });
+
+      // AnaAyet hitbox (grid-type blocks only)
+      if (block.type === "grid" && block.anaAyetId !== undefined && sTransform.anaAyet) {
+        const anaAyet = sTransform.anaAyet;
+        hitboxes.push({
+          key: `verse-${block.anaAyetId}`,
+          cx: anaAyet.x + anaAyet.w / 2 - PAGE_WIDTH / 2,
+          cy: anaAyet.y - anaAyet.h / 2,
+          cz: zFront,
+          w: anaAyet.w * VERSE_HITBOX_PAD_W,
+          h: anaAyet.h * VERSE_HITBOX_PAD_H,
+          kind: "verse",
+          verseId: block.anaAyetId,
+        });
+      }
+
+      // Frame-level hitbox so clicking blank space inside the block also
+      // elevates it. Skipped for "individual" drag blocks (e.g. Ihlas),
+      // where only precise verse clicks should register — matching the
+      // legacy custom-sections + dragBehavior:"individual" behavior.
+      if (block.dragBehavior !== "individual") {
+        const sectionId =
+          getSectionIdForVerseId(block.verseIds?.[0] ?? -1) ?? block.id;
+        const sectionVerseIds = getSectionVerseIds(sectionId);
+        if (sectionVerseIds.length > 0) {
+          const group = sTransform.groups?.[0];
+          const frame = group
+            ? { x: group.frameX, y: group.frameY, w: group.frameW, h: group.frameH }
+            : {
+                x: sTransform.frameX,
+                y: sTransform.frameY ?? 0,
+                w: sTransform.frameW,
+                h: sTransform.frameH ?? 0,
+              };
+
+          hitboxes.push({
+            key: `section-${sectionId}-frame-${idx}`,
+            cx: frame.x + frame.w / 2 - PAGE_WIDTH / 2,
+            cy: frame.y - frame.h / 2,
+            cz: zSection,
+            w: frame.w,
+            h: frame.h,
+            kind: "section",
+            sectionId,
+            verseIds: sectionVerseIds,
+          });
+        }
+      }
+    });
+
+    return hitboxes;
+  }
+
+  // ── LEGACY: sections-based configs ──────────────────────────────────────
   config.sections?.forEach((sectionConfig, idx) => {
     const sTransform = SURAH_TRANSFORMS.sections[
       idx

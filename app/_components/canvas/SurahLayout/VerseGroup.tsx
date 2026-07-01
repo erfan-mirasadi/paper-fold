@@ -144,11 +144,7 @@ export function VerseGroup({
           shadow={topLabelConfig.shadow}
           isSimpleText={topLabelConfig.isSimpleText}
           renderOrder={20}
-          textScaleOverride={
-            (config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar"
-              ? undefined
-              : topLabelConfig.textScaleOverride
-          }
+          textScaleOverride={topLabelConfig.textScaleOverride}
         />
       )}
       {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}

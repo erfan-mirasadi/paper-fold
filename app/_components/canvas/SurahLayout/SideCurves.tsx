@@ -381,12 +381,17 @@ export const SideCurves = ({
     : FALLBACK_CENTER_COLOR;
 
   const activeConfig = useStoryStore((s) => s.activeConfig);
+  const isBlockConfig = Boolean(activeConfig.blocks?.length);
   const s2SectionId = activeConfig.sections?.find((s) => s.type === "verticalGroups")?.id;
 
-  const hasActiveS2Section = useElevatedStore((state) => 
-    state.activeSectionIds.some((id) =>
-      s2SectionId && (id === s2SectionId || id.startsWith(`${s2SectionId}_g`))
-    )
+  const hasActiveS2Section = useElevatedStore((state) =>
+    isBlockConfig
+      // Block-engine configs have no separate "Section 1" grid to exclude —
+      // any active elevation section is the S2-equivalent.
+      ? state.activeSectionIds.length > 0
+      : state.activeSectionIds.some((id) =>
+          s2SectionId && (id === s2SectionId || id.startsWith(`${s2SectionId}_g`))
+        )
   );
 
   // Build set of section-1 popup group IDs so we can exclude them from hide logic

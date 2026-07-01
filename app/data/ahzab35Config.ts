@@ -13,8 +13,7 @@
  * curveColors: []         — no side brackets for now.
  */
 
-import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
-import type { AlakLayoutParams } from "./SurahConfig";
+import type { SurahLayoutConfig } from "./schema";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
@@ -35,7 +34,7 @@ const GREEN_BORDER = "#8FA88F";
 // LAYOUT CONFIG
 // ---------------------------------------------------------------------------
 
-export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
+export const AHZAB_35_CONFIG: SurahLayoutConfig = {
   id: "ahzab35",
   title: "Ahzab 35",
   heroTitle: "Ahzab",
@@ -54,6 +53,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     sceneCenterYOffset: -0.045,
     padding: 0.38,
     scrollPages: 5,
+    fixedWidthAcrossLanguages: true,
   },
 
   specialVerses: {
@@ -315,47 +315,66 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 
-  params: {
-    // --- Section 1 (stub — not rendered) ---
-    s1Top: 0,
-    s1Pad: 0,
-    gap: 0.01,
-    s1AnaGap: 0.01,
-    smallBoxH: 0.04,
-    anaAyetH: 0.04,
-    gapBetweenS1andS2: 0.01,
-
-    // --- Section 2 ---
-    s2VerticalPad: 0,
-    bigBoxH: 0,
-    groupGap: 0.035,
-    groupPad: 0.012,
-    groupPadBottom: 0.012,
-    s2Gap: 0.12, // increase horizontal gap between left / right columns
-    s2VerticalRowGap: 0.004, // very small gap between the two green rows
-    smallBoxH2: 0.085, // default height of each individual verse capsule
-    middleExtraGap: -0.01,
-    s2PadLeftRight: 0.005, // push outward to the red borders
-    g2Scale: 0.1, // indent the green group to fit the inward SVG border
-    outerScale: 0.0,
-    s1BorderWidth: 0,
-
-    // --- Misc ---
-    capsuleLabelW: 0.16,
-    capsuleLabelH: 0.024,
-    capsuleLabelBorderWidth: 0.0035,
-    capsuleLabelDrop: 0.005,
-    sgPad: 0.03,
-    sgBorderWidth: 0.006,
-    boxExtOffset: 0.02,
-    extraRowGap: 0.0,
-    labelHitboxWidth: 0.43,
-    // 5 groups: [1-row, 1-row, 2-row, 1-row, 1-row]
-    groupRows: [1, 1, 2, 1, 1],
-
-    outerCurveXOffset: 0.004,
-    centerCurveXOffset: -0.0015,
+  // ── NEW BLOCK-BASED SCHEMA ──────────────────────────────────────────────
+  // Legacy params mapping:
+  //   smallBoxH2: 0.085      → capsuleHeight
+  //   s2Gap: 0.12            → columnGap (overridden per-block via xGap anyway)
+  //   s2VerticalRowGap: 0.004 → rowGap
+  //   groupGap + middleExtraGap (0.035 + -0.01) → blockGap
+  //   s2PadLeftRight: 0.005  → sectionPadX
+  //   groupPad: 0.012        → blockPadding
+  //   sgBorderWidth: 0.006   → sectionBorderWidth
+  //   sgPad: 0.03            → connectorPad
+  globalSettings: {
+    capsuleHeight:      0.085,
+    columnGap:           0.12,
+    rowGap:              0.004,
+    blockGap:            0.025,
+    sectionPadX:         0.005,
+    blockPadding:        0.012,
+    sectionBorderWidth:  0.006,
+    connectorPad:        0.03,
+    capsuleLabelW:            0.16,
+    capsuleLabelH:            0.024,
+    capsuleLabelBorderWidth:  0.0035,
+    capsuleLabelDrop:         0.005,
   },
+
+  sectionBackground: {
+    texture: "/ahzab/section-frame.svg",
+    scaleX: 1.47,
+    scaleY: 1.41,
+    offsetY: 0.025,
+  },
+
+  // ── Custom drag/click sections ─────────────────────────────────────────
+  // Overrides the default per-block section mapping.
+  // Section 1 (top):         verses 1, 2       — İman (top yellow)
+  // Section 2 (middle right): verses 3, 5, 7, 9 — Right column
+  // Section 3 (middle left):  verses 4, 6, 8, 10 — Left column
+  // Section 4 (bottom):      verses 11, 12      — Dome (bottom yellow)
+  customSections: [
+    {
+      id: "section2_top",
+      verseIds: [1, 2],
+      cameraTarget: { y: 1.7, fov: 22.5, tilt: -1.3 },
+    },
+    {
+      id: "section2_right",
+      verseIds: [3, 5, 7, 9],
+      cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
+    },
+    {
+      id: "section2_left",
+      verseIds: [4, 6, 8, 10],
+      cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
+    },
+    {
+      id: "section2_bottom",
+      verseIds: [11, 12],
+      cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
+    },
+  ],
 
   // ---------------------------------------------------------------------------
   // SVG OVERLAYS — decorative frames anchored to specific groups
@@ -472,118 +491,82 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   ],
 
-  sections: [
+  blocks: [
+    // ── Block 0 — Yellow / İman (1 row) ────────────────────────────────────
     {
-      id: "section2",
-      type: "verticalGroups",
-      backgroundTexture: "/ahzab/section-frame.svg",
-      backgroundScaleX: 1.47,
-      backgroundScaleY: 1.41,
-      backgroundOffsetY: 0.025,
-
-      // Horizontal connector bars between paired capsules are hidden.
+      id: "section2_g0",
+      type: "group",
+      verseIds: [2, 1],
+      horizontalInset: 0.1, // was customScale
+      isPushedIn: false, // explicit: customScale>0 here is NOT the SideCurves center group
+      isCenter: false,
+      columnGap: 0.25, // was xGap
+      bgThemeKey: "s2Group1Bg",
+      verticalNudge: -0.03, // was pushDown (negative pushes UP)
+      dragBehavior: "group",
       hideRowConnectors: true,
-
-      // ── Custom drag/click sections ─────────────────────────────────────
-      // Overrides the default per-group section mapping.
-      // Section 1 (top):         verses 1, 2       — İman (top yellow)
-      // Section 2 (middle right): verses 3, 5, 7, 9 — Right column
-      // Section 3 (middle left):  verses 4, 6, 8, 10 — Left column
-      // Section 4 (bottom):      verses 11, 12      — Dome (bottom yellow)
-      customSections: [
-        {
-          id: "section2_top",
-          verseIds: [1, 2],
-          cameraTarget: { y: 1.7, fov: 22.5, tilt: -1.3 },
-        },
-        {
-          id: "section2_right",
-          verseIds: [3, 5, 7, 9],
-          cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
-        },
-        {
-          id: "section2_left",
-          verseIds: [4, 6, 8, 10],
-          cameraTarget: { y: 1.2, fov: 27.5, tilt: -1.4 },
-        },
-        {
-          id: "section2_bottom",
-          verseIds: [11, 12],
-          cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
-        },
-      ],
-
-      groups: [
-        // ── Group 0 — Yellow / İman (1 row) ──────────────────────────────
-        {
-          verseIds: [2, 1],
-          isPushedIn: false,
-          isCenter: false,
-          extraRowGap: 0,
-          customScale: 0.1,
-          xGap: 0.25,
-          bgThemeKey: "s2Group1Bg",
-          pushDown: -0.03, // negative value pushes the group UP
-          dragBehavior: "group",
-        },
-        // ── Group 1 — Blue (1 row) ────────────────────────────────────────
-        {
-          verseIds: [4, 3],
-          isPushedIn: false,
-          isCenter: true,
-          extraRowGap: 0,
-          xGap: 0.22,
-          bgThemeKey: "s2Group2Bg",
-          customScale: 0.06,
-          pushDown: 0,
-          dragBehavior: "group",
-        },
-        // ── Group 2 — Green / pushed in (2 rows) ─────────────────────────
-        {
-          verseIds: [6, 5, 8, 7],
-          isPushedIn: true,
-          isCenter: true,
-          dragBehavior: "group",
-          extraRowGap: 0.01,
-          xGap: 0.35,
-          customScale: 0.2,
-          bgThemeKey: "s2Group3Bg",
-        },
-        // ── Group 3 — Blue (1 row) ────────────────────────────────────────
-        {
-          verseIds: [10, 9],
-          isPushedIn: false,
-          isCenter: true,
-          extraRowGap: 0,
-          xGap: 0.22,
-          bgThemeKey: "s2Group2Bg",
-          customScale: 0.06,
-          dragBehavior: "group",
-          // pushDown: 0.01,
-        },
-        // ── Group 4 — Yellow / dome text (1 row, smaller capsules) ───────
-        {
-          verseIds: [12, 11],
-          isPushedIn: false,
-          isCenter: true,
-          xGap: 0.16, // Change this value to adjust the horizontal distance between the capsules!
-          bgThemeKey: "s2Group1Bg",
-          customScale: 0,
-          pushDown: 0.08,
-          dragBehavior: "group",
-          topLabelConfig: {
-            width: 0.3,
-            height: 0.085,
-            yOffset: 0.025,
-            textColor: "#000000",
-            xMultiplier: 1.0,
-            isSimpleText: true,
-            shadow: true,
-          },
-        },
-      ],
-      cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
-    } as VerticalGroupsSectionConfig,
+    },
+    // ── Block 1 — Blue (1 row) ──────────────────────────────────────────────
+    {
+      id: "section2_g1",
+      type: "group",
+      verseIds: [4, 3],
+      horizontalInset: 0.06,
+      isPushedIn: false,
+      isCenter: true,
+      columnGap: 0.22,
+      bgThemeKey: "s2Group2Bg",
+      dragBehavior: "group",
+      hideRowConnectors: true,
+    },
+    // ── Block 2 — Green / pushed in (2 rows) ───────────────────────────────
+    {
+      id: "section2_g2",
+      type: "group",
+      verseIds: [6, 5, 8, 7],
+      horizontalInset: 0.2,
+      isCenter: true,
+      dragBehavior: "group",
+      extraRowGap: 0.01, // affects only the within-block row offset, not frame height
+      columnGap: 0.35,
+      bgThemeKey: "s2Group3Bg",
+      hideRowConnectors: true,
+    },
+    // ── Block 3 — Blue (1 row) ──────────────────────────────────────────────
+    {
+      id: "section2_g3",
+      type: "group",
+      verseIds: [10, 9],
+      horizontalInset: 0.06,
+      isPushedIn: false,
+      isCenter: true,
+      columnGap: 0.22,
+      bgThemeKey: "s2Group2Bg",
+      dragBehavior: "group",
+      hideRowConnectors: true,
+    },
+    // ── Block 4 — Yellow / dome text (1 row, smaller capsules) ────────────
+    {
+      id: "section2_g4",
+      type: "group",
+      verseIds: [12, 11],
+      horizontalInset: 0,
+      isCenter: true,
+      columnGap: 0.16, // Change this value to adjust the horizontal distance between the capsules!
+      bgThemeKey: "s2Group1Bg",
+      verticalNudge: 0.08,
+      dragBehavior: "group",
+      hideRowConnectors: true,
+      topLabelConfig: {
+        width: 0.3,
+        height: 0.085,
+        yOffset: 0.025,
+        textColor: "#000000",
+        xMultiplier: 1.0,
+        isSimpleText: true,
+        shadow: true,
+      },
+    },
   ],
 
   animations: {

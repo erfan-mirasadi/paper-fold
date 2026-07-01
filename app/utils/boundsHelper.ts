@@ -1,6 +1,7 @@
 import { SurahTransforms } from "../data/SurahConfig";
 import { SectionTransforms, VerticalGroupsSectionConfig, GridSectionConfig } from "../data/schema";
 import { getActiveStoryConfig } from "../stores/useStoryStore";
+import { getSectionVerseIds } from "./sectionResolver";
 
 export type SectionBounds = {
   minX: number;
@@ -18,7 +19,71 @@ export function calculateSectionBounds(
 ): SectionBounds {
   const config = getActiveStoryConfig();
 
-  // ── Check each section in the config ────────────────────────────────────
+  // ── NEW: block-based configs ────────────────────────────────────────────
+  if (config.blocks && config.blocks.length > 0) {
+    const hasCustomSections = !!(
+      config.customSections && config.customSections.length > 0
+    );
+
+    if (hasCustomSections) {
+      // Cross-block custom section — bounds = tight union of its verse
+      // transforms (verses can live in different block transforms).
+      const verseIds = getSectionVerseIds(sectionId);
+      if (verseIds.length === 0) return undefined as any;
+
+      let minX = Infinity, maxX = -Infinity;
+      let minY = Infinity, maxY = -Infinity;
+      transforms.sections.forEach((sTransform: any) => {
+        const verseMaps = [
+          sTransform.verses,
+          ...((sTransform.groups ?? []) as any[]).map((g) => g.verses),
+        ].filter(Boolean);
+        verseMaps.forEach((verses) => {
+          verseIds.forEach((vId) => {
+            const vt = verses[vId];
+            if (!vt) return;
+            minX = Math.min(minX, vt.x);
+            maxX = Math.max(maxX, vt.x + vt.w);
+            minY = Math.min(minY, vt.y - vt.h);
+            maxY = Math.max(maxY, vt.y);
+          });
+        });
+      });
+
+      if (minX === Infinity) return undefined as any;
+      return {
+        minX: minX - pageWidth / 2 - BOUNDS_PAD,
+        maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
+        maxY: maxY + BOUNDS_PAD,
+        minY: minY - BOUNDS_PAD,
+      };
+    }
+
+    // Per-block elevation zone, keyed by block.id — use the block's own
+    // (inset-adjusted) frame, mirroring legacy per-group frame bounds.
+    const blockIdx = config.blocks.findIndex((b) => b.id === sectionId);
+    if (blockIdx < 0) return undefined as any;
+    const sTransform = transforms.sections[blockIdx] as
+      | Required<SectionTransforms>
+      | undefined;
+    if (!sTransform) return undefined as any;
+
+    const group = sTransform.groups?.[0];
+    const frameX = group ? group.frameX : sTransform.frameX;
+    const frameY = group ? group.frameY : (sTransform.frameY ?? 0);
+    const frameW = group ? group.frameW : sTransform.frameW;
+    const frameH = group ? group.frameH : (sTransform.frameH ?? 0);
+
+    return {
+      minX: frameX - pageWidth / 2 - BOUNDS_PAD,
+      maxX: frameX - pageWidth / 2 + frameW + BOUNDS_PAD,
+      maxY: frameY + BOUNDS_PAD,
+      minY: frameY - frameH - BOUNDS_PAD,
+    };
+  }
+
+  // ── LEGACY: sections-based configs ──────────────────────────────────────
+  // Check each section in the config ────────────────────────────────────
   for (let secIdx = 0; secIdx < (config.sections ?? []).length; secIdx++) {
     const sec = (config.sections ?? [])[secIdx];
     const sTransform = transforms.sections[secIdx] as Required<SectionTransforms>;
