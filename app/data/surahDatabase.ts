@@ -36,6 +36,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     reference: "Al-Fatiha 1",
   },
   {
+    id: "fatiha2",
+    displayName: "Al-Fatiha 2",
+    arabicName: "الفاتحة 2",
+    reference: "Al-Fatiha 2",
+  },
+  {
     id: "alak",
     displayName: "Al-Alak",
     arabicName: "العَلَق",
@@ -106,6 +112,14 @@ export async function getSurahDataAsync(id: string): Promise<SurahEntry | null> 
         ...meta,
         config: module.FATIHA_1_CONFIG,
         textData: module.FATIHA_1_TEXT_DATA,
+      };
+    }
+    case "fatiha2": {
+      const module = await import("./fatiha2Config");
+      return {
+        ...meta,
+        config: module.FATIHA_2_CONFIG,
+        textData: module.FATIHA_2_TEXT_DATA,
       };
     }
     case "alak": {
