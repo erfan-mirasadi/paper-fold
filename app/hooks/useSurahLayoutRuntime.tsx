@@ -5,12 +5,7 @@ import {
   useSurahLanguageStore,
   type SurahLanguage,
 } from "./useSurahLanguageStore";
-import {
-  buildSurahTransforms,
-  createLayoutMath,
-  createBlockLayoutMath,
-  buildBlockTransforms,
-} from "../data/SurahConfig";
+import { createBlockLayoutMath, buildBlockTransforms } from "../data/SurahConfig";
 import { useStoryStore } from "../stores/useStoryStore";
 
 export function getPageWidthForLanguage(language: SurahLanguage, basePageWidth: number, fixedWidthAcrossLanguages?: boolean) {
@@ -29,19 +24,15 @@ export function useSurahLayoutRuntime() {
     [activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.dimensions.fixedWidthAcrossLanguages],
   );
 
-  // Dual-path engine: new block engine when config.blocks is defined,
-  // legacy engine for unconverted configs.
-  const isBlockConfig = !!(activeConfig.blocks && activeConfig.blocks.length > 0);
+  const layout = useMemo(
+    () => createBlockLayoutMath(activeConfig, pageWidth),
+    [activeConfig, pageWidth],
+  );
 
-  const layout = useMemo(() => {
-    if (isBlockConfig) return createBlockLayoutMath(activeConfig, pageWidth);
-    return createLayoutMath(activeConfig, pageWidth);
-  }, [activeConfig, pageWidth, isBlockConfig]);
-
-  const transforms = useMemo(() => {
-    if (isBlockConfig) return buildBlockTransforms(layout as any, layout.START_X, activeConfig);
-    return buildSurahTransforms(layout as any, layout.START_X, activeConfig);
-  }, [layout, activeConfig, isBlockConfig]);
+  const transforms = useMemo(
+    () => buildBlockTransforms(layout, layout.START_X, activeConfig),
+    [layout, activeConfig],
+  );
   const foldYPositions = useMemo(
     () => activeConfig.animations.computeFoldYPositions(layout),
     [layout, activeConfig],

@@ -29,10 +29,12 @@ const deg = (d: number): number => (d * Math.PI) / 180;
 // ─── Lazy ID accessors ────────────────────────────────────────────────────
 // Section IDs are read lazily (at call-time) so module evaluation never
 // crashes when the active config has fewer than 2 sections (e.g. Ayat al-Kursi).
+// Intro is Alak-only, whose grid block is always "section1" and whose first
+// group block is always "section2_g0" — same ids these always fell back to.
 const getS1Id = (): string =>
-  getActiveStoryConfig().sections?.[0]?.id ?? "section1";
-const getS2Id = (): string =>
-  getActiveStoryConfig().sections?.[1]?.id ?? "section2";
+  getActiveStoryConfig().blocks?.find((b: any) => b.type === "grid")?.id ??
+  "section1";
+const getS2Id = (): string => "section2";
 const getS2TopId = (): string => `${getS2Id()}_g0`;
 const getS2CenterId = (): string => `${getS2Id()}_g1`;
 const getS2BotId = (): string => `${getS2Id()}_g2`;

@@ -3,18 +3,11 @@ import {
   S1_INNER_BORDER,
   S1_VERSE_NUMBER_BG,
   S1_VERSE_NUMBER_BORDER,
-  CAPSULE_BG_7_8_17_18,
-  CAPSULE_BG_9_10_15_16,
-  CAPSULE_BG_12_14,
-  MAROON_THEME,
-  GREEN_THEME,
   ORANGE_THEME,
   CAPSULE_BG_6_19,
 } from "./theme";
 import { SurahDataShape } from "./surahData";
 import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
-
-import { GridSectionConfig, VerticalGroupsSectionConfig } from "./schema";
 
 export interface VerseConfig {
   id: number;
@@ -69,139 +62,25 @@ export function buildVerseConfigs(
   const configs: VerseConfig[] = [];
   const { PAGE_WIDTH, SURAH_TRANSFORMS } = runtime;
 
-  // ── NEW: block-based configs ────────────────────────────────────────────
-  // Mirrors the legacy "verticalGroups colorGroups" branch below exactly
-  // (same hinge/direction/capsuleLabel math), just driven by `config.blocks`
-  // instead of `config.sections`. Without this branch, VerseController never
-  // gets a VerseConfig for any verse in a blocks-engine surah, so nothing
-  // ever renders when a verse is elevated (the animated overlay mesh simply
-  // never mounts) — the resting capsule stays flat and unresponsive.
-  if (runtime.config.blocks && runtime.config.blocks.length > 0) {
-    runtime.config.blocks.forEach((block: any, blockIdx: number) => {
-      if (block.type === "spacer") return;
-      const transforms = SURAH_TRANSFORMS.sections[blockIdx];
-      if (!transforms) return;
+  // Section2's `colorGroups` array only counts "real" verse groups (g0/g1/
+  // g2) — Alak's grid block and intro/outro blocks sit interleaved in
+  // `config.blocks` but have no entry there, so we can't index it by raw
+  // `blockIdx`. Track a separate counter that only advances past real
+  // group blocks.
+  let colorGroupIdx = 0;
 
-      if (block.type === "grid") {
-        // No blocks-engine surah currently uses a grid-type block (Alak,
-        // the only grid+anaAyet surah, stays on the legacy engine) — skip.
-        return;
-      }
-
-      const group = transforms.groups?.[0];
-      if (!group) return;
-
-      const cols = block.columns ?? 2;
-      const colorGroup = surahData.section2?.colorGroups?.[blockIdx];
-      const arabicGroup = arabicData.section2?.colorGroups?.[blockIdx];
-      const isCenterGroup = block.isCenter ?? false;
-
-      (block.verseIds ?? []).forEach((_vId: number, i: number) => {
-        const v = colorGroup?.verses?.[i];
-        if (!v) return;
-        const isRightCol = cols === 2 ? i % 2 !== 0 : false;
-        const arabicVerseNumber = arabicGroup?.verses?.[i]?.number;
-        if (arabicVerseNumber === undefined) return;
-        const isLTR = arabicVerseNumber !== v.number;
-        const lookupNumber = isLTR ? arabicVerseNumber : v.number;
-        const t = group.verses[lookupNumber];
-        if (!t) return;
-
-        const override =
-          runtime.config.verseOverrides?.[lookupNumber] ??
-          runtime.config.verseOverrides?.[v.number];
-        const expandW = override?.expandW ?? 0;
-        const expandH = override?.expandH ?? 0;
-
-        const groupFallbackBorder = isCenterGroup
-          ? runtime.config.styling.colors.greenTheme
-          : runtime.config.styling.colors.maroonTheme;
-        const finalBg =
-          override?.bg ??
-          (isCenterGroup
-            ? runtime.config.styling.colors.greenTheme
-            : runtime.config.styling.colors.maroonTheme);
-        const finalBorder = override?.border ?? groupFallbackBorder;
-        const finalCircleBg = override?.circleBg ?? finalBg;
-        const finalCircleBorderCol = override?.circleBorderCol ?? finalBorder;
-        const finalCircleTextCol =
-          override?.circleTextCol ?? runtime.config.styling.colors.verseNumberText;
-        const finalTextColor = override?.textColor;
-        const textScaleOverride = override?.textScaleOverride;
-        const translationTextScaleOverride = override?.translationTextScaleOverride;
-        const translationTextAlign = override?.translationTextAlign;
-
-        const worldX = t.x - expandW - PAGE_WIDTH / 2;
-        const expandedW = t.w + expandW * 2;
-        const expandedH = t.h + expandH * 2;
-        const direction = isRightCol ? "right" : "left";
-        const hingeX = isRightCol ? worldX : worldX + expandedW;
-
-        const capsuleLabelW = (runtime.layoutMath as any).capsuleLabelW ?? 0.2;
-        const capsuleLabelH = (runtime.layoutMath as any).capsuleLabelH ?? 0.032;
-        const capsuleLabelBorderWidth =
-          (runtime.layoutMath as any).capsuleLabelBorderWidth ?? 0.0035;
-        const capsuleLabelDrop = (runtime.layoutMath as any).capsuleLabelDrop ?? 0.015;
-
-        let capsuleLabel;
-        if (override?.hasCapsuleLabel) {
-          const isTop = override.capsuleLabelPosition !== "bottom";
-          const capsuleCenterX =
-            direction === "right" ? expandedW / 2 : -expandedW / 2;
-          const yTop = capsuleLabelDrop;
-          const yBottom = -expandedH - capsuleLabelDrop;
-
-          capsuleLabel = {
-            x: capsuleCenterX,
-            y: isTop ? yTop : yBottom,
-            w: capsuleLabelW,
-            h: capsuleLabelH,
-            borderWidth: capsuleLabelBorderWidth,
-            labelDrop: capsuleLabelDrop,
-            customText: getTranslatedLabel(
-              override.customCapsuleLabel,
-              runtime.activeLanguage,
-            ),
-          };
-        }
-
-        configs.push({
-          id: v.number,
-          verse: v.text,
-          splitTexts: v.splitTexts,
-          number: v.number,
-          y: t.y + expandH,
-          w: expandedW,
-          h: expandedH,
-          hingeX,
-          direction,
-          bg: finalBg,
-          border: finalBorder,
-          circleBorderCol: finalCircleBorderCol,
-          circleBg: finalCircleBg,
-          circleTextCol: finalCircleTextCol,
-          textColor: finalTextColor,
-          textScaleOverride,
-          translationTextScaleOverride,
-          translationTextAlign,
-          isPill: override?.isPill,
-          capsuleLabel,
-        });
-      });
-    });
-
-    return configs;
-  }
-
-  runtime.config.sections?.forEach((sectionConfig, sectionIdx) => {
-    const transforms = SURAH_TRANSFORMS.sections[sectionIdx];
+  (runtime.config.blocks ?? []).forEach((block: any, blockIdx: number) => {
+    if (block.type === "spacer") return;
+    const transforms = SURAH_TRANSFORMS.sections[blockIdx];
     if (!transforms) return;
 
-    if (sectionConfig.type === "gridWithAnaAyet") {
-      const gridConfig = sectionConfig as GridSectionConfig;
+    if (block.type === "grid") {
+      // Mirrors the legacy "gridWithAnaAyet" branch below exactly (same
+      // hinge/direction/capsuleLabel math), driven by `block.verseIds`/
+      // `block.anaAyetId` instead of `sectionConfig.verses`/`.anaAyet`.
+      const verseIds: number[] = block.verseIds ?? [];
+      const anaAyetId: number | undefined = block.anaAyetId;
 
-      // Build a language-aware text map keyed by verse number (always Arabic ID).
-      // This works for all languages since v.number is always the canonical Arabic number.
       const verseTextMap: Record<number, string> = {};
       surahData.section1.gridVerses.forEach((v) => {
         verseTextMap[v.number] = v.text;
@@ -211,24 +90,20 @@ export function buildVerseConfigs(
           surahData.section1.anaAyet.text;
       }
 
-      // Unified entry list: grid verses (with column index) + optional anaAyet.
       const verseEntries: Array<{ vId: number; gridIdx?: number }> = [
-        ...gridConfig.verses.map((vId, i) => ({ vId, gridIdx: i })),
-        ...(gridConfig.anaAyet !== undefined
-          ? [{ vId: gridConfig.anaAyet }]
-          : []),
+        ...verseIds.map((vId, i) => ({ vId, gridIdx: i })),
+        ...(anaAyetId !== undefined ? [{ vId: anaAyetId }] : []),
       ];
 
       for (const { vId, gridIdx } of verseEntries) {
         const isGridVerse = gridIdx !== undefined;
 
-        // Swapping layout lookup for LTR grid verses
         let lookupNumber = vId;
         let actualVerseId = vId;
         if (isGridVerse) {
-          const arabicVerseNumber = gridConfig.verses[gridIdx];
+          const arabicVerseNumber = verseIds[gridIdx!];
           const currentLanguageVerseNumber =
-            surahData.section1.gridVerses[gridIdx]?.number;
+            surahData.section1.gridVerses[gridIdx!]?.number;
           if (
             currentLanguageVerseNumber !== undefined &&
             currentLanguageVerseNumber !== arabicVerseNumber
@@ -238,14 +113,11 @@ export function buildVerseConfigs(
           }
         }
 
-        // Resolve the layout transform for this verse using lookupNumber.
-        // Grid verses live in transforms.verses; the anaAyet has its own slot.
         const rawTransform = isGridVerse
           ? transforms.verses?.[lookupNumber]
           : transforms.anaAyet;
         if (!rawTransform) continue;
 
-        // --- Override-driven properties (all optional, default to section values) ---
         const override = runtime.config.verseOverrides?.[actualVerseId];
         const expandW = override?.expandW ?? 0;
         const expandH = override?.expandH ?? 0;
@@ -268,12 +140,10 @@ export function buildVerseConfigs(
         const translationTextScaleOverride = override?.translationTextScaleOverride;
         const translationTextAlign = override?.translationTextAlign;
 
-        // --- Hinge and fold direction ---
         let direction: "left" | "right";
         let hingeX: number;
         if (isGridVerse) {
-          // Even column index (0, 2, …) → left-fold; odd (1, 3, …) → right-fold
-          const isRightCol = gridIdx % 2 !== 0;
+          const isRightCol = gridIdx! % 2 !== 0;
           direction = isRightCol ? "right" : "left";
           const worldX = rawTransform.x - PAGE_WIDTH / 2;
           hingeX = isRightCol ? worldX : worldX + rawTransform.w;
@@ -282,8 +152,6 @@ export function buildVerseConfigs(
           hingeX = rawTransform.x - PAGE_WIDTH / 2 - expandW;
         }
 
-        // --- CapsuleLabel: only generated when the override declares it and the
-        // layout provides its dimensions.
         const capsuleLabel =
           !isGridVerse &&
           override?.hasCapsuleLabel &&
@@ -327,162 +195,144 @@ export function buildVerseConfigs(
           capsuleLabel,
         });
       }
-    } else if (sectionConfig.type === "verticalGroups") {
-      const vConfig = sectionConfig as VerticalGroupsSectionConfig;
-      const introT = transforms.introVerse;
-      const introVerseData = surahData.section2?.introVerse;
-      if (introT && introVerseData?.number) {
-        configs.push({
-          id: introVerseData.number,
-          verse: introVerseData.text || "",
-          number: introVerseData.number,
-          y: introT.y,
-          w: introT.w,
-          h: introT.h,
-          hingeX: introT.x - PAGE_WIDTH / 2,
-          direction: "right",
-          bg: CAPSULE_BG_6_19,
-          border: ORANGE_THEME,
-          circleBorderCol: ORANGE_THEME,
-          circleBg: CAPSULE_BG_6_19,
-          circleTextCol: ORANGE_THEME,
-          isPill: false,
-        });
-      }
-
-      surahData.section2?.colorGroups?.forEach((group, gIdx) => {
-        group.verses?.forEach((v, i) => {
-          const isRightCol = i % 2 !== 0;
-          const arabicGroup = arabicData.section2?.colorGroups?.[gIdx];
-          const arabicVerseNumber = arabicGroup?.verses?.[i]?.number;
-          if (arabicVerseNumber === undefined) return;
-          const isLTR = arabicVerseNumber !== v.number;
-          const lookupNumber = isLTR ? arabicVerseNumber : v.number;
-          const t = transforms.groups![gIdx].verses[lookupNumber];
-          if (!t) return;
-
-          const override =
-            runtime.config.verseOverrides?.[lookupNumber] ??
-            runtime.config.verseOverrides?.[v.number];
-
-          const expandW = override?.expandW ?? 0;
-          const expandH = override?.expandH ?? 0;
-
-          const isCenterGroup = gIdx === 1;
-          const groupFallbackBorder = isCenterGroup
-            ? runtime.config.styling.colors.greenTheme
-            : runtime.config.styling.colors.maroonTheme;
-
-          const finalBg =
-            override?.bg ??
-            (isCenterGroup
-              ? runtime.config.styling.colors.greenTheme
-              : runtime.config.styling.colors.maroonTheme);
-
-          const finalBorder = override?.border ?? groupFallbackBorder;
-          const finalCircleBg = override?.circleBg ?? finalBg;
-          const finalCircleBorderCol = override?.circleBorderCol ?? finalBorder;
-          const finalCircleTextCol =
-            override?.circleTextCol ??
-            runtime.config.styling.colors.verseNumberText;
-          const finalTextColor = override?.textColor;
-          const textScaleOverride = override?.textScaleOverride;
-          const translationTextScaleOverride = override?.translationTextScaleOverride;
-          const translationTextAlign = override?.translationTextAlign;
-
-          const worldX = t.x - expandW - PAGE_WIDTH / 2;
-          const expandedW = t.w + expandW * 2;
-          const expandedH = t.h + expandH * 2;
-          const direction = isRightCol ? "right" : "left";
-          const hingeX = isRightCol ? worldX : worldX + expandedW;
-
-          const capsuleLabelW = (runtime.layoutMath as any).capsuleLabelW ?? 0.2;
-          const capsuleLabelH = (runtime.layoutMath as any).capsuleLabelH ?? 0.032;
-          const capsuleLabelBorderWidth =
-            (runtime.layoutMath as any).capsuleLabelBorderWidth ?? 0.0035;
-          const capsuleLabelDrop = (runtime.layoutMath as any).capsuleLabelDrop ?? 0.015;
-
-          let capsuleLabel;
-          if (override?.hasCapsuleLabel) {
-            const isTop = override.capsuleLabelPosition !== "bottom";
-
-            // Mirror exactly what VerseGroup.tsx does on the static paper:
-            //   tabX = finalX + finalW / 2  (center of capsule, world space)
-            //   tabY = isTop ? finalY + labelDrop : finalY - finalH - labelDrop
-            //
-            // In VerseMesh the fold-group is placed at position-y = config.y = finalY.
-            // So local space Y = world Y - finalY:
-            //   top:    localY = (finalY + labelDrop) - finalY = +labelDrop
-            //   bottom: localY = (finalY - expandedH - labelDrop) - finalY = -expandedH - labelDrop
-            //
-            // X: CapsuleLabel uses x as its horizontal center (it renders at x - w/2).
-            //   direction="right": hinge is left edge, capsule center = +expandedW / 2
-            //   direction="left":  hinge is right edge, capsule center = -expandedW / 2
-
-            const capsuleCenterX =
-              direction === "right" ? expandedW / 2 : -expandedW / 2;
-            const yTop = capsuleLabelDrop;
-            const yBottom = -expandedH - capsuleLabelDrop;
-
-            capsuleLabel = {
-              x: capsuleCenterX,
-              y: isTop ? yTop : yBottom,
-              w: capsuleLabelW,
-              h: capsuleLabelH,
-              borderWidth: capsuleLabelBorderWidth,
-              labelDrop: capsuleLabelDrop,
-              customText: getTranslatedLabel(
-                override.customCapsuleLabel,
-                runtime.activeLanguage,
-              ),
-            };
-          }
-
-          configs.push({
-            id: v.number,
-            verse: v.text,
-            number: v.number,
-            y: t.y + expandH,
-            w: expandedW,
-            h: expandedH,
-            hingeX,
-            direction,
-            bg: finalBg,
-            border: finalBorder,
-            circleBorderCol: finalCircleBorderCol,
-            circleBg: finalCircleBg,
-            circleTextCol: finalCircleTextCol,
-            textColor: finalTextColor,
-            textScaleOverride,
-            translationTextScaleOverride,
-            translationTextAlign,
-            isPill: override?.isPill,
-            capsuleLabel,
-          });
-        });
-      });
-
-      const outroT = transforms.outroVerse;
-      const outroVerseData = surahData.section2?.outroVerse;
-      if (outroT && outroVerseData?.number) {
-        configs.push({
-          id: outroVerseData.number,
-          verse: outroVerseData.text || "",
-          number: outroVerseData.number,
-          y: outroT.y,
-          w: outroT.w,
-          h: outroT.h,
-          hingeX: outroT.x - PAGE_WIDTH / 2,
-          direction: "right",
-          bg: CAPSULE_BG_6_19,
-          border: ORANGE_THEME,
-          circleBorderCol: ORANGE_THEME,
-          circleBg: CAPSULE_BG_6_19,
-          circleTextCol: ORANGE_THEME,
-          isPill: false,
-        });
-      }
+      return;
     }
+
+    if (block.introOutroRole) {
+      // Mirrors the legacy dedicated introT/outroT push below exactly —
+      // hardcoded orange theme, non-pill, ignoring verseOverrides (kept
+      // identical even though alak96Config.ts's overrides for 6/19
+      // happen to match these constants already).
+      const t =
+        block.introOutroRole === "intro"
+          ? transforms.introVerse
+          : transforms.outroVerse;
+      const verseData =
+        block.introOutroRole === "intro"
+          ? surahData.section2?.introVerse
+          : surahData.section2?.outroVerse;
+      if (t && verseData?.number) {
+        configs.push({
+          id: verseData.number,
+          verse: verseData.text || "",
+          number: verseData.number,
+          y: t.y,
+          w: t.w,
+          h: t.h,
+          hingeX: t.x - PAGE_WIDTH / 2,
+          direction: "right",
+          bg: CAPSULE_BG_6_19,
+          border: ORANGE_THEME,
+          circleBorderCol: ORANGE_THEME,
+          circleBg: CAPSULE_BG_6_19,
+          circleTextCol: ORANGE_THEME,
+          isPill: false,
+        });
+      }
+      return;
+    }
+
+    const group = transforms.groups?.[0];
+    if (!group) return;
+
+    const cols = block.columns ?? 2;
+    const colorGroup = surahData.section2?.colorGroups?.[colorGroupIdx];
+    const arabicGroup = arabicData.section2?.colorGroups?.[colorGroupIdx];
+    colorGroupIdx++;
+    const isCenterGroup = block.isCenter ?? false;
+
+    (block.verseIds ?? []).forEach((_vId: number, i: number) => {
+      const v = colorGroup?.verses?.[i];
+      if (!v) return;
+      const isRightCol = cols === 2 ? i % 2 !== 0 : false;
+      const arabicVerseNumber = arabicGroup?.verses?.[i]?.number;
+      if (arabicVerseNumber === undefined) return;
+      const isLTR = arabicVerseNumber !== v.number;
+      const lookupNumber = isLTR ? arabicVerseNumber : v.number;
+      const t = group.verses[lookupNumber];
+      if (!t) return;
+
+      const override =
+        runtime.config.verseOverrides?.[lookupNumber] ??
+        runtime.config.verseOverrides?.[v.number];
+      const expandW = override?.expandW ?? 0;
+      const expandH = override?.expandH ?? 0;
+
+      const groupFallbackBorder = isCenterGroup
+        ? runtime.config.styling.colors.greenTheme
+        : runtime.config.styling.colors.maroonTheme;
+      const finalBg =
+        override?.bg ??
+        (isCenterGroup
+          ? runtime.config.styling.colors.greenTheme
+          : runtime.config.styling.colors.maroonTheme);
+      const finalBorder = override?.border ?? groupFallbackBorder;
+      const finalCircleBg = override?.circleBg ?? finalBg;
+      const finalCircleBorderCol = override?.circleBorderCol ?? finalBorder;
+      const finalCircleTextCol =
+        override?.circleTextCol ?? runtime.config.styling.colors.verseNumberText;
+      const finalTextColor = override?.textColor;
+      const textScaleOverride = override?.textScaleOverride;
+      const translationTextScaleOverride = override?.translationTextScaleOverride;
+      const translationTextAlign = override?.translationTextAlign;
+
+      const worldX = t.x - expandW - PAGE_WIDTH / 2;
+      const expandedW = t.w + expandW * 2;
+      const expandedH = t.h + expandH * 2;
+      const direction = isRightCol ? "right" : "left";
+      const hingeX = isRightCol ? worldX : worldX + expandedW;
+
+      const capsuleLabelW = (runtime.layoutMath as any).capsuleLabelW ?? 0.2;
+      const capsuleLabelH = (runtime.layoutMath as any).capsuleLabelH ?? 0.032;
+      const capsuleLabelBorderWidth =
+        (runtime.layoutMath as any).capsuleLabelBorderWidth ?? 0.0035;
+      const capsuleLabelDrop = (runtime.layoutMath as any).capsuleLabelDrop ?? 0.015;
+
+      let capsuleLabel;
+      if (override?.hasCapsuleLabel) {
+        const isTop = override.capsuleLabelPosition !== "bottom";
+        const capsuleCenterX =
+          direction === "right" ? expandedW / 2 : -expandedW / 2;
+        const yTop = capsuleLabelDrop;
+        const yBottom = -expandedH - capsuleLabelDrop;
+
+        capsuleLabel = {
+          x: capsuleCenterX,
+          y: isTop ? yTop : yBottom,
+          w: capsuleLabelW,
+          h: capsuleLabelH,
+          borderWidth: capsuleLabelBorderWidth,
+          labelDrop: capsuleLabelDrop,
+          customText: getTranslatedLabel(
+            override.customCapsuleLabel,
+            runtime.activeLanguage,
+          ),
+        };
+      }
+
+      configs.push({
+        id: v.number,
+        verse: v.text,
+        splitTexts: v.splitTexts,
+        number: v.number,
+        y: t.y + expandH,
+        w: expandedW,
+        h: expandedH,
+        hingeX,
+        direction,
+        bg: finalBg,
+        border: finalBorder,
+        circleBorderCol: finalCircleBorderCol,
+        circleBg: finalCircleBg,
+        circleTextCol: finalCircleTextCol,
+        textColor: finalTextColor,
+        textScaleOverride,
+        translationTextScaleOverride,
+        translationTextAlign,
+        isPill: override?.isPill,
+        capsuleLabel,
+      });
+    });
   });
 
   return configs;

@@ -227,10 +227,9 @@ export function resetAllDrags() {
 
 /** Helper to resolve verse -> section map.
  *  Delegates to the shared reverse index built by `initElevatedStoreForStory`,
- *  which already knows how to traverse either the new block engine
- *  (`config.blocks` + `config.customSections`) or the legacy `config.sections`
- *  tree — including intro/outro verses attaching to their first/last group.
- *  This guarantees a single source of truth across drag, bounds and hitboxes.
+ *  which traverses `config.blocks` + `config.customSections` — including
+ *  intro/outro verses attaching to their first/last group. This guarantees a
+ *  single source of truth across drag, bounds and hitboxes.
  */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
   return getSectionIdForVerseId(verseId);

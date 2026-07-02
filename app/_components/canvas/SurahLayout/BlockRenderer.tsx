@@ -162,7 +162,7 @@ function GridBlock({
   const t = sectionT as Required<SectionTransforms>;
   const config = useStoryStore((state) => state.activeConfig);
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
-  const s1Config = config.sections?.[0] as any;
+  const gridBlock = config.blocks?.find((b: any) => b.type === "grid") as any;
 
   const s1FrameTexture = useTexture(S1_FRAME_IMAGE, (tex) => { tex.colorSpace = THREE.SRGBColorSpace; });
 
@@ -173,8 +173,8 @@ function GridBlock({
     return map;
   }, [section1Data]);
 
-  const allVerseIds: number[] = s1Config
-    ? [...s1Config.verses, ...(s1Config.anaAyet !== undefined ? [s1Config.anaAyet] : [])]
+  const allVerseIds: number[] = gridBlock
+    ? [...(gridBlock.verseIds ?? []), ...(gridBlock.anaAyetId !== undefined ? [gridBlock.anaAyetId] : [])]
     : [];
 
   const BW = 0.0055;
@@ -203,11 +203,11 @@ function GridBlock({
       })}
 
       {allVerseIds.map((vId, i) => {
-        const isAnaAyet = vId === s1Config?.anaAyet;
+        const isAnaAyet = vId === gridBlock?.anaAyetId;
         let lookupNumber = vId;
         let actualVerseId = vId;
-        if (!isAnaAyet && i < 4 && s1Config) {
-          const arabicVerseNumber = s1Config.verses[i];
+        if (!isAnaAyet && i < 4 && gridBlock) {
+          const arabicVerseNumber = gridBlock.verseIds[i];
           const currentLanguageVerseNumber = section1Data.gridVerses[i]?.number;
           if (currentLanguageVerseNumber !== undefined && currentLanguageVerseNumber !== arabicVerseNumber) {
             lookupNumber = arabicVerseNumber;
@@ -428,7 +428,17 @@ export function BlockRenderer({
       {allGroups.length > 0 && (
         <SideCurves
           layout={layout} startX={startX} borderWidth={edgeVerseBorderWidth}
-          groups={allGroups} hasIntroOutro={layout.hasIntroOutro} />
+          groups={allGroups}
+          introOutro={
+            hasIntroVerse && hasOutroVerse && s2Section?.introVerse && s2Section?.outroVerse
+              ? {
+                  v6Y: s2Section.introVerse.y,
+                  v6H: s2Section.introVerse.h,
+                  v19Y: s2Section.outroVerse.y,
+                  v19H: s2Section.outroVerse.h,
+                }
+              : null
+          } />
       )}
 
       {/* SVG overlays */}

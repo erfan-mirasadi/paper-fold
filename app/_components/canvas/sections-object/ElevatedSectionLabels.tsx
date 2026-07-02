@@ -146,8 +146,6 @@ function AnimatedElevatedLabel({
   );
 }
 
-import { GridSectionConfig, VerticalGroupsSectionConfig } from "../../../data/schema";
-
 export function ElevatedSectionLabels() {
   const config = useStoryStore((state) => state.activeConfig);
   const runtime = useSurahLayoutRuntime();
@@ -187,17 +185,19 @@ export function ElevatedSectionLabels() {
 
   const labelsToRender: Array<AnimatedLabelProps & { key: string; showInIntro: boolean }> = [];
 
-  config.sections?.forEach((section, idx) => {
-    const sTransform = SURAH_TRANSFORMS.sections[idx]!;
-    if (section.type === "gridWithAnaAyet") {
-      const gConfig = section as GridSectionConfig;
+  {
+    const blocks = config.blocks ?? [];
+    const gridBlockIdx = blocks.findIndex((b: any) => b.type === "grid");
+    if (gridBlockIdx >= 0) {
+      const gridBlock = blocks[gridBlockIdx];
+      const sTransform = SURAH_TRANSFORMS.sections[gridBlockIdx]!;
       labelsToRender.push({
-        key: gConfig.id,
-        sectionId: gConfig.id,
+        key: gridBlock.id,
+        sectionId: gridBlock.id,
         y: sTransform.labelPinY!,
         text: isIntroActive
           ? "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
-          : getLabelText(gConfig.labelKey),
+          : getLabelText(gridBlock.labelKey),
         fontSizeOverride: isIntroActive ? 0.032 : undefined,
         bgColor: S1_TOP_LABEL_BG,
         borderColor: S1_TOP_LABEL_BORDER,
@@ -209,22 +209,28 @@ export function ElevatedSectionLabels() {
         depthTest: true,
         showInIntro: true,
       });
-    } else if (section.type === "verticalGroups") {
-      const vConfig = section as VerticalGroupsSectionConfig;
-      const hasCustomSections = vConfig.customSections && vConfig.customSections.length > 0;
-      const isUnified = vConfig.groupElevation === "unified";
-      const lastGroupIdx = vConfig.groups.length - 1;
-      const topSectionId = hasCustomSections
-        ? vConfig.customSections![0].id
-        : isUnified ? vConfig.id : `${vConfig.id}_g0`;
-      const bottomSectionId = hasCustomSections
-        ? vConfig.customSections![vConfig.customSections!.length - 1].id
-        : isUnified ? vConfig.id : `${vConfig.id}_g${lastGroupIdx}`;
+    }
 
-      const topText = getLabelText(vConfig.topLabelKey);
+    // "Section 2" top/bottom labels are surah-wide, not per-block — read
+    // topLabelKey/bottomLabelKey off any non-grid block that declares them
+    // (every non-grid SectionTransforms shares the same topLabelPinY/
+    // bottomLabelPinY, computed once for the whole block stack).
+    const realGroupBlocks = blocks
+      .map((b: any, i: number) => ({ b, i }))
+      .filter(({ b }: any) => b.type === "group" && !b.introOutroRole);
+    const labelSourceBlock = blocks.find(
+      (b: any) => b.topLabelKey || b.bottomLabelKey,
+    );
+    if (labelSourceBlock && realGroupBlocks.length > 0) {
+      const anyIdx = blocks.findIndex((b: any) => b.type !== "grid");
+      const sTransform = SURAH_TRANSFORMS.sections[anyIdx]!;
+      const topSectionId = realGroupBlocks[0].b.id;
+      const bottomSectionId = realGroupBlocks[realGroupBlocks.length - 1].b.id;
+
+      const topText = getLabelText(labelSourceBlock.topLabelKey);
       if (topText) {
         labelsToRender.push({
-          key: `${vConfig.id}_top_label`,
+          key: "section2_top_label",
           sectionId: topSectionId,
           y: sTransform.topLabelPinY!,
           text: topText,
@@ -243,10 +249,10 @@ export function ElevatedSectionLabels() {
         });
       }
 
-      const bottomText = getLabelText(vConfig.bottomLabelKey);
+      const bottomText = getLabelText(labelSourceBlock.bottomLabelKey);
       if (bottomText) {
         labelsToRender.push({
-          key: `${vConfig.id}_bottom_label`,
+          key: "section2_bottom_label",
           sectionId: bottomSectionId,
           y: sTransform.bottomLabelPinY!,
           text: bottomText,
@@ -266,7 +272,7 @@ export function ElevatedSectionLabels() {
         });
       }
     }
-  });
+  }
 
   return (
     <group position={[0, runtime.SCENE_CENTER_Y, 0]}>

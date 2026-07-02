@@ -56,30 +56,20 @@ export function PopUpHoverSensors({
 
   // Build set of verse IDs that should skip hover sensors (anaAyet + introVerse boundary, and disabled popups)
   const skipGroupVerseIds = new Set<number>();
-  if (activeConfig.blocks && activeConfig.blocks.length > 0) {
-    activeConfig.blocks.forEach((block: any) => {
-      if (block.type === "grid" && block.anaAyetId !== undefined) {
-        skipGroupVerseIds.add(block.anaAyetId);
-      }
-      if (block.disablePopUp) {
-        (block.verseIds ?? []).forEach((id: number) => skipGroupVerseIds.add(id));
-      }
-    });
-  } else {
-    activeConfig.sections?.forEach((sec: any) => {
-      if (sec.type === "gridWithAnaAyet" && sec.anaAyet) skipGroupVerseIds.add(sec.anaAyet);
-      if (sec.type === "verticalGroups") {
-        if (sec.introVerse) skipGroupVerseIds.add(sec.introVerse);
-        if (sec.groups) {
-          sec.groups.forEach((g: any) => {
-            if (g.disablePopUp) {
-              g.verseIds.forEach((id: number) => skipGroupVerseIds.add(id));
-            }
-          });
-        }
-      }
-    });
-  }
+  (activeConfig.blocks ?? []).forEach((block: any) => {
+    if (block.type === "grid" && block.anaAyetId !== undefined) {
+      skipGroupVerseIds.add(block.anaAyetId);
+    }
+    // Only the intro verse joins the anaAyet↔introVerse bridge skip set;
+    // outroVerse never gets its own popup group in the first place (see
+    // usePopUpStore's solo-outro skip), so it needs no entry here.
+    if (block.introOutroRole === "intro") {
+      (block.verseIds ?? []).forEach((id: number) => skipGroupVerseIds.add(id));
+    }
+    if (block.disablePopUp) {
+      (block.verseIds ?? []).forEach((id: number) => skipGroupVerseIds.add(id));
+    }
+  });
 
   useEffect(() => {
     return () => {

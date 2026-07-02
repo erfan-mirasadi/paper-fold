@@ -6,7 +6,7 @@ import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { useDragState } from "../../../utils/dragEngine";
 import { useStoryStore } from "../../../stores/useStoryStore";
-import { GridSectionConfig, VerticalGroupsSectionConfig, CameraTargetConfig } from "../../../data/schema";
+import { CameraTargetConfig } from "../../../data/schema";
 
 import { useMemo } from "react";
 
@@ -16,131 +16,49 @@ export function SectionZoomCamera() {
   const { zoomTargets, getSectionIdForVerse } = useMemo(() => {
     const zoomTargets: Record<string, CameraTargetConfig> = {};
 
-    // ── NEW: block-based configs ───────────────────────────────────────────
-    if (config.blocks && config.blocks.length > 0) {
-      if (config.customSections && config.customSections.length > 0) {
-        // Register the custom section camera target (falls back to the first block with one)
-        const fallback = config.blocks.find((b: any) => b.cameraTarget)?.cameraTarget;
-        config.customSections.forEach((cs: any) => {
-          const target = cs.cameraTarget ?? fallback;
-          if (target) zoomTargets[cs.id] = target;
-        });
-      } else {
-        // "perBlock" elevation (Fatiha, Kafirun): mirrors legacy's per-group
-        // fallback — blocks without their own `cameraTarget` reuse the first
-        // block's target (matching legacy's "Fallback: per-group entries
-        // with same target" behavior), instead of never zooming at all.
-        const fallback = config.blocks.find((b: any) => b.cameraTarget)?.cameraTarget;
-        config.blocks.forEach((block: any) => {
-          if (block.type === 'spacer' || !block.verseIds?.length) return;
-          const target = block.cameraTarget ?? fallback;
-          if (target) zoomTargets[block.id] = target;
-        });
-      }
-
-      const getSectionIdForVerse = (vid: number): string | null => {
-        if (config.customSections && config.customSections.length > 0) {
-          for (const cs of config.customSections) {
-            if (cs.verseIds.includes(vid)) return cs.id;
-          }
-        }
-        for (const block of (config.blocks ?? [])) {
-          if (block.verseIds?.includes(vid)) return block.id;
-        }
-        return null;
-      };
-
-      return { zoomTargets, getSectionIdForVerse };
+    if (config.customSections && config.customSections.length > 0) {
+      // Register the custom section camera target (falls back to the first block with one)
+      const fallback = config.blocks?.find((b: any) => b.cameraTarget)?.cameraTarget;
+      config.customSections.forEach((cs: any) => {
+        const target = cs.cameraTarget ?? fallback;
+        if (target) zoomTargets[cs.id] = target;
+      });
+    } else {
+      // "perBlock" elevation (Fatiha, Kafirun, Alak): blocks sharing a
+      // `customSectionId` (e.g. Alak's intro/outro merging into their
+      // neighboring group's zone) register under that zone instead of
+      // their own id. Blocks without their own `cameraTarget` reuse the
+      // first target found anywhere (matching "Fallback: per-group entries
+      // with same target" behavior for Kafirun/Fatiha, where only one block
+      // declares a target), instead of never zooming.
+      const fallback = config.blocks?.find((b: any) => b.cameraTarget)?.cameraTarget;
+      config.blocks?.forEach((block: any) => {
+        if (block.type === 'spacer' || !block.verseIds?.length) return;
+        const zoneId = block.customSectionId ?? block.id;
+        const target = block.cameraTarget ?? zoomTargets[zoneId] ?? fallback;
+        if (target) zoomTargets[zoneId] = target;
+      });
     }
 
-    // ── LEGACY: sections-based configs ──────────────────────────────────
-    config.sections?.forEach((section) => {
-      if (section.type === "gridWithAnaAyet") {
-        const s1 = section as GridSectionConfig;
-        if (s1.cameraTarget) {
-          zoomTargets[s1.id] = s1.cameraTarget;
-        }
-      } else if (section.type === "verticalGroups") {
-        const s2 = section as VerticalGroupsSectionConfig;
-        const defaultTarget = s2.cameraTarget;
-        const hasCustomSections = s2.customSections && s2.customSections.length > 0;
-        const isUnified = s2.groupElevation === "unified";
-
-        if (hasCustomSections) {
-          // Register camera target for custom section IDs (fallback to defaultTarget)
-          s2.customSections!.forEach((cs) => {
-            if (cs.cameraTarget || defaultTarget) {
-              zoomTargets[cs.id] = cs.cameraTarget ?? defaultTarget!;
-            }
-          });
-        } else if (!isUnified && s2.subCameraTargets) {
-          // Map sub-camera targets to _g{idx} naming
-          const subKeys = ["top", "center", "bottom"] as const;
-          s2.groups.forEach((_, gIdx) => {
-            const subKey = subKeys[gIdx]; // top=g0, center=g1, bottom=g2
-            const groupTarget = subKey ? s2.subCameraTargets?.[subKey] : undefined;
-            if (groupTarget || defaultTarget) {
-              zoomTargets[`${s2.id}_g${gIdx}`] = (groupTarget ?? defaultTarget)!;
-            }
-          });
-        } else if (!isUnified && defaultTarget) {
-          // Fallback: per-group entries with same target
-          s2.groups.forEach((_, gIdx) => {
-            zoomTargets[`${s2.id}_g${gIdx}`] = defaultTarget;
-          });
-        }
-        
-        // Always register section-level target (used by unified and as fallback)
-        if (defaultTarget) {
-          zoomTargets[s2.id] = defaultTarget;
+    const getSectionIdForVerse = (vid: number): string | null => {
+      if (config.customSections && config.customSections.length > 0) {
+        for (const cs of config.customSections) {
+          if (cs.verseIds.includes(vid)) return cs.id;
         }
       }
-    });
-
-    const getSectionIdForVerse = (vid: number): string | null => {
-      for (const section of (config.sections ?? [])) {
-        if (section.type === "gridWithAnaAyet") {
-          const s1 = section as GridSectionConfig;
-          if (s1.verses.includes(vid) || s1.anaAyet === vid) return s1.id;
-        } else if (section.type === "verticalGroups") {
-          const s2 = section as VerticalGroupsSectionConfig;
-
-          // Custom sections: look up the verse's custom section ID
-          if (s2.customSections && s2.customSections.length > 0) {
-            for (const cs of s2.customSections) {
-              if (cs.verseIds.includes(vid)) return cs.id;
-            }
-            continue;
-          }
-
-          const isUnified = s2.groupElevation === "unified";
-          if (isUnified) {
-            // Unified: all verses map to section ID
-            if (s2.introVerse === vid || s2.outroVerse === vid) return s2.id;
-            for (const group of s2.groups) {
-              if (group.verseIds.includes(vid)) return s2.id;
-            }
-          } else if (s2.subCameraTargets) {
-            if (s2.introVerse === vid) return `${s2.id}_g0`;
-            const lastIdx = s2.groups.length - 1;
-            if (s2.outroVerse === vid) return `${s2.id}_g${lastIdx}`;
-            for (let i = 0; i < s2.groups.length; i++) {
-              if (s2.groups[i].verseIds.includes(vid)) return `${s2.id}_g${i}`;
-            }
-          } else {
-            if (s2.introVerse === vid) return s2.id;
-            if (s2.outroVerse === vid) return s2.id;
-            for (const group of s2.groups || []) {
-              if (group.verseIds.includes(vid)) return s2.id;
-            }
-          }
+      for (const block of (config.blocks ?? [])) {
+        if (block.verseIds?.includes(vid)) return block.customSectionId ?? block.id;
+        // Grid blocks (Alak) carry their anaAyet as a separate field, not
+        // part of `verseIds`.
+        if (block.type === "grid" && block.anaAyetId === vid) {
+          return block.customSectionId ?? block.id;
         }
       }
       return null;
     };
 
     return { zoomTargets, getSectionIdForVerse };
-  }, [config.sections, config.blocks, config.customSections]);
+  }, [config.blocks, config.customSections]);
 
   const activeSectionId = useElevatedStore((s) => s.activeSectionId);
   const activeVerseIds = useElevatedStore((s) => s.activeVerseIds);

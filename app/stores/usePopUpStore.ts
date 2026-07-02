@@ -19,20 +19,13 @@ export function initPopUpStoreForStory(config: any) {
   const middleVerseIds = [...middleFolds.left, ...middleFolds.right].sort((a, b) => a - b);
   DYNAMIC_MIDDLE_GROUP_ID = middleVerseIds.length > 0 ? `g_${middleVerseIds.join("_")}` : "g_11_12_13_14";
 
-  // Collect all verse IDs — from blocks (new engine) or sections (legacy).
-  const allVerseIds: number[] = config.blocks?.length
-    ? config.blocks.flatMap((b: any) => b.verseIds ?? [])
-    : (config.sections?.flatMap((sec: any) => {
-        if (sec.type === "gridWithAnaAyet") return [...sec.verses, sec.anaAyet];
-        if (sec.type === "verticalGroups") {
-          let ids: number[] = [];
-          sec.groups.forEach((g: any) => ids.push(...g.verseIds));
-          if (sec.introVerse) ids.push(sec.introVerse);
-          if (sec.outroVerse) ids.push(sec.outroVerse);
-          return ids;
-        }
-        return [];
-      }) ?? []);
+  // Collect all verse IDs from the config's blocks.
+  const allVerseIds: number[] = (config.blocks ?? []).flatMap((b: any) => [
+    ...(b.verseIds ?? []),
+    // Grid blocks (Alak) carry their anaAyet as a separate field, not part
+    // of `verseIds`.
+    ...(b.type === "grid" && b.anaAyetId !== undefined ? [b.anaAyetId] : []),
+  ]);
 
   const uniqueVerses = Array.from(new Set(allVerseIds as number[])).sort((a, b) => a - b);
   const groups: PopUpGroup[] = [];
@@ -44,12 +37,10 @@ export function initPopUpStoreForStory(config: any) {
   let anaAyetId: number | null = null;
   let introVerseId: number | null = null;
   let outroVerseId: number | null = null;
-  for (const sec of config.sections ?? []) {
-    if (sec.type === "gridWithAnaAyet" && sec.anaAyet) anaAyetId = sec.anaAyet;
-    if (sec.type === "verticalGroups") {
-      if (sec.introVerse) introVerseId = sec.introVerse;
-      if (sec.outroVerse) outroVerseId = sec.outroVerse;
-    }
+  for (const b of config.blocks ?? []) {
+    if (b.type === "grid" && b.anaAyetId !== undefined) anaAyetId = b.anaAyetId;
+    if (b.introOutroRole === "intro") introVerseId = b.verseIds?.[0] ?? null;
+    if (b.introOutroRole === "outro") outroVerseId = b.verseIds?.[0] ?? null;
   }
   // Build the anaAyet+introVerse popup pair (e.g. [5,6])
   const bridgeGroupIds: number[] = [];

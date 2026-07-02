@@ -21,10 +21,10 @@ let SECTION_PRIORITY: string[] = [];
 let ALL_ELEVATED_VERSE_IDS: number[] = [];
 
 export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
-  // All engine-specific (blocks vs legacy sections) traversal lives in the
-  // shared resolver so dragEngine/boundsHelper/hitboxes/elevated-surfaces
-  // stay in sync with this store without importing it directly (avoids a
-  // circular import between this store and dragEngine).
+  // Block/customSection traversal lives in the shared resolver so
+  // dragEngine/boundsHelper/hitboxes/elevated-surfaces stay in sync with
+  // this store without importing it directly (avoids a circular import
+  // between this store and dragEngine).
   initSectionResolverForStory(config);
   SECTION_PRIORITY = getSectionPriority();
   ALL_ELEVATED_VERSE_IDS = getAllSectionVerseIds();
