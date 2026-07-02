@@ -172,16 +172,16 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   //   sgBorderWidth: 0.006   → sectionBorderWidth
   //   sgPad: 0.03            → connectorPad
   globalSettings: {
-    capsuleHeight:      0.075,
-    columnGap:           0.02,
-    rowGap:              0.02,
-    blockGap:            0.032,
-    sectionPadX:         0.08,
-    blockPadding:        0.012,
-    sectionBorderWidth:  0.006,
-    connectorPad:        0.03,
-    framePad:            0.02, // was s2VerticalPad
-    verseTextScale:          1.0,
+    capsuleHeight: 0.075,
+    columnGap: 0.02,
+    rowGap: 0.02,
+    blockGap: 0.032,
+    sectionPadX: 0.08,
+    blockPadding: 0.012,
+    sectionBorderWidth: 0.006,
+    connectorPad: 0.03,
+    framePad: 0.02, // was s2VerticalPad
+    verseTextScale: 1.0,
     translationVerseTextScale: null,
   },
 
@@ -190,7 +190,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/ayatalKursi/frame-section-1.svg",
     scaleX: 0.9,
-    scaleY: 1.1,
+    scaleY: 1.2,
     solidScaleX: 0.6,
     solidScaleY: 1,
   },
@@ -244,13 +244,15 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       // groupYPositions[i] = frameY (top edge) of block i; groupHeights[i] = frameH.
       // Position 1: between block 0 (top) and block 1 (middle)
       const fold1 =
-        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) / 2;
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+        2;
       // Position 2: between row 1 and row 2 inside block 1 (middle, 2×2)
       const fold2 =
         lm.groupYPositions[1] - lm.groupPad - lm.smallBoxH2 - lm.rowGap / 2;
       // Position 3: between block 1 (middle) and block 2 (bottom)
       const fold3 =
-        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) / 2;
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
+        2;
 
       return [fold1, fold2, fold3];
     },

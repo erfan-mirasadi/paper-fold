@@ -214,6 +214,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
+      verticalNudge: -0.03,
       // Legacy had pushDown: -0.03 to compensate for extra gap above.
       // In the block engine the auto-centering handles this, so no offset needed.
     },

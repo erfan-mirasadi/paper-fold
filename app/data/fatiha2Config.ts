@@ -211,8 +211,8 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/fatiha/all-section-bg.svg",
     scaleX: 1.2,
-    scaleY: 1.15,
-    offsetY: -0.114,
+    scaleY: 1.1,
+    offsetY: -0.14,
   },
 
   // Section-wide resting-state background is intentionally omitted here —
@@ -565,7 +565,12 @@ export const FATIHA_2_TEXT_EN: SurahDataShape = {
       },
       {
         // colorGroup[5] → g5[verseIds:7]: verse 7 single wide capsule
-        verses: [{ number: 7, text: "That path is the path You taught the Prophet, not the path of those who have earned anger and of those who have gone astray." }],
+        verses: [
+          {
+            number: 7,
+            text: "That path is the path You taught the Prophet, not the path of those who have earned anger and of those who have gone astray.",
+          },
+        ],
       },
     ],
     outroVerse: { number: 0, text: "" },
@@ -619,7 +624,12 @@ export const FATIHA_2_TEXT_TR: SurahDataShape = {
       },
       {
         // colorGroup[5] → g5[verseIds:7]: verse 7 single wide capsule
-        verses: [{ number: 7, text: "O yol, Peygambere öğrettiğin yoldur, gazap ettiklerinin ve sapmışların yolu değil." }],
+        verses: [
+          {
+            number: 7,
+            text: "O yol, Peygambere öğrettiğin yoldur, gazap ettiklerinin ve sapmışların yolu değil.",
+          },
+        ],
       },
     ],
     outroVerse: { number: 0, text: "" },

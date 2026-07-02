@@ -3,9 +3,9 @@ import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import { CAPSULE_BG_6_19, ORANGE_THEME } from "./theme";
 
-const OUTER_GROUP_BG   = "#FDF4CA"; // Yellow (top and bottom full-width verses)
+const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (top and bottom full-width verses)
 const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
-const CENTER_GROUP_BG  = "#eaf2db"; // Green (middle 2-col group)
+const CENTER_GROUP_BG = "#eaf2db"; // Green (middle 2-col group)
 const CENTER_GROUP_BORDER = "#5E7367"; // Dark green border
 
 export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
@@ -151,12 +151,12 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
 
   // ── NEW BLOCK-BASED SCHEMA ──────────────────────────────────────────────
   globalSettings: {
-    capsuleHeight:      0.075, // was smallBoxH2
-    columnGap:          0.02,  // was s2Gap (horizontal gap between the 2 columns)
-    rowGap:             0.02,  // was s2VerticalRowGap (defaults to s2Gap)
-    blockGap:           0.06,  // was groupGap (gap between the 3 blocks)
-    sectionPadX:        0.028, // was s2PadLeftRight
-    blockPadding:       0.012, // was groupPad / groupPadBottom
+    capsuleHeight: 0.075, // was smallBoxH2
+    columnGap: 0.02, // was s2Gap (horizontal gap between the 2 columns)
+    rowGap: 0.02, // was s2VerticalRowGap (defaults to s2Gap)
+    blockGap: 0.06, // was groupGap (gap between the 3 blocks)
+    sectionPadX: 0.028, // was s2PadLeftRight
+    blockPadding: 0.012, // was groupPad / groupPadBottom
     sectionBorderWidth: 0.006, // was sgBorderWidth
   },
 
@@ -166,13 +166,13 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/ayatalKursi/frame-section-1.svg",
     scaleX: 1.1,
-    scaleY: 1.25,
+    scaleY: 1.3,
   },
 
   blocks: [
     // Block 0 — Verse 1 (full-width, yellow "Say" verse)
     {
-      id: "section2",        // reuse same id so elevation/drag section IDs are stable
+      id: "section2", // reuse same id so elevation/drag section IDs are stable
       type: "group",
       verseIds: [1],
       columns: 1,
@@ -213,7 +213,9 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
       // groupHeights[i]    = frameH of block i.
       // Verse 1 (block 0) has expandH=0.028 → expands downward, shift fold1 down 0.01.
       const fold1 =
-        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) / 2 - 0.01;
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+          2 -
+        0.01;
 
       // fold2 sits inside block 1 — between the top row and the gap below it.
       const fold2 =
@@ -224,7 +226,9 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
 
       // Verse 6 (block 2) has expandH=0.028 → expands upward, shift fold3 up 0.01.
       const fold3 =
-        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) / 2 + 0.01;
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
+          2 +
+        0.01;
 
       return [fold1, fold2, fold3];
     },
@@ -233,26 +237,26 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
       {
         id: "pre-start",
         folds: [
-          { direction: 1,  angleFactor: 0.4 },
+          { direction: 1, angleFactor: 0.4 },
           { direction: -1, angleFactor: 1 },
-          { direction: 1,  angleFactor: 0.6 },
+          { direction: 1, angleFactor: 0.6 },
         ],
       },
       {
         id: "end",
         folds: [
-          { direction: 1,  angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
-          { direction: 1,  angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
         ],
       },
     ] as const,
 
     scrollTimeline: {
-      intro:  { start: 0,  end: 10 },
+      intro: { start: 0, end: 10 },
       ambient: { start: 10, end: 40 },
       handoff: { start: 40, end: 55 },
-      story:  { start: 55, end: 100 },
+      story: { start: 55, end: 100 },
     },
 
     scrollLock: {
@@ -320,24 +324,40 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "Say, O you who do not believe (in my religion)!" }],
+        verses: [
+          {
+            number: 1,
+            text: "Say, O you who do not believe (in my religion)!",
+          },
+        ],
       },
       {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "I (did not worship), do not worship what you worship" },
+          {
+            number: 2,
+            text: "I (did not worship), do not worship what you worship",
+          },
           { number: 3, text: "You also do not worship the Allah I worship" },
           { number: 4, text: "I am not going to worship what you worship" },
-          { number: 5, text: "You also are not worshippers of the Allah I worship" },
+          {
+            number: 5,
+            text: "You also are not worshippers of the Allah I worship",
+          },
         ],
       },
       {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 6, text: "Your religion is for you, my religion is for me !" }],
+        verses: [
+          {
+            number: 6,
+            text: "Your religion is for you, my religion is for me !",
+          },
+        ],
       },
     ],
     outroVerse: { number: 0, text: "" },
@@ -360,17 +380,28 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         isPushedIn: false,
         isCenter: false,
         extraRowGap: 0,
-        verses: [{ number: 1, text: "De ki, Ey (benim dinime) inanmayanlar !" }],
+        verses: [
+          { number: 1, text: "De ki, Ey (benim dinime) inanmayanlar !" },
+        ],
       },
       {
         isPushedIn: true,
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 2, text: "Ben sizin taptıklarınıza (tapmadım), tapmıyorum" },
-          { number: 3, text: "Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz" },
+          {
+            number: 2,
+            text: "Ben sizin taptıklarınıza (tapmadım), tapmıyorum",
+          },
+          {
+            number: 3,
+            text: "Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz",
+          },
           { number: 4, text: "Ben sizin taptıklarınıza tapacak değilim" },
-          { number: 5, text: "Siz de benim ibadet ettiğim Allah'a ibadet edici değilsiz" },
+          {
+            number: 5,
+            text: "Siz de benim ibadet ettiğim Allah'a ibadet edici değilsiz",
+          },
         ],
       },
       {
