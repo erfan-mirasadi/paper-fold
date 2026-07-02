@@ -7,7 +7,6 @@ import {
   MAROON_THEME,
   GREEN_THEME,
   CAPSULE_BG_6_19,
-  CAPSULE_BG_9_10_15_16,
   CAPSULE_BG_12_14,
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
@@ -75,10 +74,10 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT, // red text
     },
     2: {
-      // Normal centered capsule — NOT a wide pill
-      expandW: 0.0442,
+      // Wide capsule
+      expandW: 0.2875,
       expandH: 0.015,
-      textScaleOverride: 1.15,
+      textScaleOverride: 1.35,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -116,10 +115,10 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT, // red text
     },
     6: {
-      // Centered solo capsule, same size as v3/v4
-      expandW: 0.0442,
+      // Wide centered capsule
+      expandW: 0.2875,
       expandH: 0.015,
-      textScaleOverride: 1.15,
+      textScaleOverride: 1.35,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -167,8 +166,8 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
         {
           color: ORANGE_THEME,
           fillColor: CAPSULE_BG_6_19,
-          bowGap: 0.66,
-          innerBowGap: 0.645,
+          bowGap: 0.36,
+          innerBowGap: 0.345,
           tipThickness: 0.1,
         }, // Pair 1 (2 ↔ 6) shown — default thickness & offset
         { color: "transparent", fillColor: "transparent" }, // Pair 2 (4-3 ↔ 5) hidden
@@ -431,7 +430,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       const g2Bottom = lm.groupYPositions[2] - lm.groupHeights[2];
       const g3Top = lm.groupYPositions[3];
       const fold2 = g2Bottom * (3 / 4) + g3Top * (1 / 4); // 1/4 down
-      const fold3 = g2Bottom * (1 / 4) + g3Top * (3 / 4); // 3/4 down
+      const fold3 = lm.groupYPositions[3] - lm.groupHeights[3] / 2; // exactly middle of v5
 
       // ── fold4: midpoint between g3 (v5) and g4 (v6) ─────────────────────
       const fold4 =
@@ -450,9 +449,9 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
         id: "pre-start",
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
-          { direction: 1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3
-          { direction: -1, angleFactor: 1.1 }, // fold2: 1st crease v4,3↔v5
-          { direction: 1, angleFactor: 0.6 }, // fold3: 2nd crease v4,3↔v5
+          { direction: -1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3
+          { direction: 1, angleFactor: 0.5 }, // fold2: 1st crease v4,3↔v5
+          { direction: 1, angleFactor: 0 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6
           { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
         ],
