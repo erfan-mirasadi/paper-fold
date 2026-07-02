@@ -14,7 +14,7 @@ let SECTION_VERSE_IDS: Record<string, number[]> = {};
 let SECTION_PRIORITY: SectionId[] = [];
 let VERSE_TO_SECTION_ID: Record<number, SectionId> = {};
 
-export function initSectionResolverForStory(config: SurahLayoutConfig<any>) {
+export function initSectionResolverForStory(config: SurahLayoutConfig) {
   SECTION_VERSE_IDS = {};
   SECTION_PRIORITY = [];
 
@@ -85,7 +85,7 @@ export function getAllSectionVerseIds(): number[] {
  * surah except Alak).
  */
 export function getIntroGridSectionId(
-  config: SurahLayoutConfig<any>,
+  config: SurahLayoutConfig,
 ): SectionId | null {
   return config.blocks?.find((b: any) => b.type === "grid")?.id ?? null;
 }

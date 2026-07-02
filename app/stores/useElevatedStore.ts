@@ -20,7 +20,7 @@ export const ELEVATED_RETURN_SYNC_MS = 480;
 let SECTION_PRIORITY: string[] = [];
 let ALL_ELEVATED_VERSE_IDS: number[] = [];
 
-export function initElevatedStoreForStory(config: SurahLayoutConfig<any>) {
+export function initElevatedStoreForStory(config: SurahLayoutConfig) {
   // Block/customSection traversal lives in the shared resolver so
   // dragEngine/boundsHelper/hitboxes/elevated-surfaces stay in sync with
   // this store without importing it directly (avoids a circular import
@@ -78,10 +78,6 @@ function pickActiveSectionId(
   }
 
   return sectionIds[0] ?? null;
-}
-
-function hasAllSections(sectionIds: ElevatedSectionId[]): boolean {
-  return SECTION_PRIORITY.every((sectionId) => sectionIds.includes(sectionId));
 }
 
 interface ElevatedStoreState {

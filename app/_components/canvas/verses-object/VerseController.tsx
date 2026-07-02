@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSpring, a, to, SpringValue } from "@react-spring/three";
+import { useSpring, a, to } from "@react-spring/three";
 import {
   useFoldAnimation,
   useMiddleHorizontalFoldAnimation,
@@ -248,14 +248,6 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
 
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
-
-  // Static check: does this verse belong to a center/group-drag section?
-  const isGroupDragType = useMemo(() => {
-    if (!sectionId) return false;
-    return shouldUseGroupDrag(
-      resolveSectionDragInfo(activeStoryConfig, leadVerseId),
-    );
-  }, [sectionId, activeStoryConfig, leadVerseId]);
 
   // ── Snap mode + bounds ────────────────────────────────────────────────────
   //

@@ -17,12 +17,8 @@ import {
   LATIN_VERSE_FONT,
   LATIN_LABEL_FONT,
   TEXT_SIZES,
-  S2_VERSE_NUMBER_TEXT,
   LANGUAGE_TEXT_SCALE,
-  S1_TOP_LABEL_BORDER,
-  S1_TOP_LABEL_BG,
   S1_ANA_LABEL_BORDER,
-  S1_VERSE_NUMBER_TEXT,
 } from "../../../data/theme";
 export * from "../../../data/theme";
 import {
@@ -708,11 +704,6 @@ export const VerseBox = ({
 
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
 
-  // 👈 بازگردانی رنگ شمارههای بخش اول علق
-  const isAlakS1 = activeStoryConfig.id === "alak" && Number(number) <= 5;
-  const finalCircleTextCol =
-    circleTextCol ?? (isAlakS1 ? S1_VERSE_NUMBER_TEXT : S2_VERSE_NUMBER_TEXT);
-
   return (
     <group position={[finalX, y, z]}>
       {/* 1. حاشیه (عمیقترین لایه z=0) */}
@@ -753,7 +744,7 @@ export const VerseBox = ({
           number={number}
           circleBg={circleBg ?? bg}
           circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
-          circleTextCol={finalCircleTextCol}
+          circleTextCol={circleTextCol ?? TEXT_DARK}
           opacity={opacity}
           renderOrder={zOrder + 2}
         />

@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { getActiveStoryConfig } from "./useStoryStore";
 
 export type PopUpGroup = {
   id: string;

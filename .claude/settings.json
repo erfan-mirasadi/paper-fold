@@ -5,7 +5,9 @@
       "Bash(grep -n \"const sectionMap: Record<string, number> = {};\" app/hooks/usePaperMasking.ts)",
       "Bash(xargs -I{} echo {})",
       "Bash(node fatiha_check.mjs)",
-      "Bash(grep -n \"^export function\\\\|^export interface\\\\|^export type\\\\|^function \\\\|^interface \\\\|^type \\\\|^// ─\\\\{5,\\\\}\" /Users/erfan/Desktop/quran/quran-fold/app/data/SurahConfig.ts)"
+      "Bash(grep -n \"^export function\\\\|^export interface\\\\|^export type\\\\|^function \\\\|^interface \\\\|^type \\\\|^// ─\\\\{5,\\\\}\" /Users/erfan/Desktop/quran/quran-fold/app/data/SurahConfig.ts)",
+      "Bash(grep -v \"^--$\")",
+      "Read(//tmp/**)"
     ]
   }
 }

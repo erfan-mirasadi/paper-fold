@@ -4,7 +4,6 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import { CAPSULE_BG_6_19, ORANGE_THEME } from "./theme";
 
 const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (top and bottom full-width verses)
-const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
 const CENTER_GROUP_BG = "#eaf2db"; // Green (middle 2-col group)
 const CENTER_GROUP_BORDER = "#5E7367"; // Dark green border
 

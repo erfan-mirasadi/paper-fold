@@ -19,7 +19,7 @@ export interface SurahMeta {
 
 export interface SurahEntry extends SurahMeta {
   /** Layout & animation config injected into useStoryStore */
-  config: SurahLayoutConfig<any>;
+  config: SurahLayoutConfig;
   /** Multi-language text data injected into useStoryStore */
   textData: Record<SurahLanguage, SurahDataShape>;
 }

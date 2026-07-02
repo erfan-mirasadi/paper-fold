@@ -210,7 +210,7 @@ export interface BlockLayoutConfig {
  * Returns a `BlockLayoutConfig` that is consumed by `buildBlockTransforms`.
  */
 export function createBlockLayoutMath(
-  config: SurahLayoutConfig<any>,
+  config: SurahLayoutConfig,
   dynamicPageWidth: number,
 ): BlockLayoutConfig {
   const gs = config.globalSettings!;
@@ -355,7 +355,7 @@ export interface BlockSurahTransforms {
 export function buildBlockTransforms(
   lm: BlockLayoutConfig,
   startX: number,
-  config: SurahLayoutConfig<any>,
+  config: SurahLayoutConfig,
 ): BlockSurahTransforms {
   const gs = config.globalSettings!;
   const blocks = config.blocks ?? [];

@@ -39,7 +39,7 @@ interface VerseHitbox {
 
 function buildHitboxes(
   runtime: ReturnType<typeof useSurahLayoutRuntime>,
-  config: SurahLayoutConfig<any>,
+  config: SurahLayoutConfig,
 ): VerseHitbox[] {
   const hitboxes: VerseHitbox[] = [];
   const zFront = PAGE_DEPTH / 2 + 0.003;

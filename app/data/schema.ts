@@ -577,7 +577,7 @@ export interface SurahAnimations {
   introCamera?: IntroCameraConfig;
 }
 
-export interface SurahLayoutConfig<TParams = any> {
+export interface SurahLayoutConfig {
   id: string;
   title: string;
   heroTitle?: string;
