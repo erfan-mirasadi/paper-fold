@@ -394,11 +394,17 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
           2 -
         0.02; // Moved lower by 0.02
 
+      // ── fold1_5: crease between verse 3 and verse 4 inside g2 ───────────
+      const g2ContentY = lm.blockMeta[2].contentY;
+      const capH = lm.capsuleHeight; // 0.075
+      const rg2 = 0.024; // g2's custom rowGap (section2_g2)
+      const fold1_5 = g2ContentY - capH - rg2 / 2;
+
       // ── fold2 & fold3: two creases between g2 (v4,3) and g3 (v5) ────────
       // Divide the gap into 4 equal parts and pick the 2 interior quarter-points.
       const g2Bottom = lm.groupYPositions[2] - lm.groupHeights[2];
       const g3Top = lm.groupYPositions[3];
-      const fold2 = g2Bottom * (3 / 4) + g3Top * (1 / 4); // 1/4 down
+      // const fold2 = g2Bottom * (3 / 4) + g3Top * (1 / 4); // 1/4 down
       const fold3 = g2Bottom * (1 / 4) + g3Top * (3 / 4); // 3/4 down
 
       // ── fold4: midpoint between g3 (v5) and g4 (v6,7) ───────────────────
@@ -409,20 +415,20 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
 
       // ── fold5: crease between verse 6 and verse 7 inside g4 ─────────────
       const g4ContentY = lm.blockMeta[4].contentY;
-      const capH = lm.capsuleHeight; // 0.075
       const rg4 = 0.024; // g4's custom rowGap (section2_g4)
       const fold5 = g4ContentY - capH - rg4 / 2;
 
-      return [fold0, fold1, fold2, fold3, fold4, fold5];
+      return [fold0, fold1, fold1_5, fold3, fold4, fold5];
     },
     foldSteps: [
       {
         id: "pre-start",
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
-          { direction: 1, angleFactor: 0.52 }, // fold1: v2 ↔ v4,3 (flat)
-          { direction: -1, angleFactor: 1.1 }, // fold2: 1st crease v4,3↔v5
-          { direction: 1, angleFactor: 0.6 }, // fold3: 2nd crease v4,3↔v5
+          { direction: 1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3 (flat)
+          { direction: -1, angleFactor: 1.05 }, // fold1_5: v3 ↔ v4
+          // { direction: -1, angleFactor: 0.4 }, // fold2: 1st crease v4,3↔v5
+          { direction: 1, angleFactor: 0.5 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 0.9 }, // fold4: v5 ↔ v6,7
           { direction: 1, angleFactor: 0 }, // fold5: v6 ↔ v7
         ],
@@ -432,7 +438,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
           { direction: 1, angleFactor: 0 }, // fold1: v2 ↔ v4,3 (flat)
-          { direction: -1, angleFactor: 0 }, // fold2: 1st crease v4,3↔v5
+          { direction: 1, angleFactor: 0 }, // fold1_5: v3 ↔ v4
+          // { direction: -1, angleFactor: 0 }, // fold2: 1st crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6,7
           { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
@@ -443,7 +450,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0
           { direction: 1, angleFactor: 0 }, // fold1
-          { direction: -1, angleFactor: 0 }, // fold2
+          { direction: -1, angleFactor: 0 }, // fold1_5
+          // { direction: -1, angleFactor: 0 }, // fold2
           { direction: 1, angleFactor: 0 }, // fold3
           { direction: 1, angleFactor: 0 }, // fold4
           { direction: -1, angleFactor: 0 }, // fold5
