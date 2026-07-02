@@ -447,7 +447,9 @@ export const SinglePaper: FC<SinglePaperProps> = ({
           sharedMatRef={sharedMatRef}
         />
       ))}
-      <BismillahText3D surfaceZ={PAGE_DEPTH / 2} />
+      {!runtime.config.features.hideBismillah3D && (
+        <BismillahText3D surfaceZ={PAGE_DEPTH / 2} />
+      )}
     </group>
   );
 };

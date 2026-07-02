@@ -7,6 +7,7 @@ import {
   VerseBox,
   RoundedShapeComponent,
   CapsuleLabel,
+  SplitVerseCapsules,
 } from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
 import {
@@ -39,6 +40,7 @@ export interface VerseMeshProps {
   isPill?: boolean;
   backfaceColor: string;
   verse: string;
+  splitTexts?: [string, string];
   number: number;
   bg: string;
   border: string;
@@ -136,6 +138,7 @@ export function VerseMesh({
   elevateOpacity,
   isPill = true,
   verse,
+  splitTexts,
   number,
   bg,
   border,
@@ -373,27 +376,48 @@ export function VerseMesh({
                   )}
 
                   <a.group position={[alignX, alignY, 0.002]} renderOrder={101}>
-                    <VerseBox
-                      x={0}
-                      y={0}
-                      z={0}
-                      w={w}
-                      h={h}
-                      verse={verse}
-                      number={number}
-                      bg={bg}
-                      border={border}
-                      circleBorderCol={circleBorderCol}
-                      circleBg={circleBg}
-                      circleTextCol={circleTextCol}
-                      textColor={textColor}
-                      textScaleOverride={textScaleOverride}
-                      textAlignOverride={translationTextAlign}
-                      isPill={isPill}
-                      shadow={false}
-                      opacity={combinedOpacity}
-                      baseRenderOrder={baseRenderOrder}
-                    />
+                    {splitTexts ? (
+                      <SplitVerseCapsules
+                        x={0}
+                        y={0}
+                        z={0}
+                        w={w}
+                        h={h}
+                        texts={splitTexts}
+                        number={number}
+                        bg={bg}
+                        border={border}
+                        circleBorderCol={circleBorderCol}
+                        circleBg={circleBg}
+                        circleTextCol={circleTextCol}
+                        textColor={textColor}
+                        textScaleOverride={textScaleOverride}
+                        opacity={combinedOpacity}
+                        baseRenderOrder={baseRenderOrder}
+                      />
+                    ) : (
+                      <VerseBox
+                        x={0}
+                        y={0}
+                        z={0}
+                        w={w}
+                        h={h}
+                        verse={verse}
+                        number={number}
+                        bg={bg}
+                        border={border}
+                        circleBorderCol={circleBorderCol}
+                        circleBg={circleBg}
+                        circleTextCol={circleTextCol}
+                        textColor={textColor}
+                        textScaleOverride={textScaleOverride}
+                        textAlignOverride={translationTextAlign}
+                        isPill={isPill}
+                        shadow={false}
+                        opacity={combinedOpacity}
+                        baseRenderOrder={baseRenderOrder}
+                      />
+                    )}
                   </a.group>
                 </group>
 

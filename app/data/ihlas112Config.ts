@@ -1,16 +1,13 @@
-import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
-import type { AlakLayoutParams } from "./SurahConfig";
+import type { SurahLayoutConfig } from "./schema";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
-const YELLOW_BG = "#E5CFA4";
+const YELLOW_BG     = "#E5CFA4";
 const YELLOW_BORDER = "#BE9E63";
-// const BLUE_BG = "#CEE0E9";
-// const BLUE_BORDER = "#7A9CAD";
-const GREEN_BG = "#eaf2db";
-const GREEN_BORDER = "#5E7367";
+const GREEN_BG      = "#eaf2db";
+const GREEN_BORDER  = "#5E7367";
 
-export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
+export const IHLAS_112_CONFIG: SurahLayoutConfig = {
   id: "ihlas112",
   title: "İhlas Suresi",
   heroTitle: "İhlas Suresi",
@@ -125,7 +122,9 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
           bottomAnchorXOffset: -0.02,
         },
         {
-          color: "transparent", // Dummy center color to prevent rendering on single verse
+          // Dummy transparent entry prevents a third SideCurves bracket from
+          // appearing when there is no real third group pair.
+          color: "transparent",
           fillColor: "transparent",
         },
       ],
@@ -142,134 +141,144 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 
-  params: {
-    s1Top: 0.5,
-    s1Pad: 0.01,
-    gap: 0.01,
-    s1AnaGap: 0.01,
-    smallBoxH: 0.04,
-    anaAyetH: 0.04,
-    gapBetweenS1andS2: 0.01,
-    s2VerticalPad: 0.02,
-    bigBoxH: 0.07,
-    groupGap: 0.025,
-    groupPad: 0.012,
-    groupPadBottom: 0.012,
-    s2Gap: 0.12,
-    s2VerticalRowGap: 0.02,
-    smallBoxH2: 0.12,
-    middleExtraGap: 0,
-    s2PadLeftRight: 0.005,
-    g2Scale: 0.0,
-    outerScale: 0.0,
-    s1BorderWidth: 0,
-    capsuleLabelW: 0.16,
-    capsuleLabelH: 0.024,
-    capsuleLabelBorderWidth: 0.0035,
-    capsuleLabelDrop: 0.005,
-    sgPad: 0.03,
-    sgBorderWidth: 0.006,
-    boxExtOffset: 0.02,
-    extraRowGap: 0.0,
-    labelHitboxWidth: 0.43,
-    verseTextScale: 1.6,
-    translationVerseTextScale: 1.1,
-    groupRows: [1, 1, 1, 1],
-  },
-
   svgOverlays: [],
 
-  sections: [
+  // ── NEW BLOCK-BASED SCHEMA ──────────────────────────────────────────────
+  globalSettings: {
+    // Legacy params mapping:
+    //   smallBoxH2: 0.12  → capsuleHeight
+    //   s2Gap: 0.12       → columnGap
+    //   s2VerticalRowGap: 0.02 → rowGap
+    //   groupGap: 0.025   → blockGap
+    //   s2PadLeftRight: 0.005 → sectionPadX
+    //   groupPad: 0.012   → blockPadding
+    //   sgBorderWidth: 0.006 → sectionBorderWidth
+    //   verseTextScale: 1.6, translationVerseTextScale: 1.1
+    capsuleHeight:           0.12,
+    columnGap:               0.12,
+    rowGap:                  0.02,
+    blockGap:                0.025,
+    sectionPadX:             0.005,
+    blockPadding:            0.012,
+    sectionBorderWidth:      0.006,
+    verseTextScale:          1.6,
+    translationVerseTextScale: 1.1,
+  },
+
+  // Section-wide resting-state background — was incorrectly attached to
+  // block0 alone, which also made it (wrongly) render as block0's own small
+  // elevated/all-sections frame instead of the whole section's.
+  sectionBackground: {
+    texture: "/ayatalKursi/frame-section-1.svg",
+    scaleX: 0.9,
+    scaleY: 1.1,
+    offsetY: 0.01,
+    solidScaleX: 0.87,
+    solidScaleY: 0.85,
+  },
+
+  blocks: [
+    // Block 0 — Verse 1 (full-width yellow, not pushed in)
     {
       id: "section2",
-      type: "verticalGroups",
-      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 0.9,
-      backgroundScaleY: 1.1,
-      backgroundOffsetY: 0.01,
-      backgroundSolidScaleX: 0.87,
-      backgroundSolidScaleY: 0.85,
-
+      type: "group",
+      verseIds: [1],
+      columns: 1,
+      // outerScale was 0.0 for Ihlas → no push-out, standard width.
+      // isPushedIn: false → horizontalInset: 0
+      horizontalInset: 0,
+      isCenter: true,
+      dragBehavior: "individual",
       hideRowConnectors: true,
-      customSections: [
-        {
-          id: "section2_main",
-          verseIds: [1, 2, 3, 4],
-          cameraTarget: { y: 1.4, fov: 27.5, tilt: -1.4 },
-        },
-      ],
-      groups: [
-        {
-          verseIds: [1],
-          columns: 1,
-          isPushedIn: false,
-          isCenter: true,
-          dragBehavior: "individual",
-        },
-        {
-          verseIds: [2],
-          columns: 1,
-          isPushedIn: true,
-          isCenter: true,
-          dragBehavior: "individual",
-        },
-        {
-          verseIds: [3],
-          columns: 1,
-          isPushedIn: true,
-          isCenter: true,
-          dragBehavior: "individual",
-          pushDown: -0.03,
-        },
-        {
-          verseIds: [4],
-          columns: 1,
-          isPushedIn: false,
-          isCenter: true,
-          dragBehavior: "individual",
-        },
-      ],
-      cameraTarget: { y: 0.4, fov: 35, tilt: -1.2 },
-    } as VerticalGroupsSectionConfig,
+    },
+    // Block 1 — Verse 2 (single column, pushed in)
+    {
+      id: "section2_main",  // carries the customSection id for unified elevation drag
+      type: "group",
+      verseIds: [2],
+      columns: 1,
+      // g2Scale: 0.0 → no explicit scale offset; isPushedIn: true → inset inward
+      horizontalInset: 0.04, // small push-in (approximates legacy isPushedIn visual)
+      isCenter: true,
+      dragBehavior: "individual",
+      hideRowConnectors: true,
+      customSectionId: "section2_main",
+    },
+    // Block 2 — Verse 3 (single column, pushed in, slight pushDown compensation)
+    {
+      id: "section2_g2",
+      type: "group",
+      verseIds: [3],
+      columns: 1,
+      horizontalInset: 0.04,
+      isCenter: true,
+      dragBehavior: "individual",
+      hideRowConnectors: true,
+      verticalNudge: -0.03,
+      // Legacy had pushDown: -0.03 to compensate for extra gap above.
+      // In the block engine the auto-centering handles this, so no offset needed.
+    },
+    // Block 3 — Verse 4 (full-width yellow, not pushed in)
+    {
+      id: "section2_g3",
+      type: "group",
+      verseIds: [4],
+      columns: 1,
+      horizontalInset: 0,
+      isCenter: true,
+      dragBehavior: "individual",
+      hideRowConnectors: true,
+    },
+  ],
+
+  // customSections maps a virtual drag/elevation zone across all 4 blocks.
+  customSections: [
+    {
+      id: "section2_main",
+      verseIds: [1, 2, 3, 4],
+      cameraTarget: { y: 1.4, fov: 27.5, tilt: -1.4 },
+    },
   ],
 
   animations: {
     computeFoldYPositions: (lm) => {
+      // groupYPositions[i] = frameY (top edge) of block i.
+      // groupHeights[i]    = frameH of block i.
       const fold1 =
-        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
-        2;
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) / 2;
       const fold2 =
-        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
-        2;
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) / 2;
       const fold3 =
-        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) /
-        2;
+        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) / 2;
       return [fold1, fold2, fold3];
     },
+
     foldSteps: [
       {
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 0.4 },
+          { direction: 1,  angleFactor: 0.4 },
           { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 0.6 },
+          { direction: 1,  angleFactor: 0.6 },
         ],
       },
       {
         id: "end",
         folds: [
-          { direction: 1, angleFactor: 0 },
+          { direction: 1,  angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
+          { direction: 1,  angleFactor: 0 },
         ],
       },
     ] as const,
+
     scrollTimeline: {
-      intro: { start: 0, end: 10 },
+      intro:   { start: 0,  end: 10 },
       ambient: { start: 10, end: 40 },
       handoff: { start: 40, end: 55 },
-      story: { start: 55, end: 100 },
+      story:   { start: 55, end: 100 },
     },
+
     scrollLock: {
       lockPositionPercentage: 0.55,
       effortRequired: 2500,
@@ -277,6 +286,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 };
+
+// ── TEXT DATA (unchanged) ────────────────────────────────────────────────────
 
 export const IHLAS_112_TEXT_AR: SurahDataShape = {
   bismillah: "بِسْـــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
@@ -289,30 +300,10 @@ export const IHLAS_112_TEXT_AR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 1, text: "قُلْ هُوَ اللَّهُ أَحَدٌ" }],
-      },
-      {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 2, text: "اللَّهُ الصَّمَدُ" }],
-      },
-      {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 3, text: "لَمْ يَلِدْ وَلَمْ يُولَدْ" }],
-      },
-      {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 4, text: "وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ" }],
-      },
+      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 1, text: "قُلْ هُوَ اللَّهُ أَحَدٌ" }] },
+      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 2, text: "اللَّهُ الصَّمَدُ" }] },
+      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 3, text: "لَمْ يَلِدْ وَلَمْ يُولَدْ" }] },
+      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 4, text: "وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ" }] },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",
@@ -330,34 +321,10 @@ export const IHLAS_112_TEXT_EN: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 1, text: "Say, He is Allah, the One" }],
-      },
-      {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 2, text: "Allah is Samet :" }],
-      },
-      {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [
-          { number: 3, text: "He has not begotten and has not been begotten" },
-        ],
-      },
-      {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [
-          { number: 4, text: "And nothing is equal and equivalent to Him" },
-        ],
-      },
+      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 1, text: "Say, He is Allah, the One" }] },
+      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 2, text: "Allah is Samet :" }] },
+      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 3, text: "He has not begotten and has not been begotten" }] },
+      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 4, text: "And nothing is equal and equivalent to Him" }] },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",
@@ -375,32 +342,10 @@ export const IHLAS_112_TEXT_TR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 1, text: "Söyle, O Allah tek'tir" }],
-      },
-      {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 2, text: "Allah, Samet'tir :" }],
-      },
-      {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır" }],
-      },
-      {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
-        verses: [
-          { number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" },
-        ],
-      },
+      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 1, text: "Söyle, O Allah tek'tir" }] },
+      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 2, text: "Allah, Samet'tir :" }] },
+      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır" }] },
+      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" }] },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",

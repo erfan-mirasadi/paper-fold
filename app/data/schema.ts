@@ -14,6 +14,13 @@ export interface SurahFeatures {
   hasElevatedSections: boolean;
   hasPopUps: boolean;
   hideVerseNumbers?: boolean;
+  /**
+   * When true, the floating 3D bismillah text overlay is NOT rendered on the
+   * paper surface for this surah. Use for surahs (e.g. Fatiha) where the
+   * bismillah is already part of the verse content and the 3D overlay would
+   * duplicate it.
+   */
+  hideBismillah3D?: boolean;
 }
 
 export interface LayoutDimensions {
@@ -22,6 +29,13 @@ export interface LayoutDimensions {
   sceneCenterYOffset: number;
   padding: number;
   scrollPages: number;
+  /**
+   * When true, the paper does NOT widen for English/Turkish translations
+   * (which normally need extra horizontal room for longer text). Set this
+   * for surahs whose layout is already wide enough or tuned per-language
+   * separately. Defaults to false (paper widens as usual).
+   */
+  fixedWidthAcrossLanguages?: boolean;
 }
 
 export interface CurveColorConfig {
@@ -83,6 +97,296 @@ export interface ThemeColors {
   sectionBackgrounds?: string[];
 }
 
+// ----------------------------------------------------------------------------
+// BLOCK-BASED LAYOUT SCHEMA (NEW — replaces GridSectionConfig / VerticalGroupsSectionConfig)
+// ----------------------------------------------------------------------------
+
+/**
+ * Minimal global settings that drive the layout engine's auto-centering math.
+ * Replaces the sprawling `AlakLayoutParams` object (~30 fields).
+ */
+export interface SurahGlobalSettings {
+  /** Height of a single capsule row in world units. (was `smallBoxH2`) */
+  capsuleHeight: number;
+
+  /** Horizontal gap between the two columns inside a 2-col group. (was `s2Gap`) */
+  columnGap: number;
+
+  /** Vertical gap between rows within a single group. (was `s2VerticalRowGap` or `s2Gap`) */
+  rowGap: number;
+
+  /** Vertical gap between adjacent blocks. (was `groupGap`) */
+  blockGap: number;
+
+  /** Horizontal padding from the section edge to the outer group frame. (was `s2PadLeftRight`) */
+  sectionPadX: number;
+
+  /** Top/bottom internal padding inside each block frame. (was `groupPad` / `groupPadBottom`) */
+  blockPadding: number;
+
+  /** Border width of the outer section connector/frame. (was `sgBorderWidth`) */
+  sectionBorderWidth: number;
+
+  /**
+   * Horizontal padding of the outer section connector/frame, independent of
+   * `sectionPadX` (which pads the group content). Falls back to
+   * `sectionPadX * 0.5` when omitted. (was the always-0.03 `sgPad`)
+   */
+  connectorPad?: number;
+
+  /**
+   * Vertical padding added around the whole block stack's decorative outer
+   * frame (`shiftedTop`/`shiftedBot`/`shiftedH`), beyond the content itself.
+   * Defaults to 0 (frame hugs the content tightly). (was `s2VerticalPad`)
+   */
+  framePad?: number;
+
+  /** Optional uniform scale for Arabic verse text. */
+  verseTextScale?: number;
+
+  /** Optional uniform scale for translation verse text. null = inherit. */
+  translationVerseTextScale?: number | null;
+
+  /**
+   * Sizing for the small pill-shaped label rendered above/below a verse when
+   * `verseOverrides[id].hasCapsuleLabel` is set (e.g. Ahzab's "İman"/"Zekat"
+   * tags). Falls back to generic defaults (0.2/0.032/0.0035/0.015) when omitted.
+   */
+  capsuleLabelW?: number;
+  capsuleLabelH?: number;
+  capsuleLabelBorderWidth?: number;
+  capsuleLabelDrop?: number;
+
+  /**
+   * How far the decorative top/bottom connector frames (rendered only when
+   * `features.hasIntro` is true) extend beyond the first/last vertical
+   * group. Defaults to 0. (was `boxExtOffset`, Alak-only)
+   */
+  boxExtOffset?: number;
+
+  /**
+   * Bypasses the auto-centering pass and pins the content stack's top edge
+   * to this exact Y value instead (was Alak's hand-tuned fixed `s1Top`).
+   * Defaults to undefined (auto-center on the paper, the standard for every
+   * other surah).
+   */
+  contentStartYOverride?: number;
+}
+
+/**
+ * The single unified primitive for ALL layout content — replaces both
+ * `GridSectionConfig` (Alak Section 1) and `VerseBlockConfig` (Section 2 groups).
+ *
+ * A flat `blocks: LayoutBlock[]` array on `SurahLayoutConfig` is the
+ * sole source of truth for the layout hierarchy.
+ */
+export interface LayoutBlock {
+  /** Unique ID used for camera targets, drag sections, elevation, etc. */
+  id: string;
+
+  /**
+   * Layout mode for this block:
+   * - `'group'`   → A box of verse capsules in a 1- or 2-column grid (was VerseBlockConfig).
+   * - `'grid'`    → Alak-style 2-column grid with a full-width AnaAyet verse below.
+   * - `'spacer'`  → Invisible gap of `fixedHeight` (for intro/outro verse slots).
+   */
+  type: 'group' | 'grid' | 'spacer';
+
+  // ── CONTENT ──────────────────────────────────────────────────────────────
+
+  /** Verse IDs to render in this block (in display order). */
+  verseIds?: number[];
+
+  /**
+   * For `type: 'grid'` only — the single full-width AnaAyet verse ID.
+   * Rendered below the 2-column grid rows.
+   */
+  anaAyetId?: number;
+
+  /**
+   * For `type: 'grid'` only — gap between the last grid row and the AnaAyet
+   * row, used for both height reservation and position. Falls back to the
+   * block's own `rowGap`. (was `s1AnaGap`)
+   */
+  anaAyetGap?: number;
+
+  /**
+   * For `type: 'grid'` only — small cosmetic Y fine-tune applied ONLY to the
+   * AnaAyet's final position (not reflected in height reservation).
+   * Defaults to 0.
+   */
+  anaAyetYOffset?: number;
+
+  /** Label key to look up in the surah text labels (for `type: 'grid'` header). */
+  labelKey?: string;
+
+  /**
+   * Surah-wide elevated top/bottom title labels (Alak-only: "Beş ayetlik 1./2.
+   * Açıklama Böl."), looked up in the same text-label table as `labelKey`.
+   * Declared on any one block; the label anchors to the first/last "real"
+   * group block regardless of which block declares it.
+   */
+  topLabelKey?: string;
+  bottomLabelKey?: string;
+
+  // ── LAYOUT ───────────────────────────────────────────────────────────────
+
+  /** Number of columns inside this block. Defaults to 2. Use 1 for full-width. */
+  columns?: number;
+
+  /**
+   * Override capsule height for this block only.
+   * Falls back to `globalSettings.capsuleHeight`.
+   */
+  capsuleHeight?: number;
+
+  /**
+   * Override row gap for this block only.
+   * Falls back to `globalSettings.rowGap`.
+   */
+  rowGap?: number;
+
+  /**
+   * Additional row gap applied ONLY to the within-block row offset (between
+   * capsule rows), NOT to the block's overall frame height. Mirrors the
+   * legacy `extraRowGap` field exactly — a deliberate decoupling where extra
+   * spacing nudges later rows down without expanding the frame to match.
+   */
+  extraRowGap?: number;
+
+  /**
+   * Override the gap between this block and the PREVIOUS block only.
+   * Falls back to `globalSettings.blockGap`. Use for a one-off larger gap
+   * (e.g. Alak's Section 1 → Section 2 gap, distinct from the uniform gap
+   * between the vertical groups themselves).
+   */
+  gapBefore?: number;
+
+  /**
+   * Marks this block as the special full-width "intro" or "outro" verse
+   * (Alak-only: verse 6 / verse 19) rendered via BlockRenderer's dedicated
+   * intro/outro path (non-pill, section borderWidth) instead of the regular
+   * per-block group rendering. Such a block still occupies layout height
+   * and participates in Y-positioning like any other block, but emits no
+   * `groups[]` entry of its own — assign it to a neighboring group's
+   * elevation zone via a top-level `customSections` entry.
+   */
+  introOutroRole?: "intro" | "outro";
+
+  /**
+   * Override the horizontal gap between the two columns for this block only.
+   * Falls back to `globalSettings.columnGap`. (was per-group `xGap`)
+   */
+  columnGap?: number;
+
+  /**
+   * Override internal top/bottom padding for this block only.
+   * Falls back to `globalSettings.blockPadding`.
+   */
+  blockPadding?: number;
+
+  /**
+   * Explicit row count for this block, overriding the value inferred from
+   * `ceil(verseIds.length / columns)`. Use when a block needs reserved
+   * vertical space beyond what its verses alone would occupy. (was `groupRows[i]`)
+   */
+  rows?: number;
+
+  /**
+   * Manual vertical nudge (world units) applied to this block's frameY
+   * after the auto-centering pass. Positive moves down, negative moves up.
+   * Cascades to all subsequent blocks, same as the legacy `pushDown` field.
+   */
+  verticalNudge?: number;
+
+  /**
+   * Signed horizontal inset from the section edge (world units).
+   * Positive = pushed in (narrower), Negative = pushed out (wider).
+   * Defaults to 0.
+   */
+  horizontalInset?: number;
+
+  /**
+   * Explicit override for the "is this the pushed-in/center group" flag used
+   * by SideCurves to pick the innermost bracket (`isCenter && isPushedIn`).
+   * Defaults to `horizontalInset > 0` when omitted — only needed when a
+   * block has a positive `horizontalInset` (e.g. a decorative scale offset)
+   * without being the semantic "center" group.
+   */
+  isPushedIn?: boolean;
+
+  /**
+   * Fixed height in world units for `type: 'spacer'` or
+   * for the AnaAyet row in `type: 'grid'`.
+   */
+  fixedHeight?: number;
+
+  // ── APPEARANCE ───────────────────────────────────────────────────────────
+
+  /**
+   * References a key in `ThemeColors` for the block's background fill.
+   * Decouples color from positioning.
+   */
+  bgThemeKey?: keyof ThemeColors;
+
+  /**
+   * When `true`, this block is the "center" block — affects SideCurves
+   * bracket nesting assignment.
+   */
+  isCenter?: boolean;
+
+  // ── INTERACTION ──────────────────────────────────────────────────────────
+
+  /** Drag/click interaction mode for verses in this block. */
+  dragBehavior?: 'group' | 'pair' | 'single' | 'individual';
+
+  /** When `true`, the popup interaction is disabled for all verses in this block. */
+  disablePopUp?: boolean;
+
+  /**
+   * When provided, all verses in this block belong to this drag/elevation section
+   * instead of the default per-block assignment. Enables cross-block column sections
+   * (e.g., Ahzab 35 left/right column sections).
+   */
+  customSectionId?: string;
+
+  /** Camera target when this block (or its custom section) is focused. */
+  cameraTarget?: CameraTargetConfig;
+
+  // ── BACKGROUND TEXTURE ───────────────────────────────────────────────────
+
+  backgroundTexture?: string;
+  backgroundScaleX?: number;
+  backgroundScaleY?: number;
+  backgroundOffsetX?: number;
+  backgroundOffsetY?: number;
+  /** Scale of the solid color quad rendered behind the background texture. */
+  backgroundSolidScaleX?: number;
+  /** Scale of the solid color quad rendered behind the background texture. */
+  backgroundSolidScaleY?: number;
+
+  // ── LABELS ───────────────────────────────────────────────────────────────
+
+  /** Optional top-label config rendered above this block. */
+  topLabelConfig?: {
+    width?: number;
+    height?: number;
+    yOffset?: number;
+    textOffsetY?: number;
+    textScaleOverride?: number;
+    bgColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    xMultiplier?: number;
+    isSimpleText?: boolean;
+    shadow?: boolean;
+    noBorder?: boolean;
+  };
+
+  /** When `true`, horizontal row-connector bars between paired capsules are hidden. */
+  hideRowConnectors?: boolean;
+}
+
 export interface LayoutStyling {
   colors: ThemeColors;
   capsuleBorderWidth: number;
@@ -99,66 +403,16 @@ export interface LayoutStyling {
   };
 }
 
-export interface VerseBlockConfig {
-  verseIds: number[];
-  columns?: number;
-  dragBehavior?: "group" | "pair" | "single" | "individual";
-  disablePopUp?: boolean;
-  isPill?: boolean;
-  isSectionIntroOutro?: boolean;
-  customFrameSvg?: string;
-  capsuleLabel?: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    borderWidth: number;
-    labelDrop?: number;
-  };
-  isPushedIn?: boolean;
-  isCenter?: boolean;
-  extraRowGap?: number;
-  bgThemeKey?: keyof ThemeColors;
-  customScale?: number;
-  xGap?: number;
-  pushDown?: number;
-  topLabelConfig?: {
-    width?: number;
-    height?: number;
-    yOffset?: number;
-    textOffsetY?: number;
-    textScaleOverride?: number;
-    bgColor?: string;
-    borderColor?: string;
-    textColor?: string;
-    xMultiplier?: number;
-  };
-  backgroundTexture?: string;
-  backgroundScaleX?: number;
-  backgroundScaleY?: number;
-  backgroundOffsetX?: number;
-  backgroundOffsetY?: number;
-}
-
 export interface CameraTargetConfig {
   y: number;
   fov: number;
   tilt: number;
 }
 
-export interface GridSectionConfig {
-  id: string;
-  type: "gridWithAnaAyet";
-  labelKey?: string;
-  verses: number[];
-  anaAyet: number;
-  bgThemeKey?: keyof ThemeColors;
-  cameraTarget?: CameraTargetConfig;
-}
-
 /**
  * Defines a custom section for drag/click/elevation that can span verses
- * from multiple groups. Overrides the default per-group section mapping.
+ * from multiple blocks. Used by Ahzab 35 (left/right column sections) and
+ * also referenced by `LayoutBlock.customSectionId`.
  */
 export interface CustomSectionDef {
   /** Unique section ID (e.g. "section2_right") */
@@ -168,47 +422,6 @@ export interface CustomSectionDef {
   /** Optional specific camera target for this custom section */
   cameraTarget?: CameraTargetConfig;
 }
-
-export interface VerticalGroupsSectionConfig {
-  id: string;
-  type: "verticalGroups";
-  topLabelKey?: string;
-  bottomLabelKey?: string;
-  introVerse?: number;
-  outroVerse?: number;
-  introOutroBgThemeKey?: keyof ThemeColors;
-  groups: VerseBlockConfig[];
-  /**
-   * Controls how groups are treated for drag/elevation:
-   * - "perGroup" (default): Each group gets its own section ID and drag spring (Alak).
-   * - "unified": All groups share one section ID — drag moves everything together (AyatAlKursi).
-   */
-  groupElevation?: "unified" | "perGroup";
-  /**
-   * When provided, overrides the default group-based section mapping.
-   * Each custom section defines its own ID and verse list, allowing
-   * column-based or cross-group sections (e.g. Ahzab 35 left/right columns).
-   * Takes precedence over both "perGroup" and "unified" groupElevation.
-   */
-  customSections?: CustomSectionDef[];
-  cameraTarget?: CameraTargetConfig;
-  subCameraTargets?: {
-    top?: CameraTargetConfig;
-    center?: CameraTargetConfig;
-    bottom?: CameraTargetConfig;
-  };
-  backgroundTexture?: string;
-  backgroundScaleX?: number;
-  backgroundScaleY?: number;
-  backgroundOffsetX?: number;
-  backgroundOffsetY?: number;
-  backgroundSolidScaleX?: number;
-  backgroundSolidScaleY?: number;
-  /** When true, the horizontal row-connector bars between paired capsules are hidden. */
-  hideRowConnectors?: boolean;
-}
-
-export type SectionConfig = GridSectionConfig | VerticalGroupsSectionConfig;
 
 export interface SpecialVerses {
   middleFoldVerses?: { left: number[]; right: number[] };
@@ -259,6 +472,22 @@ export interface VerseOverrideConfig {
 
 export interface SurahAssets {
   metallicVerseBorderSvg?: string;
+}
+
+/**
+ * Section-wide background texture, independent of any single block's own
+ * frame. Renders behind the whole block stack (the outer resting-state
+ * frame), as opposed to `LayoutBlock.backgroundTexture` which renders a
+ * decorative frame scoped to just that one block's own bounds.
+ */
+export interface SectionBackgroundConfig {
+  texture: string;
+  scaleX?: number;
+  scaleY?: number;
+  offsetX?: number;
+  offsetY?: number;
+  solidScaleX?: number;
+  solidScaleY?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -348,7 +577,7 @@ export interface SurahAnimations {
   introCamera?: IntroCameraConfig;
 }
 
-export interface SurahLayoutConfig<TParams = any> {
+export interface SurahLayoutConfig {
   id: string;
   title: string;
   heroTitle?: string;
@@ -359,13 +588,41 @@ export interface SurahLayoutConfig<TParams = any> {
   specialVerses: SpecialVerses;
   assets?: SurahAssets;
   verseOverrides?: Record<number, VerseOverrideConfig>;
-  params: TParams;
-  sections: SectionConfig[];
+
+  // ── NEW BLOCK-BASED SCHEMA ────────────────────────────────────────────────
+  /**
+   * Minimal global sizing settings consumed by the new block-based layout engine.
+   * Replaces the sprawling `params: AlakLayoutParams` object.
+   */
+  globalSettings?: SurahGlobalSettings;
+
+  /**
+   * Flat ordered list of layout blocks — the single source of truth for the
+   * entire layout hierarchy. Replaces the nested `sections[].groups[]` tree.
+   * The engine iterates this array top-to-bottom, calculates total height,
+   * then auto-centers the content on the page.
+   */
+  blocks?: LayoutBlock[];
+
+  /**
+   * Cross-block custom sections (e.g. Ahzab left/right column drag zones).
+   * Each entry overrides the per-block section mapping for its `verseIds`.
+   */
+  customSections?: CustomSectionDef[];
+
   animations: SurahAnimations;
   introMedia?: Record<string, IntroMediaItem>;
   introGuides?: Record<string, string>;
   /** Optional per-surah SVG overlay planes rendered on top of the section */
   svgOverlays?: SvgOverlayItem[];
+
+  /**
+   * Section-wide resting-state background, independent of any block's own
+   * frame. When omitted, the engine falls back to the first block that
+   * declares `backgroundTexture` (back-compat for Ihlas/Kafirun-style configs
+   * where a single block's frame doubles as the whole section's background).
+   */
+  sectionBackground?: SectionBackgroundConfig;
 }
 
 // ----------------------------------------------------------------------------
@@ -420,6 +677,9 @@ export interface GroupTransforms {
     borderColor?: string;
     textColor?: string;
     xMultiplier?: number;
+    isSimpleText?: boolean;
+    shadow?: boolean;
+    noBorder?: boolean;
   };
   backgroundTexture?: string;
   backgroundScaleX?: number;

@@ -18,6 +18,7 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../../../data/SurahConfig";
 import type { GroupTransforms } from "../../../data/schema";
+import { getIntroGridSectionId } from "../../../utils/sectionResolver";
 
 export const CURVE_GAP = 0.1;
 export const CURVE_INWARD_OFFSET = 0.015;
@@ -84,10 +85,17 @@ const FALLBACK_CENTER_COLOR: CurveConfig = {
   fillColor: CAPSULE_BG_12_14,
 };
 
+interface IntroOutroBracketData {
+  v6Y: number;
+  v6H: number;
+  v19Y: number;
+  v19H: number;
+}
+
 function computeBrackets(
   groups: GroupTransforms[],
   layout: LayoutConfig,
-  hasIntroOutro: boolean,
+  introOutro: IntroOutroBracketData | null,
   outerColors: CurveConfig[] = FALLBACK_OUTER_COLORS,
   centerColor: CurveConfig = FALLBACK_CENTER_COLOR,
   verseOverrides?: Record<number, { expandW?: number }>,
@@ -113,17 +121,24 @@ function computeBrackets(
     };
   };
 
-  const { v6Y, v19Y, bigBoxH, groupPad, smallBoxH2, s2Gap, g1Y, g3Y } = layout;
+  const { groupPad, smallBoxH2, s2Gap } = layout;
   const centerGroup = groups.find((g) => g.isCenter && g.isPushedIn);
   const brackets: BracketSpec[] = [];
 
-  if (hasIntroOutro) {
+  if (introOutro) {
+    const { v6Y, v6H, v19Y, v19H } = introOutro;
+    // First/last groups in display order (the center group sits in between,
+    // so groups[0] and groups[groups.length - 1] are always the two "outer"
+    // groups regardless of engine).
+    const g1Y = groups[0].frameY;
+    const g3Y = groups[groups.length - 1].frameY;
+
     const outerTop0 = v6Y;
-    const outerBot0 = v19Y - bigBoxH;
+    const outerBot0 = v19Y - v19H;
     brackets.push({
       outerYTop: outerTop0,
       outerYBot: outerBot0,
-      innerYTop: v6Y - bigBoxH,
+      innerYTop: v6Y - v6H,
       innerYBot: v19Y,
       nestLevel: 0,
       isCenter: false,
@@ -356,7 +371,7 @@ export const SideCurves = ({
   startX,
   borderWidth = DEFAULT_VERSE_BORDER_WIDTH,
   groups,
-  hasIntroOutro,
+  introOutro,
 }: any) => {
   const popUpGroups = usePopUpStore((state) => state.popUpGroups);
   const isAllSectionsMode = useElevatedStore(
@@ -381,19 +396,29 @@ export const SideCurves = ({
     : FALLBACK_CENTER_COLOR;
 
   const activeConfig = useStoryStore((s) => s.activeConfig);
-  const s2SectionId = activeConfig.sections.find((s) => s.type === "verticalGroups")?.id;
-
-  const hasActiveS2Section = useElevatedStore((state) => 
-    state.activeSectionIds.some((id) =>
-      s2SectionId && (id === s2SectionId || id.startsWith(`${s2SectionId}_g`))
-    )
+  // Grid section (Alak's Section 1) has its own separate elevation zone,
+  // unrelated to these side curves (which only ever wrap Section 2's
+  // groups) — exclude it from both the "should hide" check and the popup
+  // skip-set below. Surahs with no grid block (most of them) have no such
+  // zone, so every active section counts, same as before.
+  const gridSectionId = useMemo(
+    () => getIntroGridSectionId(activeConfig),
+    [activeConfig],
   );
 
-  // Build set of section-1 popup group IDs so we can exclude them from hide logic
+  const hasActiveS2Section = useElevatedStore((state) =>
+    state.activeSectionIds.some((id) => id !== gridSectionId),
+  );
+
+  // Build set of section-1 (grid) popup group IDs so we can exclude them
+  // from hide logic — e.g. Alak's g_5_6 anaAyet↔introVerse bridge group.
   const s1GroupIds = useMemo(() => {
-    const s1Sec = activeConfig.sections.find((s) => s.type === "gridWithAnaAyet");
-    if (!s1Sec) return new Set<string>();
-    const s1Verses = [...(s1Sec as any).verses, (s1Sec as any).anaAyet];
+    const gridBlock = activeConfig.blocks?.find((b: any) => b.type === "grid");
+    if (!gridBlock) return new Set<string>();
+    const s1Verses = [
+      ...(gridBlock.verseIds ?? []),
+      ...(gridBlock.anaAyetId !== undefined ? [gridBlock.anaAyetId] : []),
+    ];
     return new Set(
       popUpGroups
         .filter((g) => g.verseIds.every((id) => s1Verses.includes(id)))
@@ -406,20 +431,26 @@ export const SideCurves = ({
     (!isAllSectionsMode && hasActiveS2Section);
 
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
-  const baseStartX_L = startX + layout.s2Pad - 0.005;
-  const baseStartX_R = startX + layout.sectionW - layout.s2Pad + 0.005;
+  // Curve anchor pad — legacy reused `s2VerticalPad` (now `framePad`) here,
+  // not the horizontal `sectionPadX`. Only Alak's hasIntroOutro bracket
+  // branch actually falls back to this (every other surah's brackets supply
+  // explicit per-verse edges via getEdges()), so read it straight from
+  // globalSettings rather than the generic layout math object.
+  const curveAnchorPad = activeConfig.globalSettings?.framePad ?? 0;
+  const baseStartX_L = startX + curveAnchorPad - 0.005;
+  const baseStartX_R = startX + layout.sectionW - curveAnchorPad + 0.005;
 
   const brackets = useMemo(
     () =>
       computeBrackets(
         groups,
         layout,
-        hasIntroOutro,
+        introOutro,
         outerColors,
         centerColor,
         verseOverrides,
       ),
-    [groups, layout, hasIntroOutro, outerColors, centerColor, verseOverrides],
+    [groups, layout, introOutro, outerColors, centerColor, verseOverrides],
   );
 
   const totalLevels = brackets.length;

@@ -19,7 +19,7 @@ export interface SurahMeta {
 
 export interface SurahEntry extends SurahMeta {
   /** Layout & animation config injected into useStoryStore */
-  config: SurahLayoutConfig<any>;
+  config: SurahLayoutConfig;
   /** Multi-language text data injected into useStoryStore */
   textData: Record<SurahLanguage, SurahDataShape>;
 }
@@ -29,6 +29,18 @@ export interface SurahEntry extends SurahMeta {
 // ---------------------------------------------------------------------------
 
 const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
+  {
+    id: "fatiha1",
+    displayName: "Al-Fatiha",
+    arabicName: "الفاتحة",
+    reference: "Al-Fatiha 1",
+  },
+  {
+    id: "fatiha2",
+    displayName: "Al-Fatiha 2",
+    arabicName: "الفاتحة 2",
+    reference: "Al-Fatiha 2",
+  },
   {
     id: "alak",
     displayName: "Al-Alak",
@@ -94,6 +106,22 @@ export async function getSurahDataAsync(id: string): Promise<SurahEntry | null> 
   if (!meta) return null;
 
   switch (id) {
+    case "fatiha1": {
+      const module = await import("./fatiha1Config");
+      return {
+        ...meta,
+        config: module.FATIHA_1_CONFIG,
+        textData: module.FATIHA_1_TEXT_DATA,
+      };
+    }
+    case "fatiha2": {
+      const module = await import("./fatiha2Config");
+      return {
+        ...meta,
+        config: module.FATIHA_2_CONFIG,
+        textData: module.FATIHA_2_TEXT_DATA,
+      };
+    }
     case "alak": {
       const [configModule, dataModule] = await Promise.all([
         import("./alak96Config"),

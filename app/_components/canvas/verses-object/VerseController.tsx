@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useSpring, a, to, SpringValue } from "@react-spring/three";
+import { useSpring, a, to } from "@react-spring/three";
 import {
   useFoldAnimation,
   useMiddleHorizontalFoldAnimation,
@@ -42,6 +42,38 @@ function getLeadVerseId(
 ) {
   const pairedVerseId = pairings?.[configId];
   return pairedVerseId ? Math.min(configId, pairedVerseId) : configId;
+}
+
+/**
+ * Resolves the drag-behavior info ("group" vs "individual" vs custom-section)
+ * for whichever block a verse belongs to.
+ */
+function resolveSectionDragInfo(
+  config: any,
+  leadVerseId: number,
+): { dragBehavior?: string; isCenter?: boolean; hasCustomSections: boolean } {
+  // Drag behavior is a per-block property, found by verse membership —
+  // independent of which elevation section id the verse resolves to (a
+  // cross-block customSection can span verses from several blocks). Grid
+  // blocks (Alak) don't carry `dragBehavior`/`isCenter`, so a lookup miss
+  // for the anaAyet (not part of `verseIds`) resolves to the same
+  // all-undefined result a grid block would return anyway.
+  const block = config.blocks?.find((b: any) => b.verseIds?.includes(leadVerseId));
+  return {
+    dragBehavior: block?.dragBehavior,
+    isCenter: block?.isCenter,
+    hasCustomSections: Boolean(config.customSections?.length),
+  };
+}
+
+function shouldUseGroupDrag(info: {
+  dragBehavior?: string;
+  isCenter?: boolean;
+  hasCustomSections: boolean;
+}): boolean {
+  if (info.dragBehavior === "individual") return false;
+  if (info.hasCustomSections) return true;
+  return info.dragBehavior === "group" || !!info.isCenter;
 }
 
 const ZERO_OFFSET = { x: 0, y: 0 };
@@ -179,7 +211,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     horizontalDirection,
     isMiddleFoldCandidate === true,
   );
-  const middleGapHalf = runtime.layoutMath.s2Gap / 2;
+  const middleGapHalf = (runtime.layoutMath as any).s2Gap / 2;
   const horizontalPivotOffsetY = isMiddleTopRow
     ? -(config.h + middleGapHalf)
     : isMiddleBottomRow
@@ -198,39 +230,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   );
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
-    const s2Config = activeStoryConfig.sections.find(
-      (s) => s.type === "verticalGroups",
-    ) as any;
-
-    let targetGroup: any = null;
-    if (s2Config?.groups) {
-      if (sectionId.includes("_g")) {
-        const idxStr = sectionId.split("_g")[1];
-        const gIndex = parseInt(idxStr, 10);
-        targetGroup = s2Config.groups[gIndex];
-      } else {
-        targetGroup = s2Config.groups.find((g: any) =>
-          g.verseIds?.includes(leadVerseId),
-        );
-      }
-    }
-
-    // When customSections is present, evaluate its drag mode
-    if (s2Config?.customSections?.length > 0) {
-      if (targetGroup?.dragBehavior === "individual") {
-        useSectionGroupDrag = false;
-      } else {
-        useSectionGroupDrag = true;
-      }
-    } else if (targetGroup) {
-      // dragBehavior takes precedence: 'individual' overrides isCenter
-      if (targetGroup.dragBehavior === "individual") {
-        useSectionGroupDrag = false;
-      } else {
-        useSectionGroupDrag =
-          targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-      }
-    }
+    useSectionGroupDrag = shouldUseGroupDrag(
+      resolveSectionDragInfo(activeStoryConfig, leadVerseId),
+    );
   }
 
   const isVerseSeparated = useDragState((s) =>
@@ -245,43 +247,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
-  // ── Parent section for custom-sections (Ahzab) ──────────────────────────
-  // Computed early so it can be used for both snap bounds and position offset.
-  const s2Config = activeStoryConfig.sections.find(
-    (s) => s.type === "verticalGroups",
-  ) as any;
-  const hasCustomSections = Boolean(s2Config?.customSections?.length);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
-  // parentSectionDrag: always track, used for snap and (in all-sections mode) position
-  const parentSectionDrag =
-    hasCustomSections && s2Config?.id ? dragEngine.sections[s2Config.id] : null;
-
-  // Static check: does this verse belong to a center/group-drag section?
-  const isGroupDragType = useMemo(() => {
-    if (!sectionId) return false;
-
-    let targetGroup: any = null;
-    if (s2Config?.groups) {
-      if (sectionId.includes("_g")) {
-        const idxStr = sectionId.split("_g")[1];
-        const gIndex = parseInt(idxStr, 10);
-        targetGroup = s2Config.groups[gIndex];
-      } else {
-        targetGroup = s2Config.groups.find((g: any) =>
-          g.verseIds?.includes(leadVerseId),
-        );
-      }
-    }
-
-    if (hasCustomSections) {
-      if (targetGroup?.dragBehavior === "individual") return false;
-      return true;
-    }
-
-    if (!targetGroup) return false;
-    if (targetGroup.dragBehavior === "individual") return false;
-    return targetGroup.dragBehavior === "group" || targetGroup.isCenter;
-  }, [sectionId, hasCustomSections, s2Config, leadVerseId]);
 
   // ── Snap mode + bounds ────────────────────────────────────────────────────
   //
@@ -308,27 +274,12 @@ export function VerseController({ config }: { config: VerseConfig }) {
   const sectionBounds = useMemo(() => {
     if (snapMode !== "section") return undefined;
     if (!sectionId || !runtime.SURAH_TRANSFORMS) return undefined;
-    if (hasCustomSections && s2Config?.id) {
-      // For custom sections (Ahzab), snap zone = parent section frame
-      return calculateSectionBounds(
-        s2Config.id,
-        runtime.SURAH_TRANSFORMS,
-        runtime.PAGE_WIDTH,
-      );
-    }
     return calculateSectionBounds(
       sectionId,
       runtime.SURAH_TRANSFORMS,
       runtime.PAGE_WIDTH,
     );
-  }, [
-    snapMode,
-    sectionId,
-    runtime.SURAH_TRANSFORMS,
-    runtime.PAGE_WIDTH,
-    hasCustomSections,
-    s2Config,
-  ]);
+  }, [snapMode, sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
 
   const dragBind = useElevatedDrag({
     enabled:
@@ -345,35 +296,15 @@ export function VerseController({ config }: { config: VerseConfig }) {
   });
 
   const dragX = to(
-    [
-      leadVerseDrag.x,
-      sectionDrag ? sectionDrag.x : leadVerseDrag.x,
-      parentSectionDrag ? parentSectionDrag.x : leadVerseDrag.x,
-    ],
-    (vx, sx, px) => {
-      const parentOffset = parentSectionDrag ? px : 0;
-      return (
-        vx +
-        (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0) +
-        parentOffset
-      );
-    },
+    [leadVerseDrag.x, sectionDrag ? sectionDrag.x : leadVerseDrag.x],
+    (vx, sx) =>
+      vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0),
   );
 
   const dragY = to(
-    [
-      leadVerseDrag.y,
-      sectionDrag ? sectionDrag.y : leadVerseDrag.y,
-      parentSectionDrag ? parentSectionDrag.y : leadVerseDrag.y,
-    ],
-    (vy, sy, py) => {
-      const parentOffset = parentSectionDrag ? py : 0;
-      return (
-        vy +
-        (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0) +
-        parentOffset
-      );
-    },
+    [leadVerseDrag.y, sectionDrag ? sectionDrag.y : leadVerseDrag.y],
+    (vy, sy) =>
+      vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0),
   );
 
   const introSectionMotionRef = useIntroSectionOffset(sectionId);
@@ -428,6 +359,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           isPill={config.isPill !== false}
           backfaceColor={backfaceColor}
           verse={config.verse}
+          splitTexts={config.splitTexts}
           number={config.number}
           bg={config.bg}
           border={config.border}

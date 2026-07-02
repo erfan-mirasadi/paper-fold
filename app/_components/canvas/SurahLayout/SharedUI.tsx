@@ -17,12 +17,8 @@ import {
   LATIN_VERSE_FONT,
   LATIN_LABEL_FONT,
   TEXT_SIZES,
-  S2_VERSE_NUMBER_TEXT,
   LANGUAGE_TEXT_SCALE,
-  S1_TOP_LABEL_BORDER,
-  S1_TOP_LABEL_BG,
   S1_ANA_LABEL_BORDER,
-  S1_VERSE_NUMBER_TEXT,
 } from "../../../data/theme";
 export * from "../../../data/theme";
 import {
@@ -34,6 +30,7 @@ import {
   SMALL_TEXT_SHIFT,
   BIG_VERSE_VERTICAL_SHIFT,
   SMALL_VERSE_VERTICAL_SHIFT,
+  OPPOSITE_VERSE_CONNECTOR,
 } from "../../../data/SurahConfig";
 import {
   ANA_AYET_LABEL_BY_LANGUAGE,
@@ -511,6 +508,74 @@ export function CapsuleLabel({
     </group>
   );
 }
+// VERSE NUMBER BADGE — the small circled number, extracted so it can be
+// reused standalone (e.g. one badge shared by two split capsules).
+interface VerseNumberBadgeProps {
+  x: number;
+  y: number;
+  z?: number;
+  cr: number;
+  number: number | string;
+  circleBg: string;
+  circleBorderCol: string;
+  circleTextCol: string;
+  opacity?: any;
+  renderOrder?: number;
+}
+export function VerseNumberBadge({
+  x,
+  y,
+  z = 0,
+  cr,
+  number,
+  circleBg,
+  circleBorderCol,
+  circleTextCol,
+  opacity,
+  renderOrder,
+}: VerseNumberBadgeProps) {
+  const zOrder = renderOrder ?? 12;
+  return (
+    <group position={[x, y, z]}>
+      <mesh renderOrder={zOrder}>
+        <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
+        <a.meshBasicMaterial
+          color={circleBg}
+          depthTest={true}
+          depthWrite={false}
+          transparent
+          opacity={opacity ?? 0.999}
+        />
+      </mesh>
+      <mesh position={[0, 0, -0.001]} renderOrder={zOrder}>
+        <circleGeometry args={[cr, 48]} />
+        <a.meshBasicMaterial
+          color={circleBorderCol}
+          depthTest={true}
+          depthWrite={false}
+          transparent
+          opacity={opacity ?? 0.999}
+        />
+      </mesh>
+      <group position={[0, 0, 0.002]}>
+        <CanvasText
+          text={String(number)}
+          font={LATIN_LABEL_FONT}
+          fontSize={TEXT_SIZES.VERSE_NUMBER}
+          color={circleTextCol}
+          width={cr * 2}
+          height={cr * 2}
+          textAlign="center"
+          fontWeight="bold"
+          depthTest={true}
+          opacity={opacity}
+          renderOrder={zOrder + 1}
+        />
+      </group>
+    </group>
+  );
+}
+
 // VERSE BOX
 interface VerseBoxProps {
   x: number;
@@ -537,6 +602,9 @@ interface VerseBoxProps {
   baseRenderOrder?: number;
   hideBackground?: boolean;
   textAlignOverride?: "left" | "center" | "right";
+  /** When true, this capsule renders WITHOUT its own number circle — used
+   * when a shared VerseNumberBadge is drawn externally for a split verse. */
+  hideNumber?: boolean;
 }
 export const VerseBox = ({
   x,
@@ -562,6 +630,7 @@ export const VerseBox = ({
   baseRenderOrder,
   hideBackground = false,
   textAlignOverride,
+  hideNumber = false,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -571,9 +640,8 @@ export const VerseBox = ({
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
 
   const activeStoryConfig = useStoryStore((s) => s.activeConfig);
-  const showVerseNumber = !(
-    activeStoryConfig?.features?.hideVerseNumbers ?? false
-  );
+  const showVerseNumber =
+    !hideNumber && !(activeStoryConfig?.features?.hideVerseNumbers ?? false);
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;
 
@@ -636,11 +704,6 @@ export const VerseBox = ({
 
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
 
-  // 👈 بازگردانی رنگ شمارههای بخش اول علق
-  const isAlakS1 = activeStoryConfig.id === "alak" && Number(number) <= 5;
-  const finalCircleTextCol =
-    circleTextCol ?? (isAlakS1 ? S1_VERSE_NUMBER_TEXT : S2_VERSE_NUMBER_TEXT);
-
   return (
     <group position={[finalX, y, z]}>
       {/* 1. حاشیه (عمیقترین لایه z=0) */}
@@ -673,43 +736,18 @@ export const VerseBox = ({
 
       {/* 3. دایرهها (z=0.002 و z=0.003) */}
       {showVerseNumber && (
-        <group position={[cx, -h / 2, 0.002]}>
-          <mesh renderOrder={zOrder + 2}>
-            <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
-            <a.meshBasicMaterial
-              color={circleBg ?? bg}
-              depthTest={true}
-              depthWrite={false}
-              transparent
-              opacity={opacity ?? 0.999}
-            />
-          </mesh>
-          <mesh position={[0, 0, -0.001]} renderOrder={zOrder + 2}>
-            <circleGeometry args={[cr, 48]} />
-            <a.meshBasicMaterial
-              color={circleBorderCol ?? border ?? CIRCLE_BORDER}
-              depthTest={true}
-              depthWrite={false}
-              transparent
-              opacity={opacity ?? 0.999}
-            />
-          </mesh>
-          <group position={[0, 0, 0.002]}>
-            <CanvasText
-              text={String(number)}
-              font={LATIN_LABEL_FONT}
-              fontSize={TEXT_SIZES.VERSE_NUMBER}
-              color={finalCircleTextCol}
-              width={cr * 2}
-              height={cr * 2}
-              textAlign="center"
-              fontWeight="bold"
-              depthTest={true}
-              opacity={opacity}
-              renderOrder={zOrder + 3}
-            />
-          </group>
-        </group>
+        <VerseNumberBadge
+          x={cx}
+          y={-h / 2}
+          z={0.002}
+          cr={cr}
+          number={number}
+          circleBg={circleBg ?? bg}
+          circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
+          circleTextCol={circleTextCol ?? TEXT_DARK}
+          opacity={opacity}
+          renderOrder={zOrder + 2}
+        />
       )}
 
       {/* 4. متن عربی یا انگلیسی (بالاترین لایه z=0.005) */}
@@ -738,6 +776,134 @@ export const VerseBox = ({
           renderOrder={zOrder + 4}
         />
       </group>
+    </group>
+  );
+};
+
+// SPLIT VERSE CAPSULES — one verse rendered as TWO capsules (no per-capsule
+// number) sharing a single VerseNumberBadge at the RTL "end" (left) edge.
+interface SplitVerseCapsulesProps {
+  x: number;
+  y: number;
+  z?: number;
+  w: number;
+  h: number;
+  /** RTL order: [nearNumberText, farFromNumberText]. */
+  texts: [string, string];
+  number: number | string;
+  bg: string;
+  border: string;
+  circleBorderCol?: string;
+  circleBg?: string;
+  circleTextCol?: string;
+  borderWidth?: number;
+  textColor?: string;
+  textScaleOverride?: number;
+  opacity?: any;
+  baseRenderOrder?: number;
+}
+export const SplitVerseCapsules = ({
+  x,
+  y,
+  z = 0,
+  w,
+  h,
+  texts,
+  number,
+  bg,
+  border,
+  circleBorderCol,
+  circleBg,
+  circleTextCol,
+  borderWidth,
+  textColor,
+  textScaleOverride,
+  opacity,
+  baseRenderOrder,
+}: SplitVerseCapsulesProps) => {
+  const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
+
+  // Mirrors VerseBox's own circle geometry exactly, so the shared badge lines
+  // up with where a normal capsule's own number would have sat.
+  const cr = Math.min(h * 0.28, 0.021);
+  const SMALL_PILL_OFFSET = 0.002;
+  const cx = cr + SMALL_PILL_OFFSET;
+  const badgeGap = 0.014;
+  const capsuleGap = 0.012;
+
+  const badgeZoneW = cx + cr + badgeGap;
+  const capsuleW = (w - badgeZoneW - capsuleGap) / 2;
+
+  const nearX = x + badgeZoneW;
+  const farX = nearX + capsuleW + capsuleGap;
+
+  // "Hollow connector" backdrop — same rounded-rect halo used behind paired
+  // verses (e.g. v3/v4's row connector), sized to span from the shared badge
+  // to the far capsule so the whole group reads as one connected unit.
+  const connPad = OPPOSITE_VERSE_CONNECTOR;
+  const connX = x - connPad.paddingX;
+  const connW = farX + capsuleW - x + connPad.paddingX * 2;
+  const connY = y + connPad.paddingY;
+  const connH = h + connPad.paddingY * 2;
+
+  return (
+    <group>
+      <UiRect
+        x={connX}
+        y={connY}
+        z={z - 0.001}
+        w={connW}
+        h={connH}
+        radius={connPad.radius}
+        color={border}
+        renderOrder={zOrder}
+      />
+      <VerseNumberBadge
+        x={x + cx}
+        y={y - h / 2}
+        z={z + 0.002}
+        cr={cr}
+        number={number}
+        circleBg={circleBg ?? bg}
+        circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
+        circleTextCol={circleTextCol ?? TEXT_DARK}
+        opacity={opacity}
+        renderOrder={zOrder + 2}
+      />
+      <VerseBox
+        x={nearX}
+        y={y}
+        z={z}
+        w={capsuleW}
+        h={h}
+        verse={texts[0]}
+        number={number}
+        bg={bg}
+        border={border}
+        borderWidth={borderWidth}
+        textColor={textColor}
+        textScaleOverride={textScaleOverride}
+        opacity={opacity}
+        baseRenderOrder={baseRenderOrder}
+        hideNumber
+      />
+      <VerseBox
+        x={farX}
+        y={y}
+        z={z}
+        w={capsuleW}
+        h={h}
+        verse={texts[1]}
+        number={number}
+        bg={bg}
+        border={border}
+        borderWidth={borderWidth}
+        textColor={textColor}
+        textScaleOverride={textScaleOverride}
+        opacity={opacity}
+        baseRenderOrder={baseRenderOrder}
+        hideNumber
+      />
     </group>
   );
 };

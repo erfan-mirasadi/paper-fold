@@ -1,15 +1,13 @@
-import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
-import type { AlakLayoutParams } from "./SurahConfig";
+import type { SurahLayoutConfig } from "./schema";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import { CAPSULE_BG_6_19, ORANGE_THEME } from "./theme";
 
-const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (Top and Bottom groups)
-const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
-const CENTER_GROUP_BG = "#eaf2db"; // Green (Middle group)
-const CENTER_GROUP_BORDER = "#5E7367"; // Dark Green border
+const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (top and bottom full-width verses)
+const CENTER_GROUP_BG = "#eaf2db"; // Green (middle 2-col group)
+const CENTER_GROUP_BORDER = "#5E7367"; // Dark green border
 
-export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
+export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
   id: "kafirun109",
   title: "Kafirun Suresi",
   heroTitle: "Kafirun",
@@ -28,6 +26,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     sceneCenterYOffset: -0.045,
     padding: 0.29,
     scrollPages: 1.5,
+    fixedWidthAcrossLanguages: true,
   },
 
   specialVerses: {
@@ -114,7 +113,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       boarderHalo: "#ADADAD",
       innerCard: "#eeeeee",
       sectionBgTexture: "#fcfcfc",
-      hollowConnectorInnerBg: "#FAF7F2", // No connector filling background (matches paper)
+      hollowConnectorInnerBg: "#FAF7F2",
       maroonTheme: OUTER_GROUP_BG,
       greenTheme: CENTER_GROUP_BORDER,
       s1InnerBorder: "#cccccc",
@@ -122,7 +121,6 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
       s2Group1Bg: OUTER_GROUP_BG,
       s2Group2Bg: CENTER_GROUP_BORDER,
       s2Group3Bg: OUTER_GROUP_BG,
-
       curveColors: [
         {
           color: ORANGE_THEME,
@@ -150,92 +148,86 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 
-  params: {
-    s1Top: 0.5,
-    s1Pad: 0.01,
-    gap: 0.01,
-    s1AnaGap: 0.01,
-    smallBoxH: 0.04,
-    anaAyetH: 0.04,
-    gapBetweenS1andS2: 0.01,
-
-    s2VerticalPad: 0.02,
-    bigBoxH: 0.07,
-    groupGap: 0.06,
-    groupPad: 0.012,
-    groupPadBottom: 0.012,
-    s2Gap: 0.02,
-    smallBoxH2: 0.075,
-    middleExtraGap: 0,
-    s2PadLeftRight: 0.028,
-    g2Scale: 0.01,
-    outerScale: -0.11,
-    s1BorderWidth: 0,
-
-    capsuleLabelW: 0.2,
-    capsuleLabelH: 0.032,
-    capsuleLabelBorderWidth: 0.0035,
-    capsuleLabelDrop: 0.015,
-    sgPad: 0.03,
-    sgBorderWidth: 0.006,
-    boxExtOffset: 0.02,
-    extraRowGap: 0.01,
-    labelHitboxWidth: 0.43,
-    groupRows: [1, 2, 1],
-    outerCurveXOffset: 0.07, // Reverted offset
-    centerCurveXOffset: -0.02,
+  // ── NEW BLOCK-BASED SCHEMA ──────────────────────────────────────────────
+  globalSettings: {
+    capsuleHeight: 0.075, // was smallBoxH2
+    columnGap: 0.02, // was s2Gap (horizontal gap between the 2 columns)
+    rowGap: 0.02, // was s2VerticalRowGap (defaults to s2Gap)
+    blockGap: 0.06, // was groupGap (gap between the 3 blocks)
+    sectionPadX: 0.028, // was s2PadLeftRight
+    blockPadding: 0.012, // was groupPad / groupPadBottom
+    sectionBorderWidth: 0.006, // was sgBorderWidth
   },
 
-  sections: [
+  // Section-wide resting-state background — was incorrectly attached to
+  // block0 alone, which also made it (wrongly) render as block0's own small
+  // elevated/all-sections frame instead of the whole section's.
+  sectionBackground: {
+    texture: "/ayatalKursi/frame-section-1.svg",
+    scaleX: 1.1,
+    scaleY: 1.3,
+  },
+
+  blocks: [
+    // Block 0 — Verse 1 (full-width, yellow "Say" verse)
     {
-      id: "section2",
-      type: "verticalGroups",
-      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 1.1,
-      backgroundScaleY: 1.25,
-      groups: [
-        {
-          verseIds: [1],
-          columns: 1, // Make it a single column
-          isPushedIn: false,
-          isCenter: false,
-          disablePopUp: true,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group1Bg",
-        },
-        {
-          verseIds: [3, 2, 5, 4], // mapping according to image
-          isPushedIn: true,
-          isCenter: true,
-          dragBehavior: "group",
-          extraRowGap: 0,
-          bgThemeKey: "s2Group2Bg",
-        },
-        {
-          verseIds: [6],
-          columns: 1, // Make it a single column
-          isPushedIn: false,
-          isCenter: false,
-          disablePopUp: true,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group3Bg",
-        },
-      ],
+      id: "section2", // reuse same id so elevation/drag section IDs are stable
+      type: "group",
+      verseIds: [1],
+      columns: 1,
+      // outerScale: -0.11 in legacy = the block was wider than the section inner width.
+      // horizontalInset < 0 → pushed OUT (wider). 0.11 outward.
+      horizontalInset: -0.11,
+      isCenter: false,
+      disablePopUp: true,
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.2 },
-    } as VerticalGroupsSectionConfig,
+    },
+    // Block 1 — Verses 2–5 (2-column center group, pushed in)
+    {
+      id: "section2_g1",
+      type: "group",
+      verseIds: [3, 2, 5, 4], // display order: right,left (Arabic RTL)
+      columns: 2,
+      // g2Scale: 0.01 → pushed in by 0.01 on each side
+      horizontalInset: 0.01,
+      isCenter: true,
+      dragBehavior: "group",
+      hideRowConnectors: false,
+    },
+    // Block 2 — Verse 6 (full-width, yellow closing verse)
+    {
+      id: "section2_g2",
+      type: "group",
+      verseIds: [6],
+      columns: 1,
+      horizontalInset: -0.11,
+      isCenter: false,
+      disablePopUp: true,
+    },
   ],
 
   animations: {
     computeFoldYPositions: (lm) => {
-      // Verse 1 (g1) has expandH = 0.02. It expands downwards by 0.02.
-      // So its actual bottom is lower. We should shift fold1 down by 0.01 to keep it centered.
-      const fold1 = (lm.g1Y - lm.groupHeights[0] + lm.g2Y) / 2 - 0.01;
+      // groupYPositions[i] = frameY (top edge) of block i.
+      // groupHeights[i]    = frameH of block i.
+      // Verse 1 (block 0) has expandH=0.028 → expands downward, shift fold1 down 0.01.
+      const fold1 =
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+          2 -
+        0.01;
 
-      const fold2 = lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2Gap / 2;
+      // fold2 sits inside block 1 — between the top row and the gap below it.
+      const fold2 =
+        lm.groupYPositions[1] -
+        (lm as any).blockPadding -
+        (lm as any).capsuleHeight -
+        (lm as any).columnGap / 2;
 
-      // Verse 6 (g3) has expandH = 0.02. It expands upwards by 0.02.
-      // So its actual top is higher. We should shift fold3 up by 0.01 to keep it centered.
-      const fold3 = (lm.g2Y - lm.groupHeights[1] + lm.g3Y) / 2 + 0.01;
+      // Verse 6 (block 2) has expandH=0.028 → expands upward, shift fold3 up 0.01.
+      const fold3 =
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
+          2 +
+        0.01;
 
       return [fold1, fold2, fold3];
     },
@@ -273,6 +265,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 };
+
+// ── TEXT DATA (unchanged) ────────────────────────────────────────────────────
 
 export const KAFIRUN_109_TEXT_AR: SurahDataShape = {
   bismillah: "بِسْـــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
@@ -345,14 +339,8 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
             number: 2,
             text: "I (did not worship), do not worship what you worship",
           },
-          {
-            number: 3,
-            text: "You also do not worship the Allah I worship",
-          },
-          {
-            number: 4,
-            text: "I am not going to worship what you worship",
-          },
+          { number: 3, text: "You also do not worship the Allah I worship" },
+          { number: 4, text: "I am not going to worship what you worship" },
           {
             number: 5,
             text: "You also are not worshippers of the Allah I worship",
@@ -408,10 +396,7 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
             number: 3,
             text: "Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz",
           },
-          {
-            number: 4,
-            text: "Ben sizin taptıklarınıza tapacak değilim",
-          },
+          { number: 4, text: "Ben sizin taptıklarınıza tapacak değilim" },
           {
             number: 5,
             text: "Siz de benim ibadet ettiğim Allah'a ibadet edici değilsiz",

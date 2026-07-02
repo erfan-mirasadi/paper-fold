@@ -1,8 +1,7 @@
 import { SpringValue } from "@react-spring/three";
 import { create } from "zustand";
 import { type ElevatedSectionId } from "../stores/useElevatedStore";
-import { getActiveStoryConfig } from "../stores/useStoryStore";
-import { GridSectionConfig, VerticalGroupsSectionConfig } from "../data/schema";
+import { getSectionIdForVerseId } from "./sectionResolver";
 
 export const DRAG_SPRING_CONFIG = { mass: 1.5, tension: 350, friction: 35 };
 
@@ -227,46 +226,13 @@ export function resetAllDrags() {
 }
 
 /** Helper to resolve verse -> section map.
- *  Intro verse attaches to the first group (_g0);
- *  outro verse attaches to the last group (_g{last}).
- *  This guarantees intro/outro verses move with their section when dragged.
+ *  Delegates to the shared reverse index built by `initElevatedStoreForStory`,
+ *  which traverses `config.blocks` + `config.customSections` — including
+ *  intro/outro verses attaching to their first/last group. This guarantees a
+ *  single source of truth across drag, bounds and hitboxes.
  */
 export function getVerseSectionId(verseId: number): ElevatedSectionId | null {
-  for (const sec of getActiveStoryConfig().sections) {
-    if (sec.type === "gridWithAnaAyet") {
-      const g = sec as GridSectionConfig;
-      if (g.verses.includes(verseId) || g.anaAyet === verseId) return g.id;
-    } else if (sec.type === "verticalGroups") {
-      const v = sec as VerticalGroupsSectionConfig;
-
-      // ── CUSTOM SECTIONS: check custom section mapping first ──────────
-      if (v.customSections && v.customSections.length > 0) {
-        for (const cs of v.customSections) {
-          if (cs.verseIds.includes(verseId)) return cs.id;
-        }
-        // Also check intro/outro verses — attach to first/last custom section
-        if (v.introVerse === verseId && v.customSections.length > 0) {
-          return v.customSections[0].id;
-        }
-        if (v.outroVerse === verseId && v.customSections.length > 0) {
-          return v.customSections[v.customSections.length - 1].id;
-        }
-        continue;
-      }
-
-      const isUnified = v.groupElevation === "unified";
-      const lastIdx = v.groups.length - 1;
-      for (let i = 0; i <= lastIdx; i++) {
-        const group = v.groups[i];
-        const isIntroMatch = i === 0 && v.introVerse === verseId;
-        const isOutroMatch = i === lastIdx && v.outroVerse === verseId;
-        if (group.verseIds.includes(verseId) || isIntroMatch || isOutroMatch) {
-          return isUnified ? v.id : `${v.id}_g${i}`;
-        }
-      }
-    }
-  }
-  return null;
+  return getSectionIdForVerseId(verseId);
 }
 
 /**

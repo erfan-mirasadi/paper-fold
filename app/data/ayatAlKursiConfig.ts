@@ -12,8 +12,7 @@
  * (i.e. even indices → left/RTL-start column, odd indices → right/RTL-end column)
  */
 
-import type { SurahLayoutConfig, VerticalGroupsSectionConfig } from "./schema";
-import type { AlakLayoutParams } from "./SurahConfig";
+import type { SurahLayoutConfig } from "./schema";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
@@ -26,7 +25,7 @@ const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
 const CENTER_GROUP_BG = "#CBE2EE"; // Blue/Grey (Middle group)
 const CENTER_GROUP_BORDER = "#7A9CAD"; // Lighter slate blue border
 
-export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
+export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   id: "ayatalkursi",
   title: "Bakara 255",
   heroTitle: "Ayetel",
@@ -162,111 +161,98 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig<AlakLayoutParams> = {
     },
   },
 
-  // -------------------------------------------------------------------------
-  // PARAMS — feed into createLayoutMath (AlakLayoutParams-compatible).
-  //
-  // Section-1 fields are set to minimal values (no real section 1 is rendered).
-  // Section-2 fields are tuned so the 3 groups fit the 1.1-unit paper height.
-  //
-  // Derived reference (approximate, with paperHeight=1.1, sceneCenterY=0.55):
-  //   s2Top  ≈  0.30
-  //   g1Y    ≈  0.17   (top group — 2 verses, 1 row)
-  //   g2Y    ≈ -0.07   (middle group — 4 verses, 2 rows, pushed in)
-  //   g3Y    ≈ -0.32   (bottom group — 2 verses, 1 row)
-  // -------------------------------------------------------------------------
-  params: {
-    // --- Section 1 (stub — not rendered) ---
-    s1Top: 0.5,
-    s1Pad: 0.01,
-    gap: 0.01,
-    s1AnaGap: 0.01,
-    smallBoxH: 0.04,
-    anaAyetH: 0.04,
-    gapBetweenS1andS2: 0.01,
-
-    // --- Section 2 (active — drives VerticalGroupsSectionConfig) ---
-    s2VerticalPad: 0.02,
-    bigBoxH: 0.07, // only used for intro/outro verse; not rendered here
-    groupGap: 0.025,
-    groupPad: 0.012,
-    groupPadBottom: 0.012,
-    s2Gap: 0.02, // matching alak96Config.ts
-    s2VerticalRowGap: 0.02, // the vertical gap between rows in the same group!
-    smallBoxH2: 0.075, // height of each individual verse capsule
-    middleExtraGap: 0.007,
-    s2PadLeftRight: 0.08,
-    g2Scale: 0.01,
-    outerScale: 0.0,
-    s1BorderWidth: 0,
-
-    // --- Misc (carried over from Alak; not material for this layout) ---
-    capsuleLabelW: 0.2,
-    capsuleLabelH: 0.032,
-    capsuleLabelBorderWidth: 0.0035,
-    capsuleLabelDrop: 0.015,
-    sgPad: 0.03,
-    sgBorderWidth: 0.006,
-    boxExtOffset: 0.02,
-    extraRowGap: 0.01,
-    labelHitboxWidth: 0.43,
+  // ── NEW BLOCK-BASED SCHEMA ──────────────────────────────────────────────
+  // Legacy params mapping:
+  //   smallBoxH2: 0.075      → capsuleHeight
+  //   s2Gap: 0.02            → columnGap
+  //   s2VerticalRowGap: 0.02 → rowGap
+  //   groupGap + middleExtraGap (0.025 + 0.007) → blockGap
+  //   s2PadLeftRight: 0.08   → sectionPadX
+  //   groupPad: 0.012        → blockPadding
+  //   sgBorderWidth: 0.006   → sectionBorderWidth
+  //   sgPad: 0.03            → connectorPad
+  globalSettings: {
+    capsuleHeight: 0.075,
+    columnGap: 0.02,
+    rowGap: 0.02,
+    blockGap: 0.032,
+    sectionPadX: 0.08,
+    blockPadding: 0.012,
+    sectionBorderWidth: 0.006,
+    connectorPad: 0.03,
+    framePad: 0.02, // was s2VerticalPad
     verseTextScale: 1.0,
     translationVerseTextScale: null,
-    groupRows: [1, 2, 1],
-    outerCurveXOffset: 0.07,
-    centerCurveXOffset: -0.02,
   },
 
-  sections: [
+  // Section-wide resting-state background (the whole 3-block stack's outer
+  // frame) — independent of any single block's own bounds.
+  sectionBackground: {
+    texture: "/ayatalKursi/frame-section-1.svg",
+    scaleX: 0.9,
+    scaleY: 1.2,
+    solidScaleX: 0.6,
+    solidScaleY: 1,
+  },
+
+  blocks: [
+    // ── Top block: 2 verses side-by-side (NOT pushed in) ────────────────
+    {
+      id: "section2_g0",
+      type: "group",
+      verseIds: [2, 1], // [left-col=2, right-col=1]
+      columns: 2,
+      horizontalInset: 0,
+      isCenter: false,
+      bgThemeKey: "s2Group1Bg",
+    },
+    // ── Middle block: 4 verses 2×2 (pushed in / indented) ────────────────
+    {
+      id: "section2_g1",
+      type: "group",
+      verseIds: [4, 3, 6, 5], // [left-row1=4, right-row1=3, left-row2=6, right-row2=5]
+      columns: 2,
+      horizontalInset: 0.01, // was g2Scale
+      isCenter: true,
+      dragBehavior: "individual",
+      bgThemeKey: "s2Group2Bg",
+    },
+    // ── Bottom block: 2 verses side-by-side (NOT pushed in) ──────────────
+    {
+      id: "section2_g2",
+      type: "group",
+      verseIds: [8, 7], // [left-col=8, right-col=7]
+      columns: 2,
+      horizontalInset: 0,
+      isCenter: false,
+      bgThemeKey: "s2Group3Bg",
+    },
+  ],
+
+  // "unified" elevation (legacy groupElevation: "unified") — all 3 blocks
+  // share one drag/elevation zone, exactly like Ihlas's customSections.
+  customSections: [
     {
       id: "section2",
-      type: "verticalGroups",
-      backgroundTexture: "/ayatalKursi/frame-section-1.svg",
-      backgroundScaleX: 0.9,
-      backgroundScaleY: 1.1,
-      backgroundSolidScaleX: 0.6,
-      backgroundSolidScaleY: 1,
-      groupElevation: "unified",
-      // No topLabelKey / bottomLabelKey / introVerse / outroVerse — clean slate.
-      groups: [
-        // ── Top group: 2 verses side-by-side (NOT pushed in) ─────────────
-        {
-          verseIds: [2, 1], // [left-col=2, right-col=1]
-          isPushedIn: false,
-          isCenter: false,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group1Bg",
-        },
-        // ── Middle group: 4 verses 2×2 (pushed in / indented) ────────────
-        {
-          verseIds: [4, 3, 6, 5], // [left-row1=4, right-row1=3, left-row2=6, right-row2=5]
-          isPushedIn: true,
-          isCenter: true,
-          dragBehavior: "individual",
-          extraRowGap: 0,
-          bgThemeKey: "s2Group2Bg",
-        },
-        // ── Bottom group: 2 verses side-by-side (NOT pushed in) ──────────
-        {
-          verseIds: [8, 7], // [left-col=8, right-col=7]
-          isPushedIn: false,
-          isCenter: false,
-          extraRowGap: 0,
-          bgThemeKey: "s2Group3Bg",
-        },
-      ],
+      verseIds: [1, 2, 3, 4, 5, 6, 7, 8],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.2 },
-    } as VerticalGroupsSectionConfig,
+    },
   ],
 
   animations: {
     computeFoldYPositions: (lm) => {
-      // Position 1: between Group 0 and Group 1
-      const fold1 = (lm.g1Y - lm.groupHeights[0] + lm.g2Y) / 2;
-      // Position 2: between row 1 and row 2 of Group 1
+      // groupYPositions[i] = frameY (top edge) of block i; groupHeights[i] = frameH.
+      // Position 1: between block 0 (top) and block 1 (middle)
+      const fold1 =
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+        2;
+      // Position 2: between row 1 and row 2 inside block 1 (middle, 2×2)
       const fold2 =
-        lm.g2Y - lm.groupPad - lm.smallBoxH2 - lm.s2VerticalRowGap / 2;
-      // Position 3: between Group 1 and Group 2
-      const fold3 = (lm.g2Y - lm.groupHeights[1] + lm.g3Y) / 2;
+        lm.groupYPositions[1] - lm.groupPad - lm.smallBoxH2 - lm.rowGap / 2;
+      // Position 3: between block 1 (middle) and block 2 (bottom)
+      const fold3 =
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
+        2;
 
       return [fold1, fold2, fold3];
     },

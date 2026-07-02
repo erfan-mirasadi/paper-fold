@@ -10,9 +10,9 @@ import {
 } from "../data/surahData";
 
 interface StoryState {
-  activeConfig: SurahLayoutConfig<any>;
+  activeConfig: SurahLayoutConfig;
   activeTextData: Record<SurahLanguage, SurahDataShape>;
-  setActiveStory: (config: SurahLayoutConfig<any>, textData: Record<SurahLanguage, SurahDataShape>) => void;
+  setActiveStory: (config: SurahLayoutConfig, textData: Record<SurahLanguage, SurahDataShape>) => void;
 }
 
 const INITIAL_TEXT_DATA: Record<SurahLanguage, SurahDataShape> = {

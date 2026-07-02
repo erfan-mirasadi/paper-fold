@@ -10,8 +10,6 @@ import {
   S1_SOLID_Y_OFFSET,
   S1_IMAGE_SCALE,
   S1_IMAGE_Y_OFFSET,
-} from "../SurahLayout/SectionOne";
-import {
   S2_TOP_SOLID_SCALE_X,
   S2_TOP_SOLID_SCALE_Y,
   S2_TOP_SOLID_X_OFFSET,
@@ -28,14 +26,13 @@ import {
   S2_BOTTOM_IMAGE_SCALE_Y,
   S2_BOTTOM_IMAGE_X_OFFSET,
   S2_BOTTOM_IMAGE_Y_OFFSET,
-} from "../SurahLayout/SectionTwo";
+} from "../SurahLayout/BlockRenderer";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
 import {
   SectionTransforms,
   RowConnectorTransform,
-  VerticalGroupsSectionConfig,
 } from "../../../data/schema";
 
 import {
@@ -53,6 +50,10 @@ import {
   useElevatedStore,
   type ElevatedSectionId,
 } from "../../../stores/useElevatedStore";
+import {
+  getSectionIdForVerseId,
+  getIntroGridSectionId,
+} from "../../../utils/sectionResolver";
 import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
@@ -138,14 +139,14 @@ function useSectionSurfaceSpring(
     delay: actuallyActive
       ? SECTION_SURFACE.opacityShowDelayMs
       : isIntroActive ||
-          sectionId === useStoryStore.getState().activeConfig.sections[0].id ||
+          sectionId === getIntroGridSectionId(useStoryStore.getState().activeConfig) ||
           !justLeftIntro
         ? SECTION_SURFACE.opacityHideDelayMs
         : 0,
     immediate:
       actuallyActive ||
       (justLeftIntro &&
-        sectionId !== useStoryStore.getState().activeConfig.sections[0].id), // Snap to 0 instantly ONLY when leaving the intro!
+        sectionId !== getIntroGridSectionId(useStoryStore.getState().activeConfig)), // Snap to 0 instantly ONLY when leaving the intro!
     config: actuallyActive
       ? SECTION_SURFACE.spring
       : SECTION_SURFACE.opacityHideSpring,
@@ -181,7 +182,7 @@ export function useHandoffOpacity(
       const targetOpacity =
         state.isIntroActive &&
         sectionId &&
-        sectionId !== useStoryStore.getState().activeConfig.sections[0].id
+        sectionId !== getIntroGridSectionId(useStoryStore.getState().activeConfig)
           ? 1 - state.introHandoffProgress
           : 1;
 
@@ -491,25 +492,6 @@ function DraggableSectionGroup({
   );
 }
 
-// ─── Passive drag follower ─────────────────────────────────────────────
-// Applies a parent section's drag spring offset WITHOUT providing a drag handle.
-// Used by non-primary groups that should move with the parent frame when it's dragged.
-function ParentDragOffset({
-  parentSectionId,
-  children,
-}: {
-  parentSectionId: string;
-  children: React.ReactNode;
-}) {
-  const sectionDrag = dragEngine.sections[parentSectionId];
-  if (!sectionDrag) return <group>{children}</group>;
-  return (
-    <a.group position-x={sectionDrag.x} position-y={sectionDrag.y}>
-      {children}
-    </a.group>
-  );
-}
-
 // ── Pure visual SVG overlay (no drag) ────────────────────────────────
 function ElevatedSvgOverlay({ overlay, spring, s2, groupTransforms }: any) {
   const runtime = useSurahLayoutRuntime();
@@ -608,301 +590,241 @@ function DraggableElevatedSvgOverlay({ overlay, s2, groupTransforms, parentSecti
   );
 }
 
-function DynamicElevatedGroup({
-  groupId,
-  groupIndex,
-  s2,
+// ─── Block-engine elevated surface (Kafirun, Ihlas, etc.) ───────────────
+// Mirrors DynamicElevatedGroup's role for the new `config.blocks` schema:
+// renders the lifted background plate / row connectors for a single block
+// and wraps it in the same draggable handle used by the legacy engine.
+// `sectionId` is resolved via the shared verse->section reverse index so
+// cross-block customSections (e.g. Ihlas' single zone spanning 4 blocks)
+// are honored automatically — multiple blocks may share the same sectionId
+// and therefore the same drag spring, same pattern as legacy "unified" mode.
+function DynamicElevatedBlock({
+  block,
+  blockIndex,
+  sTransform,
   config,
-  vertConfig,
-  sectionBgTexture,
-  getConnectorColor,
-  topConnector,
-  bottomConnector,
-  parentSectionId,
 }: any) {
-  const vConfig = vertConfig as VerticalGroupsSectionConfig | undefined;
-  const hasCustomSections =
-    vConfig?.customSections && vConfig.customSections.length > 0;
-
-  // For custom sections: a group is active if ANY custom section containing its verses is active
-  const groupVerseIds = vConfig?.groups?.[groupIndex]?.verseIds ?? [];
-  const relevantCustomSectionIds = hasCustomSections
-    ? vConfig!
-        .customSections!.filter((cs: any) =>
-          cs.verseIds.some((vId: number) => groupVerseIds.includes(vId)),
-        )
-        .map((cs: any) => cs.id)
-    : [];
+  const sectionId =
+    getSectionIdForVerseId(block.verseIds?.[0] ?? -1) ?? block.id;
 
   const isActive = useElevatedStore((s) =>
-    hasCustomSections
-      ? relevantCustomSectionIds.some((csId: string) =>
-          s.activeSectionIds.includes(csId),
-        )
-      : s.activeSectionIds.includes(groupId),
+    s.activeSectionIds.includes(sectionId),
   );
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const runtime = useSurahLayoutRuntime();
-  const PAGE_WIDTH = runtime.PAGE_WIDTH;
+  // Scatters this block's background/connector plate into the intro's
+  // floating layout together with its verses (VerseController registers
+  // under the same sectionId) — a no-op for surahs without an intro
+  // (IntroSectionAnimationController skips all work when !hasIntro).
+  const introRef = useIntroSectionOffset(sectionId);
 
-  // For custom sections, use the first relevant custom section ID for the spring
-  const springId = hasCustomSections
-    ? (relevantCustomSectionIds[0] ?? groupId)
-    : groupId;
-  const baseSpring = useSectionSurfaceSpring(isActive, springId);
+  const baseSpring = useSectionSurfaceSpring(isActive, sectionId);
   const spring = {
     ...baseSpring,
-    opacity: useHandoffOpacity(baseSpring.opacity, springId),
+    opacity: useHandoffOpacity(baseSpring.opacity, sectionId),
   };
-  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
 
-  // Bounds for "page" snap: section's resting position on the paper.
-  // Only computed in paper mode (all-sections mode has no snap for section-level drags).
   const bounds = useMemo(
     () =>
-      isAllSectionsMode || !s2 || hasCustomSections
+      isAllSectionsMode
         ? undefined
-        : calculateSectionBounds(groupId, runtime.SURAH_TRANSFORMS, PAGE_WIDTH),
-    [isAllSectionsMode, PAGE_WIDTH, groupId, s2, hasCustomSections, runtime.SURAH_TRANSFORMS],
+        : calculateSectionBounds(
+            sectionId,
+            runtime.SURAH_TRANSFORMS,
+            runtime.PAGE_WIDTH,
+          ),
+    [isAllSectionsMode, runtime.PAGE_WIDTH, sectionId, runtime.SURAH_TRANSFORMS],
   );
 
-  const introRef = useIntroSectionOffset(hasCustomSections ? null : groupId);
-  const groupTransforms = s2.groups[groupIndex];
-  const hideConnectors = vertConfig?.hideRowConnectors ?? false;
+  const group = sTransform.groups?.[0];
+  const frame = group
+    ? { x: group.frameX, y: group.frameY, w: group.frameW, h: group.frameH }
+    : {
+        x: sTransform.frameX,
+        y: sTransform.frameY ?? 0,
+        w: sTransform.frameW,
+        h: sTransform.frameH ?? 0,
+      };
 
-  // خواندن تکسچرها و ابعاد از تنظیمات احزاب و آیتالکرسی
-  const bgTex = vertConfig?.backgroundTexture || S2_FRAME_IMAGE;
-  const bgScaleX = vertConfig?.backgroundScaleX ?? S2_TOP_IMAGE_SCALE_X;
-  const bgScaleY = vertConfig?.backgroundScaleY ?? S2_TOP_IMAGE_SCALE_Y;
+  // Section-wide background (config.sectionBackground) is a resting-state-only
+  // decoration (rendered by BlockRenderer). On paper, elevating a section must
+  // NEVER bring it along — only the all-sections overview shows it, rendered
+  // exactly ONCE (at block index 0, mirroring legacy's `groupIndex === 0`
+  // check) and sized to the OVERALL section frame — every block's SectionTransforms
+  // shares the same frameX/frameW/shiftedTop/shiftedH (computed once for the
+  // whole block stack in buildBlockTransforms), so block 0's own sTransform
+  // already covers the whole surah, not just its own bounds.
+  const sectionBgFrame =
+    isAllSectionsMode &&
+    !block.backgroundTexture &&
+    config.sectionBackground &&
+    blockIndex === 0
+      ? {
+          x: sTransform.frameX + sTransform.frameW / 2,
+          y: (sTransform.shiftedTop ?? 0) - (sTransform.shiftedH ?? 0) / 2,
+          w: sTransform.frameW,
+          h: sTransform.shiftedH ?? 0,
+        }
+      : null;
 
-  // ── Paper mode: NO frame for custom sections (Ahzab) ─────────────────────
-  // Custom sections (hasCustomSections) show no frame in paper mode — only verses
-  // animate via VerseController. Frames appear only in all-sections mode.
-  // Other surahs (Alak, AyatAlKursi…) show their frame whenever the section is elevated.
-  if (hasCustomSections && !isAllSectionsMode) return null;
+  // Alak-only: decorative top/bottom connector frames (rendered only when
+  // `features.hasIntro`), lifting together with whichever "real" group
+  // (excluding the grid block and intro/outro) is nearest each edge —
+  // mirrors legacy's `groupIndex === 0` / `groupIndex === lastIndex` gating.
+  const realGroupIndices = config.blocks
+    .map((b: any, i: number) => ({ b, i }))
+    .filter(({ b }: any) => b.type === "group" && !b.introOutroRole)
+    .map(({ i }: any) => i);
+  const isFirstRealGroup = blockIndex === realGroupIndices[0];
+  const isLastRealGroup = blockIndex === realGroupIndices[realGroupIndices.length - 1];
+  const connectorBgTex = config.sectionBackground?.texture || S2_FRAME_IMAGE;
 
-  const innerContent = (
-    <group>
-      {groupIndex === 0 && vertConfig?.backgroundTexture && (isAllSectionsMode || vertConfig?.groupElevation === "unified") && (
-        <ElevatedSvgFrame
-          centerX={s2.frameX + s2.frameW / 2}
-          centerY={(s2.shiftedTop ?? 0) - (s2.shiftedH ?? 0) / 2}
-          w={s2.frameW}
-          h={s2.shiftedH ?? 0}
-          solidColor="transparent"
-          texturePath={vertConfig.backgroundTexture}
-          solidScale={[
-            vertConfig.backgroundSolidScaleX ?? 1,
-            vertConfig.backgroundSolidScaleY ?? 1,
-            1,
-          ]}
-          imageScale={[
-            vertConfig.backgroundScaleX ?? 1,
-            vertConfig.backgroundScaleY ?? 1,
-            1,
-          ]}
-          imageXOffset={vertConfig.backgroundOffsetX ?? 0}
-          imageYOffset={vertConfig.backgroundOffsetY ?? 0}
-          spring={spring}
-          shadow={false}
-          suppressShadow={isIntroActive && !isActive}
-          zOffset={-0.002}
-        />
-      )}
-      {/* شرط hasIntro حذف شد تا در احزاب هم دیده شود */}
-      {groupIndex === 0 && s2.topConnectorY !== undefined && topConnector && (
-        <ElevatedSvgFrame
-          centerX={s2.connectorX + s2.connectorW / 2}
-          centerY={s2.topConnectorY - s2.topConnectorH / 2}
-          w={s2.connectorW}
-          h={s2.topConnectorH}
-          solidColor={S2_FRAME_BG_COLOR}
-          texturePath={bgTex}
-          solidScale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
-          imageScale={[bgScaleX, bgScaleY, 1]}
-          solidXOffset={S2_TOP_SOLID_X_OFFSET}
-          solidYOffset={S2_TOP_SOLID_Y_OFFSET}
-          imageXOffset={S2_TOP_IMAGE_X_OFFSET}
-          imageYOffset={S2_TOP_IMAGE_Y_OFFSET}
-          spring={spring}
-          shadow
-          shadowStrength={0.8}
-          suppressShadow={isIntroActive && !isActive}
-        />
-      )}
+  const rowConnectors: RowConnectorTransform[] =
+    group?.rowConnectors ?? sTransform.rowConnectors ?? [];
 
-      {/* Static SVG Overlays only (those with customSectionId are rendered separately with drag) */}
-      {config.svgOverlays
-        ?.filter(
-          (overlay: any) =>
-            overlay.anchorGroupIndex === groupIndex &&
-            overlay.customSectionId == null,
-        )
-        .map((overlay: any, idx: number) => (
-          <ElevatedSvgOverlay
-            key={`overlay-${idx}`}
-            overlay={overlay}
-            spring={spring}
-            s2={s2}
-            groupTransforms={groupTransforms}
-          />
-        ))}
-
-      {!hideConnectors &&
-        groupTransforms.rowConnectors?.map((rc: any, j: number) => {
-          const rcColor = getConnectorColor(groupIndex);
-          
-          const verseIds = vertConfig?.groups[groupIndex]?.verseIds;
-          const leftVId = verseIds?.[j * 2];
-          const rightVId = verseIds?.[j * 2 + 1];
-          
-          const rowLeftOverride = leftVId ? config.verseOverrides?.[leftVId] : undefined;
-          const rowRightOverride = rightVId ? config.verseOverrides?.[rightVId] : undefined;
-          
-          const leftExpandW = rowLeftOverride?.expandW ?? 0;
-          const rightExpandW = rowRightOverride?.expandW ?? 0;
-          const finalRcX = rc.x - leftExpandW;
-          const finalRcW = rc.w + leftExpandW + rightExpandW;
-
-          return (
-            <ElevatedLayer
-              key={`${groupId}-rc-${j}`}
-              x={finalRcX}
-              y={rc.y}
-              w={finalRcW}
-              h={rc.h}
-              radius={OPPOSITE_VERSE_CONNECTOR.radius}
-              color={rcColor}
-              sectionBgTexture={
-                rcColor === SECTION_BG_TEXTURE ||
-                rcColor === HOLLOW_CONNECTOR_INNER_BG_1_3
-                  ? sectionBgTexture
-                  : null
-              }
-              spring={spring}
-              zOffset={0.0025}
-              renderOrder={3}
-            />
-          );
-        })}
-
-      {/* شرط hasIntro برای قاب پایین هم حذف شد */}
-      {groupIndex === s2.groups.length - 1 &&
-        s2.bottomConnectorY !== undefined &&
-        bottomConnector && (
-          <ElevatedSvgFrame
-            centerX={s2.connectorX + s2.connectorW / 2}
-            centerY={s2.bottomConnectorY - s2.bottomConnectorH / 2}
-            w={s2.connectorW}
-            h={s2.bottomConnectorH}
-            solidColor={S2_FRAME_BG_COLOR}
-            texturePath={bgTex}
-            solidScale={[
-              S2_BOTTOM_SOLID_SCALE_X,
-              S2_BOTTOM_SOLID_SCALE_Y,
-              1,
-            ]}
-            imageScale={[
-              vertConfig?.backgroundScaleX ?? S2_BOTTOM_IMAGE_SCALE_X,
-              vertConfig?.backgroundScaleY ?? S2_BOTTOM_IMAGE_SCALE_Y,
-              1,
-            ]}
-            solidXOffset={S2_BOTTOM_SOLID_X_OFFSET}
-            solidYOffset={S2_BOTTOM_SOLID_Y_OFFSET}
-            imageXOffset={S2_BOTTOM_IMAGE_X_OFFSET}
-            imageYOffset={S2_BOTTOM_IMAGE_Y_OFFSET}
-            spring={spring}
-            shadow
-            shadowStrength={0.8}
-            suppressShadow={isIntroActive && !isActive}
-          />
-        )}
-    </group>
-  );
-
-  if (hasCustomSections) {
-    // Custom sections in all-sections mode:
-    // The overall background frame (groupIndex=0) is wrapped in a DraggableSectionGroup
-    // using the parent S2_ID, making the whole frame draggable as one unit.
-    // Verse drag already follows their individual custom section spring.
-    if (groupIndex === 0 && isAllSectionsMode && vertConfig?.backgroundTexture && parentSectionId) {
-      // Extract just the background frame content for the parent drag wrapper
-      const bgFrameContent = (
-        <group>
-          <ElevatedSvgFrame
-            centerX={s2.frameX + s2.frameW / 2}
-            centerY={(s2.shiftedTop ?? 0) - (s2.shiftedH ?? 0) / 2}
-            w={s2.frameW}
-            h={s2.shiftedH ?? 0}
-            solidColor="transparent"
-            texturePath={vertConfig.backgroundTexture}
-            solidScale={[
-              vertConfig.backgroundSolidScaleX ?? 1,
-              vertConfig.backgroundSolidScaleY ?? 1,
-              1,
-            ]}
-            imageScale={[
-              vertConfig.backgroundScaleX ?? 1,
-              vertConfig.backgroundScaleY ?? 1,
-              1,
-            ]}
-            imageXOffset={vertConfig.backgroundOffsetX ?? 0}
-            imageYOffset={vertConfig.backgroundOffsetY ?? 0}
-            spring={spring}
-            shadow={false}
-            suppressShadow={false}
-            zOffset={-0.002}
-          />
-        </group>
-      );
-      return (
-        <group>
-          <DraggableSectionGroup
-            sectionId={parentSectionId as ElevatedSectionId}
-            isActive={true}
-            sectionBounds={bounds}
-          >
-            {bgFrameContent}
-          </DraggableSectionGroup>
-        </group>
-      );
-    }
-    // All other groups in custom-section mode: follow parent frame drag passively
-    if (parentSectionId) {
-      return (
-        <group>
-          <ParentDragOffset parentSectionId={parentSectionId}>
-            {innerContent}
-          </ParentDragOffset>
-        </group>
-      );
-    }
-    return <group>{innerContent}</group>;
-  }
+  const firstVerseId = block.verseIds?.[0];
+  const override =
+    firstVerseId !== undefined ? config.verseOverrides?.[firstVerseId] : undefined;
+  const connectorColor =
+    override?.border ??
+    (block.isCenter
+      ? (config.styling.colors.greenTheme ?? "#000000")
+      : (config.styling.colors.maroonTheme ?? "#000000"));
 
   return (
     <group ref={introRef}>
       <DraggableSectionGroup
-        sectionId={groupId}
+        sectionId={sectionId}
         isActive={isActive}
         sectionBounds={bounds}
       >
-        {isIntroActive && (
+        {isIntroActive && !block.introOutroRole && (
           <IntroGuide3DReporter
-            guideId={groupId}
+            guideId={sectionId}
             position={[
-              s2.frameX - PAGE_WIDTH / 2 + s2.frameW,
-              groupIndex === 0 && s2.shiftedTop !== undefined
-                ? s2.shiftedTop
-                : groupIndex === s2.groups.length - 1 &&
-                    s2.shiftedBot !== undefined
-                  ? s2.shiftedBot
-                  : groupTransforms.frameY,
+              sTransform.frameX - runtime.PAGE_WIDTH / 2 + sTransform.frameW,
+              isFirstRealGroup && sTransform.shiftedTop !== undefined
+                ? sTransform.shiftedTop
+                : isLastRealGroup && sTransform.shiftedBot !== undefined
+                  ? sTransform.shiftedBot
+                  : frame.y,
               0.005,
             ]}
           />
         )}
-        {innerContent}
+        <group>
+          {sectionBgFrame && (
+            <ElevatedSvgFrame
+              centerX={sectionBgFrame.x}
+              centerY={sectionBgFrame.y}
+              w={sectionBgFrame.w}
+              h={sectionBgFrame.h}
+              solidColor="transparent"
+              texturePath={config.sectionBackground.texture}
+              solidScale={[
+                config.sectionBackground.solidScaleX ?? 1,
+                config.sectionBackground.solidScaleY ?? 1,
+                1,
+              ]}
+              imageScale={[
+                config.sectionBackground.scaleX ?? 1,
+                config.sectionBackground.scaleY ?? 1,
+                1,
+              ]}
+              imageXOffset={config.sectionBackground.offsetX ?? 0}
+              imageYOffset={config.sectionBackground.offsetY ?? 0}
+              spring={spring}
+              shadow
+              shadowStrength={0.6}
+              suppressShadow={isIntroActive && !isActive}
+            />
+          )}
+          {block.backgroundTexture && (
+            <ElevatedSvgFrame
+              centerX={frame.x + frame.w / 2}
+              centerY={frame.y - frame.h / 2}
+              w={frame.w}
+              h={frame.h}
+              solidColor="transparent"
+              texturePath={block.backgroundTexture}
+              solidScale={[
+                block.backgroundSolidScaleX ?? 1,
+                block.backgroundSolidScaleY ?? 1,
+                1,
+              ]}
+              imageScale={[
+                block.backgroundScaleX ?? 1,
+                block.backgroundScaleY ?? 1,
+                1,
+              ]}
+              imageXOffset={block.backgroundOffsetX ?? 0}
+              imageYOffset={block.backgroundOffsetY ?? 0}
+              spring={spring}
+              shadow
+              shadowStrength={0.6}
+              suppressShadow={isIntroActive && !isActive}
+            />
+          )}
+
+          {isFirstRealGroup && sTransform.topConnectorY !== undefined && (
+            <ElevatedSvgFrame
+              centerX={sTransform.connectorX + sTransform.connectorW / 2}
+              centerY={sTransform.topConnectorY - sTransform.topConnectorH / 2}
+              w={sTransform.connectorW}
+              h={sTransform.topConnectorH}
+              solidColor={S2_FRAME_BG_COLOR}
+              texturePath={connectorBgTex}
+              solidScale={[S2_TOP_SOLID_SCALE_X, S2_TOP_SOLID_SCALE_Y, 1]}
+              imageScale={[S2_TOP_IMAGE_SCALE_X, S2_TOP_IMAGE_SCALE_Y, 1]}
+              solidXOffset={S2_TOP_SOLID_X_OFFSET}
+              solidYOffset={S2_TOP_SOLID_Y_OFFSET}
+              imageXOffset={S2_TOP_IMAGE_X_OFFSET}
+              imageYOffset={S2_TOP_IMAGE_Y_OFFSET}
+              spring={spring}
+              shadow
+              shadowStrength={0.8}
+              suppressShadow={isIntroActive && !isActive}
+            />
+          )}
+
+          {isLastRealGroup && sTransform.bottomConnectorY !== undefined && (
+            <ElevatedSvgFrame
+              centerX={sTransform.connectorX + sTransform.connectorW / 2}
+              centerY={sTransform.bottomConnectorY - sTransform.bottomConnectorH / 2}
+              w={sTransform.connectorW}
+              h={sTransform.bottomConnectorH}
+              solidColor={S2_FRAME_BG_COLOR}
+              texturePath={connectorBgTex}
+              solidScale={[S2_BOTTOM_SOLID_SCALE_X, S2_BOTTOM_SOLID_SCALE_Y, 1]}
+              imageScale={[S2_BOTTOM_IMAGE_SCALE_X, S2_BOTTOM_IMAGE_SCALE_Y, 1]}
+              solidXOffset={S2_BOTTOM_SOLID_X_OFFSET}
+              solidYOffset={S2_BOTTOM_SOLID_Y_OFFSET}
+              imageXOffset={S2_BOTTOM_IMAGE_X_OFFSET}
+              imageYOffset={S2_BOTTOM_IMAGE_Y_OFFSET}
+              spring={spring}
+              shadow
+              shadowStrength={0.8}
+              suppressShadow={isIntroActive && !isActive}
+            />
+          )}
+
+          {!block.hideRowConnectors &&
+            rowConnectors.map((rc: RowConnectorTransform, j: number) => (
+              <ElevatedLayer
+                key={`${sectionId}-rc-${blockIndex}-${j}`}
+                x={rc.x}
+                y={rc.y}
+                w={rc.w}
+                h={rc.h}
+                radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                color={connectorColor}
+                spring={spring}
+                zOffset={0.0025}
+                renderOrder={3}
+              />
+            ))}
+        </group>
       </DraggableSectionGroup>
     </group>
   );
@@ -917,11 +839,11 @@ export function ElevatedSectionSurfaces() {
   });
 
   const config = useStoryStore((state) => state.activeConfig);
-  const gridConfig = config.sections.find((s) => s.type === "gridWithAnaAyet");
-  const vertConfig = config.sections.find((s) => s.type === "verticalGroups");
 
-  const S1_ID = gridConfig?.id ?? "__no_s1__";
-  const S2_ID = vertConfig?.id ?? "__no_s2__";
+  // S1 ("grid" block, e.g. Alak's Section 1) — via the shared resolver, same
+  // helper used for the opacity-snap fix.
+  const gridBlockIndex = config.blocks?.findIndex((b) => b.type === "grid") ?? -1;
+  const S1_ID = getIntroGridSectionId(config) ?? "__no_s1__";
   const s1Active = useElevatedStore((s) => s.activeSectionIds.includes(S1_ID));
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
@@ -932,17 +854,10 @@ export function ElevatedSectionSurfaces() {
     opacity: useHandoffOpacity(s1BaseSpring.opacity, S1_ID),
   };
 
-  const gridConfigIndex = config.sections.findIndex(
-    (s) => s.type === "gridWithAnaAyet",
-  );
-  const vertConfigIndex = config.sections.findIndex(
-    (s) => s.type === "verticalGroups",
-  );
-
   const s1 =
-    gridConfigIndex >= 0
+    gridBlockIndex >= 0
       ? (SURAH_TRANSFORMS.sections[
-          gridConfigIndex
+          gridBlockIndex
         ] as Required<SectionTransforms>)
       : undefined;
 
@@ -956,91 +871,10 @@ export function ElevatedSectionSurfaces() {
     [isAllSectionsMode, runtime.PAGE_WIDTH, S1_ID, !!s1],
   );
 
-  const s2 =
-    vertConfigIndex >= 0
-      ? (SURAH_TRANSFORMS.sections[
-          vertConfigIndex
-        ] as Required<SectionTransforms>)
-      : undefined;
-
-  const bw = s2?.borderWidth ?? 0;
-  const innerBorderInset = bw * 0.7;
-
-  const buildConnectorLayers = (
-    yTop: number,
-    height: number,
-    position: "top" | "bottom",
-  ) => {
-    if (!s2) return null;
-    const outerX = s2.connectorX - bw;
-    const outerW = s2.connectorW + bw * 2;
-    const outerH = height + bw * 3;
-    const outerY = position === "top" ? yTop + bw * 2 : yTop + bw;
-
-    const middleX = outerX + innerBorderInset;
-    const middleY = outerY - innerBorderInset;
-    const middleW = outerW - innerBorderInset * 2;
-    const middleH = outerH - innerBorderInset * 2;
-
-    return {
-      outer: { x: outerX, y: outerY, w: outerW, h: outerH, radius: 0.025 },
-      middle: {
-        x: middleX,
-        y: middleY,
-        w: middleW,
-        h: middleH,
-        radius: 0.023,
-      },
-      fill: {
-        x: s2.connectorX,
-        y: yTop,
-        w: s2.connectorW,
-        h: height,
-        radius: 0.022,
-      },
-    };
-  };
-
-  const topConnector = s2
-    ? buildConnectorLayers(s2.topConnectorY, s2.topConnectorH, "top")
-    : null;
-
-  const bottomConnector = s2
-    ? buildConnectorLayers(s2.bottomConnectorY, s2.bottomConnectorH, "bottom")
-    : null;
   const getTextureForColor = (color: string): Texture | null =>
     color === SECTION_BG_TEXTURE || color === HOLLOW_CONNECTOR_INNER_BG_1_3
       ? sectionBgTexture
       : null;
-
-  const getGroupColor = (idx: number, fallback: string) => {
-    if (
-      vertConfig &&
-      vertConfig.type === "verticalGroups" &&
-      vertConfig.groups[idx]
-    ) {
-      const key = vertConfig.groups[idx].bgThemeKey;
-      if (key) return (config.styling.colors as any)[key] ?? fallback;
-    }
-    return fallback;
-  };
-
-
-  const getConnectorColor = (groupIdx: number) => {
-    if (!vertConfig || vertConfig.type !== "verticalGroups")
-      return config.styling.colors.maroonTheme ?? "#000000";
-    const group = vertConfig.groups[groupIdx];
-    if (!group) return config.styling.colors.maroonTheme ?? "#000000";
-    const firstVerseId = group.verseIds?.[0];
-    const override =
-      firstVerseId !== undefined
-        ? config.verseOverrides?.[firstVerseId]
-        : undefined;
-    if (override?.border) return override.border;
-    return group.isCenter
-      ? (config.styling.colors.greenTheme ?? "#000000")
-      : (config.styling.colors.maroonTheme ?? "#000000");
-  };
 
   const s1IntroRef = useIntroSectionOffset(S1_ID);
 
@@ -1102,43 +936,50 @@ export function ElevatedSectionSurfaces() {
         </group>
       )}
 
-      {s2 && (
+      {/* ─── SVG overlays + verse groups (Alak, Kafirun, Ihlas, Ayat al-Kursi, Fatiha, Ahzab) ─── */}
+      {config.blocks && config.blocks.length > 0 && (
         <>
-          {/* ─── SVG overlays with customSectionId — each in its own drag group ─── */}
+          {/* SVG overlays with customSectionId — each in its own drag group
+              (all-sections mode only). */}
           {config.svgOverlays
             ?.filter((overlay: any) => overlay.customSectionId != null)
             .map((overlay: any, idx: number) => {
               const gIdx = overlay.anchorGroupIndex ?? 0;
-              const groupTransforms = s2.groups[gIdx];
-              if (!groupTransforms) return null;
+              const blockSection = SURAH_TRANSFORMS.sections[gIdx] as
+                | Required<SectionTransforms>
+                | undefined;
+              const groupTransforms = blockSection?.groups?.[0];
+              const anyBlockSection = SURAH_TRANSFORMS.sections[0] as
+                | Required<SectionTransforms>
+                | undefined;
+              if (!groupTransforms || !anyBlockSection) return null;
               return (
                 <DraggableElevatedSvgOverlay
                   key={`custom-overlay-${idx}`}
                   overlay={overlay}
-                  s2={s2}
+                  s2={anyBlockSection}
                   groupTransforms={groupTransforms}
-                  parentSectionId={S2_ID}
+                  parentSectionId={null}
                 />
               );
             })}
 
-          {/* ─── Rendered groups (visual backgrounds + static overlays) ─── */}
-          {s2.groups.map((_: any, idx: number) => {
-            const isUnified = vertConfig?.groupElevation === "unified";
-            const gId = isUnified ? S2_ID : `${S2_ID}_g${idx}`;
+          {config.blocks.map((block, idx) => {
+            // "grid" blocks (Alak's Section 1) get their own dedicated
+            // render above (the `{s1 && (...)}` block) — skip here to avoid
+            // rendering the same frame/connectors/drag-handle twice.
+            if (block.type === "spacer" || block.type === "grid") return null;
+            const sTransform = SURAH_TRANSFORMS.sections[idx] as
+              | Required<SectionTransforms>
+              | undefined;
+            if (!sTransform) return null;
             return (
-              <DynamicElevatedGroup
-                key={`${S2_ID}_g${idx}`}
-                groupId={gId}
-                groupIndex={idx}
-                s2={s2}
+              <DynamicElevatedBlock
+                key={`block-${block.id}`}
+                block={block}
+                blockIndex={idx}
+                sTransform={sTransform}
                 config={config}
-                vertConfig={vertConfig}
-                sectionBgTexture={sectionBgTexture}
-                getConnectorColor={getConnectorColor}
-                topConnector={topConnector}
-                bottomConnector={bottomConnector}
-                parentSectionId={S2_ID}
               />
             );
           })}

@@ -8,15 +8,9 @@ import { ELEVATE_TEXTURE_TIMING } from "./useElevateAnimation";
 import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
 import { VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
 import { getActiveStoryConfig, useStoryStore } from "../stores/useStoryStore";
-import {
-  SectionTransforms,
-  GroupTransforms,
-  ElementTransform,
-  GridSectionConfig,
-  VerticalGroupsSectionConfig,
-  ThemeColors,
-} from "../data/schema";
+import { SectionTransforms, ThemeColors } from "../data/schema";
 import { S1_INNER_BG, S1_INNER_BORDER } from "../data/theme";
+import { getSectionPriority } from "../utils/sectionResolver";
 
 export const MASK_CONFIG = {
   sectionExpand: 0.013,
@@ -78,62 +72,23 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       const exp = MASK_CONFIG.sectionExpand;
       let secIdx = 0;
 
-      activeConfig.sections.forEach((sec, idx) => {
-        const sTransform = SURAH_TRANSFORMS.sections[
-          idx
-        ] as Required<SectionTransforms>;
-        if (sec.type === "gridWithAnaAyet") {
-          const g = sec as GridSectionConfig;
-          // Apply any expand override so the shader cutout matches the actual VerseBox size.
-          // Verses without an override fall back to their raw transform.
-          g.verses.forEach((vId) => {
-            const ov = activeConfig.verseOverrides?.[vId];
-            const expandW = ov?.expandW ?? 0;
-            const expandH = ov?.expandH ?? 0;
-            const rawT = sTransform.verses[vId];
-            setVerseRect(
-              vId,
-              {
-                x: rawT.x - expandW,
-                y: rawT.y + expandH,
-                w: rawT.w + expandW * 2,
-                h: rawT.h + expandH * 2,
-              },
-              ov?.isPill ?? true,
-            );
-          });
+      {
+        const hasCustomSections = Boolean(activeConfig.customSections?.length);
+        const blocks = activeConfig.blocks ?? [];
 
-          // anaAyet: always apply its expand override
-          const anaOv = activeConfig.verseOverrides?.[g.anaAyet];
-          const anaExpandW = anaOv?.expandW ?? 0;
-          const anaExpandH = anaOv?.expandH ?? 0;
-          const anaRawT = sTransform.anaAyet;
-          setVerseRect(
-            g.anaAyet,
-            {
-              x: anaRawT.x - anaExpandW,
-              y: anaRawT.y + anaExpandH,
-              w: anaRawT.w + anaExpandW * 2,
-              h: anaRawT.h + anaExpandH * 2,
-            },
-            anaOv?.isPill ?? false,
-          );
+        blocks.forEach((block: any, blockIdx: number) => {
+          if (block.type === "spacer") return;
+          const sTransform = SURAH_TRANSFORMS.sections[blockIdx] as
+            | Required<SectionTransforms>
+            | undefined;
+          if (!sTransform) return;
 
-          sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-          sRects[secIdx * 4 + 1] = sTransform.frameY + PAD / 2 + exp;
-          sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-          sRects[secIdx * 4 + 3] = sTransform.frameH + PAD + exp * 2;
-          secIdx++;
-        } else if (sec.type === "verticalGroups") {
-          const v = sec as VerticalGroupsSectionConfig;
-          if (v.introVerse)
-            setVerseRect(v.introVerse, sTransform.introVerse, false);
-          if (v.outroVerse)
-            setVerseRect(v.outroVerse, sTransform.outroVerse, false);
-          v.groups.forEach((gConf, gIdx) => {
-            const gTrans = sTransform.groups[gIdx];
-            gConf.verseIds.forEach((vId) => {
-              const rawT = gTrans.verses[vId];
+          // Grid block (Alak's Section 1): verses + AnaAyet live directly on
+          // the section transform, not inside a `groups[0]`.
+          if (block.type === "grid") {
+            (block.verseIds ?? []).forEach((vId: number) => {
+              const rawT = sTransform.verses?.[vId];
+              if (!rawT) return;
               const ov = activeConfig.verseOverrides?.[vId];
               const expandW = ov?.expandW ?? 0;
               const expandH = ov?.expandH ?? 0;
@@ -148,116 +103,123 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
                 ov?.isPill ?? true,
               );
             });
-          });
-
-          if (v.customSections && v.customSections.length > 0) {
-            // CUSTOM SECTIONS: do NOT write section-level rect.
-            // Per-verse masking (uVerseRects) handles individual capsule cutouts.
-            // Section-level rects would create a large bounding box covering the whole
-            // column — which masks through the paper where there's no verse.
-            // Just advance secIdx to keep sectionMap indices aligned.
-            v.customSections.forEach(() => {
-              secIdx++; // slot stays as zeros → no section mask effect
-            });
-          } else if (v.groupElevation === "unified") {
-            // ONE rect covering the whole section
-            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-            sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
-            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-            sRects[secIdx * 4 + 3] =
-              sTransform.shiftedTop - sTransform.shiftedBot + PAD + exp * 2;
-            secIdx++;
-          } else {
-            // Per-group rects using fold positions
-            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-            sRects[secIdx * 4 + 1] = sTransform.shiftedTop + PAD / 2 + exp;
-            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-            sRects[secIdx * 4 + 3] =
-              sTransform.shiftedTop - FOLD_Y_POSITIONS[3] + PAD + exp * 2;
-            secIdx++;
-
-            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-            sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[3] + PAD / 2 + exp;
-            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-            sRects[secIdx * 4 + 3] =
-              FOLD_Y_POSITIONS[3] - FOLD_Y_POSITIONS[5] + PAD + exp * 2;
-            secIdx++;
-
-            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
-            sRects[secIdx * 4 + 1] = FOLD_Y_POSITIONS[5] + PAD / 2 + exp;
-            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
-            sRects[secIdx * 4 + 3] =
-              FOLD_Y_POSITIONS[5] - sTransform.shiftedBot + PAD + exp * 2;
-            secIdx++;
+            if (block.anaAyetId !== undefined && sTransform.anaAyet) {
+              const ov = activeConfig.verseOverrides?.[block.anaAyetId];
+              const expandW = ov?.expandW ?? 0;
+              const expandH = ov?.expandH ?? 0;
+              const rawT = sTransform.anaAyet;
+              setVerseRect(
+                block.anaAyetId,
+                {
+                  x: rawT.x - expandW,
+                  y: rawT.y + expandH,
+                  w: rawT.w + expandW * 2,
+                  h: rawT.h + expandH * 2,
+                },
+                ov?.isPill ?? false,
+              );
+            }
+            return;
           }
-        }
-      });
 
-      const verseColorKeys = new Array<keyof ThemeColors | undefined>(VERSE_ARR_SIZE);
-      const verseIsSection1 = new Array<boolean>(VERSE_ARR_SIZE).fill(false);
+          const group = sTransform.groups?.[0];
+          if (!group) return;
 
-      activeConfig.sections.forEach((sec) => {
-        if (sec.type === "gridWithAnaAyet") {
-          const g = sec as GridSectionConfig;
-          g.verses.forEach((v) => {
-            verseColorKeys[v] = g.bgThemeKey;
-            verseIsSection1[v] = true;
+          (block.verseIds ?? []).forEach((vId: number) => {
+            const rawT = group.verses[vId];
+            if (!rawT) return;
+            const ov = activeConfig.verseOverrides?.[vId];
+            const expandW = ov?.expandW ?? 0;
+            const expandH = ov?.expandH ?? 0;
+            setVerseRect(
+              vId,
+              {
+                x: rawT.x - expandW,
+                y: rawT.y + expandH,
+                w: rawT.w + expandW * 2,
+                h: rawT.h + expandH * 2,
+              },
+              ov?.isPill ?? true,
+            );
           });
-          verseColorKeys[g.anaAyet] = g.bgThemeKey;
-          verseIsSection1[g.anaAyet] = true;
-        } else if (sec.type === "verticalGroups") {
-          const v = sec as VerticalGroupsSectionConfig;
-          if (v.introVerse) verseColorKeys[v.introVerse] = v.introOutroBgThemeKey;
-          if (v.outroVerse) verseColorKeys[v.outroVerse] = v.introOutroBgThemeKey;
-          v.groups.forEach((g) => {
-            g.verseIds.forEach((vId) => (verseColorKeys[vId] = g.bgThemeKey));
+        });
+
+        if (!hasCustomSections) {
+          // "perBlock" elevation (Fatiha, Kafirun): one mask rect per block,
+          // scoped to that block's own frame — EXCEPT for "big" (isPill:false)
+          // verse blocks (e.g. Kafirun's verse 1/6, Fatiha's verse 1/2/5),
+          // which must mask exactly like Alak's intro/outro verses: through
+          // their own precise per-verse rounded-rect (uVerseRects/uVerseRadii)
+          // only. A rectangular section mask would clip their rounded corners.
+          const sectionPriority = getSectionPriority();
+          sectionPriority.forEach((sectionId) => {
+            const blockIdx = blocks.findIndex((b: any) => b.id === sectionId);
+            const block = blocks[blockIdx];
+            const sTransform = SURAH_TRANSFORMS.sections[blockIdx] as
+              | Required<SectionTransforms>
+              | undefined;
+            const hasBigVerse = (block?.verseIds ?? []).some(
+              (vId: number) => activeConfig.verseOverrides?.[vId]?.isPill === false,
+            );
+            if (!sTransform || hasBigVerse) { secIdx++; return; }
+            sRects[secIdx * 4 + 0] = sTransform.frameX - PAD / 2 - exp;
+            sRects[secIdx * 4 + 1] = sTransform.frameY! + PAD / 2 + exp;
+            sRects[secIdx * 4 + 2] = sTransform.frameW + PAD + exp * 2;
+            sRects[secIdx * 4 + 3] = sTransform.frameH! + PAD + exp * 2;
+            secIdx++;
           });
         }
-      });
+        // customSections (Ihlas, Ayat al-Kursi, Ahzab): NO section-level rect —
+        // per-verse masking (uVerseRects) handles individual capsule cutouts.
 
-      const bgColors = new Float32Array(VERSE_ARR_SIZE * 3);
-      const tempCol = new Color();
-      const setCol = (i: number, hex: string) => {
-        tempCol.set(hex);
-        bgColors[i * 3 + 0] = tempCol.r;
-        bgColors[i * 3 + 1] = tempCol.g;
-        bgColors[i * 3 + 2] = tempCol.b;
-      };
+        const verseColorKeys: Array<keyof ThemeColors | undefined> = new Array(VERSE_ARR_SIZE);
+        const verseIsGrid = new Array<boolean>(VERSE_ARR_SIZE).fill(false);
+        blocks.forEach((block: any) => {
+          if (block.type === "spacer") return;
+          if (block.type === "grid") {
+            (block.verseIds ?? []).forEach((vId: number) => { verseIsGrid[vId] = true; });
+            if (block.anaAyetId !== undefined) verseIsGrid[block.anaAyetId] = true;
+            return;
+          }
+          (block.verseIds ?? []).forEach((vId: number) => {
+            verseColorKeys[vId] = block.bgThemeKey;
+          });
+        });
 
-      for (let i = 1; i <= MAX_VERSE_ID; i++) {
-        const ov = activeConfig.verseOverrides?.[i];
-        const isPill = verseIsPill[i];
-        
-        let colorHex: string | undefined;
-        
-        if (isPill) {
-          colorHex = ov?.border;
-        } else {
-          colorHex = ov?.bg;
-        }
+        const bgColors = new Float32Array(VERSE_ARR_SIZE * 3);
+        const tempCol = new Color();
+        const setCol = (i: number, hex: string) => {
+          tempCol.set(hex);
+          bgColors[i * 3 + 0] = tempCol.r;
+          bgColors[i * 3 + 1] = tempCol.g;
+          bgColors[i * 3 + 2] = tempCol.b;
+        };
 
-        if (!colorHex) {
-          if (verseIsSection1[i]) {
-            colorHex = isPill ? S1_INNER_BORDER : S1_INNER_BG;
-          } else {
-            const key = verseColorKeys[i];
-            if (key && activeConfig.styling.colors[key]) {
-              colorHex = activeConfig.styling.colors[key] as string;
+        for (let i = 1; i <= MAX_VERSE_ID; i++) {
+          const ov = activeConfig.verseOverrides?.[i];
+          const isPill = verseIsPill[i];
+          let colorHex: string | undefined = isPill ? ov?.border : ov?.bg;
+          if (!colorHex) {
+            if (verseIsGrid[i]) {
+              colorHex = isPill ? S1_INNER_BORDER : S1_INNER_BG;
+            } else {
+              const key = verseColorKeys[i];
+              if (key && activeConfig.styling.colors[key]) {
+                colorHex = activeConfig.styling.colors[key] as string;
+              }
             }
           }
+          if (colorHex) setCol(i, colorHex);
         }
-        
-        if (colorHex) {
-          setCol(i, colorHex);
-        }
+
+        return {
+          verseRects: vRects,
+          verseRadii: vRadii,
+          sectionRects: sRects,
+          verseBgColors: bgColors,
+        };
       }
 
-      return {
-        verseRects: vRects,
-        verseRadii: vRadii,
-        sectionRects: sRects,
-        verseBgColors: bgColors,
-      };
     }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS, activeConfig]);
 
   const uniforms = useMemo(
@@ -355,25 +317,13 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniforms.uVerseVisibility.value[i] = hidden ? 0.0 : 1.0;
     }
 
+    // Same id set/order as the shared elevation resolver (SECTION_PRIORITY),
+    // which is what `e.activeSectionIds` below is actually populated from —
+    // keeping this in sync via one shared source instead of re-deriving the
+    // section-id scheme a third time (engine-agnostic for free).
     const sectionMap: Record<string, number> = {};
-    let sIdx = 0;
-    activeConfig.sections.forEach((sec) => {
-      if (sec.type === "gridWithAnaAyet") {
-        sectionMap[sec.id] = sIdx++;
-      } else if (sec.type === "verticalGroups") {
-        const v = sec as VerticalGroupsSectionConfig;
-        if (v.customSections && v.customSections.length > 0) {
-          v.customSections.forEach((cs) => {
-            sectionMap[cs.id] = sIdx++;
-          });
-        } else if (v.groupElevation === "unified") {
-          sectionMap[sec.id] = sIdx++;
-        } else {
-          for (let i = 0; i < v.groups.length; i++) {
-            sectionMap[`${sec.id}_g${i}`] = sIdx++;
-          }
-        }
-      }
+    getSectionPriority().forEach((id, idx) => {
+      sectionMap[id] = idx;
     });
 
     Object.entries(sectionMap).forEach(([id, idx]) => {

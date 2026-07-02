@@ -1,13 +1,18 @@
 "use client";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { VerseBox, UiRect, TopLabel, CapsuleLabel } from "./SharedUI";
+import {
+  VerseBox,
+  UiRect,
+  TopLabel,
+  CapsuleLabel,
+  SplitVerseCapsules,
+} from "./SharedUI";
 import type { ColorGroup } from "../../../data/SurahConfig";
 import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
 import type {
   GroupTransforms,
   RowConnectorTransform,
-  VerticalGroupsSectionConfig,
 } from "../../../data/schema";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
@@ -44,21 +49,6 @@ export function VerseGroup({
   const groupFallbackBorder = gt.isCenter
     ? config.styling.colors.greenTheme
     : config.styling.colors.maroonTheme;
-
-  // ── Row connector color — derived from the first verse in the group ────────
-  // We use the border from the first verse's override if available; otherwise
-  // the group-level fallback. This keeps the connector stripe in sync with
-  // the verse capsule colours automatically.
-  const firstVerseOverride =
-    config.verseOverrides?.[group.verses?.[0]?.number ?? -1];
-  const borderColor = firstVerseOverride?.border ?? groupFallbackBorder;
-
-  // ── Row connector visibility ───────────────────────────────────────────────
-  // Read hideRowConnectors from the verticalGroups section config.
-  const sectionConfig = config.sections.find(
-    (s) => s.type === "verticalGroups",
-  ) as VerticalGroupsSectionConfig | undefined;
-  const hideConnectors = sectionConfig?.hideRowConnectors ?? false;
 
   const topLabelText = group.topLabel;
   const topLabelConfig = (gt as any).topLabelConfig;
@@ -144,16 +134,12 @@ export function VerseGroup({
           shadow={topLabelConfig.shadow}
           isSimpleText={topLabelConfig.isSimpleText}
           renderOrder={20}
-          textScaleOverride={
-            (config.id === "ayatalkursi" || config.id === "ahzab35") && activeLanguage !== "ar"
-              ? undefined
-              : topLabelConfig.textScaleOverride
-          }
+          textScaleOverride={topLabelConfig.textScaleOverride}
         />
       )}
-      {/* Row Connectors for opposite verses — hidden when hideRowConnectors is set */}
-      {!hideConnectors &&
-        gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
+      {/* Row Connectors for opposite verses — the engine already omits
+          these from `gt.rowConnectors` when `block.hideRowConnectors` is set. */}
+      {gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
           const leftV = group.verses[i * 2];
           const rightV = group.verses[i * 2 + 1];
 
@@ -190,12 +176,12 @@ export function VerseGroup({
       {group.verses.map((v, i) => {
         // ── Foolproof transform lookup ─────────────────────────────────────────
         // The gt.verses dictionary is keyed by the *Arabic* verse IDs (the ids
-        // used in config.sections[*].groups[*].verseIds).  When rendering a
-        // non-Arabic language, v.number is still the same verse ID (only the
-        // text changes), but in some LTR display orderings the index i inside the
-        // group may correspond to a different Arabic verse than v.number would
-        // imply.  We resolve this by consulting the active Arabic text data for
-        // the current surah, not the hardcoded Alak SURAH_DATA_ARABIC constant.
+        // used in block.verseIds). When rendering a non-Arabic language,
+        // v.number is still the same verse ID (only the text changes), but in
+        // some LTR display orderings the index i inside the group may
+        // correspond to a different Arabic verse than v.number would imply.
+        // We resolve this by consulting the active Arabic text data for the
+        // current surah, not the hardcoded Alak SURAH_DATA_ARABIC constant.
         let lookupNumber = v.number;
 
         if (groupIndex !== undefined) {
@@ -292,24 +278,43 @@ export function VerseGroup({
 
         return (
           <group key={v.number}>
-            <VerseBox
-              x={finalX}
-              y={finalY}
-              z={vt.z}
-              w={finalW}
-              h={finalH}
-              verse={v.text}
-              number={v.number}
-              bg={finalBg}
-              border={finalBorder}
-              circleBorderCol={finalCircleBorder}
-              circleBg={finalCircleBg}
-              circleTextCol={finalCircleText}
-              isPill={override?.isPill ?? true}
-              textScaleOverride={finalTextScale}
-              textColor={override?.textColor}
-              textAlignOverride={override?.translationTextAlign}
-            />
+            {v.splitTexts ? (
+              <SplitVerseCapsules
+                x={finalX}
+                y={finalY}
+                z={vt.z}
+                w={finalW}
+                h={finalH}
+                texts={v.splitTexts}
+                number={v.number}
+                bg={finalBg}
+                border={finalBorder}
+                circleBorderCol={finalCircleBorder}
+                circleBg={finalCircleBg}
+                circleTextCol={finalCircleText}
+                textScaleOverride={finalTextScale}
+                textColor={override?.textColor}
+              />
+            ) : (
+              <VerseBox
+                x={finalX}
+                y={finalY}
+                z={vt.z}
+                w={finalW}
+                h={finalH}
+                verse={v.text}
+                number={v.number}
+                bg={finalBg}
+                border={finalBorder}
+                circleBorderCol={finalCircleBorder}
+                circleBg={finalCircleBg}
+                circleTextCol={finalCircleText}
+                isPill={override?.isPill ?? true}
+                textScaleOverride={finalTextScale}
+                textColor={override?.textColor}
+                textAlignOverride={override?.translationTextAlign}
+              />
+            )}
             {hasTab && (
               <CapsuleLabel
                 x={tabX}

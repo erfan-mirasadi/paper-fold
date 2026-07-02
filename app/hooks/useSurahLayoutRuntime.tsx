@@ -5,14 +5,11 @@ import {
   useSurahLanguageStore,
   type SurahLanguage,
 } from "./useSurahLanguageStore";
-import {
-  buildSurahTransforms,
-  createLayoutMath,
-} from "../data/SurahConfig";
+import { createBlockLayoutMath, buildBlockTransforms } from "../data/SurahConfig";
 import { useStoryStore } from "../stores/useStoryStore";
 
-export function getPageWidthForLanguage(language: SurahLanguage, basePageWidth: number, configId?: string) {
-  if (configId === "ahzab35" || configId === "kafirun109") {
+export function getPageWidthForLanguage(language: SurahLanguage, basePageWidth: number, fixedWidthAcrossLanguages?: boolean) {
+  if (fixedWidthAcrossLanguages) {
     return basePageWidth;
   }
   return basePageWidth + (language === "en" || language === "tr" ? 0.3 : 0);
@@ -23,13 +20,17 @@ export function useSurahLayoutRuntime() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
 
   const pageWidth = useMemo(
-    () => getPageWidthForLanguage(activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.id),
-    [activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.id],
+    () => getPageWidthForLanguage(activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.dimensions.fixedWidthAcrossLanguages),
+    [activeLanguage, activeConfig.dimensions.paperWidth, activeConfig.dimensions.fixedWidthAcrossLanguages],
   );
 
-  const layout = useMemo(() => createLayoutMath(activeConfig, pageWidth), [activeConfig, pageWidth]);
+  const layout = useMemo(
+    () => createBlockLayoutMath(activeConfig, pageWidth),
+    [activeConfig, pageWidth],
+  );
+
   const transforms = useMemo(
-    () => buildSurahTransforms(layout, layout.START_X, activeConfig),
+    () => buildBlockTransforms(layout, layout.START_X, activeConfig),
     [layout, activeConfig],
   );
   const foldYPositions = useMemo(
