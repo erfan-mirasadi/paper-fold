@@ -27,7 +27,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
   features: {
     hasIntro: false,
     hasElevatedSections: true,
-    hasPopUps: true,
+    hasPopUps: false,
     hideVerseNumbers: false,
     hideBismillah3D: true, // Bismillah is already verse 1 — skip the 3D overlay
   },
@@ -71,7 +71,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
       circleBg: CAPSULE_BG_6_19,
       circleTextCol: S1_VERSE_NUMBER_TEXT,
-      textColor: S1_VERSE_5_TEXT, // red text
+      textColor: "#000000", // black text
     },
     2: {
       // Wide capsule

@@ -26,7 +26,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
   features: {
     hasIntro: false,
     hasElevatedSections: true,
-    hasPopUps: true,
+    hasPopUps: false,
     hideVerseNumbers: false,
     hideBismillah3D: true, // Bismillah is already verse 1 — skip the 3D overlay
   },
@@ -70,7 +70,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
       circleBg: CAPSULE_BG_6_19,
       circleTextCol: S1_VERSE_NUMBER_TEXT,
-      textColor: S1_VERSE_5_TEXT, // red text
+      textColor: "#000000", // black text
     },
     2: {
       isPill: false,
@@ -245,7 +245,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       columns: 1,
       horizontalInset: 0,
       isCenter: false,
-      verticalNudge: 0.032,
+      verticalNudge: 0.077,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -267,14 +267,12 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     {
       id: "section2_g2",
       type: "group",
-      verseIds: [4, 3],
-      columns: 2,
+      verseIds: [3, 4],
+      columns: 1,
       horizontalInset: 0,
       isCenter: false,
-      // colGapForPosition = targetVisualGap + 2*expandW = 0.02 + 2*0.0442 = 0.108
-      // so the visual gap between capsules 4 & 3 matches kafirun's middle section.
-      columnGap: 0.108,
-      // Negative nudge → pulls 4-3 pair closer to verse 2 above it.
+      rowGap: 0.024,
+      // Negative nudge → pulls 3-4 pair closer to verse 2 above it.
       // Cascades down, compensated by +0.04 on g3.
       verticalNudge: -0.03,
       dragBehavior: "pair",
@@ -291,7 +289,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // +CLUSTER_SHIFT cancels the cascade from g1's nudge, so 5-6-7 stay
       // centered and only 2-3-4 shift upward.
       // +0.04 compensates the cascade from g2's -0.04 nudge.
-      verticalNudge: CLUSTER_SHIFT + 0.16,
+      verticalNudge: CLUSTER_SHIFT + 0.105,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -321,8 +319,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/fatiha/all-section-bg.svg",
     scaleX: 1.2,
-    scaleY: 1.35,
-    offsetY: 0.003,
+    scaleY: 1.25,
+    offsetY: 0.005,
   },
 
   svgOverlays: [
@@ -346,7 +344,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       scaleX: 1.09,
       scaleY: 0.48,
       offsetX: 0,
-      offsetY: -0.125,
+      offsetY: -0.17,
       renderOrder: 3,
       customSectionId: "section2_v234",
     },
@@ -549,8 +547,8 @@ export const FATIHA_1_TEXT_EN: SurahDataShape = {
       },
       {
         verses: [
-          { number: 4, text: "The Most Gracious, the Most Merciful." },
-          { number: 3, text: "Owner of the Day of Judgment." },
+          { number: 3, text: "The Most Gracious, the Most Merciful." },
+          { number: 4, text: "Owner of the Day of Judgment." },
         ],
       },
       {
@@ -611,8 +609,8 @@ export const FATIHA_1_TEXT_TR: SurahDataShape = {
       },
       {
         verses: [
-          { number: 4, text: "Rahmandır, Rahimdir." },
-          { number: 3, text: "Din gününün sahibidir." },
+          { number: 3, text: "Rahmandır, Rahimdir." },
+          { number: 4, text: "Din gününün sahibidir." },
         ],
       },
       {
