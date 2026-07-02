@@ -213,13 +213,6 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     framePad: 0.1,
   },
 
-  sectionBackground: {
-    texture: "/fatiha/all-section-bg.svg",
-    scaleX: 1.2,
-    scaleY: 1.1,
-    offsetY: -0.14,
-  },
-
   // Section-wide resting-state background is intentionally omitted here —
   // Fatiha renders 3 independent section frames instead of one whole-stack
   // frame, via `svgOverlays` below (the same mechanism ahzab35Config.ts
@@ -234,7 +227,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       columns: 1,
       horizontalInset: 0,
       isCenter: false,
-      verticalNudge: -0.05,
+      verticalNudge: 0.05,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -314,17 +307,20 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     },
   ],
 
-  // Decorative section frames — same mechanism as ahzab35Config.ts's
-  // `svgOverlays`: rendered as flat 1×1 planes scaled directly to
-  // `scaleX`×`scaleY` world units, anchored to a block index + edge.
-  // anchorGroupIndex is the flat block index (0=verse1, 1=verse2, 3=verse5).
+  sectionBackground: {
+    texture: "/fatiha/all-section-bg.svg",
+    scaleX: 1.2,
+    scaleY: 1.35,
+    offsetY: -0.01,
+  },
+
   svgOverlays: [
     {
       // Frame for verse 1 — standalone individual
-      src: "/fatiha/bismillah-frame-2.svg",
+      src: "/fatiha/bismillah-frame-3.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
-      scaleX: 1.15,
+      scaleX: 1.09,
       scaleY: 0.22, // preserve the svg's native aspect
       offsetX: 0,
       offsetY: 0,
