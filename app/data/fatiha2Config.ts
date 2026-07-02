@@ -356,6 +356,32 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       renderOrder: 3,
       customSectionId: "section2_v67",
     },
+    {
+      // Center arrow pointing up
+      src: "/fatiha/arrow-2.svg",
+      anchorGroupIndex: 3, // Verse 5 (center pivot)
+      anchorEdge: "top",
+      scaleX: 0.13,
+      scaleY: 0.25,
+      offsetX: 0,
+      offsetY: 0.12,
+      rotationZ: 0,
+      renderOrder: 5,
+      customSectionId: "section2_v5",
+    },
+    {
+      // Center arrow pointing down
+      src: "/fatiha/arrow.svg",
+      anchorGroupIndex: 3, // Verse 5 (center pivot)
+      anchorEdge: "bottom",
+      scaleX: 0.08,
+      scaleY: 0.11,
+      offsetX: 0,
+      offsetY: -0.05,
+      rotationZ: Math.PI,
+      renderOrder: 5,
+      customSectionId: "section2_v5",
+    },
   ],
 
   // Cross-block elevation zones:
@@ -438,7 +464,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       //     { direction: 1, angleFactor: 0 }, // fold1: v2 ↔ v4,3 (flat)
       //     { direction: -1, angleFactor: 0 }, // fold2
       //     { direction: 1, angleFactor: 0 }, // fold3
-      //     { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6
+      //     { direction: 1, angleFactor: 0 }, // fold4: v53 ↔ v6
       //     { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
       //   ],
       // },

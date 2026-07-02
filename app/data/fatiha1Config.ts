@@ -397,7 +397,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // ── fold1: midpoint between g1 (v2) and g2 (v4,3) ───────────────────
       const fold1 =
         (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
-        2;
+          2 -
+        0.02; // Moved lower by 0.02
 
       // ── fold2 & fold3: two creases between g2 (v4,3) and g3 (v5) ────────
       // Divide the gap into 4 equal parts and pick the 2 interior quarter-points.
@@ -409,7 +410,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // ── fold4: midpoint between g3 (v5) and g4 (v6,7) ───────────────────
       const fold4 =
         (lm.groupYPositions[3] - lm.groupHeights[3] + lm.groupYPositions[4]) /
-        2;
+          2 -
+        0.02; // Moved lower by 0.02
 
       // ── fold5: crease between verse 6 and verse 7 inside g4 ─────────────
       const g4ContentY = lm.blockMeta[4].contentY;
@@ -424,9 +426,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
         id: "pre-start",
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
-          { direction: 1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3 (flat)
+          { direction: 1, angleFactor: 0.52 }, // fold1: v2 ↔ v4,3 (flat)
           { direction: -1, angleFactor: 1.1 }, // fold2: 1st crease v4,3↔v5
-          { direction: 1, angleFactor: 0.5 }, // fold3: 2nd crease v4,3↔v5
+          { direction: 1, angleFactor: 0.6 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 1 }, // fold4: v5 ↔ v6,7
           { direction: 1, angleFactor: 0 }, // fold5: v6 ↔ v7
         ],
