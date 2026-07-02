@@ -126,19 +126,31 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     7: {
-      // Renders as TWO capsules sharing one number badge (see `splitTexts` on
-      // the verse-7 text entries below) — expandW reuses the same "big pill"
-      // width as verses 1/2/5 so it's wide enough to hold both capsules;
-      // height matches v3/v4 exactly (no expandH), same reasoning as v6.
+      // Mirrors Fatiha 2's verse 7 exactly: one single wide ("elongated")
+      // capsule, normal (non-inverted) badge colors — no splitTexts. Same
+      // expandW as verses 1/2/5 (the "big pill" width); height matches
+      // v3/v4/v6 exactly (no expandH). Verse 6 is untouched — still its own
+      // narrow solo capsule right above this one, same block/frame as before.
       expandW: 0.2875,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
-      // Badge fill matches the hollow-connector backdrop (= border color);
-      // badge ring + text match the capsules' own background, so it reads as
-      // a "cut-out" of the connector rather than a floating mismatched circle.
-      circleBg: MAROON_THEME,
-      circleBorderCol: CAPSULE_BG_9_10_15_16,
-      circleTextCol: CAPSULE_BG_9_10_15_16,
+      circleBorderCol: MAROON_THEME,
+      circleBg: CAPSULE_BG_9_10_15_16,
+      circleTextCol: MAROON_THEME,
+      // ── OLD (commented out, not deleted): "two capsules sharing one
+      // number badge" version — restore this + re-enable `splitTexts` on the
+      // verse-7 text entries below (search "OLD split-capsule logic") to
+      // bring the old look back.
+      // expandW: 0.2875,
+      // bg: CAPSULE_BG_9_10_15_16,
+      // border: MAROON_THEME,
+      // // Badge fill matches the hollow-connector backdrop (= border color);
+      // // badge ring + text match the capsules' own background, so it reads
+      // // as a "cut-out" of the connector rather than a floating mismatched
+      // // circle.
+      // circleBg: MAROON_THEME,
+      // circleBorderCol: CAPSULE_BG_9_10_15_16,
+      // circleTextCol: CAPSULE_BG_9_10_15_16,
     },
   },
   styling: {
@@ -494,11 +506,13 @@ export const FATIHA_1_TEXT_AR: SurahDataShape = {
           {
             number: 7,
             text: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
-            // RTL order: [nearNumberText, farFromNumberText].
-            splitTexts: [
-              "غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
-              "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ",
-            ],
+            // ── OLD split-capsule logic (commented out, not deleted) — see
+            // verseOverrides[7] note above. RTL order: [nearNumberText,
+            // farFromNumberText].
+            // splitTexts: [
+            //   "غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+            //   "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ",
+            // ],
           },
         ],
       },
@@ -550,13 +564,25 @@ export const FATIHA_1_TEXT_EN: SurahDataShape = {
         ],
       },
       {
+        // Verse 6 was previously mislabeled with verse 7's text (and vice
+        // versa) — an artifact of the old split-capsule badge logic. Fixed
+        // to match Fatiha 2's (correct) mapping; verse 6 itself is untouched.
         verses: [
-          { number: 7, text: "Show us the straight path." },
+          { number: 6, text: "Show us the straight path." },
           {
-            number: 6,
+            number: 7,
             text: "That path is the path You taught the Prophet, not the path of those who have earned anger and of those who have gone astray.",
           },
         ],
+        // ── OLD (commented out, not deleted) — swapped number/text pairing
+        // that the old split-capsule badge logic relied on:
+        // verses: [
+        //   { number: 7, text: "Show us the straight path." },
+        //   {
+        //     number: 6,
+        //     text: "That path is the path You taught the Prophet, not the path of those who have earned anger and of those who have gone astray.",
+        //   },
+        // ],
       },
     ],
     outroVerse: { number: 0, text: "" },
@@ -600,13 +626,25 @@ export const FATIHA_1_TEXT_TR: SurahDataShape = {
         ],
       },
       {
+        // Verse 6 was previously mislabeled with verse 7's text (and vice
+        // versa) — an artifact of the old split-capsule badge logic. Fixed
+        // to match Fatiha 2's (correct) mapping; verse 6 itself is untouched.
         verses: [
-          { number: 7, text: "Bize doğru yolu göster." },
+          { number: 6, text: "Bize doğru yolu göster." },
           {
-            number: 6,
+            number: 7,
             text: "O yol, Peygambere öğrettiğin yoldur, gazap ettiklerinin ve sapmışların yolu değil.",
           },
         ],
+        // ── OLD (commented out, not deleted) — swapped number/text pairing
+        // that the old split-capsule badge logic relied on:
+        // verses: [
+        //   { number: 7, text: "Bize doğru yolu göster." },
+        //   {
+        //     number: 6,
+        //     text: "O yol, Peygambere öğrettiğin yoldur, gazap ettiklerinin ve sapmışların yolu değil.",
+        //   },
+        // ],
       },
     ],
     outroVerse: { number: 0, text: "" },

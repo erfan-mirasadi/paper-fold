@@ -5,8 +5,10 @@ import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import {
   ORANGE_THEME,
   MAROON_THEME,
+  GREEN_THEME,
   CAPSULE_BG_6_19,
   CAPSULE_BG_9_10_15_16,
+  CAPSULE_BG_12_14,
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
   S1_VERSE_5_TEXT,
@@ -75,35 +77,36 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     2: {
       // Normal centered capsule — NOT a wide pill
       expandW: 0.0442,
+      expandH: 0.015,
+      textScaleOverride: 1.15,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
       circleBg: CAPSULE_BG_6_19,
       circleTextCol: ORANGE_THEME,
-      textColor: S1_VERSE_5_TEXT, // red text
     },
     3: {
       expandW: 0.0442, // 0.0486 / 1.1
-      bg: CAPSULE_BG_9_10_15_16, // Blue theme
-      border: MAROON_THEME, // Slate blue border
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
     },
     4: {
       expandW: 0.0442, // 0.0486 / 1.1
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
     },
     5: {
       // Big pill — CENTER of the layout, mirrors verse 1's wide pill style
       isPill: false,
       expandW: 0.2875,
       expandH: 0.028,
-      textScaleOverride: 0.9,
+      textScaleOverride: 0.65,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
@@ -115,21 +118,23 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     6: {
       // Centered solo capsule, same size as v3/v4
       expandW: 0.0442,
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
+      expandH: 0.015,
+      textScaleOverride: 1.15,
+      bg: CAPSULE_BG_6_19,
+      border: ORANGE_THEME,
+      circleBorderCol: ORANGE_THEME,
+      circleBg: CAPSULE_BG_6_19,
+      circleTextCol: ORANGE_THEME,
     },
     7: {
       // Single wide capsule — very wide (same expandW as pills) but same height
       // as v3/v4. No splitTexts — renders as one capsule.
       expandW: 0.2875,
-      bg: CAPSULE_BG_9_10_15_16,
-      border: MAROON_THEME,
-      circleBorderCol: MAROON_THEME,
-      circleBg: CAPSULE_BG_9_10_15_16,
-      circleTextCol: MAROON_THEME,
+      bg: CAPSULE_BG_12_14,
+      border: GREEN_THEME,
+      circleBorderCol: GREEN_THEME,
+      circleBg: CAPSULE_BG_12_14,
+      circleTextCol: GREEN_THEME,
     },
   },
   styling: {
@@ -162,8 +167,9 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
         {
           color: ORANGE_THEME,
           fillColor: CAPSULE_BG_6_19,
-          bowGap: 0.52,
-          innerBowGap: 0.51,
+          bowGap: 0.66,
+          innerBowGap: 0.645,
+          tipThickness: 0.1,
         }, // Pair 1 (2 ↔ 6) shown — default thickness & offset
         { color: "transparent", fillColor: "transparent" }, // Pair 2 (4-3 ↔ 5) hidden
       ],
@@ -295,7 +301,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
     // Verse 7 — single wide capsule, tight under verse 6.
-    // nudge = -(blockGap - 0.024) = -0.036 so gap between v6 and v7 ≈ 0.024.
+    // nudge = -(2 * blockPadding + blockGap - 0.024) = -(0.04 + 0.06 - 0.024) = -0.076 so capsule gap between v6 and v7 is 0.024.
     {
       id: "section2_g5",
       type: "group",
@@ -303,7 +309,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       columns: 1,
       horizontalInset: 0,
       isCenter: false,
-      verticalNudge: -0.036,
+      verticalNudge: -0.046, // moved down to increase gap
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -420,22 +426,22 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
           { direction: 1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3
           { direction: -1, angleFactor: 1.1 }, // fold2: 1st crease v4,3↔v5
-          { direction: 1, angleFactor: 0.5 }, // fold3: 2nd crease v4,3↔v5
-          { direction: 1, angleFactor: 1 }, // fold4: v5 ↔ v6
-          { direction: 1, angleFactor: 0 }, // fold5: v6 ↔ v7
-        ],
-      },
-      {
-        id: "start",
-        folds: [
-          { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
-          { direction: 1, angleFactor: 0 }, // fold1: v2 ↔ v4,3 (flat)
-          { direction: -1, angleFactor: 0 }, // fold2
-          { direction: 1, angleFactor: 0 }, // fold3
+          { direction: 1, angleFactor: 0.6 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6
           { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
         ],
       },
+      // {
+      //   id: "start",
+      //   folds: [
+      //     { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
+      //     { direction: 1, angleFactor: 0 }, // fold1: v2 ↔ v4,3 (flat)
+      //     { direction: -1, angleFactor: 0 }, // fold2
+      //     { direction: 1, angleFactor: 0 }, // fold3
+      //     { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6
+      //     { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
+      //   ],
+      // },
       {
         id: "end",
         folds: [
@@ -491,7 +497,7 @@ export const FATIHA_2_TEXT_AR: SurahDataShape = {
       },
       {
         verses: [
-          { number: 5, text: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ" },
+          { number: 5, text: "إِيَّاكَ نَعْبُدُ\nوَإِيَّاكَ نَسْتَعِينُ" },
         ],
       },
       {
@@ -550,7 +556,7 @@ export const FATIHA_2_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 5,
-            text: "We worship You alone and we ask for help from You alone.",
+            text: "We worship You alone\nand we ask for help from You alone.",
           },
         ],
       },
@@ -609,7 +615,7 @@ export const FATIHA_2_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 5,
-            text: "Yalnız sana ibadet ediyoruz ve yalnız senden yardım istiyoruz.",
+            text: "Yalnız sana ibadet ediyoruz\nve yalnız senden yardım istiyoruz.",
           },
         ],
       },

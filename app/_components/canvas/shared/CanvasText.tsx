@@ -133,21 +133,25 @@ export function CanvasText({
       verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
 
     const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
-    const words = text.split(" ");
+    const paragraphs = text.split("\n");
     const lines = [];
-    let currentLine = "";
 
-    for (let i = 0; i < words.length; i++) {
-      const testLine = currentLine ? currentLine + " " + words[i] : words[i];
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > finalMaxWidth && i > 0) {
-        lines.push(currentLine);
-        currentLine = words[i];
-      } else {
-        currentLine = testLine;
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(" ");
+      let currentLine = "";
+
+      for (let i = 0; i < words.length; i++) {
+        const testLine = currentLine ? currentLine + " " + words[i] : words[i];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > finalMaxWidth && i > 0) {
+          lines.push(currentLine);
+          currentLine = words[i];
+        } else {
+          currentLine = testLine;
+        }
       }
+      lines.push(currentLine);
     }
-    lines.push(currentLine);
 
     const totalHeight = lines.length * scaledFontSize * lineHeight;
     let startY = y;
