@@ -419,13 +419,13 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       // ── fold1: midpoint between g1 (v2) and g2 (v4,3) ───────────────────
       const fold1 =
         (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
-        2;
+          2 -
+        0.11;
 
       // ── fold2 & fold3: two creases between g2 (v4,3) and g3 (v5) ────────
-      // Divide the gap into 4 equal parts and pick the 2 interior quarter-points.
       const g2Bottom = lm.groupYPositions[2] - lm.groupHeights[2];
       const g3Top = lm.groupYPositions[3];
-      const fold2 = g2Bottom * (3 / 4) + g3Top * (1 / 4); // 1/4 down
+      const fold2 = g2Bottom * (1 / 4) + g3Top * (3 / 4); // 3/4 down, closer to v5
       const fold3 = lm.groupYPositions[3] - lm.groupHeights[3] / 2; // exactly middle of v5
 
       // ── fold4: midpoint between g3 (v5) and g4 (v6) ─────────────────────
@@ -433,10 +433,8 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
         (lm.groupYPositions[3] - lm.groupHeights[3] + lm.groupYPositions[4]) /
         2;
 
-      // ── fold5: midpoint between g4 (v6) and g5 (v7) ─────────────────────
-      const fold5 =
-        (lm.groupYPositions[4] - lm.groupHeights[4] + lm.groupYPositions[5]) /
-        2;
+      // ── fold5: below g5 (v7) with a large gap ─────────────────────
+      const fold5 = lm.groupYPositions[5] - lm.groupHeights[5] - 0.09;
 
       return [fold0, fold1, fold2, fold3, fold4, fold5];
     },
@@ -445,11 +443,11 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
         id: "pre-start",
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
-          { direction: -1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3
-          { direction: 1, angleFactor: 0.5 }, // fold2: 1st crease v4,3↔v5
+          { direction: -1, angleFactor: 1 }, // fold1: v2 ↔ v4,3
+          { direction: 1, angleFactor: 1 }, // fold2: 1st crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6
-          { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
+          { direction: -1, angleFactor: 1 }, // fold5: v6 ↔ v7
         ],
       },
       // {
