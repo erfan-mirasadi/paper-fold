@@ -10,7 +10,7 @@ export function TitleOverlay() {
   const rawTitle = activeConfig.title || "";
   // Sentence case: only the very first letter is uppercase, rest is lowercase
   const title =
-    rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1).toLowerCase();
+    rawTitle.charAt(0).toLocaleUpperCase("tr") + rawTitle.slice(1).toLocaleLowerCase("tr");
 
   const insetX = "clamp(14px, 2.2vw, 24px)";
   const insetY = "clamp(12px, 2vw, 16px)";

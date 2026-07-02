@@ -423,7 +423,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
           { direction: 1, angleFactor: 0.52 }, // fold1: v2 ↔ v4,3 (flat)
           { direction: -1, angleFactor: 1.1 }, // fold2: 1st crease v4,3↔v5
           { direction: 1, angleFactor: 0.6 }, // fold3: 2nd crease v4,3↔v5
-          { direction: 1, angleFactor: 1 }, // fold4: v5 ↔ v6,7
+          { direction: 1, angleFactor: 0.9 }, // fold4: v5 ↔ v6,7
           { direction: 1, angleFactor: 0 }, // fold5: v6 ↔ v7
         ],
       },
