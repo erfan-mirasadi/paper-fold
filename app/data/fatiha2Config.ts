@@ -108,10 +108,10 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       textScaleOverride: 0.65,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
-      border: ORANGE_THEME,
-      circleBorderCol: ORANGE_THEME,
+      border: S1_VERSE_5_TEXT,
+      circleBorderCol: S1_VERSE_5_TEXT,
       circleBg: CAPSULE_BG_6_19,
-      circleTextCol: ORANGE_THEME,
+      circleTextCol: S1_VERSE_5_TEXT,
       textColor: S1_VERSE_5_TEXT, // red text
     },
     6: {
