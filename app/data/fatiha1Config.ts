@@ -61,9 +61,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
   verseOverrides: {
     1: {
       isPill: false,
-      expandW: 0.2875,
-      expandH: 0.028,
-      textScaleOverride: 0.9,
+      expandW: 0.22,
+      expandH: 0.015,
+      textScaleOverride: 0.75,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
@@ -74,9 +74,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     },
     2: {
       isPill: false,
-      expandW: 0.2875,
-      expandH: 0.028,
-      textScaleOverride: 0.9,
+      expandW: 0.22,
+      expandH: 0.015,
+      textScaleOverride: 0.7,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
@@ -86,7 +86,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT, // red text
     },
     3: {
-      expandW: 0.0442, // 0.0486 / 1.1
+      expandH: 0.0025,
+      expandW: 0.1042, // 0.0486 / 1.1
+      textScaleOverride: 1.2,
       bg: CAPSULE_BG_9_10_15_16, // Blue theme
       border: MAROON_THEME, // Slate blue border
       circleBorderCol: MAROON_THEME,
@@ -94,7 +96,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     4: {
-      expandW: 0.0442, // 0.0486 / 1.1
+      expandW: 0.1042, // 0.0486 / 1.1
+      expandH: 0.0025,
+      textScaleOverride: 1.2,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -103,9 +107,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     },
     5: {
       isPill: false,
-      expandW: 0.2875,
-      expandH: 0.028,
-      textScaleOverride: 0.9,
+      expandW: 0.22,
+      expandH: 0.015,
+      textScaleOverride: 0.7,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
@@ -118,7 +122,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // Centered solo on its own row now (see blocks below) — height matches
       // v3/v4 exactly (no expandH) so the whole 3/4/6/7 cluster reads as one
       // consistent capsule size.
-      expandW: 0.0442, // synced with v3&v4, then /1.1
+      expandW: 0.1042, // 0.0486 / 1.1
+      expandH: 0.0025,
+      textScaleOverride: 1.2,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -132,6 +138,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // v3/v4/v6 exactly (no expandH). Verse 6 is untouched — still its own
       // narrow solo capsule right above this one, same block/frame as before.
       expandW: 0.2875,
+      expandH: 0.0025,
+      textScaleOverride: 1.2,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -183,10 +191,10 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
         {
           color: ORANGE_THEME,
           fillColor: CAPSULE_BG_6_19,
-          inwardOffset: 0.015,
+          inwardOffset: 0.013,
           bowGap: 0.32,
           innerBowGap: 0.31,
-          tipThickness: 0.13,
+          tipThickness: 0.105,
         }, // Pair 1 (2 to 5) shown
         { color: "transparent", fillColor: "transparent" }, // Center pair (4-3) hidden
       ],
@@ -245,7 +253,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       columns: 1,
       horizontalInset: 0,
       isCenter: false,
-      verticalNudge: 0.077,
+      verticalNudge: 0.067,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -289,7 +297,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // +CLUSTER_SHIFT cancels the cascade from g1's nudge, so 5-6-7 stay
       // centered and only 2-3-4 shift upward.
       // +0.04 compensates the cascade from g2's -0.04 nudge.
-      verticalNudge: CLUSTER_SHIFT + 0.105,
+      verticalNudge: CLUSTER_SHIFT + 0.115,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -319,8 +327,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/fatiha/all-section-bg.svg",
     scaleX: 1.2,
-    scaleY: 1.25,
-    offsetY: 0.005,
+    scaleY: 1.35,
+    offsetY: 0.011,
   },
 
   svgOverlays: [
