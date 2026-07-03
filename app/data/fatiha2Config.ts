@@ -165,14 +165,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       s2Group3Bg: ORANGE_THEME,
       curveColors: [
         { color: "transparent", fillColor: "transparent" }, // Pair 0 (1 ↔ 7) hidden
-        {
-          color: ORANGE_THEME,
-          fillColor: CAPSULE_BG_6_19,
-          bowGap: 0.36,
-          innerBowGap: 0.345,
-          tipThickness: 0.1,
-          inwardOffset: 0.0065,
-        }, // Pair 1 (2 ↔ 6) shown — default thickness & offset
+        { color: "transparent", fillColor: "transparent" }, // Pair 1 (2 ↔ 6) shown — default thickness & offset
         { color: "transparent", fillColor: "transparent" }, // Pair 2 (4-3 ↔ 5) hidden
       ],
     },
@@ -313,7 +306,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/fatiha/all-section-bg.svg",
     scaleX: 1.2,
-    scaleY: 1.35,
+    scaleY: 1.5,
     offsetY: -0.01,
   },
 
@@ -443,7 +436,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
         0.13;
 
       // ── fold6: below g5 (v7) with a large gap ─────────────────────
-      const fold6 = lm.groupYPositions[5] - lm.groupHeights[5] - 0.14;
+      const fold6 = lm.groupYPositions[5] - lm.groupHeights[5] - 0.12;
 
       return [fold0, fold1, fold2, fold3, fold4, fold5, fold6];
     },
