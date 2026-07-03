@@ -3,7 +3,7 @@ import { a } from "@react-spring/three";
 import { cloneElement, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
-import { QURAN_FONT } from "../../../data/theme";
+import { FONT_FAMILY_NAMES } from "../../../data/theme";
 import { detectGpuTier } from "../../../utils/gpuTier";
 
 interface CanvasTextProps {
@@ -113,7 +113,7 @@ export function CanvasText({
 
     ctx.clearRect(0, 0, w, h);
 
-    const fontName = font === QURAN_FONT ? "QuranFont" : "LatinFont";
+    const fontName = FONT_FAMILY_NAMES[font] ?? "LatinFont";
 
     // جادوی حل مشکل کش‌آمدگی متن: فقط از activeScaleFactor استفاده می‌کنیم
     const scaledFontSize = fontSize * activeScaleFactor;

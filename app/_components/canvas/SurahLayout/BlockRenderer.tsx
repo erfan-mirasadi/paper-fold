@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { TopLabel, UiRect, VerseBox, CapsuleLabel } from "./SharedUI";
 import { SideCurves } from "./SideCurves";
 import { VerseGroup } from "./VerseGroup";
+import { HandwrittenNote } from "./HandwrittenNote";
 import {
   S1_INNER_BG,
   S1_INNER_BORDER,
@@ -148,6 +149,19 @@ function SvgOverlays({ startX, layout, groups }: { startX: number; layout: any; 
         );
       })}
     </group>
+  );
+}
+
+function HandwrittenNotes() {
+  const config = useStoryStore((state) => state.activeConfig);
+  const notes = config.handwrittenNotes;
+  if (!notes || notes.length === 0) return null;
+  return (
+    <>
+      {notes.map((note, i) => (
+        <HandwrittenNote key={i} note={note} />
+      ))}
+    </>
   );
 }
 
@@ -443,6 +457,9 @@ export function BlockRenderer({
 
       {/* SVG overlays */}
       <SvgOverlays startX={startX} layout={layout} groups={allGroups} />
+
+      {/* Handwritten margin notes */}
+      <HandwrittenNotes />
 
       {/* Section labels */}
       {hasTopLabel && t && (

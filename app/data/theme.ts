@@ -82,6 +82,19 @@ export const WHITE_VERSE_BG = "#ffffff";
 export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.woff2";
 export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.woff2";
 export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.woff2";
+export const HANDWRITTEN_FONT = "/fonts/segoe-script-regular.woff2";
+
+/**
+ * Canvas-2D font-family names registered via the FontFace API (see
+ * `preloadFontUrl` in PaperMaterial.tsx). `CanvasText` looks up a font URL
+ * here to know which registered family to draw with — add new page-text
+ * fonts to both this map and `PAGE_TEXT_FONTS` together.
+ */
+export const FONT_FAMILY_NAMES: Record<string, string> = {
+  [QURAN_FONT]: "QuranFont",
+  [LATIN_VERSE_FONT]: "LatinFont",
+  [HANDWRITTEN_FONT]: "HandwrittenFont",
+};
 
 // ----------------------------------------------------------------------------
 // 8. GLOBAL TEXT SIZES

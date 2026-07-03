@@ -185,6 +185,29 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
     translationVerseTextScale: null,
   },
 
+  // Example handwritten margin note (Turkish) — sits in the blank top-left
+  // margin above the content, like a personal note jotted next to the ayah.
+  handwrittenNotes: [
+    {
+      x: 0.15,
+      y: -0.16,
+      fontSize: 0.04,
+      color: "#2f4858",
+      lineSpacing: 2,
+      maxWidth: 0.7,
+      textAlign: "left",
+      rotationZ: -0.035,
+      lines: [
+        { text: "Bu ayeti her gece oku," },
+        { text: "Allah hiç uyumaz, hiç unutmaz." },
+        { text: "Gökler ve yer Ona aittir," },
+        { text: "izinsiz kimse şefaat edemez." },
+        { text: "O seni daima koruyup gözetir," },
+        { text: "huzur bulursun, güvende hissedersin." },
+      ],
+    },
+  ],
+
   // Section-wide resting-state background (the whole 3-block stack's outer
   // frame) — independent of any single block's own bounds.
   sectionBackground: {

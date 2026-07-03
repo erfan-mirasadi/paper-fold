@@ -30,6 +30,8 @@ import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
+  FONT_FAMILY_NAMES,
+  HANDWRITTEN_FONT,
   LATIN_VERSE_FONT,
   PAGE_BG_COLOR,
   QURAN_FONT,
@@ -48,7 +50,7 @@ const TEXTURE_READY_DELAY_MS = 200;
 const TEXTURE_CAPTURE_FRAMES = 1;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
-const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT] as const;
+const PAGE_TEXT_FONTS = [QURAN_FONT, LATIN_VERSE_FONT, HANDWRITTEN_FONT] as const;
 const FRAME_OPACITY = 0.15;
 
 async function preloadFontUrl(fontUrl: string) {
@@ -57,7 +59,7 @@ async function preloadFontUrl(fontUrl: string) {
     return;
   }
 
-  const familyName = fontUrl === QURAN_FONT ? "QuranFont" : "LatinFont";
+  const familyName = FONT_FAMILY_NAMES[fontUrl] ?? "LatinFont";
   const fontFace = new FontFace(familyName, `url(${fontUrl})`);
   await fontFace.load();
   document.fonts.add(fontFace);

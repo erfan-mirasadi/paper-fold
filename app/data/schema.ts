@@ -521,6 +521,71 @@ export interface SvgOverlayItem {
   customSectionId?: string | null;
 }
 
+// ---------------------------------------------------------------------------
+// HANDWRITTEN NOTE CONFIG — per-surah "handwritten margin note" overlay,
+// rendered as a canvas-texture (same technique as Arabic/Latin verse text)
+// using a cursive/script font instead of native WebGL text.
+// ---------------------------------------------------------------------------
+
+export interface HandwrittenNoteLine {
+  /** The line's text content. */
+  text: string;
+  /** Per-line font-size multiplier over the note's base `fontSize`. Defaults to 1. */
+  scale?: number;
+  /**
+   * Per-line extra Z rotation in radians, layered on top of the note's overall
+   * `rotationZ`. When omitted, a small deterministic per-line wobble is
+   * applied automatically so the lines don't look machine-straight.
+   */
+  rotation?: number;
+  /** Per-line X offset in world units, applied after the note's layout. Defaults to 0. */
+  offsetX?: number;
+  /** Per-line Y offset in world units, applied after the note's layout. Defaults to 0. */
+  offsetY?: number;
+}
+
+export interface HandwrittenNoteSvg {
+  /** Path to the SVG/image asset (relative to /public). */
+  src: string;
+  /** X offset in world units, relative to the note's anchor. Defaults to 0. */
+  offsetX?: number;
+  /** Y offset in world units, relative to the note's anchor. Defaults to just below the last line. */
+  offsetY?: number;
+  /** Scale in X (world units). Defaults to 0.3. */
+  scaleX?: number;
+  /** Scale in Y (world units). Defaults to 0.3. */
+  scaleY?: number;
+  /** Extra Z rotation in radians, layered on top of the note's overall rotation. */
+  rotationZ?: number;
+}
+
+export interface HandwrittenNoteConfig {
+  /** Lines of handwritten text, top to bottom. */
+  lines: HandwrittenNoteLine[];
+  /** World-space X of the note's anchor (left edge of the text block). */
+  x: number;
+  /** World-space Y of the note's anchor (top edge of the text block). */
+  y: number;
+  /** Base font size (world units) for lines that don't set their own `scale`. */
+  fontSize: number;
+  /** Ink color. Defaults to a dark charcoal tone. */
+  color?: string;
+  /** Vertical gap between lines, as a multiplier of `fontSize`. Defaults to 1.4. */
+  lineSpacing?: number;
+  /** Max width per line before wrapping (world units). Defaults to `fontSize * 12`. */
+  maxWidth?: number;
+  /** Horizontal alignment of each line. Defaults to "left". */
+  textAlign?: "left" | "center" | "right";
+  /** Overall rotation (radians) of the whole note, for the natural "tilted on paper" look. Defaults to 0. */
+  rotationZ?: number;
+  /** Ink opacity, letting the paper texture show through slightly. Defaults to 0.94. */
+  opacity?: number;
+  /** Three.js renderOrder. Defaults to 20 (above verse text). */
+  renderOrder?: number;
+  /** Optional decorative SVG anchored to this note (e.g. an arrow pointing at a verse). */
+  svg?: HandwrittenNoteSvg;
+}
+
 export interface FoldState {
   direction: -1 | 0 | 1;
   angleFactor: number;
@@ -615,6 +680,8 @@ export interface SurahLayoutConfig {
   introGuides?: Record<string, string>;
   /** Optional per-surah SVG overlay planes rendered on top of the section */
   svgOverlays?: SvgOverlayItem[];
+  /** Optional per-surah handwritten margin notes, rendered in a cursive canvas-texture font. */
+  handwrittenNotes?: HandwrittenNoteConfig[];
 
   /**
    * Section-wide resting-state background, independent of any block's own
