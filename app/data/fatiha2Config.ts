@@ -63,8 +63,8 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     1: {
       isPill: false,
       expandW: 0.2875,
-      expandH: 0.028,
-      textScaleOverride: 0.9,
+      expandH: 0.015,
+      textScaleOverride: 0.75,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
@@ -75,9 +75,10 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     },
     2: {
       // Wide capsule
+      isPill: false,
       expandW: 0.2875,
       expandH: 0.015,
-      textScaleOverride: 1.35,
+      textScaleOverride: 0.7,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -105,7 +106,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       isPill: false,
       expandW: 0.2875,
       expandH: 0.028,
-      textScaleOverride: 0.65,
+      textScaleOverride: 0.7,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: S1_VERSE_5_TEXT,
@@ -116,9 +117,10 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     },
     6: {
       // Wide centered capsule
+      isPill: false,
       expandW: 0.2875,
       expandH: 0.015,
-      textScaleOverride: 1.35,
+      textScaleOverride: 0.7,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -169,6 +171,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
           bowGap: 0.36,
           innerBowGap: 0.345,
           tipThickness: 0.1,
+          inwardOffset: 0.0065,
         }, // Pair 1 (2 ↔ 6) shown — default thickness & offset
         { color: "transparent", fillColor: "transparent" }, // Pair 2 (4-3 ↔ 5) hidden
       ],
@@ -257,7 +260,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       // so the visual gap between capsules 4 & 3 matches kafirun's middle section.
       columnGap: 0.108,
       // Negative nudge → pulls 4-3 pair closer to verse 2 above it.
-      verticalNudge: -0.03,
+      verticalNudge: -0.039,
       dragBehavior: "pair",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -333,7 +336,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: 1.09,
-      scaleY: 0.33,
+      scaleY: 0.38,
       offsetX: 0,
       offsetY: -0.125,
       renderOrder: 3,
@@ -345,7 +348,7 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 4,
       anchorEdge: "top",
       scaleX: 1.09,
-      scaleY: 0.33,
+      scaleY: 0.38,
       offsetX: 0,
       offsetY: -0.125,
       renderOrder: 3,
@@ -437,10 +440,10 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       const fold5 =
         (lm.groupYPositions[4] - lm.groupHeights[4] + lm.groupYPositions[5]) /
           2 -
-        0.01;
+        0.13;
 
       // ── fold6: below g5 (v7) with a large gap ─────────────────────
-      const fold6 = lm.groupYPositions[5] - lm.groupHeights[5] - 0.09;
+      const fold6 = lm.groupYPositions[5] - lm.groupHeights[5] - 0.14;
 
       return [fold0, fold1, fold2, fold3, fold4, fold5, fold6];
     },
@@ -453,8 +456,8 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
           { direction: 1, angleFactor: 1 }, // fold2: 1st crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold3: 2nd crease v4,3↔v5
           { direction: 1, angleFactor: 0 }, // fold4: v5 ↔ v6
-          { direction: 1, angleFactor: 1 }, // fold5: v6 ↔ v7
-          { direction: -1, angleFactor: 1 }, // fold6: v7 bottom
+          { direction: -1, angleFactor: 1 }, // fold5: v6 ↔ v7
+          { direction: 1, angleFactor: 1 }, // fold6: v7 bottom
         ],
       },
       // {

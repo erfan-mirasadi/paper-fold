@@ -425,7 +425,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
         id: "pre-start",
         folds: [
           { direction: 1, angleFactor: 0 }, // fold0: v1 ↔ v2 (flat)
-          { direction: 1, angleFactor: 0.5 }, // fold1: v2 ↔ v4,3 (flat)
+          { direction: 1, angleFactor: 0.55 }, // fold1: v2 ↔ v4,3 (flat)
           { direction: -1, angleFactor: 1.05 }, // fold1_5: v3 ↔ v4
           // { direction: -1, angleFactor: 0.4 }, // fold2: 1st crease v4,3↔v5
           { direction: 1, angleFactor: 0.5 }, // fold3: 2nd crease v4,3↔v5
