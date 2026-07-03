@@ -10,7 +10,9 @@
       "Read(//tmp/**)",
       "Bash(node /private/tmp/claude-501/-Users-erfan-Desktop-quran-quran-fold/aef134be-c92d-4dad-b11d-9e0ad9fb1bbe/scratchpad/shot.mjs http://localhost:3000/surahs/ayatalkursi)",
       "Bash(npx --yes playwright screenshot --wait-for-timeout=8000 --viewport-size=1400,1000 \"http://localhost:3000/surahs/ayatalkursi\" /private/tmp/claude-501/-Users-erfan-Desktop-quran-quran-fold/aef134be-c92d-4dad-b11d-9e0ad9fb1bbe/scratchpad/shot1.png)",
-      "Bash(npx --yes playwright screenshot --wait-for-timeout=20000 --viewport-size=1400,1000 \"http://localhost:3000/surahs/ayatalkursi\" /private/tmp/claude-501/-Users-erfan-Desktop-quran-quran-fold/aef134be-c92d-4dad-b11d-9e0ad9fb1bbe/scratchpad/shot2.png)"
+      "Bash(npx --yes playwright screenshot --wait-for-timeout=20000 --viewport-size=1400,1000 \"http://localhost:3000/surahs/ayatalkursi\" /private/tmp/claude-501/-Users-erfan-Desktop-quran-quran-fold/aef134be-c92d-4dad-b11d-9e0ad9fb1bbe/scratchpad/shot2.png)",
+      "Skill(run)",
+      "Skill(run:*)"
     ]
   }
 }
