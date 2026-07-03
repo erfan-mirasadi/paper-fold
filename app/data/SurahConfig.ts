@@ -604,20 +604,23 @@ export function buildBlockTransforms(
       continue;
     }
 
-    // Row connectors (only for 2-col blocks)
+    // Row connectors (only for 2-col blocks, or forced 1-col)
     const numRows = Math.ceil(verseIds.length / cols);
     const rowConnectors: RowConnectorTransform[] = [];
-    if (cols === 2 && !(block.hideRowConnectors)) {
+    const shouldDrawConnectors = (cols === 2 && !block.hideRowConnectors) || block.forceRowConnector;
+    if (shouldDrawConnectors) {
       for (let r = 0; r < numRows; r++) {
-        const lv = verses[verseIds[r * 2]];
-        const rv = verses[verseIds[r * 2 + 1]];
+        const lv = verses[verseIds[r * cols]];
+        const rv = cols === 2 ? verses[verseIds[r * cols + 1]] : lv;
         if (lv && rv) {
+          const padX = block.rowConnectorPadX ?? OPPOSITE_VERSE_CONNECTOR.paddingX;
+          const padY = block.rowConnectorPadY ?? OPPOSITE_VERSE_CONNECTOR.paddingY;
           rowConnectors.push({
-            x: lv.x - OPPOSITE_VERSE_CONNECTOR.paddingX,
-            y: lv.y + OPPOSITE_VERSE_CONNECTOR.paddingY,
+            x: lv.x - padX,
+            y: lv.y + padY,
             z: 0.0025,
-            w: rv.x + rv.w - lv.x + OPPOSITE_VERSE_CONNECTOR.paddingX * 2,
-            h: lv.h + OPPOSITE_VERSE_CONNECTOR.paddingY * 2,
+            w: rv.x + rv.w - lv.x + padX * 2,
+            h: lv.h + padY * 2,
           });
         }
       }

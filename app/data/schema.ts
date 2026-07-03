@@ -385,6 +385,13 @@ export interface LayoutBlock {
 
   /** When `true`, horizontal row-connector bars between paired capsules are hidden. */
   hideRowConnectors?: boolean;
+
+  /** When `true`, forces a row connector background even if the block has 1 column. */
+  forceRowConnector?: boolean;
+
+  /** Custom padding overrides for the row connector, allowing it to be larger or smaller. */
+  rowConnectorPadX?: number;
+  rowConnectorPadY?: number;
 }
 
 export interface LayoutStyling {

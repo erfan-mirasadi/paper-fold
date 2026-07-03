@@ -140,8 +140,9 @@ export function VerseGroup({
       {/* Row Connectors for opposite verses — the engine already omits
           these from `gt.rowConnectors` when `block.hideRowConnectors` is set. */}
       {gt.rowConnectors.map((rc: RowConnectorTransform, i: number) => {
-          const leftV = group.verses[i * 2];
-          const rightV = group.verses[i * 2 + 1];
+          const cols = group.verses.length === gt.rowConnectors.length ? 1 : 2;
+          const leftV = group.verses[i * cols];
+          const rightV = group.verses[i * cols + (cols - 1)];
 
           if (!leftV || !rightV) return null;
 

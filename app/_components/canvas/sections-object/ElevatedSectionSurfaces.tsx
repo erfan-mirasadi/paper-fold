@@ -810,20 +810,32 @@ function DynamicElevatedBlock({
           )}
 
           {!block.hideRowConnectors &&
-            rowConnectors.map((rc: RowConnectorTransform, j: number) => (
-              <ElevatedLayer
-                key={`${sectionId}-rc-${blockIndex}-${j}`}
-                x={rc.x}
-                y={rc.y}
-                w={rc.w}
-                h={rc.h}
-                radius={OPPOSITE_VERSE_CONNECTOR.radius}
-                color={connectorColor}
-                spring={spring}
-                zOffset={0.0025}
-                renderOrder={3}
-              />
-            ))}
+            rowConnectors.map((rc: RowConnectorTransform, j: number) => {
+              const cols = block.columns ?? 2;
+              const leftVId = block.verseIds?.[j * cols];
+              const rightVId = block.verseIds?.[j * cols + (cols - 1)];
+
+              const leftExpandW = leftVId !== undefined ? (config.verseOverrides?.[leftVId]?.expandW ?? 0) : 0;
+              const rightExpandW = rightVId !== undefined ? (config.verseOverrides?.[rightVId]?.expandW ?? 0) : 0;
+
+              const finalRcX = rc.x - leftExpandW;
+              const finalRcW = rc.w + leftExpandW + rightExpandW;
+
+              return (
+                <ElevatedLayer
+                  key={`${sectionId}-rc-${blockIndex}-${j}`}
+                  x={finalRcX}
+                  y={rc.y}
+                  w={finalRcW}
+                  h={rc.h}
+                  radius={OPPOSITE_VERSE_CONNECTOR.radius}
+                  color={connectorColor}
+                  spring={spring}
+                  zOffset={0.0025}
+                  renderOrder={3}
+                />
+              );
+            })}
         </group>
       </DraggableSectionGroup>
     </group>

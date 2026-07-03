@@ -298,6 +298,9 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
       horizontalInset: 0,
       isCenter: false,
       verticalNudge: -0.046, // moved down to increase gap
+      forceRowConnector: true,
+      rowConnectorPadY: 0.006, // made bigger than default (-0.015)
+      rowConnectorPadX: 0.006, // made wider than default (0.045)
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },

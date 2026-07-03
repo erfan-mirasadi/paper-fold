@@ -283,6 +283,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       // Negative nudge → pulls 3-4 pair closer to verse 2 above it.
       // Cascades down, compensated by +0.04 on g3.
       verticalNudge: -0.03,
+      forceRowConnector: true,
+      rowConnectorPadY: 0.012,
+      rowConnectorPadX: 0.007,
       dragBehavior: "pair",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -319,6 +322,9 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       rowGap: 0.024,
       // Negative nudge → pulls the 6/7 stack closer to verse 5 above it.
       verticalNudge: -0.04,
+      forceRowConnector: true,
+      rowConnectorPadY: 0.012,
+      rowConnectorPadX: 0.007,
       dragBehavior: "pair",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
