@@ -53,7 +53,7 @@ export function HandwrittenNote({ note }: { note: HandwrittenNoteConfig }) {
     rotationZ = 0,
     opacity = 0.94,
     renderOrder = 20,
-    svg,
+    svgs,
   } = note;
 
   const baseMaxWidth = maxWidth ?? fontSize * 12;
@@ -80,10 +80,11 @@ export function HandwrittenNote({ note }: { note: HandwrittenNoteConfig }) {
         return (
           <group key={i} position={[lineX, lineY, 0]} rotation={[0, 0, lineRotation]}>
             <CanvasText
-              text={line.text}
+              text={line.segments ? undefined : line.text}
+              segments={line.segments}
               font={HANDWRITTEN_FONT}
               fontSize={lineFontSize}
-              color={color}
+              color={line.color ?? color}
               width={lineW}
               height={lineH}
               maxWidth={lineW}
@@ -97,17 +98,25 @@ export function HandwrittenNote({ note }: { note: HandwrittenNoteConfig }) {
           </group>
         );
       })}
-      {svg && (
-        <NoteSvg
-          src={svg.src}
-          x={svg.offsetX ?? 0}
-          y={svg.offsetY ?? -lines.length * lineGap}
-          scaleX={svg.scaleX ?? 0.3}
-          scaleY={svg.scaleY ?? 0.3}
-          rotationZ={svg.rotationZ ?? 0}
-          renderOrder={renderOrder + 1}
-        />
-      )}
+      {svgs?.map((item, i) => {
+        const anchor = item.anchor ?? "end";
+        const defaultY =
+          anchor === "start"
+            ? lineGap * 0.7
+            : -(lines.length - 1) * lineGap - lineGap * 0.9;
+        return (
+          <NoteSvg
+            key={i}
+            src={item.src}
+            x={item.offsetX ?? 0}
+            y={item.offsetY ?? defaultY}
+            scaleX={item.scaleX ?? 0.3}
+            scaleY={item.scaleY ?? 0.3}
+            rotationZ={item.rotationZ ?? 0}
+            renderOrder={renderOrder + 1}
+          />
+        );
+      })}
     </group>
   );
 }

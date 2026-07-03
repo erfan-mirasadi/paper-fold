@@ -6,8 +6,15 @@ import * as THREE from "three";
 import { FONT_FAMILY_NAMES } from "../../../data/theme";
 import { detectGpuTier } from "../../../utils/gpuTier";
 
-interface CanvasTextProps {
+interface CanvasTextSegment {
+  /** This segment's text, concatenated directly after the previous segment (no auto-spacing). */
   text: string;
+  /** Color for just this segment. Falls back to the top-level `color` prop when omitted. */
+  color?: string;
+}
+
+interface CanvasTextProps {
+  text?: string;
   font: string;
   fontSize: number;
   color: string;
@@ -25,10 +32,16 @@ interface CanvasTextProps {
   depthTest?: boolean;
   opacity?: any;
   children?: React.ReactNode;
+  /**
+   * Renders a single un-wrapped row made of differently-colored segments
+   * instead of `text` (e.g. to highlight one word in a line). When set,
+   * `text` is ignored.
+   */
+  segments?: CanvasTextSegment[];
 }
 
 export function CanvasText({
-  text,
+  text = "",
   font,
   fontSize,
   color,
@@ -46,6 +59,7 @@ export function CanvasText({
   depthTest = false,
   opacity,
   children,
+  segments,
 }: CanvasTextProps) {
   const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
 
@@ -128,45 +142,72 @@ export function CanvasText({
           ? "bottom"
           : "middle";
 
-    const x = textAlign === "center" ? w / 2 : textAlign === "right" ? w : 0;
-    const y =
-      verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
+    if (segments && segments.length > 0) {
+      // Single un-wrapped row, drawn segment-by-segment so each can carry its
+      // own color (e.g. highlighting one word in a handwritten line).
+      const fullText = segments.map((s) => s.text).join("");
+      const totalWidth = ctx.measureText(fullText).width;
+      const startX =
+        textAlign === "center"
+          ? (w - totalWidth) / 2
+          : textAlign === "right"
+            ? w - totalWidth
+            : 0;
+      const rowY =
+        verticalAlign === "top"
+          ? (scaledFontSize * lineHeight) / 2
+          : verticalAlign === "bottom"
+            ? h - (scaledFontSize * lineHeight) / 2
+            : h / 2;
 
-    const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
-    const paragraphs = text.split("\n");
-    const lines = [];
-
-    for (const paragraph of paragraphs) {
-      const words = paragraph.split(" ");
-      let currentLine = "";
-
-      for (let i = 0; i < words.length; i++) {
-        const testLine = currentLine ? currentLine + " " + words[i] : words[i];
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > finalMaxWidth && i > 0) {
-          lines.push(currentLine);
-          currentLine = words[i];
-        } else {
-          currentLine = testLine;
-        }
-      }
-      lines.push(currentLine);
-    }
-
-    const totalHeight = lines.length * scaledFontSize * lineHeight;
-    let startY = y;
-    if (verticalAlign === "middle") {
-      startY = (h - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
-    } else if (verticalAlign === "top") {
-      startY = (scaledFontSize * lineHeight) / 2;
+      ctx.textAlign = "left";
+      let cursorX = startX;
+      segments.forEach((seg) => {
+        ctx.fillStyle = seg.color ?? color;
+        ctx.fillText(seg.text, cursorX, rowY);
+        cursorX += ctx.measureText(seg.text).width;
+      });
     } else {
-      startY = h - totalHeight + (scaledFontSize * lineHeight) / 2;
-    }
+      const x = textAlign === "center" ? w / 2 : textAlign === "right" ? w : 0;
+      const y =
+        verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
 
-    lines.forEach((line) => {
-      ctx.fillText(line, x, startY);
-      startY += scaledFontSize * lineHeight;
-    });
+      const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
+      const paragraphs = text.split("\n");
+      const lines = [];
+
+      for (const paragraph of paragraphs) {
+        const words = paragraph.split(" ");
+        let currentLine = "";
+
+        for (let i = 0; i < words.length; i++) {
+          const testLine = currentLine ? currentLine + " " + words[i] : words[i];
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > finalMaxWidth && i > 0) {
+            lines.push(currentLine);
+            currentLine = words[i];
+          } else {
+            currentLine = testLine;
+          }
+        }
+        lines.push(currentLine);
+      }
+
+      const totalHeight = lines.length * scaledFontSize * lineHeight;
+      let startY = y;
+      if (verticalAlign === "middle") {
+        startY = (h - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
+      } else if (verticalAlign === "top") {
+        startY = (scaledFontSize * lineHeight) / 2;
+      } else {
+        startY = h - totalHeight + (scaledFontSize * lineHeight) / 2;
+      }
+
+      lines.forEach((line) => {
+        ctx.fillText(line, x, startY);
+        startY += scaledFontSize * lineHeight;
+      });
+    }
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -193,6 +234,7 @@ export function CanvasText({
     fontsLoadedKey,
     fontWeight,
     fontStyle,
+    segments,
   ]);
 
   useEffect(() => {

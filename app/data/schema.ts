@@ -534,9 +534,28 @@ export interface SvgOverlayItem {
 // using a cursive/script font instead of native WebGL text.
 // ---------------------------------------------------------------------------
 
-export interface HandwrittenNoteLine {
-  /** The line's text content. */
+export interface HandwrittenNoteSegment {
+  /** This segment's text, concatenated directly after the previous segment (no auto-spacing — include spaces yourself). */
   text: string;
+  /** Color for just this segment. Falls back to the line's/note's color when omitted. */
+  color?: string;
+}
+
+export interface HandwrittenNoteLine {
+  /**
+   * The line's text content. Ignored when `segments` is set — use one or
+   * the other, not both.
+   */
+  text?: string;
+  /**
+   * Split this line into differently-colored segments (e.g. to highlight a
+   * single word). Segments are concatenated in order with no added spacing,
+   * so include spaces in the segment text where needed. When set, `text` is
+   * ignored.
+   */
+  segments?: HandwrittenNoteSegment[];
+  /** Per-line color override. Falls back to the note's overall `color`. */
+  color?: string;
   /** Per-line font-size multiplier over the note's base `fontSize`. Defaults to 1. */
   scale?: number;
   /**
@@ -554,9 +573,14 @@ export interface HandwrittenNoteLine {
 export interface HandwrittenNoteSvg {
   /** Path to the SVG/image asset (relative to /public). */
   src: string;
-  /** X offset in world units, relative to the note's anchor. Defaults to 0. */
+  /**
+   * Where to anchor this icon relative to the note: "start" (just above the
+   * first line) or "end" (just below the last line). Defaults to "end".
+   */
+  anchor?: "start" | "end";
+  /** X offset in world units, relative to the anchor point. Defaults to 0. */
   offsetX?: number;
-  /** Y offset in world units, relative to the note's anchor. Defaults to just below the last line. */
+  /** Y offset in world units, relative to the anchor point. Defaults to a small gap outside the note. */
   offsetY?: number;
   /** Scale in X (world units). Defaults to 0.3. */
   scaleX?: number;
@@ -589,8 +613,8 @@ export interface HandwrittenNoteConfig {
   opacity?: number;
   /** Three.js renderOrder. Defaults to 20 (above verse text). */
   renderOrder?: number;
-  /** Optional decorative SVG anchored to this note (e.g. an arrow pointing at a verse). */
-  svg?: HandwrittenNoteSvg;
+  /** Optional decorative icons anchored to this note's start/end (e.g. an arrow pointing at a verse). */
+  svgs?: HandwrittenNoteSvg[];
 }
 
 export interface FoldState {

@@ -199,10 +199,17 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: -0.035,
       lines: [
         { text: "Bu ayeti her gece oku," },
-        { text: "Allah hiç uyumaz, hiç unutmaz." },
+        { text: "Allah hiç uyumaz, hiç unutmaz.", color: "#8a3324" },
         { text: "Gökler ve yer Ona aittir," },
         { text: "izinsiz kimse şefaat edemez." },
-        { text: "O seni daima koruyup gözetir," },
+        // Per-word color example via `segments` (replaces `text` on this line).
+        {
+          segments: [
+            { text: "O seni " },
+            { text: "daima", color: "#8a3324" },
+            { text: " koruyup gözetir," },
+          ],
+        },
         { text: "huzur bulursun, güvende hissedersin." },
       ],
     },
