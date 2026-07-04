@@ -326,25 +326,25 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
   //   sgBorderWidth: 0.006   → sectionBorderWidth
   //   sgPad: 0.03            → connectorPad
   globalSettings: {
-    capsuleHeight:      0.085,
-    columnGap:           0.12,
-    rowGap:              0.004,
-    blockGap:            0.025,
-    sectionPadX:         0.005,
-    blockPadding:        0.012,
-    sectionBorderWidth:  0.006,
-    connectorPad:        0.03,
-    capsuleLabelW:            0.16,
-    capsuleLabelH:            0.024,
-    capsuleLabelBorderWidth:  0.0035,
-    capsuleLabelDrop:         0.005,
+    capsuleHeight: 0.085,
+    columnGap: 0.12,
+    rowGap: 0.004,
+    blockGap: 0.025,
+    sectionPadX: 0.005,
+    blockPadding: 0.012,
+    sectionBorderWidth: 0.006,
+    connectorPad: 0.03,
+    capsuleLabelW: 0.16,
+    capsuleLabelH: 0.024,
+    capsuleLabelBorderWidth: 0.0035,
+    capsuleLabelDrop: 0.005,
   },
 
   sectionBackground: {
-    texture: "/ahzab/section-frame.svg",
+    texture: "/fatiha/all-section-bg.svg",
     scaleX: 1.47,
     scaleY: 1.41,
-    offsetY: 0.025,
+    offsetY: 0.035,
   },
 
   // ── Custom drag/click sections ─────────────────────────────────────────
