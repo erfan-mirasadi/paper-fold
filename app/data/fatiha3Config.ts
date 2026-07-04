@@ -57,9 +57,9 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
     // ── Verse 1 — solo wide pill, its own frame ─────────────────────────────
     1: {
       isPill: false,
-      expandW: 0.17,
+      expandW: 0.06,
       expandH: 0.02,
-      textScaleOverride: 0.8,
+      textScaleOverride: 0.6,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
@@ -70,9 +70,10 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
     },
     // ── Row 1 (5 left, 2 right) — yellow ────────────────────────────────────
     2: {
-      expandW: 0.08,
-      expandH: 0.008,
-      textScaleOverride: 1.15,
+      isPill: false,
+      expandW: 0.06,
+      expandH: 0.02,
+      textScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -81,9 +82,10 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT,
     },
     5: {
-      expandW: 0.08,
-      expandH: 0.008,
-      textScaleOverride: 1.15,
+      isPill: false,
+      expandW: 0.06,
+      expandH: 0.02,
+      textScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -93,8 +95,8 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
     },
     // ── Row 2 (6 left, 3 right) — blue ──────────────────────────────────────
     3: {
-      expandW: 0.08,
-      expandH: 0.006,
+      expandW: 0.06,
+      expandH: 0.02,
       textScaleOverride: 1.15,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
@@ -103,8 +105,8 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     6: {
-      expandW: 0.08,
-      expandH: 0.006,
+      expandW: 0.06,
+      expandH: 0.02,
       textScaleOverride: 1.15,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
@@ -114,8 +116,8 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
     },
     // ── Row 3 (7 left — wide/long, 4 right) — blue ─────────────────────────
     4: {
-      expandW: 0.08,
-      expandH: 0.006,
+      expandW: 0.06,
+      expandH: 0.02,
       textScaleOverride: 1.15,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
@@ -124,7 +126,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     7: {
-      expandW: 0.08,
+      expandW: 0.06,
       expandH: 0.02,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
@@ -199,13 +201,14 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       dragBehavior: "individual",
       customSectionId: "section2_v1",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
+      verticalNudge: -0.04,
     },
     {
       id: "section2_g1",
       type: "group",
       verseIds: [5, 2],
       columns: 2,
-      columnGap: 0.28,
+      columnGap: 0.2,
       isCenter: false,
       hideRowConnectors: true,
       gapBefore: 0.075,
@@ -217,7 +220,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [6, 3],
       columns: 2,
-      columnGap: 0.28,
+      columnGap: 0.2,
       isCenter: false,
       hideRowConnectors: true,
       dragBehavior: "individual",
@@ -228,7 +231,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [7, 4],
       columns: 2,
-      columnGap: 0.28,
+      columnGap: 0.2,
       isCenter: false,
       hideRowConnectors: true,
       dragBehavior: "individual",
@@ -237,51 +240,51 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
   ],
 
   svgOverlays: [
-    // Pink card behind the 2-column 2/3/4/5/6/7 cluster — Fatiha's own
-    // section background asset (same one Fatiha 1/2 use), not Ahzab's.
     {
       src: "/fatiha/all-section-bg.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: 1.32,
-      scaleY: 0.9,
+      scaleX: 1.15,
+      scaleY: 1.15,
       offsetX: 0,
-      offsetY: -0.07,
+      offsetY: -0.1,
       renderOrder: 1,
     },
-    {
-      src: "/fatiha/bismillah-frame-3.svg",
-      anchorGroupIndex: 0,
-      anchorEdge: "center",
-      scaleX: 0.9,
-      scaleY: 0.22,
-      offsetX: 0,
-      offsetY: 0,
-      renderOrder: 10,
-      customSectionId: "section2_v1",
-    },
-    {
-      src: "/fatiha/bismillah-frame-3.svg",
-      anchorGroupIndex: 1,
-      anchorEdge: "top",
-      scaleX: 0.63,
-      scaleY: 0.55,
-      offsetX: 0.315,
-      offsetY: -0.21,
-      renderOrder: 3,
-      customSectionId: "section2_v234",
-    },
-    {
-      src: "/fatiha/bismillah-frame-3.svg",
-      anchorGroupIndex: 1,
-      anchorEdge: "top",
-      scaleX: 0.63,
-      scaleY: 0.55,
-      offsetX: -0.315,
-      offsetY: -0.21,
-      renderOrder: 3,
-      customSectionId: "section2_v567",
-    },
+    //   {
+    //     src: "/fatiha/bismillah-frame-3.svg",
+    //     anchorGroupIndex: 0,
+    //     anchorEdge: "center",
+    //     scaleX: 0.9,
+    //     scaleY: 0.22,
+    //     offsetX: 0,
+    //     offsetY: 0,
+    //     renderOrder: 10,
+    //     customSectionId: "section2_v1",
+    //   },
+    // {
+    //   src: "/fatiha/middle-3.svg",
+    //   anchorGroupIndex: 1,
+    //   anchorEdge: "top",
+    //   scaleX: 0.5,
+    //   scaleY: 0.65,
+    //   offsetX: 0.28,
+    //   offsetY: -0.21,
+    //   rotationZ: -Math.PI / 2,
+    //   renderOrder: 3,
+    //   customSectionId: "section2_v234",
+    // },
+    // {
+    //   src: "/fatiha/middle-3.svg",
+    //   anchorGroupIndex: 1,
+    //   anchorEdge: "top",
+    //   scaleX: 0.5,
+    //   scaleY: 0.65,
+    //   offsetX: -0.28,
+    //   offsetY: -0.21,
+    //   rotationZ: -Math.PI / 2,
+    //   renderOrder: 3,
+    //   customSectionId: "section2_v567",
+    // },
   ],
 
   customSections: [
@@ -346,10 +349,6 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
     },
   },
 };
-
-// ---------------------------------------------------------------------------
-// TEXT DATA
-// ---------------------------------------------------------------------------
 
 export const FATIHA_3_TEXT_AR: SurahDataShape = {
   bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
