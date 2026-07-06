@@ -812,8 +812,9 @@ function DynamicElevatedBlock({
           {!block.hideRowConnectors &&
             rowConnectors.map((rc: RowConnectorTransform, j: number) => {
               const cols = block.columns ?? 2;
+              const connCols = block.rowConnectorCols ?? cols;
               const leftVId = block.verseIds?.[j * cols];
-              const rightVId = block.verseIds?.[j * cols + (cols - 1)];
+              const rightVId = block.verseIds?.[j * cols + (connCols - 1)];
 
               const leftExpandW = leftVId !== undefined ? (config.verseOverrides?.[leftVId]?.expandW ?? 0) : 0;
               const rightExpandW = rightVId !== undefined ? (config.verseOverrides?.[rightVId]?.expandW ?? 0) : 0;

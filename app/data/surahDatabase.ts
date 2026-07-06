@@ -83,6 +83,7 @@ const LEGACY_SURAH_ALIASES: Readonly<Record<string, string>> = {
   fatiha1: "fatiha",
   fatiha2: "fatiha",
   fatiha3: "fatiha",
+  fatiha4: "fatiha",
 };
 
 // Pre-built lookup map for O(1) access by id
@@ -118,6 +119,11 @@ const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> 
       import("./fatiha3Config").then((m) => ({
         config: m.FATIHA_3_CONFIG,
         textData: m.FATIHA_3_TEXT_DATA,
+      })),
+    () =>
+      import("./fatiha4Config").then((m) => ({
+        config: m.FATIHA_4_CONFIG,
+        textData: m.FATIHA_4_TEXT_DATA,
       })),
   ],
   alak: [

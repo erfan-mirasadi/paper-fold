@@ -428,11 +428,13 @@ export function buildBlockTransforms(
     const blockBaseX    = startX + gs.sectionPadX + inset;
 
     // Width of a single capsule column.
-    // IMPORTANT: mirrors legacy `standardGHalfW = (gInnerW - groupPad*2 - s2Gap) / 2`.
-    // Even for columns:1, the base width is the half-column size so that
-    // verseOverrides.expandW (e.g. 0.2) does the full-width stretching — exactly
-    // as in the legacy engine. Using full blockInnerW here would double-count expandW.
-    const colW = (blockInnerW - bPad * 2 - colGap) / 2;
+    // For cols === 1 or 2, mirrors the legacy formula exactly:
+    //   standardGHalfW = (gInnerW - groupPad*2 - s2Gap) / 2
+    // For cols > 2, generalises: the available inner width (minus padding and
+    // ALL inter-column gaps) is divided equally among all columns.
+    const colW = cols <= 2
+      ? (blockInnerW - bPad * 2 - colGap) / 2
+      : (blockInnerW - bPad * 2 - colGapForPosition * (cols - 1)) / cols;
 
     const centerX = blockBaseX + blockInnerW / 2;
 
@@ -542,17 +544,25 @@ export function buildBlockTransforms(
     const verses: Record<number, ElementTransform> = {};
 
     verseIds.forEach((vId, i) => {
-      const isRight  = cols === 2 ? i % 2 !== 0 : false;
-      const row      = Math.floor(i / cols);
+      const row       = Math.floor(i / cols);
+      const colIndex  = i % cols;          // 0 = leftmost in RTL display order
       const rowOffset = row * (capH + rGap + (block.extraRowGap ?? 0));
 
       let vx: number;
       if (cols === 1) {
+        // Single column — centre the capsule (legacy expandW stretches it out)
         vx = centerX - colW / 2;
-      } else {
+      } else if (cols === 2) {
+        // Legacy 2-column path: left = index 0, right = index 1
+        const isRight = colIndex !== 0;
         vx = isRight
           ? centerX + colGapForPosition / 2
           : centerX - colGapForPosition / 2 - colW;
+      } else {
+        // General N-column path.
+        // Columns are laid out left → right starting from blockBaseX + bPad.
+        // colIndex 0 is the leftmost column (highest verse number in Arabic RTL).
+        vx = blockBaseX + bPad + colIndex * (colW + colGapForPosition);
       }
 
       // Per-verse xOffset nudge from verseOverrides
@@ -604,14 +614,21 @@ export function buildBlockTransforms(
       continue;
     }
 
-    // Row connectors (only for 2-col blocks, or forced 1-col)
+    // Row connectors: drawn for 2-col blocks (legacy), or any block with
+    // cols > 2 (new: spans leftmost → rightmost capsule in the row),
+    // or for forced 1-col blocks.
+    // `rowConnectorCols` limits the span to a subset of columns from the left.
     const numRows = Math.ceil(verseIds.length / cols);
+    const connCols = block.rowConnectorCols ?? cols; // how many cols to bridge
     const rowConnectors: RowConnectorTransform[] = [];
-    const shouldDrawConnectors = (cols === 2 && !block.hideRowConnectors) || block.forceRowConnector;
+    const shouldDrawConnectors = (!block.hideRowConnectors && cols >= 2) || block.forceRowConnector;
     if (shouldDrawConnectors) {
       for (let r = 0; r < numRows; r++) {
+        // leftmost capsule = first in the row (colIndex 0)
         const lv = verses[verseIds[r * cols]];
-        const rv = cols === 2 ? verses[verseIds[r * cols + 1]] : lv;
+        // rightmost capsule: limited by rowConnectorCols
+        const lastColInRow = Math.min(connCols - 1, verseIds.length - r * cols - 1);
+        const rv = verses[verseIds[r * cols + lastColInRow]];
         if (lv && rv) {
           const padX = block.rowConnectorPadX ?? OPPOSITE_VERSE_CONNECTOR.paddingX;
           const padY = block.rowConnectorPadY ?? OPPOSITE_VERSE_CONNECTOR.paddingY;

@@ -389,6 +389,16 @@ export interface LayoutBlock {
   /** When `true`, forces a row connector background even if the block has 1 column. */
   forceRowConnector?: boolean;
 
+  /**
+   * Limits the row connector span to this many columns from the LEFT, instead
+   * of spanning the full row width. Use when the rightmost column(s) should
+   * NOT be bridged by the connector.
+   * Example: in a 3-column block [4,3,2] with `rowConnectorCols: 2`, the
+   * connector spans only between col-0 (verse 4) and col-1 (verse 3), leaving
+   * the orange verse 2 unconnected.
+   */
+  rowConnectorCols?: number;
+
   /** Custom padding overrides for the row connector, allowing it to be larger or smaller. */
   rowConnectorPadX?: number;
   rowConnectorPadY?: number;
