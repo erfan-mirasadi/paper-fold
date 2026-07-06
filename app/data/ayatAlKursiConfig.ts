@@ -217,8 +217,8 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
         {
           src: "/ayatalKursi/divider.svg",
           anchor: "start",
-          offsetX: 1.2,
-          offsetY: -0.23,
+          offsetX: 0.62,
+          offsetY: -0.36,
           scaleX: 0.3,
           scaleY: 0.15,
         },

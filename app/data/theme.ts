@@ -82,7 +82,7 @@ export const WHITE_VERSE_BG = "#ffffff";
 export const QURAN_FONT = "/fonts/KFGQPC-Uthman-Taha-Naskh-Bold.woff2";
 export const LATIN_VERSE_FONT = "/fonts/FiraSansCondensed-Medium.woff2";
 export const LATIN_LABEL_FONT = "/fonts/FiraSansCondensed-Medium.woff2";
-export const HANDWRITTEN_FONT = "/fonts/segoe-script-regular.woff2";
+export const HANDWRITTEN_FONT = "/fonts/segoe-script-bold.woff2";
 
 /**
  * Canvas-2D font-family names registered via the FontFace API (see
