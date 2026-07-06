@@ -244,7 +244,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       src: "/fatiha/all-section-bg.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: 1.15,
+      scaleX: 1.18,
       scaleY: 1.15,
       offsetX: 0,
       offsetY: -0.1,
@@ -261,30 +261,30 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
     //     renderOrder: 10,
     //     customSectionId: "section2_v1",
     //   },
-    // {
-    //   src: "/fatiha/middle-3.svg",
-    //   anchorGroupIndex: 1,
-    //   anchorEdge: "top",
-    //   scaleX: 0.5,
-    //   scaleY: 0.65,
-    //   offsetX: 0.28,
-    //   offsetY: -0.21,
-    //   rotationZ: -Math.PI / 2,
-    //   renderOrder: 3,
-    //   customSectionId: "section2_v234",
-    // },
-    // {
-    //   src: "/fatiha/middle-3.svg",
-    //   anchorGroupIndex: 1,
-    //   anchorEdge: "top",
-    //   scaleX: 0.5,
-    //   scaleY: 0.65,
-    //   offsetX: -0.28,
-    //   offsetY: -0.21,
-    //   rotationZ: -Math.PI / 2,
-    //   renderOrder: 3,
-    //   customSectionId: "section2_v567",
-    // },
+    {
+      src: "/fatiha/bismillah-frame-3.svg",
+      anchorGroupIndex: 1,
+      anchorEdge: "top",
+      scaleX: 0.52,
+      scaleY: 0.63,
+      offsetX: 0.28,
+      offsetY: -0.21,
+      rotationZ: -Math.PI / 2,
+      renderOrder: 3,
+      customSectionId: "section2_v234",
+    },
+    {
+      src: "/fatiha/bismillah-frame-3.svg",
+      anchorGroupIndex: 1,
+      anchorEdge: "top",
+      scaleX: 0.52,
+      scaleY: 0.63,
+      offsetX: -0.28,
+      offsetY: -0.21,
+      rotationZ: -Math.PI / 2,
+      renderOrder: 3,
+      customSectionId: "section2_v567",
+    },
   ],
 
   customSections: [
@@ -316,15 +316,18 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       const fold2 =
         (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) /
         2;
-      return [fold0, fold1, fold2];
+      // ── fold3: crease below verses 4 and 7 ─────────────────────
+      const fold3 = lm.groupYPositions[3] - lm.groupHeights[3] - 0.05;
+      return [fold0, fold1, fold2, fold3];
     },
     foldSteps: [
       {
         id: "pre-start",
         folds: [
+          { direction: 1, angleFactor: 0 },
           { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1.06 },
+          { direction: 1, angleFactor: 0.56 },
         ],
       },
       {
@@ -333,6 +336,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
           { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
           { direction: 1, angleFactor: 0 },
+          { direction: -1, angleFactor: 0 },
         ],
       },
     ],
