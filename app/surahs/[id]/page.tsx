@@ -13,10 +13,10 @@
  *      so the store already holds the correct config when the canvas boots.
  */
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 
-import { getSurahMeta } from "@/app/data/surahDatabase";
+import { getSurahMeta, resolveLegacySurahId } from "@/app/data/surahDatabase";
 import { StoreInitializer } from "./StoreInitializer";
 
 // ---------------------------------------------------------------------------
@@ -29,7 +29,8 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const meta = getSurahMeta(id);
+  // Retired ids (e.g. fatiha1..3, now papers of "fatiha") resolve to their target.
+  const meta = getSurahMeta(resolveLegacySurahId(id) ?? id);
 
   if (!meta) {
     return { title: "Not Found | Quran Fold" };
@@ -47,6 +48,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function SurahPage({ params }: PageProps) {
   const { id } = await params;
+
+  // Old standalone routes (fatiha1..3) now live as papers inside "fatiha" —
+  // keep existing links and bookmarks working.
+  const legacyTarget = resolveLegacySurahId(id);
+  if (legacyTarget) {
+    redirect(`/surahs/${legacyTarget}`);
+  }
 
   // Validate on the server — unknown id → Next.js 404 page.
   // We use the lightweight metadata registry.

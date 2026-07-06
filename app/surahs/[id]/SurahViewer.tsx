@@ -33,9 +33,11 @@ import { IntroBackgroundTextOverlay } from "@/app/_components/dom/IntroBackgroun
 import { HeroTitleOverlay } from "@/app/_components/dom/ui-overlay/HeroTitleOverlay";
 import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButton";
 import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOverlay";
+import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
+import { usePaperStore } from "@/app/stores/usePaperStore";
 
 const Experience = dynamic(
   () =>
@@ -62,6 +64,12 @@ export default function SurahViewer() {
   const scrollPages = useStoryStore(
     (s) => s.activeConfig.dimensions.scrollPages,
   );
+
+  // Multi-paper navigation: bumping paperInstanceKey remounts the canvas
+  // scene (full GPU dispose of the outgoing paper) behind the switch overlay.
+  const paperInstanceKey = usePaperStore((s) => s.paperInstanceKey);
+  const isPaperSwitching = usePaperStore((s) => s.isSwitching);
+
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -136,6 +144,9 @@ export default function SurahViewer() {
 
   const handleSceneReady = useCallback(() => {
     setIsSceneReady(true);
+    // If this ready signal comes from a freshly swapped paper, it dismisses
+    // the switch overlay. No-op on the initial mount.
+    usePaperStore.getState().completeSwitch();
   }, []);
 
   return (
@@ -148,6 +159,8 @@ export default function SurahViewer() {
         isIntroRenderPhase={isIntroRenderPhase}
         mountMainOverlays={mountMainOverlays}
         scrollPages={scrollPages}
+        paperInstanceKey={paperInstanceKey}
+        isPaperSwitching={isPaperSwitching}
         canvasWrapperRef={canvasWrapperRef}
         handleSceneReady={handleSceneReady}
       />
@@ -163,6 +176,8 @@ interface InnerProps {
   isIntroRenderPhase: boolean;
   mountMainOverlays: boolean;
   scrollPages: number;
+  paperInstanceKey: number;
+  isPaperSwitching: boolean;
   canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
   handleSceneReady: () => void;
 }
@@ -175,6 +190,8 @@ function SurahViewerInner({
   isIntroRenderPhase,
   mountMainOverlays,
   scrollPages,
+  paperInstanceKey,
+  isPaperSwitching,
   canvasWrapperRef,
   handleSceneReady,
 }: InnerProps) {
@@ -272,7 +289,15 @@ function SurahViewerInner({
               >
                 <ScrollManager />
                 <PopUpHoverScrollController />
-                <Experience onReady={handleSceneReady} />
+                {/*
+                 * key={paperInstanceKey} — the whole scene subtree remounts on
+                 * paper switch so the outgoing paper's geometries/RenderTextures
+                 * are disposed before the new paper allocates. The WebGL context,
+                 * loaded fonts and drei's texture cache all survive (they live on
+                 * the Canvas / module level), so a swap is far cheaper than a
+                 * route navigation.
+                 */}
+                <Experience key={paperInstanceKey} onReady={handleSceneReady} />
                 <CameraViewController />
                 {!isMobile && <Preload all />}
               </Canvas>
@@ -283,6 +308,17 @@ function SurahViewerInner({
 
       <AnimatePresence>
         {!isSceneReady && <SiteLoadingOverlay key="site-loader" />}
+      </AnimatePresence>
+
+      {/*
+       * Paper-switch overlay — covers the scene remount while navigating
+       * between papers of the same Surah. It blocks all scroll input and is
+       * dismissed by the new paper's ready signal (see handleSceneReady).
+       */}
+      <AnimatePresence>
+        {isSceneReady && isPaperSwitching && (
+          <SiteLoadingOverlay key="paper-switch-loader" />
+        )}
       </AnimatePresence>
 
       {isSceneReady && (
@@ -338,6 +374,7 @@ function SurahViewerInner({
                   <TitleOverlay />
                   <CameraViewPresetOverlay />
                   <ScrollHintOverlay />
+                  <PaperArrowsOverlay />
                 </motion.div>
               )}
             </AnimatePresence>

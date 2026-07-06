@@ -17,7 +17,14 @@ export interface SurahMeta {
   reference: string;
 }
 
-export interface SurahEntry extends SurahMeta {
+/**
+ * One physical paper inside a Surah page.
+ *
+ * A Surah route can present several papers (each with its own exclusive
+ * layout, folding, elevated sections, pop-ups, …). Exactly ONE paper is ever
+ * live on the GPU at a time — the rest exist only as cached config data.
+ */
+export interface SurahPaper {
   /** Layout & animation config injected into useStoryStore */
   config: SurahLayoutConfig;
   /** Multi-language text data injected into useStoryStore */
@@ -30,22 +37,10 @@ export interface SurahEntry extends SurahMeta {
 
 const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
   {
-    id: "fatiha1",
+    id: "fatiha",
     displayName: "Al-Fatiha",
     arabicName: "الفاتحة",
     reference: "Al-Fatiha 1",
-  },
-  {
-    id: "fatiha2",
-    displayName: "Al-Fatiha 2",
-    arabicName: "الفاتحة 2",
-    reference: "Al-Fatiha 2",
-  },
-  {
-    id: "fatiha3",
-    displayName: "Al-Fatiha 3",
-    arabicName: "الفاتحة 3",
-    reference: "Al-Fatiha 3",
   },
   {
     id: "alak",
@@ -79,10 +74,95 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
   },
 ] as const;
 
+/**
+ * Old route ids that used to be standalone Surah pages and now live as papers
+ * inside a multi-paper Surah. `app/surahs/[id]/page.tsx` redirects them so
+ * existing links and bookmarks keep working.
+ */
+const LEGACY_SURAH_ALIASES: Readonly<Record<string, string>> = {
+  fatiha1: "fatiha",
+  fatiha2: "fatiha",
+  fatiha3: "fatiha",
+};
+
 // Pre-built lookup map for O(1) access by id
 const META_REGISTRY_MAP = new Map<string, SurahMeta>(
   SURAH_META_REGISTRY.map((meta) => [meta.id, meta]),
 );
+
+// ---------------------------------------------------------------------------
+// Paper loaders — one dynamic-import loader per paper, per Surah.
+//
+// Bundle-splitting rule: every config stays in its own chunk. A paper's chunk
+// is fetched only when that paper is actually opened (or idle-prefetched as a
+// neighbor by usePaperStore). Config data is plain JS (a few KB) — the heavy
+// cost of a paper is its GPU textures, which are owned by the live scene, not
+// by this module.
+// ---------------------------------------------------------------------------
+
+type PaperLoader = () => Promise<SurahPaper>;
+
+const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> = {
+  fatiha: [
+    () =>
+      import("./fatiha1Config").then((m) => ({
+        config: m.FATIHA_1_CONFIG,
+        textData: m.FATIHA_1_TEXT_DATA,
+      })),
+    () =>
+      import("./fatiha2Config").then((m) => ({
+        config: m.FATIHA_2_CONFIG,
+        textData: m.FATIHA_2_TEXT_DATA,
+      })),
+    () =>
+      import("./fatiha3Config").then((m) => ({
+        config: m.FATIHA_3_CONFIG,
+        textData: m.FATIHA_3_TEXT_DATA,
+      })),
+  ],
+  alak: [
+    () =>
+      Promise.all([import("./alak96Config"), import("./surahData")]).then(
+        ([configModule, dataModule]) => ({
+          config: configModule.ALAK_LAYOUT_CONFIG,
+          textData: dataModule.ALAK_TEXT_DATA,
+        }),
+      ),
+  ],
+  ayatalkursi: [
+    () =>
+      import("./ayatAlKursiConfig").then((m) => ({
+        config: m.AYAT_AL_KURSI_CONFIG,
+        textData: m.AYAT_AL_KURSI_TEXT_DATA,
+      })),
+  ],
+  ahzab35: [
+    () =>
+      import("./ahzab35Config").then((m) => ({
+        config: m.AHZAB_35_CONFIG,
+        textData: m.AHZAB_35_TEXT_DATA,
+      })),
+  ],
+  ihlas112: [
+    () =>
+      import("./ihlas112Config").then((m) => ({
+        config: m.IHLAS_112_CONFIG,
+        textData: m.IHLAS_112_TEXT_DATA,
+      })),
+  ],
+  kafirun109: [
+    () =>
+      import("./kafirun109Config").then((m) => ({
+        config: m.KAFIRUN_109_CONFIG,
+        textData: m.KAFIRUN_109_TEXT_DATA,
+      })),
+  ],
+};
+
+// Memoized in-flight/settled promises. Keeping resolved configs cached makes
+// arrow navigation (and back/forward between papers) instant after the first
+// visit, at a negligible memory cost — this cache never touches GPU memory.
+const paperPromiseCache = new Map<string, Promise<SurahPaper>>();
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -103,83 +183,33 @@ export function getAllSurahs(): ReadonlyArray<SurahMeta> {
   return SURAH_META_REGISTRY;
 }
 
-/**
- * Asynchronously fetch the heavy config and text data for a specific Surah.
- * Uses dynamic imports to code-split the data per route, preventing giant bundle sizes.
- */
-export async function getSurahDataAsync(id: string): Promise<SurahEntry | null> {
-  const meta = getSurahMeta(id);
-  if (!meta) return null;
+/** Resolve a retired route id to its canonical Surah id, or null. */
+export function resolveLegacySurahId(id: string): string | null {
+  return LEGACY_SURAH_ALIASES[id] ?? null;
+}
 
-  switch (id) {
-    case "fatiha1": {
-      const module = await import("./fatiha1Config");
-      return {
-        ...meta,
-        config: module.FATIHA_1_CONFIG,
-        textData: module.FATIHA_1_TEXT_DATA,
-      };
-    }
-    case "fatiha2": {
-      const module = await import("./fatiha2Config");
-      return {
-        ...meta,
-        config: module.FATIHA_2_CONFIG,
-        textData: module.FATIHA_2_TEXT_DATA,
-      };
-    }
-    case "fatiha3": {
-      const module = await import("./fatiha3Config");
-      return {
-        ...meta,
-        config: module.FATIHA_3_CONFIG,
-        textData: module.FATIHA_3_TEXT_DATA,
-      };
-    }
-    case "alak": {
-      const [configModule, dataModule] = await Promise.all([
-        import("./alak96Config"),
-        import("./surahData")
-      ]);
-      return {
-        ...meta,
-        config: configModule.ALAK_LAYOUT_CONFIG,
-        textData: dataModule.ALAK_TEXT_DATA,
-      };
-    }
-    case "ayatalkursi": {
-      const module = await import("./ayatAlKursiConfig");
-      return {
-        ...meta,
-        config: module.AYAT_AL_KURSI_CONFIG,
-        textData: module.AYAT_AL_KURSI_TEXT_DATA,
-      };
-    }
-    case "ahzab35": {
-      const module = await import("./ahzab35Config");
-      return {
-        ...meta,
-        config: module.AHZAB_35_CONFIG,
-        textData: module.AHZAB_35_TEXT_DATA,
-      };
-    }
-    case "ihlas112": {
-      const module = await import("./ihlas112Config");
-      return {
-        ...meta,
-        config: module.IHLAS_112_CONFIG,
-        textData: module.IHLAS_112_TEXT_DATA,
-      };
-    }
-    case "kafirun109": {
-      const module = await import("./kafirun109Config");
-      return {
-        ...meta,
-        config: module.KAFIRUN_109_CONFIG,
-        textData: module.KAFIRUN_109_TEXT_DATA,
-      };
-    }
-    default:
-      return null;
+/** How many papers a Surah page presents (0 for unknown ids). */
+export function getSurahPaperCount(id: string): number {
+  return SURAH_PAPER_LOADERS[id]?.length ?? 0;
+}
+
+/**
+ * Asynchronously fetch the heavy config and text data for one paper of a Surah.
+ * Results are memoized; a failed fetch is evicted so it can be retried.
+ */
+export function loadSurahPaper(
+  id: string,
+  paperIndex: number,
+): Promise<SurahPaper | null> {
+  const loader = SURAH_PAPER_LOADERS[id]?.[paperIndex];
+  if (!loader) return Promise.resolve(null);
+
+  const cacheKey = `${id}:${paperIndex}`;
+  let promise = paperPromiseCache.get(cacheKey);
+  if (!promise) {
+    promise = loader();
+    promise.catch(() => paperPromiseCache.delete(cacheKey));
+    paperPromiseCache.set(cacheKey, promise);
   }
+  return promise;
 }
