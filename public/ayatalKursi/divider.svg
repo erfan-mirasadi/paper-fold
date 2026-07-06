@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="300" height="150">
+  
+  <path 
+    d="M 32,32 Q 55,29 82,31 Q 87,50 84,115 Q 60,119 33,116 Q 29,90 32,32" 
+    fill="none" 
+    stroke="#8a4b3d" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+  />
+  
+  <path 
+    d="M 45,65 Q 57,75 69,85 M 69,65 Q 57,75 45,85" 
+    fill="none" 
+    stroke="#8a4b3d" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+  />
+
+  <path 
+    d="M 148,15 L 148,135" 
+    fill="none" 
+    stroke="#4a4a4a" 
+    stroke-width="2" 
+    stroke-dasharray="10 12" 
+    stroke-linecap="round" 
+  />
+
+  <path 
+    d="M 105,50 Q 150,45 190,50" 
+    fill="none" 
+    stroke="#3d4f40" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+  />
+  
+  <path 
+    d="M 175,35 Q 185,45 190,50 Q 185,60 175,65" 
+    fill="none" 
+    stroke="#3d4f40" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+  />
+
+  <path 
+    d="M 190,95 Q 150,100 105,95" 
+    fill="none" 
+    stroke="#8a4b3d" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+  />
+  
+  <path 
+    d="M 120,80 Q 110,90 105,95 Q 110,105 120,110" 
+    fill="none" 
+    stroke="#8a4b3d" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+  />
+
+  <path 
+    d="M 212,32 Q 235,29 262,31 Q 267,50 264,115 Q 240,119 213,116 Q 209,90 212,32" 
+    fill="none" 
+    stroke="#3d4f40" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+  />
+  
+  <path 
+    d="M 225,75 Q 230,85 235,90 Q 245,70 255,55" 
+    fill="none" 
+    stroke="#3d4f40" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+  />
+  
+</svg>

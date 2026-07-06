@@ -194,23 +194,34 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       fontSize: 0.04,
       color: "#2f4858",
       lineSpacing: 2,
-      maxWidth: 0.7,
+      maxWidth: 1.5,
       textAlign: "left",
       rotationZ: 0,
       lines: [
-        { text: "Bu ayeti her gece oku," },
-        { text: "Allah hiç uyumaz, hiç unutmaz.", color: "#8a3324" },
-        { text: "Gökler ve yer Ona aittir," },
-        { text: "izinsiz kimse şefaat edemez." },
-        // Per-word color example via `segments` (replaces `text` on this line).
-        // {
-        //   segments: [
-        //     { text: "O seni " },
-        //     { text: "daima", color: "#8a3324" },
-        //     { text: " koruyup gözetir," },
-        //   ],
-        // },
-        // { text: "huzur bulursun, güvende hissedersin." },
+        {
+          segments: [
+            { text: "Sağ blokta müspet ", color: "#3d4f40" },
+            { text: "cümlelerle hakikat beyan edilir;" },
+          ],
+        },
+        {
+          segments: [
+            { text: "sol blokta menfi ", color: "#8a4b3d" },
+            { text: "cümlelerle bu hakikate aykırı bütün" },
+          ],
+        },
+        { text: "yanlışlar reddedilir. Bu ahenkli diziliş, Ayetü'l-" },
+        { text: "Kürsî'nin eşsiz nazmını yansıtır." },
+      ],
+      svgs: [
+        {
+          src: "/ayatalKursi/divider.svg",
+          anchor: "start",
+          offsetX: 1.2,
+          offsetY: -0.23,
+          scaleX: 0.3,
+          scaleY: 0.15,
+        },
       ],
     },
   ],
