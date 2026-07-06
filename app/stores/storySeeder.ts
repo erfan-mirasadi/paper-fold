@@ -17,7 +17,20 @@ import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import { cleanupIntroAnimations } from "../hooks/useIntroSectionAnimation";
 import type { SurahPaper } from "../data/surahDatabase";
 
-export function seedStoresForPaper(paper: SurahPaper): void {
+export interface SeedStoresOptions {
+  /**
+   * Keep the user's camera view selection (bottom-left preset controls)
+   * across in-page paper switches. Route-level loads always reset to the
+   * default view. The freshly mounted camera is re-aimed at the preserved
+   * view by usePaperStore.completeSwitch once the new scene is live.
+   */
+  preserveCameraView?: boolean;
+}
+
+export function seedStoresForPaper(
+  paper: SurahPaper,
+  options: SeedStoresOptions = {},
+): void {
   const { config, textData } = paper;
 
   cleanupIntroAnimations();
@@ -30,11 +43,13 @@ export function seedStoresForPaper(paper: SurahPaper): void {
     cameraTarget: null,
     phase: "idle",
   });
-  useCameraViewStore.setState({
-    requestedView: null,
-    selectedView: "default",
-    continuousOffset: null,
-  });
+  if (!options.preserveCameraView) {
+    useCameraViewStore.setState({
+      requestedView: null,
+      selectedView: "default",
+      continuousOffset: null,
+    });
+  }
   useTafsirStore.setState({
     tafsirActiveId: null,
     tafsirAnchorPos: { x: -9999, y: -9999 },

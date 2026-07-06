@@ -26,6 +26,7 @@
 import { create } from "zustand";
 import { getSurahPaperCount, loadSurahPaper } from "../data/surahDatabase";
 import { getLenisInstance } from "../_components/dom/LenisProvider";
+import { useCameraViewStore } from "./useCameraViewStore";
 import { seedStoresForPaper } from "./storySeeder";
 
 /** If the new paper never reports ready (e.g. WebGL context loss), release the overlay. */
@@ -92,6 +93,20 @@ function resetScrollToStoryStart(): void {
   const lenis = getLenisInstance();
   if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
   window.scrollTo(0, 0);
+}
+
+/**
+ * Re-aim the freshly mounted camera at the view the user had selected before
+ * the paper switch. The scene remount recreates the camera at its initial
+ * position, so a persisted preset must be re-requested once the new scene is
+ * live — CameraViewController then eases the camera into place behind the
+ * loading overlay. A continuous offset needs no help: the controller
+ * re-applies it every frame on its own.
+ */
+function reapplyCameraViewAfterSwitch(): void {
+  const { selectedView, continuousOffset } = useCameraViewStore.getState();
+  if (continuousOffset !== null || selectedView === "default") return;
+  useCameraViewStore.setState({ requestedView: selectedView });
 }
 
 /**
@@ -162,7 +177,10 @@ export const usePaperStore = create<PaperState>((set, get) => ({
         // fold story always restarts from the beginning: seedStoresForPaper
         // zeroes the fold store and resetScrollToStoryStart zeroes Lenis
         // before the commit, so no stale offset can survive the swap.
-        seedStoresForPaper(paper);
+        // The camera view selection is the one thing that DOES survive a
+        // paper switch (unlike route navigation) — completeSwitch re-aims
+        // the new camera at it.
+        seedStoresForPaper(paper, { preserveCameraView: true });
         resetScrollToStoryStart();
         set((state) => ({
           activePaperIndex: index,
@@ -197,5 +215,6 @@ export const usePaperStore = create<PaperState>((set, get) => ({
     if (!get().isSwitching) return;
     clearFailsafe();
     set({ isSwitching: false });
+    reapplyCameraViewAfterSwitch();
   },
 }));
