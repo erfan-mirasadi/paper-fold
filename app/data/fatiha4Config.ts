@@ -53,12 +53,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
   },
   specialVerses: {
     versePairings: {
-      2: 5,
-      5: 2,
-      3: 6,
-      6: 3,
-      4: 7,
-      7: 4,
+      3: 4,
+      4: 3,
+      5: 6,
+      6: 5,
     },
   },
   verseOverrides: {
@@ -220,7 +218,8 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       columnGap: 0.2, // Maintain visualGap = 0.03 with expandW = 0.08
       isCenter: false,
       hideRowConnectors: true,
-      dragBehavior: "individual",
+      dragBehavior: "group",
+      customSectionId: "section2_v234",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
     // ── Row 2: [7, 6, 5] — no connectors ─────────
@@ -233,7 +232,8 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       gapBefore: 0.16, // Reduced gap between row 1 and row 2 to move it higher
       isCenter: false,
       hideRowConnectors: true,
-      dragBehavior: "individual",
+      dragBehavior: "group",
+      customSectionId: "section2_v567",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
   ],

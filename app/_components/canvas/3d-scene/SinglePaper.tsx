@@ -1,7 +1,7 @@
 "use client";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { writeFoldAnglesForScroll } from "./FoldStory";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { easing } from "maath";
 import { useEffect, useMemo, useRef, FC } from "react";
 import {
@@ -27,10 +27,10 @@ import {
   TextureToggles,
 } from "./PaperMaterial";
 import { useFoldStore } from "../orchestrator/ScrollManager";
-import { usePaperStore } from "../../../stores/usePaperStore";
 import {
   registerPaperSnapshotSource,
   unregisterPaperSnapshotSource,
+  processPendingCaptureRequest,
   type PaperSnapshotSource,
 } from "./paperSnapshot";
 
@@ -374,10 +374,12 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   // and inject it into their panelMaterials[4] slot — no RenderTexture needed.
   const sharedMatRef = useRef<PaperMaterialHandle | null>(null);
 
+  const { gl } = useThree();
+
   // Register this paper as the capture source for the page-turn transition.
-  // usePaperStore grabs the LIVE material + current fold pose the instant a
-  // switch starts — the transition sheet shares them while this scene is
-  // still mounted, so the handoff is pixel-perfect with zero copy cost.
+  // usePaperStore blits GPU copies of the page textures the instant a switch
+  // starts, so the transition sheet can keep showing the old page WHILE the
+  // live material is already rebuilding with the new paper's content.
   useEffect(() => {
     const pageHeight = runtime.PAGE_HEIGHT;
     const foldYPositions = runtime.FOLD_Y_POSITIONS;
@@ -411,13 +413,14 @@ export const SinglePaper: FC<SinglePaperProps> = ({
       sceneCenterY: runtime.SCENE_CENTER_Y,
     };
 
-    registerPaperSnapshotSource(source);
+    registerPaperSnapshotSource(source, gl);
     return () => unregisterPaperSnapshotSource(source);
   }, [
     runtime.PAGE_WIDTH,
     runtime.PAGE_HEIGHT,
     runtime.SCENE_CENTER_Y,
     runtime.FOLD_Y_POSITIONS,
+    gl,
   ]);
 
   useEffect(() => {
@@ -441,22 +444,19 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   }, []);
 
   useFrame(() => {
-    const paperProgress = useFoldStore.getState().currentOffset;
-    const transitionPhase = usePaperStore.getState().transitionPhase;
+    // Processes usePaperStore's capture request (if any) right here, inside
+    // R3F's own frame loop — the one place renderer.render() calls are
+    // always safe to make. See paperSnapshot.ts for why this matters.
+    processPendingCaptureRequest();
 
-    // During the switch's "flatten"/"exit" phases the fold targets are
-    // zeroed — the per-bone damping below unfolds the paper smoothly, so the
-    // page-turn sheet (which is rigged flat) never meets a crease line.
-    if (transitionPhase === "flatten" || transitionPhase === "exit") {
-      globalFoldAngles.current!.fill(0);
-    } else {
-      // Fold angle computation runs ONCE here and is shared with all panels via ref.
-      writeFoldAnglesForScroll(
-        paperProgress,
-        runtime.foldSteps,
-        globalFoldAngles.current!,
-      );
-    }
+    const paperProgress = useFoldStore.getState().currentOffset;
+
+    // Fold angle computation runs ONCE here and is shared with all panels via ref.
+    writeFoldAnglesForScroll(
+      paperProgress,
+      runtime.foldSteps,
+      globalFoldAngles.current!,
+    );
 
     const maxStageIndex =
       runtime.foldSteps.length > 0 ? runtime.foldSteps.length - 1 : 0;

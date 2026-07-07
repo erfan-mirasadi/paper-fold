@@ -21,6 +21,7 @@ import { NavigationOverlay } from "@/app/_components/dom/ui-overlay/NavigationOv
 import { TitleOverlay } from "@/app/_components/dom/ui-overlay/TitleOverlay";
 import { ThemeToggleOverlay } from "@/app/_components/dom/ui-overlay/ThemeToggleOverlay";
 import { HomeButtonOverlay } from "@/app/_components/dom/ui-overlay/HomeButtonOverlay";
+import { SurahMenuOverlay } from "@/app/_components/dom/ui-overlay/SurahMenuOverlay";
 import { LanguageSwitchOverlay } from "@/app/_components/dom/ui-overlay/LanguageSwitchOverlay";
 import { AllSectionsOverlay } from "@/app/_components/dom/ui-overlay/AllSectionsOverlay";
 import { SiteLoadingOverlay } from "@/app/_components/dom/ui-overlay/SiteLoadingOverlay";
@@ -37,6 +38,7 @@ import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButto
 import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOverlay";
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
+import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
@@ -69,9 +71,9 @@ export default function SurahViewer() {
   );
 
   // Multi-paper navigation: the scene is PERSISTENT — switches swap only the
-  // content buffers in place. The loading overlay is only the fallback for
-  // switches where capturing the live paper failed.
-  const showSwitchFallback = usePaperStore((s) => s.switchFallback);
+  // content buffers in place. No overlay is shown for switches — a plain
+  // loading cursor is enough, since the transition itself never starts
+  // until the new content is truly ready (see usePaperStore).
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -162,7 +164,6 @@ export default function SurahViewer() {
         isIntroRenderPhase={isIntroRenderPhase}
         mountMainOverlays={mountMainOverlays}
         scrollPages={scrollPages}
-        showSwitchFallback={showSwitchFallback}
         canvasWrapperRef={canvasWrapperRef}
         handleSceneReady={handleSceneReady}
       />
@@ -178,7 +179,6 @@ interface InnerProps {
   isIntroRenderPhase: boolean;
   mountMainOverlays: boolean;
   scrollPages: number;
-  showSwitchFallback: boolean;
   canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
   handleSceneReady: () => void;
 }
@@ -191,7 +191,6 @@ function SurahViewerInner({
   isIntroRenderPhase,
   mountMainOverlays,
   scrollPages,
-  showSwitchFallback,
   canvasWrapperRef,
   handleSceneReady,
 }: InnerProps) {
@@ -216,6 +215,22 @@ function SurahViewerInner({
       document.body.style.overflow = "";
     }
   }, [lenis, isSceneReady]);
+
+  // "wait" cursor while a paper switch is in flight — subscribed via
+  // zustand.subscribe (NOT a React hook) so toggling isSwitching never
+  // re-renders the overlay tree. The cursor is purely imperative.
+  useEffect(() => {
+    const unsub = usePaperStore.subscribe((state, prevState) => {
+      if (state.isSwitching && !prevState.isSwitching) {
+        document.body.style.cursor = "wait";
+      } else if (!state.isSwitching && prevState.isSwitching) {
+        if (document.body.style.cursor === "wait") {
+          document.body.style.cursor = "";
+        }
+      }
+    });
+    return unsub;
+  }, []);
 
   return (
     <main
@@ -331,16 +346,7 @@ function SurahViewerInner({
         {!isSceneReady && <SiteLoadingOverlay key="site-loader" />}
       </AnimatePresence>
 
-      {/*
-       * Paper-switch fallback overlay — only shown when a switch could NOT
-       * capture a snapshot for the animated page-turn (e.g. WebGL context
-       * loss). Normal switches are carried entirely by the transition sheet.
-       */}
-      <AnimatePresence>
-        {isSceneReady && showSwitchFallback && (
-          <SiteLoadingOverlay key="paper-switch-loader" />
-        )}
-      </AnimatePresence>
+      <PaperSwitchCursorSpinner />
 
       {isSceneReady && (
         <motion.div
@@ -359,6 +365,7 @@ function SurahViewerInner({
           )}
 
           <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-100 flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none">
+            <SurahMenuOverlay />
             <HomeButtonOverlay />
             <ThemeToggleOverlay />
             <LanguageSwitchOverlay />

@@ -3,56 +3,58 @@
 /**
  * usePaperStore — multi-paper navigation inside a single Surah page.
  *
- * ONE persistent scene. Paper switches never remount the canvas tree —
- * only the content buffers (RenderTextures keyed by storyRevision) and the
- * config-bound subtrees rebuild in place, which keeps the swap commit small
- * and the WebGL state (camera, lights, meshes, compiled shaders) untouched.
+ * ONE persistent scene. Paper switches never remount the canvas tree — only
+ * the content buffers (RenderTextures keyed by storyRevision) rebuild in
+ * place, so the WebGL state (camera, lights, meshes, compiled shaders) is
+ * never torn down.
  *
- * The switch is a five-phase choreography with no frozen frames, no white
- * unsettled textures and no color shifts:
+ * The switch has exactly two visible phases, gated on TRUTH:
  *
- *   "flatten" — the REAL paper smoothly unfolds to flat (its fold targets
- *               are zeroed; the existing per-bone damping does the motion).
- *               Skipped when the paper is already flat.
- *   "exit"    — the transition sheet (sharing the outgoing paper's LIVE
- *               material — pixel-perfect, zero copy) replaces the flat paper
- *               and slides out of the viewport with an edge-concentrated
- *               vertical-axis curl. LEFT for next, RIGHT for previous.
- *   "waiting" — the sheet has left the screen. NOW the in-place content swap
- *               runs on a static background. The new content renders
- *               OFF-SCREEN, where its shaders compile and its texture draws.
- *   "enter"   — after a short adaptive gate (frames AND time, so slow
- *               devices automatically wait longer), the new paper glides in
- *               from the opposite side while its texture finishes settling.
- *   "idle"    — done; scroll unlocks.
+ *   "loading"   — starts the INSTANT the content swap happens (seed +
+ *                 storyRevision bump), so the new paper's RenderTexture
+ *                 begins compiling/settling off-screen right away. On
+ *                 screen, a FROZEN sheet (an independent GPU-texture copy of
+ *                 the outgoing page, in its exact former position and fold
+ *                 pose) sits completely still — no motion of any kind. This
+ *                 is intentional: loading and animating never run at the
+ *                 same time, so neither ever steals frame budget from the
+ *                 other and the animation itself is never janky. The ONLY
+ *                 feedback during this wait is a loading cursor.
+ *   "animating" — fires the instant the new paper's true "settled" signal
+ *                 arrives (the same settle pipeline the very first page
+ *                 load uses). From here the ENTIRE choreography plays once,
+ *                 uninterrupted, with nothing left to wait for: the frozen
+ *                 sheet unfolds (if it had folds), hands off invisibly to a
+ *                 curl sheet that curls + slides fully out, while the real
+ *                 paper (already fully settled) glides in from the opposite
+ *                 side, synchronized with the curl so the crossing reads as
+ *                 one continuous motion. Once both finish, the switch ends.
+ *
+ * A capture failure (outgoing paper never settled) skips the sheet meshes
+ * entirely but reuses the exact same phase machine — the real content still
+ * parks off-screen and glides in once ready.
  */
 
 import { create } from "zustand";
 import { getSurahPaperCount, loadSurahPaper } from "../data/surahDatabase";
-import type { SurahPaper } from "../data/surahDatabase";
 import { getLenisInstance } from "../_components/dom/LenisProvider";
 import { useCameraViewStore } from "./useCameraViewStore";
 import { useCameraStore } from "./useCameraStore";
 import { useElevatedStore } from "./useElevatedStore";
 import { seedStoresForPaper } from "./storySeeder";
 import {
-  capturePaperTransition,
+  requestPaperTransitionCapture,
   type PaperTransitionCapture,
 } from "../_components/canvas/3d-scene/paperSnapshot";
 
 /** If any phase hangs (e.g. WebGL context loss), force the switch to finish. */
-const SWITCH_FAILSAFE_MS = 15000;
-/** How long the real paper gets to unfold before the sheet takes over. */
-const FLATTEN_MS = 520;
-/** Fold rotations below this are considered "already flat" → skip flatten. */
+const SWITCH_FAILSAFE_MS = 20000;
+/** Fold rotations below this are considered "already flat" → no unfold step. */
 const FLAT_ANGLE_EPSILON = 0.06;
 
-export type PaperTransitionPhase =
-  | "idle"
-  | "flatten"
-  | "exit"
-  | "waiting"
-  | "enter";
+export type PaperTransitionPhase = "idle" | "loading" | "animating";
+/** Which sheet mesh is currently standing in for the outgoing page. */
+export type SheetStage = "flatten" | "curl";
 
 interface PaperState {
   /** Canonical Surah id of the currently mounted page (null before init). */
@@ -61,31 +63,29 @@ interface PaperState {
   paperCount: number;
   /** Index of the live paper. */
   activePaperIndex: number;
-  /** True from switch request until the enter animation lands. */
+  /** True from switch request until the switch fully lands. */
   isSwitching: boolean;
   /** Current phase of the animated switch choreography. */
   transitionPhase: PaperTransitionPhase;
   /** +1 → next (exit left, enter from right); -1 → previous (mirrored). */
   transitionDirection: 1 | -1;
-  /**
-   * True only when a switch could NOT capture the live paper (e.g. it never
-   * settled) — the viewer then shows the loading overlay as a fallback.
-   * Never true during a normal animated switch.
-   */
-  switchFallback: boolean;
+  /** True while "loading"/"animating" should render a flatten/curl sheet. */
+  hasTransitionSheet: boolean;
+  /** Which sheet mesh is mounted right now. */
+  sheetStage: SheetStage;
 
   /** Called once per route by StoreInitializer after the first paper is seeded. */
   initForSurah: (surahId: string) => void;
   goToPaper: (index: number) => void;
   goToNextPaper: () => void;
   goToPreviousPaper: () => void;
-  /** Called by the transition sheet once it has fully left the viewport. */
-  exitFinished: () => void;
-  /** Called by the slide group when the adaptive warm-up gate opens. */
-  beginEnter: () => void;
+  /** Called by the flatten sheet once its own unfold timeline completes. */
+  markFlattenVisualDone: () => void;
   /** Called when the freshly swapped paper's texture fully settles. */
   completeSwitch: () => void;
-  /** Called by the slide group when the enter glide has landed. */
+  /** Called by the curl sheet once its exit timeline completes. */
+  curlSheetFinished: () => void;
+  /** Called by the slide group once the enter glide lands. */
   enterFinished: () => void;
 }
 
@@ -94,31 +94,27 @@ interface PaperState {
 /** Invalidates in-flight switches when a newer switch/route init happens. */
 let switchToken = 0;
 let failsafeTimeoutId: number | null = null;
-let flattenTimeoutId: number | null = null;
 
-/**
- * Live handoff data for the transition sheet. Held at module level — it
- * references the outgoing content's material and is only read while that
- * content is still mounted.
- */
+/** GPU copies of the outgoing page for the flatten/curl sheets (nullable). */
 let activeCapture: PaperTransitionCapture | null = null;
 
-/** The loaded paper waiting to be swapped in once the exit completes. */
-let pendingPaper: SurahPaper | null = null;
-let pendingIndex = 0;
+/** Dual-condition gate for leaving "animating". */
+let curlDone = false;
+let enterDone = false;
 
 export function getActiveTransitionCapture(): PaperTransitionCapture | null {
   return activeCapture;
 }
 
-function clearTimers(): void {
+function disposeActiveCapture(): void {
+  activeCapture?.dispose();
+  activeCapture = null;
+}
+
+function clearFailsafe(): void {
   if (failsafeTimeoutId !== null) {
     window.clearTimeout(failsafeTimeoutId);
     failsafeTimeoutId = null;
-  }
-  if (flattenTimeoutId !== null) {
-    window.clearTimeout(flattenTimeoutId);
-    flattenTimeoutId = null;
   }
 }
 
@@ -159,22 +155,15 @@ function reapplyCameraViewAfterSwitch(): void {
   useCameraViewStore.setState({ requestedView: selectedView });
 }
 
-/**
- * The heavy part: seed every store (storyRevision bump rebuilds the content
- * buffers in place — the scene itself never remounts). Called ONLY when the
- * screen is static (sheet gone, incoming content off-screen), so the commit
- * stall is imperceptible.
- */
-function performPendingSwap(): void {
-  const paper = pendingPaper;
-  if (!paper) return;
-  pendingPaper = null;
-
-  seedStoresForPaper(paper, { preserveCameraView: true });
-  resetScrollToStoryStart();
+/** Ends the switch the instant BOTH the sheet and the glide have landed. */
+function tryFinishSwitch(): void {
+  if (!curlDone || !enterDone) return;
+  clearFailsafe();
+  disposeActiveCapture();
   usePaperStore.setState({
-    activePaperIndex: pendingIndex,
-    transitionPhase: "waiting",
+    transitionPhase: "idle",
+    isSwitching: false,
+    hasTransitionSheet: false,
   });
 }
 
@@ -202,21 +191,22 @@ export const usePaperStore = create<PaperState>((set, get) => ({
   isSwitching: false,
   transitionPhase: "idle",
   transitionDirection: 1,
-  switchFallback: false,
+  hasTransitionSheet: false,
+  sheetStage: "curl",
 
   initForSurah: (surahId) => {
     // Invalidate any in-flight switch from a previous route.
     switchToken += 1;
-    clearTimers();
-    activeCapture = null;
-    pendingPaper = null;
+    clearFailsafe();
+    disposeActiveCapture();
     set({
       surahId,
       paperCount: Math.max(getSurahPaperCount(surahId), 1),
       activePaperIndex: 0,
       isSwitching: false,
       transitionPhase: "idle",
-      switchFallback: false,
+      hasTransitionSheet: false,
+      sheetStage: "curl",
     });
     prefetchNeighborPapers(surahId, 0);
   },
@@ -227,21 +217,21 @@ export const usePaperStore = create<PaperState>((set, get) => ({
     if (index === activePaperIndex || index < 0 || index >= paperCount) return;
 
     const token = ++switchToken;
-    clearTimers();
+    clearFailsafe();
     const direction: 1 | -1 = index > activePaperIndex ? 1 : -1;
-    // Locks scroll (ScrollManager) and disables the arrows immediately.
+    // Locks scroll (ScrollManager) and shows the loading cursor immediately.
     set({ isSwitching: true, transitionDirection: direction });
 
-    // Whole-switch failsafe: whatever phase hangs, land on the new paper.
+    // Whole-switch failsafe: whatever gate never opens, land on the new
+    // paper so the UI can never get permanently stuck.
     failsafeTimeoutId = window.setTimeout(() => {
       failsafeTimeoutId = null;
       if (token !== switchToken) return;
-      performPendingSwap();
-      activeCapture = null;
+      disposeActiveCapture();
       set({
         isSwitching: false,
         transitionPhase: "idle",
-        switchFallback: false,
+        hasTransitionSheet: false,
       });
     }, SWITCH_FAILSAFE_MS);
 
@@ -259,7 +249,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
         }
 
         // Config chunk is usually idle-prefetched already → resolves
-        // instantly. waitForPaint lets the arrows' state paint first.
+        // instantly. waitForPaint lets the arrows' disabled state paint.
         const [paper] = await Promise.all([
           loadSurahPaper(surahId, index),
           waitForPaint(),
@@ -268,56 +258,57 @@ export const usePaperStore = create<PaperState>((set, get) => ({
         // A newer switch or a route change won this race — do nothing.
         if (token !== switchToken || get().surahId !== surahId) return;
         if (!paper) {
-          clearTimers();
+          clearFailsafe();
           set({ isSwitching: false });
           return;
         }
 
-        pendingPaper = paper;
-        pendingIndex = index;
+        // GPU-copy the outgoing page (map + normal, two blits) so a flatten/
+        // curl sheet can stand in for it independently of the live material,
+        // which is about to rebuild with the NEW paper's content. Awaiting
+        // this request means the actual GPU blit runs inside SinglePaper's
+        // own useFrame on the next frame — never on this click handler's own
+        // stack — so it can never race or interleave with R3F's own render.
+        disposeActiveCapture();
+        activeCapture = await requestPaperTransitionCapture();
 
-        // Grab the LIVE material of the outgoing paper. The old content
-        // stays mounted for the whole flatten + exit flight, so no copy is
-        // made and the sheet is indistinguishable from the real paper.
-        activeCapture = capturePaperTransition();
-
-        if (!activeCapture) {
-          // Fallback path (paper never settled / context lost): swap now
-          // behind the loading overlay.
-          set({ switchFallback: true });
-          performPendingSwap();
-          prefetchNeighborPapers(surahId, index);
+        // A newer switch or a route change won the race while we waited for
+        // that frame — abandon this one; the newer switch owns the capture.
+        if (token !== switchToken || get().surahId !== surahId) {
+          disposeActiveCapture();
           return;
         }
 
-        // Animated path. Phase 1: let the real paper unfold to flat — the
-        // sheet must never interact with fold crease lines. Skipped when
-        // the paper is already flat.
-        const needsFlatten = activeCapture.maxFoldAngle > FLAT_ANGLE_EPSILON;
-        set({ transitionPhase: "flatten" });
-        flattenTimeoutId = window.setTimeout(
-          () => {
-            flattenTimeoutId = null;
-            if (token !== switchToken) return;
-            if (get().transitionPhase === "flatten") {
-              // Mounting the sheet is the ONLY work in this commit — the
-              // exit motion starts on the very next frame.
-              set({ transitionPhase: "exit" });
-            }
-          },
-          needsFlatten ? FLATTEN_MS : 50,
-        );
+        const needsFlatten = activeCapture
+          ? activeCapture.maxFoldAngle > FLAT_ANGLE_EPSILON
+          : false;
+
+        // Reset the exit-side dual gate for this switch.
+        curlDone = !activeCapture; // no sheet → nothing to wait for on exit
+        enterDone = false;
+
+        // THE SWAP — happens NOW, immediately, so the new paper's
+        // RenderTexture starts compiling/settling off-screen at once, using
+        // every millisecond of the (frozen, motionless) wait productively.
+        seedStoresForPaper(paper, { preserveCameraView: true });
+        resetScrollToStoryStart();
+
+        set({
+          activePaperIndex: index,
+          transitionPhase: "loading",
+          hasTransitionSheet: activeCapture !== null,
+          sheetStage: needsFlatten ? "flatten" : "curl",
+        });
 
         prefetchNeighborPapers(surahId, index);
       } catch {
         if (token === switchToken) {
-          clearTimers();
-          pendingPaper = null;
-          activeCapture = null;
+          clearFailsafe();
+          disposeActiveCapture();
           set({
             isSwitching: false,
             transitionPhase: "idle",
-            switchFallback: false,
+            hasTransitionSheet: false,
           });
         }
       }
@@ -334,42 +325,38 @@ export const usePaperStore = create<PaperState>((set, get) => ({
     get().goToPaper(activePaperIndex - 1);
   },
 
-  exitFinished: () => {
-    if (get().transitionPhase !== "exit") return;
-    // The sheet is out of the viewport — the screen is static. Run the
-    // in-place swap now; the same commit unmounts the sheet, so the shared
-    // material is never shown with the new content.
-    performPendingSwap();
-  },
-
-  beginEnter: () => {
-    if (get().transitionPhase !== "waiting") return;
-    set({ transitionPhase: "enter" });
+  markFlattenVisualDone: () => {
+    if (get().transitionPhase !== "animating") return;
+    set({ sheetStage: "curl" });
   },
 
   completeSwitch: () => {
-    const state = get();
     reapplyCameraViewAfterSwitch();
-    if (!state.isSwitching) return;
+    if (!get().isSwitching || get().transitionPhase !== "loading") return;
 
-    if (state.switchFallback) {
-      // Overlay path — the settle signal ends the switch.
-      clearTimers();
-      activeCapture = null;
-      set({ isSwitching: false, switchFallback: false });
+    if (!get().hasTransitionSheet) {
+      // Fallback path: no sheet ever stood in for the outgoing page, so the
+      // real content stayed visible in place the whole time (PaperSlideGroup
+      // never parks it off-screen when hasTransitionSheet is false). There is
+      // no curl and no glide to wait for — the switch is simply done now.
+      clearFailsafe();
+      set({ transitionPhase: "idle", isSwitching: false });
+      return;
     }
-    // Animated path: the adaptive gate (beginEnter) and enterFinished own
-    // the lifecycle; the settle signal needs no action here.
+
+    // "loading" → "animating": the ENTIRE choreography (unfold → curl-exit →
+    // enter-glide) now plays once, back to back, with nothing left to wait
+    // for — this is the only place that transition fires from.
+    set({ transitionPhase: "animating" });
+  },
+
+  curlSheetFinished: () => {
+    curlDone = true;
+    tryFinishSwitch();
   },
 
   enterFinished: () => {
-    if (get().transitionPhase !== "enter") return;
-    clearTimers();
-    activeCapture = null;
-    set({
-      transitionPhase: "idle",
-      isSwitching: false,
-      switchFallback: false,
-    });
+    enterDone = true;
+    tryFinishSwitch();
   },
 }));

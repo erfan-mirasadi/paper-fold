@@ -2,6 +2,7 @@
 import {
   forwardRef,
   memo,
+  Suspense,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -107,6 +108,25 @@ export interface PaperMaterialHandle {
   getMaterial: () => MeshStandardMaterial | null;
 }
 
+/**
+ * Commits together with its Suspense siblings, so its mount effect fires at
+ * the exact moment the (possibly suspended) page content actually reaches
+ * the RenderTexture scene — the truthful "content is really there" signal
+ * the settle timer must wait for.
+ */
+function RenderTextureContentMounted({
+  mountedKey,
+  onMounted,
+}: {
+  mountedKey: string;
+  onMounted: (key: string) => void;
+}) {
+  useEffect(() => {
+    onMounted(mountedKey);
+  }, [mountedKey, onMounted]);
+  return null;
+}
+
 interface PaperMaterialProps {
   toggles: TextureToggles;
   isFolded?: boolean;
@@ -164,6 +184,15 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 
   const [settledKey, setSettledKey] = useState<string | null>(null);
 
+  // The renderTextureKey whose PaperContent has ACTUALLY committed into the
+  // RenderTexture scene. Per-surah content textures (verse frames, SVG
+  // dividers, handwritten notes…) suspend on their first-ever load, and the
+  // settle pipeline must never declare the page "ready" while the content is
+  // still suspended — otherwise frames freeze on a blank capture.
+  const [contentMountedKey, setContentMountedKey] = useState<string | null>(
+    null,
+  );
+
   // استیت بیدارباش فقط برای باز کردن فریمها
   const [isWakingUp, setIsWakingUp] = useState(false);
 
@@ -201,13 +230,15 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   }, [gl]);
 
   useEffect(() => {
-    if (!fontsReady) return;
+    // Settle only counts down once the content for THIS key has truly
+    // committed (fonts ready AND any suspended textures resolved).
+    if (!fontsReady || contentMountedKey !== renderTextureKey) return;
     const t = setTimeout(
       () => setSettledKey(renderTextureKey),
       TEXTURE_SETTLE_DELAY_MS,
     );
     return () => clearTimeout(t);
-  }, [fontsReady, renderTextureKey]);
+  }, [fontsReady, contentMountedKey, renderTextureKey]);
 
   const settled = fontsReady && settledKey === renderTextureKey;
 
@@ -334,7 +365,32 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
           </mesh>
         )}
 
-        {fontsReady && <PaperContent isFolded={isFolded} />}
+        {/*
+         * THE first-switch black-flash fix. SurahLayout is full of
+         * useTexture calls with per-surah URLs (verse frames, SVG dividers,
+         * handwritten notes…). The first time a paper's URLs are ever
+         * requested, the whole subtree SUSPENDS — and without a boundary
+         * right here, that suspension bubbles out of this portal, past
+         * SinglePaper, all the way to the dynamic() boundary around
+         * Experience, unmounting the ENTIRE scene (paper, sheets, spotlight)
+         * until the textures resolve — one full disappear/reappear flash,
+         * exactly once per never-before-seen paper. Catching it here means
+         * the worst case is a few frames of empty page background inside an
+         * off-screen texture, while the on-screen scene stays untouched.
+         * The reporter below re-arms the settle gate once the real content
+         * has committed.
+         */}
+        <Suspense fallback={null}>
+          {fontsReady && (
+            <>
+              <PaperContent isFolded={isFolded} />
+              <RenderTextureContentMounted
+                mountedKey={renderTextureKey}
+                onMounted={setContentMountedKey}
+              />
+            </>
+          )}
+        </Suspense>
 
         <mesh position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, 2]}>
           <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />

@@ -1,11 +1,22 @@
 "use client";
 import { SpotLight } from "@react-three/drei";
 import { a } from "@react-spring/three";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
 import { Perf } from "r3f-perf";
 import { SinglePaper } from "./SinglePaper";
-import { PaperTransitionLayer, PaperSlideGroup } from "./PaperTransitionMesh";
+import {
+  PaperTransitionLayer,
+  PaperSlideGroup,
+  TransitionShaderWarmup,
+} from "./PaperTransitionMesh";
 import { VersesRenderer } from "../verses-object/VersesRenderer";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../sections-object/ElevatedSectionSurfaces";
@@ -156,6 +167,13 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
        */}
       {hasIntro && <IntroCameraScrollController />}
       <SectionZoomCamera />
+      {/*
+       * Precompiles the page-turn sheet's shader (a distinct permutation
+       * from the live paper's masked material) as soon as the first paper
+       * has settled, so the FIRST real paper switch is never the one that
+       * pays a first-time shader-compile stall.
+       */}
+      {paperReady && <TransitionShaderWarmup />}
       <a.group
         rotation-x={-Math.PI / 4}
         position-x={sceneOffsetX}
@@ -183,17 +201,31 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
            * Config-bound subtrees rebuild in place per content revision —
            * far cheaper than remounting the whole scene, and it guarantees
            * no per-paper state leaks across switches.
+           *
+           * CRITICAL: this Suspense boundary is local to this group. Verse
+           * and section textures (useTexture) are config-dependent, so a
+           * fresh paper — the FIRST time its specific asset URLs are
+           * requested — suspends while they load. Without a boundary HERE,
+           * that suspense bubbles all the way up to the outer
+           * <Suspense fallback={null}> wrapping the whole canvas-wrapper
+           * and unmounts EVERYTHING (camera, lights, the transition sheet,
+           * the folded paper itself) — a full black flash. Catching it here
+           * means only this small group defers for a moment while the
+           * paper mesh, lights and any in-flight transition sheet keep
+           * rendering normally.
            */}
-          <group key={storyRevision}>
-            {config.features.hasElevatedSections && (
-              <>
-                <ElevatedSectionSurfaces />
-                <ElevatedSectionLabels />
-              </>
-            )}
-            {!isAllSectionsMode && <VerseClickHitboxes />}
-            <VersesRenderer />
-          </group>
+          <Suspense fallback={null}>
+            <group key={storyRevision}>
+              {config.features.hasElevatedSections && (
+                <>
+                  <ElevatedSectionSurfaces />
+                  <ElevatedSectionLabels />
+                </>
+              )}
+              {!isAllSectionsMode && <VerseClickHitboxes />}
+              <VersesRenderer />
+            </group>
+          </Suspense>
         </PaperSlideGroup>
         {/*
          * The flying page-turn sheet — a sibling of the slide group so it
@@ -235,4 +267,3 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
     </>
   );
 }
-

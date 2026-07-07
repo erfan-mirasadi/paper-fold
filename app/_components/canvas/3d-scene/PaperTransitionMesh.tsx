@@ -1,96 +1,105 @@
 "use client";
 
 /**
- * PaperTransitionMesh — the animated page-turn choreography.
+ * PaperTransitionMesh — the truth-gated page-turn choreography.
  *
- * Two cooperating pieces, both driven by usePaperStore's transitionPhase:
+ * Loading and animating NEVER overlap. During usePaperStore's "loading"
+ * phase, a FROZEN sheet (an independent GPU-texture copy of the outgoing
+ * page, holding whatever fold pose it had at click time) sits completely
+ * still in the paper's exact former position — zero per-frame work beyond a
+ * static draw call, so it can never compete with the new paper's settling
+ * for frame budget. Only once the new paper's true "settled" signal arrives
+ * does "animating" begin, and the ENTIRE choreography (unfold → curl-exit →
+ * enter-glide) plays once, back to back, uninterrupted:
  *
- * ── TransitionSheet ("exit" phase) ──────────────────────────────────────────
- * A FLAT clone of the outgoing paper that shares the live paper's material
- * (same shader, same masking, same normal map — pixel-perfect, zero copy).
- * Unlike the real paper (whose bones fold around HORIZONTAL crease lines),
- * the sheet is rigged with a bone chain along the WIDTH, hinged at the
- * trailing edge — so it bends around a VERTICAL axis like a real page being
- * turned, with the curvature concentrated toward the leading edge. It never
- * interacts with fold crease lines: the choreography flattens the real paper
- * first ("flatten" phase), then hands off to this sheet.
+ * ── FlattenSheet (sheetStage "flatten") ──────────────────────────────────────
+ * Own vertical bone rig, identical to SinglePaper's own fold rig. Frozen at
+ * the captured pose while phase is "loading"; the instant phase becomes
+ * "animating" it starts unfolding to flat on its own clock. On completion it
+ * reports done — the store flips sheetStage to "curl", and since both sheets
+ * show an identical flat page at that instant, the React `key` swap is
+ * imperceptible.
  *
- * Direction: next → slides LEFT (leading edge curling inward toward the
- * viewer); previous → mirrored to the RIGHT.
+ * ── CurlSheet (sheetStage "curl") ────────────────────────────────────────────
+ * Rigged along the WIDTH (hinged at the trailing edge) so it bends around a
+ * VERTICAL axis like a real turned page, curvature concentrated toward the
+ * leading edge. Frozen until phase is "animating" (this covers BOTH "still
+ * waiting on the flatten sheet" and "not yet ready" cases), then curls and
+ * slides fully out.
  *
  * ── PaperSlideGroup (wraps the real scene content) ──────────────────────────
- * Visible during "flatten" (the real paper smoothly unfolds in place),
- * hidden during "exit", parked OFF-SCREEN during "waiting" (the freshly
- * swapped content renders there: shaders compile and the RenderTexture draws
- * out of sight — no white frame can ever be seen), and glides in during
- * "enter". The waiting→enter handoff is an ADAPTIVE gate: it requires both a
- * frame count and a minimum time, so slower devices automatically hold the
- * paper off-screen a little longer instead of showing half-drawn content.
+ * Parked off-screen for the entire "loading" phase AND for as long as
+ * "animating" is still on the flatten stage — so it only starts gliding in
+ * the instant the curl sheet does, keeping the crossing perfectly
+ * synchronized ("old leaves, new immediately takes its place").
  *
- * Per-frame cost: one extra skinned mesh during the exit + simple group
- * transforms — no React state, no springs, zero allocations.
+ * Per-frame cost while frozen: nothing (bones are set once and never
+ * touched again). While animating: one skinned mesh + simple group
+ * transforms — no React state, no springs, zero steady-state allocations.
  */
 
-import { useLayoutEffect, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
   Bone,
   BoxGeometry,
+  DataTexture,
   Float32BufferAttribute,
   Group,
   Material,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  RGBAFormat,
   Skeleton,
   SkinnedMesh,
   Uint16BufferAttribute,
+  UnsignedByteType,
+  Vector2,
 } from "three";
 import {
   usePaperStore,
   getActiveTransitionCapture,
-  type PaperTransitionPhase,
 } from "../../../stores/usePaperStore";
-import { PAGE_DEPTH } from "./SinglePaper";
+import { createPanelGeometry, PAGE_DEPTH, PAGE_SEGMENTS } from "./SinglePaper";
+import { PAPER_MATERIAL_CONFIG } from "./PaperMaterial";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import type { PaperTransitionCapture } from "./paperSnapshot";
 
-// ── Exit timeline ───────────────────────────────────────────────────────────
-/** Two frames of hold so the sheet↔paper handoff commit fully settles. */
-const EXIT_WARMUP_FRAMES = 2;
-/** Slow, deliberate exit — the curl is worth watching. */
-const EXIT_DURATION_S = 1.7;
+// ── Flatten sheet timeline (plays only after "animating" begins) ───────────
+/** A calm, natural-paced unfold — no longer needs to "buy" loading time. */
+const FLATTEN_DURATION_S = 0.9;
+
+// ── Curl sheet timeline ─────────────────────────────────────────────────────
+/** Slowed down for a smoother, more deliberate feel. */
+const EXIT_DURATION_S = 1.6;
 /** Bone segments across the sheet's width (vertical-axis bend resolution). */
 const SHEET_SEGMENTS = 48;
-/** Total curl (radians) accumulated across the curl zone at its peak. */
+/** Total curl (radians) accumulated across the chain at its peak. */
 const CURL_MAX = 2.2;
 /** Curl ramps in across this window of the timeline, then holds. */
 const CURL_RISE_START = 0.04;
-const CURL_RISE_END = 0.45;
-/**
- * Flip to -1 to curl the leading edge AWAY from the viewer instead of
- * inward toward the viewer.
- */
+const CURL_RISE_END = 0.42;
+/** Flip to -1 to curl the leading edge AWAY from the viewer. */
 const CURL_TOWARD_VIEWER = 1;
 /** Subtle whole-sheet tilt while flying (radians) — natural paper feel. */
 const EXIT_TILT_Z = 0.035;
 /** Gentle lift toward the camera + upward drift at mid-flight. */
 const EXIT_LIFT_Z = 0.12;
 const EXIT_RISE_Y = 0.06;
-/** Past this point the sheet is guaranteed off-screen → run the swap. */
-const EXIT_HANDOFF_T = 0.93;
-/** Keeps the sheet off the real paper's surface (no z-fighting). */
+/** Matches the live paper's enabled normal scale (PaperMaterial). */
+const SHEET_NORMAL_SCALE = new Vector2(1.2, 1.2);
+/** Keeps sheets off the incoming paper's plane (no z-fighting). */
 const SHEET_Z_EPSILON = 0.004;
 
-// ── Waiting gate + enter glide ──────────────────────────────────────────────
-/**
- * Adaptive warm-up gate: BOTH conditions must pass before the new paper may
- * enter. Frames adapt to device speed (a struggling GPU ticks fewer frames,
- * extending the hold automatically); the time floor guarantees the content
- * buffers have had real wall-clock time to draw.
- */
-const ENTER_GATE_FRAMES = 14;
-const ENTER_GATE_S = 0.3;
-const ENTER_DURATION_S = 1.0;
+// ── Enter glide (real content) ──────────────────────────────────────────────
+/** Matches EXIT_DURATION_S so the crossing motion starts AND ends together. */
+const ENTER_DURATION_S = 1.6;
 /** Extra world-units past the half-viewport to guarantee "fully off-screen". */
 const OFFSCREEN_MARGIN = 3;
 
@@ -99,11 +108,219 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 const easeInOutCubic = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
+function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
+  const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
+  const backMaterial = new MeshBasicMaterial({ color: "#ffffff" });
+  const frontMaterial = new MeshStandardMaterial({
+    ...PAPER_MATERIAL_CONFIG,
+    map: capture.mapCopy,
+    normalMap: capture.normalCopy,
+    normalScale: capture.normalCopy
+      ? SHEET_NORMAL_SCALE.clone()
+      : new Vector2(0, 0),
+  });
+  // Same slot layout as SinglePaper: [sideL, sideR, top, bottom, front, back].
+  return [
+    sideMaterial,
+    sideMaterial,
+    sideMaterial,
+    sideMaterial,
+    frontMaterial,
+    backMaterial,
+  ];
+}
+
+function disposeSheetMaterials(materials: Material[]): void {
+  new Set(materials).forEach((m) => m.dispose());
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// TransitionSheet — the flying copy of the outgoing paper
+// TransitionShaderWarmup — precompiles the sheets' shader ahead of any switch
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// The sheet's front material is a PLAIN MeshStandardMaterial (map + normalMap,
+// no onBeforeCompile) — a DIFFERENT shader permutation from the live paper's
+// material (which always carries usePaperMasking's injected onBeforeCompile
+// GLSL). The very first time that plain permutation is ever drawn, three.js
+// has to compile it from scratch, which can stall the main thread for
+// hundreds of milliseconds — exactly the "everything freezes and flashes
+// black for a moment, only on the very first switch" symptom. Mounting one
+// invisible mesh with the SAME material shape and precompiling it with
+// gl.compileAsync (the same technique Experience already uses for the intro
+// flow) warms that shader before the user ever triggers a real switch, so
+// the first real switch is exactly as fast as every later one.
+
+function TransitionShaderWarmup() {
+  const { gl, scene, camera } = useThree();
+  const warmedRef = useRef(false);
+
+  const warmupTexture = useMemo(() => {
+    const texture = new DataTexture(
+      new Uint8Array([255, 255, 255, 255]),
+      1,
+      1,
+      RGBAFormat,
+      UnsignedByteType,
+    );
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
+
+  const warmupMaterial = useMemo(
+    () =>
+      new MeshStandardMaterial({
+        ...PAPER_MATERIAL_CONFIG,
+        map: warmupTexture,
+        normalMap: warmupTexture,
+        normalScale: SHEET_NORMAL_SCALE.clone(),
+      }),
+    [warmupTexture],
+  );
+
+  useEffect(() => {
+    return () => {
+      warmupTexture.dispose();
+      warmupMaterial.dispose();
+    };
+  }, [warmupTexture, warmupMaterial]);
+
+  useEffect(() => {
+    if (warmedRef.current) return;
+    // A short delay mirrors Experience's own intro-shader warmup — gives the
+    // main thread a moment of breathing room right after the paper settles,
+    // instead of compiling right on top of that other work.
+    const timer = setTimeout(() => {
+      warmedRef.current = true;
+      gl.compileAsync(scene, camera).catch(() => {});
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [gl, scene, camera]);
+
+  // scene.traverse() (which compile()/compileAsync() use to find materials)
+  // does not skip invisible objects — only the renderer's actual draw calls
+  // do. So this mesh's shader gets warmed up while never being drawn.
+  return (
+    <mesh visible={false} frustumCulled={false}>
+      <planeGeometry args={[0.01, 0.01]} />
+      <primitive object={warmupMaterial} attach="material" />
+    </mesh>
+  );
+}
+
+export { TransitionShaderWarmup };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FlattenSheet — frozen during "loading", unfolds only during "animating"
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface TransitionRig {
+interface FlattenRig {
+  mesh: SkinnedMesh;
+  dispose: () => void;
+}
+
+/** Mirrors SinglePaper's own vertical fold rig exactly (same helper functions). */
+function buildFlattenRig(capture: PaperTransitionCapture): FlattenRig {
+  const { pageWidth, pageHeight } = capture;
+  const geometry = createPanelGeometry(
+    pageWidth,
+    pageHeight,
+    pageWidth,
+    pageHeight,
+    0,
+    0,
+  );
+  const materials = buildSheetMaterials(capture);
+
+  const globalSegmentHeight = pageHeight / PAGE_SEGMENTS;
+  const bones: Bone[] = [];
+  for (let i = 0; i <= PAGE_SEGMENTS; i++) {
+    const bone = new Bone();
+    bones.push(bone);
+    bone.position.y = i === 0 ? 0 : -globalSegmentHeight;
+    if (i > 0) bones[i - 1].add(bone);
+  }
+  const skeleton = new Skeleton(bones);
+
+  const mesh = new SkinnedMesh(geometry, materials);
+  mesh.castShadow = false;
+  mesh.receiveShadow = false;
+  mesh.frustumCulled = false;
+  mesh.add(bones[0]);
+  mesh.bind(skeleton);
+
+  // Frozen starting pose — exactly what the live paper looked like at the
+  // moment of capture. Stays untouched until "animating" begins.
+  for (let i = 0; i < bones.length; i++) {
+    bones[i].rotation.x = capture.boneRotations[i] ?? 0;
+  }
+
+  return {
+    mesh,
+    dispose: () => {
+      geometry.dispose();
+      disposeSheetMaterials(materials);
+    },
+  };
+}
+
+function FlattenSheet({ capture }: { capture: PaperTransitionCapture }) {
+  const groupRef = useRef<Group>(null);
+  const rigRef = useRef<FlattenRig | null>(null);
+  const elapsedRef = useRef(0);
+  const reportedDoneRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const group = groupRef.current;
+    if (!group) return;
+
+    const rig = buildFlattenRig(capture);
+    rigRef.current = rig;
+    elapsedRef.current = 0;
+    reportedDoneRef.current = false;
+
+    // SinglePaper's own group sits at [0, SCENE_CENTER_Y, 0] with the panel
+    // geometry itself already translated by createPanelGeometry — mirror
+    // that exactly so this sheet exactly overlays the real page.
+    group.position.set(0, capture.sceneCenterY, SHEET_Z_EPSILON);
+    group.add(rig.mesh);
+
+    return () => {
+      rigRef.current = null;
+      group.remove(rig.mesh);
+      rig.dispose();
+    };
+  }, [capture]);
+
+  useFrame((_, delta) => {
+    const rig = rigRef.current;
+    if (!rig || reportedDoneRef.current) return;
+
+    // Frozen while "loading" — no per-frame work at all beyond this check.
+    if (usePaperStore.getState().transitionPhase !== "animating") return;
+
+    elapsedRef.current += Math.min(delta, 0.05);
+    const t = Math.min(elapsedRef.current / FLATTEN_DURATION_S, 1);
+    const eased = easeOutCubic(t);
+    const bones = rig.mesh.skeleton.bones;
+
+    for (let i = 0; i < bones.length; i++) {
+      bones[i].rotation.x = (capture.boneRotations[i] ?? 0) * (1 - eased);
+    }
+
+    if (t >= 1) {
+      reportedDoneRef.current = true;
+      usePaperStore.getState().markFlattenVisualDone();
+    }
+  });
+
+  return <group ref={groupRef} />;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CurlSheet — frozen until phase is "animating", then curls + slides out
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CurlRig {
   mesh: SkinnedMesh;
   /** Local X of the hinge (trailing edge) relative to the page center. */
   hingeOffsetX: number;
@@ -111,15 +328,15 @@ interface TransitionRig {
 }
 
 /**
- * Build a flat sheet rigged along its WIDTH: bone 0 sits at the trailing
- * edge (opposite the slide direction) and the chain extends to the leading
- * edge, so rotating bones around Y bends the page around a vertical axis —
- * a clean book-like curl with zero relation to the fold crease lines.
+ * Flat sheet rigged along its WIDTH: bone 0 sits at the trailing edge
+ * (opposite the slide direction) and the chain extends to the leading edge,
+ * so rotating bones around Y bends the page around a vertical axis — a
+ * clean book-like curl, unrelated to the fold crease lines.
  */
-function buildTransitionRig(
+function buildCurlRig(
   capture: PaperTransitionCapture,
   direction: 1 | -1,
-): TransitionRig {
+): CurlRig {
   const { pageWidth, pageHeight } = capture;
 
   const geometry = new BoxGeometry(
@@ -129,11 +346,8 @@ function buildTransitionRig(
     SHEET_SEGMENTS,
     2,
   );
-  // Hinge (trailing edge) at local x=0; the sheet extends toward -direction,
-  // i.e. toward where it is about to travel.
   geometry.translate(-direction * (pageWidth / 2), 0, 0);
 
-  // Skin weights by distance from the hinge along the width.
   const position = geometry.attributes.position;
   const segmentWidth = pageWidth / SHEET_SEGMENTS;
   const skinIndexes: number[] = [];
@@ -146,26 +360,13 @@ function buildTransitionRig(
     skinIndexes.push(skinIndex, skinIndex + 1, 0, 0);
     skinWeights.push(1 - skinWeight, skinWeight, 0, 0);
   }
-  geometry.setAttribute(
-    "skinIndex",
-    new Uint16BufferAttribute(skinIndexes, 4),
-  );
+  geometry.setAttribute("skinIndex", new Uint16BufferAttribute(skinIndexes, 4));
   geometry.setAttribute(
     "skinWeight",
     new Float32BufferAttribute(skinWeights, 4),
   );
 
-  // Same slot layout as SinglePaper: [sideL, sideR, top, bottom, front, back].
-  const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
-  const backMaterial = new MeshBasicMaterial({ color: "#ffffff" });
-  const materials: Material[] = [
-    sideMaterial,
-    sideMaterial,
-    sideMaterial,
-    sideMaterial,
-    capture.material,
-    backMaterial,
-  ];
+  const materials = buildSheetMaterials(capture);
 
   const bones: Bone[] = [];
   for (let i = 0; i <= SHEET_SEGMENTS; i++) {
@@ -188,52 +389,29 @@ function buildTransitionRig(
     hingeOffsetX: direction * (pageWidth / 2),
     dispose: () => {
       geometry.dispose();
-      sideMaterial.dispose();
-      backMaterial.dispose();
-      // capture.material is the live paper's — owned by the scene content.
+      disposeSheetMaterials(materials);
     },
   };
 }
 
-export function PaperTransitionLayer() {
-  const transitionPhase = usePaperStore((s) => s.transitionPhase);
-  if (transitionPhase !== "exit") return null;
-
-  const capture = getActiveTransitionCapture();
-  if (!capture) return null;
-
-  return <TransitionSheet capture={capture} />;
-}
-
-interface TransitionSheetProps {
-  capture: PaperTransitionCapture;
-}
-
-function TransitionSheet({ capture }: TransitionSheetProps) {
+function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
   const groupRef = useRef<Group>(null);
-  const rigRef = useRef<TransitionRig | null>(null);
+  const rigRef = useRef<CurlRig | null>(null);
   const directionRef = useRef<1 | -1>(1);
-  const warmupFramesRef = useRef(0);
   const elapsedRef = useRef(0);
-  const handoffFiredRef = useRef(false);
+  const finishedRef = useRef(false);
 
-  // Layout effect (not passive) so the sheet is attached BEFORE the browser
-  // paints the handoff commit — the real paper is hidden and replaced by
-  // this sheet with no blank frame in between.
   useLayoutEffect(() => {
     const group = groupRef.current;
     if (!group) return;
 
     const direction = usePaperStore.getState().transitionDirection;
-    const rig = buildTransitionRig(capture, direction);
+    const rig = buildCurlRig(capture, direction);
     rigRef.current = rig;
     directionRef.current = direction;
-    warmupFramesRef.current = 0;
     elapsedRef.current = 0;
-    handoffFiredRef.current = false;
+    finishedRef.current = false;
 
-    // Place the hinge so the sheet exactly overlays the real page, vertically
-    // centered like SinglePaper's mesh (its geometry hangs from y=0).
     group.position.set(
       rig.hingeOffsetX,
       capture.sceneCenterY - capture.pageHeight / 2,
@@ -252,22 +430,20 @@ function TransitionSheet({ capture }: TransitionSheetProps) {
   useFrame((state, delta) => {
     const group = groupRef.current;
     const rig = rigRef.current;
-    if (!group || !rig) return;
+    if (!group || !rig || finishedRef.current) return;
 
-    // Hold briefly so the handoff commit settles before motion starts.
-    if (warmupFramesRef.current < EXIT_WARMUP_FRAMES) {
-      warmupFramesRef.current += 1;
-      return;
-    }
+    // Frozen (rest pose, no slide) until the store actually flips to
+    // "animating" — covers both "still loading" and "flatten sheet still
+    // unfolding" (this mesh isn't even mounted during the latter, but the
+    // check stays cheap and correct either way).
+    if (usePaperStore.getState().transitionPhase !== "animating") return;
 
     elapsedRef.current += Math.min(delta, 0.05);
     const t = Math.min(elapsedRef.current / EXIT_DURATION_S, 1);
     const direction = directionRef.current;
     const bones = rig.mesh.skeleton.bones;
 
-    // Vertical-axis curl, concentrated toward the leading edge (p² ramp):
-    // per-bone deltas sum to curlTotal, so the page bows like a turned page
-    // instead of the whole sheet hinging.
+    // Vertical-axis curl, concentrated toward the leading edge (p² ramp).
     const curlTotal =
       CURL_MAX *
       easeOutCubic(
@@ -292,14 +468,38 @@ function TransitionSheet({ capture }: TransitionSheetProps) {
       capture.sceneCenterY - capture.pageHeight / 2 + EXIT_RISE_Y * arc;
     group.position.z = SHEET_Z_EPSILON + EXIT_LIFT_Z * arc;
 
-    // Off-screen → hand off to the in-place swap (runs on a static screen).
-    if (t >= EXIT_HANDOFF_T && !handoffFiredRef.current) {
-      handoffFiredRef.current = true;
-      usePaperStore.getState().exitFinished();
+    if (t >= 1) {
+      finishedRef.current = true;
+      usePaperStore.getState().curlSheetFinished();
     }
   });
 
   return <group ref={groupRef} />;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PaperTransitionLayer — mounts whichever sheet matches the current stage
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function PaperTransitionLayer() {
+  const phase = usePaperStore((s) => s.transitionPhase);
+  const hasSheet = usePaperStore((s) => s.hasTransitionSheet);
+  const stage = usePaperStore((s) => s.sheetStage);
+
+  if (!hasSheet || phase === "idle") return null;
+
+  const capture = getActiveTransitionCapture();
+  if (!capture) return null;
+
+  // key includes captureId so a NEW switch always remounts cleanly, and the
+  // flatten→curl handoff for the SAME switch is a clean swap too — both show
+  // an identical flat page at that instant, so it is imperceptible.
+  if (stage === "flatten") {
+    return (
+      <FlattenSheet key={`flatten-${capture.captureId}`} capture={capture} />
+    );
+  }
+  return <CurlSheet key={`curl-${capture.captureId}`} capture={capture} />;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -313,56 +513,9 @@ interface PaperSlideGroupProps {
 export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
   const groupRef = useRef<Group>(null);
   const viewport = useThree((s) => s.viewport);
-  const appliedPhaseRef = useRef<PaperTransitionPhase | null>(null);
   const enterFromRef = useRef(0);
   const enterElapsedRef = useRef(0);
-  const gateFramesRef = useRef(0);
-  const gateElapsedRef = useRef(0);
-
-  const applyPhase = (phase: PaperTransitionPhase, group: Group) => {
-    if (appliedPhaseRef.current === phase) return;
-    appliedPhaseRef.current = phase;
-
-    switch (phase) {
-      case "flatten":
-        // The real paper is unfolding in place — fully visible.
-        group.visible = true;
-        group.position.x = 0;
-        break;
-      case "exit":
-        // The transition sheet (an exact visual stand-in) took over.
-        group.visible = false;
-        break;
-      case "waiting": {
-        // Freshly swapped content: park it fully off-screen on the incoming
-        // side. It still renders there (nothing is frustum-culled), so its
-        // shaders compile and its texture draws without ever being seen.
-        const direction = usePaperStore.getState().transitionDirection;
-        enterFromRef.current =
-          direction * (viewport.width / 2 + OFFSCREEN_MARGIN + 2);
-        gateFramesRef.current = 0;
-        gateElapsedRef.current = 0;
-        group.visible = true;
-        group.position.x = enterFromRef.current;
-        break;
-      }
-      case "enter":
-        enterElapsedRef.current = 0;
-        break;
-      default:
-        group.visible = true;
-        group.position.x = 0;
-    }
-  };
-
-  // Position the group correctly BEFORE the first paint after a mount — on
-  // route load the phase is "idle"; if a hot-reload lands mid-switch the
-  // group must still start in a consistent pose.
-  useLayoutEffect(() => {
-    const group = groupRef.current;
-    if (group) applyPhase(usePaperStore.getState().transitionPhase, group);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const glidingRef = useRef(false);
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -370,30 +523,51 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
 
     const store = usePaperStore.getState();
     const phase = store.transitionPhase;
-    applyPhase(phase, group);
 
-    if (phase === "waiting") {
-      // Adaptive warm-up gate — see constants above.
-      gateFramesRef.current += 1;
-      gateElapsedRef.current += Math.min(delta, 0.1);
-      if (
-        gateFramesRef.current >= ENTER_GATE_FRAMES &&
-        gateElapsedRef.current >= ENTER_GATE_S
-      ) {
-        store.beginEnter();
-      }
+    if (phase === "idle" || !store.hasTransitionSheet) {
+      // No sheet exists to stand in for the outgoing page (either nothing
+      // is switching, or the capture failed — the rare fallback path).
+      // NEVER park the real content off-screen here: with no sheet to show
+      // in its place, doing so would leave the paper's spot completely
+      // empty for the whole "loading" wait. Staying visible in place means
+      // the fallback is, at worst, a plain content refresh — never a blank
+      // gap.
+      glidingRef.current = false;
+      group.visible = true;
+      group.position.x = 0;
       return;
     }
 
-    if (phase === "enter") {
-      enterElapsedRef.current += Math.min(delta, 0.05);
-      const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
-      group.position.x = enterFromRef.current * (1 - easeInOutCubic(t));
+    // Glide in ONLY once the curl sheet is actually curling — i.e. once
+    // "animating" has moved past any flatten prefix. Synchronized start
+    // with CurlSheet is what makes the crossing read as one motion.
+    const shouldGlide = phase === "animating" && store.sheetStage === "curl";
 
-      if (t >= 1) {
-        group.position.x = 0;
-        store.enterFinished();
-      }
+    if (!shouldGlide) {
+      // Parked off-screen: covers "loading" AND "animating while the
+      // flatten sheet is still unfolding". Re-asserted every frame is cheap
+      // and needs no separate mount-time bookkeeping.
+      glidingRef.current = false;
+      const direction = store.transitionDirection;
+      group.visible = true;
+      group.position.x =
+        direction * (viewport.width / 2 + OFFSCREEN_MARGIN + 2);
+      return;
+    }
+
+    if (!glidingRef.current) {
+      glidingRef.current = true;
+      enterElapsedRef.current = 0;
+      enterFromRef.current = group.position.x;
+    }
+
+    enterElapsedRef.current += Math.min(delta, 0.05);
+    const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
+    group.position.x = enterFromRef.current * (1 - easeInOutCubic(t));
+
+    if (t >= 1) {
+      group.position.x = 0;
+      store.enterFinished();
     }
   });
 
