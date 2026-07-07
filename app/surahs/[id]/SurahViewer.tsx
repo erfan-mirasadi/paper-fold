@@ -36,6 +36,7 @@ import { HeroTitleOverlay } from "@/app/_components/dom/ui-overlay/HeroTitleOver
 import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButton";
 import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOverlay";
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
+import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
@@ -395,6 +396,7 @@ function SurahViewerInner({
                   <CameraViewPresetOverlay />
                   <ScrollHintOverlay />
                   <PaperArrowsOverlay />
+                  <PaperPaginationOverlay />
                 </motion.div>
               )}
             </AnimatePresence>

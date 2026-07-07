@@ -654,32 +654,37 @@ export const VerseBox = ({
   const rad = isPill ? h / 2 : VERSE_5_6_19_RADIUS;
   const cr = Math.min(h * 0.28, 0.021);
   const SMALL_PILL_OFFSET = 0.002;
-  const cx = isPill ? cr + SMALL_PILL_OFFSET : 0.05;
+  const isTightPadding = activeStoryConfig?.globalSettings?.tightVersePadding === true;
+  const cx = isPill ? cr + SMALL_PILL_OFFSET : (isTightPadding ? cr + 0.005 : 0.05);
 
-  const isTranslationCenterOverride = !isArabic && textAlignOverride === "center";
-  const centerTextInCapsule = !isPill || !showVerseNumber || isTranslationCenterOverride;
+  const isTranslationCenterOverride =
+    !isArabic && textAlignOverride === "center";
+  const centerTextInCapsule =
+    !isPill || !showVerseNumber || isTranslationCenterOverride;
 
   // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
   const circleEnd = cx + cr;
-  const numberSidePadding = showVerseNumber ? circleEnd + 0.012 : 0.012;
+  const numberSidePadding = showVerseNumber ? circleEnd + (isTightPadding ? 0.005 : 0.012) : (isTightPadding ? 0.005 : 0.012);
   const textPaddingX = isArabic || centerTextInCapsule ? 0 : numberSidePadding;
 
   const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
 
   const safeMargin = 0.0;
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
-  const EXTRA_BIG_VERSE_PADDING = !isPill && !isArabic ? 0.07 : 0;
+  const EXTRA_BIG_VERSE_PADDING = !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
   const centeredSidePadding = centerTextInCapsule
-    ? (showVerseNumber ? numberSidePadding : 0.012) + EXTRA_BIG_VERSE_PADDING
+    ? (showVerseNumber ? numberSidePadding : (isTightPadding ? 0.005 : 0.012)) + EXTRA_BIG_VERSE_PADDING
     : 0;
-  const textMaxW = !showVerseNumber
-    ? finalW - 0.04
-    : (finalW -
-        safeMargin * 2 -
-        centeredSidePadding * 2 -
-        textPaddingX -
-        (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
-      nonArabicTextTighten;
+  const textMaxW = isTightPadding
+    ? finalW // remove wrapping limit so user can freely scale text to borders
+    : !showVerseNumber
+      ? finalW - 0.04
+      : (finalW -
+          safeMargin * 2 -
+          centeredSidePadding * 2 -
+          textPaddingX -
+          (isArabic ? textPaddingX : VERSE_TEXT_RIGHT_PADDING)) *
+        nonArabicTextTighten;
 
   const textX = centerTextInCapsule
     ? finalW / 2

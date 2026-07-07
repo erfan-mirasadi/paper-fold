@@ -21,14 +21,12 @@ import {
 //   Row 2:  [7]  [6]  [5]    ← blue–blue–orange
 //
 // Elevation / drag grouping (via customSections):
-//   • verse 2   → section2_v2   (individual)
-//   • verses 3+4 → section2_v34 (elevate together)
-//   • verse 5   → section2_v5   (individual)
-//   • verses 6+7 → section2_v67 (elevate together)
+//   • verses 2, 3, 4 → section2_v234 (elevate together)
+//   • verses 5, 6, 7 → section2_v567 (elevate together)
 //
 // SVG overlays (bismillah-frame-3.svg):
-//   • top row    linked to section2_v34  (moves with 3&4 group)
-//   • bottom row linked to section2_v67  (moves with 6&7 group)
+//   • top row    linked to section2_v234 (moves with top row)
+//   • bottom row linked to section2_v567 (moves with bottom row)
 // ---------------------------------------------------------------------------
 
 const EXPAND_H = 0.05; // uniform so both blocks have identical heights
@@ -46,10 +44,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     hideBismillah3D: true, // verse 1 capsule replaces the 3D overlay
   },
   dimensions: {
-    paperWidth: 1.72,
+    paperWidth: 1.54,
     paperHeight: 1.78,
     sceneCenterYOffset: 0,
-    padding: 0.22,
+    padding: 0.29,
     scrollPages: 1.5,
     fixedWidthAcrossLanguages: true,
   },
@@ -67,8 +65,8 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     // ── Verse 1 — Bismillah, solo wide pill, centered above the two rows ─────
     1: {
       isPill: false,
-      expandW: 0.06,
-      expandH: 0.02,
+      expandW: 0.17,
+      expandH: 0.025,
       textScaleOverride: 0.7,
       translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_6_19,
@@ -81,7 +79,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     // ── Row 1 ────────────────────────────────────────────────────────────────
     2: {
       isPill: false,
-      expandW: 0,
+      expandW: 0.09,
       expandH: EXPAND_H,
       textScaleOverride: 0.7, // further reduced
       bg: CAPSULE_BG_6_19,
@@ -92,9 +90,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT,
     },
     3: {
-      expandW: 0.015,
+      isPill: false,
+      expandW: 0.09,
       expandH: EXPAND_H,
-      textScaleOverride: 1.2,
+      textScaleOverride: 0.7,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -102,9 +101,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     4: {
-      expandW: 0.015,
+      isPill: false,
+      expandW: 0.09,
       expandH: EXPAND_H,
-      textScaleOverride: 1.2,
+      textScaleOverride: 0.7,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -114,9 +114,9 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     // ── Row 2 ────────────────────────────────────────────────────────────────
     5: {
       isPill: false,
-      expandW: 0,
+      expandW: 0.09,
       expandH: EXPAND_H,
-      textScaleOverride: 0.65, // further reduced
+      textScaleOverride: 0.7, // further reduced
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -125,9 +125,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT,
     },
     6: {
-      expandW: 0.015,
+      isPill: false,
+      expandW: 0.09,
       expandH: EXPAND_H,
-      textScaleOverride: 1.16,
+      textScaleOverride: 0.7,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -135,9 +136,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       circleTextCol: MAROON_THEME,
     },
     7: {
-      expandW: 0.015,
+      isPill: false,
+      expandW: 0.09,
       expandH: EXPAND_H,
-      textScaleOverride: 1.06, // intentionally smaller — long multi-line verse
+      textScaleOverride: 0.5, // intentionally smaller — long multi-line verse
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -186,13 +188,14 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
 
   globalSettings: {
     capsuleHeight: 0.1,
-    columnGap: 0.04,
+    columnGap: 0.06,
     rowGap: 0.05,
     blockGap: 0.18,
     sectionPadX: 0.04,
     blockPadding: 0.014,
     sectionBorderWidth: 0.006,
     connectorPad: 0.025,
+    tightVersePadding: true,
   },
 
   blocks: [
@@ -208,33 +211,28 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
       verticalNudge: 0.02,
     },
-    // ── Row 1: [4, 3, 2] — connector bridges left 2 cols (4↔3) only ─────────
+    // ── Row 1: [4, 3, 2] — no connectors ─────────
     {
       id: "section2_g1",
       type: "group",
       verseIds: [4, 3, 2],
       columns: 3,
-      columnGap: 0.04,
+      columnGap: 0.2, // Maintain visualGap = 0.03 with expandW = 0.08
       isCenter: false,
-      hideRowConnectors: false,
-      rowConnectorCols: 2,
-      rowConnectorPadY: 0.04, // taller connector bar
-      rowConnectorPadX: -0.01, // narrower — stops it overflowing the capsule edges
+      hideRowConnectors: true,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
-    // ── Row 2: [7, 6, 5] — connector bridges left 2 cols (7↔6) only ─────────
+    // ── Row 2: [7, 6, 5] — no connectors ─────────
     {
       id: "section2_g2",
       type: "group",
       verseIds: [7, 6, 5],
       columns: 3,
-      columnGap: 0.04,
+      columnGap: 0.2, // Maintain visualGap = 0.03 with expandW = 0.08
+      gapBefore: 0.16, // Reduced gap between row 1 and row 2 to move it higher
       isCenter: false,
-      hideRowConnectors: false,
-      rowConnectorCols: 2,
-      rowConnectorPadY: 0.04, // taller connector bar
-      rowConnectorPadX: -0.01, // narrower — stops it overflowing the capsule edges
+      hideRowConnectors: true,
       dragBehavior: "individual",
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
@@ -242,41 +240,53 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
 
   svgOverlays: [
     // ── Section background (static, behind everything) ────────────────────────
+    // {
+    //   src: "/fatiha/all-section-bg.svg",
+    //   anchorGroupIndex: 1,
+    //   anchorEdge: "top",
+    //   scaleX: 1.36,
+    //   scaleY: 1.15,
+    //   offsetX: 0,
+    //   offsetY: -0.07,
+    //   renderOrder: 1,
+    // },
+    // ── Bismillah frame — verse 1 ───
     {
-      src: "/fatiha/all-section-bg.svg",
-      anchorGroupIndex: 1,
-      anchorEdge: "top",
-      scaleX: 1.36,
-      scaleY: 1.15,
+      src: "/ayatalkursi/frame-section-1.svg",
+      anchorGroupIndex: 0,
+      anchorEdge: "center",
+      scaleX: 1.17,
+      scaleY: 0.27,
       offsetX: 0,
-      offsetY: -0.07,
-      renderOrder: 1,
+      offsetY: 0,
+      renderOrder: 3,
+      customSectionId: "section2_v1",
     },
-    // ── Bismillah frame — top row (verses 2, 3, 4); moves with 3&4 section ───
+    // ── Bismillah frame — top row (verses 2, 3, 4) ───
     {
-      src: "/fatiha/bismillah-frame-3.svg",
+      src: "/ayatalkursi/frame-section-1.svg",
       anchorGroupIndex: 1,
       anchorEdge: "center",
-      scaleX: 1.3,
-      scaleY: 0.35,
+      scaleX: 1.17,
+      scaleY: 0.27,
       offsetX: 0,
       offsetY: 0,
       // rotationZ: -Math.PI / 2,
       renderOrder: 3,
-      customSectionId: "section2_v34",
+      customSectionId: "section2_v234",
     },
-    // ── Bismillah frame — bottom row (verses 5, 6, 7); moves with 6&7 section ─
+    // ── Bismillah frame — bottom row (verses 5, 6, 7) ─
     {
-      src: "/fatiha/bismillah-frame-3.svg",
+      src: "/ayatalkursi/frame-section-1.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 1.3,
-      scaleY: 0.35,
+      scaleX: 1.17,
+      scaleY: 0.27,
       offsetX: 0,
       offsetY: 0,
       // rotationZ: -Math.PI / 2,
       renderOrder: 3,
-      customSectionId: "section2_v67",
+      customSectionId: "section2_v567",
     },
   ],
 
@@ -290,28 +300,16 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       verseIds: [1],
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
-    // Row 1 — verse 2 elevates individually
+    // Row 1 — verses 2, 3, 4 elevate together
     {
-      id: "section2_v2",
-      verseIds: [2],
+      id: "section2_v234",
+      verseIds: [2, 3, 4],
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
-    // Row 1 — verses 3 & 4 elevate together
+    // Row 2 — verses 5, 6, 7 elevate together
     {
-      id: "section2_v34",
-      verseIds: [3, 4],
-      cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
-    },
-    // Row 2 — verse 5 elevates individually
-    {
-      id: "section2_v5",
-      verseIds: [5],
-      cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
-    },
-    // Row 2 — verses 6 & 7 elevate together
-    {
-      id: "section2_v67",
-      verseIds: [6, 7],
+      id: "section2_v567",
+      verseIds: [5, 6, 7],
       cameraTarget: { y: 1.2, fov: 35, tilt: -1.2 },
     },
   ],
@@ -382,10 +380,10 @@ export const FATIHA_4_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ\nغَيْرِ الْمَغْضُوبِ عَلَيْهِمْ\n وَلَا الضَّالِّينَ",
+            text: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ\nغَيْرِ الْمَغْضُوبِ عَلَيْهِمْ\nوَلَا الضَّالِّينَ",
           },
-          { number: 6, text: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ" },
-          { number: 5, text: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ" },
+          { number: 6, text: "اهْدِنَا الصِّرَاطَ\nالْمُسْتَقِيمَ" },
+          { number: 5, text: "إِيَّاكَ نَعْبُدُ\nوَإِيَّاكَ نَسْتَعِينُ" },
         ],
       },
     ],

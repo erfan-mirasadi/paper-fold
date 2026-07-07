@@ -171,6 +171,13 @@ export interface SurahGlobalSettings {
    * other surah).
    */
   contentStartYOverride?: number;
+
+  /**
+   * When true, drastically reduces the internal padding inside capsules
+   * (especially non-pill capsules) by pushing the verse number closer to the
+   * edge and expanding the text's maximum width constraint.
+   */
+  tightVersePadding?: boolean;
 }
 
 /**
