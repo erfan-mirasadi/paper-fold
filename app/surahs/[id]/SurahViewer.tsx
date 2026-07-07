@@ -219,14 +219,49 @@ function SurahViewerInner({
   // "wait" cursor while a paper switch is in flight — subscribed via
   // zustand.subscribe (NOT a React hook) so toggling isSwitching never
   // re-renders the overlay tree. The cursor is purely imperative.
+  // We also handle paper switch sound effects here.
   useEffect(() => {
+    let playedOut = false;
+    let playedIn = false;
+
     const unsub = usePaperStore.subscribe((state, prevState) => {
+      // 1. Reset tracking when a new switch begins
       if (state.isSwitching && !prevState.isSwitching) {
         document.body.style.cursor = "wait";
+        playedOut = false;
+        playedIn = false;
       } else if (!state.isSwitching && prevState.isSwitching) {
         if (document.body.style.cursor === "wait") {
           document.body.style.cursor = "";
         }
+      }
+
+      // 2. Play out transition sound when the outgoing paper actually starts curling out
+      if (
+        state.transitionPhase === "animating" &&
+        state.sheetStage === "curl" &&
+        !playedOut
+      ) {
+        playedOut = true;
+        setTimeout(() => {
+          const outAudio = new Audio("/paper-flip.mp3");
+          outAudio.playbackRate = 0.9; // Make it even slower
+          outAudio.volume = 0.1;
+          outAudio.play().catch((e) => console.error("Audio play failed:", e));
+        }, 300); // Delay slightly so it matches the visual acceleration of the cubic easing
+      }
+
+      // 3. Play in transition sound when the incoming paper starts gliding in
+      // (This coincides with the curl stage of the outgoing paper)
+      if (
+        state.transitionPhase === "animating" &&
+        state.sheetStage === "curl" &&
+        !playedIn
+      ) {
+        playedIn = true;
+        const inAudio = new Audio("/paper-flip-2.mp3");
+        inAudio.volume = 0.5;
+        inAudio.play().catch((e) => console.error("Audio play failed:", e));
       }
     });
     return unsub;
