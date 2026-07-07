@@ -252,7 +252,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     // },
     // ── Bismillah frame — verse 1 ───
     {
-      src: "/ayatalkursi/frame-section-1.svg",
+      src: "/ayatalKursi/frame-section-1.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
       scaleX: 1.17,
@@ -264,7 +264,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     },
     // ── Bismillah frame — top row (verses 2, 3, 4) ───
     {
-      src: "/ayatalkursi/frame-section-1.svg",
+      src: "/ayatalKursi/frame-section-1.svg",
       anchorGroupIndex: 1,
       anchorEdge: "center",
       scaleX: 1.17,
@@ -277,7 +277,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     },
     // ── Bismillah frame — bottom row (verses 5, 6, 7) ─
     {
-      src: "/ayatalkursi/frame-section-1.svg",
+      src: "/ayatalKursi/frame-section-1.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
       scaleX: 1.17,
