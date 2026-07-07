@@ -260,7 +260,6 @@ function SurahViewerInner({
       ) {
         playedIn = true;
         const inAudio = new Audio("/paper-flip-2.mp3");
-        inAudio.volume = 0.5;
         inAudio.play().catch((e) => console.error("Audio play failed:", e));
       }
     });
