@@ -27,6 +27,7 @@ import {
 } from "three";
 import { usePaperMasking } from "../../../hooks/usePaperMasking";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
+import { useStoryStore } from "../../../stores/useStoryStore";
 import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
@@ -120,7 +121,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   PaperMaterialHandle,
   PaperMaterialProps
 > = ({ toggles, isFolded = false, onReady }, ref) => {
-  const { gl, size } = useThree();
+  const { gl } = useThree();
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
@@ -148,7 +149,13 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const normalTexW = Math.min(renderTexWidth, 1024);
   const normalTexHeight = Math.min(renderTexHeight, 1024);
 
+  // The scene (and this material) persist across paper switches — bumping
+  // storyRevision remounts ONLY the RenderTextures so the new paper's content
+  // is drawn into fresh buffers in place.
+  const storyRevision = useStoryStore((s) => s.storyRevision);
+
   const renderTextureKey = [
+    `story${storyRevision}`,
     activeLanguage,
     fontsReady ? "fonts-ready" : "fonts-loading",
     isFolded ? "folded" : "flat",
@@ -343,6 +350,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 
       {toggles.normal && (
         <RenderTexture
+          key={`${renderTextureKey}-normal`}
           attach="normalMap"
           width={normalTexW}
           height={normalTexHeight}

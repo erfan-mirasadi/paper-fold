@@ -7,6 +7,7 @@ import { getOffsetForId } from "../3d-scene/FoldStory";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 
 import { usePopUpStore } from "../../../stores/usePopUpStore";
+import { usePaperStore } from "../../../stores/usePaperStore";
 import { useLenis } from "../../dom/LenisProvider";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { getActiveStoryConfig } from "../../../stores/useStoryStore";
@@ -356,6 +357,9 @@ export function ScrollManager() {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const elevatedPhase = useElevatedStore((s) => s.phase);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
+  // Paper switching runs without a blocking overlay — the scroll lock here is
+  // what keeps the fold story untouched while the page-turn sheet flies.
+  const isPaperSwitching = usePaperStore((s) => s.isSwitching);
   // Use a stable boolean instead of the raw float so the scroll-lock effect
   // only re-runs when the paper actually crosses the open/folded threshold,
   // not on every scroll tick. A per-frame re-run would call lenis.start()
@@ -368,11 +372,13 @@ export function ScrollManager() {
     const isPaperFolded = !isPaperFullyOpen;
 
     // Lock scroll when:
-    // 1. All sections mode (paper hidden) AND not in intro
-    // 2. Paper still has folds AND user has zoomed into a section
+    // 1. A paper switch (page-turn transition) is in flight
+    // 2. All sections mode (paper hidden) AND not in intro
+    // 3. Paper still has folds AND user has zoomed into a section
     const shouldLockScroll =
-      !isIntroActive &&
-      (isAllSectionsMode || (isPaperFolded && elevatedPhase === "elevated"));
+      isPaperSwitching ||
+      (!isIntroActive &&
+        (isAllSectionsMode || (isPaperFolded && elevatedPhase === "elevated")));
 
     if (shouldLockScroll) {
       lenis.stop();
@@ -556,6 +562,7 @@ export function ScrollManager() {
     isAllSectionsMode,
     elevatedPhase,
     isIntroActive,
+    isPaperSwitching,
     isPaperFullyOpen,
     syncCurrentOffset,
     LOCK_CONFIG,

@@ -12,6 +12,13 @@ import {
 interface StoryState {
   activeConfig: SurahLayoutConfig;
   activeTextData: Record<SurahLanguage, SurahDataShape>;
+  /**
+   * Bumps on every setActiveStory. The 3D scene is PERSISTENT across paper
+   * switches — only content buffers (RenderTextures) and config-bound
+   * subtrees key on this revision to rebuild in place, which is far cheaper
+   * than remounting the scene.
+   */
+  storyRevision: number;
   setActiveStory: (config: SurahLayoutConfig, textData: Record<SurahLanguage, SurahDataShape>) => void;
 }
 
@@ -24,6 +31,7 @@ const INITIAL_TEXT_DATA: Record<SurahLanguage, SurahDataShape> = {
 export const useStoryStore = create<StoryState>((set) => ({
   activeConfig: ALAK_LAYOUT_CONFIG,
   activeTextData: INITIAL_TEXT_DATA,
+  storyRevision: 0,
   setActiveStory: (config, textData) => {
     // Clean up drag engine state before switching stories to prevent
     // stale SpringValues and drag markers from leaking across surah navigations.
@@ -31,7 +39,11 @@ export const useStoryStore = create<StoryState>((set) => ({
     import("../utils/dragEngine").then(({ resetDragEngineForStory }) => {
       resetDragEngineForStory();
     });
-    set({ activeConfig: config, activeTextData: textData });
+    set((state) => ({
+      activeConfig: config,
+      activeTextData: textData,
+      storyRevision: state.storyRevision + 1,
+    }));
   },
 }));
 

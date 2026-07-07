@@ -1,21 +1,16 @@
 "use client";
-import {
-  Environment,
-  OrbitControls,
-  PerspectiveCamera,
-  SpotLight,
-} from "@react-three/drei";
+import { SpotLight } from "@react-three/drei";
 import { a } from "@react-spring/three";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
 import { Perf } from "r3f-perf";
 import { SinglePaper } from "./SinglePaper";
+import { PaperTransitionLayer, PaperSlideGroup } from "./PaperTransitionMesh";
 import { VersesRenderer } from "../verses-object/VersesRenderer";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { ElevatedSectionSurfaces } from "../sections-object/ElevatedSectionSurfaces";
 import { ElevatedSectionLabels } from "../sections-object/ElevatedSectionLabels";
 import { useDragState } from "../../../utils/dragEngine";
-import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { VerseClickHitboxes } from "../verses-object/VerseClickHitboxes";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { IntroCameraScrollController } from "../orchestrator/IntroCameraScrollController";
@@ -32,16 +27,21 @@ interface ExperienceProps {
 export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const config = useStoryStore((state) => state.activeConfig);
+  const storyRevision = useStoryStore((state) => state.storyRevision);
   const hasIntro = config.features.hasIntro;
   const showSpotlight = useFoldStore((s) => hasIntro && s.rawOffset < 0.37);
   const { gl, scene, camera } = useThree();
 
-  const [paperReady, setPaperReady] = useState(false);
+  // The scene persists across paper switches, so readiness is tracked PER
+  // CONTENT REVISION: the paper is "ready" only when the revision it settled
+  // at matches the live revision — each swap re-arms the signal by itself.
+  const [settledRevision, setSettledRevision] = useState(-1);
   const handlePaperReady = useCallback(() => {
-    setPaperReady(true);
+    setSettledRevision(useStoryStore.getState().storyRevision);
   }, []);
+  const paperReady = settledRevision === storyRevision;
 
-  const readyFiredRef = useRef(false);
+  const firedRevisionRef = useRef(-1);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // ✏️ isMobile = سنجش بر اساس هویت دستگاه (UserAgent) — نه عرض صفحه.
@@ -54,12 +54,12 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   }, []);
 
   useEffect(() => {
-    if (paperReady && !readyFiredRef.current) {
+    if (paperReady && firedRevisionRef.current !== storyRevision) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
       timeoutRef.current = setTimeout(() => {
-        if (!readyFiredRef.current) {
-          readyFiredRef.current = true;
+        if (firedRevisionRef.current !== storyRevision) {
+          firedRevisionRef.current = storyRevision;
           onReady?.();
         }
       }, 500);
@@ -68,7 +68,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [paperReady, onReady]);
+  }, [paperReady, storyRevision, onReady]);
 
   useEffect(() => {
     if (paperReady && useFoldStore.getState().isIntroActive && !isMobile) {
@@ -150,11 +150,10 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   return (
     <>
       {process.env.NODE_ENV === "development" && <Perf position="top-left" />}
-      <PerspectiveCamera
-        makeDefault
-        position={CAMERA_CONFIG.initialCamera.position}
-        fov={CAMERA_CONFIG.initialCamera.fov}
-      />
+      {/*
+       * The PerspectiveCamera + DynamicControls live in SurahViewer, OUTSIDE
+       * this paper-keyed subtree, so the camera survives paper switches.
+       */}
       {hasIntro && <IntroCameraScrollController />}
       <SectionZoomCamera />
       <a.group
@@ -164,23 +163,44 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         scale-y={sceneScale}
         scale-z={sceneScale}
       >
-        <a.group
-          position-y={paperFocusY}
-          position-z={paperFocusZ}
-          scale-x={paperFocusScale}
-          scale-y={paperFocusScale}
-          scale-z={paperFocusScale}
-        >
-          <SinglePaper isFolded={isFolded} onReady={handlePaperReady} />
-        </a.group>
-        {config.features.hasElevatedSections && (
-          <>
-            <ElevatedSectionSurfaces />
-            <ElevatedSectionLabels />
-          </>
-        )}
-        {!isAllSectionsMode && <VerseClickHitboxes />}
-        <VersesRenderer />
+        {/*
+         * PaperSlideGroup owns the switch choreography for the REAL content:
+         * hidden during "exit" (the transition sheet is an exact stand-in),
+         * parked off-screen during "waiting" (settles there unseen), and
+         * glides in during "enter".
+         */}
+        <PaperSlideGroup>
+          <a.group
+            position-y={paperFocusY}
+            position-z={paperFocusZ}
+            scale-x={paperFocusScale}
+            scale-y={paperFocusScale}
+            scale-z={paperFocusScale}
+          >
+            <SinglePaper isFolded={isFolded} onReady={handlePaperReady} />
+          </a.group>
+          {/*
+           * Config-bound subtrees rebuild in place per content revision —
+           * far cheaper than remounting the whole scene, and it guarantees
+           * no per-paper state leaks across switches.
+           */}
+          <group key={storyRevision}>
+            {config.features.hasElevatedSections && (
+              <>
+                <ElevatedSectionSurfaces />
+                <ElevatedSectionLabels />
+              </>
+            )}
+            {!isAllSectionsMode && <VerseClickHitboxes />}
+            <VersesRenderer />
+          </group>
+        </PaperSlideGroup>
+        {/*
+         * The flying page-turn sheet — a sibling of the slide group so it
+         * stays visible while the real content is hidden. Renders null
+         * outside of the "exit" phase.
+         */}
+        <PaperTransitionLayer />
       </a.group>
 
       {hasIntro && <IntroSectionAnimationController />}
@@ -195,10 +215,8 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         visible={useFoldStore.getState().isIntroActive}
       ></group>
 
-      <DynamicControls />
-
-      <Environment files="/hdri/lebombo_1k.hdr" environmentIntensity={1} />
-      <ambientLight intensity={0.8} />
+      {/* Environment + base lights live in SceneLighting (SurahViewer level)
+          so illumination never pops across paper switches. */}
 
       {showSpotlight && (
         <SpotLight
@@ -214,47 +232,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
           volumetric={!isMobile}
         />
       )}
-      {!isAllSectionsMode && (
-        <directionalLight position={[0, 4.2, -2]} intensity={1} />
-      )}
     </>
   );
 }
 
-// ... DynamicControls remains the same
-function DynamicControls() {
-  const isIntroActive = useFoldStore((s) => s.isIntroActive);
-
-  const config = useStoryStore((state) => state.activeConfig);
-
-  const enableInteractions = isIntroActive
-    ? (config.animations.introCamera?.allowOrbit ?? false)
-    : false;
-
-  const minAzimuthAngle = isIntroActive
-    ? -Infinity
-    : CAMERA_CONFIG.orbitControls.minAzimuthAngle;
-  const maxAzimuthAngle = isIntroActive
-    ? Infinity
-    : CAMERA_CONFIG.orbitControls.maxAzimuthAngle;
-  const minPolarAngle = isIntroActive
-    ? 0
-    : CAMERA_CONFIG.orbitControls.minPolarAngle;
-  const maxPolarAngle = isIntroActive
-    ? Math.PI
-    : CAMERA_CONFIG.orbitControls.maxPolarAngle;
-
-  return (
-    <OrbitControls
-      enabled={enableInteractions}
-      makeDefault={true}
-      enableRotate={enableInteractions}
-      enableZoom={enableInteractions}
-      enablePan={enableInteractions}
-      minAzimuthAngle={minAzimuthAngle}
-      maxAzimuthAngle={maxAzimuthAngle}
-      minPolarAngle={minPolarAngle}
-      maxPolarAngle={maxPolarAngle}
-    />
-  );
-}

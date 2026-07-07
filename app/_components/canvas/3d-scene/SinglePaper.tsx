@@ -27,10 +27,16 @@ import {
   TextureToggles,
 } from "./PaperMaterial";
 import { useFoldStore } from "../orchestrator/ScrollManager";
+import { usePaperStore } from "../../../stores/usePaperStore";
+import {
+  registerPaperSnapshotSource,
+  unregisterPaperSnapshotSource,
+  type PaperSnapshotSource,
+} from "./paperSnapshot";
 
 const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;
-const PAGE_SEGMENTS = 80;
+export const PAGE_SEGMENTS = 80;
 
 // 🚀 OPTIMIZATION 1: Static materials created ONCE as module-level singletons.
 // Prevents continuous WebGL shader recompilation on mobile GPUs.
@@ -73,7 +79,7 @@ export interface PaperPanelConfig {
   ignoreFolds?: number[];
 }
 
-function createPanelGeometry(
+export function createPanelGeometry(
   panelW: number,
   panelH: number,
   fullW: number,
@@ -368,6 +374,52 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   // and inject it into their panelMaterials[4] slot — no RenderTexture needed.
   const sharedMatRef = useRef<PaperMaterialHandle | null>(null);
 
+  // Register this paper as the capture source for the page-turn transition.
+  // usePaperStore grabs the LIVE material + current fold pose the instant a
+  // switch starts — the transition sheet shares them while this scene is
+  // still mounted, so the handoff is pixel-perfect with zero copy cost.
+  useEffect(() => {
+    const pageHeight = runtime.PAGE_HEIGHT;
+    const foldYPositions = runtime.FOLD_Y_POSITIONS;
+    const segmentHeight = pageHeight / PAGE_SEGMENTS;
+    const foldAnglesRef = globalFoldAngles;
+
+    const source: PaperSnapshotSource = {
+      getMaterial: () => sharedMatRef.current?.getMaterial() ?? null,
+      getBoneRotations: () => {
+        const targetAngles = foldAnglesRef.current;
+        if (!targetAngles) return null;
+        // Distribute the global fold angles onto the bone chain exactly like
+        // PaperPanelMesh does per frame, so the transition sheet starts in
+        // the same pose the live paper is showing.
+        const rotations = new Float32Array(PAGE_SEGMENTS + 1);
+        for (let foldIdx = 0; foldIdx < targetAngles.length; foldIdx++) {
+          const rawBonePos = Math.min(
+            Math.abs(foldYPositions[foldIdx]) / segmentHeight,
+            PAGE_SEGMENTS,
+          );
+          const lowerBone = Math.min(Math.floor(rawBonePos), PAGE_SEGMENTS - 1);
+          const upperBone = Math.min(lowerBone + 1, PAGE_SEGMENTS);
+          const blendToUpper = rawBonePos - lowerBone;
+          rotations[lowerBone] += targetAngles[foldIdx] * (1 - blendToUpper);
+          rotations[upperBone] += targetAngles[foldIdx] * blendToUpper;
+        }
+        return rotations;
+      },
+      pageWidth: runtime.PAGE_WIDTH,
+      pageHeight,
+      sceneCenterY: runtime.SCENE_CENTER_Y,
+    };
+
+    registerPaperSnapshotSource(source);
+    return () => unregisterPaperSnapshotSource(source);
+  }, [
+    runtime.PAGE_WIDTH,
+    runtime.PAGE_HEIGHT,
+    runtime.SCENE_CENTER_Y,
+    runtime.FOLD_Y_POSITIONS,
+  ]);
+
   useEffect(() => {
     foldSound.current = new Audio("/paper-fold.mp3");
     if (foldSound.current) foldSound.current.volume = 1;
@@ -390,13 +442,21 @@ export const SinglePaper: FC<SinglePaperProps> = ({
 
   useFrame(() => {
     const paperProgress = useFoldStore.getState().currentOffset;
+    const transitionPhase = usePaperStore.getState().transitionPhase;
 
-    // Fold angle computation runs ONCE here and is shared with all panels via ref.
-    writeFoldAnglesForScroll(
-      paperProgress,
-      runtime.foldSteps,
-      globalFoldAngles.current!,
-    );
+    // During the switch's "flatten"/"exit" phases the fold targets are
+    // zeroed — the per-bone damping below unfolds the paper smoothly, so the
+    // page-turn sheet (which is rigged flat) never meets a crease line.
+    if (transitionPhase === "flatten" || transitionPhase === "exit") {
+      globalFoldAngles.current!.fill(0);
+    } else {
+      // Fold angle computation runs ONCE here and is shared with all panels via ref.
+      writeFoldAnglesForScroll(
+        paperProgress,
+        runtime.foldSteps,
+        globalFoldAngles.current!,
+      );
+    }
 
     const maxStageIndex =
       runtime.foldSteps.length > 0 ? runtime.foldSteps.length - 1 : 0;

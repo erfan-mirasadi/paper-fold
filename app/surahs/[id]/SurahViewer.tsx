@@ -9,7 +9,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
-import { Preload } from "@react-three/drei";
+import { Preload, PerspectiveCamera } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useState, useRef } from "react";
 import * as THREE from "three";
@@ -26,6 +26,8 @@ import { AllSectionsOverlay } from "@/app/_components/dom/ui-overlay/AllSections
 import { SiteLoadingOverlay } from "@/app/_components/dom/ui-overlay/SiteLoadingOverlay";
 import { CameraViewPresetOverlay } from "@/app/_components/dom/ui-overlay/CameraViewPresetOverlay";
 import { CameraViewController } from "@/app/_components/canvas/orchestrator/CameraViewController";
+import { DynamicControls } from "@/app/_components/canvas/orchestrator/DynamicControls";
+import { SceneLighting } from "@/app/_components/canvas/orchestrator/SceneLighting";
 import { IntroSectionGuidesOverlay } from "@/app/_components/dom/IntroSectionGuidesOverlay";
 import AmbientMedia from "@/app/_components/dom/AmbientMedia";
 import JoinedStepOverlay from "@/app/_components/dom/JoinedStepOverlay";
@@ -65,10 +67,10 @@ export default function SurahViewer() {
     (s) => s.activeConfig.dimensions.scrollPages,
   );
 
-  // Multi-paper navigation: bumping paperInstanceKey remounts the canvas
-  // scene (full GPU dispose of the outgoing paper) behind the switch overlay.
-  const paperInstanceKey = usePaperStore((s) => s.paperInstanceKey);
-  const isPaperSwitching = usePaperStore((s) => s.isSwitching);
+  // Multi-paper navigation: the scene is PERSISTENT — switches swap only the
+  // content buffers in place. The loading overlay is only the fallback for
+  // switches where capturing the live paper failed.
+  const showSwitchFallback = usePaperStore((s) => s.switchFallback);
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -159,8 +161,7 @@ export default function SurahViewer() {
         isIntroRenderPhase={isIntroRenderPhase}
         mountMainOverlays={mountMainOverlays}
         scrollPages={scrollPages}
-        paperInstanceKey={paperInstanceKey}
-        isPaperSwitching={isPaperSwitching}
+        showSwitchFallback={showSwitchFallback}
         canvasWrapperRef={canvasWrapperRef}
         handleSceneReady={handleSceneReady}
       />
@@ -176,8 +177,7 @@ interface InnerProps {
   isIntroRenderPhase: boolean;
   mountMainOverlays: boolean;
   scrollPages: number;
-  paperInstanceKey: number;
-  isPaperSwitching: boolean;
+  showSwitchFallback: boolean;
   canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
   handleSceneReady: () => void;
 }
@@ -190,8 +190,7 @@ function SurahViewerInner({
   isIntroRenderPhase,
   mountMainOverlays,
   scrollPages,
-  paperInstanceKey,
-  isPaperSwitching,
+  showSwitchFallback,
   canvasWrapperRef,
   handleSceneReady,
 }: InnerProps) {
@@ -290,14 +289,35 @@ function SurahViewerInner({
                 <ScrollManager />
                 <PopUpHoverScrollController />
                 {/*
-                 * key={paperInstanceKey} — the whole scene subtree remounts on
-                 * paper switch so the outgoing paper's geometries/RenderTextures
-                 * are disposed before the new paper allocates. The WebGL context,
-                 * loaded fonts and drei's texture cache all survive (they live on
-                 * the Canvas / module level), so a swap is far cheaper than a
-                 * route navigation.
+                 * Camera + controls are mounted here, OUTSIDE the paper-keyed
+                 * Experience, so the user's camera orientation survives paper
+                 * switches completely untouched — no reset, no re-aim.
                  */}
-                <Experience key={paperInstanceKey} onReady={handleSceneReady} />
+                <PerspectiveCamera
+                  makeDefault
+                  position={CAMERA_CONFIG.initialCamera.position}
+                  fov={CAMERA_CONFIG.initialCamera.fov}
+                />
+                <DynamicControls />
+                {/*
+                 * Persistent lighting — never remounts on paper switches, so
+                 * illumination stays perfectly stable during the swap.
+                 * The inner Suspense is CRITICAL: Environment suspends while
+                 * its HDR loads, and without a boundary INSIDE the canvas the
+                 * suspension bubbles to the outer <Suspense fallback={null}>
+                 * and unmounts the entire Canvas (blank page).
+                 */}
+                <Suspense fallback={null}>
+                  <SceneLighting />
+                </Suspense>
+                {/*
+                 * PERSISTENT scene — never remounted on paper switches. Only
+                 * the content buffers (RenderTextures keyed by storyRevision)
+                 * and config-bound subtrees rebuild in place, so switches are
+                 * cheap and nothing (camera, lights, meshes, compiled
+                 * shaders) is ever torn down.
+                 */}
+                <Experience onReady={handleSceneReady} />
                 <CameraViewController />
                 {!isMobile && <Preload all />}
               </Canvas>
@@ -311,12 +331,12 @@ function SurahViewerInner({
       </AnimatePresence>
 
       {/*
-       * Paper-switch overlay — covers the scene remount while navigating
-       * between papers of the same Surah. It blocks all scroll input and is
-       * dismissed by the new paper's ready signal (see handleSceneReady).
+       * Paper-switch fallback overlay — only shown when a switch could NOT
+       * capture a snapshot for the animated page-turn (e.g. WebGL context
+       * loss). Normal switches are carried entirely by the transition sheet.
        */}
       <AnimatePresence>
-        {isSceneReady && isPaperSwitching && (
+        {isSceneReady && showSwitchFallback && (
           <SiteLoadingOverlay key="paper-switch-loader" />
         )}
       </AnimatePresence>
