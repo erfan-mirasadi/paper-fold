@@ -1,11 +1,10 @@
 <svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="314.39" y="1173.2" width="21458.21" height="9513.5" rx="800" ry="800" fill="#F0E4E5"/>
+<path d="M 314.39 1173.2 H 21772.6 V 10686.7 H 314.39 Z" fill="#F0E4E5"/>
 <mask id="mask0_1202_3878" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="224" y="1083" width="21639" height="9694">
-<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="800" fill="white"/>
-<rect x="314.39" y="1173.2" width="21458.21" height="9513.5" rx="800" ry="800" fill="black"/>
+<path d="M 224.41 1083.2 H 21862.6 V 10776.7 H 224.41 Z M 314.39 1173.2 V 10686.7 H 21772.6 V 1173.2 Z" fill="white"/>
 </mask>
 <g mask="url(#mask0_1202_3878)">
-<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="800" fill="url(#paint0_linear_1202_3878)"/>
+<path d="M 224.41 1083.2 H 21862.6 V 10776.7 H 224.41 Z M 314.39 1173.2 V 10686.7 H 21772.6 V 1173.2 Z" fill="url(#paint0_linear_1202_3878)"/>
 </g>
 <defs>
 <linearGradient id="paint0_linear_1202_3878" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">

@@ -71,7 +71,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     paperHeight: 1.78,
     sceneCenterYOffset: -0.045,
     padding: 0.29,
-    scrollPages: 2.5,
+    scrollPages: 2,
     fixedWidthAcrossLanguages: true,
   },
 
@@ -289,26 +289,26 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
   // 7-line block sits centered in the gap, not just its top-left anchor.
   handwrittenNotes: [
     {
-      x: 0.065,
-      y: -1.53,
+      x: 0.77,
+      y: -1.51,
       fontSize: 0.038,
       color: "#2f4858",
       lineSpacing: 1.6,
       maxWidth: 1.5,
-      textAlign: "left",
+      textAlign: "center",
       rotationZ: 0,
       lines: [
         {
-          text: "Ana-baba başta anılırken, kölenin sonda tek başına zikredilmesi",
+          text: "Ana-baba başta anılırken, kölenin sonda tek başına",
         },
         {
-          text: "dikkatleri özellikle ona yöneltiyor. Böylece iyiliğe en çok",
+          text: "zikredilmesi dikkatleri özellikle ona yöneltiyor.",
         },
         {
-          text: "muhtaç olan kimsenin köle olduğu, kelime dizilişiyle bile ince",
+          text: "Böylece iyiliğe en çok muhtaç olan kimsenin köle",
         },
         {
-          text: "bir şekilde hissettiriliyor.",
+          text: "olduğu, kelime dizilişiyle bile ince bir şekilde hissettiriliyor.",
         },
       ],
     },
@@ -416,7 +416,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       bgThemeKey: "s2IntroOutroBg",
       disablePopUp: true,
       capsuleHeight: 0.125,
-      verticalNudge: 0.07,
+      verticalNudge: 0.035,
     },
   ],
 
@@ -454,23 +454,23 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       renderOrder: 2,
       customSectionId: "section2_main",
     },
-    {
-      src: "/fatiha/all-section-bg.svg",
-      anchorGroupIndex: 1,
-      anchorEdge: "top",
-      scaleX: 1.17,
-      scaleY: 1.17,
-      offsetX: 0,
-      offsetY: -0.09,
-      renderOrder: 1,
-      customSectionId: "section2_all",
-    },
+    // {
+    //   src: "/fatiha/all-section-bg.svg",
+    //   anchorGroupIndex: 1,
+    //   anchorEdge: "top",
+    //   scaleX: 1.17,
+    //   scaleY: 1.17,
+    //   offsetX: 0,
+    //   offsetY: -0.09,
+    //   renderOrder: 1,
+    //   customSectionId: "section2_all",
+    // },
   ],
   animations: {
     computeFoldYPositions: (lm) => {
       const y = lm.groupYPositions;
       const h = lm.groupHeights;
-      const fold0 = (y[0] - h[0] + y[1]) / 2; // between [1,2] and mid1
+      const fold0 = (y[0] - h[0] + y[1]) / 2 - 0.045; // between [1,2] and mid1
       const fold1 = y[1] - lm.groupPad - lm.smallBoxH2 - lm.rowGap / 2; // inside mid1
       const fold2 = (y[1] - h[1] + y[2]) / 2; // between mid1 and mid2
       const fold3 = y[2] - lm.groupPad - lm.smallBoxH2 - lm.rowGap / 2; // inside mid2
