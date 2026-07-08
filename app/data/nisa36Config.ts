@@ -55,7 +55,7 @@ const WARM_BG = CAPSULE_BG_6_19; // "#E5CFA4"
 
 export const NISA_36_CONFIG: SurahLayoutConfig = {
   id: "nisa36",
-  title: "Nisa 36",
+  title: "Nisa suresi",
   heroTitle: "Nisa",
   heroSubtitle: "suresi 36",
 
@@ -107,6 +107,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT,
       isPill: false,
       expandW: 0.0852,
+      expandH: 0.015,
       textScaleOverride: 0.667,
       translationTextScaleOverride: 0.467,
     },
@@ -119,6 +120,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT,
       isPill: false,
       expandW: 0.0852,
+      expandH: 0.015,
       textScaleOverride: 0.667,
       translationTextScaleOverride: 0.467,
     },
@@ -191,8 +193,9 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       textColor: S1_VERSE_5_TEXT,
       isPill: false,
       expandW: 0.0852,
+      expandH: 0.015,
       textScaleOverride: 0.667,
-      translationTextScaleOverride: 0.467,
+      translationTextScaleOverride: 0.447,
     },
     // ── Verse 12 — standalone LONG non-pill capsule, orange theme, red text
     // Only verse on the page that shows a number badge — and it shows the
@@ -274,6 +277,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     sectionBorderWidth: 0.006,
     connectorPad: 0.03,
     framePad: 0.054, // Alak's s2VerticalPad
+    contentStartYOverride: -0.545,
   },
 
   // Handwritten margin note, centered in the empty space below the content.
@@ -286,7 +290,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
   handwrittenNotes: [
     {
       x: 0.065,
-      y: -1.395,
+      y: -1.53,
       fontSize: 0.038,
       color: "#2f4858",
       lineSpacing: 1.6,
@@ -295,22 +299,16 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          text: "İyi davranılacak kişilerin başında ana-baba sayılmış. Elbette doğrusu",
+          text: "Ana-baba başta anılırken, kölenin sonda tek başına zikredilmesi",
         },
         {
-          text: "budur. En sonda da kölelerin adı geçiyor. Ancak köleler en sonda",
+          text: "dikkatleri özellikle ona yöneltiyor. Böylece iyiliğe en çok",
         },
         {
-          text: "tek kelime olduğu için, ikili sisteme göre tek olan en çok dikkat",
+          text: "muhtaç olan kimsenin köle olduğu, kelime dizilişiyle bile ince",
         },
         {
-          text: "çekilendir. Böylece köle, iyi davranılması gereken en önemli isim",
-        },
-        {
-          text: "haline geliyor. Ne kadar manidar. Çünkü iyi davranılmaya en çok",
-        },
-        {
-          text: "muhtaç olan ve ne yazık ki iyi davranılmayan insanlar onlardı.",
+          text: "bir şekilde hissettiriliyor.",
         },
       ],
     },
@@ -354,15 +352,16 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       columns: 1,
       isCenter: false,
       capsuleHeight: 0.0833,
+      rowGap: 0.055,
       bgThemeKey: "s2IntroOutroBg",
       disablePopUp: true,
-      verticalNudge: -0.24, // Shifted down slightly to be closer to center
+      verticalNudge: -0.26, // Shifted down slightly to be closer to center
     },
     // ── Block 1 — Middle section 1 (verses 3,4,5,6) — blue, curve, pop-up ──
     {
       id: "section2_mid1",
       type: "group",
-      verseIds: [4, 3, 6, 5],
+      verseIds: [3, 4, 5, 6],
       columns: 2,
       horizontalInset: 0.01,
       isCenter: true,
@@ -380,7 +379,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     {
       id: "section2_mid2",
       type: "group",
-      verseIds: [8, 7, 10, 9],
+      verseIds: [7, 8, 9, 10],
       columns: 2,
       horizontalInset: 0.01,
       isCenter: true,
@@ -404,7 +403,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       capsuleHeight: 0.0833,
       bgThemeKey: "s2IntroOutroBg",
       disablePopUp: true,
-      verticalNudge: -0.01,
+      verticalNudge: 0.01,
     },
     // ── Block 4 — verse 12, standalone LONG non-pill capsule, orange,
     //     outside the main section, own elevation/drag zone, no pop-up ─────
@@ -417,7 +416,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       bgThemeKey: "s2IntroOutroBg",
       disablePopUp: true,
       capsuleHeight: 0.125,
-      verticalNudge: 0.05,
+      verticalNudge: 0.07,
     },
   ],
 
@@ -449,7 +448,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 3,
       anchorEdge: "center",
       scaleX: 1.1,
-      scaleY: 0.72,
+      scaleY: 0.76,
       offsetX: 0,
       offsetY: 0.28,
       renderOrder: 2,
@@ -460,9 +459,9 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: 1.17,
-      scaleY: 1.04,
+      scaleY: 1.17,
       offsetX: 0,
-      offsetY: -0.115,
+      offsetY: -0.09,
       renderOrder: 1,
       customSectionId: "section2_all",
     },
@@ -563,10 +562,10 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "وَبِذِي الْقُرْبَىٰ" },
           { number: 3, text: "وَبِالْوَالِدَيْنِ إِحْسَانًا" },
-          { number: 6, text: "وَالْمَسَاكِينِ" },
+          { number: 4, text: "وَبِذِي الْقُرْبَىٰ" },
           { number: 5, text: "وَالْيَتَامَىٰ" },
+          { number: 6, text: "وَالْمَسَاكِينِ" },
         ],
       },
       // ── Group 2 — middle section 2 (green) ───────────────────────────────
@@ -575,10 +574,10 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "وَالْجَارِ الْجُنُبِ" },
           { number: 7, text: "وَالْجَارِ ذِي الْقُرْبَىٰ" },
-          { number: 10, text: "وَابْنِ السَّبِيلِ" },
+          { number: 8, text: "وَالْجَارِ الْجُنُبِ" },
           { number: 9, text: "وَالصَّاحِبِ بِالْجَنْبِ" },
+          { number: 10, text: "وَابْنِ السَّبِيلِ" },
         ],
       },
       // ── Group 3 — verse 11 (standalone) ──────────────────────────────────
@@ -635,10 +634,10 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "Sonra diğer yakınlara," },
           { number: 3, text: "Ve önce ana-babaya," },
-          { number: 6, text: "Sonra fakirlere," },
+          { number: 4, text: "Sonra diğer yakınlara," },
           { number: 5, text: "Önce yetimlere," },
+          { number: 6, text: "Sonra fakirlere," },
         ],
       },
       {
@@ -646,10 +645,10 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "Sonra uzak komşuya," },
           { number: 7, text: "Önce yakın komşuya," },
-          { number: 10, text: "Sonra yolcuya, garibe," },
+          { number: 8, text: "Sonra uzak komşuya," },
           { number: 9, text: "Önce yol arkadaşına," },
+          { number: 10, text: "Sonra yolcuya, garibe," },
         ],
       },
       {
@@ -710,10 +709,10 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 4, text: "then to other close relatives," },
           { number: 3, text: "And first, to parents," },
-          { number: 6, text: "then to the poor," },
+          { number: 4, text: "then to other close relatives," },
           { number: 5, text: "first, to orphans," },
+          { number: 6, text: "then to the poor," },
         ],
       },
       {
@@ -721,13 +720,13 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
         isCenter: true,
         extraRowGap: 0,
         verses: [
-          { number: 8, text: "then to the distant neighbor," },
           { number: 7, text: "first, to the near neighbor," },
+          { number: 8, text: "then to the distant neighbor," },
+          { number: 9, text: "first, to the companion at your side," },
           {
             number: 10,
             text: "then to the traveler, the stranger far from home,",
           },
-          { number: 9, text: "first, to the companion at your side," },
         ],
       },
       {
