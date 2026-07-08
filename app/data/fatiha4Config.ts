@@ -116,7 +116,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       expandW: 0.17,
       expandH: 0.025,
       textScaleOverride: 0.7,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
@@ -129,7 +129,8 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       isPill: false,
       expandW: EXPAND_W,
       expandH: EXPAND_H,
-      textScaleOverride: 0.7, // further reduced
+      textScaleOverride: 0.7,
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -142,6 +143,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       expandW: EXPAND_W,
       expandH: EXPAND_H,
       textScaleOverride: 0.7,
+      translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -153,6 +155,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       expandW: EXPAND_W,
       expandH: EXPAND_H,
       textScaleOverride: 0.7,
+      translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -165,6 +168,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       expandW: EXPAND_W,
       expandH: EXPAND_H,
       textScaleOverride: 0.7, // further reduced
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -177,6 +181,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       expandW: EXPAND_W,
       expandH: EXPAND_H,
       textScaleOverride: 0.7,
+      translationTextScaleOverride: 0.45,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -187,7 +192,8 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       isPill: false,
       expandW: EXPAND_W,
       expandH: EXPAND_H,
-      textScaleOverride: 0.5, // intentionally smaller — long multi-line verse
+      textScaleOverride: 0.5,
+      translationTextScaleOverride: 0.6,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -509,8 +515,8 @@ export const FATIHA_4_TEXT_EN: SurahDataShape = {
       },
       {
         verses: [
-          { number: 4, text: "Owner of the Day of Judgment." },
           { number: 3, text: "The Most Gracious, the Most Merciful." },
+          { number: 4, text: "Owner of the Day of Judgment." },
         ],
       },
       {
@@ -523,11 +529,11 @@ export const FATIHA_4_TEXT_EN: SurahDataShape = {
       },
       {
         verses: [
+          { number: 6, text: "Show us the straight path." },
           {
             number: 7,
             text: "That path is the path You taught the Prophet, not the path of those who have earned anger and of those who have gone astray.",
           },
-          { number: 6, text: "Show us the straight path." },
         ],
       },
     ],
@@ -562,8 +568,8 @@ export const FATIHA_4_TEXT_TR: SurahDataShape = {
       },
       {
         verses: [
-          { number: 4, text: "Din gününün sahibidir." },
           { number: 3, text: "Rahmandır, Rahimdir." },
+          { number: 4, text: "Din gününün sahibidir." },
         ],
       },
       {
@@ -576,11 +582,11 @@ export const FATIHA_4_TEXT_TR: SurahDataShape = {
       },
       {
         verses: [
+          { number: 6, text: "Bize doğru yolu göster." },
           {
             number: 7,
             text: "O yol, Peygambere öğrettiğin yoldur, gazap ettiklerinin ve sapmışların yolu değil.",
           },
-          { number: 6, text: "Bize doğru yolu göster." },
         ],
       },
     ],

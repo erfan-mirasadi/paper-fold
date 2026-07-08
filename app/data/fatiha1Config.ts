@@ -64,7 +64,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       expandW: 0.22,
       expandH: 0.015,
       textScaleOverride: 0.75,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
@@ -77,7 +77,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       expandW: 0.22,
       expandH: 0.015,
       textScaleOverride: 0.7,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -89,6 +89,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       expandH: 0.0025,
       expandW: 0.1042, // 0.0486 / 1.1
       textScaleOverride: 1.2,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16, // Blue theme
       border: MAROON_THEME, // Slate blue border
       circleBorderCol: MAROON_THEME,
@@ -98,7 +99,8 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     4: {
       expandW: 0.1042, // 0.0486 / 1.1
       expandH: 0.0025,
-      textScaleOverride: 1.2,
+      textScaleOverride: 1.3,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -110,7 +112,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       expandW: 0.22,
       expandH: 0.015,
       textScaleOverride: 0.7,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.5,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -125,6 +127,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       expandW: 0.1042, // 0.0486 / 1.1
       expandH: 0.0025,
       textScaleOverride: 1.2,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -140,6 +143,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
       expandW: 0.2875,
       expandH: 0.0025,
       textScaleOverride: 1.2,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,

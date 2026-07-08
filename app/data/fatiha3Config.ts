@@ -60,7 +60,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       expandW: 0.06,
       expandH: 0.02,
       textScaleOverride: 0.6,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.45,
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
@@ -74,6 +74,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       expandW: 0.06,
       expandH: 0.02,
       textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.45,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -86,6 +87,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       expandW: 0.06,
       expandH: 0.02,
       textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.45,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -98,6 +100,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       expandW: 0.06,
       expandH: 0.02,
       textScaleOverride: 1.15,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -108,6 +111,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       expandW: 0.06,
       expandH: 0.02,
       textScaleOverride: 1.15,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -119,6 +123,7 @@ export const FATIHA_3_CONFIG: SurahLayoutConfig = {
       expandW: 0.06,
       expandH: 0.02,
       textScaleOverride: 1.15,
+      translationTextScaleOverride: 0.85,
       bg: CAPSULE_BG_9_10_15_16,
       border: MAROON_THEME,
       circleBorderCol: MAROON_THEME,
@@ -417,28 +422,28 @@ export const FATIHA_3_TEXT_EN: SurahDataShape = {
       {
         verses: [
           {
-            number: 5,
-            text: "We worship You alone and we ask for help from You alone.",
-          },
-          {
             number: 2,
             text: "All praise is to Allah, Lord of the Worlds !",
           },
+          {
+            number: 5,
+            text: "We worship You alone and we ask for help from You alone.",
+          },
         ],
       },
       {
         verses: [
-          { number: 6, text: "Show us the straight path." },
           { number: 3, text: "The Most Gracious, the Most Merciful." },
+          { number: 6, text: "Show us the straight path." },
         ],
       },
       {
         verses: [
+          { number: 4, text: "Owner of the Day of Judgment." },
           {
             number: 7,
             text: "That path is the path You taught the Prophet, not the path of those who have earned anger and of those who have gone astray.",
           },
-          { number: 4, text: "Owner of the Day of Judgment." },
         ],
       },
     ],
@@ -459,32 +464,30 @@ export const FATIHA_3_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        verses: [
-          { number: 1, text: "Allah adına ! ki O Rahmandır, Rahimdir." },
-        ],
+        verses: [{ number: 1, text: "Allah adına!ki O Rahmandır, Rahimdir" }],
       },
       {
         verses: [
+          { number: 2, text: "Tüm övgüler Allaha, Alemlerin Rabbine !" },
           {
             number: 5,
             text: "Yalnız sana ibadet ediyoruz ve yalnız senden yardım istiyoruz.",
           },
-          { number: 2, text: "Tüm övgüler Allaha, Alemlerin Rabbine !" },
         ],
       },
       {
         verses: [
-          { number: 6, text: "Bize doğru yolu göster." },
           { number: 3, text: "Rahmandır, Rahimdir." },
+          { number: 6, text: "Bize doğru yolu göster." },
         ],
       },
       {
         verses: [
+          { number: 4, text: "Din gününün sahibidir." },
           {
             number: 7,
             text: "O yol, Peygambere öğrettiğin yoldur, gazap ettiklerinin ve sapmışların yolu değil.",
           },
-          { number: 4, text: "Din gününün sahibidir." },
         ],
       },
     ],
