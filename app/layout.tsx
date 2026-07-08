@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text, Fraunces } from "next/font/google";
 import "./globals.css";
 import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
+import AudioUnlockInitializer from "./_components/dom/AudioUnlockInitializer";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -86,6 +87,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans" suppressHydrationWarning>
+        <AudioUnlockInitializer />
         <GrainOverlay />
         {children}
       </body>

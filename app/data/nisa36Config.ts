@@ -55,7 +55,7 @@ const WARM_BG = CAPSULE_BG_6_19; // "#E5CFA4"
 
 export const NISA_36_CONFIG: SurahLayoutConfig = {
   id: "nisa36",
-  title: "Nisa suresi",
+  title: "Nisa suresi 36",
   heroTitle: "Nisa",
   heroSubtitle: "suresi 36",
 

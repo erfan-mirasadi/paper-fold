@@ -43,6 +43,7 @@ import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
+import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
 
 const Experience = dynamic(
   () =>
@@ -243,12 +244,16 @@ function SurahViewerInner({
         !playedOut
       ) {
         playedOut = true;
-        setTimeout(() => {
-          const outAudio = new Audio("/paper-flip.mp3");
-          outAudio.playbackRate = 0.9; // Make it even slower
-          outAudio.volume = 0.1;
-          outAudio.play().catch((e) => console.error("Audio play failed:", e));
-        }, 300); // Delay slightly so it matches the visual acceleration of the cubic easing
+        if (useAudioUnlockStore.getState().hasInteracted) {
+          setTimeout(() => {
+            const outAudio = new Audio("/paper-flip.mp3");
+            outAudio.playbackRate = 0.9; // Make it even slower
+            outAudio.volume = 0.1;
+            outAudio
+              .play()
+              .catch((e) => console.error("Audio play failed:", e));
+          }, 300); // Delay slightly so it matches the visual acceleration of the cubic easing
+        }
       }
 
       // 3. Play in transition sound when the incoming paper starts gliding in
@@ -259,8 +264,10 @@ function SurahViewerInner({
         !playedIn
       ) {
         playedIn = true;
-        const inAudio = new Audio("/paper-flip-2.mp3");
-        inAudio.play().catch((e) => console.error("Audio play failed:", e));
+        if (useAudioUnlockStore.getState().hasInteracted) {
+          const inAudio = new Audio("/paper-flip-2.mp3");
+          inAudio.play().catch((e) => console.error("Audio play failed:", e));
+        }
       }
     });
     return unsub;

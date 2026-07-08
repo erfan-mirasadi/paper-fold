@@ -33,6 +33,10 @@ import {
   processPendingCaptureRequest,
   type PaperSnapshotSource,
 } from "./paperSnapshot";
+import {
+  attachGlobalAudioUnlockListeners,
+  useAudioUnlockStore,
+} from "../../../stores/useAudioUnlockStore";
 
 const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;
@@ -354,7 +358,6 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   const runtime = useSurahLayoutRuntime();
   const foldSound = useRef<HTMLAudioElement | null>(null);
   const lastActiveStage = useRef<number>(0);
-  const hasInteracted = useRef(false);
 
   // 🚀 OPTIMIZATION 7: Global fold angle buffer written ONCE in the parent useFrame,
   // then shared via ref with all panels. Eliminates N redundant writeFoldAnglesForScroll
@@ -427,14 +430,11 @@ export const SinglePaper: FC<SinglePaperProps> = ({
     foldSound.current = new Audio("/paper-fold.mp3");
     if (foldSound.current) foldSound.current.volume = 1;
 
-    const onInteract = () => {
-      hasInteracted.current = true;
-    };
-    window.addEventListener("pointerdown", onInteract, { once: true });
-    window.addEventListener("keydown", onInteract, { once: true });
+    // Safety net — AudioUnlockInitializer already attaches these at the app
+    // root, but attaching is idempotent, so this covers any mount order.
+    attachGlobalAudioUnlockListeners();
+
     return () => {
-      window.removeEventListener("pointerdown", onInteract);
-      window.removeEventListener("keydown", onInteract);
       if (foldSound.current) {
         foldSound.current.pause();
         foldSound.current.src = "";
@@ -464,7 +464,11 @@ export const SinglePaper: FC<SinglePaperProps> = ({
 
     if (currentStage !== lastActiveStage.current) {
       lastActiveStage.current = currentStage;
-      if (foldSound.current && paperProgress > 0 && hasInteracted.current) {
+      if (
+        foldSound.current &&
+        paperProgress > 0 &&
+        useAudioUnlockStore.getState().hasInteracted
+      ) {
         foldSound.current.currentTime = 0;
         foldSound.current.play().catch(() => {});
       }
