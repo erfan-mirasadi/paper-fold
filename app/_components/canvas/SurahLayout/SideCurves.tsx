@@ -122,7 +122,11 @@ function computeBrackets(
   };
 
   const { groupPad, smallBoxH2, s2Gap } = layout;
-  const centerGroup = groups.find((g) => g.isCenter && g.isPushedIn);
+  // Normally exactly one block is flagged isCenter&&isPushedIn (the classic
+  // single "pushed-in middle box"). A config may flag several blocks this
+  // way to get independent "hug this one block" bracket curves — each such
+  // block can carry its own `curveOverride` color (see LayoutBlock.curveOverride).
+  const centerGroups = groups.filter((g) => g.isCenter && g.isPushedIn);
   const brackets: BracketSpec[] = [];
 
   if (introOutro) {
@@ -169,7 +173,7 @@ function computeBrackets(
       ...(outerColors[2] ?? FALLBACK_OUTER_COLORS[2]),
     });
 
-    if (centerGroup) {
+    centerGroups.forEach((centerGroup, ci) => {
       const cTop = centerGroup.frameY - groupPad;
       const cBot =
         centerGroup.frameY - groupPad - smallBoxH2 - s2Gap - smallBoxH2;
@@ -178,11 +182,11 @@ function computeBrackets(
         outerYBot: cBot,
         innerYTop: cTop - smallBoxH2,
         innerYBot: cBot + smallBoxH2,
-        nestLevel: 3,
+        nestLevel: 3 + ci,
         isCenter: true,
-        ...centerColor,
+        ...(centerGroup.curveOverride ?? centerColor),
       });
-    }
+    });
   } else {
     const lastIdx = groups.length - 1;
     const outerPairs = Math.min(
@@ -224,9 +228,10 @@ function computeBrackets(
       });
     }
 
-    if (centerGroup) {
+    centerGroups.forEach((centerGroup, ci) => {
       const pad = groupPad;
-      const centerTipThickness = centerColor?.tipThickness ?? smallBoxH2;
+      const cColor = centerGroup.curveOverride ?? centerColor;
+      const centerTipThickness = cColor?.tipThickness ?? smallBoxH2;
       const centerHalfTip = centerTipThickness / 2;
       const centerCapsuleCenterTop = centerGroup.frameY - pad - smallBoxH2 / 2;
       const centerCapsuleCenterBot =
@@ -237,7 +242,7 @@ function computeBrackets(
         outerYBot: centerCapsuleCenterBot - centerHalfTip,
         innerYTop: centerCapsuleCenterTop - centerHalfTip,
         innerYBot: centerCapsuleCenterBot + centerHalfTip,
-        nestLevel: outerPairs,
+        nestLevel: outerPairs + ci,
         isCenter: true,
         leftColLeftTop: centerEdges.leftColLeft,
         leftColRightTop: centerEdges.leftColRight,
@@ -247,9 +252,9 @@ function computeBrackets(
         leftColRightBot: centerEdges.leftColRight,
         rightColLeftBot: centerEdges.rightColLeft,
         rightColRightBot: centerEdges.rightColRight,
-        ...centerColor,
+        ...cColor,
       });
-    }
+    });
   }
 
   return brackets;

@@ -61,6 +61,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     reference: "Al-Ahzab 35",
   },
   {
+    id: "nisa36",
+    displayName: "An-Nisa",
+    arabicName: "النساء",
+    reference: "An-Nisa 36",
+  },
+  {
     id: "ihlas112",
     displayName: "Al-Ikhlas",
     arabicName: "الإخلاص",
@@ -147,6 +153,13 @@ const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> 
       import("./ahzab35Config").then((m) => ({
         config: m.AHZAB_35_CONFIG,
         textData: m.AHZAB_35_TEXT_DATA,
+      })),
+  ],
+  nisa36: [
+    () =>
+      import("./nisa36Config").then((m) => ({
+        config: m.NISA_36_CONFIG,
+        textData: m.NISA_36_TEXT_DATA,
       })),
   ],
   ihlas112: [

@@ -304,7 +304,7 @@ export function VerseGroup({
                 w={finalW}
                 h={finalH}
                 verse={v.text}
-                number={v.number}
+                number={override?.displayNumber ?? v.number}
                 bg={finalBg}
                 border={finalBorder}
                 circleBorderCol={finalCircleBorder}
@@ -314,6 +314,7 @@ export function VerseGroup({
                 textScaleOverride={finalTextScale}
                 textColor={override?.textColor}
                 textAlignOverride={override?.translationTextAlign}
+                forceShowNumber={override?.showNumber}
               />
             )}
             {hasTab && (

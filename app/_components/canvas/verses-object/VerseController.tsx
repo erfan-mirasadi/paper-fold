@@ -361,6 +361,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           verse={config.verse}
           splitTexts={config.splitTexts}
           number={config.number}
+          forceShowNumber={config.forceShowNumber}
           bg={config.bg}
           border={config.border}
           circleBorderCol={config.circleBorderCol}

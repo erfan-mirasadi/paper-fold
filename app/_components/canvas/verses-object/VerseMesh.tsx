@@ -41,7 +41,8 @@ export interface VerseMeshProps {
   backfaceColor: string;
   verse: string;
   splitTexts?: [string, string];
-  number: number;
+  number: number | string;
+  forceShowNumber?: boolean;
   bg: string;
   border: string;
   circleBorderCol: string;
@@ -140,6 +141,7 @@ export function VerseMesh({
   verse,
   splitTexts,
   number,
+  forceShowNumber,
   bg,
   border,
   circleBorderCol,
@@ -416,6 +418,7 @@ export function VerseMesh({
                         shadow={false}
                         opacity={combinedOpacity}
                         baseRenderOrder={baseRenderOrder}
+                        forceShowNumber={forceShowNumber}
                       />
                     )}
                   </a.group>

@@ -605,6 +605,9 @@ interface VerseBoxProps {
   /** When true, this capsule renders WITHOUT its own number circle — used
    * when a shared VerseNumberBadge is drawn externally for a split verse. */
   hideNumber?: boolean;
+  /** When true, shows the number badge even if `features.hideVerseNumbers`
+   * is globally true — see `VerseOverrideConfig.showNumber`. */
+  forceShowNumber?: boolean;
 }
 export const VerseBox = ({
   x,
@@ -631,6 +634,7 @@ export const VerseBox = ({
   hideBackground = false,
   textAlignOverride,
   hideNumber = false,
+  forceShowNumber = false,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -641,7 +645,8 @@ export const VerseBox = ({
 
   const activeStoryConfig = useStoryStore((s) => s.activeConfig);
   const showVerseNumber =
-    !hideNumber && !(activeStoryConfig?.features?.hideVerseNumbers ?? false);
+    forceShowNumber ||
+    (!hideNumber && !(activeStoryConfig?.features?.hideVerseNumbers ?? false));
   const textLineHeight = isArabic ? 1.2 : 1.06;
   const nonArabicTextTighten = 1;
 

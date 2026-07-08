@@ -650,6 +650,7 @@ export function buildBlockTransforms(
       frameH: meta.frameH,
       isPushedIn: block.isPushedIn ?? (block.horizontalInset ?? 0) > 0,
       isCenter:   block.isCenter ?? false,
+      curveOverride: block.curveOverride,
       verses,
       rowConnectors,
       topLabelConfig: block.topLabelConfig,

@@ -323,6 +323,17 @@ export interface LayoutBlock {
   isPushedIn?: boolean;
 
   /**
+   * Per-block override for the "center" bracket color/shape drawn by
+   * SideCurves when this block is flagged `isCenter && isPushedIn`. Falls
+   * back to the shared `styling.colors.curveColors` last entry when omitted
+   * (the original single-centerGroup behavior). Multiple blocks may each set
+   * `isCenter: true` + their own `curveOverride` to get independent
+   * "hug this one block" bracket curves in the same section (e.g. two
+   * separate middle-section boxes each with their own color).
+   */
+  curveOverride?: CurveColorConfig;
+
+  /**
    * Fixed height in world units for `type: 'spacer'` or
    * for the AnaAyet row in `type: 'grid'`.
    */
@@ -492,6 +503,19 @@ export interface VerseOverrideConfig {
    * so both sides appear visually balanced.
    */
   xOffset?: number;
+  /**
+   * Forces this verse's number badge to render even when
+   * `features.hideVerseNumbers` is globally true. Use for a page where all
+   * verses are sub-clauses of one ayah and only the LAST one should carry
+   * the ayah-ending number.
+   */
+  showNumber?: boolean;
+  /**
+   * Overrides the text shown inside the number badge, independent of this
+   * verse's own id (which stays the lookup key everywhere else — overrides,
+   * blocks, pairings, camera targets). E.g. verseId 12 displaying "36".
+   */
+  displayNumber?: number | string;
 }
 
 export interface SurahAssets {
@@ -780,6 +804,8 @@ export interface GroupTransforms {
   frameH: number;
   isPushedIn: boolean;
   isCenter: boolean;
+  /** Per-group center-bracket color override — see `LayoutBlock.curveOverride`. */
+  curveOverride?: CurveColorConfig;
   verses: Record<number, ElementTransform>;
   rowConnectors: RowConnectorTransform[];
   topLabelConfig?: {

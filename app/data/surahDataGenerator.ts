@@ -15,7 +15,7 @@ export interface VerseConfig {
   /** See `Verse.splitTexts` in SurahConfig.ts — renders as two capsules
    * sharing one number badge instead of a single numbered capsule. */
   splitTexts?: [string, string];
-  number: number;
+  number: number | string;
   y: number;
   w: number;
   h: number;
@@ -31,6 +31,9 @@ export interface VerseConfig {
   translationTextScaleOverride?: number | null;
   translationTextAlign?: "left" | "center" | "right";
   isPill?: boolean;
+  /** See `VerseOverrideConfig.showNumber` — forces the number badge on even
+   * when `features.hideVerseNumbers` is globally true. */
+  forceShowNumber?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
   frameScaleLTR?: number;
@@ -314,7 +317,7 @@ export function buildVerseConfigs(
         id: v.number,
         verse: v.text,
         splitTexts: v.splitTexts,
-        number: v.number,
+        number: override?.displayNumber ?? v.number,
         y: t.y + expandH,
         w: expandedW,
         h: expandedH,
@@ -330,6 +333,7 @@ export function buildVerseConfigs(
         translationTextScaleOverride,
         translationTextAlign,
         isPill: override?.isPill,
+        forceShowNumber: override?.showNumber,
         capsuleLabel,
       });
     });
