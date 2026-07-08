@@ -186,10 +186,10 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     // Same 2/3-size treatment as 1/2 — see the comment there.
     11: {
       bg: WARM_BG,
-      border: WARM_BG,
-      circleBorderCol: S1_VERSE_NUMBER_BORDER,
+      border: ORANGE_THEME,
+      circleBorderCol: ORANGE_THEME,
       circleBg: WARM_BG,
-      circleTextCol: S1_VERSE_NUMBER_TEXT,
+      circleTextCol: ORANGE_THEME,
       textColor: S1_VERSE_5_TEXT,
       isPill: false,
       expandW: 0.0852,
@@ -205,7 +205,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
       circleBg: WARM_BG,
-      circleTextCol: ORANGE_THEME,
+      circleTextCol: S1_VERSE_NUMBER_TEXT,
       textColor: S1_VERSE_5_TEXT,
       isPill: false,
       expandW: 0.2335,
