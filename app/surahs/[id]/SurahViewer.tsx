@@ -40,10 +40,12 @@ import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrows
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
+import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
+import { isWebGLSupported } from "@/app/utils/gpuTier";
 
 const Experience = dynamic(
   () =>
@@ -58,6 +60,7 @@ export default function SurahViewer() {
   const [canvasReady, setCanvasReady] = useState(false);
   const [mountMainOverlays, setMountMainOverlays] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   // Decoupled from immediate Zustand hooks to prevent render cascade at handoff
   const [showPostIntroUI, setShowPostIntroUI] = useState(
@@ -88,6 +91,7 @@ export default function SurahViewer() {
     // right at the start of the load, while the loading overlay is visible
     const rafId = requestAnimationFrame(() => {
       setIsMobile(mobileCheck);
+      setWebglSupported(isWebGLSupported());
       setCanvasReady(true);
     });
     return () => {
@@ -161,6 +165,7 @@ export default function SurahViewer() {
         isSceneReady={isSceneReady}
         canvasReady={canvasReady}
         isMobile={isMobile}
+        webglSupported={webglSupported}
         showPostIntroUI={showPostIntroUI}
         isIntroRenderPhase={isIntroRenderPhase}
         mountMainOverlays={mountMainOverlays}
@@ -176,6 +181,7 @@ interface InnerProps {
   isSceneReady: boolean;
   canvasReady: boolean;
   isMobile: boolean;
+  webglSupported: boolean;
   showPostIntroUI: boolean;
   isIntroRenderPhase: boolean;
   mountMainOverlays: boolean;
@@ -188,6 +194,7 @@ function SurahViewerInner({
   isSceneReady,
   canvasReady,
   isMobile,
+  webglSupported,
   showPostIntroUI,
   isIntroRenderPhase,
   mountMainOverlays,
@@ -314,7 +321,8 @@ function SurahViewerInner({
           }}
         >
           {isSceneReady && isIntroRenderPhase && <IntroSectionGuidesOverlay />}
-          {canvasReady && (
+          {canvasReady && !webglSupported && <WebGLUnsupportedOverlay />}
+          {canvasReady && webglSupported && (
             <div
               ref={canvasWrapperRef}
               style={{
@@ -384,7 +392,7 @@ function SurahViewerInner({
       </Suspense>
 
       <AnimatePresence>
-        {!isSceneReady && <SiteLoadingOverlay key="site-loader" />}
+        {!isSceneReady && webglSupported && <SiteLoadingOverlay key="site-loader" />}
       </AnimatePresence>
 
       <PaperSwitchCursorSpinner />

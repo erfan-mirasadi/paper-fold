@@ -8,7 +8,9 @@ import { SurahCarousel } from "./_components/dom/hero/SurahCarousel";
 import { SurahCard } from "./_components/dom/hero/SurahCard";
 
 export const metadata: Metadata = {
-  title: "Quran Patterns",
+  // `absolute` bypasses the root layout's "%s | Quran Patterns" template so
+  // the homepage doesn't render as "Quran Patterns | Quran Patterns".
+  title: { absolute: "Quran Patterns — Explore the Quran in 3D" },
   description:
     "Explore the Quran through immersive 3D visualizations. Each Surah is a layered journey into meaning, structure, and beauty.",
 };

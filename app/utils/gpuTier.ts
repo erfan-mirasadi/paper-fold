@@ -77,6 +77,25 @@ export function detectGpuTier(): GpuTier {
   return cachedTier;
 }
 
+/**
+ * Quick capability check: does this browser/device expose a WebGL context at
+ * all? Distinct from `detectGpuTier`, which assumes WebGL exists and only
+ * grades how powerful it is — this answers a prior yes/no question so
+ * callers can show a fallback instead of silently mounting a dead <canvas>.
+ */
+export function isWebGLSupported(): boolean {
+  if (typeof window === "undefined") return true;
+
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      canvas.getContext("webgl2") || canvas.getContext("webgl")
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Convenience booleans for common checks */
 export const gpuTier = {
   get value(): GpuTier {

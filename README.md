@@ -77,8 +77,6 @@ The project relies on a modern, bleeding-edge tech stack:
 - **Animation & Physics**:
   - Framer Motion v12.38.0 (DOM animations)
   - @react-spring/three v10.0.3 (3D spring physics)
-  - GSAP v3.14.2 (Complex timeline animations)
-  - @theatre/core & @theatre/r3f v0.7.2 (Cinematic sequencing)
   - maath v0.10.8 (Math utilities and dampening)
 - **Scroll Orchestration**: Lenis v1.1.13 (Smooth scrolling)
 - **State Management**: Zustand

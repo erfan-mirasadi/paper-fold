@@ -39,18 +39,40 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
 });
 
+const SITE_NAME = "Quran Patterns";
+const SITE_DESCRIPTION =
+  "Quran Patterns is an interactive 3D visualization of the Quran — combining traditional Arabic calligraphy with immersive WebGL paper-fold experiences that invite exploration and reflection.";
+// Encoded so Next's metadata resolver never has to guess how to escape the space.
+const DEFAULT_OG_IMAGE = "/hero/Hero%20section.jpg";
+
 export const metadata: Metadata = {
-  title: "Alak",
-  description:
-    "Alak is an interactive 3D visualization of the first verses of the Quran, designed to evoke a sense of wonder and connection to the text. It combines traditional Arabic calligraphy with modern web technologies to create an immersive experience that invites exploration and reflection.",
+  metadataBase: new URL("https://quranpatterns.com"),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Alak",
+    title: SITE_NAME,
   },
   icons: {
     icon: "/logo.svg",
     apple: "/logo.svg",
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

@@ -33,12 +33,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const meta = getSurahMeta(resolveLegacySurahId(id) ?? id);
 
   if (!meta) {
-    return { title: "Not Found | Quran Fold" };
+    return { title: "Not Found" };
   }
 
+  // Plain strings here — the root layout's "%s | Quran Patterns" template
+  // appends the site name automatically, so it must not be repeated here.
+  const title = `${meta.displayName} (${meta.arabicName})`;
+  const description = `Interactive 3D folded-paper visualization of ${meta.displayName} — ${meta.reference}.`;
+  const ogImage = "/hero/Hero%20section.jpg";
+
   return {
-    title: `${meta.displayName} (${meta.arabicName}) | Quran Fold`,
-    description: `Interactive 3D folded-paper visualization of ${meta.displayName} — ${meta.reference}.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 

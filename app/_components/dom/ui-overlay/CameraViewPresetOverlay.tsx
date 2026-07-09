@@ -1,14 +1,17 @@
 "use client";
 
 import { motion, useMotionValue, useTransform, useMotionValueEvent, animate } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCameraStore } from "../../../stores/useCameraStore";
 import { useCameraViewStore } from "../../../stores/useCameraViewStore";
+
+const KNOB_STEP = 24; // ~10% of the -120..120 range per key press
 
 export function CameraViewPresetOverlay() {
   const zoomPhase = useCameraStore((s) => s.phase);
   const isLocked = zoomPhase !== "idle";
   const [isHovered, setIsHovered] = useState(false);
+  const knobRef = useRef<HTMLDivElement>(null);
 
   // Knob X position: -120 to 120 (for a 240px wide track)
   const x = useMotionValue(0);
@@ -25,6 +28,9 @@ export function CameraViewPresetOverlay() {
   useMotionValueEvent(x, "change", (latestX) => {
     const normalized = latestX / 120;
     useCameraViewStore.getState().setContinuousOffset(normalized);
+    // Imperative DOM update (not React state) so assistive tech announces the
+    // live value without re-rendering on every drag/animation frame.
+    knobRef.current?.setAttribute("aria-valuenow", normalized.toFixed(2));
   });
 
   // When the app initializes or resets to default, we reset the slider to center.
@@ -41,6 +47,24 @@ export function CameraViewPresetOverlay() {
       animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
     }
     setIsHovered(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isLocked) return;
+    const clamp = (v: number) => Math.max(-120, Math.min(120, v));
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      animate(x, clamp(x.get() - KNOB_STEP), { type: "spring", stiffness: 400, damping: 30 });
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      animate(x, clamp(x.get() + KNOB_STEP), { type: "spring", stiffness: 400, damping: 30 });
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      animate(x, -120, { type: "spring", stiffness: 400, damping: 30 });
+    } else if (e.key === "End") {
+      e.preventDefault();
+      animate(x, 120, { type: "spring", stiffness: 400, damping: 30 });
+    }
   };
 
   return (
@@ -71,13 +95,22 @@ export function CameraViewPresetOverlay() {
 
       {/* Draggable Knob */}
       <motion.div
+        ref={knobRef}
         style={{ x, y }}
         drag={isLocked ? false : "x"}
         dragConstraints={{ left: -120, right: 120 }}
         dragElastic={0.1}
         dragMomentum={false}
         onDragEnd={handleDragEnd}
-        className="absolute top-0 left-1/2 -ml-[8px] w-4 h-4 rounded-full bg-foreground cursor-grab active:cursor-grabbing pointer-events-auto"
+        onKeyDown={handleKeyDown}
+        role="slider"
+        aria-label="Camera view angle"
+        aria-orientation="horizontal"
+        aria-valuemin={-1}
+        aria-valuemax={1}
+        aria-valuenow={0}
+        tabIndex={isLocked ? -1 : 0}
+        className="absolute top-0 left-1/2 -ml-[8px] w-4 h-4 rounded-full bg-foreground cursor-grab active:cursor-grabbing pointer-events-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         whileHover={{ scale: 1.25 }}
         whileTap={{ scale: 0.9 }}
       />
