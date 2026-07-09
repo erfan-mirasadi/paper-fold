@@ -331,10 +331,10 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
       src: "/nisa/all-section-1.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: 1.36,
-      scaleY: 1.15,
+      scaleX: 1.03,
+      scaleY: 1.47,
       offsetX: 0,
-      offsetY: -0.07,
+      offsetY: -0.275,
       renderOrder: 1,
     },
     // ── Bismillah frame — verse 1 ───
