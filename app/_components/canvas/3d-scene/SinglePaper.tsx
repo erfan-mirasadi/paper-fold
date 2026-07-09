@@ -42,6 +42,18 @@ const easingFactor = 0.5;
 export const PAGE_DEPTH = 0.003;
 export const PAGE_SEGMENTS = 80;
 
+/**
+ * Set by PaperSlideGroup for the WHOLE duration of the ash-eligible "falling
+ * paper" drop (see PaperTransitionMesh's FALL_BOW_* constants) — a gentle
+ * bow through the page's own vertical middle (edges unaffected) that rises
+ * and falls in sync with the same rock/tumble while it's in the air, fading
+ * out together with it by landing. Stays 0 the rest of the time, and for
+ * every non-ash-eligible Surah nothing ever sets it away from 0, so it's a
+ * true no-op unless actively driven. The bone loop below reads it every
+ * frame; the cost of checking is one cheap comparison.
+ */
+export const paperBowAmount = { value: 0 };
+
 // 🚀 OPTIMIZATION 1: Static materials created ONCE as module-level singletons.
 // Prevents continuous WebGL shader recompilation on mobile GPUs.
 const paperBaseColor = new Color(PAGE_BG_COLOR);
@@ -303,6 +315,21 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
 
       foldContributions[lowerBone] += totalAngle * (1 - blendToUpper);
       foldContributions[upperBone] += totalAngle * blendToUpper;
+    }
+
+    // In-flight bow (see paperBowAmount) — a single sine hump across the
+    // WHOLE page's bone range. Bone index i maps to the same global Y on
+    // every panel (see createPanelGeometry), so this composes into one
+    // unified bow even on multi-panel layouts, not a separate bow per panel.
+    // Anti-symmetric around the midpoint means the cumulative tilt rises
+    // through the top half and falls back through the bottom half, so the
+    // page's own top and bottom edges land back at zero net tilt — only the
+    // middle bulges. Zero the rest of the time, so this is a no-op then.
+    const bow = paperBowAmount.value;
+    if (bow !== 0) {
+      for (let i = 0; i < bones.length; i++) {
+        foldContributions[i] += bow * Math.sin((2 * Math.PI * i) / PAGE_SEGMENTS);
+      }
     }
 
     for (let i = 0; i < bones.length; i++) {

@@ -66,7 +66,12 @@ import {
   usePaperStore,
   getActiveTransitionCapture,
 } from "../../../stores/usePaperStore";
-import { createPanelGeometry, PAGE_DEPTH, PAGE_SEGMENTS } from "./SinglePaper";
+import {
+  createPanelGeometry,
+  paperBowAmount,
+  PAGE_DEPTH,
+  PAGE_SEGMENTS,
+} from "./SinglePaper";
 import { PAPER_MATERIAL_CONFIG } from "./PaperMaterial";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import type { PaperTransitionCapture } from "./paperSnapshot";
@@ -158,6 +163,21 @@ const FALL_ROCK_CYCLES = 1.4;
  *  stays "loose"/tilted for longer and only calms down right at the very
  *  end; lower (e.g. 1) = it settles down more evenly the whole way. */
 const FALL_ROCK_DECAY_POWER = 3;
+
+/** Peak strength (radians, per bone) of a gentle BOW that ripples through
+ *  the page's own vertical MIDDLE — its top and bottom edges stay put —
+ *  for the WHOLE time it's in the air, rising and falling together with
+ *  FALL_ROCK_AMOUNT via the same rockDecay envelope, so it reads as one
+ *  continuous "loose paper" motion rather than a separate late effect. This
+ *  is the only actual mesh deformation anywhere in this effect (everything
+ *  else above is a rigid transform on the whole group); see SinglePaper's
+ *  paperBowAmount for where it's applied. Set to 0 to disable it entirely. */
+const FALL_BOW_AMOUNT = 0.4;
+
+/** How many full bow oscillations (bulges one way, then the other) happen
+ *  across the whole fall — independent of FALL_ROCK_CYCLES, in case you
+ *  want the page's own flex to feel faster/slower than its rocking. */
+const FALL_BOW_CYCLES = 0.4;
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -653,6 +673,7 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
       group.visible = true;
       group.position.set(0, 0, 0);
       group.rotation.set(0, 0, 0);
+      paperBowAmount.value = 0;
       return;
     }
 
@@ -681,6 +702,7 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
         group.position.set(group.position.x, 0, 0);
         group.rotation.set(0, 0, 0);
       }
+      paperBowAmount.value = 0;
       return;
     }
 
@@ -715,14 +737,23 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
         dir * rock * FALL_ROCK_AMOUNT * rockDecay;
       group.rotation.x = FALL_TILT_X * rockDecay;
 
+      // In-flight bow — oscillates the WHOLE time it's airborne, riding the
+      // same rockDecay envelope as the rock above (so both fade out
+      // together by landing), read by SinglePaper's own bone loop (see
+      // paperBowAmount). Not a separate late effect — one continuous motion.
+      const bowOscillation = Math.sin(ft * FALL_BOW_CYCLES * Math.PI * 2);
+      paperBowAmount.value = FALL_BOW_AMOUNT * bowOscillation * rockDecay;
+
       if (ft >= 1) {
         group.position.set(0, 0, 0);
         group.rotation.set(0, 0, 0);
+        paperBowAmount.value = 0;
         store.enterFinished();
       }
     } else {
       const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
       group.position.x = enterFromXRef.current * (1 - easeInOutCubic(t));
+      paperBowAmount.value = 0;
 
       if (t >= 1) {
         group.position.x = 0;
