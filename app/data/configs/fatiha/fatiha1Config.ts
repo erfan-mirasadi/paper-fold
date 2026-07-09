@@ -334,46 +334,46 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
     },
   ],
 
-  sectionBackground: {
-    texture: "/nisa/all-section-1.svg",
-    scaleX: 1.2,
-    scaleY: 1.35,
-    offsetY: 0.011,
-  },
+  // sectionBackground: {
+  //   texture: "/nisa/all-section-1.svg",
+  //   scaleX: 1.2,
+  //   scaleY: 1.35,
+  //   offsetY: 0.011,
+  // },
 
   svgOverlays: [
     {
-      src: "/fatiha/bismillah-frame-3.svg",
+      src: "/nisa/all-section.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
-      scaleX: 1.09,
-      scaleY: 0.22, // preserve the svg's native aspect
+      scaleX: 1,
+      scaleY: 0.21, // preserve the svg's native aspect
       offsetX: 0,
-      offsetY: 0,
+      offsetY: 0.01,
       renderOrder: 10,
       customSectionId: "section2_v1",
     },
     {
       // Spans down through section2_g2's frame too (blockPadding*2 +
       // capsuleHeight, twice, + blockGap = 0.115 + 0.06 + 0.115 = 0.29).
-      src: "/fatiha/bismillah-frame-3.svg",
+      src: "/nisa/all-section.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: 1.09,
-      scaleY: 0.48,
+      scaleX: 1,
+      scaleY: 0.445,
       offsetX: 0,
-      offsetY: -0.17,
+      offsetY: -0.155,
       renderOrder: 3,
       customSectionId: "section2_v234",
     },
     {
-      src: "/fatiha/bismillah-frame-3.svg",
+      src: "/nisa/all-section.svg",
       anchorGroupIndex: 3,
       anchorEdge: "top",
-      scaleX: 1.09,
-      scaleY: 0.48,
+      scaleX: 1.0,
+      scaleY: 0.445,
       offsetX: 0,
-      offsetY: -0.165,
+      offsetY: -0.15,
       renderOrder: 3,
       customSectionId: "section2_v567",
     },

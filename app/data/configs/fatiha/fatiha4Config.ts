@@ -327,16 +327,16 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
 
   svgOverlays: [
     // ── Section background (static, behind everything) ────────────────────────
-    {
-      src: "/nisa/all-section-1.svg",
-      anchorGroupIndex: 1,
-      anchorEdge: "top",
-      scaleX: 1.03,
-      scaleY: 1.47,
-      offsetX: 0,
-      offsetY: -0.275,
-      renderOrder: 1,
-    },
+    // {
+    //   src: "/nisa/all-section-1.svg",
+    //   anchorGroupIndex: 1,
+    //   anchorEdge: "top",
+    //   scaleX: 1.03,
+    //   scaleY: 1.47,
+    //   offsetX: 0,
+    //   offsetY: -0.275,
+    //   renderOrder: 1,
+    // },
     // ── Bismillah frame — verse 1 ───
     // {
     //   src: "/ayatalKursi/frame-section-1.svg",
@@ -353,26 +353,26 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     // Anchored to g1a's TOP edge, then scaled/offset down to span through
     // g1b's frame too — same technique as fatiha2Config.ts's "234" overlay.
     {
-      src: "/ayatalKursi/frame-section-1.svg",
+      src: "/nisa/all-section.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: CLUSTER_FRAME_SCALE_X,
-      scaleY: CLUSTER_H + FRAME_MARGIN,
+      scaleX: CLUSTER_FRAME_SCALE_X - 0.065,
+      scaleY: CLUSTER_H + FRAME_MARGIN + 0.05,
       offsetX: 0,
-      offsetY: -CLUSTER_H / 2,
+      offsetY: -CLUSTER_H / 2 + 0.02,
       // rotationZ: -Math.PI / 2,
       renderOrder: 3,
       customSectionId: "section2_v234",
     },
     // ── Bismillah frame — cluster 2 (verse 5 solo + [7,6] pair below) ────
     {
-      src: "/ayatalKursi/frame-section-1.svg",
+      src: "/nisa/all-section.svg",
       anchorGroupIndex: 3,
       anchorEdge: "top",
-      scaleX: CLUSTER_FRAME_SCALE_X,
-      scaleY: CLUSTER_H + FRAME_MARGIN,
+      scaleX: CLUSTER_FRAME_SCALE_X - 0.065,
+      scaleY: CLUSTER_H + FRAME_MARGIN + 0.05,
       offsetX: 0,
-      offsetY: -CLUSTER_H / 2,
+      offsetY: -CLUSTER_H / 2 + 0.02,
       // rotationZ: -Math.PI / 2,
       renderOrder: 3,
       customSectionId: "section2_v567",
