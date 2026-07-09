@@ -2,10 +2,10 @@ import type { SurahLayoutConfig } from "./schema";
 import type { SurahDataShape } from "./surahData";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
-const YELLOW_BG     = "#E5CFA4";
+const YELLOW_BG = "#E5CFA4";
 const YELLOW_BORDER = "#BE9E63";
-const GREEN_BG      = "#eaf2db";
-const GREEN_BORDER  = "#5E7367";
+const GREEN_BG = "#eaf2db";
+const GREEN_BORDER = "#5E7367";
 
 export const IHLAS_112_CONFIG: SurahLayoutConfig = {
   id: "ihlas112",
@@ -154,14 +154,14 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     //   groupPad: 0.012   → blockPadding
     //   sgBorderWidth: 0.006 → sectionBorderWidth
     //   verseTextScale: 1.6, translationVerseTextScale: 1.1
-    capsuleHeight:           0.12,
-    columnGap:               0.12,
-    rowGap:                  0.02,
-    blockGap:                0.025,
-    sectionPadX:             0.005,
-    blockPadding:            0.012,
-    sectionBorderWidth:      0.006,
-    verseTextScale:          1.6,
+    capsuleHeight: 0.12,
+    columnGap: 0.12,
+    rowGap: 0.02,
+    blockGap: 0.025,
+    sectionPadX: 0.005,
+    blockPadding: 0.012,
+    sectionBorderWidth: 0.006,
+    verseTextScale: 1.6,
     translationVerseTextScale: 1.1,
   },
 
@@ -169,10 +169,10 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
   // block0 alone, which also made it (wrongly) render as block0's own small
   // elevated/all-sections frame instead of the whole section's.
   sectionBackground: {
-    texture: "/ayatalKursi/frame-section-1.svg",
+    texture: "/nisa/all-section-1.svg",
     scaleX: 0.9,
-    scaleY: 1.1,
-    offsetY: 0.01,
+    scaleY: 1.3,
+    offsetY: 0.046,
     solidScaleX: 0.87,
     solidScaleY: 0.85,
   },
@@ -193,7 +193,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     },
     // Block 1 — Verse 2 (single column, pushed in)
     {
-      id: "section2_main",  // carries the customSection id for unified elevation drag
+      id: "section2_main", // carries the customSection id for unified elevation drag
       type: "group",
       verseIds: [2],
       columns: 1,
@@ -245,11 +245,14 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
       // groupYPositions[i] = frameY (top edge) of block i.
       // groupHeights[i]    = frameH of block i.
       const fold1 =
-        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) / 2;
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+        2;
       const fold2 =
-        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) / 2;
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
+        2;
       const fold3 =
-        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) / 2;
+        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) /
+        2;
       return [fold1, fold2, fold3];
     },
 
@@ -257,26 +260,26 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
       {
         id: "pre-start",
         folds: [
-          { direction: 1,  angleFactor: 0.4 },
+          { direction: 1, angleFactor: 0.4 },
           { direction: -1, angleFactor: 1 },
-          { direction: 1,  angleFactor: 0.6 },
+          { direction: 1, angleFactor: 0.6 },
         ],
       },
       {
         id: "end",
         folds: [
-          { direction: 1,  angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
           { direction: -1, angleFactor: 0 },
-          { direction: 1,  angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
         ],
       },
     ] as const,
 
     scrollTimeline: {
-      intro:   { start: 0,  end: 10 },
+      intro: { start: 0, end: 10 },
       ambient: { start: 10, end: 40 },
       handoff: { start: 40, end: 55 },
-      story:   { start: 55, end: 100 },
+      story: { start: 55, end: 100 },
     },
 
     scrollLock: {
@@ -300,10 +303,30 @@ export const IHLAS_112_TEXT_AR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 1, text: "قُلْ هُوَ اللَّهُ أَحَدٌ" }] },
-      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 2, text: "اللَّهُ الصَّمَدُ" }] },
-      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 3, text: "لَمْ يَلِدْ وَلَمْ يُولَدْ" }] },
-      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 4, text: "وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ" }] },
+      {
+        isPushedIn: false,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 1, text: "قُلْ هُوَ اللَّهُ أَحَدٌ" }],
+      },
+      {
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 2, text: "اللَّهُ الصَّمَدُ" }],
+      },
+      {
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 3, text: "لَمْ يَلِدْ وَلَمْ يُولَدْ" }],
+      },
+      {
+        isPushedIn: false,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 4, text: "وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ" }],
+      },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",
@@ -321,10 +344,34 @@ export const IHLAS_112_TEXT_EN: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 1, text: "Say, He is Allah, the One" }] },
-      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 2, text: "Allah is Samet :" }] },
-      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 3, text: "He has not begotten and has not been begotten" }] },
-      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 4, text: "And nothing is equal and equivalent to Him" }] },
+      {
+        isPushedIn: false,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 1, text: "Say, He is Allah, the One" }],
+      },
+      {
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 2, text: "Allah is Samet :" }],
+      },
+      {
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [
+          { number: 3, text: "He has not begotten and has not been begotten" },
+        ],
+      },
+      {
+        isPushedIn: false,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [
+          { number: 4, text: "And nothing is equal and equivalent to Him" },
+        ],
+      },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",
@@ -342,10 +389,32 @@ export const IHLAS_112_TEXT_TR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 1, text: "Söyle, O Allah tek'tir" }] },
-      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 2, text: "Allah, Samet'tir :" }] },
-      { isPushedIn: true,  isCenter: true, extraRowGap: 0, verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır" }] },
-      { isPushedIn: false, isCenter: true, extraRowGap: 0, verses: [{ number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" }] },
+      {
+        isPushedIn: false,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 1, text: "Söyle, O Allah tek'tir" }],
+      },
+      {
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 2, text: "Allah, Samet'tir :" }],
+      },
+      {
+        isPushedIn: true,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır" }],
+      },
+      {
+        isPushedIn: false,
+        isCenter: true,
+        extraRowGap: 0,
+        verses: [
+          { number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" },
+        ],
+      },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",

@@ -341,10 +341,10 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
   },
 
   sectionBackground: {
-    texture: "/fatiha/all-section-bg.svg",
-    scaleX: 1.47,
-    scaleY: 1.41,
-    offsetY: 0.035,
+    texture: "/nisa/all-section-1.svg",
+    scaleX: 1.48,
+    scaleY: 1.42,
+    offsetY: 0.038,
   },
 
   // ── Custom drag/click sections ─────────────────────────────────────────

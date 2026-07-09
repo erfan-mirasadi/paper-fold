@@ -229,9 +229,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   // Section-wide resting-state background (the whole 3-block stack's outer
   // frame) — independent of any single block's own bounds.
   sectionBackground: {
-    texture: "/ayatalKursi/frame-section-1.svg",
+    texture: "/nisa/all-section-1.svg",
     scaleX: 0.9,
-    scaleY: 1.2,
+    scaleY: 1.3,
+    offsetY: 0.025,
     solidScaleX: 0.6,
     solidScaleY: 1,
   },
