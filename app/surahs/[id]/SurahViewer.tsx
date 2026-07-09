@@ -47,6 +47,20 @@ import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
 import { isWebGLSupported } from "@/app/utils/gpuTier";
 
+// @react-three/fiber's <Canvas> still creates a THREE.Clock internally to
+// drive its render loop; three r183 deprecated Clock in favor of Timer but
+// fiber hasn't migrated yet. Silence just that one notice via three's own
+// console hook (rather than patching global console.warn) so real warnings
+// still surface.
+if (typeof window !== "undefined") {
+  THREE.setConsoleFunction((type, message, ...params) => {
+    if (type === "warn" && message.includes("Clock: This module has been deprecated")) {
+      return;
+    }
+    console[type](message, ...params);
+  });
+}
+
 const Experience = dynamic(
   () =>
     import("@/app/_components/canvas/3d-scene/Experience").then(
