@@ -253,7 +253,7 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
   },
 
   blocks: [
-    // ── Verse 1: Bismillah — single column, centered, same as fatiha3 ─────────
+    // ── Verse 1: Bismillah — single column, centered ─────────
     {
       id: "section2_g0",
       type: "group",
