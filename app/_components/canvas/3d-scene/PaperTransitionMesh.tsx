@@ -70,6 +70,16 @@ import { createPanelGeometry, PAGE_DEPTH, PAGE_SEGMENTS } from "./SinglePaper";
 import { PAPER_MATERIAL_CONFIG } from "./PaperMaterial";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import type { PaperTransitionCapture } from "./paperSnapshot";
+import {
+  applyFadeOnlyShader,
+  applyFrontBurnShader,
+  BURN_DURATION_S,
+  BURN_EFFECT_MIN_PAPER_COUNT,
+  createBurnUniforms,
+  EtchGlowOverlay,
+  isAshTransitionEligible,
+  type BurnUniforms,
+} from "./PageAshTransition";
 
 // ── Flatten sheet timeline (plays only after "animating" begins) ───────────
 /** A calm, natural-paced unfold — no longer needs to "buy" loading time. */
@@ -101,14 +111,64 @@ const SHEET_Z_EPSILON = 0.004;
 /** Matches EXIT_DURATION_S so the crossing motion starts AND ends together. */
 const ENTER_DURATION_S = 1.6;
 /** Extra world-units past the half-viewport to guarantee "fully off-screen". */
-const OFFSCREEN_MARGIN = 3;
+const OFFSCREEN_MARGIN = 1;
+
+// ── Ash-eligible enter: "falling paper" corner drop (replaces the plain
+// glide above, only for Surahs past BURN_EFFECT_MIN_PAPER_COUNT papers) ────
+// Tune these directly — every knob below controls exactly one part of the
+// "falls from the corner, rocks in the air, settles gently" feel.
+
+/** Total time (seconds) for the whole fall, corner → resting flat.
+ *  Bigger = slower/floatier overall, and it settles later. */
+const FALL_DURATION_S = 2.4;
+
+/** How far above the resting position the fall starts (world units).
+ *  Bigger = falls from higher up, more vertical distance to travel. */
+const FALL_START_Y_MARGIN = 3;
+
+/** Forward "lift" at the start (world units) — the sheet hovers slightly
+ *  closer to the viewer while falling, then eases back to the page's
+ *  normal depth by the time it lands. Bigger = more hover-toward-camera. */
+const FALL_LIFT_Z = 0.28;
+
+/** Starting roll (radians) — how far tipped onto its side the sheet is at
+ *  the very start, toward the corner it fell from. This is a ONE-WAY decay
+ *  toward 0 (not oscillating) — the base lean the rocking below swings
+ *  around. Bigger = starts more dramatically tilted. */
+const FALL_TILT_Z = 0.8;
+
+/** Starting pitch (radians) — a forward/backward lean at the start,
+ *  independent of the roll above, also decaying to 0 by landing.
+ *  Bigger = starts leaning more toward/away from the viewer. */
+const FALL_TILT_X = 1.5;
+
+/** How WIDE the side-to-side ROCKING swing is (radians) — the big, slow
+ *  "back and forth" sway layered on top of FALL_TILT_Z. THIS is the main
+ *  knob for "how floaty does it feel" — raise this for a bigger, more
+ *  obvious rock. (Not a vibration/tremor — see FALL_ROCK_CYCLES.) */
+const FALL_ROCK_AMOUNT = 0.9;
+
+/** How many full back-and-forth rocks happen across the whole fall. Keep
+ *  this LOW (1–2) for a graceful sway; pushing it much higher starts to
+ *  read as a jittery shake rather than a rock. */
+const FALL_ROCK_CYCLES = 1.4;
+
+/** Shapes how quickly the tilt/rock amplitude fades to exactly 0 as the
+ *  sheet approaches landing (applied as (1-t)^POWER). Higher = the sheet
+ *  stays "loose"/tilted for longer and only calms down right at the very
+ *  end; lower (e.g. 1) = it settles down more evenly the whole way. */
+const FALL_ROCK_DECAY_POWER = 3;
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
 const easeInOutCubic = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
+function buildSheetMaterials(
+  capture: PaperTransitionCapture,
+  burn?: BurnUniforms,
+): Material[] {
   const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
   const backMaterial = new MeshBasicMaterial({ color: "#ffffff" });
   const frontMaterial = new MeshStandardMaterial({
@@ -119,6 +179,17 @@ function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
       ? SHEET_NORMAL_SCALE.clone()
       : new Vector2(0, 0),
   });
+
+  // Ash-transition treatment (see PageAshTransition) — only ever passed in
+  // for the CurlSheet on Surahs above BURN_EFFECT_MIN_PAPER_COUNT papers.
+  // Front gets the full ink→ash recolor + glow; side/back just fade in sync
+  // with it so the sheet doesn't leave a solid edge once the front is gone.
+  if (burn) {
+    applyFrontBurnShader(frontMaterial, burn, capture.pageHeight);
+    applyFadeOnlyShader(sideMaterial, burn);
+    applyFadeOnlyShader(backMaterial, burn);
+  }
+
   // Same slot layout as SinglePaper: [sideL, sideR, top, bottom, front, back].
   return [
     sideMaterial,
@@ -153,6 +224,9 @@ function disposeSheetMaterials(materials: Material[]): void {
 function TransitionShaderWarmup() {
   const { gl, scene, camera } = useThree();
   const warmedRef = useRef(false);
+  const ashEligible = usePaperStore(
+    (s) => s.paperCount > BURN_EFFECT_MIN_PAPER_COUNT,
+  );
 
   const warmupTexture = useMemo(() => {
     const texture = new DataTexture(
@@ -177,12 +251,29 @@ function TransitionShaderWarmup() {
     [warmupTexture],
   );
 
+  // The ash-burn front material (see PageAshTransition) is ANOTHER distinct
+  // permutation — its onBeforeCompile injects extra varyings/uniforms not
+  // present in the plain sheet material above, so it needs its own warm-up
+  // or the first ash-eligible switch pays the same first-time compile stall
+  // this whole component exists to avoid.
+  const burnWarmupMaterial = useMemo(() => {
+    const material = new MeshStandardMaterial({
+      ...PAPER_MATERIAL_CONFIG,
+      map: warmupTexture,
+      normalMap: warmupTexture,
+      normalScale: SHEET_NORMAL_SCALE.clone(),
+    });
+    applyFrontBurnShader(material, createBurnUniforms(), 1);
+    return material;
+  }, [warmupTexture]);
+
   useEffect(() => {
     return () => {
       warmupTexture.dispose();
       warmupMaterial.dispose();
+      burnWarmupMaterial.dispose();
     };
-  }, [warmupTexture, warmupMaterial]);
+  }, [warmupTexture, warmupMaterial, burnWarmupMaterial]);
 
   useEffect(() => {
     if (warmedRef.current) return;
@@ -200,10 +291,18 @@ function TransitionShaderWarmup() {
   // does not skip invisible objects — only the renderer's actual draw calls
   // do. So this mesh's shader gets warmed up while never being drawn.
   return (
-    <mesh visible={false} frustumCulled={false}>
-      <planeGeometry args={[0.01, 0.01]} />
-      <primitive object={warmupMaterial} attach="material" />
-    </mesh>
+    <>
+      <mesh visible={false} frustumCulled={false}>
+        <planeGeometry args={[0.01, 0.01]} />
+        <primitive object={warmupMaterial} attach="material" />
+      </mesh>
+      {ashEligible && (
+        <mesh visible={false} frustumCulled={false}>
+          <planeGeometry args={[0.01, 0.01]} />
+          <primitive object={burnWarmupMaterial} attach="material" />
+        </mesh>
+      )}
+    </>
   );
 }
 
@@ -336,6 +435,7 @@ interface CurlRig {
 function buildCurlRig(
   capture: PaperTransitionCapture,
   direction: 1 | -1,
+  burn?: BurnUniforms,
 ): CurlRig {
   const { pageWidth, pageHeight } = capture;
 
@@ -366,7 +466,7 @@ function buildCurlRig(
     new Float32BufferAttribute(skinWeights, 4),
   );
 
-  const materials = buildSheetMaterials(capture);
+  const materials = buildSheetMaterials(capture, burn);
 
   const bones: Bone[] = [];
   for (let i = 0; i <= SHEET_SEGMENTS; i++) {
@@ -400,13 +500,16 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
   const directionRef = useRef<1 | -1>(1);
   const elapsedRef = useRef(0);
   const finishedRef = useRef(false);
+  const burnRef = useRef<BurnUniforms | null>(null);
 
   useLayoutEffect(() => {
     const group = groupRef.current;
     if (!group) return;
 
     const direction = usePaperStore.getState().transitionDirection;
-    const rig = buildCurlRig(capture, direction);
+    const burn = isAshTransitionEligible() ? createBurnUniforms() : null;
+    burnRef.current = burn;
+    const rig = buildCurlRig(capture, direction, burn ?? undefined);
     rigRef.current = rig;
     directionRef.current = direction;
     elapsedRef.current = 0;
@@ -422,6 +525,7 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
 
     return () => {
       rigRef.current = null;
+      burnRef.current = null;
       group.remove(rig.mesh);
       rig.dispose();
     };
@@ -440,6 +544,14 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
 
     elapsedRef.current += Math.min(delta, 0.05);
     const t = Math.min(elapsedRef.current / EXIT_DURATION_S, 1);
+    if (burnRef.current) {
+      // Own (shorter) clock — races ahead of the curl/slide's own timeline
+      // so the ash sweep reads clearly before the sheet has traveled far.
+      burnRef.current.uBurnT.value = Math.min(
+        elapsedRef.current / BURN_DURATION_S,
+        1,
+      );
+    }
     const direction = directionRef.current;
     const bones = rig.mesh.skeleton.bones;
 
@@ -513,9 +625,14 @@ interface PaperSlideGroupProps {
 export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
   const groupRef = useRef<Group>(null);
   const viewport = useThree((s) => s.viewport);
-  const enterFromRef = useRef(0);
+  const enterFromXRef = useRef(0);
+  const enterFromYRef = useRef(0);
   const enterElapsedRef = useRef(0);
   const glidingRef = useRef(false);
+  const fallDirectionRef = useRef<1 | -1>(1);
+  const ashEligible = usePaperStore(
+    (s) => s.paperCount > BURN_EFFECT_MIN_PAPER_COUNT,
+  );
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -534,7 +651,8 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
       // gap.
       glidingRef.current = false;
       group.visible = true;
-      group.position.x = 0;
+      group.position.set(0, 0, 0);
+      group.rotation.set(0, 0, 0);
       return;
     }
 
@@ -542,34 +660,81 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
     // "animating" has moved past any flatten prefix. Synchronized start
     // with CurlSheet is what makes the crossing read as one motion.
     const shouldGlide = phase === "animating" && store.sheetStage === "curl";
+    const direction = store.transitionDirection;
 
     if (!shouldGlide) {
       // Parked off-screen: covers "loading" AND "animating while the
       // flatten sheet is still unfolding". Re-asserted every frame is cheap
       // and needs no separate mount-time bookkeeping.
       glidingRef.current = false;
-      const direction = store.transitionDirection;
       group.visible = true;
       group.position.x =
         direction * (viewport.width / 2 + OFFSCREEN_MARGIN + 2);
+      if (ashEligible) {
+        // Parked up in the corresponding top corner, already tilted — the
+        // fall starts the instant gliding is allowed to begin.
+        group.position.y = viewport.height / 2 + FALL_START_Y_MARGIN;
+        group.position.z = FALL_LIFT_Z;
+        group.rotation.z = direction * FALL_TILT_Z;
+        group.rotation.x = FALL_TILT_X;
+      } else {
+        group.position.set(group.position.x, 0, 0);
+        group.rotation.set(0, 0, 0);
+      }
       return;
     }
 
     if (!glidingRef.current) {
       glidingRef.current = true;
       enterElapsedRef.current = 0;
-      enterFromRef.current = group.position.x;
+      enterFromXRef.current = group.position.x;
+      enterFromYRef.current = group.position.y;
+      fallDirectionRef.current = direction;
     }
 
     enterElapsedRef.current += Math.min(delta, 0.05);
-    const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
-    group.position.x = enterFromRef.current * (1 - easeInOutCubic(t));
 
-    if (t >= 1) {
-      group.position.x = 0;
-      store.enterFinished();
+    if (ashEligible) {
+      // A loose "falling paper" drop from the top corner it entered from:
+      // a strong ease-out on position (so it settles calmly, never a hard
+      // stop) with a slow side-to-side ROCK — not a fast vibration — that
+      // fades to exactly zero by landing.
+      const ft = Math.min(enterElapsedRef.current / FALL_DURATION_S, 1);
+      const posEase = easeOutQuint(ft);
+      const rockDecay = Math.pow(1 - ft, FALL_ROCK_DECAY_POWER);
+      const dir = fallDirectionRef.current;
+
+      group.position.x = enterFromXRef.current * (1 - posEase);
+      group.position.y = enterFromYRef.current * (1 - posEase);
+      group.position.z = FALL_LIFT_Z * (1 - posEase);
+
+      const rock = Math.sin(ft * FALL_ROCK_CYCLES * Math.PI * 2);
+
+      group.rotation.z =
+        dir * FALL_TILT_Z * rockDecay +
+        dir * rock * FALL_ROCK_AMOUNT * rockDecay;
+      group.rotation.x = FALL_TILT_X * rockDecay;
+
+      if (ft >= 1) {
+        group.position.set(0, 0, 0);
+        group.rotation.set(0, 0, 0);
+        store.enterFinished();
+      }
+    } else {
+      const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
+      group.position.x = enterFromXRef.current * (1 - easeInOutCubic(t));
+
+      if (t >= 1) {
+        group.position.x = 0;
+        store.enterFinished();
+      }
     }
   });
 
-  return <group ref={groupRef}>{children}</group>;
+  return (
+    <group ref={groupRef}>
+      {children}
+      {ashEligible && <EtchGlowOverlay />}
+    </group>
+  );
 }
