@@ -112,29 +112,29 @@ type PaperLoader = () => Promise<SurahPaper>;
 const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> = {
   fatiha: [
     () =>
-      import("./fatiha1Config").then((m) => ({
+      import("./configs/fatiha/fatiha1Config").then((m) => ({
         config: m.FATIHA_1_CONFIG,
         textData: m.FATIHA_1_TEXT_DATA,
       })),
     () =>
-      import("./fatiha2Config").then((m) => ({
+      import("./configs/fatiha/fatiha2Config").then((m) => ({
         config: m.FATIHA_2_CONFIG,
         textData: m.FATIHA_2_TEXT_DATA,
       })),
     () =>
-      import("./fatiha3Config").then((m) => ({
+      import("./configs/fatiha/fatiha3Config").then((m) => ({
         config: m.FATIHA_3_CONFIG,
         textData: m.FATIHA_3_TEXT_DATA,
       })),
     () =>
-      import("./fatiha4Config").then((m) => ({
+      import("./configs/fatiha/fatiha4Config").then((m) => ({
         config: m.FATIHA_4_CONFIG,
         textData: m.FATIHA_4_TEXT_DATA,
       })),
   ],
   alak: [
     () =>
-      Promise.all([import("./alak96Config"), import("./surahData")]).then(
+      Promise.all([import("./configs/alak96Config"), import("./surahData")]).then(
         ([configModule, dataModule]) => ({
           config: configModule.ALAK_LAYOUT_CONFIG,
           textData: dataModule.ALAK_TEXT_DATA,
@@ -143,35 +143,35 @@ const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> 
   ],
   ayatalkursi: [
     () =>
-      import("./ayatAlKursiConfig").then((m) => ({
+      import("./configs/ayatAlKursiConfig").then((m) => ({
         config: m.AYAT_AL_KURSI_CONFIG,
         textData: m.AYAT_AL_KURSI_TEXT_DATA,
       })),
   ],
   ahzab35: [
     () =>
-      import("./ahzab35Config").then((m) => ({
+      import("./configs/ahzab35Config").then((m) => ({
         config: m.AHZAB_35_CONFIG,
         textData: m.AHZAB_35_TEXT_DATA,
       })),
   ],
   nisa36: [
     () =>
-      import("./nisa36Config").then((m) => ({
+      import("./configs/nisa36Config").then((m) => ({
         config: m.NISA_36_CONFIG,
         textData: m.NISA_36_TEXT_DATA,
       })),
   ],
   ihlas112: [
     () =>
-      import("./ihlas112Config").then((m) => ({
+      import("./configs/ihlas112Config").then((m) => ({
         config: m.IHLAS_112_CONFIG,
         textData: m.IHLAS_112_TEXT_DATA,
       })),
   ],
   kafirun109: [
     () =>
-      import("./kafirun109Config").then((m) => ({
+      import("./configs/kafirun109Config").then((m) => ({
         config: m.KAFIRUN_109_CONFIG,
         textData: m.KAFIRUN_109_TEXT_DATA,
       })),

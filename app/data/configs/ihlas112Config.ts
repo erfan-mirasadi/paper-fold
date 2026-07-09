@@ -1,6 +1,6 @@
-import type { SurahLayoutConfig } from "./schema";
-import type { SurahDataShape } from "./surahData";
-import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+import type { SurahLayoutConfig } from "../schema";
+import type { SurahDataShape } from "../surahData";
+import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 
 const YELLOW_BG = "#E5CFA4";
 const YELLOW_BORDER = "#BE9E63";

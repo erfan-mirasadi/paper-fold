@@ -13,9 +13,9 @@
  * curveColors: []         — no side brackets for now.
  */
 
-import type { SurahLayoutConfig } from "./schema";
-import type { SurahDataShape } from "./surahData";
-import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+import type { SurahLayoutConfig } from "../schema";
+import type { SurahDataShape } from "../surahData";
+import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — matches the hand-drawn sketch exactly

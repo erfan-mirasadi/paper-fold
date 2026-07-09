@@ -12,9 +12,9 @@
  * (i.e. even indices → left/RTL-start column, odd indices → right/RTL-end column)
  */
 
-import type { SurahLayoutConfig } from "./schema";
-import type { SurahDataShape } from "./surahData";
-import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+import type { SurahLayoutConfig } from "../schema";
+import type { SurahDataShape } from "../surahData";
+import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 
 // ---------------------------------------------------------------------------
 // LAYOUT CONFIG

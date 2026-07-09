@@ -22,9 +22,9 @@
  * SideCurves.tsx) — previously only ONE such bracket was possible per surah.
  */
 
-import type { SurahLayoutConfig } from "./schema";
-import type { SurahDataShape } from "./surahData";
-import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+import type { SurahLayoutConfig } from "../schema";
+import type { SurahDataShape } from "../surahData";
+import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 import {
   ORANGE_THEME,
   GREEN_THEME,
@@ -33,7 +33,7 @@ import {
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
   S1_VERSE_5_TEXT,
-} from "./theme";
+} from "../theme";
 
 // ---------------------------------------------------------------------------
 // LAYOUT CONFIG

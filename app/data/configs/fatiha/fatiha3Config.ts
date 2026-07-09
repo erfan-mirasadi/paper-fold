@@ -1,6 +1,6 @@
-import type { SurahLayoutConfig } from "./schema";
-import type { SurahDataShape } from "./surahData";
-import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
+import type { SurahLayoutConfig } from "../../schema";
+import type { SurahDataShape } from "../../surahData";
+import type { SurahLanguage } from "../../../hooks/useSurahLanguageStore";
 
 import {
   ORANGE_THEME,
@@ -10,7 +10,7 @@ import {
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
   S1_VERSE_5_TEXT,
-} from "./theme";
+} from "../../theme";
 
 // ── LAYOUT ──────────────────────────────────────────────────────────────────
 // Fatiha 3 — same 7 verses as Fatiha 1, but rearranged into a 2-column "book"

@@ -10,7 +10,7 @@ import type {
   SectionTransforms,
 } from "./schema";
 import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
-import { ALAK_LAYOUT_CONFIG } from "./alak96Config";
+import { ALAK_LAYOUT_CONFIG } from "./configs/alak96Config";
 export { ALAK_LAYOUT_CONFIG };
 
 export interface Verse {

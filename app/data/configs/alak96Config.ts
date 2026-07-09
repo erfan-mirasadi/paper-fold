@@ -1,4 +1,4 @@
-import { SurahLayoutConfig } from "./schema";
+import { SurahLayoutConfig } from "../schema";
 import {
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
@@ -10,7 +10,7 @@ import {
   CAPSULE_BG_7_8_17_18,
   CAPSULE_BG_9_10_15_16,
   CAPSULE_BG_12_14,
-} from "./theme";
+} from "../theme";
 
 export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
   id: "alak",

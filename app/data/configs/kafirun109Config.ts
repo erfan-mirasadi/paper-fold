@@ -1,7 +1,7 @@
-import type { SurahLayoutConfig } from "./schema";
-import type { SurahDataShape } from "./surahData";
-import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
-import { CAPSULE_BG_6_19, ORANGE_THEME } from "./theme";
+import type { SurahLayoutConfig } from "../schema";
+import type { SurahDataShape } from "../surahData";
+import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
+import { CAPSULE_BG_6_19, ORANGE_THEME } from "../theme";
 
 const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (top and bottom full-width verses)
 const CENTER_GROUP_BG = "#eaf2db"; // Green (middle 2-col group)
