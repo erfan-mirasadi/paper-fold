@@ -6,7 +6,7 @@ import {
   ORANGE_THEME,
   CAPSULE_BG_6_19,
 } from "./theme";
-import { SurahDataShape } from "./surahData";
+import { SurahDataShape } from "./SurahConfig";
 import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
 
 export interface VerseConfig {

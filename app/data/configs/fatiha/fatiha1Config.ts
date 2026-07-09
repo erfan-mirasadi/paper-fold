@@ -1,5 +1,5 @@
 import type { SurahLayoutConfig } from "../../schema";
-import type { SurahDataShape } from "../../surahData";
+import type { SurahDataShape } from "../../SurahConfig";
 import type { SurahLanguage } from "../../../hooks/useSurahLanguageStore";
 
 import {
@@ -335,7 +335,7 @@ export const FATIHA_1_CONFIG: SurahLayoutConfig = {
   ],
 
   sectionBackground: {
-    texture: "/fatiha/all-section-bg.svg",
+    texture: "/nisa/all-section-1.svg",
     scaleX: 1.2,
     scaleY: 1.35,
     offsetY: 0.011,

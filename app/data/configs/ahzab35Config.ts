@@ -14,7 +14,7 @@
  */
 
 import type { SurahLayoutConfig } from "../schema";
-import type { SurahDataShape } from "../surahData";
+import type { SurahDataShape } from "../SurahConfig";
 import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 
 // ---------------------------------------------------------------------------

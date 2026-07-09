@@ -1,5 +1,5 @@
 import type { SurahLayoutConfig } from "../../schema";
-import type { SurahDataShape } from "../../surahData";
+import type { SurahDataShape } from "../../SurahConfig";
 import type { SurahLanguage } from "../../../hooks/useSurahLanguageStore";
 
 import {
@@ -327,16 +327,16 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
 
   svgOverlays: [
     // ── Section background (static, behind everything) ────────────────────────
-    // {
-    //   src: "/fatiha/all-section-bg.svg",
-    //   anchorGroupIndex: 1,
-    //   anchorEdge: "top",
-    //   scaleX: 1.36,
-    //   scaleY: 1.15,
-    //   offsetX: 0,
-    //   offsetY: -0.07,
-    //   renderOrder: 1,
-    // },
+    {
+      src: "/nisa/all-section-1.svg",
+      anchorGroupIndex: 1,
+      anchorEdge: "top",
+      scaleX: 1.36,
+      scaleY: 1.15,
+      offsetX: 0,
+      offsetY: -0.07,
+      renderOrder: 1,
+    },
     // ── Bismillah frame — verse 1 ───
     // {
     //   src: "/ayatalKursi/frame-section-1.svg",

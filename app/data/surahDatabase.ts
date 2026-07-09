@@ -1,6 +1,6 @@
 import type { SurahLayoutConfig } from "./schema";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
-import type { SurahDataShape } from "./surahData";
+import type { SurahDataShape } from "./SurahConfig";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -134,12 +134,10 @@ const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> 
   ],
   alak: [
     () =>
-      Promise.all([import("./configs/alak96Config"), import("./surahData")]).then(
-        ([configModule, dataModule]) => ({
-          config: configModule.ALAK_LAYOUT_CONFIG,
-          textData: dataModule.ALAK_TEXT_DATA,
-        }),
-      ),
+      import("./configs/alak96Config").then((m) => ({
+        config: m.ALAK_LAYOUT_CONFIG,
+        textData: m.ALAK_TEXT_DATA,
+      })),
   ],
   ayatalkursi: [
     () =>

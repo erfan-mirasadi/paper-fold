@@ -9,8 +9,7 @@ import type {
   RowConnectorTransform,
   SectionTransforms,
 } from "./schema";
-import { SURAH_DATA_ARABIC as SURAH_DATA } from "./surahData";
-import { ALAK_LAYOUT_CONFIG } from "./configs/alak96Config";
+import { ALAK_LAYOUT_CONFIG, ALAK_TEXT_AR as SURAH_DATA } from "./configs/alak96Config";
 export { ALAK_LAYOUT_CONFIG };
 
 export interface Verse {
@@ -46,6 +45,12 @@ export interface SectionTwoData {
   colorGroups: ColorGroup[];
   outroVerse: Verse;
   bottomLabel: string;
+}
+
+export interface SurahDataShape {
+  bismillah: string;
+  section1: SectionOneData;
+  section2: SectionTwoData;
 }
 
 export { SURAH_DATA };

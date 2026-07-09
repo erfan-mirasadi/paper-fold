@@ -1,5 +1,5 @@
 import type { SurahLayoutConfig } from "../schema";
-import type { SurahDataShape } from "../surahData";
+import type { SurahDataShape } from "../SurahConfig";
 import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 import { CAPSULE_BG_6_19, ORANGE_THEME } from "../theme";
 
