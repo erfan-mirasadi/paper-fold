@@ -27,9 +27,6 @@ export const SURAH_DATA_ARABIC: SurahDataShape = {
     colorGroups: [
       {
         // Group 1 — Upper maroon block (verses 7–10)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 8, text: "إِنَّ إِلَىٰ رَبِّكَ الرُّجْعَىٰ" },
           { number: 7, text: "أَنْ رَآهُ اسْتَغْنَىٰ" },
@@ -39,9 +36,6 @@ export const SURAH_DATA_ARABIC: SurahDataShape = {
       },
       {
         // Group 2 — Center green block (verses 11–14), indented/pushed in
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 12, text: "أَوْ أَمَرَ بِالتَّقْوَىٰ" },
           { number: 11, text: "أَرَأَيْتَ إِنْ كَانَ عَلَى الْهُدَىٰ" },
@@ -51,9 +45,6 @@ export const SURAH_DATA_ARABIC: SurahDataShape = {
       },
       {
         // Group 3 — Lower maroon block (verses 15–18)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 16, text: "نَاصِيَةٍ كَاذِبَةٍ خَاطِئَةٍ" },
           {
@@ -112,9 +103,6 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
     colorGroups: [
       {
         // Group 1 — Upper maroon block (verses 7–10)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0.01,
         verses: [
           {
             number: 7,
@@ -136,9 +124,6 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
       },
       {
         // Group 2 — Center green block (verses 11–14), indented/pushed in
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 11, text: "Ya O Kul doğru yoldaysa ?" },
           { number: 12, text: "Allah'a itaat edin diyorsa ?" },
@@ -154,9 +139,6 @@ export const SURAH_DATA_TURKISH: SurahDataShape = {
       },
       {
         // Group 3 — Lower maroon block (verses 15–18)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0.01,
         verses: [
           {
             number: 15,
@@ -224,9 +206,6 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
     colorGroups: [
       {
         // Group 1 — Upper maroon block (verses 7–10)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0.01,
         verses: [
           {
             number: 7,
@@ -248,9 +227,6 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
       },
       {
         // Group 2 — Center green block (verses 11–14), indented/pushed in
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           {
             number: 11,
@@ -269,9 +245,6 @@ export const SURAH_DATA_ENGLISH: SurahDataShape = {
       },
       {
         // Group 3 — Lower maroon block (verses 15–18)
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0.01,
         verses: [
           {
             number: 15,

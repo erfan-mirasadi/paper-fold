@@ -280,15 +280,9 @@ export const KAFIRUN_109_TEXT_AR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [{ number: 1, text: "قُلْ يَا أَيُّهَا الْكَافِرُونَ" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 3, text: "وَلَا أَنْتُمْ عَابِدُونَ مَا أَعْبُدُ" },
           { number: 2, text: "لَا أَعْبُدُ مَا تَعْبُدُونَ" },
@@ -297,9 +291,6 @@ export const KAFIRUN_109_TEXT_AR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [{ number: 6, text: "لَكُمْ دِينُكُمْ وَلِيَ دِينِ" }],
       },
     ],
@@ -320,9 +311,6 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 1,
@@ -331,9 +319,6 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           {
             number: 2,
@@ -348,9 +333,6 @@ export const KAFIRUN_109_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 6,
@@ -376,17 +358,11 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 1, text: "De ki, Ey (benim dinime) inanmayanlar !" },
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           {
             number: 2,
@@ -404,9 +380,6 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [{ number: 6, text: "Sizin dininiz size, benim dinim bana !" }],
       },
     ],

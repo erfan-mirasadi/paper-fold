@@ -359,9 +359,6 @@ export const AYAT_AL_KURSI_TEXT_AR: SurahDataShape = {
     colorGroups: [
       // ── Group 0 — top, not pushed in ─────────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           // i=0 → verseId 2 (left column)
           { number: 2, text: "لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ" },
@@ -374,9 +371,6 @@ export const AYAT_AL_KURSI_TEXT_AR: SurahDataShape = {
       },
       // ── Group 1 — middle, pushed in ─────────────────────────────────────
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           // i=0 → verseId 4 (left col, row 1)
           {
@@ -399,9 +393,6 @@ export const AYAT_AL_KURSI_TEXT_AR: SurahDataShape = {
       },
       // ── Group 2 — bottom, not pushed in ─────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           // i=0 → verseId 8 (left column)
           {
@@ -434,9 +425,6 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 1,
@@ -446,9 +434,6 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           {
             number: 3,
@@ -469,9 +454,6 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 7,
@@ -505,9 +487,6 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 1,
@@ -520,9 +499,6 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 3, text: "Göklerde ve yerde ne varsa Onundur." },
           {
@@ -540,9 +516,6 @@ export const AYAT_AL_KURSI_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 7,

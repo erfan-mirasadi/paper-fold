@@ -32,9 +32,6 @@ export interface ColorGroup {
   verses: Verse[];
   verseBg?: string;
   topLabel?: string;
-  isPushedIn?: boolean;
-  isCenter?: boolean;
-  extraRowGap?: number;
 }
 
 export interface SectionOneData {

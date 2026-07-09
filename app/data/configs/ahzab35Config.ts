@@ -827,9 +827,6 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
     colorGroups: [
       // ── Group 0 — Yellow ─────────────────────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 2, text: "وَالْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ" },
           { number: 1, text: "إِنَّ الْمُسْلِمِينَ وَالْمُسْلِمَاتِ" },
@@ -837,9 +834,6 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       },
       // ── Group 1 — Blue ───────────────────────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 4, text: "وَالْمُتَصَدِّقِينَ وَالْمُتَصَدِّقَاتِ" },
           { number: 3, text: "وَالْقَانِتِينَ وَالْقَانِتَاتِ" },
@@ -847,9 +841,6 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       },
       // ── Group 2 — Green (pushed in, 2 rows) ──────────────────────────────
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 6, text: "وَالصَّائِمِينَ وَالصَّائِمَاتِ" },
           { number: 5, text: "وَالصَّادِقِينَ وَالصَّادِقَاتِ" },
@@ -859,9 +850,6 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       },
       // ── Group 3 — Blue ───────────────────────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 10,
@@ -872,9 +860,6 @@ export const AHZAB_35_TEXT_AR: SurahDataShape = {
       },
       // ── Group 4 — Yellow / dome text ─────────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         topLabel: "أَعَدَّ اللَّهُ لَهُمْ",
         verses: [
           { number: 12, text: "وَأَجْرًا عَظِيمًا" },
@@ -903,9 +888,6 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 2, text: "ve mümin erkekler ve mümin kadınlar" },
           {
@@ -915,9 +897,6 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 4,
@@ -927,9 +906,6 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           {
             number: 6,
@@ -950,9 +926,6 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 10,
@@ -965,9 +938,6 @@ export const AHZAB_35_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         topLabel: "Allah onlar için hazırlamıştır",
         verses: [
           { number: 12, text: "ve büyük bir mükâfat" },
@@ -996,27 +966,18 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 2, text: "and the believing men and believing women" },
           { number: 1, text: "Indeed, the Muslim men and Muslim women" },
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 4, text: "and the charitable men and charitable women" },
           { number: 3, text: "and the obedient men and obedient women" },
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           {
             number: 6,
@@ -1031,9 +992,6 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 10,
@@ -1046,9 +1004,6 @@ export const AHZAB_35_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         topLabel: "Allah has prepared for them",
         verses: [
           { number: 12, text: "and a great reward" },

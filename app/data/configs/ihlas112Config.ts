@@ -304,27 +304,15 @@ export const IHLAS_112_TEXT_AR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 1, text: "قُلْ هُوَ اللَّهُ أَحَدٌ" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 2, text: "اللَّهُ الصَّمَدُ" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 3, text: "لَمْ يَلِدْ وَلَمْ يُولَدْ" }],
       },
       {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 4, text: "وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ" }],
       },
     ],
@@ -345,29 +333,17 @@ export const IHLAS_112_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 1, text: "Say, He is Allah, the One" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 2, text: "Allah is Samet :" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 3, text: "He has not begotten and has not been begotten" },
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 4, text: "And nothing is equal and equivalent to Him" },
         ],
@@ -390,27 +366,15 @@ export const IHLAS_112_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 1, text: "Söyle, O Allah tek'tir" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 2, text: "Allah, Samet'tir :" }],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [{ number: 3, text: "Doğurmamış ve doğurulmamıştır" }],
       },
       {
-        isPushedIn: false,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" },
         ],

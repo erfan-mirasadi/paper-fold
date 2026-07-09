@@ -548,9 +548,6 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
     colorGroups: [
       // ── Group 0 — top, verses 1, 2 ───────────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 1, text: "وَاعْبُدُوا اللَّهَ" },
           { number: 2, text: "وَلَا تُشْرِكُوا بِهِ شَيْئًا" },
@@ -558,9 +555,6 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
       },
       // ── Group 1 — middle section 1 (blue) ────────────────────────────────
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 3, text: "وَبِالْوَالِدَيْنِ إِحْسَانًا" },
           { number: 4, text: "وَبِذِي الْقُرْبَىٰ" },
@@ -570,9 +564,6 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
       },
       // ── Group 2 — middle section 2 (green) ───────────────────────────────
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 7, text: "وَالْجَارِ ذِي الْقُرْبَىٰ" },
           { number: 8, text: "وَالْجَارِ الْجُنُبِ" },
@@ -582,16 +573,10 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
       },
       // ── Group 3 — verse 11 (standalone) ──────────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [{ number: 11, text: "وَمَا مَلَكَتْ أَيْمَانُكُمْ" }],
       },
       // ── Group 4 — verse 12 (standalone, long) ────────────────────────────
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 12,
@@ -621,18 +606,12 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 1, text: "Yalnızca Allah'a ibadet edin," },
           { number: 2, text: "Ve Ondan başka İlah tanımayın." },
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 3, text: "Ve önce ana-babaya," },
           { number: 4, text: "Sonra diğer yakınlara," },
@@ -641,9 +620,6 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 7, text: "Önce yakın komşuya," },
           { number: 8, text: "Sonra uzak komşuya," },
@@ -652,9 +628,6 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 11,
@@ -663,9 +636,6 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 12,
@@ -696,18 +666,12 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           { number: 1, text: "Worship Allah alone," },
           { number: 2, text: "and recognize no god besides Him." },
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 3, text: "And first, to parents," },
           { number: 4, text: "then to other close relatives," },
@@ -716,9 +680,6 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: true,
-        isCenter: true,
-        extraRowGap: 0,
         verses: [
           { number: 7, text: "first, to the near neighbor," },
           { number: 8, text: "then to the distant neighbor," },
@@ -730,9 +691,6 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 11,
@@ -741,9 +699,6 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
         ],
       },
       {
-        isPushedIn: false,
-        isCenter: false,
-        extraRowGap: 0,
         verses: [
           {
             number: 12,
