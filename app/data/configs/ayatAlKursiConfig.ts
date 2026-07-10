@@ -352,6 +352,15 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: Math.PI / 2,
       renderOrder: 1, // Behind the verses
     },
+    {
+      src: "/ayatalKursi/balara.png",
+      anchorEdge: "top",
+      scaleX: 0.4,
+      scaleY: 0.16,
+      offsetX: 0,
+      offsetY: 0.85,
+      renderOrder: 20,
+    },
   ],
 };
 
