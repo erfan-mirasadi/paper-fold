@@ -2,7 +2,7 @@ import type { SurahLayoutConfig } from "../schema";
 import type { SurahDataShape } from "../SurahConfig";
 import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 
-const YELLOW_BG = "#E5CFA4";
+const YELLOW_BG = "#EFE2C7";
 const YELLOW_BORDER = "#BE9E63";
 const GREEN_BG = "#eaf2db";
 const GREEN_BORDER = "#5E7367";
