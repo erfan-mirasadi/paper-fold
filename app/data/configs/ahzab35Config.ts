@@ -21,7 +21,7 @@ import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 // COLOR PALETTE — matches the hand-drawn sketch exactly
 // ---------------------------------------------------------------------------
 
-const YELLOW_BG = "#E5CFA4"; // Top & bottom groups (İman / dome)
+const YELLOW_BG = "#EFE2C7"; // Top & bottom groups (İman / dome)
 const YELLOW_BORDER = "#BE9E63";
 
 const BLUE_BG = "#CEE0E9"; // 2nd and 4th groups
