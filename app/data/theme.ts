@@ -17,7 +17,7 @@ export const SECTION_BG_TEXTURE = "/section-bg.webp";
 export const S1_FRAME_BG_COLOR = "#D9C7CA";
 export const S2_FRAME_BG_COLOR = "#F0E4E5";
 export const S1_FRAME_IMAGE = "/alak/Group 10.svg";
-export const S2_FRAME_IMAGE = "/nisa/all-section.svg";
+export const S2_FRAME_IMAGE = "/nisa/all-section-1.svg";
 
 export const S1_OUTER_BG = SECTION_BG_TEXTURE;
 export const S1_INNER_BG = "#fbf1d5";
