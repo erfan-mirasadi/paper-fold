@@ -20,7 +20,7 @@ import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 // LAYOUT CONFIG
 // ---------------------------------------------------------------------------
 
-const OUTER_GROUP_BG = "#FDF4CA"; // Yellow (Top and Bottom groups)
+const OUTER_GROUP_BG = "#EFE2C7"; // Yellow (Top and Bottom groups)
 const OUTER_GROUP_BORDER = "#BE9E63"; // Lighter brown/gold border
 const CENTER_GROUP_BG = "#CBE2EE"; // Blue/Grey (Middle group)
 const CENTER_GROUP_BORDER = "#7A9CAD"; // Lighter slate blue border
