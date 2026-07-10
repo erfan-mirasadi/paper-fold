@@ -4,9 +4,11 @@
  * Layout (top to bottom), per the hand-drawn brief:
  *   Block 0        verseIds [1, 2]        — stacked (1 col), orange, NO curve
  *   Block 1 "mid1" verseIds [4,3,6,5]     — 2×2 grid, blue, curve + pop-ups
+ *                                            AR order: i=0→id4(LEFT), i=1→id3(RIGHT)
  *                                            (sized identically to Ayat
  *                                            al-Kursi's pushed-in center box)
  *   Block 2 "mid2" verseIds [8,7,10,9]    — 2×2 grid, green, curve + pop-ups
+ *                                            AR order: i=0→id8(LEFT), i=1→id7(RIGHT)
  *   Block 3        verseId  [11]          — standalone pill, "yellow"
  *                                            (modeled on Alak's verse 5)
  *   Block 4        verseId  [12]          — standalone LONG non-pill capsule,
@@ -41,7 +43,7 @@ import {
 
 // Middle section 1 (verses 3-6) — same blue/grey palette Ayat al-Kursi uses
 // for its pushed-in center block.
-const MID1_BG = "#CBE2EE";
+const MID1_BG = "#ECF4F9";
 const MID1_BORDER = "#7A9CAD";
 
 // Middle section 2 (verses 7-10) — green theme.
@@ -125,62 +127,91 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       translationTextScaleOverride: 0.467,
     },
     // ── Middle section 1 — verses 3,4,5,6 (blue, exact Ayat al-Kursi sizing)
+    // ── Middle section 1 — verses 3,4,5,6 (blue, exact Ayat al-Kursi sizing)
+    // block.verseIds=[4,3,6,5]: verse 4 is at LEFT slot, verse 3 at RIGHT slot.
+    // displayNumber   = LTR reading order (TR/EN): LEFT=1, RIGHT=2, LEFT=3, RIGHT=4
+    // arDisplayNumber = RTL reading order (Arabic): RIGHT=1, LEFT=2, RIGHT=3, LEFT=4
     3: {
       bg: MID1_BG,
       border: MID1_BORDER,
-      circleBorderCol: MID1_BORDER,
+      circleBorderCol: MID1_BG,
       circleBg: MID1_BG,
-      circleTextCol: MID1_BORDER,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 2,    // RIGHT slot → 2nd in LTR reading
+      arDisplayNumber: 1,  // RIGHT slot → 1st in RTL reading (right-to-left)
     },
     4: {
       bg: MID1_BG,
       border: MID1_BORDER,
-      circleBorderCol: MID1_BORDER,
+      circleBorderCol: MID1_BG,
       circleBg: MID1_BG,
-      circleTextCol: MID1_BORDER,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 1,    // LEFT slot → 1st in LTR reading
+      arDisplayNumber: 2,  // LEFT slot → 2nd in RTL reading
     },
     5: {
       bg: MID1_BG,
       border: MID1_BORDER,
-      circleBorderCol: MID1_BORDER,
+      circleBorderCol: MID1_BG,
       circleBg: MID1_BG,
-      circleTextCol: MID1_BORDER,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 4,    // RIGHT slot → 4th in LTR
+      arDisplayNumber: 3,  // RIGHT slot → 3rd in RTL
     },
     6: {
       bg: MID1_BG,
       border: MID1_BORDER,
-      circleBorderCol: MID1_BORDER,
+      circleBorderCol: MID1_BG,
       circleBg: MID1_BG,
-      circleTextCol: MID1_BORDER,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 3,    // LEFT slot → 3rd in LTR
+      arDisplayNumber: 4,  // LEFT slot → 4th in RTL
     },
     // ── Middle section 2 — verses 7,8,9,10 (green) ─────────────────────────
+    // block.verseIds=[8,7,10,9]: verse 8 is at LEFT slot, verse 7 at RIGHT slot.
     7: {
-      bg: MID2_BG,
-      border: MID2_BORDER,
-      circleBorderCol: MID2_BORDER,
-      circleBg: MID2_BG,
-      circleTextCol: MID2_BORDER,
+      bg: MID1_BG,
+      border: MID1_BORDER,
+      circleBorderCol: MID1_BG,
+      circleBg: MID1_BG,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 6,    // RIGHT slot → 6th in LTR
+      arDisplayNumber: 5,  // RIGHT slot → 5th in RTL
     },
     8: {
-      bg: MID2_BG,
-      border: MID2_BORDER,
-      circleBorderCol: MID2_BORDER,
-      circleBg: MID2_BG,
-      circleTextCol: MID2_BORDER,
+      bg: MID1_BG,
+      border: MID1_BORDER,
+      circleBorderCol: MID1_BG,
+      circleBg: MID1_BG,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 5,    // LEFT slot → 5th in LTR
+      arDisplayNumber: 6,  // LEFT slot → 6th in RTL
     },
     9: {
-      bg: MID2_BG,
-      border: MID2_BORDER,
-      circleBorderCol: MID2_BORDER,
-      circleBg: MID2_BG,
-      circleTextCol: MID2_BORDER,
+      bg: MID1_BG,
+      border: MID1_BORDER,
+      circleBorderCol: MID1_BG,
+      circleBg: MID1_BG,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 8,    // RIGHT slot → 8th in LTR
+      arDisplayNumber: 7,  // RIGHT slot → 7th in RTL
     },
     10: {
-      bg: MID2_BG,
-      border: MID2_BORDER,
-      circleBorderCol: MID2_BORDER,
-      circleBg: MID2_BG,
-      circleTextCol: MID2_BORDER,
+      bg: MID1_BG,
+      border: MID1_BORDER,
+      circleBorderCol: MID1_BG,
+      circleBg: MID1_BG,
+      circleTextCol: "#000000",
+      showNumber: true,
+      displayNumber: 7,    // LEFT slot → 7th in LTR
+      arDisplayNumber: 8,  // LEFT slot → 8th in RTL
     },
     // ── Verse 11 — standalone, "yellow" (modeled on Alak's verse 5) ───────
     // Same 2/3-size treatment as 1/2 — see the comment there.
@@ -248,7 +279,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       // outer-pair slice (`slice(0, -1)`) is empty, which is exactly what
       // keeps the top (1,2) block and the bottom (11, 12) blocks free of
       // any side curve.
-      curveColors: [{ color: MID1_BORDER, fillColor: MID1_BG }],
+      curveColors: [{ color: "transparent", fillColor: "transparent" }],
     },
     capsuleBorderWidth: 0.0039,
     circleBorderWidth: 0.0035,
@@ -299,13 +330,16 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          text: "Ana-baba başta anılırken, kölenin sonda tek başına",
+          segments: [
+            { text: "Ana-baba başta anılırken, kölenin sonda " },
+            { text: "tek başına", color: "#8a4b3d" },
+          ],
         },
         {
           text: "zikredilmesi dikkatleri özellikle ona yöneltiyor.",
         },
         {
-          text: "Böylece iyiliğe en çok muhtaç olan kimsenin köle",
+          text: "Böylece iyiliğe en çok muhtac olan kimsenin köle",
         },
         {
           text: "olduğu, kelime dizilişiyle bile ince bir şekilde hissettiriliyor.",
@@ -361,14 +395,14 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     {
       id: "section2_mid1",
       type: "group",
-      verseIds: [3, 4, 5, 6],
+      verseIds: [4, 3, 6, 5],
       columns: 2,
       horizontalInset: 0.01,
       isCenter: true,
       bgThemeKey: "s2Group2Bg",
       curveOverride: {
-        color: MID1_BORDER,
-        fillColor: MID1_BG,
+        color: "transparent",
+        fillColor: "transparent",
         bowGap: 0.1,
         innerBowGap: 0.095,
       },
@@ -379,14 +413,14 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     {
       id: "section2_mid2",
       type: "group",
-      verseIds: [7, 8, 9, 10],
+      verseIds: [8, 7, 10, 9],
       columns: 2,
       horizontalInset: 0.01,
       isCenter: true,
       bgThemeKey: "s2Group3Bg",
       curveOverride: {
-        color: MID2_BORDER,
-        fillColor: MID2_BG,
+        color: "transparent",
+        fillColor: "transparent",
         bowGap: 0.1,
         innerBowGap: 0.095,
       },
@@ -490,7 +524,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
           { direction: -1, angleFactor: 1.1 },
           { direction: 1, angleFactor: 0.6 },
           { direction: 1, angleFactor: 0 },
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
         ],
       },
       {
@@ -553,22 +587,22 @@ export const NISA_36_TEXT_AR: SurahDataShape = {
           { number: 2, text: "وَلَا تُشْرِكُوا بِهِ شَيْئًا" },
         ],
       },
-      // ── Group 1 — middle section 1 (blue) ────────────────────────────────
+      // ── Group 1 — middle section 1 (blue) — AR RTL order: i=0→id4(LEFT), i=1→id3(RIGHT)
       {
         verses: [
-          { number: 3, text: "وَبِالْوَالِدَيْنِ إِحْسَانًا" },
           { number: 4, text: "وَبِذِي الْقُرْبَىٰ" },
-          { number: 5, text: "وَالْيَتَامَىٰ" },
+          { number: 3, text: "وَبِالْوَالِدَيْنِ إِحْسَانًا" },
           { number: 6, text: "وَالْمَسَاكِينِ" },
+          { number: 5, text: "وَالْيَتَامَىٰ" },
         ],
       },
-      // ── Group 2 — middle section 2 (green) ───────────────────────────────
+      // ── Group 2 — middle section 2 (green) — AR RTL order: i=0→id8(LEFT), i=1→id7(RIGHT)
       {
         verses: [
-          { number: 7, text: "وَالْجَارِ ذِي الْقُرْبَىٰ" },
           { number: 8, text: "وَالْجَارِ الْجُنُبِ" },
-          { number: 9, text: "وَالصَّاحِبِ بِالْجَنْبِ" },
+          { number: 7, text: "وَالْجَارِ ذِي الْقُرْبَىٰ" },
           { number: 10, text: "وَابْنِ السَّبِيلِ" },
+          { number: 9, text: "وَالصَّاحِبِ بِالْجَنْبِ" },
         ],
       },
       // ── Group 3 — verse 11 (standalone) ──────────────────────────────────
@@ -611,6 +645,8 @@ export const NISA_36_TEXT_TR: SurahDataShape = {
           { number: 2, text: "Ve Ondan başka İlah tanımayın." },
         ],
       },
+      // LTR order — TR[i] maps to AR[i]'s spatial position via isLTR=true.
+      // Verse numbers match actual verse IDs to ensure unique React keys.
       {
         verses: [
           { number: 3, text: "Ve önce ana-babaya," },
@@ -671,6 +707,8 @@ export const NISA_36_TEXT_EN: SurahDataShape = {
           { number: 2, text: "and recognize no god besides Him." },
         ],
       },
+      // LTR order — EN[i] maps to AR[i]'s spatial position via isLTR=true.
+      // Verse numbers match actual verse IDs to ensure unique React keys.
       {
         verses: [
           { number: 3, text: "And first, to parents," },

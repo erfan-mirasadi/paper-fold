@@ -516,6 +516,14 @@ export interface VerseOverrideConfig {
    * blocks, pairings, camera targets). E.g. verseId 12 displaying "36".
    */
   displayNumber?: number | string;
+  /**
+   * Arabic-specific badge number override for RTL layouts. When the active
+   * language is 'ar', this takes precedence over `displayNumber` so each
+   * verse can show reading-order numbers that differ between LTR and RTL
+   * directions. E.g. verse 3 at the RIGHT column in an RTL grid displays "1"
+   * (first in Arabic reading) while the same spatial slot shows "2" in LTR.
+   */
+  arDisplayNumber?: number | string;
 }
 
 export interface SurahAssets {

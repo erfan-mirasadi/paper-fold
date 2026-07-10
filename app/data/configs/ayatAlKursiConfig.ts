@@ -213,16 +213,6 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
         { text: "yanlışlar reddedilir. Bu ahenkli diziliş, Ayetü'l-" },
         { text: "Kürsî'nin eşsiz nazmını yansıtır." },
       ],
-      svgs: [
-        {
-          src: "/ayatalKursi/divider.svg",
-          anchor: "start",
-          offsetX: 0.62,
-          offsetY: -0.36,
-          scaleX: 0.3,
-          scaleY: 0.15,
-        },
-      ],
     },
   ],
 
@@ -231,7 +221,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   sectionBackground: {
     texture: "/nisa/all-section-1.svg",
     scaleX: 0.9,
-    scaleY: 1.3,
+    scaleY: 1.4,
     offsetY: 0.025,
     solidScaleX: 0.6,
     solidScaleY: 1,
@@ -332,6 +322,28 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       grabRangePixels: 50,
     },
   },
+
+  svgOverlays: [
+    {
+      src: "/ayatalKursi/divider.svg",
+      anchorEdge: "center",
+      scaleX: 0.51,
+      scaleY: 1,
+      offsetX: 0.005,
+      offsetY: 0,
+      renderOrder: 10, // Behind the verses
+    },
+    {
+      src: "/ayatalKursi/divider.svg",
+      anchorEdge: "center",
+      scaleX: 0.46,
+      scaleY: 1.54,
+      offsetX: 0,
+      offsetY: 0.0025,
+      rotationZ: Math.PI / 2,
+      renderOrder: 1, // Behind the verses
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------

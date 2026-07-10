@@ -317,7 +317,10 @@ export function buildVerseConfigs(
         id: v.number,
         verse: v.text,
         splitTexts: v.splitTexts,
-        number: override?.displayNumber ?? v.number,
+        number:
+          runtime.activeLanguage === "ar" && override?.arDisplayNumber !== undefined
+            ? override.arDisplayNumber
+            : (override?.displayNumber ?? v.number),
         y: t.y + expandH,
         w: expandedW,
         h: expandedH,

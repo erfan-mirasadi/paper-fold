@@ -304,7 +304,11 @@ export function VerseGroup({
                 w={finalW}
                 h={finalH}
                 verse={v.text}
-                number={override?.displayNumber ?? v.number}
+                number={
+                  activeLanguage === "ar" && override?.arDisplayNumber !== undefined
+                    ? override.arDisplayNumber
+                    : (override?.displayNumber ?? v.number)
+                }
                 bg={finalBg}
                 border={finalBorder}
                 circleBorderCol={finalCircleBorder}
