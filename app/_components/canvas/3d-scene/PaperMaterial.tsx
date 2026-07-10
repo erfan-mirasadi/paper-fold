@@ -29,6 +29,7 @@ import {
 import { usePaperMasking } from "../../../hooks/usePaperMasking";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useStoryStore } from "../../../stores/useStoryStore";
+import { usePaperStore } from "../../../stores/usePaperStore";
 import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
@@ -49,6 +50,16 @@ const BASE_RENDER_TEX_HEIGHT = 1700;
 
 const TEXTURE_SETTLE_DELAY_MS = 600;
 const TEXTURE_READY_DELAY_MS = 200;
+/**
+ * Much shorter equivalents used while a PAPER SWITCH is in flight
+ * (usePaperStore.isSwitching). The generous delays above protect the very
+ * first page load (cold fonts, first-ever suspended textures); during a
+ * switch all of that is already warm, and every extra millisecond here is
+ * spent as a visible frozen hold between "new paper loaded" and the
+ * page-turn choreography starting — the user should see them back-to-back.
+ */
+const SWITCH_TEXTURE_SETTLE_DELAY_MS = 120;
+const SWITCH_TEXTURE_READY_DELAY_MS = 0;
 const TEXTURE_CAPTURE_FRAMES = 1;
 const NORMAL_SCALE_ENABLED = new Vector2(1.2, 1.2);
 const NORMAL_SCALE_DISABLED = new Vector2(0, 0);
@@ -235,7 +246,9 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     if (!fontsReady || contentMountedKey !== renderTextureKey) return;
     const t = setTimeout(
       () => setSettledKey(renderTextureKey),
-      TEXTURE_SETTLE_DELAY_MS,
+      usePaperStore.getState().isSwitching
+        ? SWITCH_TEXTURE_SETTLE_DELAY_MS
+        : TEXTURE_SETTLE_DELAY_MS,
     );
     return () => clearTimeout(t);
   }, [fontsReady, contentMountedKey, renderTextureKey]);
@@ -272,11 +285,16 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   useEffect(() => {
     if (!settled || !onReady) return;
 
-    const t = window.setTimeout(() => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(onReady);
-      });
-    }, TEXTURE_READY_DELAY_MS);
+    const t = window.setTimeout(
+      () => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(onReady);
+        });
+      },
+      usePaperStore.getState().isSwitching
+        ? SWITCH_TEXTURE_READY_DELAY_MS
+        : TEXTURE_READY_DELAY_MS,
+    );
 
     return () => window.clearTimeout(t);
   }, [settled, onReady]);

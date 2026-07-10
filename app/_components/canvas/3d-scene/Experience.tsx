@@ -29,6 +29,7 @@ import { useIntroToPaperScroll } from "../../../hooks/useIntroToPaperScroll";
 import { IntroSectionAnimationController } from "../../../hooks/useIntroSectionAnimation";
 import { SectionZoomCamera } from "../orchestrator/SectionZoomCamera";
 import { useStoryStore } from "../../../stores/useStoryStore";
+import { usePaperStore } from "../../../stores/usePaperStore";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -68,12 +69,17 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
     if (paperReady && firedRevisionRef.current !== storyRevision) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
+      // The 500ms breather only matters on the very first load (it keeps the
+      // intro's ready signal off the main thread's busiest moment). During a
+      // paper SWITCH it would just be a visible frozen hold between "new
+      // paper ready" and the page-turn choreography — fire immediately.
+      const delay = usePaperStore.getState().isSwitching ? 0 : 500;
       timeoutRef.current = setTimeout(() => {
         if (firedRevisionRef.current !== storyRevision) {
           firedRevisionRef.current = storyRevision;
           onReady?.();
         }
-      }, 500);
+      }, delay);
     }
 
     return () => {

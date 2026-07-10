@@ -52,6 +52,16 @@ const SWITCH_FAILSAFE_MS = 20000;
 /** Fold rotations below this are considered "already flat" → no unfold step. */
 const FLAT_ANGLE_EPSILON = 0.06;
 
+/**
+ * Surahs with this many papers or fewer keep the plain curl/slide exit and
+ * glide enter. Everything past it gets the enhanced switch: the book-flip
+ * exit (PaperTransitionMesh's FlipSheet), the falling-paper enter and the
+ * etch glow (PageAshTransition). Lives here — not in a component module —
+ * because both of those component modules need it and already import this
+ * store (defining it in either one would create an import cycle).
+ */
+export const BURN_EFFECT_MIN_PAPER_COUNT = 2;
+
 export type PaperTransitionPhase = "idle" | "loading" | "animating";
 /** Which sheet mesh is currently standing in for the outgoing page. */
 export type SheetStage = "flatten" | "curl";

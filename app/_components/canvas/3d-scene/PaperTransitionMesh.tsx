@@ -53,6 +53,7 @@ import {
   Float32BufferAttribute,
   Group,
   Material,
+  Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
   RGBAFormat,
@@ -65,6 +66,7 @@ import {
 import {
   usePaperStore,
   getActiveTransitionCapture,
+  BURN_EFFECT_MIN_PAPER_COUNT,
 } from "../../../stores/usePaperStore";
 import {
   createPanelGeometry,
@@ -75,16 +77,7 @@ import {
 import { PAPER_MATERIAL_CONFIG } from "./PaperMaterial";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import type { PaperTransitionCapture } from "./paperSnapshot";
-import {
-  applyFadeOnlyShader,
-  applyFrontBurnShader,
-  BURN_DURATION_S,
-  BURN_EFFECT_MIN_PAPER_COUNT,
-  createBurnUniforms,
-  EtchGlowOverlay,
-  isAshTransitionEligible,
-  type BurnUniforms,
-} from "./PageAshTransition";
+import { EtchGlowOverlay } from "./PageAshTransition";
 
 // ── Flatten sheet timeline (plays only after "animating" begins) ───────────
 /** A calm, natural-paced unfold — no longer needs to "buy" loading time. */
@@ -111,6 +104,52 @@ const EXIT_RISE_Y = 0.06;
 const SHEET_NORMAL_SCALE = new Vector2(1.2, 1.2);
 /** Keeps sheets off the incoming paper's plane (no z-fighting). */
 const SHEET_Z_EPSILON = 0.004;
+
+// ── Book-flip exit (FlipSheet — Surahs past BURN_EFFECT_MIN_PAPER_COUNT) ───
+// The outgoing page turns EXACTLY like a page of an open book, using the
+// classic analytic PAGE-CURL: the sheet wraps around an invisible cylinder
+// whose crease line starts as a diagonal through the page's bottom outer
+// corner (the "finger grabbed it there" dog-ear), then sweeps across the
+// page while rotating upright, so the corner peels first, the curl rolls
+// smoothly through the whole sheet in one continuous curved surface (zero
+// kinks — this is pure math on a dense grid, not bone skinning), the back
+// is fully revealed, and the turned page glides off-screen.
+//
+// If the outgoing page was folded, the usual FlattenSheet stage plays first
+// (the fold-story gently unfolds), and this sheet takes over only once the
+// page is flat — so the turn itself is always one crease-free piece of
+// paper.
+
+/** Total time (seconds), grab → fully off-screen. */
+const FLIP_DURATION_S = 3.6;
+/** Grid resolution of the flip sheet — a plain (non-skinned) mesh whose
+ *  vertices are re-positioned analytically on the CPU every frame (a few
+ *  thousand vertices — trivial), so the curl silhouette is perfectly
+ *  smooth. Raise for extra silkiness, lower for weak devices. */
+const FLIP_WIDTH_SEGMENTS = 96;
+const FLIP_HEIGHT_SEGMENTS = 48;
+/** Radius of the roll the page bends around, as a fraction of page width.
+ *  Bigger = looser, softer curl; smaller = tighter roll. Also caps how far
+ *  the page ever reaches toward the camera (max = 2 × this × pageWidth). */
+const FLIP_CURL_RADIUS_RATIO = 0.2;
+/** Crease tilt at the very start: π/4 = a perfect 45° diagonal through the
+ *  bottom corner — the classic corner peel. */
+const FLIP_START_TILT = Math.PI / 4;
+/** The crease finishes rotating upright (parallel to the book spine) at
+ *  this fraction of the timeline… */
+const FLIP_UPRIGHT_END = 0.75;
+/** …and finishes traveling across the page (fully turned over) at this.
+ *  The travel uses an ease-OUT so the very first frame after the unfold
+ *  already shows the corner visibly peeling — an ease-in start here read
+ *  as a dead "timeout" pause between the unfold and the turn. */
+const FLIP_TRAVEL_END = 0.85;
+/** From here the turned-over page eases back down toward flat… */
+const FLIP_SETTLE_START = 0.78;
+/** …reaching this fraction of the full curl height by the end. */
+const FLIP_SETTLE_MIN = 0.12;
+/** The glide out begins here — deliberately OVERLAPPING the turn's tail
+ *  ("back shows, and at the same time it slides away"). */
+const FLIP_SLIDE_START = 0.6;
 
 // ── Enter glide (real content) ──────────────────────────────────────────────
 /** Matches EXIT_DURATION_S so the crossing motion starts AND ends together. */
@@ -185,10 +224,7 @@ const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
 const easeInOutCubic = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-function buildSheetMaterials(
-  capture: PaperTransitionCapture,
-  burn?: BurnUniforms,
-): Material[] {
+function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
   const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
   const backMaterial = new MeshBasicMaterial({ color: "#ffffff" });
   const frontMaterial = new MeshStandardMaterial({
@@ -199,16 +235,6 @@ function buildSheetMaterials(
       ? SHEET_NORMAL_SCALE.clone()
       : new Vector2(0, 0),
   });
-
-  // Ash-transition treatment (see PageAshTransition) — only ever passed in
-  // for the CurlSheet on Surahs above BURN_EFFECT_MIN_PAPER_COUNT papers.
-  // Front gets the full ink→ash recolor + glow; side/back just fade in sync
-  // with it so the sheet doesn't leave a solid edge once the front is gone.
-  if (burn) {
-    applyFrontBurnShader(frontMaterial, burn, capture.pageHeight);
-    applyFadeOnlyShader(sideMaterial, burn);
-    applyFadeOnlyShader(backMaterial, burn);
-  }
 
   // Same slot layout as SinglePaper: [sideL, sideR, top, bottom, front, back].
   return [
@@ -244,9 +270,6 @@ function disposeSheetMaterials(materials: Material[]): void {
 function TransitionShaderWarmup() {
   const { gl, scene, camera } = useThree();
   const warmedRef = useRef(false);
-  const ashEligible = usePaperStore(
-    (s) => s.paperCount > BURN_EFFECT_MIN_PAPER_COUNT,
-  );
 
   const warmupTexture = useMemo(() => {
     const texture = new DataTexture(
@@ -271,29 +294,12 @@ function TransitionShaderWarmup() {
     [warmupTexture],
   );
 
-  // The ash-burn front material (see PageAshTransition) is ANOTHER distinct
-  // permutation — its onBeforeCompile injects extra varyings/uniforms not
-  // present in the plain sheet material above, so it needs its own warm-up
-  // or the first ash-eligible switch pays the same first-time compile stall
-  // this whole component exists to avoid.
-  const burnWarmupMaterial = useMemo(() => {
-    const material = new MeshStandardMaterial({
-      ...PAPER_MATERIAL_CONFIG,
-      map: warmupTexture,
-      normalMap: warmupTexture,
-      normalScale: SHEET_NORMAL_SCALE.clone(),
-    });
-    applyFrontBurnShader(material, createBurnUniforms(), 1);
-    return material;
-  }, [warmupTexture]);
-
   useEffect(() => {
     return () => {
       warmupTexture.dispose();
       warmupMaterial.dispose();
-      burnWarmupMaterial.dispose();
     };
-  }, [warmupTexture, warmupMaterial, burnWarmupMaterial]);
+  }, [warmupTexture, warmupMaterial]);
 
   useEffect(() => {
     if (warmedRef.current) return;
@@ -311,18 +317,10 @@ function TransitionShaderWarmup() {
   // does not skip invisible objects — only the renderer's actual draw calls
   // do. So this mesh's shader gets warmed up while never being drawn.
   return (
-    <>
-      <mesh visible={false} frustumCulled={false}>
-        <planeGeometry args={[0.01, 0.01]} />
-        <primitive object={warmupMaterial} attach="material" />
-      </mesh>
-      {ashEligible && (
-        <mesh visible={false} frustumCulled={false}>
-          <planeGeometry args={[0.01, 0.01]} />
-          <primitive object={burnWarmupMaterial} attach="material" />
-        </mesh>
-      )}
-    </>
+    <mesh visible={false} frustumCulled={false}>
+      <planeGeometry args={[0.01, 0.01]} />
+      <primitive object={warmupMaterial} attach="material" />
+    </mesh>
   );
 }
 
@@ -455,7 +453,6 @@ interface CurlRig {
 function buildCurlRig(
   capture: PaperTransitionCapture,
   direction: 1 | -1,
-  burn?: BurnUniforms,
 ): CurlRig {
   const { pageWidth, pageHeight } = capture;
 
@@ -486,7 +483,7 @@ function buildCurlRig(
     new Float32BufferAttribute(skinWeights, 4),
   );
 
-  const materials = buildSheetMaterials(capture, burn);
+  const materials = buildSheetMaterials(capture);
 
   const bones: Bone[] = [];
   for (let i = 0; i <= SHEET_SEGMENTS; i++) {
@@ -520,16 +517,13 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
   const directionRef = useRef<1 | -1>(1);
   const elapsedRef = useRef(0);
   const finishedRef = useRef(false);
-  const burnRef = useRef<BurnUniforms | null>(null);
 
   useLayoutEffect(() => {
     const group = groupRef.current;
     if (!group) return;
 
     const direction = usePaperStore.getState().transitionDirection;
-    const burn = isAshTransitionEligible() ? createBurnUniforms() : null;
-    burnRef.current = burn;
-    const rig = buildCurlRig(capture, direction, burn ?? undefined);
+    const rig = buildCurlRig(capture, direction);
     rigRef.current = rig;
     directionRef.current = direction;
     elapsedRef.current = 0;
@@ -545,7 +539,6 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
 
     return () => {
       rigRef.current = null;
-      burnRef.current = null;
       group.remove(rig.mesh);
       rig.dispose();
     };
@@ -564,14 +557,6 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
 
     elapsedRef.current += Math.min(delta, 0.05);
     const t = Math.min(elapsedRef.current / EXIT_DURATION_S, 1);
-    if (burnRef.current) {
-      // Own (shorter) clock — races ahead of the curl/slide's own timeline
-      // so the ash sweep reads clearly before the sheet has traveled far.
-      burnRef.current.uBurnT.value = Math.min(
-        elapsedRef.current / BURN_DURATION_S,
-        1,
-      );
-    }
     const direction = directionRef.current;
     const bones = rig.mesh.skeleton.bones;
 
@@ -610,6 +595,245 @@ function CurlSheet({ capture }: { capture: PaperTransitionCapture }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FlipSheet — the real book page-turn (Surahs past BURN_EFFECT_MIN_PAPER_COUNT)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface FlipRig {
+  mesh: Mesh;
+  geometry: BoxGeometry;
+  /** Untouched flat-pose vertex positions — the input of every frame's curl. */
+  basePositions: Float32Array;
+  dispose: () => void;
+}
+
+/**
+ * A plain dense-grid sheet, centered exactly like the live page. No bones:
+ * every frame the analytic curl below rewrites the positions from
+ * `basePositions`, so its rest state is the perfectly flat page.
+ */
+function buildFlipRig(capture: PaperTransitionCapture): FlipRig {
+  const { pageWidth, pageHeight } = capture;
+
+  const geometry = new BoxGeometry(
+    pageWidth,
+    pageHeight,
+    PAGE_DEPTH,
+    FLIP_WIDTH_SEGMENTS,
+    FLIP_HEIGHT_SEGMENTS,
+  );
+  const basePositions = Float32Array.from(
+    geometry.attributes.position.array as Float32Array,
+  );
+
+  // Like buildSheetMaterials, but the BACK is a lit paper-toned standard
+  // material instead of SinglePaper's unlit pure white: mid-flip the back
+  // fills much of the screen, and unlit white reads as a glaring blob while
+  // a lit paper tone shades naturally with the scene lighting.
+  const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
+  const backMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
+  const frontMaterial = new MeshStandardMaterial({
+    ...PAPER_MATERIAL_CONFIG,
+    map: capture.mapCopy,
+    normalMap: capture.normalCopy,
+    normalScale: capture.normalCopy
+      ? SHEET_NORMAL_SCALE.clone()
+      : new Vector2(0, 0),
+  });
+  const materials: Material[] = [
+    sideMaterial,
+    sideMaterial,
+    sideMaterial,
+    sideMaterial,
+    frontMaterial,
+    backMaterial,
+  ];
+
+  const mesh = new Mesh(geometry, materials);
+  mesh.castShadow = false;
+  mesh.receiveShadow = false;
+  mesh.frustumCulled = false;
+
+  return {
+    mesh,
+    geometry,
+    basePositions,
+    dispose: () => {
+      geometry.dispose();
+      disposeSheetMaterials(materials);
+    },
+  };
+}
+
+/**
+ * The classic analytic page-curl: everything on the free-corner side of a
+ * moving crease line wraps around a cylinder of radius `r` lying on that
+ * line; past half a turn the paper continues flat, upside down, at height
+ * 2r. C1-continuous everywhere → one smooth curved surface, no facets.
+ *
+ * `dirX/dirY` is the unit direction the curl advances in (perpendicular to
+ * the crease, pointing toward the grabbed corner), `s` is how far the
+ * crease has traveled from the corner, `settle` scales the lift so the
+ * turned page can ease back down to flat near the end.
+ */
+function applyPageCurl(
+  rig: FlipRig,
+  dirX: number,
+  dirY: number,
+  cornerX: number,
+  cornerY: number,
+  s: number,
+  r: number,
+  settle: number,
+): void {
+  const positionAttr = rig.geometry.attributes.position;
+  const positions = positionAttr.array as Float32Array;
+  const base = rig.basePositions;
+  const halfTurn = Math.PI * r;
+
+  for (let i = 0; i < positions.length; i += 3) {
+    const x0 = base[i];
+    const y0 = base[i + 1];
+    const z0 = base[i + 2];
+    // Signed distance past the crease line, toward the grabbed corner.
+    const u = (x0 - cornerX) * dirX + (y0 - cornerY) * dirY + s;
+    if (u <= 0) {
+      positions[i] = x0;
+      positions[i + 1] = y0;
+      positions[i + 2] = z0;
+      continue;
+    }
+
+    // In-plane pullback (du - u) and lift w, plus the local surface normal
+    // (nu, nw) so the sheet's tiny thickness follows the curl too.
+    let du: number;
+    let w: number;
+    let nu: number;
+    let nw: number;
+    const theta = u / r;
+    if (theta < Math.PI) {
+      du = r * Math.sin(theta);
+      w = r * (1 - Math.cos(theta));
+      nu = -Math.sin(theta);
+      nw = Math.cos(theta);
+    } else {
+      du = -(u - halfTurn);
+      w = 2 * r;
+      nu = 0;
+      nw = -1;
+    }
+
+    const inPlane = du - u + nu * z0;
+    positions[i] = x0 + dirX * inPlane;
+    positions[i + 1] = y0 + dirY * inPlane;
+    positions[i + 2] = w * settle + nw * z0;
+  }
+
+  positionAttr.needsUpdate = true;
+  rig.geometry.computeVertexNormals();
+}
+
+function FlipSheet({ capture }: { capture: PaperTransitionCapture }) {
+  const groupRef = useRef<Group>(null);
+  const rigRef = useRef<FlipRig | null>(null);
+  const directionRef = useRef<1 | -1>(1);
+  const elapsedRef = useRef(0);
+  const finishedRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const group = groupRef.current;
+    if (!group) return;
+
+    const rig = buildFlipRig(capture);
+    rigRef.current = rig;
+    directionRef.current = usePaperStore.getState().transitionDirection;
+    elapsedRef.current = 0;
+    finishedRef.current = false;
+
+    // Centered exactly over the live page, like FlattenSheet (the geometry
+    // is centered, so only the vertical center needs offsetting).
+    group.position.set(
+      0,
+      capture.sceneCenterY - capture.pageHeight / 2,
+      SHEET_Z_EPSILON,
+    );
+    group.rotation.set(0, 0, 0);
+    group.add(rig.mesh);
+
+    return () => {
+      rigRef.current = null;
+      group.remove(rig.mesh);
+      rig.dispose();
+    };
+  }, [capture]);
+
+  useFrame((state, delta) => {
+    const group = groupRef.current;
+    const rig = rigRef.current;
+    if (!group || !rig || finishedRef.current) return;
+
+    // Frozen in place until the store actually flips to "animating" —
+    // identical truth-gating to CurlSheet. The rig's rest pose IS the flat
+    // page, so no per-frame work happens while frozen.
+    if (usePaperStore.getState().transitionPhase !== "animating") return;
+
+    elapsedRef.current += Math.min(delta, 0.05);
+    const t = Math.min(elapsedRef.current / FLIP_DURATION_S, 1);
+    const direction = directionRef.current;
+    const { pageWidth, pageHeight } = capture;
+    const r = FLIP_CURL_RADIUS_RATIO * pageWidth;
+
+    // Crease tilt: starts as a 45° diagonal through the bottom corner
+    // (corner peels first), eases upright as the turn progresses.
+    const tilt =
+      FLIP_START_TILT * (1 - easeInOutCubic(clamp01(t / FLIP_UPRIGHT_END)));
+    // Crease travel: from resting exactly ON the corner (page untouched) to
+    // far enough past the opposite edge that the page is fully turned over
+    // no matter the tilt. Ease-OUT: moving from the very first frame (see
+    // FLIP_TRAVEL_END's note), calm by the end.
+    const travel = easeOutCubic(clamp01(t / FLIP_TRAVEL_END));
+    const s =
+      travel *
+      (pageWidth * Math.cos(tilt) +
+        pageHeight * Math.sin(tilt) +
+        Math.PI * r +
+        0.1);
+    // Ease the turned-over page back down toward flat near the end.
+    const settle =
+      1 -
+      (1 - FLIP_SETTLE_MIN) *
+        easeInOutCubic(
+          clamp01((t - FLIP_SETTLE_START) / (1 - FLIP_SETTLE_START)),
+        );
+
+    // Curl advances FROM the bottom exit-opposite corner TOWARD the exit:
+    // grab bottom-right when leaving left, bottom-left when leaving right.
+    const dirX = direction * Math.cos(tilt);
+    const dirY = -Math.sin(tilt);
+    const cornerX = direction * (pageWidth / 2);
+    const cornerY = -pageHeight / 2;
+
+    applyPageCurl(rig, dirX, dirY, cornerX, cornerY, s, r, settle);
+
+    // The glide out — overlaps the turn's tail. The fully turned page lies
+    // just past the exit-side edge of where it was, so carrying the group a
+    // bit past half the viewport takes every part of it off-screen.
+    const slide = easeInOutCubic(
+      clamp01((t - FLIP_SLIDE_START) / (1 - FLIP_SLIDE_START)),
+    );
+    const slideDistance =
+      state.viewport.width / 2 + capture.pageWidth / 2 + OFFSCREEN_MARGIN;
+    group.position.x = -direction * slideDistance * slide;
+
+    if (t >= 1) {
+      finishedRef.current = true;
+      usePaperStore.getState().curlSheetFinished();
+    }
+  });
+
+  return <group ref={groupRef} />;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PaperTransitionLayer — mounts whichever sheet matches the current stage
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -617,6 +841,9 @@ export function PaperTransitionLayer() {
   const phase = usePaperStore((s) => s.transitionPhase);
   const hasSheet = usePaperStore((s) => s.hasTransitionSheet);
   const stage = usePaperStore((s) => s.sheetStage);
+  const bookFlip = usePaperStore(
+    (s) => s.paperCount > BURN_EFFECT_MIN_PAPER_COUNT,
+  );
 
   if (!hasSheet || phase === "idle") return null;
 
@@ -630,6 +857,11 @@ export function PaperTransitionLayer() {
     return (
       <FlattenSheet key={`flatten-${capture.captureId}`} capture={capture} />
     );
+  }
+  // Surahs past BURN_EFFECT_MIN_PAPER_COUNT get the real book page-turn;
+  // everything else keeps the original plain curl+slide untouched.
+  if (bookFlip) {
+    return <FlipSheet key={`flip-${capture.captureId}`} capture={capture} />;
   }
   return <CurlSheet key={`curl-${capture.captureId}`} capture={capture} />;
 }
