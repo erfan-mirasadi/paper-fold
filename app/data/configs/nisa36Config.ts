@@ -138,8 +138,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 2,    // RIGHT slot → 2nd in LTR reading
-      arDisplayNumber: 1,  // RIGHT slot → 1st in RTL reading (right-to-left)
+      displayNumber: 2, // RIGHT slot → 2nd in LTR reading
+      arDisplayNumber: 1, // RIGHT slot → 1st in RTL reading (right-to-left)
     },
     4: {
       bg: MID1_BG,
@@ -148,8 +148,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 1,    // LEFT slot → 1st in LTR reading
-      arDisplayNumber: 2,  // LEFT slot → 2nd in RTL reading
+      displayNumber: 1, // LEFT slot → 1st in LTR reading
+      arDisplayNumber: 2, // LEFT slot → 2nd in RTL reading
     },
     5: {
       bg: MID1_BG,
@@ -158,8 +158,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 4,    // RIGHT slot → 4th in LTR
-      arDisplayNumber: 3,  // RIGHT slot → 3rd in RTL
+      displayNumber: 4, // RIGHT slot → 4th in LTR
+      arDisplayNumber: 3, // RIGHT slot → 3rd in RTL
     },
     6: {
       bg: MID1_BG,
@@ -168,8 +168,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 3,    // LEFT slot → 3rd in LTR
-      arDisplayNumber: 4,  // LEFT slot → 4th in RTL
+      displayNumber: 3, // LEFT slot → 3rd in LTR
+      arDisplayNumber: 4, // LEFT slot → 4th in RTL
     },
     // ── Middle section 2 — verses 7,8,9,10 (green) ─────────────────────────
     // block.verseIds=[8,7,10,9]: verse 8 is at LEFT slot, verse 7 at RIGHT slot.
@@ -180,8 +180,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 6,    // RIGHT slot → 6th in LTR
-      arDisplayNumber: 5,  // RIGHT slot → 5th in RTL
+      displayNumber: 6, // RIGHT slot → 6th in LTR
+      arDisplayNumber: 5, // RIGHT slot → 5th in RTL
     },
     8: {
       bg: MID1_BG,
@@ -190,8 +190,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 5,    // LEFT slot → 5th in LTR
-      arDisplayNumber: 6,  // LEFT slot → 6th in RTL
+      displayNumber: 5, // LEFT slot → 5th in LTR
+      arDisplayNumber: 6, // LEFT slot → 6th in RTL
     },
     9: {
       bg: MID1_BG,
@@ -200,8 +200,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 8,    // RIGHT slot → 8th in LTR
-      arDisplayNumber: 7,  // RIGHT slot → 7th in RTL
+      displayNumber: 8, // RIGHT slot → 8th in LTR
+      arDisplayNumber: 7, // RIGHT slot → 7th in RTL
     },
     10: {
       bg: MID1_BG,
@@ -210,8 +210,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       circleBg: MID1_BG,
       circleTextCol: "#000000",
       showNumber: true,
-      displayNumber: 7,    // LEFT slot → 7th in LTR
-      arDisplayNumber: 8,  // LEFT slot → 8th in RTL
+      displayNumber: 7, // LEFT slot → 7th in LTR
+      arDisplayNumber: 8, // LEFT slot → 8th in RTL
     },
     // ── Verse 11 — standalone, "yellow" (modeled on Alak's verse 5) ───────
     // Same 2/3-size treatment as 1/2 — see the comment there.
@@ -487,6 +487,23 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       offsetY: 0.28,
       renderOrder: 2,
       customSectionId: "section2_main",
+    },
+
+    {
+      src: "/nisa/curved-arrow.svg",
+      scaleX: 0.74,
+      scaleY: 1.18,
+      offsetX: -0.48,
+      offsetY: 0.15,
+      renderOrder: 4,
+    },
+    {
+      src: "/nisa/curved-arrow.svg",
+      scaleX: -0.74, // Flipped
+      scaleY: 1.18,
+      offsetX: 0.48,
+      offsetY: 0.15,
+      renderOrder: 4,
     },
     // {
     //   src: "/fatiha/all-section-bg.svg",

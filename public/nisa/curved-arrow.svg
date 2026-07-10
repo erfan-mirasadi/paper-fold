@@ -1,0 +1,31 @@
+<svg 
+  xmlns="http://www.w3.org/2000/svg" 
+  viewBox="0 0 300 500" 
+  width="3000" 
+  height="5000"
+  role="img"
+  aria-label="Curved red arrow"
+>
+  <defs>
+    <marker 
+      id="arrowHead" 
+      viewBox="0 0 10 10" 
+      refX="4" 
+      refY="5" 
+      markerWidth="3" 
+      markerHeight="3" 
+      orient="auto"
+    >
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#A30000" />
+    </marker>
+  </defs>
+  
+  <path 
+    d="M 250 36 C 30 50, 0 350, 150 440" 
+    fill="none" 
+    stroke="#A30000" 
+    stroke-width="8" 
+    stroke-linecap="round" 
+    marker-end="url(#arrowHead)" 
+  />
+</svg>

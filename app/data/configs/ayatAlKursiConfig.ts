@@ -216,7 +216,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          segments: [{ text: "sol blokta menfi ", color: "#8a4b3d" }],
+          segments: [{ text: "Sol blokta menfi ", color: "#8a4b3d" }],
         },
         { text: "cümlelerle bu hakikate" },
         { text: "aykırı bütün yanlışlar" },
