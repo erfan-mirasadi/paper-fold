@@ -190,7 +190,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   handwrittenNotes: [
     {
       x: 1.15,
-      y: -0.16,
+      y: -0.3,
       fontSize: 0.04,
       color: "#2f4858",
       lineSpacing: 2,
@@ -199,14 +199,15 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          segments: [{ text: "Sağ blokta müspet ", color: "#3d4f40" }],
+          segments: [{ text: "Sağ blokta müspet ", color: "#8a4b3d" }],
         },
-        { text: "cümlelerle hakikat beyan edilir;" },
+        { text: "cümlelerle hakikat beyan" },
+        { text: "edilir;" },
       ],
     },
     {
       x: 0.38,
-      y: -0.16,
+      y: -0.3,
       fontSize: 0.04,
       color: "#2f4858",
       lineSpacing: 2,
@@ -215,15 +216,11 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          segments: [
-            { text: "sol blokta menfi ", color: "#8a4b3d" },
-            { text: "cümlelerle" },
-          ],
+          segments: [{ text: "sol blokta menfi ", color: "#8a4b3d" }],
         },
-        { text: "bu hakikate aykırı bütün" },
-        { text: "yanlışlar reddedilir. Bu ahenkli" },
-        { text: "diziliş, Ayetü'l- Kürsî'nin eşsiz" },
-        { text: "nazmını yansıtır." },
+        { text: "cümlelerle bu hakikate" },
+        { text: "aykırı bütün yanlışlar" },
+        { text: "reddedilir." },
       ],
     },
   ],
@@ -340,7 +337,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       src: "/ayatalKursi/divider.svg",
       anchorEdge: "center",
       scaleX: 0.51,
-      scaleY: 1,
+      scaleY: 1.35,
       offsetX: 0.005,
       offsetY: 0,
       renderOrder: 10, // Behind the verses
