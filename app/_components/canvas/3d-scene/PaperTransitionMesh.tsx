@@ -77,7 +77,6 @@ import {
 import { PAPER_MATERIAL_CONFIG } from "./PaperMaterial";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import type { PaperTransitionCapture } from "./paperSnapshot";
-import { EtchGlowOverlay } from "./PageAshTransition";
 
 // ── Flatten sheet timeline (plays only after "animating" begins) ───────────
 /** A calm, natural-paced unfold — no longer needs to "buy" loading time. */
@@ -997,7 +996,6 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
   return (
     <group ref={groupRef}>
       {children}
-      {ashEligible && <EtchGlowOverlay />}
     </group>
   );
 }

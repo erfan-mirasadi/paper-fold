@@ -163,9 +163,10 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
   // block0 alone, which also made it (wrongly) render as block0's own small
   // elevated/all-sections frame instead of the whole section's.
   sectionBackground: {
-    texture: "/ayatalKursi/frame-section-1.svg",
+    texture: "/nisa/all-section-1.svg",
     scaleX: 1.1,
-    scaleY: 1.3,
+    scaleY: 1.4,
+    offsetY: 0.03,
   },
 
   blocks: [

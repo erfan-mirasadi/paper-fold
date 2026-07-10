@@ -173,9 +173,9 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   //   sgPad: 0.03            → connectorPad
   globalSettings: {
     capsuleHeight: 0.075,
-    columnGap: 0.02,
-    rowGap: 0.02,
-    blockGap: 0.032,
+    columnGap: 0.032,
+    rowGap: 0.032,
+    blockGap: 0.035,
     sectionPadX: 0.08,
     blockPadding: 0.012,
     sectionBorderWidth: 0.006,
@@ -189,29 +189,41 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   // margin above the content, like a personal note jotted next to the ayah.
   handwrittenNotes: [
     {
-      x: 0.15,
+      x: 1.15,
       y: -0.16,
       fontSize: 0.04,
       color: "#2f4858",
       lineSpacing: 2,
-      maxWidth: 1.5,
-      textAlign: "left",
+      maxWidth: 1.7,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          segments: [{ text: "Sağ blokta müspet ", color: "#3d4f40" }],
+        },
+        { text: "cümlelerle hakikat beyan edilir;" },
+      ],
+    },
+    {
+      x: 0.38,
+      y: -0.16,
+      fontSize: 0.04,
+      color: "#2f4858",
+      lineSpacing: 2,
+      maxWidth: 0.7,
+      textAlign: "center",
       rotationZ: 0,
       lines: [
         {
           segments: [
-            { text: "Sağ blokta müspet ", color: "#3d4f40" },
-            { text: "cümlelerle hakikat beyan edilir;" },
-          ],
-        },
-        {
-          segments: [
             { text: "sol blokta menfi ", color: "#8a4b3d" },
-            { text: "cümlelerle bu hakikate aykırı bütün" },
+            { text: "cümlelerle" },
           ],
         },
-        { text: "yanlışlar reddedilir. Bu ahenkli diziliş, Ayetü'l-" },
-        { text: "Kürsî'nin eşsiz nazmını yansıtır." },
+        { text: "bu hakikate aykırı bütün" },
+        { text: "yanlışlar reddedilir. Bu ahenkli" },
+        { text: "diziliş, Ayetü'l- Kürsî'nin eşsiz" },
+        { text: "nazmını yansıtır." },
       ],
     },
   ],
