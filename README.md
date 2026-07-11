@@ -1,118 +1,134 @@
 <div align="center">
 
-# Quran Fold (Paper Fold)
-
-Premium 3D Interactive Quran Reading Experience
+# 🌌 3D Interactive Folded Document
+### ✧ A Premium Tactile Reading Experience in the Browser ✧
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r183-000000?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
+<br />
+
+*Where Typography Meets Physics*
+
 </div>
 
-## Core Innovation
+<br />
 
-### Cinematic WebGL Intro & Seamless Handoff
+> Welcome to a bleeding-edge exploration of layout and 3D space. This project transforms traditional flat digital reading into a highly tactile, physical experience using advanced WebGL rendering, custom shaders, and skeletal mesh animation.
 
-The project begins with a deeply immersive, scroll-driven cinematic intro. As the user scrolls through the initial viewport pages , the camera dramatically glides across 3D typography and abstract geometries.
+---
 
-- The **ScrollManager** orchestrates a strict timeline (Intro -> Handoff -> Story).
-- At the exact handoff point, the camera seamlessly locks into place, unlocking the interactive 3D paper fold experience.
-- Heavy texture rendering is dynamically downscaled during the intro to maintain buttery-smooth framerates, popping to crisp high-res instantly after the handoff.
+## ✦ Core Innovation ✦
 
-### WebGL Texture Projection on 3D Paper
+<table align="center">
+  <tr>
+    <td width="50%" valign="top">
+      <h3 align="center">🎬 Cinematic WebGL Intro</h3>
+      <p>The experience begins with a deeply immersive, scroll-driven cinematic intro. The camera glides dramatically across 3D typography and abstract geometries.</p>
+      <ul>
+        <li><b>Scroll Orchestration:</b> A strict timeline (Intro ➔ Handoff ➔ Story).</li>
+        <li><b>Seamless Handoff:</b> At the exact handoff point, the camera locks into place, unlocking the interactive 3D paper fold experience.</li>
+        <li><b>Dynamic Resolution:</b> Heavy textures scale dynamically during the intro to maintain buttery-smooth framerates.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3 align="center">🖌️ Texture Projection</h3>
+      <p>The defining technique of this project is dynamic texture projection mapped onto a deforming physical surface.</p>
+      <ul>
+        <li><b>Real-time Render:</b> Document layout is rendered into high-fidelity textures continuously.</li>
+        <li><b>Precision Mapping:</b> Maps to a custom 3D paper material (<code>map</code> & <code>normalMap</code>).</li>
+        <li><b>Skinned Mesh:</b> The paper is a highly segmented skinned mesh driven by an intricate bone system, bending and warping organically.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-This project's main technique is dynamic texture projection with WebGL:
+---
 
-- Quran layout is rendered in real time into textures using `RenderTexture`.
-- These textures are attached to a deforming 3D paper material as:
-  - `map` (main color/content)
-  - `normalMap` (crease and surface normal detail)
-- The paper itself is a skinned mesh with many bones, so text and graphics bend with the fold in real time.
+## ⚡ Key Features ⚡
 
-## Features
+### ◫ Scroll-Driven 3D Folding Mechanics
+| Feature | Description |
+| :--- | :--- |
+| **🦴 Bone-Based Deformation** | High segmentation for incredibly precise, organic fold behavior. |
+| **🎞️ Multi-Stage Interpolation** | The storytelling unfolds through smoothly interpolated angles between distinct fold states. |
+| **🕹️ Programmatic Navigation** | Effortlessly fold and unfold the paper through responsive stage transitions. |
+| **🔊 Audio Feedback** | Authentic, tactile fold sound effects trigger responsively on stage changes. |
 
-### 1) Scroll-Driven 3D Folding (Paper Physics)
+<br />
 
-- Bone-based page deformation with high segmentation for precise fold behavior.
-- Multi-stage fold story with interpolated angles between fold states.
-- Programmatic fold/unfold navigation between stages.
-- Fold sound effect on stage changes.
+### 🕋 3D Capsules and Dynamic Elevation
+> *Bridging 2D content with 3D volume.*
 
-### 2) Advanced DOM Overlays & UI Layering
+- **Elevated Capsules:** 2D layout elements intelligently transform into individual 3D capsules.
+- **Positional Tracking:** An advanced elevation system tracks the deformed paper mesh, lifting distinct sections above the page.
+- **Interactive Extrusions:** Text sections are rendered as dedicated metallic 3D extrusions, dynamically folding open and close.
+- **Reactive Shadows & Tilt:** Each capsule casts physically accurate animated shadows, respecting the local surface normal of the folded mesh.
 
-A rich ecosystem of HTML overlays sit on top of the WebGL canvas, animated seamlessly with `framer-motion`:
+<br />
 
-- **Intro Overlays:** `HeroTitleOverlay`, `IntroBackgroundTextOverlay`, `JoinedStepOverlay`, `IntroSectionGuidesOverlay`, and `AmbientMedia` (floating videos/images synchronized to the scroll).
-- **Main UI:** `NavigationOverlay`, `TitleOverlay`, `ThemeToggleOverlay`, `LanguageSwitchOverlay`, `AllSectionsOverlay`, and `CameraViewPresetOverlay`.
-- The WebGL Canvas casts dynamic, real-time drop-shadows onto the DOM elements beneath it using CSS filters based on the 3D alpha channel.
+### 🎭 Advanced DOM Overlays & UI Layering
+A rich ecosystem of HTML overlays perfectly synchronized atop the WebGL canvas, animated fluidly with `framer-motion`:
+- **Intro Overlays:** Choreographed elements and floating `AmbientMedia` tied seamlessly to the scroll.
+- **Alpha-Channeled Shadows:** The WebGL Canvas casts dynamic, real-time drop-shadows onto the underlying DOM elements utilizing CSS filters based on the 3D alpha channel.
 
-### 3) 3D Elements Emerging From the Paper
+<br />
 
-- Interactive pop-up verse cards are rendered as 3D extruded bodies that fold open/close.
-- Verse 5 is rendered as a dedicated metallic 3D extruded model on top of paper.
-- Elevation system lifts verses/sections above the page with animated shadow and tilt.
+### 🎥 Precision Interaction & Camera State Machine
+* **Hitbox Mapping:** Invisible, per-capsule 3D hitboxes allow for pixel-perfect click targeting, even as the mesh deforms.
+* **Camera Orchestration:** An intricate state machine (`idle` ➔ `zooming_in` ➔ `zoomed` ➔ `zooming_out`).
 
-### 4) Click Interaction + Camera Focus
+<br />
 
-- Invisible per-verse and per-section 3D hitboxes for accurate click targeting.
-- Camera state machine with phases (`idle`, `zooming_in`, `zoomed`, `zooming_out`).
-- Smooth zoom-in, edge panning, and return behavior.
+### 🌌 Postprocessing & Cinematic Atmosphere
+* **Color Science:** ACES tone mapping with Vignette, Brightness, and Contrast adjustments.
+* **Reactive Optics:** Depth of Field that reacts dynamically to the camera's elevation.
+* **Environment:** Interactive desktop particle fields and volumetric SpotLights casting cinematic beams.
 
-### 5) Postprocessing and Atmosphere
+---
 
-- ACES tone mapping, Vignette, and Brightness/Contrast adjustment.
-- Depth of field (reactive to elevated phase).
-- Interactive desktop particle field (hover-reactive + animated drift).
-- Volumetric SpotLights casting cinematic beams over the paper.
+## 🛠️ Tech Stack
 
-## Tech Stack
+<div align="center">
+  <code>Next.js 16.2.1</code> • <code>React 19.2.4</code> • <code>TypeScript 5</code> • <code>TailwindCSS v4</code> <br/>
+  <code>Three.js v0.183.2</code> • <code>@react-three/fiber v9.5.0</code> • <code>@react-three/drei v10.7.7</code> <br/>
+  <code>Framer Motion v12.38.0</code> • <code>@react-spring/three v10.0.3</code> <br/>
+  <code>Lenis v1.1.13</code> • <code>Zustand</code> • <code>@react-three/postprocessing v3.0.4</code>
+</div>
 
-The project relies on a modern, bleeding-edge tech stack:
+<br />
 
-- **Framework**: Next.js 16.2.1, React 19.2.4, TypeScript 5
-- **Styling**: TailwindCSS v4, clsx, tailwind-merge
-- **3D Core**: Three.js v0.183.2, @react-three/fiber v9.5.0, @react-three/drei v10.7.7
-- **Animation & Physics**:
-  - Framer Motion v12.38.0 (DOM animations)
-  - @react-spring/three v10.0.3 (3D spring physics)
-  - maath v0.10.8 (Math utilities and dampening)
-- **Scroll Orchestration**: Lenis v1.1.13 (Smooth scrolling)
-- **State Management**: Zustand
-- **Postprocessing**: @react-three/postprocessing v3.0.4 + postprocessing v6.39.0
+---
 
-## Project Structure (High-Level)
+## 📂 Architecture
 
 ```text
-app/
-	_components/
-		canvas/
-			3d-scene/              # Main experience, paper material, lighting
-			intro/                 # Cinematic intro animations, text, and geometries
-			orchestrator/          # ScrollManager, intro/handoff timeline, fold states
-			SurahLayout/           # Quran layout rendered into textures
-			pop-up-verses/         # 3D extrusions and metallic verses
-			sections-object/       # Section hovering, elevation surfaces
-			verses-object/         # Verse hitboxes and neon trackers
-		dom/                     # All HTML overlays
-			ui-overlay/            # Main controls (Theme, Nav, Language, Titles)
-			AmbientMedia.tsx       # Floating videos/images during intro
-			LenisProvider.tsx      # Smooth scroll context
+📦 app/
+ ┣ 📂 _components/
+ ┃ ┣ 📂 canvas/
+ ┃ ┃ ┣ 📂 3d-scene/              # Main experience, paper material, lighting
+ ┃ ┃ ┣ 📂 intro/                 # Cinematic intro animations and geometries
+ ┃ ┃ ┣ 📂 orchestrator/          # ScrollManager, handoff timeline, fold states
+ ┃ ┃ ┣ 📂 DocumentLayout/        # Layout rendered into textures
+ ┃ ┃ ┣ 📂 pop-up-blocks/         # 3D extrusions and metallic text
+ ┃ ┃ ┣ 📂 sections-object/       # Hover effects, elevation surfaces
+ ┃ ┃ ┗ 📂 capsules-object/       # Hitboxes and neon trackers
+ ┃ ┗ 📂 dom/                     # HTML overlays (UI, Nav, Titles)
 ```
 
-## Getting Started
+---
 
-Install dependencies:
+## 🚀 Getting Started
 
 ```bash
+# 1. Install dependencies
 npm install
-```
 
-Run development server:
-
-```bash
+# 2. Run the development server
 npm run dev
-```
 
-Open [http://localhost:3000](http://localhost:3000).
+# 3. Open in your browser
+# http://localhost:3000
+```
