@@ -1,8 +1,8 @@
 <div align="center">
 
-# Quran Fold (Paper Fold)
+# 3D Interactive Folded Document
 
-Premium 3D Interactive Quran Reading Experience
+A Premium 3D Interactive Reading Experience
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r183-000000?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
@@ -11,65 +11,73 @@ Premium 3D Interactive Quran Reading Experience
 
 </div>
 
+Welcome to this bleeding-edge exploration of typography, layout, and 3D space. This project transforms traditional flat digital reading into a highly tactile, physical experience using advanced WebGL rendering, custom shaders, and skeletal mesh animation.
+
+---
+
 ## Core Innovation
 
 ### Cinematic WebGL Intro & Seamless Handoff
 
-The project begins with a deeply immersive, scroll-driven cinematic intro. As the user scrolls through the initial viewport pages , the camera dramatically glides across 3D typography and abstract geometries.
+The experience begins with a deeply immersive, scroll-driven cinematic intro. As the user scrolls through the initial viewport pages, the camera dramatically glides across 3D typography and abstract geometries.
 
 - The **ScrollManager** orchestrates a strict timeline (Intro -> Handoff -> Story).
 - At the exact handoff point, the camera seamlessly locks into place, unlocking the interactive 3D paper fold experience.
-- Heavy texture rendering is dynamically downscaled during the intro to maintain buttery-smooth framerates, popping to crisp high-res instantly after the handoff.
+- Heavy texture rendering is dynamically downscaled during the intro to maintain buttery-smooth framerates, instantly popping to a crisp high-resolution display post-handoff.
 
 ### WebGL Texture Projection on 3D Paper
 
-This project's main technique is dynamic texture projection with WebGL:
+The defining technique of this project is dynamic texture projection mapped onto a deforming physical surface using WebGL:
 
-- Quran layout is rendered in real time into textures using `RenderTexture`.
-- These textures are attached to a deforming 3D paper material as:
-  - `map` (main color/content)
+- The document layout is continuously rendered in real-time into high-fidelity textures using `RenderTexture`.
+- These textures are precisely mapped to a custom 3D paper material as:
+  - `map` (main color and content)
   - `normalMap` (crease and surface normal detail)
-- The paper itself is a skinned mesh with many bones, so text and graphics bend with the fold in real time.
+- The paper itself is a highly segmented skinned mesh driven by an intricate bone system. This allows the text and graphics to bend, warp, and react to folding physics in real time.
 
-## Features
+## Key Features
 
-### 1) Scroll-Driven 3D Folding (Paper Physics)
+### 1) Scroll-Driven 3D Folding Mechanics
 
-- Bone-based page deformation with high segmentation for precise fold behavior.
-- Multi-stage fold story with interpolated angles between fold states.
-- Programmatic fold/unfold navigation between stages.
-- Fold sound effect on stage changes.
+- **Bone-Based Deformation:** The paper mesh features high segmentation for extremely precise, organic fold behavior.
+- **Multi-Stage Interpolation:** The storytelling unfolds through a multi-stage fold timeline, with smoothly interpolated angles between distinct fold states.
+- **Programmatic Navigation:** Users can effortlessly fold and unfold the paper through programmatic stage transitions.
+- **Audio Feedback:** Authentic fold sound effects trigger responsively on stage changes.
 
-### 2) Advanced DOM Overlays & UI Layering
+### 2) 3D Capsules and Dynamic Elevation
 
-A rich ecosystem of HTML overlays sit on top of the WebGL canvas, animated seamlessly with `framer-motion`:
+This project uniquely bridges 2D content with 3D space:
 
-- **Intro Overlays:** `HeroTitleOverlay`, `IntroBackgroundTextOverlay`, `JoinedStepOverlay`, `IntroSectionGuidesOverlay`, and `AmbientMedia` (floating videos/images synchronized to the scroll).
-- **Main UI:** `NavigationOverlay`, `TitleOverlay`, `ThemeToggleOverlay`, `LanguageSwitchOverlay`, `AllSectionsOverlay`, and `CameraViewPresetOverlay`.
-- The WebGL Canvas casts dynamic, real-time drop-shadows onto the DOM elements beneath it using CSS filters based on the 3D alpha channel.
+- **Elevated 3D Capsules:** 2D layout elements are intelligently transformed into individual 3D capsules.
+- **Positional Tracking:** An advanced elevation system precisely tracks the underlying deformed paper mesh. It lifts these individual capsules and sections above the page, granting each its own distinct 3D volume.
+- **Interactive Extrusions:** Certain text sections are rendered as dedicated metallic 3D extruded models resting on top of the paper, while pop-up text blocks act as 3D extruded bodies that can dynamically fold open and close.
+- **Reactive Shadows & Tilt:** Each elevated capsule casts physically accurate animated shadows and features subtle tilting that respects the local surface normal of the underlying folded mesh.
 
-### 3) 3D Elements Emerging From the Paper
+### 3) Advanced DOM Overlays & UI Layering
 
-- Interactive pop-up verse cards are rendered as 3D extruded bodies that fold open/close.
-- Verse 5 is rendered as a dedicated metallic 3D extruded model on top of paper.
-- Elevation system lifts verses/sections above the page with animated shadow and tilt.
+A rich ecosystem of HTML overlays sits perfectly synchronized atop the WebGL canvas, animated fluidly with `framer-motion`:
 
-### 4) Click Interaction + Camera Focus
+- **Intro Overlays:** Elements like `HeroTitleOverlay`, `IntroBackgroundTextOverlay`, and floating `AmbientMedia` (videos/images) are choreographed to the user's scroll.
+- **Main UI:** Seamless controls including `NavigationOverlay`, `ThemeToggleOverlay`, `LanguageSwitchOverlay`, and `CameraViewPresetOverlay`.
+- **Alpha-Channeled Shadows:** The WebGL Canvas casts dynamic, real-time drop-shadows onto the DOM elements beneath it utilizing CSS filters based on the 3D alpha channel.
 
-- Invisible per-verse and per-section 3D hitboxes for accurate click targeting.
-- Camera state machine with phases (`idle`, `zooming_in`, `zoomed`, `zooming_out`).
-- Smooth zoom-in, edge panning, and return behavior.
+### 4) Precision Interaction & Camera State Machine
 
-### 5) Postprocessing and Atmosphere
+- **Hitbox Mapping:** Invisible, per-capsule and per-section 3D hitboxes allow for pixel-perfect click targeting, even as the mesh deforms.
+- **Camera Orchestration:** An intricate camera state machine governs view phases (`idle`, `zooming_in`, `zoomed`, `zooming_out`).
+- **Smooth Navigation:** Features smooth zoom-in, responsive edge panning, and seamless return behavior.
 
-- ACES tone mapping, Vignette, and Brightness/Contrast adjustment.
-- Depth of field (reactive to elevated phase).
-- Interactive desktop particle field (hover-reactive + animated drift).
-- Volumetric SpotLights casting cinematic beams over the paper.
+### 5) Postprocessing and Cinematic Atmosphere
+
+- **Color Science:** ACES tone mapping combined with Vignette, Brightness, and Contrast adjustments for a cinematic grade.
+- **Reactive Optics:** Depth of Field that dynamically reacts to the camera's elevation phase.
+- **Environment:** Interactive desktop particle fields (hover-reactive with animated drift) and volumetric SpotLights casting cinematic light beams across the folded paper.
+
+---
 
 ## Tech Stack
 
-The project relies on a modern, bleeding-edge tech stack:
+The project leverages a modern, performance-focused stack to achieve 60FPS across devices:
 
 - **Framework**: Next.js 16.2.1, React 19.2.4, TypeScript 5
 - **Styling**: TailwindCSS v4, clsx, tailwind-merge
@@ -91,10 +99,10 @@ app/
 			3d-scene/              # Main experience, paper material, lighting
 			intro/                 # Cinematic intro animations, text, and geometries
 			orchestrator/          # ScrollManager, intro/handoff timeline, fold states
-			SurahLayout/           # Quran layout rendered into textures
-			pop-up-verses/         # 3D extrusions and metallic verses
+			DocumentLayout/        # Document layout rendered into textures
+			pop-up-blocks/         # 3D extrusions and metallic text
 			sections-object/       # Section hovering, elevation surfaces
-			verses-object/         # Verse hitboxes and neon trackers
+			capsules-object/       # Capsule hitboxes and neon trackers
 		dom/                     # All HTML overlays
 			ui-overlay/            # Main controls (Theme, Nav, Language, Titles)
 			AmbientMedia.tsx       # Floating videos/images during intro
@@ -115,4 +123,4 @@ Run development server:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) to view the experience.
