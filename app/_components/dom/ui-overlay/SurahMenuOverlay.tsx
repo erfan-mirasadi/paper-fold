@@ -62,6 +62,10 @@ export function SurahMenuOverlay() {
   const pathname = usePathname();
   const surahs = getAllSurahs();
 
+  const sortedSurahs = [...surahs].sort((a, b) => 
+    a.arabicName.localeCompare(b.arabicName, 'ar')
+  );
+
   // Only render when we are in a Surah page (e.g. /surahs/[id])
   if (!pathname?.startsWith("/surahs/")) {
     return null;
@@ -122,7 +126,7 @@ export function SurahMenuOverlay() {
                 </button>
               </div>
               <div className="overflow-y-auto p-4 space-y-2" style={{ scrollbarWidth: "none" }}>
-                {surahs.map((surah, i) => (
+                {sortedSurahs.map((surah, i) => (
                   <motion.div
                     key={surah.id}
                     initial={{ opacity: 0, x: -10 }}

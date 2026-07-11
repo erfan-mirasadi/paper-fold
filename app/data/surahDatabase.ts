@@ -38,14 +38,14 @@ export interface SurahPaper {
 const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
   {
     id: "fatiha",
-    displayName: "Al-Fatiha",
-    arabicName: "الفاتحة",
+    displayName: "Al-Fatiha 1",
+    arabicName: "الفاتحة ١",
     reference: "Al-Fatiha 1",
   },
   {
     id: "alak",
-    displayName: "Al-Alak",
-    arabicName: "العَلَق",
+    displayName: "Al-Alak 96",
+    arabicName: "العَلَق ٩٦",
     reference: "Al-Alak 96",
   },
   {
@@ -56,26 +56,26 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
   },
   {
     id: "ahzab35",
-    displayName: "Al-Ahzab",
-    arabicName: "الأحزاب",
+    displayName: "Al-Ahzab 35",
+    arabicName: "الأحزاب ٣٥",
     reference: "Al-Ahzab 35",
   },
   {
     id: "nisa36",
-    displayName: "An-Nisa",
-    arabicName: "النساء",
+    displayName: "An-Nisa 36",
+    arabicName: "النساء ٣٦",
     reference: "An-Nisa 36",
   },
   {
     id: "ihlas112",
-    displayName: "Al-Ikhlas",
-    arabicName: "الإخلاص",
+    displayName: "Al-Ikhlas 112",
+    arabicName: "الإخلاص ١١٢",
     reference: "Al-Ikhlas 112",
   },
   {
     id: "kafirun109",
-    displayName: "Al-Kafirun",
-    arabicName: "الكافرون",
+    displayName: "Al-Kafirun 109",
+    arabicName: "الكافرون ١٠٩",
     reference: "Al-Kafirun 109",
   },
 ] as const;
@@ -108,7 +108,9 @@ const META_REGISTRY_MAP = new Map<string, SurahMeta>(
 
 type PaperLoader = () => Promise<SurahPaper>;
 
-const SURAH_PAPER_LOADERS: Readonly<Record<string, ReadonlyArray<PaperLoader>>> = {
+const SURAH_PAPER_LOADERS: Readonly<
+  Record<string, ReadonlyArray<PaperLoader>>
+> = {
   fatiha: [
     () =>
       import("./configs/fatiha/fatiha1Config").then((m) => ({

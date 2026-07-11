@@ -140,6 +140,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 2, // RIGHT slot → 2nd in LTR reading
       arDisplayNumber: 1, // RIGHT slot → 1st in RTL reading (right-to-left)
+      expandW: -0.02,
     },
     4: {
       bg: MID1_BG,
@@ -150,6 +151,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 1, // LEFT slot → 1st in LTR reading
       arDisplayNumber: 2, // LEFT slot → 2nd in RTL reading
+      expandW: -0.02,
     },
     5: {
       bg: MID1_BG,
@@ -160,6 +162,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 4, // RIGHT slot → 4th in LTR
       arDisplayNumber: 3, // RIGHT slot → 3rd in RTL
+      expandW: -0.02,
     },
     6: {
       bg: MID1_BG,
@@ -170,6 +173,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 3, // LEFT slot → 3rd in LTR
       arDisplayNumber: 4, // LEFT slot → 4th in RTL
+      expandW: -0.02,
     },
     // ── Middle section 2 — verses 7,8,9,10 (green) ─────────────────────────
     // block.verseIds=[8,7,10,9]: verse 8 is at LEFT slot, verse 7 at RIGHT slot.
@@ -273,13 +277,23 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       s2Group1Bg: WARM_BG,
       s2Group2Bg: MID1_BG,
       s2Group3Bg: MID2_BG,
-      // Only ONE fallback entry needed here — both middle sections supply
-      // their own `curveOverride` directly on the block (see `blocks`
-      // below), so this shared entry is never actually used for them. Its
-      // outer-pair slice (`slice(0, -1)`) is empty, which is exactly what
-      // keeps the top (1,2) block and the bottom (11, 12) blocks free of
-      // any side curve.
-      curveColors: [{ color: "transparent", fillColor: "transparent" }],
+      // Curve for the outermost pair (block 0 and block 4).
+      // We only want the left side.
+      curveColors: [
+        {
+          color: ORANGE_THEME,
+          fillColor: WARM_BG,
+          curveSide: "left",
+          bowGap: 0.34,
+          innerBowGap: 0.32,
+          tipThickness: 0.14,
+          topAnchorYOffset: -0.05,
+          topAnchorXOffset: 0.091,
+          bottomAnchorYOffset: 0.03,
+          bottomAnchorXOffset: 0.01,
+        },
+        { color: "transparent", fillColor: "transparent" },
+      ],
     },
     capsuleBorderWidth: 0.0039,
     circleBorderWidth: 0.0035,
@@ -319,6 +333,21 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
   // band-center offset by half the note's own rendered height so the whole
   // 7-line block sits centered in the gap, not just its top-left anchor.
   handwrittenNotes: [
+    {
+      x: 0.77,
+      y: -0.08,
+      fontSize: 0.044,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "Nisa Suresi 36",
+        },
+      ],
+    },
     {
       x: 0.77,
       y: -1.51,
@@ -389,7 +418,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       rowGap: 0.055,
       bgThemeKey: "s2IntroOutroBg",
       disablePopUp: true,
-      verticalNudge: -0.26, // Shifted down slightly to be closer to center
+      verticalNudge: -0.29, // Shifted down slightly to be closer to center
     },
     // ── Block 1 — Middle section 1 (verses 3,4,5,6) — blue, curve, pop-up ──
     {
@@ -450,16 +479,27 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       bgThemeKey: "s2IntroOutroBg",
       disablePopUp: true,
       capsuleHeight: 0.125,
-      verticalNudge: 0.035,
+      verticalNudge: 0.05,
     },
   ],
 
   svgOverlays: [
     {
       src: "/nisa/all-section.svg",
+      anchorGroupIndex: 0,
+      anchorEdge: "center",
+      scaleX: 0.75,
+      scaleY: 0.35,
+      offsetX: 0,
+      offsetY: 0.015,
+      renderOrder: 3,
+      customSectionId: "section2_top",
+    },
+    {
+      src: "/nisa/all-section.svg",
       anchorGroupIndex: 1,
       anchorEdge: "center",
-      scaleX: 1.05,
+      scaleX: 1,
       scaleY: 0.25,
       offsetX: 0,
       offsetY: 0.01,
@@ -470,7 +510,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       src: "/nisa/all-section.svg",
       anchorGroupIndex: 2,
       anchorEdge: "center",
-      scaleX: 1.05,
+      scaleX: 1,
       scaleY: 0.25,
       offsetX: 0,
       offsetY: 0.01,
@@ -481,7 +521,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       src: "/nisa/all-section-1.svg",
       anchorGroupIndex: 3,
       anchorEdge: "center",
-      scaleX: 1.1,
+      scaleX: 1.05,
       scaleY: 0.76,
       offsetX: 0,
       offsetY: 0.28,
@@ -489,14 +529,14 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       customSectionId: "section2_main",
     },
 
-    {
-      src: "/nisa/curved-arrow.svg",
-      scaleX: 0.74,
-      scaleY: 1.18,
-      offsetX: -0.48,
-      offsetY: 0.15,
-      renderOrder: 4,
-    },
+    // {
+    //   src: "/nisa/curved-arrow.svg",
+    //   scaleX: 0.74,
+    //   scaleY: 1.18,
+    //   offsetX: -0.48,
+    //   offsetY: 0.15,
+    //   renderOrder: 4,
+    // },
     // {
     //   src: "/nisa/curved-arrow.svg",
     //   scaleX: -0.74, // Flipped
