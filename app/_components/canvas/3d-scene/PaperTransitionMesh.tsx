@@ -29,9 +29,17 @@
  *
  * ── PaperSlideGroup (wraps the real scene content) ──────────────────────────
  * Parked off-screen for the entire "loading" phase AND for as long as
- * "animating" is still on the flatten stage — so it only starts gliding in
- * the instant the curl sheet does, keeping the crossing perfectly
- * synchronized ("old leaves, new immediately takes its place").
+ * "animating" is still on the flatten stage. What happens the instant the
+ * curl/flip sheet takes over differs by exit style: below
+ * BURN_EFFECT_MIN_PAPER_COUNT it glides in from the side, synchronized with
+ * CurlSheet's slide so the crossing reads as one motion ("old leaves, new
+ * immediately takes its place"). Past that threshold (FlipSheet's real
+ * book-turn), it instead SNAPS straight into its resting place — no motion
+ * of its own — the moment the old page is fully open and the turn begins.
+ * That's safe because every sheet mesh is forced to SHEET_RENDER_ORDER, well
+ * above anything the live page draws (see that constant's comment) — so the
+ * new page is simply already there, waiting, completely hidden, and the
+ * turn's own curl/slide is what reveals it.
  *
  * Per-frame cost while frozen: nothing (bones are set once and never
  * touched again). While animating: one skinned mesh + simple group
@@ -56,12 +64,14 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  NoBlending,
   RGBAFormat,
   Skeleton,
   SkinnedMesh,
   Uint16BufferAttribute,
   UnsignedByteType,
   Vector2,
+  type WebGLRenderer,
 } from "three";
 import {
   usePaperStore,
@@ -103,6 +113,31 @@ const EXIT_RISE_Y = 0.06;
 const SHEET_NORMAL_SCALE = new Vector2(1.2, 1.2);
 /** Keeps sheets off the incoming paper's plane (no z-fighting). */
 const SHEET_Z_EPSILON = 0.004;
+/**
+ * Draw order every transition sheet mesh is forced to — and why renderOrder
+ * alone is NOT enough. The live page's decoration (verse text, section
+ * surfaces/labels — see CanvasText's `transparent: true` + `depthTest: false`
+ * defaults and VerseController's `dynamicRenderOrder`, which alone reaches
+ * 1000 + verseId * 10) is TRANSPARENT, and three.js draws the entire
+ * transparent list after the entire opaque list; renderOrder only sorts
+ * WITHIN each list. So an opaque sheet — any renderOrder, any z — is always
+ * painted before that text, and text that also skips the depth test then
+ * lands on top of it unconditionally. Full coverage therefore needs all
+ * three of the tricks below, together (see makeSheetMaterialsCover):
+ *
+ *   1. `transparent: true` on the sheet materials — moves the sheets into
+ *      the transparent list, so they can compete with the text at all;
+ *   2. this renderOrder — sorts them after every real transparent drawable
+ *      (highest real order is ~4k; DOM overlays are outside WebGL entirely);
+ *   3. `blending: NoBlending` — "transparent" is only the LIST assignment;
+ *      the page capture is a RenderTexture whose empty pixels carry alpha 0,
+ *      and normal alpha blending would turn those into literal holes.
+ *      NoBlending writes the sheet's color outright, fully opaque.
+ *
+ * DepthClearGuard (drawn at this order − 1) completes the picture for the
+ * depth-WRITING content the page also has.
+ */
+const SHEET_RENDER_ORDER = 100000;
 
 // ── Book-flip exit (FlipSheet — Surahs past BURN_EFFECT_MIN_PAPER_COUNT) ───
 // The outgoing page turns EXACTLY like a page of an open book, using the
@@ -156,72 +191,23 @@ const ENTER_DURATION_S = 1.6;
 /** Extra world-units past the half-viewport to guarantee "fully off-screen". */
 const OFFSCREEN_MARGIN = 1;
 
-// ── Ash-eligible enter: "falling paper" corner drop (replaces the plain
-// glide above, only for Surahs past BURN_EFFECT_MIN_PAPER_COUNT papers) ────
-// Tune these directly — every knob below controls exactly one part of the
-// "falls from the corner, rocks in the air, settles gently" feel.
-
-/** Total time (seconds) for the whole fall, corner → resting flat.
- *  Bigger = slower/floatier overall, and it settles later. */
-const FALL_DURATION_S = 2.4;
-
-/** How far above the resting position the fall starts (world units).
- *  Bigger = falls from higher up, more vertical distance to travel. */
-const FALL_START_Y_MARGIN = 3;
-
-/** Forward "lift" at the start (world units) — the sheet hovers slightly
- *  closer to the viewer while falling, then eases back to the page's
- *  normal depth by the time it lands. Bigger = more hover-toward-camera. */
-const FALL_LIFT_Z = 0.28;
-
-/** Starting roll (radians) — how far tipped onto its side the sheet is at
- *  the very start, toward the corner it fell from. This is a ONE-WAY decay
- *  toward 0 (not oscillating) — the base lean the rocking below swings
- *  around. Bigger = starts more dramatically tilted. */
-const FALL_TILT_Z = 0.8;
-
-/** Starting pitch (radians) — a forward/backward lean at the start,
- *  independent of the roll above, also decaying to 0 by landing.
- *  Bigger = starts leaning more toward/away from the viewer. */
-const FALL_TILT_X = 1.5;
-
-/** How WIDE the side-to-side ROCKING swing is (radians) — the big, slow
- *  "back and forth" sway layered on top of FALL_TILT_Z. THIS is the main
- *  knob for "how floaty does it feel" — raise this for a bigger, more
- *  obvious rock. (Not a vibration/tremor — see FALL_ROCK_CYCLES.) */
-const FALL_ROCK_AMOUNT = 0.9;
-
-/** How many full back-and-forth rocks happen across the whole fall. Keep
- *  this LOW (1–2) for a graceful sway; pushing it much higher starts to
- *  read as a jittery shake rather than a rock. */
-const FALL_ROCK_CYCLES = 1.4;
-
-/** Shapes how quickly the tilt/rock amplitude fades to exactly 0 as the
- *  sheet approaches landing (applied as (1-t)^POWER). Higher = the sheet
- *  stays "loose"/tilted for longer and only calms down right at the very
- *  end; lower (e.g. 1) = it settles down more evenly the whole way. */
-const FALL_ROCK_DECAY_POWER = 3;
-
-/** Peak strength (radians, per bone) of a gentle BOW that ripples through
- *  the page's own vertical MIDDLE — its top and bottom edges stay put —
- *  for the WHOLE time it's in the air, rising and falling together with
- *  FALL_ROCK_AMOUNT via the same rockDecay envelope, so it reads as one
- *  continuous "loose paper" motion rather than a separate late effect. This
- *  is the only actual mesh deformation anywhere in this effect (everything
- *  else above is a rigid transform on the whole group); see SinglePaper's
- *  paperBowAmount for where it's applied. Set to 0 to disable it entirely. */
-const FALL_BOW_AMOUNT = 0.4;
-
-/** How many full bow oscillations (bulges one way, then the other) happen
- *  across the whole fall — independent of FALL_ROCK_CYCLES, in case you
- *  want the page's own flex to feel faster/slower than its rocking. */
-const FALL_BOW_CYCLES = 0.4;
-
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
 const easeInOutCubic = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/**
+ * Flips every sheet material into the transparent render list while keeping
+ * it visually opaque — the coverage half of the SHEET_RENDER_ORDER strategy
+ * (see that constant's comment for the full why).
+ */
+function makeSheetMaterialsCover(materials: Material[]): Material[] {
+  new Set(materials).forEach((m) => {
+    m.transparent = true;
+    m.blending = NoBlending;
+  });
+  return materials;
+}
 
 function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
   const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
@@ -236,14 +222,14 @@ function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
   });
 
   // Same slot layout as SinglePaper: [sideL, sideR, top, bottom, front, back].
-  return [
+  return makeSheetMaterialsCover([
     sideMaterial,
     sideMaterial,
     sideMaterial,
     sideMaterial,
     frontMaterial,
     backMaterial,
-  ];
+  ]);
 }
 
 function disposeSheetMaterials(materials: Material[]): void {
@@ -361,6 +347,7 @@ function buildFlattenRig(capture: PaperTransitionCapture): FlattenRig {
   mesh.castShadow = false;
   mesh.receiveShadow = false;
   mesh.frustumCulled = false;
+  mesh.renderOrder = SHEET_RENDER_ORDER;
   mesh.add(bones[0]);
   mesh.bind(skeleton);
 
@@ -497,6 +484,7 @@ function buildCurlRig(
   mesh.castShadow = false;
   mesh.receiveShadow = false;
   mesh.frustumCulled = false;
+  mesh.renderOrder = SHEET_RENDER_ORDER;
   mesh.add(bones[0]);
   mesh.bind(skeleton);
 
@@ -638,19 +626,20 @@ function buildFlipRig(capture: PaperTransitionCapture): FlipRig {
       ? SHEET_NORMAL_SCALE.clone()
       : new Vector2(0, 0),
   });
-  const materials: Material[] = [
+  const materials: Material[] = makeSheetMaterialsCover([
     sideMaterial,
     sideMaterial,
     sideMaterial,
     sideMaterial,
     frontMaterial,
     backMaterial,
-  ];
+  ]);
 
   const mesh = new Mesh(geometry, materials);
   mesh.castShadow = false;
   mesh.receiveShadow = false;
   mesh.frustumCulled = false;
+  mesh.renderOrder = SHEET_RENDER_ORDER;
 
   return {
     mesh,
@@ -833,6 +822,46 @@ function FlipSheet({ capture }: { capture: PaperTransitionCapture }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DepthClearGuard — wipes the depth buffer right before the sheets draw
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// The sheets sit only SHEET_Z_EPSILON in front of the page plane, but some of
+// the live page's content DOES write depth from further forward (verse
+// backings settle around z ≈ 0.005–0.02) — those pixels would fail the
+// sheets' depth test and punch page-shaped holes straight through them. This
+// invisible mesh renders at SHEET_RENDER_ORDER − 1 (same transparent list as
+// the sheets, immediately before them) and clears the whole depth buffer, so
+// the sheets depth-test purely against THEMSELVES: nothing in the scene can
+// stab through them, while their own front/back still self-occludes
+// correctly mid-curl. Nothing real draws after the sheets, so wiping the
+// scene's depth costs nothing.
+
+function clearDepthBeforeSheets(renderer: WebGLRenderer) {
+  // gl.clear honors the current depth mask — force it writable first, or a
+  // preceding depthWrite:false material would silently turn this into a no-op.
+  renderer.state.buffers.depth.setMask(true);
+  renderer.clearDepth();
+}
+
+function DepthClearGuard() {
+  return (
+    <mesh
+      renderOrder={SHEET_RENDER_ORDER - 1}
+      frustumCulled={false}
+      onBeforeRender={clearDepthBeforeSheets}
+    >
+      <planeGeometry args={[0.001, 0.001]} />
+      <meshBasicMaterial
+        transparent
+        colorWrite={false}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PaperTransitionLayer — mounts whichever sheet matches the current stage
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -852,17 +881,25 @@ export function PaperTransitionLayer() {
   // key includes captureId so a NEW switch always remounts cleanly, and the
   // flatten→curl handoff for the SAME switch is a clean swap too — both show
   // an identical flat page at that instant, so it is imperceptible.
+  let sheet: ReactNode;
   if (stage === "flatten") {
-    return (
+    sheet = (
       <FlattenSheet key={`flatten-${capture.captureId}`} capture={capture} />
     );
+  } else if (bookFlip) {
+    // Surahs past BURN_EFFECT_MIN_PAPER_COUNT get the real book page-turn;
+    // everything else keeps the original plain curl+slide untouched.
+    sheet = <FlipSheet key={`flip-${capture.captureId}`} capture={capture} />;
+  } else {
+    sheet = <CurlSheet key={`curl-${capture.captureId}`} capture={capture} />;
   }
-  // Surahs past BURN_EFFECT_MIN_PAPER_COUNT get the real book page-turn;
-  // everything else keeps the original plain curl+slide untouched.
-  if (bookFlip) {
-    return <FlipSheet key={`flip-${capture.captureId}`} capture={capture} />;
-  }
-  return <CurlSheet key={`curl-${capture.captureId}`} capture={capture} />;
+
+  return (
+    <>
+      <DepthClearGuard />
+      {sheet}
+    </>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -877,10 +914,8 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
   const groupRef = useRef<Group>(null);
   const viewport = useThree((s) => s.viewport);
   const enterFromXRef = useRef(0);
-  const enterFromYRef = useRef(0);
   const enterElapsedRef = useRef(0);
   const glidingRef = useRef(false);
-  const fallDirectionRef = useRef<1 | -1>(1);
   const ashEligible = usePaperStore(
     (s) => s.paperCount > BURN_EFFECT_MIN_PAPER_COUNT,
   );
@@ -908,13 +943,15 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
       return;
     }
 
-    // Glide in ONLY once the curl sheet is actually curling — i.e. once
-    // "animating" has moved past any flatten prefix. Synchronized start
-    // with CurlSheet is what makes the crossing read as one motion.
-    const shouldGlide = phase === "animating" && store.sheetStage === "curl";
+    // The reveal moment ONLY starts once the outgoing page is fully open
+    // and its real curl/flip is under way — i.e. once "animating" has moved
+    // past any flatten prefix (whether that prefix ran at all, or was
+    // skipped because the page was already flat). Before that instant the
+    // new page must stay completely out of sight.
+    const shouldReveal = phase === "animating" && store.sheetStage === "curl";
     const direction = store.transitionDirection;
 
-    if (!shouldGlide) {
+    if (!shouldReveal) {
       // Parked off-screen: covers "loading" AND "animating while the
       // flatten sheet is still unfolding". Re-asserted every frame is cheap
       // and needs no separate mount-time bookkeeping.
@@ -922,18 +959,27 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
       group.visible = true;
       group.position.x =
         direction * (viewport.width / 2 + OFFSCREEN_MARGIN + 2);
-      if (ashEligible) {
-        // Parked up in the corresponding top corner, already tilted — the
-        // fall starts the instant gliding is allowed to begin.
-        group.position.y = viewport.height / 2 + FALL_START_Y_MARGIN;
-        group.position.z = FALL_LIFT_Z;
-        group.rotation.z = direction * FALL_TILT_Z;
-        group.rotation.x = FALL_TILT_X;
-      } else {
-        group.position.set(group.position.x, 0, 0);
-        group.rotation.set(0, 0, 0);
-      }
+      group.position.set(group.position.x, 0, 0);
+      group.rotation.set(0, 0, 0);
       paperBowAmount.value = 0;
+      return;
+    }
+
+    if (ashEligible) {
+      // FlipSheet's real book-turn is forced to SHEET_RENDER_ORDER — it
+      // paints over the live page's own content unconditionally, no matter
+      // how that content orders its own depth — so the new page can SNAP
+      // straight into its resting place with zero motion of its own right
+      // now: it was never visible on the way here, and it only becomes
+      // visible as FlipSheet's own curl/slide peels away and uncovers it,
+      // exactly like a real page turn revealing the sheet underneath.
+      group.position.set(0, 0, 0);
+      group.rotation.set(0, 0, 0);
+      paperBowAmount.value = 0;
+      if (!glidingRef.current) {
+        glidingRef.current = true;
+        store.enterFinished();
+      }
       return;
     }
 
@@ -941,55 +987,17 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
       glidingRef.current = true;
       enterElapsedRef.current = 0;
       enterFromXRef.current = group.position.x;
-      enterFromYRef.current = group.position.y;
-      fallDirectionRef.current = direction;
     }
 
     enterElapsedRef.current += Math.min(delta, 0.05);
 
-    if (ashEligible) {
-      // A loose "falling paper" drop from the top corner it entered from:
-      // a strong ease-out on position (so it settles calmly, never a hard
-      // stop) with a slow side-to-side ROCK — not a fast vibration — that
-      // fades to exactly zero by landing.
-      const ft = Math.min(enterElapsedRef.current / FALL_DURATION_S, 1);
-      const posEase = easeOutQuint(ft);
-      const rockDecay = Math.pow(1 - ft, FALL_ROCK_DECAY_POWER);
-      const dir = fallDirectionRef.current;
+    const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
+    group.position.x = enterFromXRef.current * (1 - easeInOutCubic(t));
+    paperBowAmount.value = 0;
 
-      group.position.x = enterFromXRef.current * (1 - posEase);
-      group.position.y = enterFromYRef.current * (1 - posEase);
-      group.position.z = FALL_LIFT_Z * (1 - posEase);
-
-      const rock = Math.sin(ft * FALL_ROCK_CYCLES * Math.PI * 2);
-
-      group.rotation.z =
-        dir * FALL_TILT_Z * rockDecay +
-        dir * rock * FALL_ROCK_AMOUNT * rockDecay;
-      group.rotation.x = FALL_TILT_X * rockDecay;
-
-      // In-flight bow — oscillates the WHOLE time it's airborne, riding the
-      // same rockDecay envelope as the rock above (so both fade out
-      // together by landing), read by SinglePaper's own bone loop (see
-      // paperBowAmount). Not a separate late effect — one continuous motion.
-      const bowOscillation = Math.sin(ft * FALL_BOW_CYCLES * Math.PI * 2);
-      paperBowAmount.value = FALL_BOW_AMOUNT * bowOscillation * rockDecay;
-
-      if (ft >= 1) {
-        group.position.set(0, 0, 0);
-        group.rotation.set(0, 0, 0);
-        paperBowAmount.value = 0;
-        store.enterFinished();
-      }
-    } else {
-      const t = Math.min(enterElapsedRef.current / ENTER_DURATION_S, 1);
-      group.position.x = enterFromXRef.current * (1 - easeInOutCubic(t));
-      paperBowAmount.value = 0;
-
-      if (t >= 1) {
-        group.position.x = 0;
-        store.enterFinished();
-      }
+    if (t >= 1) {
+      group.position.x = 0;
+      store.enterFinished();
     }
   });
 
