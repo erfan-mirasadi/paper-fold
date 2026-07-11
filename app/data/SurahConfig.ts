@@ -427,7 +427,7 @@ export function buildBlockTransforms(
     // ── Section-level geometry (horizontal) ───────────────────────────────
     const sectionInnerW = lm.sectionW - gs.sectionPadX * 2;
     const blockInnerW   = sectionInnerW - inset * 2;
-    const blockBaseX    = startX + gs.sectionPadX + inset;
+    const blockBaseX    = startX + gs.sectionPadX + inset + (block.xOffset ?? 0);
 
     // Width of a single capsule column.
     // For cols === 1 or 2, mirrors the legacy formula exactly:

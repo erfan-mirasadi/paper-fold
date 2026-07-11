@@ -113,9 +113,9 @@ const SURAH_PAPER_LOADERS: Readonly<
 > = {
   fatiha: [
     () =>
-      import("./configs/fatiha/fatiha1Config").then((m) => ({
-        config: m.FATIHA_1_CONFIG,
-        textData: m.FATIHA_1_TEXT_DATA,
+      import("./configs/fatiha/fatihaLandscapeConfig").then((m) => ({
+        config: m.FATIHA_LANDSCAPE_CONFIG,
+        textData: m.FATIHA_LANDSCAPE_TEXT_DATA,
       })),
     () =>
       import("./configs/fatiha/fatiha2Config").then((m) => ({
@@ -126,6 +126,11 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/fatiha/fatiha4Config").then((m) => ({
         config: m.FATIHA_4_CONFIG,
         textData: m.FATIHA_4_TEXT_DATA,
+      })),
+    () =>
+      import("./configs/fatiha/fatiha1Config").then((m) => ({
+        config: m.FATIHA_1_CONFIG,
+        textData: m.FATIHA_1_TEXT_DATA,
       })),
   ],
   alak: [

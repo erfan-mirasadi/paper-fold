@@ -314,6 +314,15 @@ export interface LayoutBlock {
   horizontalInset?: number;
 
   /**
+   * Manual horizontal shift (world units) applied to this block's frameX on
+   * top of `horizontalInset`, additive, defaults to 0. Lets a block sit off
+   * the page's horizontal center — e.g. two blocks with a symmetric
+   * `horizontalInset` (both narrowed to half-width) and opposite `xOffset`
+   * values render as side-by-side panels instead of one centered stack.
+   */
+  xOffset?: number;
+
+  /**
    * Explicit override for the "is this the pushed-in/center group" flag used
    * by SideCurves to pick the innermost bracket (`isCenter && isPushedIn`).
    * Defaults to `horizontalInset > 0` when omitted — only needed when a
