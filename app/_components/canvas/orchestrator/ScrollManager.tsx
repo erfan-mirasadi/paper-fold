@@ -359,7 +359,13 @@ export function ScrollManager() {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
   // Paper switching runs without a blocking overlay — the scroll lock here is
   // what keeps the fold story untouched while the page-turn sheet flies.
-  const isPaperSwitching = usePaperStore((s) => s.isSwitching);
+  // Unlocks the moment the incoming page is visually on screen
+  // (newPaperRevealed): from there the outgoing sheet is only gliding off
+  // through the margin, and holding the scroll hostage for that cosmetic
+  // tail makes the switch feel like it's still loading.
+  const isPaperSwitching = usePaperStore(
+    (s) => s.isSwitching && !s.newPaperRevealed,
+  );
   // Use a stable boolean instead of the raw float so the scroll-lock effect
   // only re-runs when the paper actually crosses the open/folded threshold,
   // not on every scroll tick. A per-frame re-run would call lenis.start()

@@ -247,12 +247,17 @@ function SurahViewerInner({
     let playedIn = false;
 
     const unsub = usePaperStore.subscribe((state, prevState) => {
-      // 1. Reset tracking when a new switch begins
-      if (state.isSwitching && !prevState.isSwitching) {
+      // 1. Reset tracking when a new switch begins. The "wait" cursor drops
+      // as soon as the incoming page is visually on screen
+      // (newPaperRevealed) — not when the whole switch mechanically ends —
+      // so the UI never feels busy over a page that has already arrived.
+      const wasBusy = prevState.isSwitching && !prevState.newPaperRevealed;
+      const isBusy = state.isSwitching && !state.newPaperRevealed;
+      if (isBusy && !wasBusy) {
         document.body.style.cursor = "wait";
         playedOut = false;
         playedIn = false;
-      } else if (!state.isSwitching && prevState.isSwitching) {
+      } else if (!isBusy && wasBusy) {
         if (document.body.style.cursor === "wait") {
           document.body.style.cursor = "";
         }

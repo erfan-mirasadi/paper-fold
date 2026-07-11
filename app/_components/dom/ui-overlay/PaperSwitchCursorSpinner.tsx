@@ -15,11 +15,17 @@ import { useEffect, useRef } from "react";
 import { usePaperStore } from "../../../stores/usePaperStore";
 
 export function PaperSwitchCursorSpinner() {
-  const isSwitching = usePaperStore((s) => s.isSwitching);
+  // Hide the spinner the moment the incoming page is visually on screen
+  // (newPaperRevealed) — the switch may still be mechanically "in flight"
+  // while the outgoing sheet finishes gliding off, but nothing is loading
+  // anymore and a spinner over an arrived page reads as a stall.
+  const showSpinner = usePaperStore(
+    (s) => s.isSwitching && !s.newPaperRevealed,
+  );
   const elRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isSwitching) return;
+    if (!showSpinner) return;
 
     const onMove = (e: PointerEvent) => {
       const el = elRef.current;
@@ -29,9 +35,9 @@ export function PaperSwitchCursorSpinner() {
 
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
-  }, [isSwitching]);
+  }, [showSpinner]);
 
-  if (!isSwitching) return null;
+  if (!showSpinner) return null;
 
   return (
     <div

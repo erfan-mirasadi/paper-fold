@@ -251,20 +251,98 @@ function disposeSheetMaterials(materials: Material[]): void {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TransitionShaderWarmup — precompiles the sheets' shader ahead of any switch
+// TransitionShaderWarmup — precompiles the sheets' shaders ahead of any switch
 // ─────────────────────────────────────────────────────────────────────────────
 //
-// The sheet's front material is a PLAIN MeshStandardMaterial (map + normalMap,
-// no onBeforeCompile) — a DIFFERENT shader permutation from the live paper's
-// material (which always carries usePaperMasking's injected onBeforeCompile
-// GLSL). The very first time that plain permutation is ever drawn, three.js
-// has to compile it from scratch, which can stall the main thread for
-// hundreds of milliseconds — exactly the "everything freezes and flashes
-// black for a moment, only on the very first switch" symptom. Mounting one
-// invisible mesh with the SAME material shape and precompiling it with
-// gl.compileAsync (the same technique Experience already uses for the intro
-// flow) warms that shader before the user ever triggers a real switch, so
-// the first real switch is exactly as fast as every later one.
+// The very first time a shader permutation is ever drawn, three.js has to
+// compile it from scratch, which can stall the main thread for hundreds of
+// milliseconds — exactly the "everything freezes and the page flashes away
+// for a moment, only on the very first switch" symptom (intermittent across
+// refreshes because the browser's GPU shader cache sometimes still holds the
+// compiled program). Mounting invisible meshes with the SAME program-relevant
+// parameters and precompiling them with gl.compileAsync (the same technique
+// Experience already uses for the intro flow) warms those shaders before the
+// user ever triggers a real switch.
+//
+// The transition draws FOUR distinct permutations, and every program-key
+// input must match the real sheets exactly — `transparent` is part of the
+// program key (opaque materials compile with `#define OPAQUE`), and so is
+// skinning; map/normalMap presence too:
+//   1. standard + map + normalMap, transparent  (Curl/Flip front)
+//   2. same as 1 but on a SkinnedMesh           (Flatten front)
+//   3. standard, no maps, transparent           (sides, Flip back)
+//   4. basic, no maps, transparent              (Flatten/Curl back, guard)
+
+interface WarmupRig {
+  objects: (Mesh | SkinnedMesh)[];
+  dispose: () => void;
+}
+
+function buildWarmupRig(warmupTexture: DataTexture): WarmupRig {
+  const frontMaterial = new MeshStandardMaterial({
+    ...PAPER_MATERIAL_CONFIG,
+    map: warmupTexture,
+    normalMap: warmupTexture,
+    normalScale: SHEET_NORMAL_SCALE.clone(),
+  });
+  const plainStandardMaterial = new MeshStandardMaterial({
+    color: PAGE_BG_COLOR,
+  });
+  const plainBasicMaterial = new MeshBasicMaterial({ color: "#ffffff" });
+  makeSheetMaterialsCover([
+    frontMaterial,
+    plainStandardMaterial,
+    plainBasicMaterial,
+  ]);
+  // Skinned variant of the front material (clone keeps every param in sync).
+  const skinnedFrontMaterial = frontMaterial.clone();
+
+  const geometry = new BoxGeometry(0.01, 0.01, 0.01);
+
+  const objects: (Mesh | SkinnedMesh)[] = [
+    frontMaterial,
+    plainStandardMaterial,
+    plainBasicMaterial,
+  ].map((material) => {
+    const mesh = new Mesh(geometry, material);
+    mesh.visible = false;
+    mesh.frustumCulled = false;
+    return mesh;
+  });
+
+  const skinnedGeometry = new BoxGeometry(0.01, 0.01, 0.01);
+  const vertexCount = skinnedGeometry.attributes.position.count;
+  const skinIndexes = new Uint16Array(vertexCount * 4);
+  const skinWeights = new Float32Array(vertexCount * 4);
+  for (let i = 0; i < vertexCount; i++) skinWeights[i * 4] = 1;
+  skinnedGeometry.setAttribute(
+    "skinIndex",
+    new Uint16BufferAttribute(skinIndexes, 4),
+  );
+  skinnedGeometry.setAttribute(
+    "skinWeight",
+    new Float32BufferAttribute(skinWeights, 4),
+  );
+  const bone = new Bone();
+  const skinnedMesh = new SkinnedMesh(skinnedGeometry, skinnedFrontMaterial);
+  skinnedMesh.visible = false;
+  skinnedMesh.frustumCulled = false;
+  skinnedMesh.add(bone);
+  skinnedMesh.bind(new Skeleton([bone]));
+  objects.push(skinnedMesh);
+
+  return {
+    objects,
+    dispose: () => {
+      geometry.dispose();
+      skinnedGeometry.dispose();
+      frontMaterial.dispose();
+      plainStandardMaterial.dispose();
+      plainBasicMaterial.dispose();
+      skinnedFrontMaterial.dispose();
+    },
+  };
+}
 
 function TransitionShaderWarmup() {
   const { gl, scene, camera } = useThree();
@@ -282,23 +360,17 @@ function TransitionShaderWarmup() {
     return texture;
   }, []);
 
-  const warmupMaterial = useMemo(
-    () =>
-      new MeshStandardMaterial({
-        ...PAPER_MATERIAL_CONFIG,
-        map: warmupTexture,
-        normalMap: warmupTexture,
-        normalScale: SHEET_NORMAL_SCALE.clone(),
-      }),
+  const warmupRig = useMemo(
+    () => buildWarmupRig(warmupTexture),
     [warmupTexture],
   );
 
   useEffect(() => {
     return () => {
       warmupTexture.dispose();
-      warmupMaterial.dispose();
+      warmupRig.dispose();
     };
-  }, [warmupTexture, warmupMaterial]);
+  }, [warmupTexture, warmupRig]);
 
   useEffect(() => {
     if (warmedRef.current) return;
@@ -314,12 +386,13 @@ function TransitionShaderWarmup() {
 
   // scene.traverse() (which compile()/compileAsync() use to find materials)
   // does not skip invisible objects — only the renderer's actual draw calls
-  // do. So this mesh's shader gets warmed up while never being drawn.
+  // do. So these meshes' shaders get warmed up while never being drawn.
   return (
-    <mesh visible={false} frustumCulled={false}>
-      <planeGeometry args={[0.01, 0.01]} />
-      <primitive object={warmupMaterial} attach="material" />
-    </mesh>
+    <group>
+      {warmupRig.objects.map((object, i) => (
+        <primitive key={i} object={object} />
+      ))}
+    </group>
   );
 }
 
@@ -826,7 +899,25 @@ function FlipSheet({ capture }: { capture: PaperTransitionCapture }) {
       state.viewport.width / 2 + capture.pageWidth / 2 + OFFSCREEN_MARGIN;
     group.position.x = -direction * slideDistance * slide;
 
-    if (t >= 1) {
+    // The slide starting is the "page has arrived" moment: the turn is
+    // essentially complete (its ease-out packs the motion early) and from
+    // here the sheet only glides AWAY — nothing is loading anymore, so the
+    // busy indicators can stand down while the exit plays out cosmetically.
+    if (t >= FLIP_SLIDE_START) {
+      usePaperStore.getState().markNewPaperRevealed();
+    }
+
+    // Finish as soon as the whole sheet is genuinely outside the viewport —
+    // the trailing edge sits pageWidth/2 from the group origin, so once the
+    // group has traveled half the viewport plus that, nothing is visible and
+    // waiting out the timeline's mathematical tail would just prolong
+    // isSwitching for nothing. The t >= 1 check stays as the fallback.
+    // 0.2 pad: the residual curl lift tilts parts of the sheet toward the
+    // camera, which projects them slightly wider than their world extent.
+    const traveled = slideDistance * slide;
+    const fullyOffscreen =
+      traveled >= state.viewport.width / 2 + capture.pageWidth / 2 + 0.2;
+    if (t >= 1 || fullyOffscreen) {
       finishedRef.current = true;
       usePaperStore.getState().curlSheetFinished();
     }

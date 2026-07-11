@@ -82,6 +82,15 @@ interface PaperState {
   hasTransitionSheet: boolean;
   /** Which sheet mesh is mounted right now. */
   sheetStage: SheetStage;
+  /**
+   * True from the moment the incoming page is, visually, fully on screen —
+   * even though the outgoing sheet may still be finishing its cosmetic
+   * off-screen glide (isSwitching stays true for that mechanical tail).
+   * Loading INDICATORS (cursor spinner, "wait" cursor, scroll lock) key off
+   * this so the UI stops feeling busy the instant the page has arrived;
+   * re-entry guards (arrows, goToPaper) keep keying off isSwitching.
+   */
+  newPaperRevealed: boolean;
 
   /** Called once per route by StoreInitializer after the first paper is seeded. */
   initForSurah: (surahId: string) => void;
@@ -92,6 +101,8 @@ interface PaperState {
   markFlattenVisualDone: () => void;
   /** Called when the freshly swapped paper's texture fully settles. */
   completeSwitch: () => void;
+  /** Called by the flip sheet once the incoming page is fully uncovered. */
+  markNewPaperRevealed: () => void;
   /** Called by the curl sheet once its exit timeline completes. */
   curlSheetFinished: () => void;
   /** Called by the slide group once the enter glide lands. */
@@ -173,6 +184,7 @@ function tryFinishSwitch(): void {
     transitionPhase: "idle",
     isSwitching: false,
     hasTransitionSheet: false,
+    newPaperRevealed: true,
   });
 }
 
@@ -202,6 +214,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
   transitionDirection: 1,
   hasTransitionSheet: false,
   sheetStage: "curl",
+  newPaperRevealed: true,
 
   initForSurah: (surahId) => {
     // Invalidate any in-flight switch from a previous route.
@@ -216,6 +229,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
       transitionPhase: "idle",
       hasTransitionSheet: false,
       sheetStage: "curl",
+      newPaperRevealed: true,
     });
     prefetchNeighborPapers(surahId, 0);
   },
@@ -229,7 +243,11 @@ export const usePaperStore = create<PaperState>((set, get) => ({
     clearFailsafe();
     const direction: 1 | -1 = index > activePaperIndex ? 1 : -1;
     // Locks scroll (ScrollManager) and shows the loading cursor immediately.
-    set({ isSwitching: true, transitionDirection: direction });
+    set({
+      isSwitching: true,
+      transitionDirection: direction,
+      newPaperRevealed: false,
+    });
 
     // Whole-switch failsafe: whatever gate never opens, land on the new
     // paper so the UI can never get permanently stuck.
@@ -241,6 +259,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
         isSwitching: false,
         transitionPhase: "idle",
         hasTransitionSheet: false,
+        newPaperRevealed: true,
       });
     }, SWITCH_FAILSAFE_MS);
 
@@ -268,7 +287,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
         if (token !== switchToken || get().surahId !== surahId) return;
         if (!paper) {
           clearFailsafe();
-          set({ isSwitching: false });
+          set({ isSwitching: false, newPaperRevealed: true });
           return;
         }
 
@@ -318,6 +337,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
             isSwitching: false,
             transitionPhase: "idle",
             hasTransitionSheet: false,
+            newPaperRevealed: true,
           });
         }
       }
@@ -349,7 +369,11 @@ export const usePaperStore = create<PaperState>((set, get) => ({
       // never parks it off-screen when hasTransitionSheet is false). There is
       // no curl and no glide to wait for — the switch is simply done now.
       clearFailsafe();
-      set({ transitionPhase: "idle", isSwitching: false });
+      set({
+        transitionPhase: "idle",
+        isSwitching: false,
+        newPaperRevealed: true,
+      });
       return;
     }
 
@@ -357,6 +381,13 @@ export const usePaperStore = create<PaperState>((set, get) => ({
     // enter-glide) now plays once, back to back, with nothing left to wait
     // for — this is the only place that transition fires from.
     set({ transitionPhase: "animating" });
+  },
+
+  markNewPaperRevealed: () => {
+    if (get().transitionPhase !== "animating" || get().newPaperRevealed) {
+      return;
+    }
+    set({ newPaperRevealed: true });
   },
 
   curlSheetFinished: () => {
