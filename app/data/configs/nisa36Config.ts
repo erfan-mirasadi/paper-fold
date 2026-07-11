@@ -497,14 +497,14 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       offsetY: 0.15,
       renderOrder: 4,
     },
-    {
-      src: "/nisa/curved-arrow.svg",
-      scaleX: -0.74, // Flipped
-      scaleY: 1.18,
-      offsetX: 0.48,
-      offsetY: 0.15,
-      renderOrder: 4,
-    },
+    // {
+    //   src: "/nisa/curved-arrow.svg",
+    //   scaleX: -0.74, // Flipped
+    //   scaleY: 1.18,
+    //   offsetX: 0.48,
+    //   offsetY: 0.15,
+    //   renderOrder: 4,
+    // },
     // {
     //   src: "/fatiha/all-section-bg.svg",
     //   anchorGroupIndex: 1,
