@@ -34,12 +34,13 @@
  * BURN_EFFECT_MIN_PAPER_COUNT it glides in from the side, synchronized with
  * CurlSheet's slide so the crossing reads as one motion ("old leaves, new
  * immediately takes its place"). Past that threshold (FlipSheet's real
- * book-turn), it instead SNAPS straight into its resting place — no motion
- * of its own — the moment the old page is fully open and the turn begins.
- * That's safe because every sheet mesh is forced to SHEET_RENDER_ORDER, well
- * above anything the live page draws (see that constant's comment) — so the
- * new page is simply already there, waiting, completely hidden, and the
- * turn's own curl/slide is what reveals it.
+ * book-turn), it instead appears straight in its resting spot — at
+ * ENTER_SCALE_START, growing imperceptibly slowly to full size — the moment
+ * the old page is fully open and the turn begins. That's safe because every
+ * sheet mesh is forced to SHEET_RENDER_ORDER, well above anything the live
+ * page draws (see that constant's comment) — so the new page is simply
+ * already there, waiting, completely hidden, and the turn's own curl/slide
+ * is what reveals it.
  *
  * Per-frame cost while frozen: nothing (bones are set once and never
  * touched again). While animating: one skinned mesh + simple group
@@ -190,6 +191,19 @@ const FLIP_SLIDE_START = 0.6;
 const ENTER_DURATION_S = 1.6;
 /** Extra world-units past the half-viewport to guarantee "fully off-screen". */
 const OFFSCREEN_MARGIN = 1;
+
+// ── Book-flip enter (Surahs past BURN_EFFECT_MIN_PAPER_COUNT) ──────────────
+/** The new page appears under the flip sheet SMALLER than full size, so its
+ *  rim sits comfortably inside the sheet's silhouette — at 1:1 the incoming
+ *  page's antialiased edges shimmer out around the outgoing sheet's border
+ *  ("its corners poke out"). */
+const ENTER_SCALE_START = 0.95;
+/** Seconds to drift from ENTER_SCALE_START back to exactly 1, pivoting on
+ *  the page center. Deliberately much shorter than the turn itself: the
+ *  page is already full-size and "ready" well before the sheet's slide-out
+ *  uncovers most of it, while the ease-in-out keeps the growth gentle
+ *  enough not to read as motion under the turning page. */
+const ENTER_GROW_DURATION_S = 1.4;
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -939,6 +953,7 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
       group.visible = true;
       group.position.set(0, 0, 0);
       group.rotation.set(0, 0, 0);
+      group.scale.setScalar(1);
       paperBowAmount.value = 0;
       return;
     }
@@ -961,6 +976,7 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
         direction * (viewport.width / 2 + OFFSCREEN_MARGIN + 2);
       group.position.set(group.position.x, 0, 0);
       group.rotation.set(0, 0, 0);
+      group.scale.setScalar(1);
       paperBowAmount.value = 0;
       return;
     }
@@ -968,16 +984,39 @@ export function PaperSlideGroup({ children }: PaperSlideGroupProps) {
     if (ashEligible) {
       // FlipSheet's real book-turn is forced to SHEET_RENDER_ORDER — it
       // paints over the live page's own content unconditionally, no matter
-      // how that content orders its own depth — so the new page can SNAP
-      // straight into its resting place with zero motion of its own right
-      // now: it was never visible on the way here, and it only becomes
-      // visible as FlipSheet's own curl/slide peels away and uncovers it,
-      // exactly like a real page turn revealing the sheet underneath.
-      group.position.set(0, 0, 0);
-      group.rotation.set(0, 0, 0);
-      paperBowAmount.value = 0;
+      // how that content orders its own depth — so the new page appears in
+      // its resting spot with no entrance of its own: it was never visible
+      // on the way here, and it only becomes visible as FlipSheet's own
+      // curl/slide peels away and uncovers it, exactly like a real page
+      // turn revealing the sheet underneath. It arrives at ENTER_SCALE_START
+      // (rim strictly inside the sheet's silhouette — nothing peeks out
+      // around the border) and grows to exactly 1 so slowly the motion is
+      // imperceptible.
       if (!glidingRef.current) {
         glidingRef.current = true;
+        enterElapsedRef.current = 0;
+      }
+
+      enterElapsedRef.current += Math.min(delta, 0.05);
+      const t = Math.min(enterElapsedRef.current / ENTER_GROW_DURATION_S, 1);
+      const s =
+        ENTER_SCALE_START + (1 - ENTER_SCALE_START) * easeInOutCubic(t);
+
+      // Pivot the growth on the PAGE's center, not the group origin, so it
+      // swells perfectly symmetrically under the sheet.
+      const capture = getActiveTransitionCapture();
+      const pageCenterY = capture
+        ? capture.sceneCenterY - capture.pageHeight / 2
+        : 0;
+
+      group.scale.setScalar(s);
+      group.position.set(0, pageCenterY * (1 - s), 0);
+      group.rotation.set(0, 0, 0);
+      paperBowAmount.value = 0;
+
+      if (t >= 1) {
+        group.scale.setScalar(1);
+        group.position.set(0, 0, 0);
         store.enterFinished();
       }
       return;
