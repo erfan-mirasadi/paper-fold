@@ -44,6 +44,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
     sceneCenterYOffset: -0.045,
     padding: 0.15,
     scrollPages: 1.5,
+    fixedWidthAcrossLanguages: true,
   },
 
   specialVerses: {

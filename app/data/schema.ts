@@ -55,6 +55,17 @@ export interface CurveColorConfig {
   bottomAnchorXOffset?: number;
   topAnchorYOffset?: number;
   bottomAnchorYOffset?: number;
+  /**
+   * Render style for this bracket. Defaults to "bracket" (the standard
+   * filled two-line capsule). "arrow" caps the ribbon's tail end in a
+   * flared arrowhead pointing into the target verse instead of the usual
+   * flat/rounded tip — see SideCurves.tsx's `computeArrowHeadPoints`.
+   */
+  shape?: "bracket" | "arrow";
+  /** Arrow-only: how far (world units) the tip pokes past the ribbon's natural end. */
+  arrowHeadLength?: number;
+  /** Arrow-only: how far (world units) the flare's back corners spread perpendicular to the ribbon. */
+  arrowHeadWidth?: number;
 }
 
 export interface ThemeColors {

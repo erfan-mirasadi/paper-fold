@@ -50,6 +50,17 @@ export interface CurveConfig {
    * Defaults to the layout's `smallBoxH2` value.
    */
   tipThickness?: number;
+  /**
+   * Render style for this bracket. Defaults to "bracket" (the standard
+   * filled two-line capsule). "arrow" caps the ribbon's tail end in a
+   * flared arrowhead pointing into the target verse instead of the usual
+   * flat/rounded tip.
+   */
+  shape?: "bracket" | "arrow";
+  /** Arrow-only: how far (world units) the tip pokes past the ribbon's natural end. */
+  arrowHeadLength?: number;
+  /** Arrow-only: how far (world units) the flare's back corners spread perpendicular to the ribbon. */
+  arrowHeadWidth?: number;
 }
 
 interface BracketSpec extends CurveConfig {
@@ -275,6 +286,47 @@ const getSmoothCurvePoints = (
   ).getPoints(50);
 };
 
+const DEFAULT_ARROW_HEAD_LENGTH = 0.07;
+const DEFAULT_ARROW_HEAD_WIDTH = 0.05;
+
+/**
+ * Derives a flared arrowhead (back-left corner, tip, back-right corner) for
+ * a ribbon's tail. `oTail`/`iTail` are the curve's own last sampled points
+ * (where the ribbon currently ends); `oCtrl`/`iCtrl` are the bezier's second
+ * control point for each edge. Both edges' control point shares its tail
+ * point's Y (see `getSmoothCurvePoints`), so ctrl→tail is always exactly
+ * the curve's end-tangent — using it directly (instead of estimating the
+ * tangent from nearby sampled points) keeps the tip pointing precisely
+ * where the ribbon is heading even on tightly-bowed curves.
+ */
+const computeArrowHeadPoints = (
+  oTail: THREE.Vector3,
+  iTail: THREE.Vector3,
+  oCtrl: THREE.Vector3,
+  iCtrl: THREE.Vector3,
+  headLength: number,
+  headWidth: number,
+) => {
+  const centerTail = new THREE.Vector3().addVectors(oTail, iTail).multiplyScalar(0.5);
+  const centerCtrl = new THREE.Vector3().addVectors(oCtrl, iCtrl).multiplyScalar(0.5);
+  const dir = new THREE.Vector3().subVectors(centerTail, centerCtrl).normalize();
+  // The ribbon's actual local width axis (outer edge → inner edge at the
+  // tail) — using this instead of an arbitrary perpendicular-of-`dir` sign
+  // guarantees the flare spreads away from the ribbon body on both sides,
+  // regardless of which way the curve happens to bow.
+  const widthDir = new THREE.Vector3().subVectors(oTail, iTail).normalize();
+
+  // Flare corners are measured from the tail's *center*, not from oTail/iTail
+  // directly — the raw outer/inner gap at the tail is the bracket's own
+  // tipThickness (can be much wider than a good-looking arrowhead), so
+  // `headWidth` alone controls the flare instead of adding to that gap.
+  const flareOuter = centerTail.clone().addScaledVector(widthDir, headWidth);
+  const flareInner = centerTail.clone().addScaledVector(widthDir, -headWidth);
+  const tip = centerTail.clone().addScaledVector(dir, headLength);
+
+  return { flareOuter, tip, flareInner };
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CurveComponent = ({
   outerPoints,
@@ -283,6 +335,7 @@ const CurveComponent = ({
   fillColor,
   shouldHide,
   lineWidth,
+  arrowTip,
 }: any) => {
   const fillShape = useMemo(() => {
     const s = new THREE.Shape();
@@ -290,6 +343,11 @@ const CurveComponent = ({
       s.moveTo(outerPoints[0].x, outerPoints[0].y);
       for (let i = 1; i < outerPoints.length; i++) {
         s.lineTo(outerPoints[i].x, outerPoints[i].y);
+      }
+      if (arrowTip) {
+        s.lineTo(arrowTip.flareOuter.x, arrowTip.flareOuter.y);
+        s.lineTo(arrowTip.tip.x, arrowTip.tip.y);
+        s.lineTo(arrowTip.flareInner.x, arrowTip.flareInner.y);
       }
       const lastInner = innerPoints[innerPoints.length - 1];
       s.lineTo(lastInner.x, lastInner.y);
@@ -299,7 +357,18 @@ const CurveComponent = ({
       s.lineTo(outerPoints[0].x, outerPoints[0].y);
     }
     return s;
-  }, [outerPoints, innerPoints]);
+  }, [outerPoints, innerPoints, arrowTip]);
+
+  const arrowHeadOutline = useMemo(() => {
+    if (!arrowTip || outerPoints.length === 0 || innerPoints.length === 0) return null;
+    return [
+      outerPoints[outerPoints.length - 1],
+      arrowTip.flareOuter,
+      arrowTip.tip,
+      arrowTip.flareInner,
+      innerPoints[innerPoints.length - 1],
+    ];
+  }, [outerPoints, innerPoints, arrowTip]);
 
   const groupRef = useRef<THREE.Group>(null);
   const fillMatRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -307,6 +376,8 @@ const CurveComponent = ({
   const line1Ref = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const line2Ref = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const arrowLineRef = useRef<any>(null);
 
   const isAnim = useRef(false);
   const opRef = useRef(1);
@@ -325,6 +396,7 @@ const CurveComponent = ({
     if (fillMatRef.current) fillMatRef.current.opacity = 0.999 * go;
     if (line1Ref.current?.material) line1Ref.current.material.opacity = go;
     if (line2Ref.current?.material) line2Ref.current.material.opacity = go;
+    if (arrowLineRef.current?.material) arrowLineRef.current.material.opacity = go;
 
     if (Math.abs(go - target) < 0.01) {
       isAnim.current = false;
@@ -354,6 +426,16 @@ const CurveComponent = ({
           transparent
           renderOrder={5}
         />
+        {arrowHeadOutline && (
+          <Line
+            ref={arrowLineRef}
+            points={arrowHeadOutline}
+            color={color}
+            lineWidth={lineWidth ?? CURVE_OUTER_LINE_WIDTH}
+            transparent
+            renderOrder={5}
+          />
+        )}
       </group>
       <mesh renderOrder={4} visible={hasFill}>
         <shapeGeometry args={[fillShape]} />
@@ -544,7 +626,7 @@ export const SideCurves = ({
             yTopInner,
             yBotInner,
           );
-          return { outPts, inPts };
+          return { outPts, inPts, ctrlOuter, ctrlInner };
         };
 
         let curve1AnchorTop, curve1AnchorBot, curve1Bow: -1 | 1;
@@ -584,6 +666,30 @@ export const SideCurves = ({
         const curve1 = buildCurve(curve1AnchorTop, curve1AnchorBot, curve1Bow);
         const curve2 = buildCurve(curve2AnchorTop, curve2AnchorBot, curve2Bow);
 
+        const isArrow = b.shape === "arrow";
+        const arrowHeadLength = b.arrowHeadLength ?? DEFAULT_ARROW_HEAD_LENGTH;
+        const arrowHeadWidth = b.arrowHeadWidth ?? DEFAULT_ARROW_HEAD_WIDTH;
+        const arrowTip1 = isArrow
+          ? computeArrowHeadPoints(
+              curve1.outPts[curve1.outPts.length - 1],
+              curve1.inPts[curve1.inPts.length - 1],
+              new THREE.Vector3(curve1.ctrlOuter, yBotOuter, 0),
+              new THREE.Vector3(curve1.ctrlInner, yBotInner, 0),
+              arrowHeadLength,
+              arrowHeadWidth,
+            )
+          : undefined;
+        const arrowTip2 = isArrow
+          ? computeArrowHeadPoints(
+              curve2.outPts[curve2.outPts.length - 1],
+              curve2.inPts[curve2.inPts.length - 1],
+              new THREE.Vector3(curve2.ctrlOuter, yBotOuter, 0),
+              new THREE.Vector3(curve2.ctrlInner, yBotInner, 0),
+              arrowHeadLength,
+              arrowHeadWidth,
+            )
+          : undefined;
+
         let innerCurve1, innerCurve2;
         if (b.drawInnerCurves) {
           const iOuterBow = b.innerCurvesBowGap ?? outerBow;
@@ -613,6 +719,7 @@ export const SideCurves = ({
               fillColor={b.fillColor}
               shouldHide={shouldHide}
               lineWidth={configColors.curveLineWidth}
+              arrowTip={arrowTip1}
             />
             <CurveComponent
               outerPoints={curve2.outPts}
@@ -621,6 +728,7 @@ export const SideCurves = ({
               fillColor={b.fillColor}
               shouldHide={shouldHide}
               lineWidth={configColors.curveLineWidth}
+              arrowTip={arrowTip2}
             />
             {b.drawInnerCurves && innerCurve1 && (
               <CurveComponent

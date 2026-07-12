@@ -26,6 +26,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     sceneCenterYOffset: -0.045,
     padding: 0.2,
     scrollPages: 1.5,
+    fixedWidthAcrossLanguages: true,
   },
 
   specialVerses: {},
