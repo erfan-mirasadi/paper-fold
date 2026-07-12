@@ -37,7 +37,7 @@ const CAPSULE_H = 0.075; // == globalSettings.capsuleHeight
 const BLOCK_PAD = 0.02; // == globalSettings.blockPadding
 const COLUMN_GAP = 0.03; // == globalSettings.columnGap
 const SECTION_PAD_X = 0.08; // == globalSettings.sectionPadX
-const BLOCK_GAP = 0.075; // == globalSettings.blockGap (gap: verse1 -> panel row)
+const BLOCK_GAP = 0.1; // == globalSettings.blockGap (gap: verse1 -> panel row)
 const PAIR_ROW_GAP = 0.024; // tight gap between a panel's solo top verse and
 // its pair below, AND between the pair's own two verses — one uniform
 // rhythm for all 3 stacked rows in a panel (matches the reference image).
@@ -358,7 +358,7 @@ export const FATIHA_LANDSCAPE_CONFIG: SurahLayoutConfig = {
       // Verse-1 frame — sized to roughly span the two panels combined
       // (matches the reference image, where the top box is as wide as the
       // two lower boxes together), not the full (much wider) landscape page.
-      src: "/nisa/all-section.svg",
+      src: "/nisa/all-section-1.svg",
       anchorGroupIndex: 0,
       anchorEdge: "center",
       scaleX: 2 * TARGET_INNER_W + PANEL_GAP_X - 0.8,
@@ -370,25 +370,25 @@ export const FATIHA_LANDSCAPE_CONFIG: SurahLayoutConfig = {
     },
     {
       // Right panel frame (verses 2,3,4).
-      src: "/nisa/all-section.svg",
+      src: "/nisa/all-section-1.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: TARGET_INNER_W + 0.25,
-      scaleY: 0.5,
+      scaleY: 0.48,
       offsetX: PANEL_X_OFFSET,
-      offsetY: -0.19,
+      offsetY: -0.155,
       renderOrder: 3,
       customSectionId: "section2_v234",
     },
     {
       // Left panel frame (verses 5,6,7).
-      src: "/nisa/all-section.svg",
+      src: "/nisa/all-section-1.svg",
       anchorGroupIndex: 3,
       anchorEdge: "top",
       scaleX: TARGET_INNER_W + 0.25,
-      scaleY: 0.5,
+      scaleY: 0.48,
       offsetX: -PANEL_X_OFFSET,
-      offsetY: -0.19,
+      offsetY: -0.155,
       renderOrder: 3,
       customSectionId: "section2_v567",
     },

@@ -44,6 +44,7 @@ export interface CurveColorConfig {
   bowGap?: number;
   innerBowGap?: number;
   inwardOffset?: number;
+  lineWidth?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
   /** If true, draws additional curves on the inner edges of the columns (in the center gap). */

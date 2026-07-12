@@ -88,7 +88,6 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
 const LEGACY_SURAH_ALIASES: Readonly<Record<string, string>> = {
   fatiha1: "fatiha",
   fatiha2: "fatiha",
-  fatiha4: "fatiha",
 };
 
 // Pre-built lookup map for O(1) access by id
@@ -121,11 +120,6 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/fatiha/fatiha2Config").then((m) => ({
         config: m.FATIHA_2_CONFIG,
         textData: m.FATIHA_2_TEXT_DATA,
-      })),
-    () =>
-      import("./configs/fatiha/fatiha4Config").then((m) => ({
-        config: m.FATIHA_4_CONFIG,
-        textData: m.FATIHA_4_TEXT_DATA,
       })),
     () =>
       import("./configs/fatiha/fatiha1Config").then((m) => ({

@@ -38,6 +38,7 @@ export interface CurveConfig {
   bowGap?: number;
   innerBowGap?: number;
   inwardOffset?: number;
+  lineWidth?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
   /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
@@ -851,7 +852,7 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={twistTopFill}
                   shouldHide={shouldHide}
-                  lineWidth={configColors.curveLineWidth}
+                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                 />
                 <CurveComponent
                   outerPoints={seg1.bottom.outPts}
@@ -859,7 +860,7 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={b.fillColor}
                   shouldHide={shouldHide}
-                  lineWidth={configColors.curveLineWidth}
+                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                   arrowTip={arrowTip1}
                 />
               </>
@@ -870,7 +871,7 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={configColors.curveLineWidth}
+                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                 arrowTip={arrowTip1}
               />
             )}
@@ -882,7 +883,7 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={twistTopFill}
                   shouldHide={shouldHide}
-                  lineWidth={configColors.curveLineWidth}
+                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                 />
                 <CurveComponent
                   outerPoints={seg2.bottom.outPts}
@@ -890,7 +891,7 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={b.fillColor}
                   shouldHide={shouldHide}
-                  lineWidth={configColors.curveLineWidth}
+                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                   arrowTip={arrowTip2}
                 />
               </>
@@ -901,7 +902,7 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={configColors.curveLineWidth}
+                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                 arrowTip={arrowTip2}
               />
             )}
@@ -912,7 +913,7 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={configColors.curveLineWidth}
+                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
               />
             )}
             {b.drawInnerCurves && innerCurve2 && (
@@ -922,7 +923,7 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={configColors.curveLineWidth}
+                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
               />
             )}
           </Fragment>
