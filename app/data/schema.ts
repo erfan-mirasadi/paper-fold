@@ -66,6 +66,15 @@ export interface CurveColorConfig {
   arrowHeadLength?: number;
   /** Arrow-only: how far (world units) the flare's back corners spread perpendicular to the ribbon. */
   arrowHeadWidth?: number;
+  /**
+   * Arrow-only: renders the body as a folded ribbon — full-width at both
+   * capsules, pinching to a single point at the arc's far extremity where
+   * the edges cross over, with the segment before the fold auto-darkened
+   * so the ribbon reads as flipping from its back face to its front face.
+   */
+  twist?: boolean;
+  /** Arrow-only: where along the arc (0-1) the fold pinch sits. Defaults to 0.5 (the arc's extremity). */
+  twistT?: number;
 }
 
 export interface ThemeColors {

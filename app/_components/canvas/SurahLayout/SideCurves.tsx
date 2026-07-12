@@ -61,6 +61,15 @@ export interface CurveConfig {
   arrowHeadLength?: number;
   /** Arrow-only: how far (world units) the flare's back corners spread perpendicular to the ribbon. */
   arrowHeadWidth?: number;
+  /**
+   * Arrow-only: renders the body as a folded ribbon — full-width at both
+   * capsules, pinching to a single point at the arc's far extremity where
+   * the edges cross over, with the segment before the fold auto-darkened
+   * so the ribbon reads as flipping from its back face to its front face.
+   */
+  twist?: boolean;
+  /** Arrow-only: where along the arc (0-1) the fold pinch sits. Defaults to 0.5 (the arc's extremity). */
+  twistT?: number;
 }
 
 interface BracketSpec extends CurveConfig {
@@ -288,6 +297,77 @@ const getSmoothCurvePoints = (
 
 const DEFAULT_ARROW_HEAD_LENGTH = 0.07;
 const DEFAULT_ARROW_HEAD_WIDTH = 0.05;
+
+// How much the pre-fold (top) lobe of a twisted ribbon is darkened, so the
+// ribbon reads as showing its shaded back face before the fold — the 3D cue
+// in the hand-drawn reference.
+const TWIST_TOP_DARKEN = 0.8;
+
+const darkenColor = (color: string, factor: number) => {
+  if (!color || color === "transparent" || color === "none") return color;
+  return `#${new THREE.Color(color).multiplyScalar(factor).getHexString()}`;
+};
+
+/**
+ * Builds a twisted-ribbon body: ONE center arc (the same bow shape the
+ * normal bracket would take, averaged), swept with a *signed* width profile
+ * — full tipThickness at each capsule, exactly zero at `twistT`, and the
+ * sign flips there. The flip makes the two edges genuinely cross at the
+ * pinch, so the ribbon reads as folding over itself. The sin() ease holds
+ * width near the capsules and tapers cleanly into the pinch point.
+ *
+ * Returns the two edge point arrays plus `pinchIndex` (both arrays hold the
+ * identical pinch point there — split the fill at that index; one polygon
+ * through the crossing would self-intersect and break earcut).
+ */
+const buildTwistedRibbon = (
+  startX: number,
+  endX: number,
+  ctrlX: number,
+  yTop: number,
+  yBot: number,
+  halfWidthTop: number,
+  halfWidthBot: number,
+  twistT: number,
+) => {
+  const center = new THREE.CubicBezierCurve3(
+    new THREE.Vector3(startX, yTop, 0),
+    new THREE.Vector3(ctrlX, yTop, 0),
+    new THREE.Vector3(ctrlX, yBot, 0),
+    new THREE.Vector3(endX, yBot, 0),
+  );
+  const N = 64;
+  const k = Math.min(N - 1, Math.max(1, Math.round(N * twistT)));
+  const outPts: THREE.Vector3[] = [];
+  const inPts: THREE.Vector3[] = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const p = center.getPoint(t);
+    const tan = center.getTangent(t);
+    const s =
+      i <= k
+        ? halfWidthTop * Math.sin(((k - i) / k) * Math.PI * 0.5)
+        : -halfWidthBot * Math.sin(((i - k) / (N - k)) * Math.PI * 0.5);
+    outPts.push(new THREE.Vector3(p.x - tan.y * s, p.y + tan.x * s, 0));
+    inPts.push(new THREE.Vector3(p.x + tan.y * s, p.y - tan.x * s, 0));
+  }
+  return {
+    outPts,
+    inPts,
+    pinchIndex: k,
+    ctrlBot: new THREE.Vector3(ctrlX, yBot, 0),
+  };
+};
+
+/** Splits a twisted ribbon's edges into its two lobes at the shared pinch point. */
+const splitAtPinch = (
+  outPts: THREE.Vector3[],
+  inPts: THREE.Vector3[],
+  k: number,
+) => ({
+  top: { outPts: outPts.slice(0, k + 1), inPts: inPts.slice(0, k + 1) },
+  bottom: { outPts: outPts.slice(k), inPts: inPts.slice(k) },
+});
 
 /**
  * Derives a flared arrowhead (back-left corner, tip, back-right corner) for
@@ -588,6 +668,7 @@ export const SideCurves = ({
           bowDirection: -1 | 1,
           customOuterBow?: number,
           customInnerBow?: number,
+          twisted?: boolean,
         ) => {
           const usedOuterBow = customOuterBow ?? outerBow;
           const usedInnerBow = customInnerBow ?? innerBow;
@@ -612,6 +693,20 @@ export const SideCurves = ({
             ? edgeBot + sign * deepOffsetInner
             : edgeBot + sign * (inwardOffset + innerInwardOffset);
 
+          if (twisted) {
+            const ribbon = buildTwistedRibbon(
+              (tipOuterTop + tipInnerTop) / 2,
+              (tipOuterBot + tipInnerBot) / 2,
+              (ctrlOuter + ctrlInner) / 2,
+              (yTopOuter + yTopInner) / 2,
+              (yBotOuter + yBotInner) / 2,
+              Math.abs(yTopOuter - yTopInner) / 2,
+              Math.abs(yBotOuter - yBotInner) / 2,
+              b.twistT ?? 0.5,
+            );
+            return { ...ribbon, ctrlOuter, ctrlInner };
+          }
+
           const outPts = getSmoothCurvePoints(
             tipOuterTop,
             ctrlOuter,
@@ -626,7 +721,14 @@ export const SideCurves = ({
             yTopInner,
             yBotInner,
           );
-          return { outPts, inPts, ctrlOuter, ctrlInner };
+          return {
+            outPts,
+            inPts,
+            ctrlOuter,
+            ctrlInner,
+            pinchIndex: undefined as number | undefined,
+            ctrlBot: undefined as THREE.Vector3 | undefined,
+          };
         };
 
         let curve1AnchorTop, curve1AnchorBot, curve1Bow: -1 | 1;
@@ -663,18 +765,34 @@ export const SideCurves = ({
           curve2Bow = 1;
         }
 
-        const curve1 = buildCurve(curve1AnchorTop, curve1AnchorBot, curve1Bow);
-        const curve2 = buildCurve(curve2AnchorTop, curve2AnchorBot, curve2Bow);
-
         const isArrow = b.shape === "arrow";
+        const isTwisted = isArrow && !!b.twist;
+
+        const curve1 = buildCurve(
+          curve1AnchorTop,
+          curve1AnchorBot,
+          curve1Bow,
+          undefined,
+          undefined,
+          isTwisted,
+        );
+        const curve2 = buildCurve(
+          curve2AnchorTop,
+          curve2AnchorBot,
+          curve2Bow,
+          undefined,
+          undefined,
+          isTwisted,
+        );
+
         const arrowHeadLength = b.arrowHeadLength ?? DEFAULT_ARROW_HEAD_LENGTH;
         const arrowHeadWidth = b.arrowHeadWidth ?? DEFAULT_ARROW_HEAD_WIDTH;
         const arrowTip1 = isArrow
           ? computeArrowHeadPoints(
               curve1.outPts[curve1.outPts.length - 1],
               curve1.inPts[curve1.inPts.length - 1],
-              new THREE.Vector3(curve1.ctrlOuter, yBotOuter, 0),
-              new THREE.Vector3(curve1.ctrlInner, yBotInner, 0),
+              curve1.ctrlBot ?? new THREE.Vector3(curve1.ctrlOuter, yBotOuter, 0),
+              curve1.ctrlBot ?? new THREE.Vector3(curve1.ctrlInner, yBotInner, 0),
               arrowHeadLength,
               arrowHeadWidth,
             )
@@ -683,12 +801,25 @@ export const SideCurves = ({
           ? computeArrowHeadPoints(
               curve2.outPts[curve2.outPts.length - 1],
               curve2.inPts[curve2.inPts.length - 1],
-              new THREE.Vector3(curve2.ctrlOuter, yBotOuter, 0),
-              new THREE.Vector3(curve2.ctrlInner, yBotInner, 0),
+              curve2.ctrlBot ?? new THREE.Vector3(curve2.ctrlOuter, yBotOuter, 0),
+              curve2.ctrlBot ?? new THREE.Vector3(curve2.ctrlInner, yBotInner, 0),
               arrowHeadLength,
               arrowHeadWidth,
             )
           : undefined;
+
+        // A twisted ribbon renders as two lobes split at the fold: the top
+        // (pre-fold) lobe darkened as the ribbon's back face, the bottom
+        // lobe in the true fill color carrying the arrowhead.
+        const seg1 =
+          curve1.pinchIndex != null
+            ? splitAtPinch(curve1.outPts, curve1.inPts, curve1.pinchIndex)
+            : null;
+        const seg2 =
+          curve2.pinchIndex != null
+            ? splitAtPinch(curve2.outPts, curve2.inPts, curve2.pinchIndex)
+            : null;
+        const twistTopFill = darkenColor(b.fillColor, TWIST_TOP_DARKEN);
 
         let innerCurve1, innerCurve2;
         if (b.drawInnerCurves) {
@@ -712,24 +843,68 @@ export const SideCurves = ({
 
         return (
           <Fragment key={idx}>
-            <CurveComponent
-              outerPoints={curve1.outPts}
-              innerPoints={curve1.inPts}
-              color={b.color}
-              fillColor={b.fillColor}
-              shouldHide={shouldHide}
-              lineWidth={configColors.curveLineWidth}
-              arrowTip={arrowTip1}
-            />
-            <CurveComponent
-              outerPoints={curve2.outPts}
-              innerPoints={curve2.inPts}
-              color={b.color}
-              fillColor={b.fillColor}
-              shouldHide={shouldHide}
-              lineWidth={configColors.curveLineWidth}
-              arrowTip={arrowTip2}
-            />
+            {seg1 ? (
+              <>
+                <CurveComponent
+                  outerPoints={seg1.top.outPts}
+                  innerPoints={seg1.top.inPts}
+                  color={b.color}
+                  fillColor={twistTopFill}
+                  shouldHide={shouldHide}
+                  lineWidth={configColors.curveLineWidth}
+                />
+                <CurveComponent
+                  outerPoints={seg1.bottom.outPts}
+                  innerPoints={seg1.bottom.inPts}
+                  color={b.color}
+                  fillColor={b.fillColor}
+                  shouldHide={shouldHide}
+                  lineWidth={configColors.curveLineWidth}
+                  arrowTip={arrowTip1}
+                />
+              </>
+            ) : (
+              <CurveComponent
+                outerPoints={curve1.outPts}
+                innerPoints={curve1.inPts}
+                color={b.color}
+                fillColor={b.fillColor}
+                shouldHide={shouldHide}
+                lineWidth={configColors.curveLineWidth}
+                arrowTip={arrowTip1}
+              />
+            )}
+            {seg2 ? (
+              <>
+                <CurveComponent
+                  outerPoints={seg2.top.outPts}
+                  innerPoints={seg2.top.inPts}
+                  color={b.color}
+                  fillColor={twistTopFill}
+                  shouldHide={shouldHide}
+                  lineWidth={configColors.curveLineWidth}
+                />
+                <CurveComponent
+                  outerPoints={seg2.bottom.outPts}
+                  innerPoints={seg2.bottom.inPts}
+                  color={b.color}
+                  fillColor={b.fillColor}
+                  shouldHide={shouldHide}
+                  lineWidth={configColors.curveLineWidth}
+                  arrowTip={arrowTip2}
+                />
+              </>
+            ) : (
+              <CurveComponent
+                outerPoints={curve2.outPts}
+                innerPoints={curve2.inPts}
+                color={b.color}
+                fillColor={b.fillColor}
+                shouldHide={shouldHide}
+                lineWidth={configColors.curveLineWidth}
+                arrowTip={arrowTip2}
+              />
+            )}
             {b.drawInnerCurves && innerCurve1 && (
               <CurveComponent
                 outerPoints={innerCurve1.outPts}

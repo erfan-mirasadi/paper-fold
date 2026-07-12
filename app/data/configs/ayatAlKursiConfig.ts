@@ -200,8 +200,9 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          text: "Bakara 255",
+          text: "Bakara: 255",
         },
+        { text: "(Ayetel Kürsi)" },
       ],
     },
     {

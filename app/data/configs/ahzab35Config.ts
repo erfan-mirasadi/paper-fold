@@ -352,7 +352,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          text: "Ahzab 35",
+          text: "Ahzab: 35",
         },
       ],
     },
