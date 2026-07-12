@@ -340,6 +340,24 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
     capsuleLabelDrop: 0.005,
   },
 
+  handwrittenNotes: [
+    {
+      x: 0.77,
+      y: -0.08,
+      fontSize: 0.048,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "Ahzab 35",
+        },
+      ],
+    },
+  ],
+
   sectionBackground: {
     texture: "/nisa/all-section-1.svg",
     scaleX: 1.48,

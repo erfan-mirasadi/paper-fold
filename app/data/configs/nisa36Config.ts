@@ -339,7 +339,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     {
       x: 0.77,
       y: -0.08,
-      fontSize: 0.044,
+      fontSize: 0.048,
       color: "#2f4858",
       lineSpacing: 1.6,
       maxWidth: 1.5,

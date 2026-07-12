@@ -259,6 +259,24 @@ export const FATIHA_LANDSCAPE_CONFIG: SurahLayoutConfig = {
     contentStartYOverride: CONTENT_START_Y_OVERRIDE,
   },
 
+  handwrittenNotes: [
+    {
+      x: 1.25,
+      y: -0.08,
+      fontSize: 0.048,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "Fatiha suresi",
+        },
+      ],
+    },
+  ],
+
   blocks: [
     {
       // Verse 1 alone, centered on top — same capsule size as fatiha1Config

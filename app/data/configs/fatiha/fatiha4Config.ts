@@ -252,6 +252,24 @@ export const FATIHA_4_CONFIG: SurahLayoutConfig = {
     tightVersePadding: true,
   },
 
+  handwrittenNotes: [
+    {
+      x: 0.77,
+      y: -0.08,
+      fontSize: 0.048,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "Fatiha suresi",
+        },
+      ],
+    },
+  ],
+
   blocks: [
     // ── Verse 1: Bismillah — single column, centered ─────────
     {

@@ -166,6 +166,24 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     translationVerseTextScale: 1.1,
   },
 
+  handwrittenNotes: [
+    {
+      x: 0.77,
+      y: -0.08,
+      fontSize: 0.048,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "İhlas Suresi",
+        },
+      ],
+    },
+  ],
+
   // Section-wide resting-state background — was incorrectly attached to
   // block0 alone, which also made it (wrongly) render as block0's own small
   // elevated/all-sections frame instead of the whole section's.

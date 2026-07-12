@@ -211,6 +211,24 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
     framePad: 0.1,
   },
 
+  handwrittenNotes: [
+    {
+      x: 0.77,
+      y: -0.08,
+      fontSize: 0.048,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "Fatiha suresi",
+        },
+      ],
+    },
+  ],
+
   // Section-wide resting-state background is intentionally omitted here —
   // Fatiha renders 3 independent section frames instead of one whole-stack
   // frame, via `svgOverlays` below (the same mechanism ahzab35Config.ts

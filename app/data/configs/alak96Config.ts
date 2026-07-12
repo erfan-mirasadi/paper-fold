@@ -357,21 +357,21 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
   //   s2VerticalPad: 0.054   → framePad
   //   boxExtOffset: 0.02     → boxExtOffset
   globalSettings: {
-    capsuleHeight:      0.075,
-    columnGap:           0.02,
-    rowGap:              0.02,
-    blockGap:            0.035,
-    sectionPadX:         0.035,
-    blockPadding:        0.012,
-    sectionBorderWidth:  0.006,
-    connectorPad:        0.03,
-    framePad:            0.054,
-    boxExtOffset:        0.02,
+    capsuleHeight: 0.075,
+    columnGap: 0.02,
+    rowGap: 0.02,
+    blockGap: 0.035,
+    sectionPadX: 0.035,
+    blockPadding: 0.012,
+    sectionBorderWidth: 0.006,
+    connectorPad: 0.03,
+    framePad: 0.054,
+    boxExtOffset: 0.02,
     contentStartYOverride: -0.06, // was the hand-tuned fixed s1Top (Alak does not auto-center)
-    capsuleLabelW:            0.2,
-    capsuleLabelH:            0.032,
-    capsuleLabelBorderWidth:  0.0035,
-    capsuleLabelDrop:         0.015,
+    capsuleLabelW: 0.2,
+    capsuleLabelH: 0.032,
+    capsuleLabelBorderWidth: 0.0035,
+    capsuleLabelDrop: 0.015,
   },
 
   blocks: [
@@ -381,11 +381,11 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       type: "grid",
       verseIds: [2, 1, 4, 3],
       anaAyetId: 5,
-      capsuleHeight: 0.07,   // was smallBoxH
-      rowGap: 0.02,          // was gap
-      blockPadding: 0.045,   // was s1Pad
-      fixedHeight: 0.132,    // AnaAyet height, was anaAyetH
-      anaAyetGap: 0.05,      // was s1AnaGap
+      capsuleHeight: 0.07, // was smallBoxH
+      rowGap: 0.02, // was gap
+      blockPadding: 0.045, // was s1Pad
+      fixedHeight: 0.132, // AnaAyet height, was anaAyetH
+      anaAyetGap: 0.05, // was s1AnaGap
       anaAyetYOffset: -0.01, // was the hardcoded ANA_AYET_Y_OFFSET
       bgThemeKey: "s1InnerBorder",
       labelKey: "section1Label",

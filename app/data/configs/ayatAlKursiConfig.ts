@@ -190,6 +190,21 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   // margin above the content, like a personal note jotted next to the ayah.
   handwrittenNotes: [
     {
+      x: 0.77,
+      y: -0.08,
+      fontSize: 0.048,
+      color: "#2f4858",
+      lineSpacing: 1.6,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "Bakara 255",
+        },
+      ],
+    },
+    {
       x: 1.15,
       y: -0.3,
       fontSize: 0.04,
@@ -353,15 +368,15 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       rotationZ: Math.PI / 2,
       renderOrder: 1, // Behind the verses
     },
-    {
-      src: "/ayatalKursi/balara.png",
-      anchorEdge: "top",
-      scaleX: 0.4,
-      scaleY: 0.16,
-      offsetX: 0,
-      offsetY: 0.85,
-      renderOrder: 20,
-    },
+    // {
+    //   src: "/ayatalKursi/balara.png",
+    //   anchorEdge: "top",
+    //   scaleX: 0.4,
+    //   scaleY: 0.16,
+    //   offsetX: 0,
+    //   offsetY: 0.85,
+    //   renderOrder: 20,
+    // },
   ],
 };
 
