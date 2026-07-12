@@ -2,6 +2,11 @@
 
 // TEMPORARY overlay — flowing Mushaf-style Arabic text, left side, Nisa 36 only.
 // Safe to delete: self-contained, not imported anywhere except SurahViewer.tsx.
+//
+// Only large screens (lg+, ~1024px and up) are the real target — the paper's
+// on-screen position/size is what this has to stay clear of, and vw-based
+// sizing (not fixed breakpoint jumps) is what keeps it lined up as the
+// window gets wider on those screens.
 
 import { useStoryStore } from "@/app/stores/useStoryStore";
 
@@ -31,28 +36,19 @@ export function TempNisaAyahListOverlay() {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: 24,
-        transform: "translateY(-50%)",
-        zIndex: 90,
-        width: 320,
-        maxHeight: "82vh",
-        overflowY: "auto",
-        pointerEvents: "auto",
-      }}
+      className="fixed top-[46%] -translate-y-1/2 z-[90] pointer-events-auto
+        left-6 w-[150px]
+        lg:left-[5vw] lg:w-[16vw]"
     >
       {surahLabel && (
         <div
           dir="rtl"
+          className="text-center text-[10px] lg:text-[clamp(13px,1vw,20px)]"
           style={{
-            textAlign: "center",
             fontFamily: '"QuranFont", serif',
-            fontSize: 15,
             color: "#C4963B",
             letterSpacing: 1,
-            marginBottom: 14,
+            marginBottom: 18,
           }}
         >
           {surahLabel}
@@ -61,28 +57,27 @@ export function TempNisaAyahListOverlay() {
 
       <p
         dir="rtl"
+        className="text-[12px] lg:text-[clamp(16px,1.6vw,30px)]"
         style={{
           margin: 0,
           textAlign: "right",
           fontFamily: '"QuranFont", serif',
-          fontSize: 21,
           lineHeight: 2.3,
           color: "#333333",
+          overflowWrap: "break-word",
         }}
       >
         {fullAyahText}{" "}
         <span
+          className="w-[1.5em] h-[1.5em] text-[0.5em]"
           style={{
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 22,
-            height: 22,
-            margin: "0 6px",
+            margin: "0 8px",
             border: "1px solid #C4963B",
             borderRadius: "50%",
             color: "#C4963B",
-            fontSize: 11,
             lineHeight: 1,
             verticalAlign: "middle",
           }}
