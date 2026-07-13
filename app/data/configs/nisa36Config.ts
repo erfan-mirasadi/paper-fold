@@ -140,7 +140,6 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 2, // RIGHT slot → 2nd in LTR reading
       arDisplayNumber: 1, // RIGHT slot → 1st in RTL reading (right-to-left)
-      expandW: -0.02,
     },
     4: {
       bg: MID1_BG,
@@ -151,7 +150,6 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 1, // LEFT slot → 1st in LTR reading
       arDisplayNumber: 2, // LEFT slot → 2nd in RTL reading
-      expandW: -0.02,
     },
     5: {
       bg: MID1_BG,
@@ -162,7 +160,6 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 4, // RIGHT slot → 4th in LTR
       arDisplayNumber: 3, // RIGHT slot → 3rd in RTL
-      expandW: -0.02,
     },
     6: {
       bg: MID1_BG,
@@ -173,7 +170,6 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 3, // LEFT slot → 3rd in LTR
       arDisplayNumber: 4, // LEFT slot → 4th in RTL
-      expandW: -0.02,
     },
     // ── Middle section 2 — verses 7,8,9,10 (green) ─────────────────────────
     // block.verseIds=[8,7,10,9]: verse 8 is at LEFT slot, verse 7 at RIGHT slot.
