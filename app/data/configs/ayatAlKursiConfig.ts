@@ -39,6 +39,13 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
     singleAyahNumber: 255,
   },
 
+  // Fold-story → script sync: which script chunks light up at each fold step.
+  // Keys are `animations.foldSteps` ids; values are verse ids. Edit freely.
+  scriptHighlights: {
+    "pre-start": [1, 2, 7, 8],
+    end: [1, 2, 3, 4, 5, 6, 7, 8],
+  },
+
   features: {
     hasIntro: false,
     hasElevatedSections: true,

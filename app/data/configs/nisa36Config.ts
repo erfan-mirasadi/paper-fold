@@ -69,6 +69,14 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     singleAyahNumber: 36,
   },
 
+  // Fold-story → script sync: which script chunks light up at each fold step.
+  // Keys are `animations.foldSteps` ids; values are verse ids (same numbers
+  // as the text data / verseOverrides). Edit freely per step.
+  scriptHighlights: {
+    "pre-start": [1, 2, 11, 12],
+    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  },
+
   features: {
     hasIntro: false,
     hasElevatedSections: true,

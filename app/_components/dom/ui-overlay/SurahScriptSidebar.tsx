@@ -24,10 +24,25 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useStoryStore } from "@/app/stores/useStoryStore";
+import {
+  useStoryStore,
+  getActiveStoryConfig,
+} from "@/app/stores/useStoryStore";
+import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import type { SurahDataShape, Verse } from "@/app/data/SurahConfig";
 
 const GOLD = "#C4963B";
+
+const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+
+/** "#RRGGBB" (or "#RGB") → rgba() string with the given alpha. */
+function withAlpha(hex: string, alpha: number): string {
+  let h = hex.replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h, 16);
+  if (Number.isNaN(n)) return hex;
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
 
 /**
  * Flatten every verse of the AR text data (section1 grid + anaAyet,
@@ -50,6 +65,63 @@ function collectAyahs(data: SurahDataShape): Verse[] {
     })
     .sort((a, b) => a.number - b.number)
     .map((v) => ({ ...v, text: v.text.replace(/\s*\n\s*/g, " ") }));
+}
+
+/**
+ * One script chunk with a fold-story highlight border.
+ *
+ * Mirrors the paper capsule of the same verse: pill by default, rounded
+ * rectangle when the verse has `isPill: false`, colored with the verse's own
+ * capsule border color. The border is always laid out (transparent when
+ * inactive) so toggling a highlight never reflows the text — it just fades
+ * in/out with a soft glow.
+ */
+function HighlightChunk({
+  active,
+  isPill,
+  color,
+  solo,
+  children,
+}: {
+  active: boolean;
+  isPill: boolean;
+  color: string;
+  /**
+   * `solo` = numbered-surah mode: the chunk (text + its number badge) renders
+   * as ONE unbreakable capsule (inline-block), so the badge can never wrap
+   * out of the border into its own fragment. Single-ayah mode leaves this
+   * off and keeps the flowing inline text with per-line cloned borders.
+   */
+  solo?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      style={{
+        borderRadius: isPill ? "2em" : "0.4em",
+        border: `1.5px solid ${active ? color : "transparent"}`,
+        boxShadow: active
+          ? `0 0 0.45em ${withAlpha(color, 0.3)}`
+          : "0 0 0em rgba(0, 0, 0, 0)",
+        backgroundColor: active ? withAlpha(color, 0.08) : "transparent",
+        padding: "0.06em 0.35em",
+        transition:
+          "border-color 0.55s ease, box-shadow 0.55s ease, background-color 0.55s ease",
+        ...(solo
+          ? {
+              display: "inline-block",
+              maxWidth: "100%",
+              margin: "0.12em 0",
+            }
+          : {
+              WebkitBoxDecorationBreak: "clone",
+              boxDecorationBreak: "clone",
+            }),
+      }}
+    >
+      {children}
+    </span>
+  );
 }
 
 /** Inline ayah-number badge — Latin digits inside a thin gold circle. */
@@ -83,6 +155,17 @@ export function SurahScriptSidebar() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
 
+  // Fold-story sync: derive the current fold step id from the story scroll
+  // offset (0..1 spans the whole foldSteps timeline — same mapping FoldStory
+  // uses for the paper). The selector returns a string, so this component
+  // only re-renders when the STEP changes, not on every scroll frame.
+  const activeStepId = useFoldStore((s) => {
+    const steps = getActiveStoryConfig().animations.foldSteps;
+    if (steps.length === 0) return null;
+    const maxIdx = steps.length - 1;
+    return steps[Math.round(clamp01(s.currentOffset) * maxIdx)].id;
+  });
+
   // Only claim the wheel (data-lenis-prevent + inner scroll) when the text
   // actually overflows its box — otherwise wheel events over the script must
   // keep driving the page's fold-story scroll, or the area feels dead/laggy.
@@ -107,6 +190,16 @@ export function SurahScriptSidebar() {
     !activeConfig.features.hideBismillah3D && !!arData.bismillah;
   // Strip the decorative kashida elongation used by the 3D overlay.
   const bismillah = arData.bismillah?.replace(/ـ+/g, "");
+
+  // Verse ids highlighted at the current fold step (config-authored).
+  const highlighted = new Set(
+    (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [],
+  );
+  // Highlight border mirrors the verse's paper capsule (shape + color).
+  const chunkAppearance = (n: number) => {
+    const ov = activeConfig.verseOverrides?.[n];
+    return { isPill: ov?.isPill !== false, color: ov?.border ?? GOLD };
+  };
 
   return (
     <>
@@ -249,6 +342,9 @@ export function SurahScriptSidebar() {
                 className="text-[12px] lg:text-[clamp(16px,1.6vw,30px)] text-foreground"
                 style={{
                   margin: 0,
+                  // Breathing room so highlight borders (which extend past the
+                  // text via their padding) never get cropped at the box edges.
+                  padding: "0 0.5em",
                   textAlign: "right",
                   fontFamily: '"QuranFont", serif',
                   lineHeight: 2.3,
@@ -257,14 +353,34 @@ export function SurahScriptSidebar() {
                 }}
               >
                 {singleAyahNumber !== undefined ? (
+                  // ONE real ayah: chunks flow as a single text (no numbers),
+                  // but each chunk stays individually highlightable by its id.
                   <>
-                    {ayahs.map((v) => v.text).join(" ")}{" "}
+                    {ayahs.map((v) => (
+                      <span key={v.number}>
+                        <HighlightChunk
+                          active={highlighted.has(v.number)}
+                          {...chunkAppearance(v.number)}
+                        >
+                          {v.text}
+                        </HighlightChunk>{" "}
+                      </span>
+                    ))}
                     <AyahNumber n={singleAyahNumber} />
                   </>
                 ) : (
+                  // Full surah: every ayah carries its own number inside the
+                  // highlight capsule, like the capsules on the paper. `solo`
+                  // keeps text + number together in ONE unbreakable capsule.
                   ayahs.map((v) => (
                     <span key={v.number}>
-                      {v.text} <AyahNumber n={v.number} />{" "}
+                      <HighlightChunk
+                        solo
+                        active={highlighted.has(v.number)}
+                        {...chunkAppearance(v.number)}
+                      >
+                        {v.text} <AyahNumber n={v.number} />
+                      </HighlightChunk>{" "}
                     </span>
                   ))
                 )}

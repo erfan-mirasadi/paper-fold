@@ -44,6 +44,19 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
     hizb: 43,
     singleAyahNumber: 35,
   },
+
+  // Fold-story → script sync: which script chunks light up at each fold step.
+  // Keys are `animations.foldSteps` ids; values are verse ids. Edit freely.
+  // Right column = odd ids, left column = even ids (see middleFoldVerses).
+  scriptHighlights: {
+    "pre-start": [1, 2, 11, 12],
+    "open-all": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "fold-right-side": [2, 4, 6, 8, 10, 12],
+    "fold-right-side-2": [2, 4, 6, 8, 10, 12],
+    "fold-left-side": [1, 3, 5, 7, 9, 11],
+    "fold-left-side-2": [1, 3, 5, 7, 9, 11],
+    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  },
   heroTitle: "Ahzab",
   heroSubtitle: "suresi 35",
 

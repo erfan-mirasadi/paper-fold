@@ -25,6 +25,16 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
     juz: 30,
     hizb: 60,
   },
+
+  // Fold-story → script sync: which script verses light up at each fold step.
+  // Keys are `animations.foldSteps` ids; values are verse ids. Edit freely.
+  scriptHighlights: {
+    "pre-start": [1, 2, 3, 4, 5],
+    start: [1, 2, 3, 4, 5, 6, 19],
+    "outer-open": [1, 2, 3, 4, 5, 6, 7, 8, 18, 17, 19],
+    "inner-open": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 15, 17, 18, 19],
+    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  },
   features: {
     hasIntro: true,
     hasElevatedSections: true,

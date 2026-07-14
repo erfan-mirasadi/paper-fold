@@ -786,6 +786,22 @@ export interface SurahLayoutConfig {
   assets?: SurahAssets;
   /** Script metadata for the ayah-list sidebar (title + sayfa/juz/hizb). */
   scriptInfo?: SurahScriptInfo;
+
+  /**
+   * Fold-story → script highlight sync for the SurahScriptSidebar.
+   *
+   * Key:   a fold step id from `animations.foldSteps` ("pre-start", "end", …).
+   * Value: the verse ids (the same `number` used in the text data,
+   *        `verseOverrides` and `blocks[].verseIds`) whose script text is
+   *        highlighted while the fold story sits at that step — i.e. the
+   *        verses currently VISIBLE on the (partially folded) paper.
+   *
+   * A step id missing from the map means "no highlight at this step".
+   * The highlight border mirrors the paper capsule: pill by default,
+   * rounded rectangle when `verseOverrides[id].isPill === false`, colored
+   * with `verseOverrides[id].border` when set.
+   */
+  scriptHighlights?: Record<string, number[]>;
   verseOverrides?: Record<number, VerseOverrideConfig>;
 
   // ── NEW BLOCK-BASED SCHEMA ────────────────────────────────────────────────

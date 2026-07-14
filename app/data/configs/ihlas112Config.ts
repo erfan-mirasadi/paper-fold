@@ -16,6 +16,13 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     juz: 30,
     hizb: 60,
   },
+
+  // Fold-story → script sync: which script verses light up at each fold step.
+  // Keys are `animations.foldSteps` ids; values are verse ids. Edit freely.
+  scriptHighlights: {
+    "pre-start": [1, 4],
+    end: [1, 2, 3, 4],
+  },
   heroTitle: "İhlas Suresi",
   heroSubtitle: "Ihlas Suresi 112",
 
