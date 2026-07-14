@@ -10,6 +10,12 @@ const GREEN_BORDER = "#5E7367";
 export const IHLAS_112_CONFIG: SurahLayoutConfig = {
   id: "ihlas112",
   title: "İhlas Suresi",
+  mushafInfo: {
+    title: "112 Al-Ikhlas",
+    sayfa: 604,
+    juz: 30,
+    hizb: 60,
+  },
   heroTitle: "İhlas Suresi",
   heroSubtitle: "Ihlas Suresi 112",
 

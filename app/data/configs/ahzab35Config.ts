@@ -37,6 +37,13 @@ const GREEN_BORDER = "#8FA88F";
 export const AHZAB_35_CONFIG: SurahLayoutConfig = {
   id: "ahzab35",
   title: "Ahzab 35",
+  mushafInfo: {
+    title: "33 Al-Ahzab",
+    sayfa: 422,
+    juz: 22,
+    hizb: 43,
+    singleAyahNumber: 35,
+  },
   heroTitle: "Ahzab",
   heroSubtitle: "suresi 35",
 

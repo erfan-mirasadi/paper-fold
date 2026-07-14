@@ -18,7 +18,6 @@ import { PopUpHoverScrollController } from "@/app/_components/canvas/pop-up-vers
 import { ScrollManager } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { NavigationOverlay } from "@/app/_components/dom/ui-overlay/NavigationOverlay";
-import { TitleOverlay } from "@/app/_components/dom/ui-overlay/TitleOverlay";
 import { ThemeToggleOverlay } from "@/app/_components/dom/ui-overlay/ThemeToggleOverlay";
 import { HomeButtonOverlay } from "@/app/_components/dom/ui-overlay/HomeButtonOverlay";
 import { SurahMenuOverlay } from "@/app/_components/dom/ui-overlay/SurahMenuOverlay";
@@ -39,7 +38,7 @@ import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOv
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
-import { TempNisaAyahListOverlay } from "@/app/_components/dom/ui-overlay/TempNisaAyahListOverlay";
+import { MushafSidebarOverlay } from "@/app/_components/dom/ui-overlay/MushafSidebarOverlay";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
@@ -417,7 +416,7 @@ function SurahViewerInner({
 
       <PaperSwitchCursorSpinner />
 
-      {isSceneReady && <TempNisaAyahListOverlay />}
+      {isSceneReady && showPostIntroUI && <MushafSidebarOverlay />}
 
       {isSceneReady && (
         <motion.div
@@ -470,7 +469,6 @@ function SurahViewerInner({
                   transition={{ duration: 0.45, ease: "easeOut" }}
                   style={{ pointerEvents: "auto", willChange: "opacity" }}
                 >
-                  <TitleOverlay />
                   <CameraViewPresetOverlay />
                   <ScrollHintOverlay />
                   <PaperArrowsOverlay />

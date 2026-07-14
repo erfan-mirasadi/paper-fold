@@ -561,6 +561,28 @@ export interface SurahAssets {
 }
 
 /**
+ * Mushaf metadata shown in the left ayah-list sidebar (MushafSidebarOverlay):
+ * the surah title line and the "SAYFA / JUZ / HIZB" info row beneath it.
+ */
+export interface MushafInfo {
+  /** Sidebar title, e.g. "96 Al-'Alaq" (surah number + transliterated name). */
+  title: string;
+  /** Mushaf page number (Medina mushaf, 604-page layout). */
+  sayfa: number;
+  /** Juz (1-30) containing this page's content. */
+  juz: number;
+  /** Hizb (1-60) containing this page's content. */
+  hizb: number;
+  /**
+   * When set, every verse chunk on this page is a fragment of this ONE real
+   * ayah (e.g. Nisa 36, Ayat al-Kursi 255, Ahzab 35). The sidebar then joins
+   * all chunks into a single flowing text ending in this one ayah number.
+   * When omitted, each verse keeps its own trailing number (full surahs).
+   */
+  singleAyahNumber?: number;
+}
+
+/**
  * Section-wide background texture, independent of any single block's own
  * frame. Renders behind the whole block stack (the outer resting-state
  * frame), as opposed to `LayoutBlock.backgroundTexture` which renders a
@@ -762,6 +784,8 @@ export interface SurahLayoutConfig {
   styling: LayoutStyling;
   specialVerses: SpecialVerses;
   assets?: SurahAssets;
+  /** Mushaf page metadata for the ayah-list sidebar (title + sayfa/juz/hizb). */
+  mushafInfo?: MushafInfo;
   verseOverrides?: Record<number, VerseOverrideConfig>;
 
   // ── NEW BLOCK-BASED SCHEMA ────────────────────────────────────────────────

@@ -166,7 +166,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
 
   return (
     <>
-      {process.env.NODE_ENV === "development" && <Perf position="top-left" />}
+      {/* {process.env.NODE_ENV === "development" && <Perf position="top-left" />} */}
       {/*
        * The PerspectiveCamera + DynamicControls live in SurahViewer, OUTSIDE
        * this paper-keyed subtree, so the camera survives paper switches.

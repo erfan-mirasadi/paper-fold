@@ -19,6 +19,12 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
   title: "ALAK SURESİ",
   heroTitle: "Alak",
   heroSubtitle: "suresi",
+  mushafInfo: {
+    title: "96 Al-'Alaq",
+    sayfa: 597,
+    juz: 30,
+    hizb: 60,
+  },
   features: {
     hasIntro: true,
     hasElevatedSections: true,
