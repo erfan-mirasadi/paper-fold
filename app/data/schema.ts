@@ -561,10 +561,10 @@ export interface SurahAssets {
 }
 
 /**
- * Mushaf metadata shown in the left ayah-list sidebar (MushafSidebarOverlay):
+ * Surah script metadata shown in the left ayah-list sidebar (SurahScriptSidebar):
  * the surah title line and the "SAYFA / JUZ / HIZB" info row beneath it.
  */
-export interface MushafInfo {
+export interface SurahScriptInfo {
   /** Sidebar title, e.g. "96 Al-'Alaq" (surah number + transliterated name). */
   title: string;
   /** Mushaf page number (Medina mushaf, 604-page layout). */
@@ -784,8 +784,8 @@ export interface SurahLayoutConfig {
   styling: LayoutStyling;
   specialVerses: SpecialVerses;
   assets?: SurahAssets;
-  /** Mushaf page metadata for the ayah-list sidebar (title + sayfa/juz/hizb). */
-  mushafInfo?: MushafInfo;
+  /** Script metadata for the ayah-list sidebar (title + sayfa/juz/hizb). */
+  scriptInfo?: SurahScriptInfo;
   verseOverrides?: Record<number, VerseOverrideConfig>;
 
   // ── NEW BLOCK-BASED SCHEMA ────────────────────────────────────────────────

@@ -10,8 +10,8 @@ const CENTER_GROUP_BORDER = "#5E7367"; // Dark green border
 export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
   id: "kafirun109",
   title: "Kafirun Suresi",
-  mushafInfo: {
-    title: "109 Al-Kafirun",
+  scriptInfo: {
+    title: "109 Kâfirûn",
     sayfa: 603,
     juz: 30,
     hizb: 60,

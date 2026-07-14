@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
-import { Perf } from "r3f-perf";
 import { SinglePaper } from "./SinglePaper";
 import {
   PaperTransitionLayer,

@@ -1,13 +1,13 @@
 "use client";
 
-// Left-side Mushaf sidebar — flowing Arabic text of the active surah, with
+// Left-side surah script sidebar — flowing Arabic text of the active surah, with
 // a fixed top bar (menu icon + Quranpatterns wordmark + panel toggle) and
 // the surah title + SAYFA/JUZ/HIZB info above the text.
 //
 // Fully config-driven (works for every surah):
 //   - Verses are collected from the active AR text data and sorted into
 //     reading order.
-//   - When `config.mushafInfo.singleAyahNumber` is set, all verse chunks are
+//   - When `config.scriptInfo.singleAyahNumber` is set, all verse chunks are
 //     fragments of ONE real ayah (Nisa 36, Ayat al-Kursi, Ahzab 35) — the
 //     text flows as one piece with a single trailing ayah number.
 //     Otherwise every ayah carries its own trailing number.
@@ -76,7 +76,7 @@ function AyahNumber({ n }: { n: number }) {
   );
 }
 
-export function MushafSidebarOverlay() {
+export function SurahScriptSidebar() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const activeTextData = useStoryStore((s) => s.activeTextData);
   const [isOpen, setIsOpen] = useState(true);
@@ -97,7 +97,7 @@ export function MushafSidebarOverlay() {
   }, [isOpen, activeConfig.id, activeTextData]);
 
   const arData = activeTextData.ar;
-  const info = activeConfig.mushafInfo;
+  const info = activeConfig.scriptInfo;
   const ayahs = collectAyahs(arData);
   if (ayahs.length === 0) return null;
 
@@ -110,12 +110,11 @@ export function MushafSidebarOverlay() {
 
   return (
     <>
-      {/* ── Top bar — menu icon / wordmark / panel toggle, at the very top ── */}
+      {/* ── Top bar — menu icon / wordmark / panel toggle, pinned to the
+             top-left corner ─────────────────────────────────────────────── */}
       <div
-        className="fixed top-[clamp(10px,1.2vw,16px)] z-[100] pointer-events-auto
-          left-6 w-[150px]
-          lg:left-[5vw] lg:w-[16vw]
-          flex items-center justify-between"
+        className="fixed top-[clamp(10px,1.2vw,16px)] left-3 lg:left-5 z-[100]
+          pointer-events-auto flex items-center gap-16 lg:gap-18"
       >
         <button
           type="button"
@@ -192,7 +191,7 @@ export function MushafSidebarOverlay() {
               left-6 w-[150px]
               lg:left-[5vw] lg:w-[16vw]"
           >
-            {/* ── Surah title (no border) + mushaf info ─────────────────── */}
+            {/* ── Surah title (no border) + surah info ─────────────────── */}
             {info && (
               <div
                 className="text-center"
@@ -223,7 +222,7 @@ export function MushafSidebarOverlay() {
               </div>
             )}
 
-            {/* ── Flowing Mushaf text ───────────────────────────────────── */}
+            {/* ── Flowing script text ───────────────────────────────────── */}
             <div
               ref={scrollRef}
               {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}

@@ -19,8 +19,8 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
   title: "ALAK SURESİ",
   heroTitle: "Alak",
   heroSubtitle: "suresi",
-  mushafInfo: {
-    title: "96 Al-'Alaq",
+  scriptInfo: {
+    title: "96 Alak",
     sayfa: 597,
     juz: 30,
     hizb: 60,

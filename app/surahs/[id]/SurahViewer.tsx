@@ -38,7 +38,7 @@ import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOv
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
-import { MushafSidebarOverlay } from "@/app/_components/dom/ui-overlay/MushafSidebarOverlay";
+import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
@@ -416,7 +416,7 @@ function SurahViewerInner({
 
       <PaperSwitchCursorSpinner />
 
-      {isSceneReady && showPostIntroUI && <MushafSidebarOverlay />}
+      {isSceneReady && showPostIntroUI && <SurahScriptSidebar />}
 
       {isSceneReady && (
         <motion.div

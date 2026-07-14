@@ -24,8 +24,8 @@ export const FATIHA_2_CONFIG: SurahLayoutConfig = {
   title: "FATİHA SURESİ",
   heroTitle: "Fatiha",
   heroSubtitle: "suresi",
-  mushafInfo: {
-    title: "1 Al-Fatiha",
+  scriptInfo: {
+    title: "1 Fâtiha",
     sayfa: 1,
     juz: 1,
     hizb: 1,

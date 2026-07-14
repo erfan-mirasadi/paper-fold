@@ -31,8 +31,8 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   heroTitle: "Ayetel",
   heroSubtitle: "kürsî",
 
-  mushafInfo: {
-    title: "2 Al-Baqarah",
+  scriptInfo: {
+    title: "2 Bakara",
     sayfa: 42,
     juz: 3,
     hizb: 5,
