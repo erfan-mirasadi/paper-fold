@@ -1,27 +1,5 @@
 "use client";
 
-// Left-side surah script sidebar — flowing Arabic text of the active surah, with
-// a fixed top bar (menu icon + Quranpatterns wordmark + panel toggle) and
-// the surah title + SAYFA/JUZ/HIZB info above the text.
-//
-// Fully config-driven (works for every surah):
-//   - Verses are collected from the active AR text data and sorted into
-//     reading order.
-//   - When `config.scriptInfo.singleAyahNumber` is set, all verse chunks are
-//     fragments of ONE real ayah (Nisa 36, Ayat al-Kursi, Ahzab 35) — the
-//     text flows as one piece with a single trailing ayah number.
-//     Otherwise every ayah carries its own trailing number.
-//   - Bismillah is prepended for every surah EXCEPT those where it is
-//     already part of the verse content (Fatiha — `hideBismillah3D`).
-//
-// The sidebar collapses via the panel toggle; when closed, only the menu
-// icon + wordmark stay (the menu icon reopens it). OPEN by default for the
-// initial site launch.
-//
-// Only large screens (lg+, ~1024px and up) are the real target — the paper's
-// on-screen position/size is what this has to stay clear of, and vw-based
-// sizing is what keeps it lined up as the window gets wider on those screens.
-
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -38,7 +16,11 @@ const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 /** "#RRGGBB" (or "#RGB") → rgba() string with the given alpha. */
 function withAlpha(hex: string, alpha: number): string {
   let h = hex.replace("#", "");
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const n = parseInt(h, 16);
   if (Number.isNaN(n)) return hex;
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
@@ -109,9 +91,11 @@ function HighlightChunk({
           "border-color 0.55s ease, box-shadow 0.55s ease, background-color 0.55s ease",
         ...(solo
           ? {
-              display: "inline-block",
-              maxWidth: "100%",
-              margin: "0.12em 0",
+              // flex child in the RTL flex-wrap container — keeps the number
+              // badge BESIDE the text on one line; the container handles wrapping.
+              display: "flex",
+              alignItems: "center",
+              flexShrink: 0,
             }
           : {
               WebkitBoxDecorationBreak: "clone",
@@ -141,6 +125,7 @@ function AyahNumber({ n }: { n: number }) {
         verticalAlign: "middle",
         fontFamily: "var(--font-sans)",
         direction: "ltr",
+        flexShrink: 0,
       }}
     >
       {n}
@@ -207,7 +192,11 @@ export function SurahScriptSidebar() {
              top-left corner ─────────────────────────────────────────────── */}
       <div
         className="fixed top-[clamp(10px,1.2vw,16px)] left-3 lg:left-5 z-[100]
-          pointer-events-auto flex items-center gap-16 lg:gap-18"
+          pointer-events-auto flex items-center
+          gap-8
+          lg:gap-[clamp(3.5rem,6.2vw,11rem)]
+          [@media(min-width:2000px)]:gap-[clamp(5rem,6.5vw,12rem)]
+          [@media(min-width:3000px)]:gap-[clamp(7rem,8vw,18rem)]"
       >
         <button
           type="button"
@@ -232,13 +221,23 @@ export function SurahScriptSidebar() {
           </svg>
         </button>
 
+        {/* Wordmark SVG rendered as a CSS mask filled with currentColor, so
+            it follows the theme (the asset's own fill is a fixed dark brown
+            that would vanish on the dark background). Ratio 124:20. */}
         <div
-          className="text-center text-foreground text-[13px] lg:text-[clamp(15px,1.15vw,22px)]"
-          style={{ fontFamily: "var(--font-fraunces), serif" }}
-        >
-          <span style={{ fontStyle: "italic", fontWeight: 600 }}>Quran</span>
-          <span style={{ fontWeight: 400 }}>patterns</span>
-        </div>
+          role="img"
+          aria-label="Quranpatterns"
+          className="text-foreground
+            h-[16px] w-[99px]
+            lg:h-[clamp(18px,1.5vw,40px)] lg:w-[clamp(112px,9.3vw,248px)]
+            [@media(min-width:3000px)]:h-[clamp(40px,1.7vw,56px)]
+            [@media(min-width:3000px)]:w-[clamp(248px,10vw,340px)]"
+          style={{
+            backgroundColor: "currentColor",
+            WebkitMask: "url(/Quranpatterns.svg) no-repeat center / contain",
+            mask: "url(/Quranpatterns.svg) no-repeat center / contain",
+          }}
+        />
 
         {/* Fixed-width slot so the wordmark never shifts when the toggle hides */}
         <div className="w-[22px] flex justify-end">
@@ -280,18 +279,24 @@ export function SurahScriptSidebar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="fixed top-[46%] -translate-y-1/2 z-[90] pointer-events-auto
-              left-6 w-[150px]
-              lg:left-[5vw] lg:w-[16vw]"
+            style={{
+              // Anchor just below the top bar — top is larger to give proper
+              // breathing room at 4K where the logo/bar renders bigger.
+              top: "clamp(80px, 6.5vw, 260px)",
+              bottom: "clamp(20px, 2.5vw, 48px)",
+            }}
+            className="fixed z-[90] pointer-events-auto
+              left-2 w-[160px] flex flex-col
+              lg:left-[2vw] lg:w-[22vw]"
           >
             {/* ── Surah title (no border) + surah info ─────────────────── */}
             {info && (
               <div
-                className="text-center"
+                className="text-center flex-shrink-0"
                 style={{ marginBottom: "clamp(14px, 1.6vw, 24px)" }}
               >
                 <div
-                  className="text-foreground text-[15px] lg:text-[clamp(18px,1.5vw,28px)]"
+                  className="text-foreground text-[17px] lg:text-[clamp(22px,1.9vw,48px)]"
                   style={{
                     fontFamily: "var(--font-fraunces), serif",
                     fontWeight: 500,
@@ -301,7 +306,7 @@ export function SurahScriptSidebar() {
                   {info.title}
                 </div>
                 <div
-                  className="text-foreground text-[8px] lg:text-[clamp(9px,0.68vw,13px)]"
+                  className="text-foreground text-[9px] lg:text-[clamp(11px,0.85vw,20px)]"
                   style={{
                     marginTop: "clamp(4px, 0.5vw, 8px)",
                     opacity: 0.55,
@@ -315,76 +320,90 @@ export function SurahScriptSidebar() {
               </div>
             )}
 
-            {/* ── Flowing script text ───────────────────────────────────── */}
+            {/* ── Flowing script text — grows to fill remaining aside height */}
             <div
               ref={scrollRef}
               {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
-              className={`max-h-[66vh] overscroll-contain
+              className={`flex-1 min-h-0 overscroll-contain
                 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
                 ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
             >
               {showBismillah && (
                 <div
                   dir="rtl"
-                  className="text-center text-[11px] lg:text-[clamp(13px,1.1vw,22px)]"
+                  className="text-center text-[13px] lg:text-[clamp(14px,1.1vw,22px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
                   style={{
                     fontFamily: '"QuranFont", serif',
                     color: GOLD,
-                    marginBottom: "clamp(8px, 1vw, 16px)",
+                    marginBottom: "clamp(10px, 1.2vw, 20px)",
                   }}
                 >
                   {bismillah}
                 </div>
               )}
 
-              <p
-                dir="rtl"
-                className="text-[12px] lg:text-[clamp(16px,1.6vw,30px)] text-foreground"
-                style={{
-                  margin: 0,
-                  // Breathing room so highlight borders (which extend past the
-                  // text via their padding) never get cropped at the box edges.
-                  padding: "0 0.5em",
-                  textAlign: "right",
-                  fontFamily: '"QuranFont", serif',
-                  lineHeight: 2.3,
-                  overflowWrap: "break-word",
-                  opacity: 0.85,
-                }}
-              >
-                {singleAyahNumber !== undefined ? (
-                  // ONE real ayah: chunks flow as a single text (no numbers),
-                  // but each chunk stays individually highlightable by its id.
-                  <>
-                    {ayahs.map((v) => (
-                      <span key={v.number}>
-                        <HighlightChunk
-                          active={highlighted.has(v.number)}
-                          {...chunkAppearance(v.number)}
-                        >
-                          {v.text}
-                        </HighlightChunk>{" "}
-                      </span>
-                    ))}
-                    <AyahNumber n={singleAyahNumber} />
-                  </>
-                ) : (
-                  // Full surah: every ayah carries its own number inside the
-                  // highlight capsule, like the capsules on the paper. `solo`
-                  // keeps text + number together in ONE unbreakable capsule.
-                  ayahs.map((v) => (
+              {singleAyahNumber !== undefined ? (
+                // ONE real ayah: chunks flow as inline text (no numbers),
+                // each chunk individually highlightable. RTL paragraph.
+                <p
+                  dir="rtl"
+                  className="text-[12px] lg:text-[clamp(14px,1.1vw,22px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
+                  style={{
+                    margin: 0,
+                    padding: "0 0.5em",
+                    textAlign: "right",
+                    fontFamily: '"QuranFont", serif',
+                    lineHeight: 2.3,
+                    overflowWrap: "break-word",
+                    opacity: 0.85,
+                  }}
+                >
+                  {ayahs.map((v) => (
                     <span key={v.number}>
                       <HighlightChunk
-                        solo
                         active={highlighted.has(v.number)}
                         {...chunkAppearance(v.number)}
                       >
-                        {v.text} <AyahNumber n={v.number} />
+                        {v.text}
                       </HighlightChunk>{" "}
                     </span>
-                  ))
-                )}
-              </p>
+                  ))}
+                  <AyahNumber n={singleAyahNumber} />
+                </p>
+              ) : (
+                // Full surah: ONE flowing RTL paragraph — verses flow like
+                // words, multiple per line when they fit, text within a verse
+                // can wrap (box-decoration-break:clone redraws the border on
+                // each wrapped line). No solo, no nowrap, no flex.
+                <p
+                  dir="rtl"
+                  className="text-[12px] lg:text-[clamp(14px,1.1vw,22px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
+                  style={{
+                    margin: 0,
+                    padding: "0 0.3em",
+                    textAlign: "right",
+                    fontFamily: '"QuranFont", serif',
+                    lineHeight: 2.6,
+                    opacity: 0.85,
+                  }}
+                >
+                  {ayahs.map((v) => {
+                    const { isPill, color } = chunkAppearance(v.number);
+                    return (
+                      <span key={v.number}>
+                        <HighlightChunk
+                          active={highlighted.has(v.number)}
+                          isPill={isPill}
+                          color={color}
+                        >
+                          {v.text}
+                          <AyahNumber n={v.number} />
+                        </HighlightChunk>{" "}
+                      </span>
+                    );
+                  })}
+                </p>
+              )}
             </div>
           </motion.aside>
         )}
