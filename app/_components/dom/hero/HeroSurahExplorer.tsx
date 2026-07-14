@@ -265,7 +265,7 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
                       letterSpacing: "0.06em",
                     }}
                   >
-                    {NO_RESULTS.en} · {NO_RESULTS.ar}
+                    {NO_RESULTS.en}
                   </span>
                 </motion.div>
               )}
