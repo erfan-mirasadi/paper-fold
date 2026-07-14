@@ -4,8 +4,7 @@ import { getAllSurahs } from "./data/surahDatabase";
 import { ThemeToggleOverlay } from "./_components/dom/ui-overlay/ThemeToggleOverlay";
 import { LanguageSwitchOverlay } from "./_components/dom/ui-overlay/LanguageSwitchOverlay";
 import { AnimatedMountains, AnimatedHeader, AnimatedCarouselSection } from "./_components/dom/hero/HeroAnimations";
-import { SurahCarousel } from "./_components/dom/hero/SurahCarousel";
-import { SurahCard } from "./_components/dom/hero/SurahCard";
+import { HeroSurahExplorer } from "./_components/dom/hero/HeroSurahExplorer";
 
 export const metadata: Metadata = {
   // `absolute` bypasses the root layout's "%s | Quran Patterns" template so
@@ -54,13 +53,7 @@ export default function MenuPage() {
 
         {/* Subtitle & Carousel Area */}
         <AnimatedCarouselSection title="Keşfetmek İçin Bir Sure Seçin">
-          <div className="w-full flex justify-center">
-            <SurahCarousel>
-              {surahs.map((surah, index) => (
-                <SurahCard key={surah.id} surah={surah} index={index} />
-              ))}
-            </SurahCarousel>
-          </div>
+          <HeroSurahExplorer surahs={surahs} />
         </AnimatedCarouselSection>
       </div>
     </main>
