@@ -77,11 +77,19 @@ function HighlightChunk({
   solo?: boolean;
   children: React.ReactNode;
 }) {
+  const transparentColor = color.startsWith("#") ? withAlpha(color, 0) : "transparent";
+
   return (
     <span
       style={{
-        color: active ? color : "inherit",
-        transition: "color 0.55s ease",
+        color: "inherit",
+        backgroundImage: `linear-gradient(to left, ${transparentColor} 0%, ${color} 12px, ${color} calc(100% - 12px), ${transparentColor} 100%)`,
+        backgroundPosition: "100% 100%",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: active ? "100% 2px" : "0% 2px",
+        transition: "background-size 0.55s ease",
+        WebkitBoxDecorationBreak: "clone",
+        boxDecorationBreak: "clone",
         ...(solo
           ? {
               display: "flex",
