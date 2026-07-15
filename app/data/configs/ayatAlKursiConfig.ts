@@ -32,7 +32,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   heroSubtitle: "kürsî",
 
   scriptInfo: {
-    title: "2 Bakara",
+    title: "Bakara: 255",
     sayfa: 42,
     juz: 3,
     hizb: 5,

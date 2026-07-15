@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import {
   useStoryStore,
   getActiveStoryConfig,
 } from "@/app/stores/useStoryStore";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import type { SurahDataShape, Verse } from "@/app/data/SurahConfig";
+import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 
 const GOLD = "#C4963B";
 
@@ -77,11 +78,69 @@ function HighlightChunk({
   solo?: boolean;
   children: React.ReactNode;
 }) {
+  const wash = (a: number) =>
+    color.startsWith("#") ? withAlpha(color, a) : color;
+  // Warm text glow when active
+  const glow = color.startsWith("#") ? withAlpha(color, 0.55) : "transparent";
+
+  // ── "Qalam ink wash" — three stacked layers, all sweeping right → left ──
+  // 1) Gold-light shimmer: a narrow diagonal band of warm light that travels
+  //    across the verse ONCE, right after the wash settles (delayed
+  //    background-position transition through a 300%-wide layer).
+  const shimmerLayer = `linear-gradient(105deg,
+    transparent 43%,
+    rgba(255, 248, 218, 0.07) 47%,
+    rgba(255, 252, 235, 0.28) 50%,
+    rgba(255, 248, 218, 0.07) 53%,
+    transparent 57%)`;
+  // 2) Ink grain: uneven horizontal density, like a real reed-pen stroke —
+  //    slightly heavier where the stroke begins (right, in RTL).
+  const grainLayer = `linear-gradient(to left,
+    ${wash(0.16)} 0%, ${wash(0.02)} 10%, ${wash(0.1)} 27%,
+    ${wash(0.02)} 45%, ${wash(0.11)} 64%, ${wash(0.03)} 82%,
+    ${wash(0.13)} 100%)`;
+  // 3) Wash body: vertically feathered, faintly bottom-weighted — soft edges
+  //    that melt into the page instead of a hard capsule fill.
+  const washLayer = `linear-gradient(to bottom,
+    transparent 2%, ${wash(0.09)} 20%, ${wash(0.2)} 48%,
+    ${wash(0.22)} 68%, ${wash(0.09)} 88%, transparent 100%)`;
+
   return (
     <span
       style={{
-        color: active ? color : "inherit",
-        transition: "color 0.55s ease",
+        color: "inherit",
+        // Subtle always-visible capsule base
+        backgroundColor: "rgba(255,255,255,0.045)",
+        backgroundImage: [shimmerLayer, grainLayer, washLayer].join(", "),
+        backgroundRepeat: "no-repeat",
+        // Shimmer band travels via position (0% → 100% reads right → left
+        // for an oversized layer); wash + grain stay anchored right.
+        backgroundPosition: [
+          active ? "100% 50%" : "0% 50%",
+          "100% 50%",
+          "100% 50%",
+        ].join(", "),
+        backgroundSize: [
+          "300% 100%",
+          active ? "100% 100%" : "0% 100%",
+          active ? "100% 100%" : "0% 100%",
+        ].join(", "),
+        borderRadius: isPill ? "999px" : "5px",
+        padding: "0.08em 0",
+        transition: [
+          "background-size 1.15s cubic-bezier(0.16, 1, 0.3, 1)",
+          active
+            ? "background-position 2.2s cubic-bezier(0.45, 0, 0.25, 1) 0.85s"
+            : "background-position 0.25s ease",
+          "text-shadow 0.9s ease",
+          "filter 0.9s ease",
+        ].join(", "),
+        textShadow: active
+          ? `0 0 18px ${glow}, 0 0 6px ${withAlpha(color, 0.3)}`
+          : "none",
+        filter: active ? "brightness(1.15)" : "brightness(1)",
+        WebkitBoxDecorationBreak: "clone",
+        boxDecorationBreak: "clone",
         ...(solo
           ? {
               display: "flex",
@@ -118,6 +177,154 @@ function AyahNumber({ n }: { n: number }) {
     >
       {n}
     </span>
+  );
+}
+
+// ── Sidebar toggle — single button that physically moves between slots ──
+function SidebarToggle({
+  isOpen,
+  onToggle,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <MotionConfig transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}>
+      <OverlayButton
+        layoutId="sidebar-toggle"
+        layout
+        onClick={onToggle}
+        aria-label={isOpen ? "Collapse surah panel" : "Expand surah panel"}
+        aria-expanded={isOpen}
+        className="w-[23px] h-[23px] text-foreground"
+      >
+        <svg
+          width="23"
+          height="23"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.55"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          overflow="visible"
+        >
+          {/* Outer frame — always present */}
+          <motion.rect x="3" y="4.5" width="18" height="15" rx="2.8" />
+
+          {/* Left divider */}
+          <motion.line
+            animate={{ opacity: isOpen ? 1 : 0.3 }}
+            x1="9.5"
+            y1="4.5"
+            x2="9.5"
+            y2="19.5"
+          />
+
+          {/* Chevron — morphs direction */}
+          <motion.polyline
+            animate={{
+              points: isOpen
+                ? "7,9.5 4.5,12 7,14.5"
+                : "13.5,9.5 16,12 13.5,14.5",
+            }}
+            points="7,9.5 4.5,12 7,14.5"
+            fill="none"
+          />
+
+          {/* Subtle content lines (visible when open) */}
+          <motion.line
+            animate={{ opacity: isOpen ? 0.35 : 0 }}
+            x1="12.5"
+            y1="9"
+            x2="18"
+            y2="9"
+          />
+          <motion.line
+            animate={{ opacity: isOpen ? 0.35 : 0 }}
+            x1="12.5"
+            y1="12"
+            x2="17"
+            y2="12"
+          />
+          <motion.line
+            animate={{ opacity: isOpen ? 0.35 : 0 }}
+            x1="12.5"
+            y1="15"
+            x2="18"
+            y2="15"
+          />
+        </svg>
+      </OverlayButton>
+    </MotionConfig>
+  );
+}
+
+// ── Animated brand — slow crossfade loop: logo ↔ title every ~5 s ───────────
+const BRAND_HOLD_MS = 5000; // how long each face stays visible
+
+function AnimatedBrand({ title }: { title?: string }) {
+  // showTitle toggles on interval; resets to false when surah changes
+  const [showTitle, setShowTitle] = useState(false);
+
+  useEffect(() => {
+    setShowTitle(false);
+    if (!title) return;
+    const id = setInterval(() => setShowTitle((v) => !v), BRAND_HOLD_MS);
+    return () => clearInterval(id);
+  }, [title]);
+
+  // Very slow ease — luxurious, not mechanical
+  const fade = { duration: 1.6, ease: [0.4, 0, 0.2, 1] as const };
+
+  const containerCls = `relative
+    h-[16px] w-[99px]
+    lg:h-[clamp(18px,1.5vw,40px)] lg:w-[clamp(112px,9.3vw,248px)]
+    [@media(min-width:3000px)]:h-[clamp(40px,1.7vw,56px)]
+    [@media(min-width:3000px)]:w-[clamp(248px,10vw,340px)]`;
+
+  return (
+    <div className={containerCls}>
+      {/* ── Logo — fades out when title takes over ── */}
+      <motion.div
+        aria-label="Quranpatterns"
+        role="img"
+        className="absolute inset-0 text-foreground"
+        animate={{ opacity: showTitle ? 0 : 1 }}
+        transition={fade}
+        style={{
+          backgroundColor: "currentColor",
+          WebkitMask: "url(/Quranpatterns.svg) no-repeat center / contain",
+          mask: "url(/Quranpatterns.svg) no-repeat center / contain",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Title — fades in over the logo ── */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        animate={{ opacity: showTitle ? 1 : 0 }}
+        transition={fade}
+        style={{ pointerEvents: "none" }}
+      >
+        <motion.span
+          className="whitespace-nowrap text-foreground text-[16px] lg:text-[clamp(19px,1.7vw,40px)]"
+          // On each entrance: letterSpacing settles slowly from wide to tight
+          animate={
+            showTitle
+              ? { letterSpacing: "-0.02em" }
+              : { letterSpacing: "0.12em" }
+          }
+          transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            fontFamily: "var(--font-fraunces), serif",
+            fontWeight: 300,
+          }}
+        >
+          {title}
+        </motion.span>
+      </motion.div>
+    </div>
   );
 }
 
@@ -161,8 +368,8 @@ export function SurahScriptSidebar() {
   // Fatiha's bismillah is verse 1 itself — every other surah gets it prepended.
   const showBismillah =
     !activeConfig.features.hideBismillah3D && !!arData.bismillah;
-  // Strip the decorative kashida elongation used by the 3D overlay.
-  const bismillah = arData.bismillah?.replace(/ـ+/g, "");
+  // Keep the decorative kashida elongation used by the 3D overlay so it appears wider and elegant.
+  const bismillah = arData.bismillah;
 
   // Verse ids highlighted at the current fold step (config-authored).
   const highlighted = new Set(
@@ -176,8 +383,7 @@ export function SurahScriptSidebar() {
 
   return (
     <>
-      {/* ── Top bar — menu icon / wordmark / panel toggle, pinned to the
-             top-left corner ─────────────────────────────────────────────── */}
+      {/* ── Top bar — wordmark + single animated sidebar toggle ─────────── */}
       <div
         className="fixed top-[clamp(10px,1.2vw,16px)] left-3 lg:left-5 z-[100]
           pointer-events-auto flex items-center
@@ -186,78 +392,38 @@ export function SurahScriptSidebar() {
           [@media(min-width:2000px)]:gap-[clamp(5rem,6.5vw,12rem)]
           [@media(min-width:3000px)]:gap-[clamp(7rem,8vw,18rem)]"
       >
-        <button
-          type="button"
-          onClick={() => setIsOpen((o) => !o)}
-          aria-label={isOpen ? "Collapse surah panel" : "Expand surah panel"}
-          aria-expanded={isOpen}
-          className="w-[22px] flex justify-start text-foreground opacity-70
-            hover:opacity-100 transition-opacity duration-300 cursor-pointer select-none"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          >
-            <line x1="4" y1="7" x2="20" y2="7" />
-            <line x1="4" y1="12" x2="15" y2="12" />
-            <line x1="4" y1="17" x2="20" y2="17" />
-          </svg>
-        </button>
+        {/* LEFT slot — button lives here when sidebar is CLOSED */}
+        <div className="w-[22px] flex justify-start">
+          {!isOpen && (
+            <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(true)} />
+          )}
+        </div>
 
-        {/* Wordmark SVG rendered as a CSS mask filled with currentColor, so
-            it follows the theme (the asset's own fill is a fixed dark brown
-            that would vanish on the dark background). Ratio 124:20. */}
+        {/* Animated brand — alternates between logo and surah title */}
+        <AnimatedBrand title={info?.title} />
+
+        {/* RIGHT slot — button lives here when sidebar is OPEN */}
+        <div className="w-[22px] flex justify-end">
+          {isOpen && (
+            <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(false)} />
+          )}
+        </div>
+      </div>
+
+      {/* ── Fold-story divider — thin line below the top bar ─────────────── */}
+      <div
+        className="fixed left-3 lg:left-5 z-[99] pointer-events-none"
+        style={{
+          top: "clamp(42px, 4vw, 68px)",
+          width: "clamp(140px, 18vw, 320px)",
+        }}
+      >
         <div
-          role="img"
-          aria-label="Quranpatterns"
-          className="text-foreground
-            h-[16px] w-[99px]
-            lg:h-[clamp(18px,1.5vw,40px)] lg:w-[clamp(112px,9.3vw,248px)]
-            [@media(min-width:3000px)]:h-[clamp(40px,1.7vw,56px)]
-            [@media(min-width:3000px)]:w-[clamp(248px,10vw,340px)]"
           style={{
-            backgroundColor: "currentColor",
-            WebkitMask: "url(/Quranpatterns.svg) no-repeat center / contain",
-            mask: "url(/Quranpatterns.svg) no-repeat center / contain",
+            height: "1px",
+            background: `linear-gradient(to right, rgba(180,180,180,0.35), rgba(180,180,180,0.08) 60%, transparent 100%)`,
           }}
         />
-
-        {/* Fixed-width slot so the wordmark never shifts when the toggle hides */}
-        <div className="w-[22px] flex justify-end">
-          <AnimatePresence>
-            {isOpen && (
-              <motion.button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                aria-label="Collapse surah panel"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className="text-foreground opacity-70 hover:opacity-100
-                  transition-opacity duration-300 cursor-pointer select-none"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                >
-                  <rect x="3" y="4.5" width="18" height="15" rx="3" />
-                  <line x1="9.5" y1="4.5" x2="9.5" y2="19.5" />
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
       </div>
 
       <AnimatePresence>
@@ -277,7 +443,7 @@ export function SurahScriptSidebar() {
               left-2 w-[160px] flex flex-col
               lg:left-[2vw] lg:w-[22vw]"
           >
-            {/* ── Surah title (no border) + surah info ─────────────────── */}
+            {/* ── Surah title + surah info — commented out (shown in top bar instead) ──
             {info && (
               <div
                 className="text-center flex-shrink-0"
@@ -307,6 +473,7 @@ export function SurahScriptSidebar() {
                 </div>
               </div>
             )}
+            ── */}
 
             {/* ── Flowing script text — grows to fill remaining aside height */}
             <div
@@ -317,17 +484,21 @@ export function SurahScriptSidebar() {
                 ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
             >
               {showBismillah && (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, filter: "blur(4px)", y: -5 }}
+                  animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                  transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
                   dir="rtl"
                   className="text-center text-[13px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
                   style={{
                     fontFamily: '"QuranFont", serif',
                     color: GOLD,
                     marginBottom: "clamp(10px, 1.2vw, 20px)",
+                    textShadow: `0 0 12px ${withAlpha(GOLD, 0.4)}`,
                   }}
                 >
                   {bismillah}
-                </div>
+                </motion.div>
               )}
 
               {singleAyahNumber !== undefined ? (
@@ -347,13 +518,15 @@ export function SurahScriptSidebar() {
                   }}
                 >
                   {ayahs.map((v) => (
-                    <HighlightChunk
-                      key={v.number}
-                      active={highlighted.has(v.number)}
-                      {...chunkAppearance(v.number)}
-                    >
-                      {v.text}
-                    </HighlightChunk>
+                    <span key={v.number}>
+                      <HighlightChunk
+                        active={highlighted.has(v.number)}
+                        {...chunkAppearance(v.number)}
+                      >
+                        {v.text}
+                      </HighlightChunk>
+                      {" "}
+                    </span>
                   ))}
                   <AyahNumber n={singleAyahNumber} />
                 </p>

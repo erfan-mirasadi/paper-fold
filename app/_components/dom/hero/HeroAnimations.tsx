@@ -33,14 +33,23 @@ export function AnimatedHeader() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
         style={{
-          fontFamily: "var(--font-cormorant), serif",
-          textShadow: "0 4px 12px rgba(0,0,0,0.5)",
-          fontSize: "clamp(2rem, 5vw, 5rem)",
           marginBottom: "clamp(16px, 2.5vh, 40px)",
         }}
-        className="leading-[1.1] font-normal tracking-[-0.02em] text-[#F4F1EA]"
+        className="flex justify-center text-[#F4F1EA]"
       >
-        QuranPatterns
+        <span className="sr-only">QuranPatterns</span>
+        <span
+          aria-hidden="true"
+          className="block"
+          style={{
+            height: "clamp(24px, 4vw, 56px)",
+            width: "clamp(149px, 24.8vw, 347px)",
+            backgroundColor: "currentColor",
+            WebkitMask: "url(/Quranpatterns.svg) no-repeat center / contain",
+            mask: "url(/Quranpatterns.svg) no-repeat center / contain",
+            filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))",
+          }}
+        />
       </motion.h1>
       <motion.div
         initial={{ opacity: 0 }}
