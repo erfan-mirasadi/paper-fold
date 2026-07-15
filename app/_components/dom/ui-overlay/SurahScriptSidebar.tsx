@@ -80,27 +80,15 @@ function HighlightChunk({
   return (
     <span
       style={{
-        borderRadius: isPill ? "2em" : "0.4em",
-        border: `1.5px solid ${active ? color : "transparent"}`,
-        boxShadow: active
-          ? `0 0 0.45em ${withAlpha(color, 0.3)}`
-          : "0 0 0em rgba(0, 0, 0, 0)",
-        backgroundColor: active ? withAlpha(color, 0.08) : "transparent",
-        padding: "0.06em 0.35em",
-        transition:
-          "border-color 0.55s ease, box-shadow 0.55s ease, background-color 0.55s ease",
+        color: active ? color : "inherit",
+        transition: "color 0.55s ease",
         ...(solo
           ? {
-              // flex child in the RTL flex-wrap container — keeps the number
-              // badge BESIDE the text on one line; the container handles wrapping.
               display: "flex",
               alignItems: "center",
               flexShrink: 0,
             }
-          : {
-              WebkitBoxDecorationBreak: "clone",
-              boxDecorationBreak: "clone",
-            }),
+          : {}),
       }}
     >
       {children}
@@ -359,14 +347,13 @@ export function SurahScriptSidebar() {
                   }}
                 >
                   {ayahs.map((v) => (
-                    <span key={v.number}>
-                      <HighlightChunk
-                        active={highlighted.has(v.number)}
-                        {...chunkAppearance(v.number)}
-                      >
-                        {v.text}
-                      </HighlightChunk>{" "}
-                    </span>
+                    <HighlightChunk
+                      key={v.number}
+                      active={highlighted.has(v.number)}
+                      {...chunkAppearance(v.number)}
+                    >
+                      {v.text}
+                    </HighlightChunk>
                   ))}
                   <AyahNumber n={singleAyahNumber} />
                 </p>
@@ -390,16 +377,15 @@ export function SurahScriptSidebar() {
                   {ayahs.map((v) => {
                     const { isPill, color } = chunkAppearance(v.number);
                     return (
-                      <span key={v.number}>
-                        <HighlightChunk
-                          active={highlighted.has(v.number)}
-                          isPill={isPill}
-                          color={color}
-                        >
-                          {v.text}
-                          <AyahNumber n={v.number} />
-                        </HighlightChunk>{" "}
-                      </span>
+                      <HighlightChunk
+                        key={v.number}
+                        active={highlighted.has(v.number)}
+                        isPill={isPill}
+                        color={color}
+                      >
+                        {v.text}
+                        <AyahNumber n={v.number} />
+                      </HighlightChunk>
                     );
                   })}
                 </p>
