@@ -16,6 +16,25 @@ export const ScrollHintOverlay: React.FC = () => {
     (s) => s.popUpAllOpen || s.popUpGroups.some((g) => g.isOpen),
   );
 
+  // Track whether the page actually has scrollable content (i.e. content taller than viewport).
+  // On short/small devices the paper already fits on screen and the hint is misleading.
+  const [isPageScrollable, setIsPageScrollable] = useState(false);
+
+  useEffect(() => {
+    const checkScrollable = () => {
+      setIsPageScrollable(document.body.scrollHeight > window.innerHeight + 1);
+    };
+    checkScrollable();
+    window.addEventListener("resize", checkScrollable);
+    // Also observe DOM mutations that may change page height
+    const ro = new ResizeObserver(checkScrollable);
+    ro.observe(document.body);
+    return () => {
+      window.removeEventListener("resize", checkScrollable);
+      ro.disconnect();
+    };
+  }, []);
+
   // Visible only when intro is finished and we haven't reached the very end of the story
   // We use 0.92 instead of 0.99 because Lenis max scroll sometimes doesn't reach exactly 1.0
   const isFoldStory =
@@ -23,7 +42,8 @@ export const ScrollHintOverlay: React.FC = () => {
     currentOffset < 0.92 &&
     currentOffset >= 0 &&
     !isElevated &&
-    !isPopUpActive;
+    !isPopUpActive &&
+    isPageScrollable; // Only show when there is actual content to scroll to
 
   const [isVisible, setIsVisible] = useState(false);
 

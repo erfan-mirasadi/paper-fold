@@ -331,7 +331,7 @@ export function SurahScriptSidebar() {
               {showBismillah && (
                 <div
                   dir="rtl"
-                  className="text-center text-[13px] lg:text-[clamp(14px,1.1vw,22px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
+                  className="text-center text-[13px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
                   style={{
                     fontFamily: '"QuranFont", serif',
                     color: GOLD,
@@ -347,7 +347,7 @@ export function SurahScriptSidebar() {
                 // each chunk individually highlightable. RTL paragraph.
                 <p
                   dir="rtl"
-                  className="text-[12px] lg:text-[clamp(14px,1.1vw,22px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
+                  className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
                   style={{
                     margin: 0,
                     padding: "0 0.5em",
@@ -377,7 +377,7 @@ export function SurahScriptSidebar() {
                 // each wrapped line). No solo, no nowrap, no flex.
                 <p
                   dir="rtl"
-                  className="text-[12px] lg:text-[clamp(14px,1.1vw,22px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
+                  className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
                   style={{
                     margin: 0,
                     padding: "0 0.3em",
