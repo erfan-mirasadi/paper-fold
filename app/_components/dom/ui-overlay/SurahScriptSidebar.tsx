@@ -351,7 +351,7 @@ export function SurahScriptSidebar() {
                   style={{
                     margin: 0,
                     padding: "0 0.5em",
-                    textAlign: "right",
+                    textAlign: "center",
                     fontFamily: '"QuranFont", serif',
                     lineHeight: 2.3,
                     overflowWrap: "break-word",
@@ -381,7 +381,7 @@ export function SurahScriptSidebar() {
                   style={{
                     margin: 0,
                     padding: "0 0.3em",
-                    textAlign: "right",
+                    textAlign: "center",
                     fontFamily: '"QuranFont", serif',
                     lineHeight: 2.6,
                     opacity: 0.85,
