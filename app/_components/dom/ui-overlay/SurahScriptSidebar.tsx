@@ -78,10 +78,32 @@ function HighlightChunk({
   solo?: boolean;
   children: React.ReactNode;
 }) {
-  // Colored sweep layer (slides in from right when active)
-  const sweepColor = color.startsWith("#") ? withAlpha(color, 0.22) : color;
+  const wash = (a: number) =>
+    color.startsWith("#") ? withAlpha(color, a) : color;
   // Warm text glow when active
   const glow = color.startsWith("#") ? withAlpha(color, 0.55) : "transparent";
+
+  // ── "Qalam ink wash" — three stacked layers, all sweeping right → left ──
+  // 1) Gold-light shimmer: a narrow diagonal band of warm light that travels
+  //    across the verse ONCE, right after the wash settles (delayed
+  //    background-position transition through a 300%-wide layer).
+  const shimmerLayer = `linear-gradient(105deg,
+    transparent 43%,
+    rgba(255, 248, 218, 0.07) 47%,
+    rgba(255, 252, 235, 0.28) 50%,
+    rgba(255, 248, 218, 0.07) 53%,
+    transparent 57%)`;
+  // 2) Ink grain: uneven horizontal density, like a real reed-pen stroke —
+  //    slightly heavier where the stroke begins (right, in RTL).
+  const grainLayer = `linear-gradient(to left,
+    ${wash(0.16)} 0%, ${wash(0.02)} 10%, ${wash(0.1)} 27%,
+    ${wash(0.02)} 45%, ${wash(0.11)} 64%, ${wash(0.03)} 82%,
+    ${wash(0.13)} 100%)`;
+  // 3) Wash body: vertically feathered, faintly bottom-weighted — soft edges
+  //    that melt into the page instead of a hard capsule fill.
+  const washLayer = `linear-gradient(to bottom,
+    transparent 2%, ${wash(0.09)} 20%, ${wash(0.2)} 48%,
+    ${wash(0.22)} 68%, ${wash(0.09)} 88%, transparent 100%)`;
 
   return (
     <span
@@ -89,15 +111,27 @@ function HighlightChunk({
         color: "inherit",
         // Subtle always-visible capsule base
         backgroundColor: "rgba(255,255,255,0.045)",
-        // Color sweep (right → left)
-        backgroundImage: `linear-gradient(to left, ${sweepColor}, ${sweepColor})`,
+        backgroundImage: [shimmerLayer, grainLayer, washLayer].join(", "),
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "right center",
-        backgroundSize: active ? "100% 100%" : "0% 100%",
+        // Shimmer band travels via position (0% → 100% reads right → left
+        // for an oversized layer); wash + grain stay anchored right.
+        backgroundPosition: [
+          active ? "100% 50%" : "0% 50%",
+          "100% 50%",
+          "100% 50%",
+        ].join(", "),
+        backgroundSize: [
+          "300% 100%",
+          active ? "100% 100%" : "0% 100%",
+          active ? "100% 100%" : "0% 100%",
+        ].join(", "),
         borderRadius: isPill ? "999px" : "5px",
         padding: "0.08em 0",
         transition: [
           "background-size 1.15s cubic-bezier(0.16, 1, 0.3, 1)",
+          active
+            ? "background-position 2.2s cubic-bezier(0.45, 0, 0.25, 1) 0.85s"
+            : "background-position 0.25s ease",
           "text-shadow 0.9s ease",
           "filter 0.9s ease",
         ].join(", "),
@@ -387,7 +421,7 @@ export function SurahScriptSidebar() {
         <div
           style={{
             height: "1px",
-            background: `linear-gradient(to right, ${withAlpha(GOLD, 0.7)}, ${withAlpha(GOLD, 0.15)} 60%, transparent 100%)`,
+            background: `linear-gradient(to right, rgba(180,180,180,0.35), rgba(180,180,180,0.08) 60%, transparent 100%)`,
           }}
         />
       </div>
