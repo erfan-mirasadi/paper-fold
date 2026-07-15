@@ -1,6 +1,12 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, useMotionValueEvent, animate } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  useMotionValueEvent,
+  animate,
+} from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useCameraStore } from "../../../stores/useCameraStore";
 import { useCameraViewStore } from "../../../stores/useCameraViewStore";
@@ -54,10 +60,18 @@ export function CameraViewPresetOverlay() {
     const clamp = (v: number) => Math.max(-120, Math.min(120, v));
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      animate(x, clamp(x.get() - KNOB_STEP), { type: "spring", stiffness: 400, damping: 30 });
+      animate(x, clamp(x.get() - KNOB_STEP), {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+      });
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
-      animate(x, clamp(x.get() + KNOB_STEP), { type: "spring", stiffness: 400, damping: 30 });
+      animate(x, clamp(x.get() + KNOB_STEP), {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+      });
     } else if (e.key === "Home") {
       e.preventDefault();
       animate(x, -120, { type: "spring", stiffness: 400, damping: 30 });
@@ -125,11 +139,15 @@ export function CameraViewPresetOverlay() {
         <motion.svg
           animate={isHovered ? { x: [-8, 8, -8] } : { x: 0 }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-          width="24" height="24" viewBox="0 0 512 512" fill="currentColor"
+          width="24"
+          height="24"
+          viewBox="0 0 512 512"
+          fill="currentColor"
           className="opacity-70"
         >
           <g transform="translate(1 1)">
-            <path d="M417.254,178.2c-9.387,0-18.773,3.413-25.6,8.533V178.2c0-23.893-18.773-42.667-42.667-42.667
+            <path
+              d="M417.254,178.2c-9.387,0-18.773,3.413-25.6,8.533V178.2c0-23.893-18.773-42.667-42.667-42.667
               c-9.387,0-18.773,3.413-25.6,8.533c0-23.893-18.773-42.667-42.667-42.667c-9.387,0-18.773,3.413-25.6,8.533V41.667
               C255.121,17.773,236.347-1,212.454-1s-42.667,18.773-42.667,42.667v193.707c-18.773-32.427-62.293-48.64-95.573-36.693
               c-4.267,0.853-7.68,3.413-11.947,5.973c-12.8,8.533-11.947,19.627-11.947,23.04c-0.853,5.12,0,5.973,11.947,19.627
@@ -149,7 +167,8 @@ export function CameraViewPresetOverlay() {
               s8.533-3.413,8.533-8.533v-62.293c0-14.507,11.093-25.6,25.6-25.6c14.507,0,25.6,11.093,25.6,25.6V357.4
               c0,15.106-2.777,27.428-6.161,36.621c-1.015,0.932-1.826,2.12-2.372,3.485c-4.267,12.8-16.213,17.067-37.547,23.04
               c-4.267,0.853-6.827,5.973-5.973,10.24c1.707,3.413,5.12,5.973,8.533,5.973c0.853,0,1.707,0,1.707,0.853
-              c5.648-1.521,11.128-3.098,16.289-4.954c-0.659,2.39-1.258,4.895-1.782,7.514C410.427,469.187,378.854,493.933,349.841,493.933z" />
+              c5.648-1.521,11.128-3.098,16.289-4.954c-0.659,2.39-1.258,4.895-1.782,7.514C410.427,469.187,378.854,493.933,349.841,493.933z"
+            />
           </g>
         </motion.svg>
       </motion.div>
