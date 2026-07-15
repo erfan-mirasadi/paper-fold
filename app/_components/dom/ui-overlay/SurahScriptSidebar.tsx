@@ -155,19 +155,21 @@ function HighlightChunk({
   );
 }
 
-/** Inline ayah-number badge — Latin digits inside a thin gold circle. */
+/** Inline ayah-number badge — the classic mushaf end-of-ayah rosette:
+ * eight rounded petals with small radiating points at the junctions.
+ * Drawn with `currentColor` so it always matches the surrounding script
+ * color. */
 function AyahNumber({ n }: { n: number }) {
   return (
     <span
-      className="w-[1.75em] h-[1.75em] text-[0.62em]"
+      className="w-[2.5em] h-[2.5em] text-[0.72em]"
       style={{
+        position: "relative",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        margin: "0 8px",
-        border: `1px solid ${GOLD}`,
-        borderRadius: "50%",
-        color: GOLD,
+        margin: "0 7px",
+        color: "inherit",
         lineHeight: 1,
         verticalAlign: "middle",
         fontFamily: "var(--font-sans)",
@@ -175,7 +177,35 @@ function AyahNumber({ n }: { n: number }) {
         flexShrink: 0,
       }}
     >
-      {n}
+      <svg
+        viewBox="0 0 40 40"
+        aria-hidden="true"
+        style={{ position: "absolute", inset: 0, overflow: "visible" }}
+      >
+        {/* Eight rounded petals */}
+        <path
+          d="M 20 7 A 5.12 5.12 0 0 1 29.19 10.81 A 5.12 5.12 0 0 1 33 20 A 5.12 5.12 0 0 1 29.19 29.19 A 5.12 5.12 0 0 1 20 33 A 5.12 5.12 0 0 1 10.81 29.19 A 5.12 5.12 0 0 1 7 20 A 5.12 5.12 0 0 1 10.81 10.81 A 5.12 5.12 0 0 1 20 7 Z"
+          fill="currentColor"
+          fillOpacity="0.05"
+          stroke="currentColor"
+          strokeWidth="1.35"
+          strokeLinejoin="round"
+        />
+        {/* Small radiating points at the petal junctions */}
+        <path
+          d="M 20 6.2 L 21.59 4.18 L 20 2 L 18.41 4.18 Z
+             M 29.76 10.24 L 32.31 9.94 L 32.73 7.27 L 30.06 7.69 Z
+             M 33.8 20 L 35.82 21.59 L 38 20 L 35.82 18.41 Z
+             M 29.76 29.76 L 30.06 32.31 L 32.73 32.73 L 32.31 30.06 Z
+             M 20 33.8 L 18.41 35.82 L 20 38 L 21.59 35.82 Z
+             M 10.24 29.76 L 7.69 30.06 L 7.27 32.73 L 9.94 32.31 Z
+             M 6.2 20 L 4.18 18.41 L 2 20 L 4.18 21.59 Z
+             M 10.24 10.24 L 9.94 7.69 L 7.27 7.27 L 7.69 9.94 Z"
+          fill="currentColor"
+          opacity="0.85"
+        />
+      </svg>
+      <span style={{ position: "relative" }}>{n}</span>
     </span>
   );
 }
@@ -489,12 +519,10 @@ export function SurahScriptSidebar() {
                   animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
                   transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
                   dir="rtl"
-                  className="text-center text-[13px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
+                  className="text-center text-foreground text-[13px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
                   style={{
                     fontFamily: '"QuranFont", serif',
-                    color: GOLD,
                     marginBottom: "clamp(10px, 1.2vw, 20px)",
-                    textShadow: `0 0 12px ${withAlpha(GOLD, 0.4)}`,
                   }}
                 >
                   {bismillah}
