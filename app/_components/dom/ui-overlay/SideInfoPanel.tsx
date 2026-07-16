@@ -468,6 +468,13 @@ export function SideInfoPanel() {
   const side = activeConfig.sideInfo;
   if (!side || (!side.byFoldStep && !side.byVerse)) return null;
 
+  // Landscape papers (wider than tall, e.g. fatihaLandscape) sit high on the
+  // screen and leave the band below them free — there the panel drops into
+  // the right half of that bottom band (still the right side, like the
+  // default). Portrait papers keep the original right-side column untouched.
+  const isLandscapePaper =
+    activeConfig.dimensions.paperWidth > activeConfig.dimensions.paperHeight;
+
   const panelTitle = side.panelTitle ?? "Tefsir";
   const emptyText =
     side.emptyText ??
@@ -476,36 +483,55 @@ export function SideInfoPanel() {
   return (
     <>
       {/* ── Divider — thin line below the top-right button row, mirroring
-          the left sidebar's divider ───────────────────────────────────── */}
-      <div
-        className="fixed right-3 lg:right-5 z-[99] pointer-events-none hidden sm:block"
-        style={{
-          top: "clamp(68px, 5vw, 84px)",
-          width: "clamp(140px, 18vw, 320px)",
-        }}
-      >
+          the left sidebar's divider. Only for the right-side (portrait)
+          panel; the landscape bottom panel carries no top-right divider. ─ */}
+      {!isLandscapePaper && (
         <div
+          className="fixed right-3 lg:right-5 z-[99] pointer-events-none hidden sm:block"
           style={{
-            height: "1px",
-            background: `linear-gradient(to left, rgba(180,180,180,0.35), rgba(180,180,180,0.08) 60%, transparent 100%)`,
+            top: "clamp(68px, 5vw, 84px)",
+            width: "clamp(140px, 18vw, 320px)",
           }}
-        />
-      </div>
+        >
+          <div
+            style={{
+              height: "1px",
+              background: `linear-gradient(to left, rgba(180,180,180,0.35), rgba(180,180,180,0.08) 60%, transparent 100%)`,
+            }}
+          />
+        </div>
+      )}
 
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 24 }}
+            initial={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: 24 }}
+            animate={isLandscapePaper ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+            exit={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: 24 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            style={{
-              top: "clamp(84px, 6.5vw, 260px)",
-              bottom: "clamp(20px, 2.5vw, 48px)",
-            }}
-            className="fixed z-[90] pointer-events-auto
-              right-2 w-[160px] hidden sm:flex flex-col
-              lg:right-[2vw] lg:w-[22vw]"
+            style={
+              isLandscapePaper
+                ? {
+                    // Bottom band, right half — aligned with the paper's
+                    // right edge, stopping short of the horizontal center,
+                    // and vertically centered between the paper's bottom
+                    // edge (~65vh) and the bottom of the screen.
+                    top: "71vh",
+                    bottom: "clamp(48px, 7vh, 96px)",
+                    right: "clamp(48px, 17vw, 380px)",
+                    width: "min(28vw, 520px)",
+                  }
+                : {
+                    top: "clamp(84px, 6.5vw, 260px)",
+                    bottom: "clamp(20px, 2.5vw, 48px)",
+                  }
+            }
+            className={`fixed z-[90] pointer-events-auto hidden sm:flex flex-col
+              ${
+                isLandscapePaper
+                  ? ""
+                  : "right-2 w-[160px] lg:right-[2vw] lg:w-[22vw]"
+              }`}
           >
             {/* ── Panel heading — quiet small caps, right-aligned ─────── */}
             <div

@@ -63,8 +63,8 @@ const PANEL_X_OFFSET = TARGET_INNER_W / 2 + PANEL_GAP_X / 2; // 0.46
 // Wide enough that TWO half-width TARGET_INNER_W columns + PANEL_GAP_X +
 // symmetric outer margin all fit; short enough that there's no dead space
 // below/above the (much shorter, 2-row-band) content stack.
-const PAPER_WIDTH = 2.54;
-const PAPER_HEIGHT = 1.4;
+const PAPER_WIDTH = 2.34;
+const PAPER_HEIGHT = 1.1;
 
 const SECTION_INNER_W = PAPER_WIDTH - PADDING * 2 - SECTION_PAD_X * 2; // 1.8
 // Shrinks verse-1's block AND each panel block down to TARGET_INNER_W,
@@ -96,6 +96,67 @@ export const FATIHA_LANDSCAPE_CONFIG: SurahLayoutConfig = {
     hizb: 1,
   },
 
+  // Side panel content (tafsir) — shown in the bottom-right band under the
+  // landscape paper. The single "end" fold step surfaces the intro entry,
+  // then the per-verse entries follow in reading order. Edit freely.
+  sideInfo: {
+    panelTitle: "Tefsir",
+    emptyText: "Kağıt açıldıkça ayetlerin kıssaları burada belirecek.",
+    byFoldStep: {
+      end: {
+        kicker: "Kur'anın Anahtarı",
+        title: "Fatiha'nın Simetrik Yapısı",
+        paragraphs: [
+          "Fatiha suresi yedi ayetten oluşur ve Kur'anın açılış suresidir. Besmele ile açılan sure, ikiz iki bölüm halinde akar: sağdaki bölüm Allah'ı öven ayetleri, soldaki bölüm ise kulun duasını taşır. Beşinci ayet — yalnız Sana kulluk eder, yalnız Senden yardım dileriz — iki bölümü birbirine bağlayan eksendir.",
+        ],
+      },
+    },
+    byVerse: {
+      1: {
+        title: "Besmele",
+        paragraphs: [
+          "Rahmân ve Rahîm olan Allah'ın adıyla. Her hayırlı işin başı olan Besmele, Fatiha'da surenin ilk ayeti olarak yer alır: okuyuş daha ilk sözde rahmetin kuşatıcılığıyla açılır.",
+        ],
+      },
+      2: {
+        title: "Hamd, Âlemlerin Rabbine",
+        paragraphs: [
+          "Bütün övgü, âlemlerin Rabbi olan Allah'a mahsustur. Görünen ve görünmeyen bütün varlık düzenleri O'nun terbiyesi altındadır; hamd, bu gerçeğin dille ikrarıdır.",
+        ],
+      },
+      3: {
+        title: "Rahmân, Rahîm",
+        paragraphs: [
+          "Rahmeti bütün yaratılmışları kuşatan ve müminlere özel merhametiyle muamele eden Allah. İki isim birlikte, rahmetin hem genişliğini hem inceliğini anlatır.",
+        ],
+      },
+      4: {
+        title: "Din Gününün Sahibi",
+        paragraphs: [
+          "Hesap gününün tek hâkimi O'dur. O gün hiçbir aracı, hiçbir güç fayda vermez; hüküm yalnız Allah'ındır.",
+        ],
+      },
+      5: {
+        title: "Kulluk ve Yardım",
+        paragraphs: [
+          "Yalnız Sana kulluk eder, yalnız Senden yardım dileriz. Surenin dönüm noktası: övgüden duaya, haberden hitaba geçilir — kul artık Rabbiyle yüz yüze konuşmaktadır.",
+        ],
+      },
+      6: {
+        title: "Dosdoğru Yol",
+        paragraphs: [
+          "Bizi dosdoğru yola ilet. Fatiha'nın kalbindeki istek hidayettir: her rekâtta yenilenen, ömür boyu süren bir yol isteme duası.",
+        ],
+      },
+      7: {
+        title: "Nimet Verilenlerin Yolu",
+        paragraphs: [
+          "Kendilerine nimet verdiklerinin yoluna; gazaba uğrayanların ve sapanların yoluna değil. Dua, örnek alınacak olanlar ve sakınılacak olanlarla somutlaşır ve sure âmin ile mühürlenir.",
+        ],
+      },
+    },
+  },
+
   // Fold-story → script sync: which script verses light up at each fold step.
   // Keys are `animations.foldSteps` ids; values are verse ids. Edit freely.
   scriptHighlights: {
@@ -112,7 +173,7 @@ export const FATIHA_LANDSCAPE_CONFIG: SurahLayoutConfig = {
   dimensions: {
     paperWidth: PAPER_WIDTH,
     paperHeight: PAPER_HEIGHT,
-    sceneCenterYOffset: 0,
+    sceneCenterYOffset: 0.25,
     padding: PADDING,
     scrollPages: 1.5,
     fixedWidthAcrossLanguages: true, // Do not widen paper for translation
@@ -274,7 +335,7 @@ export const FATIHA_LANDSCAPE_CONFIG: SurahLayoutConfig = {
 
   handwrittenNotes: [
     {
-      x: 1.25,
+      x: 1.15,
       y: -0.08,
       fontSize: 0.048,
       color: "#2f4858",

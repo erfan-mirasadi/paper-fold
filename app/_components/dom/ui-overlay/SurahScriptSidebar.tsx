@@ -389,6 +389,13 @@ export function SurahScriptSidebar() {
     return () => ro.disconnect();
   }, [isOpen, activeConfig.id, activeTextData]);
 
+  // Landscape papers (wider than tall, e.g. fatihaLandscape) sit high on the
+  // screen and leave the band below them free — there the script drops into
+  // the left half of that bottom band, wider than the usual side column.
+  // Portrait papers keep the original left-side column untouched.
+  const isLandscapePaper =
+    activeConfig.dimensions.paperWidth > activeConfig.dimensions.paperHeight;
+
   const arData = activeTextData.ar;
   const info = activeConfig.scriptInfo;
   const ayahs = collectAyahs(arData);
@@ -459,19 +466,36 @@ export function SurahScriptSidebar() {
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
+            initial={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: -24 }}
+            animate={isLandscapePaper ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+            exit={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: -24 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            style={{
-              // Anchor just below the top bar — top is larger to give proper
-              // breathing room at 4K where the logo/bar renders bigger.
-              top: "clamp(80px, 6.5vw, 260px)",
-              bottom: "clamp(20px, 2.5vw, 48px)",
-            }}
-            className="fixed z-[90] pointer-events-auto
-              left-2 w-[160px] flex flex-col
-              lg:left-[2vw] lg:w-[22vw]"
+            style={
+              isLandscapePaper
+                ? {
+                    // Bottom band, left half — aligned with the paper's left
+                    // edge, stopping short of the horizontal center, and
+                    // vertically centered between the paper's bottom edge
+                    // (~65vh) and the bottom of the screen.
+                    top: "71vh",
+                    bottom: "clamp(48px, 7vh, 96px)",
+                    left: "clamp(48px, 17vw, 380px)",
+                    width: "min(28vw, 520px)",
+                  }
+                : {
+                    // Anchor just below the top bar — top is larger to give
+                    // proper breathing room at 4K where the logo/bar renders
+                    // bigger.
+                    top: "clamp(80px, 6.5vw, 260px)",
+                    bottom: "clamp(20px, 2.5vw, 48px)",
+                  }
+            }
+            className={`fixed z-[90] pointer-events-auto flex flex-col
+              ${
+                isLandscapePaper
+                  ? ""
+                  : "left-2 w-[160px] lg:left-[2vw] lg:w-[22vw]"
+              }`}
           >
             {/* ── Surah title + surah info — commented out (shown in top bar instead) ──
             {info && (
@@ -511,7 +535,12 @@ export function SurahScriptSidebar() {
               {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
               className={`flex-1 min-h-0 overscroll-contain
                 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
+                ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}
+                ${
+                  isLandscapePaper && !hasOverflow
+                    ? "flex flex-col justify-center"
+                    : ""
+                }`}
             >
               {showBismillah && (
                 <motion.div
