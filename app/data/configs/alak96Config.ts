@@ -259,7 +259,6 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
         kicker: "1. Açıklama Bölümü",
         title: "Şimdi Bak Şu Adama",
         paragraphs: [
-          "Bak şimdi başka bir insan (Ebu Cehil), güneş gibi apaçık olan Risalet-i Muhammediyeyi inkar ve taşkınlık ediyor.",
           {
             capsules: [
               {
