@@ -23,6 +23,37 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     "pre-start": [1, 4],
     end: [1, 2, 3, 4],
   },
+
+  // Right-hand tafsir panel (SideInfoPanel). Content transcribed verbatim
+  // from the reference tafsir book, pages 372 and 374 (p.373 not provided).
+  sideInfo: {
+    panelTitle: "Tefsir",
+    byFoldStep: {
+      "pre-start": {
+        kicker: "1 ve 4. Ayetler",
+        title: "Müspet ve Menfi Cümleler",
+        paragraphs: [
+          "İlk iki ayet müspet cümlelerle ezeli ebedi değişmez hakikati ilan ediyorlar.",
+          "Son iki ayet de menfi cümlelerle insanların yanıldıkları noktaları düzeltiyorlar.",
+          "Sure; iki müspet ve iki menfi cümle şeklinde de ikili bir düzen içinde gelmiş.",
+          "İhlas suresinin ilk ayeti ana ayettir. Surenin ana manasını veriyor. Allah birdir, diyor. Ezelden ebede değişmez gerçeği, en mühkem hakikati ifade ediyor.",
+        ],
+      },
+    },
+    byVerse: {
+      // ── Verse 3: "Doğurmamış ve doğurulmamıştır" — Allahın ailesi yoktur ──
+      3: {
+        kicker: "3. Ayet",
+        title: "Allahın Bir Ailesi Yoktur",
+        paragraphs: [
+          "O Tek'dir ve Samet'tir; Allah baba, Rab baba, Anne Tanrı, Oğul Tanrı, Kız Tanrı gibi bir ailesi de yoktur.",
+          "Eski Yunanda da insanlar Olimpus dağında yaşayan böyle kalabalık bir tanrılar ailesini tasavvur ediyorlardı. İnsanlık bu saçmalıklardan kurtulmalıdır.",
+          "Allah birdir. Allahın yanında ana tanrı, oğul tanrı var diyerek Allah'a iftira edenler Allahın hiç razı olmadığı büyük bir şirk suçu işlemektedirler.",
+        ],
+      },
+    },
+  },
+
   heroTitle: "İhlas Suresi",
   heroSubtitle: "Ihlas Suresi 112",
 

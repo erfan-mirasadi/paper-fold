@@ -23,6 +23,90 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
     "pre-start": [1, 6],
     end: [1, 2, 3, 4, 5, 6],
   },
+
+  // Right-hand tafsir panel (SideInfoPanel). Content transcribed verbatim
+  // from the reference tafsir book, pages 355-359 (read in page order:
+  // 355, 356, 357, 358, 359).
+  sideInfo: {
+    panelTitle: "Tefsir",
+    byFoldStep: {
+      "pre-start": {
+        kicker: "1 ve 6. Ayetler",
+        title: "Kafirun Suresi: Uzlaşma Çağrısı",
+        paragraphs: [
+          'Bu Sure İslam dinine karşı kesin tavır almış, inanmamakta kararlı olan bir kısım Mekkeli kafirlere; "HERKES KENDİ YOLUNA GİTSİN, MEKKEDE BERABER ve BARIŞ İÇİNDE YAŞAYALIM" DİYOR..',
+          "Kimse kimseyi inancından ve ibadetinden dolayı kınamasın, alay etmesin, taciz etmesin.",
+          "Alemlere Rahmet Hz. Muhammed AS. Efendimiz Mekke'de Peygamberlikle görevlendirilince insanları bir olan Allah'a inanmaya ve yalnız Allah'a ibadet etmeye çağırdı.",
+          "Hasbi gönüller Rasulullah'ın bu davetine kulak verip ona iman ediyorlar ve müslüman olanların sayısı her geçen gün artıyordu. Belli ki yeni bir dinin ve yeni bir dünya görüşünün temelleri atılıyordu.",
+          "Bazı müşrikler kendi eski inanç ve ibadetlerine uymayan bu dine karşı tavır aldılar ve hatta Müslümanlara Mekkede hayat hakkı tanımak istemediler. Zayıf Müslümanlara işkence ediyor, hepsine akıl almaz sıkıntılar veriyorlardı.",
+          "Bu bitmeyen işkenceler ve sıkıntılar sonucunda Müslümanlar Mekke'de, kendi öz yurtlarında yaşayamaz duruma gelmişler, büyük guruplar halinde önce Habeşistan'a ve sonra da Medine'ye hicret etmişlerdir. Aileler bölünmüştür. Ancak yaptıkları bunca zulüm bile Mekke kafirlerinin hırslarını tatmin etmemiştir.",
+          "Halbuki Mekke'de Müslümanların istekleri gayet masum ve anlaşılır bir şeydi; 1. (Doğup büyüdükleri memleketlerinde) insanca yaşamak istiyorlardı. 2. Özgürce seçtikleri İslam dinini özgürce yaşamak istiyorlardı.",
+          "Kur'an-ı Kerim, en olumsuz, en yanlış inanış ve davranışlardan bile evrensel doğrular çıkaran bir üsluba sahiptir. Hiçbir problemi çözümsüz bırakmaz. Bu Surede de, çeşitli inanç ve görüşteki insanların ve birbirlerine zarar vermeden beraberce yaşamaları teklifini getiriyor.",
+          "Kafirun Suresi önce Allah Rasulünün putlara tapmama tavrını açıkça ifade ediyor. Bu tavır, en doğal bireysel haktır. Kur'an bu hakka vurgu yapıyor peygamber efendimize de bu hakkı kullandırıyor.",
+          '"Ben sizin gibi düşünmüyorum, ben sizin inandığınız şeye inanmıyorum, ben sizin taptığınız şeylere tapmıyorum" deme hakkı vardır.',
+          "Müslümanların ikinci talepleri de; Mekke'de herkes neye inanmak istiyorsa öyle yaşamak istiyorsa öyle yaşasın ve Mekke'de beraberce barış içinde yaşayalım. Kimse kimseye karışmasın, şeklindeydi.",
+          "Bu makul, bu medeni teklif dünya var oldukça değerinden hiçbir şey kaybetmeyecek doğru bir tekliftir. Doğru bir duruştur.",
+          "Yukarıdaki yazılış Kur'an-ı Kerimin pek çok yerinde gördüğümüz şekle daha uygundur. Buna göre şu kısa surenin içinde iki bölüm var. Her iki bölümde de bir ayeti iki ayet açıyor, tafsil ediyor.",
+          "Sure mealinin sistematik olarak yazılışı: \"1. De ki, Ey (benim dinime) inanmayanlar! 2. Ben sizin taptıklarınıza (tapmadım), tapmıyorum. 3. Siz de benim ibadet ettiğim Allah'a ibadet etmiyorsunuz. 4. Ben sizin taptıklarınıza tapacak değilim. 5. Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiz. 6. Sizin dininiz size, benim dinim bana !\"",
+          "Surenin ana manasını sarı renkle gösterdiğimiz ayetler veriyor. Açık mavi ve açık yeşil renklerle gösterdiğimiz çift ayetler benzeşen (müteşabih) ayetlerdir. Açıklama ayetleridir. Ana ayetin gerekçesini açıklıyorlar.",
+          "Evet surenin ana ayeti birinci ve altıncı ayetlerdir: \"1. De ki, Ey (benim dinime) inanmayanlar!\" → \"6. Sizin dininiz size, benim dinim bana !\"",
+        ],
+      },
+    },
+    byVerse: {
+      // ── Verses 2-5: the twin tafsil (açıklama) ayet pairs ────────────────
+      2: {
+        kicker: "2-5. Ayetler",
+        title: "Muhkem ve Müteşabih Ayetler",
+        paragraphs: [
+          "Dikkat edilirse bu iki ayet bulundukları yerde tek ayet olarak duruyorlar. Fakat baştaki tek ayet sondaki tek ayetle bütünleşip çift ayet gibi haline geliyorlar. Başka bir ifadeyle: tek ayetler muhkem ayetlerdir. Değişmez gerçeği söylerler. Aradaki çift ayetler ise müteşabih benzeşen ayetlerdir. Benzeşen ayetler daima çift ayetlerdir, biri diğerine benzer ve biri diğerini tamamlar.",
+          "Bu ayetlerin muhatabı olan kafirler, Kur'ana ve Peygamber Efendimize inanmamakta kesin kararlı olan Peygamberimizle sürekli mücadele içinde ki Kureyşin ileri gelenleridir. Bunlar muannit kafirlerdir. Yoksa henüz iman etmemiş olan fakat düşmanlık içinde olmayan halkı değildir.",
+          "Yukarıdaki ana ayetleri okuduktan sonra: Rabbim senin bu emrini daha iyi anlayabilmemiz için biraz daha açar mısın diye soruyoruz. Cenab-ı Hak bu mukadder soruya cevaben şu dört ayetle emrinin gerekçesini de lütfediyor. De ki: \"2. Ey Kafirler, Ben sizin taptığınız şeylere tapmıyorum. 3. Siz de benim ibadet ettiğim tek Allah'a ibadet etmiyorsunuz. 4. Ben sizin Allahtan başka taptıklarınıza da tapacak değilim 5. Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiniz..\"",
+          "Bu ayetlerden son ayetten anlıyoruz ki kafirlerle, müşriklerle din ve inanç konusunda katiyen hiçbir uzlaşma ve anlaşma yok. Peygamber Efendimiz müşriklere; Ey müşrikler; dinlerimizi ve ibadetlerimizi birleştirelim, ben sizin taptıklarınıza da benim Allahıma ibadet edin demiyor. Aksine Peygamber Efendimiz Allahın emriyle: Ben sizin yanlış anlaşılacak tek teklifinize asla tapmayacağım, diyor. Kendi inancı ve ibadetinden hiçbir taviz vermiyor. Yalnızca; Mekke'de sizin benimle sürekli kavga halinde olmanıza hiçbir faydası yok, siz de zaten kendi yolunuza gidiyorsunuz, bırakın ben de yoluma gideyim diyor.",
+          "Peygamber Efendimiz Sallahü aleyhi ve sellem, bütün cihana ulaştırılması gereken bir mesaj sahibidir. Mekke'de bir avuç kafirle kavga ederek vakit kaybetmek istemiyor. Onun mesajını bekleyen koca bir dünya var. Onun için Mekke'deki 'kavgacı kafirler' problemini, bir sulh anlaşmasıyla çözmek istiyor. Ancak zalim kafirlerin böyle bir barış anlaşmasına yanaşmaları karşısında Peygamber Efendimiz Medineye hicret etmek zorunda kalmış ve bu problemi ancak hicretle aşabilmiştir. Mekke'nin azılı kafirleri Efendimizi ve Müslümanları Mekke'de daima zorla bırakmamışlardır. Ama artık şartlar değişmiştir.",
+          "Dikkat edilirse bu surede kafirlere, siz yanlış yoldasınız, siz batıl tanrılara tapıyorsunuz gibi bir suçlama ve tarizde bulunulmuyor. İnançlar değerlendirilmiyor. Bu surenin bu ince ifadeleri, başka din ve milletlerle görüşerek, tanışarak insanları Allahın dinine, tevhit dinine çağıracak olan müminlere, cedelleşmeden hizmet etme yolunu gösteriyor.",
+          "İkinci ayet, üçüncü ayetin ikizi yani benzeşenidir. Anlamca benzeşen ayetler oldukları kolayca anlaşılıyor.",
+          "4. ayetle 5. ayetin de anlamca hatta lafızca benzeşen ikili ayet oldukları gayet açık.",
+          "Sonra da her iki ayet diğer iki ayetle benzeşen ikiz guruplar oluşturuyorlar.",
+          '"Suredeki ayetler ikizi olduğu gibi, "Benim taptığım Allah ve sizin taptığınız putlar", "Ben tapmıyorum ve siz tapmıyorsunuz", "benim dinim" ve "sizin dininiz" gibi her şey birbirine zıt simetrik ve ikili bir şekilde anlatılıyor.',
+          "Katlanabilir simetrik Kur'an: Bu sureyi de tam ortasından, yukarıdan aşağıya sarı renkle ayetleri üst üste getirerek katlayınız. Ana manayı ifade eden ayetlerin ve geçmiş zamanla gelecek zamanın üst üste geldiğini göreceksiniz. Sonra bir de sağdan sola katlayınız ve simetrik anlamların nasıl üst üste geldiğine bakınız. Bu durumun bütün Kur'an için geçerli olduğunu diğer sureleri incelerken de görüyoruz.",
+          "Sonra bu sureyi biraz farklı bir ifadeyle açarak şöyle de yazabiliriz: \"1. De ki, Ey (benim dinime) inanmayan ve sürekli benimle mücadele edip duranlar! 2. (Görüyorsunuz ki ben bugüne kadar) sizin taptığınız putlara tapmadım, tapmıyorum. 3. Siz de benim ibadet ettiğim tek Allah'a ibadet etmediniz, etmiyorsunuz. 4. Madem ben bundan sonra da sizin taptıklarınıza tapmayacağım, 5. Ve madem siz de benim taptığım tek Allah'a tapmayacaksınız. 6. (O halde) Sizin dininiz size, benim dinim bana! Sizin putlara inandığınız ve taptığınız gibi, benim de inanma ve ibadet etme hakkım vardır. (Bırakalım herkes kendi iradesiyle seçimini yapsın ve dilediği yola gitsin. Gelin böyle, vicdanları özgür bırakan bir prensipte anlaşalım, huzur içinde bir arada yaşayalım.) Aramızdaki beşeri ilişkiler eskisi gibi devam etsin. Gerçekler zaman içinde daha iyi görülecektir. Aksine benim görevim Allah'ın emrini insanlara tebliğ etmek ve uyarmaktır, gerisi kendilerinin bilecekleri bir iştir. İster iman eder kendilerini kurtarırlar, ister müşrik olarak kalır kendilerini ebedi helakete atarlar.\"",
+        ],
+      },
+      // ── Verse 6: "Sizin dininiz size, benim dinim bana!" — sonuç ilkeleri ─
+      6: {
+        kicker: "6. Ayet",
+        title: "Sonuç: Birlikte Yaşama İlkeleri",
+        paragraphs: [
+          "Bir memlekette yaşayan farklı inanca, düşünceye veya dine mensup insanlardan bir gurup, güç kullanarak diğer gurubu kendi inanç ve görüşlerini kabule zorlamalı mı? Gücüne dayanarak farklı görüşleri yasaklamalı mı?",
+          "Farklı düşünenleri hapsedip işkence mi etmeli?",
+          "Veya yönetimden, ticaretten, sosyal hayattan tecrit mi etmeli?",
+          "Veya onları toptan yok etmenin yollarını mı aramalı?",
+          "Yahut onları şehir dışına, ülke dışına mı sürmeli?",
+          "Buradaki sorular çoğaltılabilir. Geçmişte dünyanın pek çok yerinde bu şıkların hepsi ve hatta daha fazlası uygulanmış ve yaşanmış şeyler. İşte bunlar fazlasıyla Mekke'de de yaşandı.",
+          "Kur'an diyor ki: Bunların hiçbiri olmamalı ! Çünkü bu yolların hepsi zulümdür. İnsan haklarına tecavüzdür.",
+          "Yapılması gereken şudur: Beraberce barış içinde yaşanmalı ve farklı inançlarla beraber yaşama kültürü geliştirilmelidir. Toplumlar içinde farklı düşünce ve farklı inançlar her zaman olacaktır.",
+          "Kimseye zarar vermedikçe farklılıkları hoş görmek, varlığını kabul etmek, hazmetmek hatta farklı düşünce ve inanca sahip olanların haklarını savunmak, gerekli bir olgunluktur.",
+          "Farklılıkları dışlayan, sürekli bir sürtüşme ve kavga sebebi yapan toplumlar huzurlarını ve yıllarını kaybettikleri gibi çoğu zaman da kendileri için şans olan farklı değerleri kaybederler.",
+          "Güce dayanarak kendi düşünce ve inancını herkese dayatmak, kabule zorlamak zulümdür. Farklı olanları yok etme hırsına kapılmak ise bir cinnettir. Sevinecek bir husustur ki Müslüman toplumlar hiçbir zaman böyle bir cinnete kapılmamışlardır.",
+          "Kendi düşünce ve inancını, kendi güzelliklerini müspet bir şekilde ortaya koymak, yapıcı ıslahçı tavırlarla başkalarını da inancına davet etmek meşru bir yoldur.",
+          "Barışçı üslupta ısrar etmek bir sabır işidir ve bir kahramanlıktır. Haksızlık yapanların haksızlık yaparak karşılık vermek meşruiyetini kaybetmektir.",
+          "Bugün insanlık geçmişe göre olgunlaşma yolundadır. Hukuk gelişmiş, insan haklarına saygı önem kazanmış, hemen her yerde güvenlik sağlanmış, bilim ve teknoloji gelişmiş, insanlar özgürleşmiş ve zenginleşmiştir.",
+          "İnsana baktığımız zaman onun ırkını, rengini veya inancını değil; kendisini yani \"insanı\" görmenin zemini ve şartları da hazır sayılır.",
+          "Ayrıca bugün dünya küçülmüş, ülkeler arası mesafeler kısalmıştır. Ticaret sınır tanımıyor. Her ülkenin ürettiği şeyler başka milletler tarafından tüketiliyor. Ulaşım ve iletişim imkanları tasavvurların bile ötesine geçmiştir.",
+          "Peygamber Efendimizin ve ilk Müslümanların hukuku olmadığı o zamanlarda karşılaştıkları pek çok zorluklar bugün bazı gelişmemiş ülkelerde devam etse de, gelişmiş ülkelerde büyük oranda ortadan kalkmıştır, kalkmaktadır.. Böylece Müslümanların, kendi seviyelerini yükselterek, insan kalitesini artırarak, evrensel değerleri bünyesinde taşıyan İslam dinini iyi bir temsille dünyaya tanıtmalarının önü açılmıştır.",
+          "Ey Müslümanlar, Bir olan Allahın adını herkese duyurmak, Kur'anın mesajını her yere taşımak, her müslümanın görevidir. Bu görevi yaparken kesinlikle İslamın özünden taviz vermediğiniz gibi İslamın özünde var olmayan sertlikten, şiddetten de uzak durunuz. Hakkın vesilesi de hak olmalıdır. Sakın doğru yolda giderken batıl vesilelere tevessül etmeyiniz.",
+          "Haklı davanızda haksız duruma düşmeyiniz.",
+          "İslamın üslubu sevgi ve şefkat boyutludur. Bu ölçüyü kaybetmeden güzelliklerinizi insanlığa ulaştırınız.",
+          "Ayrıca, inanç ve ibadet selametinizi bahane ederek kendinizi toplumdan soyutlamayınız. Bölünmüş alanlarda yaşama gayreti içinde olmayınız. Tam bunun aksine, iyi komşuluk ilişkileri içinde başkalarıyla beraber yaşamak görevinizdir.",
+          "Bu makul teklif, dünya var oldukça değerinden hiçbir şey kaybetmeyecek doğru bir tekliftir. Doğru bir duruştur.",
+          "Bütün insanlığı isteyen Kur'anın maksadı kavga olamaz. Kur'an, bir kaşık suda fırtına koparılmasına ve bu büyük davanın küçük bir coğrafyada, küçük insanlarla kavga ederek enerji tüketmesine, küçük meselelerde boğulmasına müsaade etmez.",
+          "Müşrikler Peygamber Efendimizi kendi şehri olan Mekkede barındırmamış ve onu öldürmeye çalışmışlar ve sonunda Onu Medineye hicret etmeye mecbur bırakmışlardır. Ama Peygamber Efendimiz ne önce ne de Mekke' fethettikten sonra Mekkelileri Mekkeden sürüp çıkarma planları yapmamıştır ve çıkarmamıştır. Aksine onlara bütün beşeri haklarını vererek beraberce barış içinde yaşamanın şartlarını hazırlamış, yalnızca onları İslama davet etmiştir. İslamiyet hukukun, insan hak ve özgürlüklerinin ve bunun da ötesinde bir güzel ahlakın davacısıdır.",
+        ],
+      },
+    },
+  },
+
   heroTitle: "Kafirun",
   heroSubtitle: "Suresi",
 

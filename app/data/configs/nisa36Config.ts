@@ -77,6 +77,61 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
     end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   },
 
+  // Right-hand tafsir panel (SideInfoPanel). Entries appear as the fold story
+  // reveals them: `byFoldStep` keys are fold step ids, `byVerse` keys are
+  // verse ids (surfacing at the first step whose scriptHighlights list them).
+  // Content transcribed verbatim from the reference tafsir book, pages 90-92.
+  sideInfo: {
+    panelTitle: "Tefsir",
+    byFoldStep: {
+      // ── Folded page: the ana cümle (1, 2, 11, 12) is already visible ────
+      "pre-start": {
+        kicker: "1, 2 ve 12. Cümleler",
+        title: "Ayetin Ana Cümlesi",
+        paragraphs: [
+          "Ayetin ana cümlesi en baştaki 1nci, 2nci ve en sondaki 12. cümledir.",
+          "O zaman bu kendini beğenen, boş yere öğünüp duran kafirler ne yapmalılar?",
+          "Cevap: büyük bölümün içindeki ana cümlelerde.",
+          "Evet Allah emrediyor ki, Her şeyden önce:",
+        ],
+      },
+    },
+    byVerse: {
+      // ── Middle section 1: verses 3-6, akrabalara iyilik sıralaması ──────
+      3: {
+        kicker: "3-6. Ayetler",
+        title: "Yakınlara İyilik: Sıralamadaki Güzellik",
+        paragraphs: [
+          "Bundan başka kimlere iyilik yapmalıyız?",
+          "İkili benzeşen bölümlerde o da tafsil edilmiş, açıklanmış.",
+          "Şu sıralamadaki güzelliğe dikkat ediniz.",
+          "Ayetin, Akrabalarınıza (yakınlarınıza) iyi davranın' tavsiyesi içinde başta her insanın eşi, çocukları, kardeşleri ve sırayla diğer yakınları vardır.",
+        ],
+      },
+      // ── Verse 11: kölelere (hizmetçilere) iyi davranın ───────────────────
+      11: {
+        kicker: "11. Ayet",
+        title: "Kölelere İyi Davranmak",
+        paragraphs: [
+          "Kölelik İslamiyetin öngördüğü bir şey değildir. İslam öncesi var olan ve o zamanlar kolay kolay da ortadan kaldırılamayacak bir anlayıştı. İslamiyet kısa vadede kölenin durumunu iyileştirmiş ve uzun vadede de kaldırılmasını öngörmüştür.",
+          "Şimdi, iyi davranmayı emreden ayete dönelim :",
+          "Elbette iyi davranılması ve iyilik yapılması gereken insanlar yalnız bu ayette sayılan kimselerden ibaret değil. Elbette herkese karşı iyi davranılacak. Ama burada sayılanlar, öne çıkarılan örneklerdir. Burada sayılan kimselere iyilik eder ve iyi davranırsanız sonucunda mutlu bir toplum inşa edilmiş olur.",
+          "Ey kendini beğenen, övülmeyi ve alkışı seven, takdir edilmekten hoşlanan insan!",
+          "Eğer Allah tarafından da insanlar tarafından da övülmek ve sevilmek istersen; Her şeyden önce Allaha iman ve ibadet edecek, öbür yandan da şu ayette sayılan kimselere karşı iyilikte bulunacaksın. Böyle (Allaha iman) + (yalnız ona ibadet ve insanlara iyilik) gibi iki kanattan mahrumsanız kendi kendinize övünmeleriniz boştur.",
+        ],
+      },
+      // ── Verse 12: kendini beğenen, boş yere övünen kafirleri sevmez ──────
+      12: {
+        kicker: "12. Ayet",
+        title: "Büyüklük İyilikledir",
+        paragraphs: [
+          "Övünmeleriniz ve büyüklenmeleriniz karşılıksız çek gibidir. Kuru kuruya büyüklük olmaz. Büyüklük iyilikle olur.",
+          "Samimi, içten gelen bir iyilik duygusuyla iyilik yapmak yerine, gösteriş ve övünme için su gibi para harcamak ama şu yukarıda ismi sayılan gruplara iyilik yapmaya gelince onlar için hiçbir şey yapmamak, insanlığın tükendiğini gösterir. Allah elbette bu şımarık gösteriş delillerini sevmez.",
+        ],
+      },
+    },
+  },
+
   features: {
     hasIntro: false,
     hasElevatedSections: true,
