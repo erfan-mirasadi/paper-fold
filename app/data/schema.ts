@@ -718,6 +718,66 @@ export interface HandwrittenNoteConfig {
   svgs?: HandwrittenNoteSvg[];
 }
 
+// ---------------------------------------------------------------------------
+// SIDE INFORMATION (TAFSIR) PANEL — right-hand reading panel synced to the
+// fold story, mirroring the left SurahScriptSidebar. Content is authored per
+// surah and keyed EITHER by fold step id (byFoldStep) or by ayah number
+// (byVerse); both may be combined. A verse entry surfaces the moment its
+// verse first appears in `scriptHighlights` for the current fold step, and
+// stays on screen (the panel is a growing, scrollable reading log) so the
+// reader always has time to finish a story before the next one arrives.
+// ---------------------------------------------------------------------------
+
+export interface SideInfoImage {
+  /** Path to the image asset (relative to /public). */
+  src: string;
+  /** Small italic caption rendered under the image. */
+  caption?: string;
+  /** Accessible alt text. Falls back to the caption. */
+  alt?: string;
+}
+
+export interface SideInfoAudio {
+  /** Path to the audio asset (relative to /public). */
+  src: string;
+  /** Small label rendered above the player (e.g. reciter name). */
+  title?: string;
+}
+
+export interface SideInfoEntry {
+  /**
+   * Tiny uppercase lead-in line above the title (e.g. "1-5. Ayetler").
+   * Verse entries fall back to "{n}. Ayet" automatically when omitted.
+   */
+  kicker?: string;
+  /** Entry heading, animated in with the intro title animation. */
+  title?: string;
+  /** Long-form body text — one string per paragraph. */
+  paragraphs?: string[];
+  /** Images rendered borderless below the text, in order. */
+  images?: SideInfoImage[];
+  /** Optional audio (e.g. recitation) rendered as a minimal player at the entry's end. */
+  audio?: SideInfoAudio;
+}
+
+export interface SurahSideInfoConfig {
+  /** Panel heading shown at the top. Defaults to "Tefsir". */
+  panelTitle?: string;
+  /** Faint hint shown while no entry is visible yet at the current fold step. */
+  emptyText?: string;
+  /**
+   * Entries keyed by fold step id (same ids as `animations.foldSteps`).
+   * The entry appears when the fold story reaches that step.
+   */
+  byFoldStep?: Record<string, SideInfoEntry>;
+  /**
+   * Entries keyed by verse id (the same `number` used in `scriptHighlights`
+   * and `blocks[].verseIds`). The entry appears at the first fold step whose
+   * `scriptHighlights` list contains the verse.
+   */
+  byVerse?: Record<number, SideInfoEntry>;
+}
+
 export interface FoldState {
   direction: -1 | 0 | 1;
   angleFactor: number;
@@ -802,6 +862,13 @@ export interface SurahLayoutConfig {
    * with `verseOverrides[id].border` when set.
    */
   scriptHighlights?: Record<string, number[]>;
+
+  /**
+   * Right-hand tafsir/story reading panel (SideInfoPanel), synced to the fold
+   * story exactly like `scriptHighlights` syncs the left script sidebar.
+   * Author entries per fold step and/or per verse — see SurahSideInfoConfig.
+   */
+  sideInfo?: SurahSideInfoConfig;
   verseOverrides?: Record<number, VerseOverrideConfig>;
 
   // ── NEW BLOCK-BASED SCHEMA ────────────────────────────────────────────────

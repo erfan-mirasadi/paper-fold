@@ -117,7 +117,7 @@ export function NavigationOverlay() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="pointer-events-auto flex flex-row-reverse md:flex-col gap-2 md:gap-3 items-center"
+      className="pointer-events-auto flex flex-row-reverse gap-2 items-center"
     >
       {!isPaperDocked && !isAllSectionsMode && (
         <NavButton

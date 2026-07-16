@@ -170,7 +170,7 @@ export function LanguageSwitchOverlay() {
           ) : (
             <motion.div
               key="language-list"
-              className="absolute right-0 flex items-center whitespace-nowrap"
+              className="absolute top-0 right-0 flex flex-col items-end whitespace-nowrap"
               initial="hidden"
               animate="visible"
               exit="hidden"
@@ -191,13 +191,13 @@ export function LanguageSwitchOverlay() {
                     variants={{
                       hidden: {
                         opacity: 0,
-                        x: 15,
+                        y: -12,
                         scale: 0.9,
                         filter: "blur(4px)",
                       },
                       visible: {
                         opacity: 1,
-                        x: 0,
+                        y: 0,
                         scale: 1,
                         filter: "blur(0px)",
                       },

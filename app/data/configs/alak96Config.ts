@@ -35,6 +35,84 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
     "inner-open": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 15, 17, 18, 19],
     end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
   },
+
+  // Right-hand tafsir panel (SideInfoPanel). Entries appear as the fold story
+  // reveals them: `byFoldStep` keys are fold step ids, `byVerse` keys are
+  // verse ids (surfacing at the first step whose scriptHighlights list them).
+  sideInfo: {
+    panelTitle: "Tefsir",
+    byFoldStep: {
+      "pre-start": {
+        kicker: "1-5. Ayetler",
+        title: "Oku! — İlk Vahiy",
+        paragraphs: [
+          "Alak suresinin ilk beş ayeti, Kur'an'ın nazil olan ilk ayetleridir. Ramazan ayının bir gecesinde, Mekke yakınlarındaki Nur Dağı'nın Hira mağarasında inzivada bulunan Muhammed aleyhisselama Cebrail aleyhisselam geldi ve \"Oku!\" dedi.",
+          "\"Ben okuma bilmem\" cevabına karşılık melek onu kucaklayıp sıktı ve tekrar \"Oku!\" dedi. Üçüncü seferinde ayetler indi: \"Yaratan Rabbinin adıyla oku!\" Vahiy, insanlık tarihinin akışını değiştiren bu tek kelimeyle başladı.",
+          "İlk emrin \"oku\" olması, bu dinin ilme, öğrenmeye ve kaleme verdiği değerin en veciz ilanıdır: İnsan bir alak'tan yaratılmış, sonra kalemle öğretilmiş ve bilmediği kendisine bildirilmiştir.",
+        ],
+        images: [
+          {
+            src: "/hero/Mountains.png",
+            caption: "Nur Dağı'nın etekleri — Hira'ya çıkan yol (temsilî)",
+            alt: "Hira mağarasının bulunduğu dağ silsilesi",
+          },
+        ],
+        audio: {
+          src: "/paper-fold.mp3",
+          title: "Örnek kıraat — yer tutucu ses",
+        },
+      },
+      start: {
+        kicker: "6 ve 19. Ayetler",
+        title: "Surenin Çerçevesi",
+        paragraphs: [
+          "Kağıdın ilk açılışı, surenin iki uç ayetini yan yana getirir: İnsanın kendini yeterli görüp azgınlaşması (6) ile secde edip Rabbine yaklaşması (19). Sure, bu iki kutup arasında insanın imtihanını anlatır.",
+        ],
+      },
+      end: {
+        kicker: "Surenin Bütünü",
+        title: "Bilgiden Secdeye",
+        paragraphs: [
+          "Tam açılan sayfada surenin mimarisi görünür hale gelir: Okumayla başlayan yolculuk, azgınlaşan insanın kıssasından geçerek secde emriyle son bulur. Bilgi, sahibini Rabbine yaklaştırmıyorsa tuğyana dönüşür.",
+        ],
+      },
+    },
+    byVerse: {
+      6: {
+        title: "Kella! — Tuğyanın Kaynağı",
+        paragraphs: [
+          "\"Hayır! İnsan kendini yeterli gördüğü için mutlaka azgınlaşır.\" Sure, ilmin övgüsünden hemen sonra insanın en büyük zaafına döner: Kendini müstağni görmek. Serveti, gücü ya da bilgisi artan insan, Rabbine muhtaç olduğunu unutmaya başlar.",
+        ],
+      },
+      9: {
+        kicker: "9-10. Ayetler",
+        title: "Namazdan Alıkoyan",
+        paragraphs: [
+          "Bu ayetlerin, Kâbe'de namaz kılan Peygamber aleyhisselamı engellemeye çalışan Ebu Cehil hakkında indiği nakledilir. \"Gördün mü şu engelleyeni — namaz kılarken bir kulu?\" Soru üslubu, bu davranışın akıl almazlığını yüzüne vurur.",
+        ],
+      },
+      11: {
+        kicker: "11-14. Ayetler",
+        title: "Ya Hidayet Üzereyse?",
+        paragraphs: [
+          "Sure, engelleyene peş peşe sorular yöneltir: Ya o kul doğru yoldaysa, ya takvayı emrediyorsa? Ya sen yalanlayıp yüz çeviriyorsan? \"Bilmez mi ki Allah görmektedir?\" Bu son soru, tüm perdeleri kaldırır: Hiçbir zorbalık, İlahi görüşten saklanamaz.",
+        ],
+      },
+      15: {
+        kicker: "15-16. Ayetler",
+        title: "Yalancı, Günahkâr Perçem",
+        paragraphs: [
+          "\"Andolsun, eğer vazgeçmezse onu perçeminden yakalarız — o yalancı, günahkâr perçeminden.\" Araplarda perçeminden tutulmak, en aşağılayıcı yakalanış biçimiydi. Kibirle kaldırılan baş, sahibini kurtaramayacaktır.",
+        ],
+      },
+      19: {
+        title: "Secde Et ve Yaklaş",
+        paragraphs: [
+          "Sure, indiği gibi bir emirle biter: \"Hayır! Ona itaat etme; secde et ve yaklaş.\" Kulun Rabbine en yakın olduğu an secde anıdır. Okumakla açılan sure, yaklaşmakla kapanır — ilim, ancak kulluğa dönüşünce tamamlanır.",
+        ],
+      },
+    },
+  },
   features: {
     hasIntro: true,
     hasElevatedSections: true,

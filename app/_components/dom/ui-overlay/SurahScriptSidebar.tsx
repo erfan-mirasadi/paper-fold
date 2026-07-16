@@ -159,7 +159,7 @@ function HighlightChunk({
  * eight rounded petals with small radiating points at the junctions.
  * Drawn with `currentColor` so it always matches the surrounding script
  * color. */
-function AyahNumber({ n }: { n: number }) {
+export function AyahNumber({ n }: { n: number }) {
   return (
     <span
       className="w-[2.5em] h-[2.5em] text-[0.72em]"

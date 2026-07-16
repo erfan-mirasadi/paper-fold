@@ -39,6 +39,10 @@ import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrows
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
 import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
+import {
+  SideInfoPanel,
+  SideInfoToggle,
+} from "@/app/_components/dom/ui-overlay/SideInfoPanel";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
@@ -417,6 +421,7 @@ function SurahViewerInner({
       <PaperSwitchCursorSpinner />
 
       {isSceneReady && showPostIntroUI && <SurahScriptSidebar />}
+      {isSceneReady && showPostIntroUI && <SideInfoPanel />}
 
       {isSceneReady && (
         <motion.div
@@ -434,7 +439,9 @@ function SurahViewerInner({
             </>
           )}
 
-          <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-100 flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none">
+          {/* Top-right overlay buttons — a single horizontal row (row-reverse:
+              first child renders at the screen edge, later ones grow inward). */}
+          <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-100 flex flex-row-reverse items-center gap-0 pointer-events-none">
             <SurahMenuOverlay />
             <HomeButtonOverlay />
             <ThemeToggleOverlay />
@@ -447,10 +454,11 @@ function SurahViewerInner({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.45, ease: "easeOut" }}
-                    className="flex flex-row-reverse md:flex-col items-center gap-0 pointer-events-none"
+                    className="flex flex-row-reverse items-center gap-0 pointer-events-none"
                   >
                     <NavigationOverlay />
                     <AllSectionsOverlay />
+                    <SideInfoToggle />
                   </motion.div>
                 )}
               </AnimatePresence>
