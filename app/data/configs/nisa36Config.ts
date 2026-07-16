@@ -72,7 +72,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
   heroSubtitle: "suresi 36",
 
   scriptInfo: {
-    title: "4 Nisâ",
+    title: "Nisa: 36",
     sayfa: 84,
     juz: 5,
     hizb: 9,

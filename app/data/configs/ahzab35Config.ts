@@ -38,7 +38,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
   id: "ahzab35",
   title: "Ahzab 35",
   scriptInfo: {
-    title: "33 Ahzâb",
+    title: "Ahzab: 35",
     sayfa: 422,
     juz: 22,
     hizb: 43,

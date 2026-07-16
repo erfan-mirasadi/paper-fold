@@ -18,7 +18,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
   id: "ihlas112",
   title: "İhlas Suresi",
   scriptInfo: {
-    title: "112 İhlâs",
+    title: "İhlas Suresi",
     sayfa: 604,
     juz: 30,
     hizb: 60,

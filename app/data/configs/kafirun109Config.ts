@@ -11,7 +11,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
   id: "kafirun109",
   title: "Kafirun Suresi",
   scriptInfo: {
-    title: "109 Kâfirûn",
+    title: "Kafirun Suresi",
     sayfa: 603,
     juz: 30,
     hizb: 60,

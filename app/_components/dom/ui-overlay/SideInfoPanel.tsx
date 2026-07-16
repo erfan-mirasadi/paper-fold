@@ -322,10 +322,10 @@ function InkCapsule({
   // picks the capsule's personality (see schema docs).
   const len = item.text.length;
   const isPill = corners ? corners === "pill" : len <= 56;
-  // The floating number chip needs the page background behind it to mask the
-  // border it straddles — inside a tinted frame that trick shows a seam, so
-  // framed capsules always keep their number inline.
-  const chipNumber = !framed && !isPill && len > 140 && item.n !== undefined;
+  // Number always renders inline inside the capsule text (as the coloured
+  // "n. " prefix). The floating-chip variant (straddling the top border) is
+  // disabled: it produced inconsistent positioning depending on text length.
+  const chipNumber = false;
 
   return (
     <motion.div
