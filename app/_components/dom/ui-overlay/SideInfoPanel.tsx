@@ -13,6 +13,8 @@ import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar"
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import type {
   SideInfoAudio,
+  SideInfoCapsuleItem,
+  SideInfoCapsules,
   SideInfoEntry,
   SideInfoImage,
   SurahLayoutConfig,
@@ -21,6 +23,14 @@ import type {
 const GOLD = "#C4963B";
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+
+/** "#RGB"/"#RRGGBB" → rgba() with the given alpha (used for accent tints). */
+const hexToRgba = (hex: string, alpha: number) => {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const num = parseInt(full, 16);
+  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+};
 
 // ── Toggle — mirrored twin of the left sidebar's SidebarToggle ──────────────
 // Rendered inside the top-right overlay button row (SurahViewer), so it lives
@@ -277,6 +287,172 @@ function InkImage({ src, caption, alt }: SideInfoImage) {
   );
 }
 
+// ── Capsules — the tafsir book's bordered phrase boxes, redrawn in the
+// panel's ink style. A group is a 1- or 2-column grid (2 collapses to 1
+// below lg, where the panel is only 160px wide), optionally wrapped in a
+// rounded frame like the book's boxed clusters. Each capsule adapts to its
+// text length: a short line sits centered in a true pill; longer passages
+// relax into a left-aligned plaque, and very long ones float their number
+// as a chip straddling the top border. ──────────────────────────────────────
+
+function InkCapsule({
+  item,
+  index,
+  framed,
+  corners,
+  groupAccent,
+  groupBg,
+  groupTextColor,
+  spanClass,
+}: {
+  item: SideInfoCapsuleItem;
+  index: number;
+  framed: boolean;
+  corners?: "pill" | "soft";
+  groupAccent?: string;
+  groupBg?: string;
+  groupTextColor?: string;
+  spanClass: string;
+}) {
+  const accent = item.color ?? groupAccent ?? GOLD;
+  const bg = item.bg ?? groupBg ?? hexToRgba(accent, 0.06);
+  const textColor = item.textColor ?? groupTextColor;
+
+  // Corner treatment: explicit `corners` wins, otherwise the text's length
+  // picks the capsule's personality (see schema docs).
+  const len = item.text.length;
+  const isPill = corners ? corners === "pill" : len <= 56;
+  // The floating number chip needs the page background behind it to mask the
+  // border it straddles — inside a tinted frame that trick shows a seam, so
+  // framed capsules always keep their number inline.
+  const chipNumber = !framed && !isPill && len > 140 && item.n !== undefined;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.97, filter: "blur(6px)" }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      viewport={{ once: false, margin: "-4% 0px -4% 0px" }}
+      transition={{ duration: 0.7, delay: index * 0.07, ease: [0.25, 1, 0.5, 1] }}
+      className={`relative flex min-w-0 ${spanClass} ${
+        isPill
+          ? "items-center justify-center text-center"
+          : len > 140
+            ? "items-start text-left"
+            : "items-center text-left"
+      }`}
+      style={{
+        border: `1px solid ${hexToRgba(accent, 0.75)}`,
+        borderRadius: isPill ? 999 : "clamp(8px, 0.7vw, 13px)",
+        background: bg,
+        padding: isPill
+          ? "clamp(7px, 0.6vw, 12px) clamp(12px, 1vw, 20px)"
+          : "clamp(8px, 0.72vw, 14px) clamp(11px, 0.95vw, 19px)",
+        marginTop: chipNumber ? "0.6em" : undefined,
+      }}
+    >
+      {chipNumber && (
+        <span
+          className="absolute font-medium tabular-nums
+            text-[8.5px] lg:text-[clamp(9.5px,0.66vw,15px)]"
+          style={{
+            top: 0,
+            left: "clamp(12px, 1vw, 18px)",
+            transform: "translateY(-52%)",
+            color: accent,
+            background: "var(--background)",
+            border: `1px solid ${hexToRgba(accent, 0.75)}`,
+            borderRadius: 999,
+            padding: "0.1em 0.6em",
+            letterSpacing: "0.06em",
+            lineHeight: 1.5,
+          }}
+        >
+          {item.n}
+        </span>
+      )}
+
+      <p
+        lang="tr"
+        className={`m-0 break-words ${textColor ? "" : "text-foreground/85"}
+          ${
+            isPill
+              ? "text-[10.5px] lg:text-[clamp(11.5px,0.82vw,19px)]"
+              : "text-[10.5px] lg:text-[clamp(11px,0.78vw,18px)]"
+          }`}
+        style={{
+          fontFamily: "var(--font-sans)",
+          lineHeight: isPill ? 1.6 : 1.9,
+          letterSpacing: "0.01em",
+          color: textColor,
+        }}
+      >
+        {!chipNumber && item.n !== undefined && (
+          <span className="font-semibold" style={{ color: accent }}>
+            {item.n}.{" "}
+          </span>
+        )}
+        {item.text}
+      </p>
+    </motion.div>
+  );
+}
+
+function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
+  const accent = group.color ?? GOLD;
+  const cols = group.columns ?? (group.capsules.length > 1 ? 2 : 1);
+  const frameColor =
+    typeof group.frame === "string"
+      ? group.frame
+      : group.frame
+        ? hexToRgba(accent, 0.45)
+        : null;
+
+  const grid = (
+    <div
+      className={`grid min-w-0 ${
+        cols === 2 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
+      }`}
+      style={{ gap: "clamp(6px, 0.55vw, 11px)" }}
+    >
+      {group.capsules.map((item, i) => (
+        <InkCapsule
+          key={i}
+          item={item}
+          index={i}
+          framed={!!frameColor}
+          corners={group.corners}
+          groupAccent={group.color}
+          groupBg={group.bg}
+          groupTextColor={group.textColor}
+          spanClass={cols === 2 && item.span ? "lg:col-span-2" : ""}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop: "clamp(13px, 1.2vw, 22px)" }}>
+      {frameColor ? (
+        <div
+          style={{
+            border: `1px solid ${frameColor}`,
+            borderRadius: "clamp(14px, 1.15vw, 22px)",
+            padding: "clamp(8px, 0.7vw, 14px)",
+            background: hexToRgba(
+              typeof group.frame === "string" ? group.frame : accent,
+              0.07,
+            ),
+          }}
+        >
+          {grid}
+        </div>
+      ) : (
+        grid
+      )}
+    </div>
+  );
+}
+
 // ── Entry resolution ────────────────────────────────────────────────────────
 
 interface ResolvedEntry {
@@ -378,26 +554,30 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
         />
       )}
 
-      {entry.paragraphs?.map((paragraph, i) => (
-        <AnimatedText
-          key={i}
-          text={paragraph}
-          as="p"
-          variant="body"
-          animationType="fadeIn"
-          cinematic
-          splitLevel="word"
-          staggerDelay={0.008}
-          className="!text-left w-full font-normal text-foreground/80
-            text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
-          style={{
-            textShadow: "none",
-            fontFamily: "var(--font-sans)",
-            lineHeight: 1.95,
-            marginTop: "clamp(10px, 1vw, 18px)",
-          }}
-        />
-      ))}
+      {entry.paragraphs?.map((item, i) =>
+        typeof item === "string" ? (
+          <AnimatedText
+            key={i}
+            text={item}
+            as="p"
+            variant="body"
+            animationType="fadeIn"
+            cinematic
+            splitLevel="word"
+            staggerDelay={0.008}
+            className="!text-left w-full font-normal text-foreground/80
+              text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+            style={{
+              textShadow: "none",
+              fontFamily: "var(--font-sans)",
+              lineHeight: 1.95,
+              marginTop: "clamp(10px, 1vw, 18px)",
+            }}
+          />
+        ) : (
+          <InkCapsuleGroup key={i} group={item} />
+        ),
+      )}
 
       {entry.images?.map((img, i) => (
         <InkImage key={i} {...img} />

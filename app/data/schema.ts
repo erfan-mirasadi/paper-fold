@@ -744,6 +744,63 @@ export interface SideInfoAudio {
   title?: string;
 }
 
+export interface SideInfoCapsuleItem {
+  /** Leading number, rendered as an accent-colored "n." before the text. */
+  n?: number | string;
+  /**
+   * The capsule's text. Its length drives the layout automatically: a short
+   * line sits centered in a true pill; longer passages relax into a
+   * left-aligned plaque, and very long ones float the number as a chip on
+   * the top border so multi-line text stays clean inside the narrow panel.
+   */
+  text: string;
+  /** Accent override (border + number color) for just this capsule. */
+  color?: string;
+  /** Fill override for just this capsule. */
+  bg?: string;
+  /** Text color override for just this capsule. */
+  textColor?: string;
+  /** In a 2-column grid, make this capsule span the full row (banner style). */
+  span?: boolean;
+}
+
+export interface SideInfoCapsules {
+  /** The capsules. A single item renders as one full-width capsule. */
+  capsules: SideInfoCapsuleItem[];
+  /**
+   * Grid columns. Defaults to 2 when there is more than one capsule
+   * (book-style side-by-side pairs), 1 otherwise. A 2-column grid collapses
+   * to 1 column on narrow screens where the panel is only 160px wide.
+   */
+  columns?: 1 | 2;
+  /** Accent color — borders and numbers — for all capsules. Defaults to the panel gold. */
+  color?: string;
+  /** Capsule fill for all capsules. Defaults to a faint tint of the accent. */
+  bg?: string;
+  /** Text color for all capsules. Defaults to the panel's body ink. */
+  textColor?: string;
+  /**
+   * Corner treatment. "pill" forces fully-rounded ends; "soft" forces the
+   * book's gently-rounded rectangle. Omit to pick automatically from each
+   * capsule's text length (short → pill, long → soft plaque).
+   */
+  corners?: "pill" | "soft";
+  /**
+   * Draw a rounded frame around the whole group, like the book's boxed
+   * capsule clusters. `true` derives the frame color from the accent;
+   * pass a color string to override it.
+   */
+  frame?: boolean | string;
+}
+
+/**
+ * One item of an entry's reading flow: a plain string renders as a body
+ * paragraph, a `{ capsules: [...] }` object renders as a capsule group —
+ * placed exactly where it sits in the array, so capsules can go before,
+ * between or after any paragraph.
+ */
+export type SideInfoFlowItem = string | SideInfoCapsules;
+
 export interface SideInfoEntry {
   /**
    * Tiny uppercase lead-in line above the title (e.g. "1-5. Ayetler").
@@ -752,8 +809,12 @@ export interface SideInfoEntry {
   kicker?: string;
   /** Entry heading, animated in with the intro title animation. */
   title?: string;
-  /** Long-form body text — one string per paragraph. */
-  paragraphs?: string[];
+  /**
+   * The entry's reading flow, in order. Plain strings are body paragraphs;
+   * `{ capsules: [...] }` items are capsule groups (single pills, 2-column
+   * grids, framed clusters) — see SideInfoCapsules.
+   */
+  paragraphs?: SideInfoFlowItem[];
   /** Images rendered borderless below the text, in order. */
   images?: SideInfoImage[];
   /** Optional audio (e.g. recitation) rendered as a minimal player at the entry's end. */
