@@ -8,8 +8,8 @@ const GREEN_BG = "#eaf2db";
 const GREEN_BORDER = "#5E7367";
 
 // Side-panel capsule palette for the tafsir book's page-372 diagram — the
-// müspet (positive) ayets 1/4 stay in the paper's own warm yellow, the menfi
-// (negative) ayets 2/3 get the book's blue-grey ink boxes.
+// müspet (positive) ayets 1/2 stay in the paper's own warm yellow, the menfi
+// (negative) ayets 3/4 get the book's blue-grey ink boxes.
 const TAFSIR_CAPSULE_INK = "#2B2B2B";
 const TAFSIR_BLUE_BG = "#ECF4F9";
 const TAFSIR_BLUE_BORDER = "#7A9CAD";
@@ -37,8 +37,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     panelTitle: "Tefsir",
     byFoldStep: {
       "pre-start": {
-        kicker: "1 ve 4. Ayetler",
-        title: "Müspet ve Menfi Cümleler",
+        kicker: "İhlas Suresi",
         paragraphs: [
           "İlk iki ayet müspet cümlelerle ezeli ebedi değişmez muhkem hakikati ilan ediyorlar.",
           {
@@ -52,8 +51,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
               {
                 n: 2,
                 text: "Allah, Samet'tir :",
-                color: TAFSIR_BLUE_BORDER,
-                bg: TAFSIR_BLUE_BG,
+                color: YELLOW_BORDER,
+                bg: YELLOW_BG,
               },
             ],
             corners: "soft",
@@ -70,16 +69,16 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
               },
               {
                 n: 4,
-                text: "Ve hiçbir şey Onun eşit ve dengi değildir.",
-                color: YELLOW_BORDER,
-                bg: YELLOW_BG,
+                text: "Ve hiçbir şey Onun eşiti ve dengi değildir.",
+                color: TAFSIR_BLUE_BORDER,
+                bg: TAFSIR_BLUE_BG,
               },
             ],
             corners: "soft",
             textColor: TAFSIR_CAPSULE_INK,
           },
           "Sure; iki müspet ve iki menfi cümle şeklinde de ikili bir düzen içinde gelmiş",
-          "İhlas suresinin ilk ayeti ana ayettir. Surenin ana manasını veriyor. Allah birdir. Diyor. Ezelden ebede değişmez gerçeği, en muhkem hakikati ifade ediyor.",
+          "İhlas suresinin ilk ayeti ana ayettir. Surenin ana manasını veriyor: Allah birdir. Diyor. Ezelden ebede değişmez gerçeği, en muhkem hakikati ifade ediyor.",
           {
             capsules: [
               {
@@ -90,7 +89,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
               },
               {
                 n: 4,
-                text: "Başka hiçbir şey Onun eşit ve dengi değildir.",
+                text: "Başka hiçbir şey Onun eşiti ve dengi değildir.",
                 color: TAFSIR_BLUE_BORDER,
                 bg: TAFSIR_BLUE_BG,
               },
@@ -104,12 +103,12 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     byVerse: {
       // ── Verse 3: "Doğurmamış ve doğurulmamıştır" — Allahın ailesi yoktur ──
       3: {
-        kicker: "3. Ayet",
-        title: "Allahın Bir Ailesi Yoktur",
+        title: "O Tek'dir ve Samet'tir.",
         paragraphs: [
-          "O Tek'dir ve Samet'tir; Allah baba, Rab baba, Anne Tanrı, Oğul Tanrı, Kız Tanrı gibi bir ailesi de yoktur.",
+          "(O Tek'dir ve Samet'tir. ; Allah baba, Rab baba, Anne Tanrı, Oğul Tanrı, Kız Tanrı gibi bir ailesi de yoktur.)",
           "Eski Yunanda da insanlar Olimpus dağında yaşayan böyle kalabalık bir tanrılar ailesini tasavvur ediyorlardı. İnsanlık bu saçmalıklardan kurtulmalıdır.",
           "Allah birdir. Allahın yanında ana tanrı, oğul tanrı var diyerek Allah'a iftira edenler Allahın hiç razı olmadığı büyük bir şirk suçu işlemektedirler.",
+          "İhlas Suresini şöyle de yazabiliriz:",
         ],
       },
     },
