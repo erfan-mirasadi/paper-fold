@@ -7,6 +7,13 @@ const YELLOW_BORDER = "#BE9E63";
 const GREEN_BG = "#eaf2db";
 const GREEN_BORDER = "#5E7367";
 
+// Side-panel capsule palette for the tafsir book's page-372 diagram — the
+// müspet (positive) ayets 1/4 stay in the paper's own warm yellow, the menfi
+// (negative) ayets 2/3 get the book's blue-grey ink boxes.
+const TAFSIR_CAPSULE_INK = "#2B2B2B";
+const TAFSIR_BLUE_BG = "#ECF4F9";
+const TAFSIR_BLUE_BORDER = "#7A9CAD";
+
 export const IHLAS_112_CONFIG: SurahLayoutConfig = {
   id: "ihlas112",
   title: "İhlas Suresi",
@@ -33,10 +40,64 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
         kicker: "1 ve 4. Ayetler",
         title: "Müspet ve Menfi Cümleler",
         paragraphs: [
-          "İlk iki ayet müspet cümlelerle ezeli ebedi değişmez hakikati ilan ediyorlar.",
-          "Son iki ayet de menfi cümlelerle insanların yanıldıkları noktaları düzeltiyorlar.",
-          "Sure; iki müspet ve iki menfi cümle şeklinde de ikili bir düzen içinde gelmiş.",
-          "İhlas suresinin ilk ayeti ana ayettir. Surenin ana manasını veriyor. Allah birdir, diyor. Ezelden ebede değişmez gerçeği, en mühkem hakikati ifade ediyor.",
+          "İlk iki ayet müspet cümlelerle ezeli ebedi değişmez muhkem hakikati ilan ediyorlar.",
+          {
+            capsules: [
+              {
+                n: 1,
+                text: "Söyle, O Allah tek'tir.",
+                color: YELLOW_BORDER,
+                bg: YELLOW_BG,
+              },
+              {
+                n: 2,
+                text: "Allah, Samet'tir :",
+                color: TAFSIR_BLUE_BORDER,
+                bg: TAFSIR_BLUE_BG,
+              },
+            ],
+            corners: "soft",
+            textColor: TAFSIR_CAPSULE_INK,
+          },
+          "Son iki ayet de menfi cümlelerle insanların yanıldıkları noktaları düzeltiyorlar",
+          {
+            capsules: [
+              {
+                n: 3,
+                text: "Doğurmamış ve doğurulmamıştır.",
+                color: TAFSIR_BLUE_BORDER,
+                bg: TAFSIR_BLUE_BG,
+              },
+              {
+                n: 4,
+                text: "Ve hiçbir şey Onun eşit ve dengi değildir.",
+                color: YELLOW_BORDER,
+                bg: YELLOW_BG,
+              },
+            ],
+            corners: "soft",
+            textColor: TAFSIR_CAPSULE_INK,
+          },
+          "Sure; iki müspet ve iki menfi cümle şeklinde de ikili bir düzen içinde gelmiş",
+          "İhlas suresinin ilk ayeti ana ayettir. Surenin ana manasını veriyor. Allah birdir. Diyor. Ezelden ebede değişmez gerçeği, en muhkem hakikati ifade ediyor.",
+          {
+            capsules: [
+              {
+                n: 1,
+                text: "Müşriklere söyle O Allah birdir, tek'tir.",
+                color: YELLOW_BORDER,
+                bg: YELLOW_BG,
+              },
+              {
+                n: 4,
+                text: "Başka hiçbir şey Onun eşit ve dengi değildir.",
+                color: TAFSIR_BLUE_BORDER,
+                bg: TAFSIR_BLUE_BG,
+              },
+            ],
+            corners: "soft",
+            textColor: TAFSIR_CAPSULE_INK,
+          },
         ],
       },
     },
@@ -323,8 +384,8 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
       {
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 0.4 },
-          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1.1 },
           { direction: 1, angleFactor: 0.6 },
         ],
       },

@@ -713,9 +713,9 @@ export function SideInfoPanel() {
                   : "right-2 w-[160px] lg:right-[2vw] lg:w-[22vw]"
               }`}
           >
-            {/* ── Panel heading — quiet small caps, right-aligned ─────── */}
+            {/* ── Panel heading — quiet small caps, centered ──────────── */}
             <div
-              className="flex-shrink-0 text-right uppercase text-foreground/50
+              className="flex-shrink-0 text-center uppercase text-foreground/50
                 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
               style={{
                 letterSpacing: "0.28em",
