@@ -383,15 +383,16 @@ function InkCapsule({
           fontFamily: "var(--font-sans)",
           lineHeight: isPill ? 1.6 : 1.9,
           letterSpacing: "0.01em",
-          color: textColor,
+          color: item.textColor || textColor,
         }}
       >
         {!chipNumber && item.n !== undefined && (
           <span className="font-semibold" style={{ color: accent }}>
-            {item.n}.{" "}
+            {item.n}
+            {typeof item.n === "number" ? "." : ""} 
           </span>
         )}
-        {item.text}
+        <span dangerouslySetInnerHTML={{ __html: item.text }} />
       </p>
     </motion.div>
   );
@@ -501,17 +502,21 @@ function resolveEntries(
 
 // ── One entry — kicker, title, paragraphs, images, audio; all animated with
 // the same intro text animation (AnimatedText, cinematic word-by-word). ─────
-function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key" | "stepIdx">) {
-  const kicker = entry.kicker ?? (verseId !== undefined ? `${verseId}. Ayet` : undefined);
+function SideInfoEntryView({
+  verseId,
+  entry,
+  hideVerseNumbers,
+}: Omit<ResolvedEntry, "key" | "stepIdx"> & { hideVerseNumbers?: boolean }) {
+  const kicker = entry.kicker ?? (!hideVerseNumbers && verseId !== undefined ? `${verseId}. Ayet` : undefined);
 
   return (
     <div>
-      {(kicker || verseId !== undefined) && (
+      {(kicker || (!hideVerseNumbers && verseId !== undefined)) && (
         <div
           className="flex items-center"
           style={{ gap: "clamp(6px, 0.5vw, 10px)", marginBottom: "clamp(6px, 0.55vw, 12px)" }}
         >
-          {verseId !== undefined && (
+          {!hideVerseNumbers && verseId !== undefined && (
             <span
               className="text-[11px] lg:text-[clamp(12px,0.85vw,19px)]"
               style={{ color: GOLD }}
@@ -585,6 +590,29 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key" | "step
               fontFamily: "var(--font-sans)",
               lineHeight: 1.95,
               marginTop: "clamp(10px, 1vw, 18px)",
+            }}
+          />
+        ) : "subtitle" in item ? (
+          <AnimatedText
+            key={i}
+            text={item.subtitle}
+            as="h4"
+            variant="subtitle"
+            animationType="flyInBottom"
+            cinematic
+            splitLevel="word"
+            staggerDelay={0.06}
+            once
+            blurPx={8}
+            durationS={0.9}
+            inViewMargin="0px"
+            className="!text-left w-full font-medium tracking-tight text-foreground
+              text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
+            style={{
+              textShadow: "none",
+              fontFamily: "var(--font-fraunces), serif",
+              lineHeight: 1.3,
+              marginTop: "clamp(18px, 2vw, 32px)",
             }}
           />
         ) : (
@@ -797,6 +825,7 @@ export function SideInfoPanel() {
                         <SideInfoEntryView
                           verseId={resolved.verseId}
                           entry={resolved.entry}
+                          hideVerseNumbers={activeConfig.features?.hideVerseNumbers}
                         />
                       </motion.article>
                     );
