@@ -9,6 +9,8 @@ import {
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import type { SurahDataShape, Verse } from "@/app/data/SurahConfig";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
+import { GlassPanelFrame } from "@/app/_components/dom/ui-overlay/GlassPanelFrame";
+import { PanelEdgeHandle } from "@/app/_components/dom/ui-overlay/PanelEdgeHandle";
 
 const GOLD = "#C4963B";
 
@@ -497,6 +499,13 @@ export function SurahScriptSidebar() {
                   : "left-2 w-[160px] lg:left-[2vw] lg:w-[22vw]"
               }`}
           >
+            <GlassPanelFrame />
+            <PanelEdgeHandle
+              edge="right"
+              onClick={() => setIsOpen(false)}
+              label="Collapse surah panel"
+            />
+
             {/* ── Surah title + surah info — commented out (shown in top bar instead) ──
             {info && (
               <div
@@ -529,97 +538,104 @@ export function SurahScriptSidebar() {
             )}
             ── */}
 
-            {/* ── Flowing script text — grows to fill remaining aside height */}
             <div
-              ref={scrollRef}
-              {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
-              className={`flex-1 min-h-0 overscroll-contain
-                [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}
-                ${
-                  isLandscapePaper && !hasOverflow
-                    ? "flex flex-col justify-center"
-                    : ""
-                }`}
+              className="relative flex flex-col flex-1 min-h-0"
+              style={{
+                padding: "clamp(16px, 1.5vw, 28px) clamp(14px, 1.3vw, 24px)",
+              }}
             >
-              {showBismillah && (
-                <motion.div
-                  initial={{ opacity: 0, filter: "blur(4px)", y: -5 }}
-                  animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                  transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
-                  dir="rtl"
-                  className="text-center text-foreground text-[13px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
-                  style={{
-                    fontFamily: '"QuranFont", serif',
-                    marginBottom: "clamp(10px, 1.2vw, 20px)",
-                  }}
-                >
-                  {bismillah}
-                </motion.div>
-              )}
+              {/* ── Flowing script text — grows to fill remaining aside height */}
+              <div
+                ref={scrollRef}
+                {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
+                className={`flex-1 min-h-0 overscroll-contain
+                  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+                  ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}
+                  ${
+                    isLandscapePaper && !hasOverflow
+                      ? "flex flex-col justify-center"
+                      : ""
+                  }`}
+              >
+                {showBismillah && (
+                  <motion.div
+                    initial={{ opacity: 0, filter: "blur(4px)", y: -5 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                    transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
+                    dir="rtl"
+                    className="text-center text-foreground text-[13px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.3vw,42px)]"
+                    style={{
+                      fontFamily: '"QuranFont", serif',
+                      marginBottom: "clamp(10px, 1.2vw, 20px)",
+                    }}
+                  >
+                    {bismillah}
+                  </motion.div>
+                )}
 
-              {singleAyahNumber !== undefined ? (
-                // ONE real ayah: chunks flow as inline text (no numbers),
-                // each chunk individually highlightable. RTL paragraph.
-                <p
-                  dir="rtl"
-                  className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
-                  style={{
-                    margin: 0,
-                    padding: "0 0.5em",
-                    textAlign: "center",
-                    fontFamily: '"QuranFont", serif',
-                    lineHeight: 2.3,
-                    overflowWrap: "break-word",
-                    opacity: 0.85,
-                  }}
-                >
-                  {ayahs.map((v) => (
-                    <span key={v.number}>
-                      <HighlightChunk
-                        active={highlighted.has(v.number)}
-                        {...chunkAppearance(v.number)}
-                      >
-                        {v.text}
-                      </HighlightChunk>
-                      {" "}
-                    </span>
-                  ))}
-                  <AyahNumber n={singleAyahNumber} />
-                </p>
-              ) : (
-                // Full surah: ONE flowing RTL paragraph — verses flow like
-                // words, multiple per line when they fit, text within a verse
-                // can wrap (box-decoration-break:clone redraws the border on
-                // each wrapped line). No solo, no nowrap, no flex.
-                <p
-                  dir="rtl"
-                  className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
-                  style={{
-                    margin: 0,
-                    padding: "0 0.3em",
-                    textAlign: "center",
-                    fontFamily: '"QuranFont", serif',
-                    lineHeight: 2.6,
-                    opacity: 0.85,
-                  }}
-                >
-                  {ayahs.map((v) => {
-                    const { isPill, color } = chunkAppearance(v.number);
-                    return (
-                      <HighlightChunk
-                        key={v.number}
-                        active={highlighted.has(v.number)}
-                        isPill={isPill}
-                        color={color}
-                      >
-                        {v.text}
-                        <AyahNumber n={v.number} />
-                      </HighlightChunk>
-                    );
-                  })}
-                </p>
-              )}
+                {singleAyahNumber !== undefined ? (
+                  // ONE real ayah: chunks flow as inline text (no numbers),
+                  // each chunk individually highlightable. RTL paragraph.
+                  <p
+                    dir="rtl"
+                    className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
+                    style={{
+                      margin: 0,
+                      padding: "0 0.5em",
+                      textAlign: "center",
+                      fontFamily: '"QuranFont", serif',
+                      lineHeight: 2.3,
+                      overflowWrap: "break-word",
+                      opacity: 0.85,
+                    }}
+                  >
+                    {ayahs.map((v) => (
+                      <span key={v.number}>
+                        <HighlightChunk
+                          active={highlighted.has(v.number)}
+                          {...chunkAppearance(v.number)}
+                        >
+                          {v.text}
+                        </HighlightChunk>
+                        {" "}
+                      </span>
+                    ))}
+                    <AyahNumber n={singleAyahNumber} />
+                  </p>
+                ) : (
+                  // Full surah: ONE flowing RTL paragraph — verses flow like
+                  // words, multiple per line when they fit, text within a verse
+                  // can wrap (box-decoration-break:clone redraws the border on
+                  // each wrapped line). No solo, no nowrap, no flex.
+                  <p
+                    dir="rtl"
+                    className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
+                    style={{
+                      margin: 0,
+                      padding: "0 0.3em",
+                      textAlign: "center",
+                      fontFamily: '"QuranFont", serif',
+                      lineHeight: 2.6,
+                      opacity: 0.85,
+                    }}
+                  >
+                    {ayahs.map((v) => {
+                      const { isPill, color } = chunkAppearance(v.number);
+                      return (
+                        <HighlightChunk
+                          key={v.number}
+                          active={highlighted.has(v.number)}
+                          isPill={isPill}
+                          color={color}
+                        >
+                          {v.text}
+                          <AyahNumber n={v.number} />
+                        </HighlightChunk>
+                      );
+                    })}
+                  </p>
+                )}
+              </div>
             </div>
           </motion.aside>
         )}

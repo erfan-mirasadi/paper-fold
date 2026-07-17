@@ -11,6 +11,8 @@ import { useSideInfoStore } from "@/app/stores/useSideInfoStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
+import { GlassPanelFrame } from "@/app/_components/dom/ui-overlay/GlassPanelFrame";
+import { PanelEdgeHandle } from "@/app/_components/dom/ui-overlay/PanelEdgeHandle";
 import type {
   SideInfoAudio,
   SideInfoCapsuleItem,
@@ -458,6 +460,10 @@ function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
 interface ResolvedEntry {
   key: string;
   verseId?: number;
+  /** Index of the fold step that first surfaced this entry — used to tell
+   * the freshly-arrived entries (this step) from ones the reader has
+   * already moved past. */
+  stepIdx: number;
   entry: SideInfoEntry;
 }
 
@@ -484,7 +490,7 @@ function resolveEntries(
     const stepId = steps[i].id;
 
     const stepEntry = side.byFoldStep?.[stepId];
-    if (stepEntry) out.push({ key: `step-${stepId}`, entry: stepEntry });
+    if (stepEntry) out.push({ key: `step-${stepId}`, stepIdx: i, entry: stepEntry });
 
     const fresh = (config.scriptHighlights?.[stepId] ?? [])
       .filter((v) => !seenVerses.has(v))
@@ -492,16 +498,92 @@ function resolveEntries(
     for (const v of fresh) {
       seenVerses.add(v);
       const entry = side.byVerse?.[v];
-      if (entry) out.push({ key: `verse-${v}`, verseId: v, entry });
+      if (entry) out.push({ key: `verse-${v}`, verseId: v, stepIdx: i, entry });
     }
   }
   return out;
 }
 
+// ── "New" mark — a small illuminated-manuscript sparkle that greets the
+// entry the fold story just revealed. A soft ring flashes outward once on
+// arrival, then the gold sparkle itself settles into a slow, quiet breathing
+// glow for as long as this stays the newest entry; once the reader advances
+// past it, both fade away so only the current entry keeps drawing the eye. ──
+function NewEntryMark({ active }: { active: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="relative inline-flex flex-shrink-0 items-center justify-center"
+      style={{ width: "0.62em", height: "0.62em" }}
+    >
+      <motion.span
+        className="absolute inset-0 rounded-full"
+        style={{ border: `1px solid ${GOLD}` }}
+        initial={false}
+        animate={
+          active
+            ? { scale: [0.5, 2.6], opacity: [0.85, 0] }
+            : { scale: 0.5, opacity: 0 }
+        }
+        transition={
+          active
+            ? {
+                scale: { duration: 1.3, ease: [0.16, 1, 0.3, 1], repeat: Infinity, repeatDelay: 1.4 },
+                opacity: { duration: 1.3, ease: [0.16, 1, 0.3, 1], repeat: Infinity, repeatDelay: 1.4 },
+              }
+            : { duration: 0.4, ease: "easeIn" }
+        }
+      />
+      <motion.svg
+        viewBox="0 0 24 24"
+        fill={GOLD}
+        className="relative"
+        style={{
+          width: "100%",
+          height: "100%",
+          filter: `drop-shadow(0 0 0.32em ${hexToRgba(GOLD, 0.75)})`,
+        }}
+        initial={false}
+        animate={
+          active
+            ? { scale: [0.82, 1, 0.82], opacity: [0.72, 1, 0.72], rotate: 0 }
+            : { scale: 0, opacity: 0, rotate: -35 }
+        }
+        transition={
+          active
+            ? {
+                scale: { duration: 2.3, repeat: Infinity, ease: "easeInOut" },
+                opacity: { duration: 2.3, repeat: Infinity, ease: "easeInOut" },
+                rotate: { duration: 0.5, ease: [0.25, 1, 0.5, 1] },
+              }
+            : { duration: 0.4, ease: "easeIn" }
+        }
+      >
+        <path d="M12 0C12 6.2 13.9 10 20 12C13.9 14 12 17.8 12 24C12 17.8 10.1 14 4 12C10.1 10 12 6.2 12 0Z" />
+      </motion.svg>
+    </span>
+  );
+}
+
 // ── One entry — kicker, title, paragraphs, images, audio; all animated with
 // the same intro text animation (AnimatedText, cinematic word-by-word). ─────
-function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
+function SideInfoEntryView({
+  verseId,
+  entry,
+  isNewest,
+}: Omit<ResolvedEntry, "key" | "stepIdx"> & { isNewest: boolean }) {
   const kicker = entry.kicker ?? (verseId !== undefined ? `${verseId}. Ayet` : undefined);
+
+  // The sparkle sits beside whichever element leads the entry: the title if
+  // there is one, else the kicker line, else — for the rare entry with
+  // neither — the first paragraph line.
+  const markSlot: "title" | "kicker" | "paragraph" | null = entry.title
+    ? "title"
+    : kicker || verseId !== undefined
+      ? "kicker"
+      : typeof entry.paragraphs?.[0] === "string"
+        ? "paragraph"
+        : null;
 
   return (
     <div>
@@ -510,6 +592,7 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
           className="flex items-center"
           style={{ gap: "clamp(6px, 0.5vw, 10px)", marginBottom: "clamp(6px, 0.55vw, 12px)" }}
         >
+          {markSlot === "kicker" && <NewEntryMark active={isNewest} />}
           {verseId !== undefined && (
             <span
               className="text-[11px] lg:text-[clamp(12px,0.85vw,19px)]"
@@ -536,44 +619,74 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
       )}
 
       {entry.title && (
-        <AnimatedText
-          text={entry.title}
-          as="h3"
-          variant="subtitle"
-          animationType="flyInBottom"
-          cinematic
-          splitLevel="word"
-          staggerDelay={0.06}
-          className="!text-left w-full font-light tracking-tight text-foreground
-            text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
-          style={{
-            textShadow: "none",
-            fontFamily: "var(--font-fraunces), serif",
-            lineHeight: 1.2,
-          }}
-        />
+        <div
+          className="flex items-center"
+          style={{ gap: "clamp(7px, 0.6vw, 11px)" }}
+        >
+          {markSlot === "title" && <NewEntryMark active={isNewest} />}
+          <AnimatedText
+            text={entry.title}
+            as="h3"
+            variant="subtitle"
+            animationType="flyInBottom"
+            cinematic
+            splitLevel="word"
+            staggerDelay={0.06}
+            className="!text-left w-full font-light tracking-tight text-foreground
+              text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
+            style={{
+              textShadow: "none",
+              fontFamily: "var(--font-fraunces), serif",
+              lineHeight: 1.2,
+            }}
+          />
+        </div>
       )}
 
       {entry.paragraphs?.map((item, i) =>
         typeof item === "string" ? (
-          <AnimatedText
-            key={i}
-            text={item}
-            as="p"
-            variant="body"
-            animationType="fadeIn"
-            cinematic
-            splitLevel="word"
-            staggerDelay={0.008}
-            className="!text-left w-full font-normal text-foreground/80
-              text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
-            style={{
-              textShadow: "none",
-              fontFamily: "var(--font-sans)",
-              lineHeight: 1.95,
-              marginTop: "clamp(10px, 1vw, 18px)",
-            }}
-          />
+          markSlot === "paragraph" && i === 0 ? (
+            <div
+              key={i}
+              className="flex items-start"
+              style={{ gap: "clamp(7px, 0.6vw, 11px)", marginTop: "clamp(10px, 1vw, 18px)" }}
+            >
+              <span style={{ marginTop: "0.5em" }}>
+                <NewEntryMark active={isNewest} />
+              </span>
+              <AnimatedText
+                text={item}
+                as="p"
+                variant="body"
+                animationType="fadeIn"
+                cinematic
+                splitLevel="word"
+                staggerDelay={0.008}
+                className="!text-left w-full font-normal text-foreground/80
+                  text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+                style={{ textShadow: "none", fontFamily: "var(--font-sans)", lineHeight: 1.95 }}
+              />
+            </div>
+          ) : (
+            <AnimatedText
+              key={i}
+              text={item}
+              as="p"
+              variant="body"
+              animationType="fadeIn"
+              cinematic
+              splitLevel="word"
+              staggerDelay={0.008}
+              className="!text-left w-full font-normal text-foreground/80
+                text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+              style={{
+                textShadow: "none",
+                fontFamily: "var(--font-sans)",
+                lineHeight: 1.95,
+                marginTop: "clamp(10px, 1vw, 18px)",
+              }}
+            />
+          )
         ) : (
           <InkCapsuleGroup key={i} group={item} />
         ),
@@ -592,6 +705,7 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
 export function SideInfoPanel() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const isOpen = useSideInfoStore((s) => s.isOpen);
+  const setOpen = useSideInfoStore((s) => s.setOpen);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
 
@@ -713,70 +827,98 @@ export function SideInfoPanel() {
                   : "right-2 w-[160px] lg:right-[2vw] lg:w-[22vw]"
               }`}
           >
-            {/* ── Panel heading — quiet small caps, centered ──────────── */}
+            <GlassPanelFrame />
+            <PanelEdgeHandle
+              edge="left"
+              onClick={() => setOpen(false)}
+              label="Collapse tafsir panel"
+            />
+
             <div
-              className="flex-shrink-0 text-center uppercase text-foreground/50
-                text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
+              className="relative flex flex-col flex-1 min-h-0"
               style={{
-                letterSpacing: "0.28em",
-                fontFamily: "var(--font-sans)",
-                marginBottom: "clamp(14px, 1.4vw, 24px)",
-                paddingRight: "0.1em",
+                padding: "clamp(16px, 1.5vw, 28px) clamp(14px, 1.3vw, 24px)",
               }}
             >
-              {panelTitle}
-            </div>
+              {/* ── Panel heading — quiet small caps, centered ──────────── */}
+              <div
+                className="flex-shrink-0 text-center uppercase text-foreground/50
+                  text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
+                style={{
+                  letterSpacing: "0.28em",
+                  fontFamily: "var(--font-sans)",
+                  marginBottom: "clamp(14px, 1.4vw, 24px)",
+                  paddingRight: "0.1em",
+                }}
+              >
+                {panelTitle}
+              </div>
 
-            {/* ── Reading log — grows to fill the aside, scrolls on its own */}
-            <div
-              ref={scrollRef}
-              {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
-              className={`relative flex-1 min-h-0 overscroll-contain
-                [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
-            >
-              <AnimatePresence initial={false}>
-                {entries.length === 0 ? (
-                  <motion.p
-                    key="side-info-empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="italic text-foreground/40
-                      text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
-                    style={{
-                      fontFamily: "var(--font-cormorant), serif",
-                      lineHeight: 1.8,
-                      margin: 0,
-                    }}
-                  >
-                    {emptyText}
-                  </motion.p>
-                ) : (
-                  entries.map((resolved) => (
-                    <motion.article
-                      key={resolved.key}
-                      data-entry-key={resolved.key}
-                      initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={{
-                        opacity: 0,
-                        y: 10,
-                        filter: "blur(6px)",
-                        transition: { duration: 0.35, ease: "easeIn" },
+              {/* ── Reading log — grows to fill the aside, scrolls on its own */}
+              <div
+                ref={scrollRef}
+                {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
+                className={`relative flex-1 min-h-0 overscroll-contain
+                  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+                  ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
+              >
+                <AnimatePresence initial={false}>
+                  {entries.length === 0 ? (
+                    <motion.p
+                      key="side-info-empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8 }}
+                      className="italic text-foreground/40
+                        text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
+                      style={{
+                        fontFamily: "var(--font-cormorant), serif",
+                        lineHeight: 1.8,
+                        margin: 0,
                       }}
-                      transition={{ duration: 0.85, ease: [0.25, 1, 0.5, 1] }}
-                      style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
                     >
-                      <SideInfoEntryView
-                        verseId={resolved.verseId}
-                        entry={resolved.entry}
-                      />
-                    </motion.article>
-                  ))
-                )}
-              </AnimatePresence>
+                      {emptyText}
+                    </motion.p>
+                  ) : (
+                    entries.map((resolved) => {
+                      // The entry the fold story just revealed stays at full
+                      // ink; everything the reader has already moved past
+                      // settles back — quieter and greyed, like older writing
+                      // on the same page — so the newest story keeps the eye.
+                      const isNewest = resolved.stepIdx === stepIdx;
+                      return (
+                        <motion.article
+                          key={resolved.key}
+                          data-entry-key={resolved.key}
+                          initial={{ opacity: 0, y: 18, filter: "blur(6px) grayscale(0)" }}
+                          animate={{
+                            opacity: isNewest ? 1 : 0.4,
+                            y: 0,
+                            filter: isNewest
+                              ? "blur(0px) grayscale(0)"
+                              : "blur(0px) grayscale(0.85)",
+                          }}
+                          exit={{
+                            opacity: 0,
+                            y: 10,
+                            filter: "blur(6px) grayscale(0)",
+                            transition: { duration: 0.35, ease: "easeIn" },
+                          }}
+                          transition={{ duration: isNewest ? 0.85 : 1.1, ease: [0.25, 1, 0.5, 1] }}
+                          style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
+                        >
+                          <SideInfoEntryView
+                            verseId={resolved.verseId}
+                            entry={resolved.entry}
+                            isNewest={isNewest}
+                          />
+                        </motion.article>
+                      );
+                    })
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </motion.aside>
         )}
