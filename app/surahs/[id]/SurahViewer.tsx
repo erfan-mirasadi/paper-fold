@@ -50,6 +50,7 @@ import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
 import { isWebGLSupported } from "@/app/utils/gpuTier";
+import { useAutoCollapsePanelsOnElevate } from "@/app/hooks/useAutoCollapsePanelsOnElevate";
 
 // @react-three/fiber's <Canvas> still creates a THREE.Clock internally to
 // drive its render loop; three r183 deprecated Clock in favor of Timer but
@@ -221,6 +222,8 @@ function SurahViewerInner({
   handleSceneReady,
 }: InnerProps) {
   const lenis = useLenis();
+
+  useAutoCollapsePanelsOnElevate();
 
   // ── Lock scroll during loading so user cannot scroll before scene is ready ──
   // Part 1: Immediately lock native scroll on mount (before Lenis is ready)

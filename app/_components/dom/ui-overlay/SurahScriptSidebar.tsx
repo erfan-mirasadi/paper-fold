@@ -7,6 +7,7 @@ import {
   getActiveStoryConfig,
 } from "@/app/stores/useStoryStore";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
+import { useSurahScriptStore } from "@/app/stores/useSurahScriptStore";
 import type { SurahDataShape, Verse } from "@/app/data/SurahConfig";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 
@@ -361,7 +362,8 @@ function AnimatedBrand({ title }: { title?: string }) {
 export function SurahScriptSidebar() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const activeTextData = useStoryStore((s) => s.activeTextData);
-  const [isOpen, setIsOpen] = useState(true);
+  const isOpen = useSurahScriptStore((s) => s.isOpen);
+  const setIsOpen = useSurahScriptStore((s) => s.setOpen);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
 
