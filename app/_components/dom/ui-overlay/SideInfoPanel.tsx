@@ -528,6 +528,10 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key" | "step
               cinematic
               splitLevel="word"
               staggerDelay={0.05}
+              once
+              blurPx={0}
+              durationS={0.8}
+              inViewMargin="0px"
               className="!text-left w-full uppercase font-medium text-[8.5px] lg:text-[clamp(9.5px,0.66vw,15px)]"
               spanClassName="tracking-[0.26em]"
               style={{ textShadow: "none", color: GOLD }}
@@ -545,6 +549,10 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key" | "step
           cinematic
           splitLevel="word"
           staggerDelay={0.06}
+          once
+          blurPx={8}
+          durationS={0.9}
+          inViewMargin="0px"
           className="!text-left w-full font-light tracking-tight text-foreground
             text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
           style={{
@@ -566,6 +574,10 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key" | "step
             cinematic
             splitLevel="word"
             staggerDelay={0.008}
+            once
+            blurPx={0}
+            durationS={0.7}
+            inViewMargin="0px"
             className="!text-left w-full font-normal text-foreground/80
               text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
             style={{

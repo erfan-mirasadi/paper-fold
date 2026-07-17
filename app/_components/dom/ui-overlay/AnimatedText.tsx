@@ -1,7 +1,14 @@
 "use client";
 
-import { CSSProperties, FC, ReactNode, JSX } from "react";
-import { motion, Variants } from "framer-motion";
+import {
+  CSSProperties,
+  FC,
+  ReactNode,
+  JSX,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -38,8 +45,23 @@ export interface AnimatedTextProps {
   spanClassName?: string;
   // Controls how the text is split for animation
   splitLevel?: "char" | "word" | "none";
+  // Animate only on the first viewport entry and then stay visible —
+  // prevents the "text keeps re-loading" feel inside scrollable panels
+  once?: boolean;
+  // Entrance blur radius in px; defaults to 12 for cinematic/movieCredits.
+  // Set 0 on small body text: the blur is invisible there but very costly.
+  blurPx?: number;
+  // Per-word duration override in seconds
+  durationS?: number;
+  // rootMargin for the in-view trigger (default matches the old framer margin)
+  inViewMargin?: string;
 }
 
+// The entrance itself lives in globals.css (`at-child-in` / `at-credits-in`)
+// as plain CSS animations: the browser runs them off the main thread and drops
+// every filter/transform/layer once they finish, instead of keeping one
+// JS-driven motion component (plus a permanent will-change GPU layer) alive
+// per character.
 export const AnimatedText: FC<AnimatedTextProps> = ({
   text,
   as: Tag = "h2",
@@ -53,7 +75,34 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
   style,
   spanClassName,
   splitLevel = "char",
+  once = false,
+  blurPx,
+  durationS,
+  inViewMargin = "-10% 0px -10% 0px",
 }) => {
+  const containerRef = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  // Same trigger semantics as the previous framer-motion version:
+  // whileInView with viewport {once, margin}.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          if (once) observer.disconnect();
+        } else if (!once) {
+          setInView(false);
+        }
+      },
+      { rootMargin: inViewMargin },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [once, inViewMargin]);
+
   // Base typography styles matching the ORYZO references
   const variantStyles = {
     title: "text-6xl md:text-8xl font-bold tracking-tighter font-serif",
@@ -63,7 +112,6 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
   };
 
   // Glow effect styles
-  // Optimized text-shadow for better performance (less GPU lag) and much better contrast
   const glowStyles = glow
     ? {
         textShadow:
@@ -73,106 +121,45 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
         textShadow: "0 2px 10px rgba(0, 0, 0, 0.7)",
       };
 
-  // Container variants to handle the staggering of children (words)
-  const containerVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      ...(animationType === "movieCredits" && { y: 400 }),
-    },
-    visible: (i = 1) => ({
-      opacity: 1,
-      ...(animationType === "movieCredits" && { y: 0 }),
-      transition: {
-        ...(animationType === "movieCredits" && {
-          y: { duration: 4, ease: [0.16, 1, 0.3, 1] },
-        }),
-        staggerChildren:
-          animationType === "movieCredits"
-            ? staggerDelay
-            : cinematic
-              ? staggerDelay * 1.5
-              : staggerDelay,
-        delayChildren:
-          animationType === "movieCredits"
-            ? 0.2 * i
-            : cinematic
-              ? 0.05 * i
-              : 0.1 * i,
-      },
-    }),
-  };
+  // Timing — identical numbers to the old framer-motion variants.
+  const isCredits = animationType === "movieCredits";
+  const blurred = cinematic || isCredits;
+  const blur = blurPx ?? (blurred ? 12 : 0);
+  const duration = durationS ?? (isCredits ? 1.5 : cinematic ? 1.2 : 0.7);
+  // The 0.7s ease-out approximates the old critically damped spring
+  // (stiffness 100, damping 20); cinematic keeps the exact bezier.
+  const ease = blurred
+    ? "cubic-bezier(0.16, 1, 0.3, 1)"
+    : "cubic-bezier(0.22, 1, 0.36, 1)";
+  const delayChildren = isCredits ? 0.2 : cinematic ? 0.05 : 0.1;
+  const stagger = cinematic && !isCredits ? staggerDelay * 1.5 : staggerDelay;
 
-  // Determine the starting Y position based on animationType
-  const getInitialY = () => {
-    if (animationType === "movieCredits") return 130;
-    if (animationType === "flyInTop") return -40;
-    if (animationType === "flyInBottom") return 40;
-    return 0; // fadeIn, flyInLeft
-  };
+  const initialY = isCredits
+    ? 130
+    : animationType === "flyInTop"
+      ? -40
+      : animationType === "flyInBottom"
+        ? 40
+        : 0;
+  const initialX = animationType === "flyInLeft" ? -40 : 0;
 
-  // Determine the starting X position based on animationType
-  const getInitialX = () => {
-    if (animationType === "flyInLeft") return -40;
-    return 0;
-  };
-
-  // Child variants for individual words
-  const childVariants: Variants = {
-    visible: {
-      opacity: 1,
-      y: 0,
-      x: 0,
-      rotateX: 0,
-      filter:
-        cinematic || animationType === "movieCredits" ? "blur(0px)" : undefined,
-      transition:
-        animationType === "movieCredits"
-          ? {
-              duration: 1.5, // exceptionally slow and smooth
-              ease: [0.16, 1, 0.3, 1],
-            }
-          : cinematic
-            ? {
-                duration: 1.2,
-                ease: [0.16, 1, 0.3, 1], // cinematic smooth ease
-              }
-            : {
-                type: "spring",
-                damping: 20,
-                stiffness: 100,
-              },
-    },
-    hidden: {
-      opacity: 0,
-      y: getInitialY(),
-      x: getInitialX(),
-      rotateX: animationType === "movieCredits" ? 60 : 0,
-      filter:
-        cinematic || animationType === "movieCredits"
-          ? "blur(12px)"
-          : undefined,
-      transition:
-        animationType === "movieCredits"
-          ? {
-              duration: 1.5,
-              ease: [0.16, 1, 0.3, 1],
-            }
-          : cinematic
-            ? {
-                duration: 1.2,
-                ease: [0.16, 1, 0.3, 1],
-              }
-            : {
-                type: "spring",
-                damping: 20,
-                stiffness: 100,
-              },
-    },
-  };
-
-  // Convert the dynamically chosen Tag to a motion component
-  // We use type assertion here to satisfy TypeScript for dynamic motion tags
-  const MotionTag = motion[Tag as keyof typeof motion] as typeof motion.div;
+  // Each animated span only carries its own stagger delay; the shared
+  // animation vars (offset, blur, duration…) are inherited from the container.
+  let spanIndex = 0;
+  const animatedSpan = (key: string, content: ReactNode, zIndex: number) => (
+    <span
+      key={key}
+      className={cn("at-child inline-block relative", spanClassName)}
+      style={
+        {
+          zIndex,
+          "--at-delay": `${delayChildren + spanIndex++ * stagger}s`,
+        } as CSSProperties
+      }
+    >
+      {content}
+    </span>
+  );
 
   // Split text by \n to handle manual line breaks
   const lines = text.split("\n");
@@ -181,19 +168,21 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
   lines.forEach((line, lineIndex) => {
     if (splitLevel === "none") {
       renderElements.push(
-        <motion.span
+        <span
           key={`line-${lineIndex}`}
-          variants={childVariants}
-          className={cn("inline-block relative whitespace-nowrap", spanClassName)}
-          style={{
-            zIndex: 1000 - lineIndex,
-            willChange: cinematic
-              ? "transform, filter, opacity"
-              : "transform, opacity",
-          }}
+          className={cn(
+            "at-child inline-block relative whitespace-nowrap",
+            spanClassName,
+          )}
+          style={
+            {
+              zIndex: 1000 - lineIndex,
+              "--at-delay": `${delayChildren + spanIndex++ * stagger}s`,
+            } as CSSProperties
+          }
         >
           {line}
-        </motion.span>
+        </span>,
       );
     } else {
       // Split each line into words
@@ -201,38 +190,21 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
       words.forEach((word, wordIndex) => {
         let wordContent: ReactNode;
         if (splitLevel === "word") {
-          wordContent = (
-            <motion.span
-              key={`word-anim-${lineIndex}-${wordIndex}`}
-              variants={childVariants}
-              className={cn("inline-block relative", spanClassName)}
-              style={{
-                zIndex: 1000,
-                willChange: cinematic
-                  ? "transform, filter, opacity"
-                  : "transform, opacity",
-              }}
-            >
-              {word}
-            </motion.span>
+          wordContent = animatedSpan(
+            `word-anim-${lineIndex}-${wordIndex}`,
+            word,
+            1000,
           );
         } else {
-          const chars = word.split("");
-          wordContent = chars.map((char, charIndex) => (
-            <motion.span
-              key={`${lineIndex}-${wordIndex}-${charIndex}`}
-              variants={childVariants}
-              className={cn("inline-block relative", spanClassName)}
-              style={{
-                zIndex: 1000 - charIndex,
-                willChange: cinematic
-                  ? "transform, filter, opacity"
-                  : "transform, opacity",
-              }}
-            >
-              {char}
-            </motion.span>
-          ));
+          wordContent = word
+            .split("")
+            .map((char, charIndex) =>
+              animatedSpan(
+                `${lineIndex}-${wordIndex}-${charIndex}`,
+                char,
+                1000 - charIndex,
+              ),
+            );
         }
 
         renderElements.push(
@@ -256,21 +228,33 @@ export const AnimatedText: FC<AnimatedTextProps> = ({
     }
   });
 
+  const TagEl = Tag as "h2";
+
   return (
-    <MotionTag
-      variants={containerVariants}
-      whileInView="visible"
-      initial="hidden"
-      viewport={{ once: false, margin: "-10% 0px -10% 0px" }}
-      style={{ ...glowStyles, ...style }}
+    <TagEl
+      ref={containerRef as never}
+      style={
+        {
+          "--at-x": `${initialX}px`,
+          "--at-y": `${initialY}px`,
+          "--at-rx": isCredits ? "60deg" : "0deg",
+          "--at-blur": `${blur}px`,
+          "--at-dur": `${duration}s`,
+          "--at-ease": ease,
+          ...glowStyles,
+          ...style,
+        } as CSSProperties
+      }
       className={cn(
-        "text-center", // Default to text-center since it's most common, can be overridden
+        "at-container text-center", // Default to text-center since it's most common, can be overridden
+        isCredits && "at-credits",
+        inView && "at-visible",
         noWrap ? "whitespace-nowrap" : "",
         variantStyles[variant],
         className,
       )}
     >
       {renderElements}
-    </MotionTag>
+    </TagEl>
   );
 };

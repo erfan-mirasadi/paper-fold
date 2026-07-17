@@ -2,8 +2,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --page-bg: #ffffff;
-  --background: #ffffff;
+  --page-bg: #f4f2ee;
+  --background: #f4f2ee;
   --foreground: #000000;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -416,4 +416,47 @@ html.dark .canvas-wrapper {
     transparent 58%);
   background-size: 260% 100%;
   animation: glass-sheen-drift 16s ease-in-out infinite;
+}
+
+/* AnimatedText — CSS-driven word/char entrance. Runs on the compositor and
+   leaves no filter, transform, or will-change behind once finished (the
+   `backwards` fill means spans return to plain, layer-free text). Per-span
+   timing comes from custom properties set inline by the component. */
+@keyframes at-child-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--at-x, 0px), var(--at-y, 0px), 0)
+      rotateX(var(--at-rx, 0deg));
+    filter: blur(var(--at-blur, 0px));
+  }
+}
+
+@keyframes at-credits-in {
+  from {
+    transform: translate3d(0, 400px, 0);
+  }
+}
+
+.at-container {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.at-container.at-visible {
+  opacity: 1;
+}
+
+.at-container.at-credits.at-visible {
+  animation: at-credits-in 4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.at-child {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.at-visible .at-child {
+  opacity: 1;
+  animation: at-child-in var(--at-dur, 1.2s)
+    var(--at-ease, cubic-bezier(0.16, 1, 0.3, 1)) var(--at-delay, 0s) backwards;
 }
