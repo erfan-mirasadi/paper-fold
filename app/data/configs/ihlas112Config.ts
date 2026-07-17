@@ -69,7 +69,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
               },
               {
                 n: 4,
-                text: "Ve hiçbir şey Onun eşiti ve dengi değildir.",
+                text: "Ve hiçbir şey Onun eşit ve dengi değildir.",
                 color: TAFSIR_BLUE_BORDER,
                 bg: TAFSIR_BLUE_BG,
               },
@@ -89,7 +89,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
               },
               {
                 n: 4,
-                text: "Başka hiçbir şey Onun eşiti ve dengi değildir.",
+                text: "Başka hiçbir şey Onun eşit ve dengi değildir.",
                 color: TAFSIR_BLUE_BORDER,
                 bg: TAFSIR_BLUE_BG,
               },
@@ -499,7 +499,7 @@ export const IHLAS_112_TEXT_TR: SurahDataShape = {
       },
       {
         verses: [
-          { number: 4, text: "Ve hiçbir şey Onun eşiti ve dengi değildir" },
+          { number: 4, text: "Ve hiçbir şey Onun eşit ve dengi değildir" },
         ],
       },
     ],

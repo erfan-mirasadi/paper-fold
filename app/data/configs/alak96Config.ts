@@ -97,7 +97,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
             capsules: [
               {
                 n: 7,
-                text: "Adam kendini yaratan Allaha iman yerine istiğna ediyor, çevresine güvenerek, ihtiyacım yok diyor, inkar ediyor.",
+                text: "Adam kendini yaratan Allaha iman edeceğine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
                 color: MAROON_THEME,
                 bg: CAPSULE_BG_7_8_17_18,
               },
@@ -167,7 +167,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
               },
               {
                 n: 14,
-                text: "Allahın gördüğünü bilmiyor mu yoksa?",
+                text: "Allahın kendisini gördüğünü bilmiyor mu yoksa?",
                 color: GREEN_THEME,
                 bg: CAPSULE_BG_12_14,
               },
@@ -283,7 +283,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
             capsules: [
               {
                 n: 7,
-                text: "Adam kendini yaratan Allaha iman yerine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
+                text: "Adam kendini yaratan Allaha karşı iman yerine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
                 color: MAROON_THEME,
                 bg: CAPSULE_BG_7_8_17_18,
               },
@@ -357,7 +357,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
         kicker: "13-14. Ayetler · Ara Bölüm",
         title: "Allahın Gördüğünü Bilmiyor mu?",
         paragraphs: [
-          "Ebu Cehil ve onun gibileri iman davetini yalanladılar. Peygamberin davetine sırt döndüler. Kendilerinin başıboş bırakılacaklarını mı sanıyorlar? Allah, elbette kullarının bu inkar ve isyanlarını görüyor. Onlardan bunun hesabını soracaktır.",
+          "Ebu Cehil ve onun gibileri yukarıdaki iman davetini yalanladılar. Peygamberin davetine sırt döndüler. Kendilerinin başıboş bırakılacaklarını mı sanıyorlar? Allah, elbette kullarının bu inkar ve isyanlarını görüyor. Onlardan bunun hesabını soracaktır.",
           "Kesin inançsızlar veya inatçı kafirler: Bir kere günlük olaylardan sıyrılıp kendini dinlememiş, tabiata bakmamış, bir kere yaratılış mucizesini düşünmemiş, bir kere evrensel hakikatlerden bahseden peygamberlere ve Allahın gönderdiği kitaplara vicdanıyla kulak vermemiş. Hayata yalnız bedensel ihtiyaçlarının penceresinden bakmış, kendi basit sosyal statüsünü ve basit çıkarlarını korumayı dünyanın en önemli meselesi zannetmiş küçük adamlar…",
           "Böyle kendi yanlış inanç ve düşüncelerini kesin doğrular olarak kabul eden ve karşı tarafın bütün doğrularını yanlış kabul eden adamlar doğruyu bulamazlar, makul ve mutedil davranamazlar. Zihin yapıları taşlaşmıştır, beyinleri esnemez. Ne olur bir kere makul olabilseler, bir kere de kendi doğrularından azıcık şüphe etseler? Bir kere de karşı tarafa azıcık hak verebilseler dersiniz.",
           "Bu konuda onların vicdanları kararmış, muhakemeleri bozulmuş olabilir. Ama her şeyi gören, bilen bir de Allah var. Bir de Allahın şaşmaz adaleti var. Allahın her şeyi gördüğünü bilmiyorlar mı yoksa? Bile bile düşmanlık edenleri Allah hiç iflah eder mi?",

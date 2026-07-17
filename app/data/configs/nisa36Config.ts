@@ -143,7 +143,7 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
           },
           {
             capsules: [
-              { n: 3, text: "Ve önce ana-babaya" },
+              { n: 3, text: "Ve önce ana-babaya," },
               { n: 4, text: "Sonra diğer yakınlara," },
               { n: 5, text: "Önce yetimlere," },
               { n: 6, text: "Sonra diğer fakirlere," },
@@ -162,8 +162,8 @@ export const NISA_36_CONFIG: SurahLayoutConfig = {
             capsules: [
               { n: 7, text: "Önce yakın komşuya," },
               { n: 8, text: "Sonra uzak komşuya," },
-              { n: 9, text: "Önce yol arkadaşına" },
-              { n: 10, text: "Sonra yolcuya, garibe" },
+              { n: 9, text: "Önce yol arkadaşına," },
+              { n: 10, text: "Sonra yolcuya, garibe," },
             ],
             corners: "soft",
             color: BOOK_CAPS,

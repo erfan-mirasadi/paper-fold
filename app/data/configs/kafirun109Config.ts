@@ -43,7 +43,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
           "Halbuki Mekke'de Müslümanların istekleri gayet masum ve anlaşılır bir şeydi; 1. (Doğup büyüdükleri memleketlerinde) insanca yaşamak istiyorlardı. 2. Özgürce seçtikleri İslam dinini özgürce yaşamak istiyorlardı.",
           "Kur'an-ı Kerim, en olumsuz, en yanlış inanış ve davranışlardan bile evrensel doğrular çıkaran bir üsluba sahiptir. Hiçbir problemi çözümsüz bırakmaz. Bu Surede de, çeşitli inanç ve görüşteki insanların ve birbirlerine zarar vermeden beraberce yaşamaları teklifini getiriyor.",
           "Kafirun Suresi önce Allah Rasulünün putlara tapmama tavrını açıkça ifade ediyor. Bu tavır, en doğal bireysel haktır. Kur'an bu hakka vurgu yapıyor peygamber efendimize de bu hakkı kullandırıyor.",
-          '"Ben sizin gibi düşünmüyorum, ben sizin inandığınız şeye inanmıyorum, ben sizin taptığınız şeylere tapmıyorum" deme hakkı vardır.',
+          'Herkesin, "Ben sizin gibi düşünmüyorum, ben sizin inandığınız şeye inanmıyorum, ben sizin taptığınız şeylere tapmıyorum" deme hakkı vardır.',
           "Müslümanların ikinci talepleri de; Mekke'de herkes neye inanmak istiyorsa öyle yaşamak istiyorsa öyle yaşasın ve Mekke'de beraberce barış içinde yaşayalım. Kimse kimseye karışmasın, şeklindeydi.",
           "Bu makul, bu medeni teklif dünya var oldukça değerinden hiçbir şey kaybetmeyecek doğru bir tekliftir. Doğru bir duruştur.",
           "Yukarıdaki yazılış Kur'an-ı Kerimin pek çok yerinde gördüğümüz şekle daha uygundur. Buna göre şu kısa surenin içinde iki bölüm var. Her iki bölümde de bir ayeti iki ayet açıyor, tafsil ediyor.",
@@ -52,7 +52,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
             capsules: [
               {
                 n: 1,
-                text: "De ki, Ey (benim dinime) inanmayanlar !",
+                text: "De ki, Ey (benim dinime) inanmayanlar!",
                 color: ORANGE_THEME,
                 bg: CAPSULE_BG_6_19,
               },
@@ -108,7 +108,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
             corners: "soft",
             textColor: "#2B2B2B",
           },
-          "Surenin ana manasını sarı renkle gösterdiğimiz ayetler veriyor. Açık mavi ve açık yeşil renklerle gösterdiğimiz çift ayetler benzeşen (müteşabih) ayetlerdir. Açıklama ayetleridir. Ana ayetin gerekçesini açıklıyorlar.",
+          "Surenin ana manasını sarı renkle gösterdiğimiz ayetler veriyor. Açık mavi ve açık yeşil renklerle gösterdiğimiz çift ayet Ayetler benzeşen (müteşabih) ayetlerdir. Açıklama ayetleridir. Ana ayetin gerekçesini açıklıyorlar.",
           'Evet surenin ana ayeti birinci ve altıncı ayetlerdir: "1. De ki, Ey (benim dinime) inanmayanlar!" → "6. Sizin dininiz size, benim dinim bana !"',
         ],
       },
@@ -150,7 +150,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
               },
               {
                 n: 5,
-                text: "Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiniz.",
+                text: "Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiniz..",
                 color: CENTER_GROUP_BORDER,
                 bg: CENTER_GROUP_BG,
               },
@@ -164,8 +164,8 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
           "İkinci ayet, üçüncü ayetin ikizi yani benzeşenidir. Anlamca benzeşen ayetler oldukları kolayca anlaşılıyor.",
           "4. ayetle 5. ayetin de anlamca hatta lafızca benzeşen ikili ayet oldukları gayet açık.",
           "Sonra da her iki ayet diğer iki ayetle benzeşen ikiz guruplar oluşturuyorlar.",
-          '"Suredeki ayetler ikizi olduğu gibi, "Benim taptığım Allah ve sizin taptığınız putlar", "Ben tapmıyorum ve siz tapmıyorsunuz", "benim dinim" ve "sizin dininiz" gibi her şey birbirine zıt simetrik ve ikili bir şekilde anlatılıyor.',
-          "Katlanabilir simetrik Kur'an: Bu sureyi de tam ortasından, yukarıdan aşağıya sarı renkle ayetleri üst üste getirerek katlayınız. Ana manayı ifade eden ayetlerin ve geçmiş zamanla gelecek zamanın üst üste geldiğini göreceksiniz. Sonra bir de sağdan sola katlayınız ve simetrik anlamların nasıl üst üste geldiğine bakınız. Bu durumun bütün Kur'an için geçerli olduğunu diğer sureleri incelerken de görüyoruz.",
+          '"Suredeki ayetler ikili olduğu gibi, "Benim taptığım Allah ve sizin taptığınız putlar", "Ben tapmıyorum ve siz tapmıyorsunuz", "benim dinim" ve "sizin dininiz" gibi her şey birbirine zıt simetrik ve ikili bir şekilde anlatılıyor.',
+          "Katlanabilir simetrik Kur'an: Bu sureyi de tam ortasından, yukarıdan aşağıya sarı renkli ayetleri üst üste getirerek katlayınız. Ana manayı ifade eden ayetlerin ve geçmiş zamanla gelecek zamanın üst üste geldiğini göreceksiniz. Sonra bir de da sağdan sola katlayınız ve simetrik anlamların nasıl üst üste geldiğine bakınız. Bu durumun bütün Kur'an için geçerli olduğunu diğer sureleri incelerken de görüyoruz.",
           "Sonra bu sureyi biraz farklı bir ifadeyle açarak şöyle de yazabiliriz: \"1. De ki, Ey (benim dinime) inanmayan ve sürekli benimle mücadele edip duranlar! 2. (Görüyorsunuz ki ben bugüne kadar) sizin taptığınız putlara tapmadım, tapmıyorum. 3. Siz de benim ibadet ettiğim tek Allah'a ibadet etmediniz, etmiyorsunuz. 4. Madem ben bundan sonra da sizin taptıklarınıza tapmayacağım, 5. Ve madem siz de benim taptığım tek Allah'a tapmayacaksınız. 6. (O halde) Sizin dininiz size, benim dinim bana! Sizin putlara inandığınız ve taptığınız gibi, benim de inanma ve ibadet etme hakkım vardır. (Bırakalım herkes kendi iradesiyle seçimini yapsın ve dilediği yola gitsin. Gelin böyle, vicdanları özgür bırakan bir prensipte anlaşalım, huzur içinde bir arada yaşayalım.) Aramızdaki beşeri ilişkiler eskisi gibi devam etsin. Gerçekler zaman içinde daha iyi görülecektir. Aksine benim görevim Allah'ın emrini insanlara tebliğ etmek ve uyarmaktır, gerisi kendilerinin bilecekleri bir iştir. İster iman eder kendilerini kurtarırlar, ister müşrik olarak kalır kendilerini ebedi helakete atarlar.\"",
           {
             capsules: [
