@@ -62,17 +62,6 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
           "Alak Suresi: İlk beş ayeti ile insanların bilmeleri ve inanmaları gereken müspet hakikati vaz'ediyor, değişmez doğruyu ortaya koyuyor. Sonra gelen iki tafsil bölümü ise; olmaması gereken menfi olaylardan, yüzlerce küfür ve zulüm hadiselerinden bir örnek veriyor.",
           "Beş ayetlik birinci bölüm bu surenin ana bölümüdür. Bu surede verilmek istenen esas mesaj bu bölümde veciz bir şekilde veriliyor. Kur'anın Mekkedeki muhatapları Mekkeli müşrikler ve Hıristiyan ve Yahudilerdi. Allah C.C. her ifadesinde bu iki muhatabı gözetmiştir. Burada sırayla onlardan bahsediliyor.",
         ],
-        images: [
-          {
-            src: "/hero/Mountains.png",
-            caption: "Nur Dağı'nın etekleri — Hira'ya çıkan yol (temsilî)",
-            alt: "Hira mağarasının bulunduğu dağ silsilesi",
-          },
-        ],
-        audio: {
-          src: "/paper-fold.mp3",
-          title: "Örnek kıraat — yer tutucu ses",
-        },
       },
       // ── First unfold: verses 6 and 19 frame the two Açıklama sections ──
       start: {
@@ -467,6 +456,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
     sceneCenterYOffset: -0.045,
     padding: 0.29,
     scrollPages: 6,
+    fixedWidthAcrossLanguages: true,
   },
   specialVerses: {
     middleFoldVerses: { left: [12, 14], right: [11, 13] },

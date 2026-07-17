@@ -607,15 +607,16 @@ export function SurahScriptSidebar() {
                   {ayahs.map((v) => {
                     const { isPill, color } = chunkAppearance(v.number);
                     return (
-                      <HighlightChunk
-                        key={v.number}
-                        active={highlighted.has(v.number)}
-                        isPill={isPill}
-                        color={color}
-                      >
-                        {v.text}
+                      <span key={v.number}>
+                        <HighlightChunk
+                          active={highlighted.has(v.number)}
+                          isPill={isPill}
+                          color={color}
+                        >
+                          {v.text}
+                        </HighlightChunk>
                         <AyahNumber n={v.number} />
-                      </HighlightChunk>
+                      </span>
                     );
                   })}
                 </p>
