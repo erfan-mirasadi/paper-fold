@@ -46,6 +46,274 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
     end: [1, 2, 3, 4, 5, 6, 7, 8],
   },
 
+  // Right-hand tafsir panel (SideInfoPanel). Entries follow the reference
+  // tafsir book's own page order (pp. 33-42) one-for-one: byFoldStep entries
+  // are the book's structural/summary pages, byVerse entries are the book's
+  // per-cümle deep dives — resolveEntries renders pre-start, then verses
+  // [1,2,7,8], then end, then verses [3,4,5,6], which is exactly that order.
+  // Capsule text reuses this file's own AYAT_AL_KURSI_TEXT_TR translations
+  // (already canonical in-app copy); the surrounding commentary is an
+  // original condensed paraphrase, not a transcription of the book's prose.
+  sideInfo: {
+    panelTitle: "Tefsir",
+    byFoldStep: {
+      "pre-start": {
+        kicker: "Yapı",
+        title: "Sekiz Cümlenin Ritmi",
+        paragraphs: [
+          "Ayet-ül Kürsi sekiz cümleden oluşur ve ikişer ikişer ilerler: tek sıradaki cümle bir hakikati doğrudan bildirir, ardından gelen çift sıradaki cümle ise buna aykırı bir yanlışı düzeltir.",
+          {
+            capsules: [
+              { n: 1, text: "Doğrudan bir hakikati bildirir." },
+              { n: 2, text: "Buna aykırı bir yanlışı düzeltir." },
+              { n: 3, text: "Doğrudan bir hakikati bildirir." },
+              { n: 4, text: "Buna aykırı bir yanlışı düzeltir." },
+              { n: 5, text: "Doğrudan bir hakikati bildirir." },
+              { n: 6, text: "Buna aykırı bir yanlışı düzeltir." },
+              { n: 7, text: "Doğrudan bir hakikati bildirir." },
+              { n: 8, text: "Buna aykırı bir yanlışı düzeltir." },
+            ],
+            corners: "soft",
+            color: OUTER_GROUP_BORDER,
+            bg: OUTER_GROUP_BG,
+            textColor: "#2B2B2B",
+            frame: OUTER_GROUP_BORDER,
+          },
+        ],
+      },
+      end: {
+        kicker: "Sayfa 38",
+        title: "Ana Cümle ve Ara Cümleler",
+        paragraphs: [
+          "Birinci-ikinci cümle ile yedinci-sekizinci cümle birlikte okununca tek bir anlam bütünlüğü oluşturur: Allah tektir, diridir, hiç uyumaz; mülkü ve hakimiyeti gökleri ve yeri kuşatır, bu Ona asla ağır gelmez.",
+          {
+            capsules: [
+              { n: 1, text: "Allah! (Onun eşi ortağı yoktur). Hay ve Kayyumdur." },
+              { n: 2, text: "O hiç uyuklamaz ve uyumaz." },
+              {
+                n: 7,
+                text: "Onun tahtı, hakimiyeti gökler ve yer genişliğindedir.",
+              },
+              {
+                n: 8,
+                text: "O ikisini korumak Ona ağır gelmez. O, Yüce ve Büyüktür.",
+              },
+            ],
+            corners: "soft",
+            color: OUTER_GROUP_BORDER,
+            bg: OUTER_GROUP_BG,
+            textColor: "#2B2B2B",
+            frame: OUTER_GROUP_BORDER,
+          },
+          "Üçüncü ile altıncı cümleler arasında kalan kısım ise bu ana fikri açan ayrıntılardır — ana cümlenin içine yerleştirilmiş bir açıklama gibi. Önce ana fikir söylenir, ayrıntıyla açılır, sonra yine ana fikre dönülür.",
+        ],
+      },
+    },
+    byVerse: {
+      // ── Page 34 ───────────────────────────────────────────────────────
+      1: {
+        kicker: "Sayfa 34",
+        title: "Kainat ve İnsan: İki Ayna",
+        paragraphs: [
+          "Yüce Allah her varlığı sayısız hikmet ve anlamla yaratmıştır. Kainattaki her şey kendi ötesinde bir gerçeğe işaret eder: onu var eden Zat'a.",
+          "Nasıl her sanat eseri ustasının imzasını taşırsa, yaratılan her şey de Yaratıcısının kudretini, ilmini ve şefkatini yansıtan bir ayna gibidir.",
+          "İnsan, görünüşte küçük olsa da akıl ve kalp gibi yetileri sayesinde kainattan bile kapsamlı bir aynadır. Yaratılışının en anlamlı gayesi, Rabbini tanıyıp Ona bilinçli bir ayna olmaktır.",
+        ],
+      },
+      // ── Page 35 ───────────────────────────────────────────────────────
+      2: {
+        kicker: "Sayfa 35",
+        title: "Peygamber ve Kur'an: En Berrak Aynalar",
+        paragraphs: [
+          "Hz. Muhammed (s.a.v.), herkesten önce Allah'ı tanımış ve bütün hayatıyla Onu en mükemmel şekilde yansıtan bir örnek olmuştur.",
+          "Kur'an-ı Kerim'in de sayısız hikmeti vardır, ama en büyük gayesi yine Allah'ı anlatmak ve tanıtmaktır.",
+          "Kur'an'da \"muhkem\" diye anılan, değişmez ve sağlam hakikatleri bildiren ayetler doğrudan Allah'tan bahseder. Ayet-ül Kürsi, İhlas Suresi, Fatiha'nın başı ve Haşir Suresi'nin son ayetleri bu yönüyle Kur'an'ın kalbi sayılır.",
+        ],
+      },
+      // ── Page 36 ───────────────────────────────────────────────────────
+      7: {
+        kicker: "Sayfa 36",
+        title: "Ayet-ül Kürsi: Sekiz Cümle Bir Bütün",
+        paragraphs: [
+          "Ayet-ül Kürsi de bütün cümleleriyle Rabbimizi tanıtır ve bazı yanlış inançların kökünü keser. Kur'an soyut hakikatleri çoğu zaman somut bir benzetmeyle anlatır; burada Yüce Allah kendini bir padişah benzetmesiyle tarif eder.",
+          "Padişahını, tahtını ve otoritesini tanımayan yoktur; ama sınırlı aklımız sonsuz olan Allah'ı tam kavrayamaz. Bu benzetme, ancak uzaktan bakabildiğimiz bir dürbün gibidir.",
+          {
+            capsules: [
+              {
+                n: 1,
+                text: "Allah! (Onun eşi ortağı yoktur). Hay ve Kayyumdur.",
+                color: OUTER_GROUP_BORDER,
+                bg: OUTER_GROUP_BG,
+              },
+              {
+                n: 2,
+                text: "O hiç uyuklamaz ve uyumaz.",
+                color: OUTER_GROUP_BORDER,
+                bg: OUTER_GROUP_BG,
+              },
+              {
+                n: 3,
+                text: "Göklerde ve yerde ne varsa Onundur.",
+                color: CENTER_GROUP_BORDER,
+                bg: CENTER_GROUP_BG,
+              },
+              {
+                n: 4,
+                text: "Onun izni olmadan kim onun huzurunda şefaatçi ve söz sahibi olabilir ki?",
+                color: CENTER_GROUP_BORDER,
+                bg: CENTER_GROUP_BG,
+              },
+              {
+                n: 5,
+                text: "Yalnızca Allah onların geleceklerini de geçmişlerini bilmektedir.",
+                color: CENTER_GROUP_BORDER,
+                bg: CENTER_GROUP_BG,
+              },
+              {
+                n: 6,
+                text: "Allah dilemeden, Onun ilminden bir şeyler mi kapmışlar ki geçmişi ve geleceği bilsinler?",
+                color: CENTER_GROUP_BORDER,
+                bg: CENTER_GROUP_BG,
+              },
+              {
+                n: 7,
+                text: "Onun tahtı, hakimiyeti gökler ve yer genişliğindedir.",
+                color: OUTER_GROUP_BORDER,
+                bg: OUTER_GROUP_BG,
+              },
+              {
+                n: 8,
+                text: "O ikisini korumak Ona ağır gelmez. O, Yüce ve Büyüktür.",
+                color: OUTER_GROUP_BORDER,
+                bg: OUTER_GROUP_BG,
+              },
+            ],
+            corners: "soft",
+            textColor: "#2B2B2B",
+            frame: OUTER_GROUP_BORDER,
+          },
+        ],
+      },
+      // ── Page 37 ───────────────────────────────────────────────────────
+      8: {
+        kicker: "Sayfa 37",
+        title: "Her Cümlenin Derinliği",
+        paragraphs: [
+          "Yukarıdaki sekiz cümlenin her biri padişah benzetmesinin bir yönünü tamamlar: Allah'ın varlığı ve birliği, uyanıklığı, mülkü, izni, ilmi, hakimiyeti ve büyüklüğü.",
+          "Cümleler tesadüfen yan yana gelmemiştir; her biri kendinden öncekini pekiştirir ve bir sonrakine zemin hazırlar.",
+        ],
+      },
+      // ── Page 39 ───────────────────────────────────────────────────────
+      3: {
+        kicker: "Sayfa 39",
+        title: "Mülk Onundur, Şefaat Onun İzniyledir",
+        paragraphs: [
+          {
+            capsules: [
+              {
+                n: 3,
+                text: "Göklerde ve yerde ne varsa Onundur.",
+              },
+              {
+                n: 4,
+                text: "Onun izni olmadan kim onun huzurunda şefaatçi ve söz sahibi olabilir ki?",
+              },
+            ],
+            corners: "soft",
+            color: CENTER_GROUP_BORDER,
+            bg: CENTER_GROUP_BG,
+            textColor: "#2B2B2B",
+            frame: OUTER_GROUP_BORDER,
+          },
+          "Eski Arap toplumunda henüz güçlü bir devlet düzeni yerleşmemişken, zayıf ve yabancı kimseleri kabile reisleri korurdu; bu korumaya \"şefaat\" ya da \"himaye\" denirdi ve reisin izni olmadan kimse ondan yararlanamazdı.",
+          "Bugün bu görevi devletler üstlenir: vatandaşlık, pasaport, güvenlik hep devletin yetkisiyle sağlanır. Ayetteki \"Onun izni olmadan şefaat edilemez\" ifadesi de aynı mantığı taşır — kainatın gerçek sahibi ve yetkilisi yalnızca Allah'tır.",
+        ],
+      },
+      // ── Page 40 ───────────────────────────────────────────────────────
+      4: {
+        kicker: "Sayfa 40",
+        title: "Yetkisiz Elçi Olmaz",
+        paragraphs: [
+          "Bir büyükelçi ancak devletinden aldığı yetkiyle görev yapar. Putperestlerin taptığı putlara da Allah'tan hiçbir yetki verilmediği halde kendilerine bir \"aracılık\" yetkisi yakıştırılmıştır.",
+          "Allah, gökleri ve yeri hiçbir aracıya ihtiyaç duymadan bizzat ilmi ve kudretiyle yönetirken, birilerinin kalkıp Ona kendiliğinden ortaklar icat etmesi büyük bir haksızlıktır. Hz. İsa ve Hz. Meryem'i tanrılaştıranlar da, birer peygamber ve onun annesi olan bu iki mübarek insana asılsız yetkiler yakıştırarak aynı hataya düşmüşlerdir.",
+        ],
+      },
+      // ── Page 41 ───────────────────────────────────────────────────────
+      5: {
+        kicker: "Sayfa 41",
+        title: "Dördüncü Cümleye Dönüş",
+        paragraphs: [
+          {
+            capsules: [
+              {
+                n: 4,
+                text: "Onun izni olmadan kim onun huzurunda şefaatçi ve söz sahibi olabilir ki?",
+              },
+            ],
+            corners: "soft",
+            color: CENTER_GROUP_BORDER,
+            bg: CENTER_GROUP_BG,
+            textColor: "#2B2B2B",
+          },
+          "Göklerin ve yerin tek sahibi ve hakimi Allah olduğuna göre, Onun izni olmadan kimse Onun mülkünde söz sahibi olamaz. Bu yüzden herkes hiçbir aracıya ihtiyaç duymadan doğrudan Rabbine yönelebilir.",
+          {
+            capsules: [
+              {
+                n: 5,
+                text: "Yalnızca Allah onların geleceklerini de geçmişlerini bilmektedir.",
+              },
+              {
+                n: 6,
+                text: "Allah dilemeden, Onun ilminden bir şeyler mi kapmışlar ki geçmişi ve geleceği bilsinler?",
+              },
+            ],
+            corners: "soft",
+            color: CENTER_GROUP_BORDER,
+            bg: CENTER_GROUP_BG,
+            textColor: "#2B2B2B",
+            frame: OUTER_GROUP_BORDER,
+          },
+          "Geçmişi ve geleceği yalnızca Allah bilir. Gaipten haber verdiğini iddia edenlerin sözleri, Allah'ın izni ve bilgisi olmadan boştur.",
+          {
+            capsules: [
+              {
+                n: "A1",
+                text: "TEK İLAH — Eşi benzeri olmayan tek Allah; diridir, her şeyi O yönetir.",
+                span: true,
+              },
+              {
+                n: "B1",
+                text: "PUTLARIN YETKİSİ YOK — Her şeyin gerçek sahibi Allah'tır; putların kendiliğinden hiçbir yetkisi yoktur.",
+              },
+              {
+                n: "B2",
+                text: "GAYBI BİLEN YOK — Geçmişi geleceği yalnızca Allah bilir; gaipten haber verenlerin sözü boştur.",
+              },
+              {
+                n: "A2",
+                text: "SONSUZ HAKİMİYET — Hakimiyeti gökleri ve yeri kuşatır; bu Ona hiç ağır gelmez.",
+                span: true,
+              },
+            ],
+            corners: "soft",
+            color: OUTER_GROUP_BORDER,
+            bg: OUTER_GROUP_BG,
+            textColor: "#2B2B2B",
+            frame: OUTER_GROUP_BORDER,
+          },
+        ],
+      },
+      // ── Page 42 ───────────────────────────────────────────────────────
+      6: {
+        kicker: "Sayfa 42",
+        title: "Yorulmayan, Uyumayan Allah",
+        paragraphs: [
+          "Ayet-ül Kürsi, Allah'ın hiç yorulmadığını, uyumadığını ve kainatın her zerresini kudretiyle elinde tuttuğunu vurgulayarak, Onu diğer varlıklara benzeten yanlış anlayışları ortadan kaldırır.",
+        ],
+      },
+    },
+  },
+
   features: {
     hasIntro: false,
     hasElevatedSections: true,
