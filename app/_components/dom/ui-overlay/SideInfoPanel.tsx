@@ -9,6 +9,7 @@ import {
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { useSideInfoStore } from "@/app/stores/useSideInfoStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
+import { FoldedEntry } from "@/app/_components/dom/ui-overlay/FoldedEntry";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import type {
@@ -509,6 +510,80 @@ function SideInfoEntryView({
 }: Omit<ResolvedEntry, "key" | "stepIdx"> & { hideVerseNumbers?: boolean }) {
   const kicker = entry.kicker ?? (!hideVerseNumbers && verseId !== undefined ? `${verseId}. Ayet` : undefined);
 
+  // The entry's reading flow, built on demand because it renders up to
+  // twice: once as the real body, and once more as the fold window's
+  // preview copy (see FoldedEntry) — identical markup keeps both copies
+  // wrapping (and even word-animating) in perfect sync.
+  const renderFlow = () =>
+    entry.paragraphs?.map((item, i) =>
+      typeof item === "string" ? (
+        <AnimatedText
+          key={i}
+          text={item}
+          as="p"
+          variant="body"
+          animationType="fadeIn"
+          cinematic
+          splitLevel="word"
+          staggerDelay={0.008}
+          once
+          blurPx={0}
+          durationS={0.7}
+          inViewMargin="0px"
+          className="!text-left w-full font-normal text-foreground/80
+            text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+          style={{
+            textShadow: "none",
+            fontFamily: "var(--font-handlee)",
+            lineHeight: 1.95,
+            marginTop: "clamp(10px, 1vw, 18px)",
+          }}
+        />
+      ) : "subtitle" in item ? (
+        <AnimatedText
+          key={i}
+          text={item.subtitle}
+          as="h4"
+          variant="subtitle"
+          animationType="flyInBottom"
+          cinematic
+          splitLevel="word"
+          staggerDelay={0.06}
+          once
+          blurPx={8}
+          durationS={0.9}
+          inViewMargin="0px"
+          className="!text-left w-full font-medium tracking-tight text-foreground
+            text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
+          style={{
+            textShadow: "none",
+            fontFamily: "var(--font-handlee)",
+            lineHeight: 1.3,
+            marginTop: "clamp(18px, 2vw, 32px)",
+          }}
+        />
+      ) : (
+        <InkCapsuleGroup key={i} group={item} />
+      ),
+    );
+
+  const body = (
+    <>
+      {renderFlow()}
+
+      {entry.images?.map((img, i) => (
+        <InkImage key={i} {...img} />
+      ))}
+
+      {entry.audio && <InkAudioPlayer {...entry.audio} />}
+    </>
+  );
+
+  // Entries that open with a body paragraph ship folded at the 4th line —
+  // kicker and title stay visible above the fold (see FoldedEntry.tsx for
+  // every tunable). Capsule-first entries (e.g. summary pages) stay whole.
+  const foldable = typeof entry.paragraphs?.[0] === "string";
+
   return (
     <div>
       {(kicker || (!hideVerseNumbers && verseId !== undefined)) && (
@@ -568,63 +643,11 @@ function SideInfoEntryView({
         />
       )}
 
-      {entry.paragraphs?.map((item, i) =>
-        typeof item === "string" ? (
-          <AnimatedText
-            key={i}
-            text={item}
-            as="p"
-            variant="body"
-            animationType="fadeIn"
-            cinematic
-            splitLevel="word"
-            staggerDelay={0.008}
-            once
-            blurPx={0}
-            durationS={0.7}
-            inViewMargin="0px"
-            className="!text-left w-full font-normal text-foreground/80
-              text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
-            style={{
-              textShadow: "none",
-              fontFamily: "var(--font-handlee)",
-              lineHeight: 1.95,
-              marginTop: "clamp(10px, 1vw, 18px)",
-            }}
-          />
-        ) : "subtitle" in item ? (
-          <AnimatedText
-            key={i}
-            text={item.subtitle}
-            as="h4"
-            variant="subtitle"
-            animationType="flyInBottom"
-            cinematic
-            splitLevel="word"
-            staggerDelay={0.06}
-            once
-            blurPx={8}
-            durationS={0.9}
-            inViewMargin="0px"
-            className="!text-left w-full font-medium tracking-tight text-foreground
-              text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
-            style={{
-              textShadow: "none",
-              fontFamily: "var(--font-handlee)",
-              lineHeight: 1.3,
-              marginTop: "clamp(18px, 2vw, 32px)",
-            }}
-          />
-        ) : (
-          <InkCapsuleGroup key={i} group={item} />
-        ),
+      {foldable ? (
+        <FoldedEntry preview={renderFlow()}>{body}</FoldedEntry>
+      ) : (
+        body
       )}
-
-      {entry.images?.map((img, i) => (
-        <InkImage key={i} {...img} />
-      ))}
-
-      {entry.audio && <InkAudioPlayer {...entry.audio} />}
     </div>
   );
 }
@@ -661,6 +684,9 @@ export function SideInfoPanel() {
     check();
     const ro = new ResizeObserver(check);
     ro.observe(el);
+    // Content growth (e.g. a FoldedParagraph expanding) changes scrollHeight
+    // without resizing the container itself — watch the entries too.
+    for (const child of Array.from(el.children)) ro.observe(child);
     return () => ro.disconnect();
   }, [isOpen, activeConfig.id, entries.length]);
 

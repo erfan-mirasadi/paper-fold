@@ -316,6 +316,7 @@ function SurahViewerInner({
         position: "relative",
       }}
     >
+      <div className="surah-bg-image" />
       <div
         aria-hidden="true"
         style={{
