@@ -18,7 +18,7 @@ export function WebGLUnsupportedOverlay() {
       </p>
       <Link
         href="/"
-        className="mt-1 inline-flex items-center justify-center rounded-full border border-current/20 px-6 py-3 text-sm font-medium hover:opacity-80 transition-opacity"
+        className="mt-1 inline-flex items-center justify-center rounded-full border border-current/20 px-6 py-3 text-sm font-medium hover:opacity-80 transition-all hover:scale-105"
       >
         Back to Surah list
       </Link>

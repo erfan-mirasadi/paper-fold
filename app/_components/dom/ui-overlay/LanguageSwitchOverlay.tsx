@@ -183,6 +183,21 @@ export function LanguageSwitchOverlay() {
                 },
               }}
             >
+              <motion.div
+                className="absolute -inset-y-12 -inset-x-16 -z-10 pointer-events-none"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1 },
+                }}
+                transition={{ duration: 0.4 }}
+                style={{
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  background: "color-mix(in srgb, var(--background) 15%, transparent)",
+                  WebkitMaskImage: "radial-gradient(50% 50% at 50% 50%, black 25%, transparent 100%)",
+                  maskImage: "radial-gradient(50% 50% at 50% 50%, black 25%, transparent 100%)",
+                }}
+              />
               {SURAH_LANGUAGE_ORDER.map((lang) => {
                 const isActive = activeLanguage === lang;
                 return (

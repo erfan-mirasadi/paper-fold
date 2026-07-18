@@ -195,8 +195,8 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
           onClick={togglePlay}
           aria-label={isPlaying ? "Duraklat" : "Dinle"}
           className="flex items-center justify-center flex-shrink-0 cursor-pointer
-            rounded-full transition-opacity duration-300
-            opacity-60 hover:opacity-100
+            rounded-full transition-all duration-300
+            opacity-60 hover:opacity-100 hover:scale-110
             w-[28px] h-[28px] lg:w-[clamp(30px,2.1vw,44px)] lg:h-[clamp(30px,2.1vw,44px)]"
           style={{
             border: "1px solid currentColor",

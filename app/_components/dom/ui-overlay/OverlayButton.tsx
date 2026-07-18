@@ -61,6 +61,7 @@ export const OverlayButton = forwardRef<HTMLButtonElement, OverlayButtonProps>(
           disabled && "opacity-50 cursor-not-allowed",
           className
         )}
+        whileHover={{ scale: 1.1 }}
         {...props}
       >
         {/* Layer 1: Dimmed Base */}
