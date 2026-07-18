@@ -94,7 +94,7 @@ export function SurahCard({
             fontSize: "clamp(1.6rem, 4vw, 2rem)",
             fontFamily: "var(--font-cormorant), serif",
             fontWeight: 500,
-            color: "var(--overlay-text)",
+            color: "var(--foreground)",
             lineHeight: 1,
             letterSpacing: "0.02em",
           }}
@@ -125,7 +125,7 @@ export function SurahCard({
           fontFamily: "var(--font-manrope), sans-serif",
           fontSize: "1.05rem",
           fontWeight: 600,
-          color: "var(--overlay-text)",
+          color: "var(--foreground)",
           margin: "0 0 0.3rem 0",
           letterSpacing: "-0.01em",
         }}
@@ -141,7 +141,7 @@ export function SurahCard({
           fontWeight: 400,
           letterSpacing: "0.1em",
           textTransform: "uppercase",
-          color: "var(--overlay-text)",
+          color: "var(--foreground)",
           opacity: 0.5,
           margin: "0 0 1.25rem 0",
         }}

@@ -164,7 +164,7 @@ function HighlightChunk({
 export function AyahNumber({ n }: { n: number }) {
   return (
     <span
-      className="w-[2.5em] h-[2.5em] text-[0.72em]"
+      className={`text-[0.72em] ${n > 99 ? "w-[3.1em] h-[3.1em]" : "w-[2.5em] h-[2.5em]"}`}
       style={{
         position: "relative",
         display: "inline-flex",

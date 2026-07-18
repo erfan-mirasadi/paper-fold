@@ -74,22 +74,19 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
       >
         <div
           onClick={() => inputRef.current?.focus()}
-          className="relative flex items-center gap-3 rounded-full cursor-text backdrop-blur-xl transition-all duration-300"
+          className={`relative flex items-center gap-3 rounded-full cursor-text backdrop-blur-xl transition-all duration-300 ${
+            isFocused
+              ? "bg-foreground/[0.05] dark:bg-black/55 border-[#C4963B]/65 shadow-[0_0_0_4px_rgba(196,150,59,0.14),0_8px_32px_rgba(0,0,0,0.15)] dark:shadow-[0_0_0_4px_rgba(196,150,59,0.14),0_8px_32px_rgba(0,0,0,0.35)]"
+              : "bg-foreground/[0.03] dark:bg-black/40 border-foreground/10 dark:border-white/20 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)]"
+          }`}
           style={{
             width: "min(560px, 100%)",
             padding: "clamp(10px, 1.4vh, 14px) clamp(18px, 2vw, 24px)",
-            background: isFocused ? "rgba(0,0,0,0.55)" : "rgba(0,0,0,0.38)",
-            border: `1px solid ${
-              isFocused ? "rgba(196,150,59,0.65)" : "rgba(255,255,255,0.18)"
-            }`,
-            boxShadow: isFocused
-              ? `0 0 0 4px rgba(196,150,59,0.14), 0 8px 32px rgba(0,0,0,0.35)`
-              : "0 4px 24px rgba(0,0,0,0.25)",
           }}
         >
           <span
             className="transition-colors duration-300"
-            style={{ color: isFocused ? GOLD : "rgba(255,255,255,0.55)" }}
+            style={{ color: isFocused ? GOLD : "var(--foreground)" }}
           >
             <SearchIcon />
           </span>
@@ -106,7 +103,7 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
               spellCheck={false}
               autoComplete="off"
               aria-label="Search surahs"
-              className="w-full bg-transparent outline-none text-white/95"
+              className="w-full bg-transparent outline-none text-foreground"
               style={{
                 fontFamily: "var(--font-manrope), sans-serif",
                 fontSize: "clamp(0.95rem, 1.2vw, 1.05rem)",
@@ -126,7 +123,7 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="text-white/45 truncate w-full"
+                    className="text-foreground/50 truncate w-full"
                     style={{
                       fontFamily:
                         placeholder.lang === "ar"
@@ -157,7 +154,7 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
                   inputRef.current?.focus();
                 }}
                 aria-label="Clear search"
-                className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10 hover:bg-white/25 text-white/70 hover:text-white transition-colors"
+                className="flex items-center justify-center w-6 h-6 rounded-full bg-foreground/10 hover:bg-foreground/20 text-foreground/70 hover:text-foreground transition-colors"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -249,7 +246,7 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
                   className="flex flex-col items-center gap-2 py-10 text-center"
                 >
                   <span
-                    className="text-white/70"
+                    className="text-foreground/70"
                     style={{
                       fontFamily: "var(--font-cormorant), serif",
                       fontSize: "clamp(1.2rem, 2vw, 1.5rem)",
@@ -258,7 +255,7 @@ export function HeroSurahExplorer({ surahs }: { surahs: SurahCardData[] }) {
                     {NO_RESULTS.tr}
                   </span>
                   <span
-                    className="text-white/40"
+                    className="text-foreground/50"
                     style={{
                       fontFamily: "var(--font-manrope), sans-serif",
                       fontSize: "0.85rem",

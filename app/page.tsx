@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getAllSurahs } from "./data/surahDatabase";
 import { ThemeToggleOverlay } from "./_components/dom/ui-overlay/ThemeToggleOverlay";
 import { LanguageSwitchOverlay } from "./_components/dom/ui-overlay/LanguageSwitchOverlay";
-import { AnimatedMountains, AnimatedHeader, AnimatedCarouselSection } from "./_components/dom/hero/HeroAnimations";
+import { AnimatedHeader, AnimatedCarouselSection } from "./_components/dom/hero/HeroAnimations";
 import { HeroSurahExplorer } from "./_components/dom/hero/HeroSurahExplorer";
 
 export const metadata: Metadata = {
@@ -23,28 +23,14 @@ export default function MenuPage() {
   }));
 
   return (
-    <main className="w-full h-[100dvh] overflow-hidden selection:bg-[#5E7367]/30 flex flex-col relative bg-[#111] text-white">
+    <main className="w-full h-[100dvh] overflow-hidden selection:bg-[#5E7367]/30 flex flex-col relative bg-background text-foreground">
       {/* ── Fixed Overlays ── */}
       <div className="fixed top-[clamp(8px,1vw,12px)] right-[16px] md:right-[24px] z-[100] flex flex-row-reverse md:flex-col items-center gap-0">
         <ThemeToggleOverlay />
         <LanguageSwitchOverlay />
       </div>
 
-      {/* ── Background Image (Always visible, Hero section.jpg) ── */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/hero/Hero section.jpg"
-          alt="Hero Background"
-          fill
-          priority
-          className="object-cover object-center"
-        />
-        {/* Darkening Gradient Overlay for readability */}
-        <div className="absolute inset-0 bg-black/30 md:bg-black/40" />
-      </div>
 
-      {/* ── Mountains (Slide up from bottom) ── */}
-      <AnimatedMountains />
 
       {/* ── Content Container ── */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-start" style={{ paddingTop: 'clamp(40px, 12vh, 160px)', paddingBottom: 'clamp(16px, 3vh, 48px)' }}>
