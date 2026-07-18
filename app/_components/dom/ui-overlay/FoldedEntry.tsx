@@ -37,14 +37,17 @@ import {
 
 // How much stays readable while folded.
 const CRISP_LINES = 4; // fully-inked body lines
-const FOLD_LINES = 2.6; // receding preview lines (ends mid-line on purpose)
-const MIN_HIDDEN_LINES = 1.2; // don't fold for less reveal than this
+const FOLD_LINES = 5; // receding preview lines (ends mid-line on purpose)
+const MIN_HIDDEN_LINES = 1; // don't fold for less reveal than this
 
 // The fold's geometry. Negative rotateX with a top origin tips the bottom
-// edge away from the reader, into the page.
-const FOLD_ANGLE = -46;
-const FOLD_ANGLE_NEAR = -24; // the fold lifts when the cursor comes close
-const FOLD_PERSPECTIVE = 620;
+// edge away from the reader, into the page. The shallow angle keeps the
+// preview lines separated enough to count 4-5 of them; the tight perspective
+// still draws the trapezoid — each line projects visibly narrower than the
+// one above, converging toward the crease.
+const FOLD_ANGLE = -35;
+const FOLD_ANGLE_NEAR = -20; // the fold lifts when the cursor comes close
+const FOLD_PERSPECTIVE = 150;
 
 // The magnetic hint.
 const MAGNET_RADIUS = 180; // px — cursor distance where the pull begins
@@ -57,8 +60,12 @@ const REWRITE_STAGGER = 0.014; // s between words…
 const REWRITE_MAX_SPAN = 2.4; // …capped so huge entries stay brisk
 
 const GOLD = "#C4963B";
+// Painted in the fold's own (pre-transform) space, so the fade rides the
+// receding plane itself: strongest ink at the crease, gone by the last line.
+// Kept bright deep into the window so all 4-5 preview lines stay readable
+// before the final dissolve.
 const FOLD_MASK =
-  "linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.38) 52%, rgba(0,0,0,0.14) 80%, transparent 97%)";
+  "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.52) 35%, rgba(0,0,0,0.32) 65%, rgba(0,0,0,0.14) 88%, transparent 100%)";
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t);
 
