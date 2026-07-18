@@ -7,8 +7,10 @@ import {
   getActiveStoryConfig,
 } from "@/app/stores/useStoryStore";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
+import { useSurahScriptStore } from "@/app/stores/useSurahScriptStore";
 import type { SurahDataShape, Verse } from "@/app/data/SurahConfig";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
+import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
 
 const GOLD = "#C4963B";
 
@@ -361,20 +363,22 @@ function AnimatedBrand({ title }: { title?: string }) {
 export function SurahScriptSidebar() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const activeTextData = useStoryStore((s) => s.activeTextData);
-  const [isOpen, setIsOpen] = useState(true);
+  const isOpen = useSurahScriptStore((s) => s.isOpen);
+  const setIsOpen = useSurahScriptStore((s) => s.setOpen);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
 
-  // Fold-story sync: derive the current fold step id from the story scroll
+  // Fold-story sync: derive the current fold step INDEX from the story scroll
   // offset (0..1 spans the whole foldSteps timeline — same mapping FoldStory
-  // uses for the paper). The selector returns a string, so this component
+  // uses for the paper). The selector returns a number, so this component
   // only re-renders when the STEP changes, not on every scroll frame.
-  const activeStepId = useFoldStore((s) => {
+  const stepIdx = useFoldStore((s) => {
     const steps = getActiveStoryConfig().animations.foldSteps;
-    if (steps.length === 0) return null;
+    if (steps.length === 0) return 0;
     const maxIdx = steps.length - 1;
-    return steps[Math.round(clamp01(s.currentOffset) * maxIdx)].id;
+    return Math.round(clamp01(s.currentOffset) * maxIdx);
   });
+  const activeStepId = activeConfig.animations.foldSteps[stepIdx]?.id ?? null;
 
   // Only claim the wheel (data-lenis-prevent + inner scroll) when the text
   // actually overflows its box — otherwise wheel events over the script must
@@ -408,15 +412,35 @@ export function SurahScriptSidebar() {
   // Keep the decorative kashida elongation used by the 3D overlay so it appears wider and elegant.
   const bismillah = arData.bismillah;
 
-  // Verse ids highlighted at the current fold step (config-authored).
-  const highlighted = new Set(
-    (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [],
-  );
+  const highlightArray = (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
+  const highlighted = new Set(highlightArray);
+
   // Highlight border mirrors the verse's paper capsule (shape + color).
   const chunkAppearance = (n: number) => {
     const ov = activeConfig.verseOverrides?.[n];
     return { isPill: ov?.isPill !== false, color: ov?.border ?? GOLD };
   };
+
+  // Backdrop accent — picks the color of the *newly added* verses in this
+  // step vs the previous step. This way the gradient always matches what just
+  // appeared on the paper, not whatever happens to be last in the full array.
+  const prevStepId = stepIdx > 0
+    ? activeConfig.animations.foldSteps[stepIdx - 1]?.id
+    : null;
+  const prevHighlightSet = new Set(
+    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || []
+  );
+  // Newly added = in current step but NOT in previous step
+  const newlyAdded = highlightArray.filter((n) => !prevHighlightSet.has(n));
+
+  let backdropAccent: string | null = null;
+  if (newlyAdded.length > 0) {
+    // Use the first newly added verse's color (it's the "headline" of this step)
+    backdropAccent = chunkAppearance(newlyAdded[0]).color;
+  } else if (highlightArray.length > 0) {
+    // Fallback: no new verses in this step — use the most recent existing one
+    backdropAccent = chunkAppearance(highlightArray[highlightArray.length - 1]).color;
+  }
 
   return (
     <>
@@ -497,6 +521,8 @@ export function SurahScriptSidebar() {
                   : "left-2 w-[160px] lg:left-[2vw] lg:w-[22vw]"
               }`}
           >
+            <PanelBackdrop accent={backdropAccent} side="left" />
+
             {/* ── Surah title + surah info — commented out (shown in top bar instead) ──
             {info && (
               <div
@@ -607,15 +633,16 @@ export function SurahScriptSidebar() {
                   {ayahs.map((v) => {
                     const { isPill, color } = chunkAppearance(v.number);
                     return (
-                      <HighlightChunk
-                        key={v.number}
-                        active={highlighted.has(v.number)}
-                        isPill={isPill}
-                        color={color}
-                      >
-                        {v.text}
+                      <span key={v.number}>
+                        <HighlightChunk
+                          active={highlighted.has(v.number)}
+                          isPill={isPill}
+                          color={color}
+                        >
+                          {v.text}
+                        </HighlightChunk>
                         <AyahNumber n={v.number} />
-                      </HighlightChunk>
+                      </span>
                     );
                   })}
                 </p>

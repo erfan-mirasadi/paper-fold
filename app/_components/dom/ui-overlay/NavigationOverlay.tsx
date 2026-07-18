@@ -17,7 +17,7 @@ export function NavigationOverlay() {
   const isEndStage = useFoldStore((s) => s.currentOffset < 0.5);
 
 
-  const accentColor = "#000";
+  const accentColor = "var(--foreground)";
   const iconUnfold = (
     <svg
       width="22"
@@ -117,7 +117,7 @@ export function NavigationOverlay() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="pointer-events-auto flex flex-col gap-0 items-end"
+      className="pointer-events-auto flex flex-row-reverse gap-2 items-center"
     >
       {!isPaperDocked && !isAllSectionsMode && (
         <NavButton
@@ -173,7 +173,7 @@ const NavButton = memo(function NavButton({
         {icon}
       </span>
       {label && (
-        <span className="text-[10px] font-semibold tracking-wider pointer-events-none uppercase text-black">
+        <span className="text-[10px] font-semibold tracking-wider pointer-events-none uppercase text-foreground">
           {label}
         </span>
       )}

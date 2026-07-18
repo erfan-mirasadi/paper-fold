@@ -225,7 +225,7 @@ function makeSheetMaterialsCover(materials: Material[]): Material[] {
 
 function buildSheetMaterials(capture: PaperTransitionCapture): Material[] {
   const sideMaterial = new MeshStandardMaterial({ color: PAGE_BG_COLOR });
-  const backMaterial = new MeshBasicMaterial({ color: "#ffffff" });
+  const backMaterial = new MeshBasicMaterial({ color: "#f4f2ee" });
   const frontMaterial = new MeshStandardMaterial({
     ...PAPER_MATERIAL_CONFIG,
     map: capture.mapCopy,
@@ -288,7 +288,7 @@ function buildWarmupRig(warmupTexture: DataTexture): WarmupRig {
   const plainStandardMaterial = new MeshStandardMaterial({
     color: PAGE_BG_COLOR,
   });
-  const plainBasicMaterial = new MeshBasicMaterial({ color: "#ffffff" });
+  const plainBasicMaterial = new MeshBasicMaterial({ color: "#f4f2ee" });
   makeSheetMaterialsCover([
     frontMaterial,
     plainStandardMaterial,

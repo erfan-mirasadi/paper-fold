@@ -186,58 +186,60 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         scale-y={sceneScale}
         scale-z={sceneScale}
       >
-        {/*
-         * PaperSlideGroup owns the switch choreography for the REAL content:
-         * hidden during "exit" (the transition sheet is an exact stand-in),
-         * parked off-screen during "waiting" (settles there unseen), and
-         * glides in during "enter".
-         */}
-        <PaperSlideGroup>
-          <a.group
-            position-y={paperFocusY}
-            position-z={paperFocusZ}
-            scale-x={paperFocusScale}
-            scale-y={paperFocusScale}
-            scale-z={paperFocusScale}
-          >
-            <SinglePaper isFolded={isFolded} onReady={handlePaperReady} />
-          </a.group>
+        <group position={[0, 0, 0]} scale={0.9}>
           {/*
-           * Config-bound subtrees rebuild in place per content revision —
-           * far cheaper than remounting the whole scene, and it guarantees
-           * no per-paper state leaks across switches.
-           *
-           * CRITICAL: this Suspense boundary is local to this group. Verse
-           * and section textures (useTexture) are config-dependent, so a
-           * fresh paper — the FIRST time its specific asset URLs are
-           * requested — suspends while they load. Without a boundary HERE,
-           * that suspense bubbles all the way up to the outer
-           * <Suspense fallback={null}> wrapping the whole canvas-wrapper
-           * and unmounts EVERYTHING (camera, lights, the transition sheet,
-           * the folded paper itself) — a full black flash. Catching it here
-           * means only this small group defers for a moment while the
-           * paper mesh, lights and any in-flight transition sheet keep
-           * rendering normally.
+           * PaperSlideGroup owns the switch choreography for the REAL content:
+           * hidden during "exit" (the transition sheet is an exact stand-in),
+           * parked off-screen during "waiting" (settles there unseen), and
+           * glides in during "enter".
            */}
-          <Suspense fallback={null}>
-            <group key={storyRevision}>
-              {config.features.hasElevatedSections && (
-                <>
-                  <ElevatedSectionSurfaces />
-                  <ElevatedSectionLabels />
-                </>
-              )}
-              {!isAllSectionsMode && <VerseClickHitboxes />}
-              <VersesRenderer />
-            </group>
-          </Suspense>
-        </PaperSlideGroup>
-        {/*
-         * The flying page-turn sheet — a sibling of the slide group so it
-         * stays visible while the real content is hidden. Renders null
-         * outside of the "exit" phase.
-         */}
-        <PaperTransitionLayer />
+          <PaperSlideGroup>
+            <a.group
+              position-y={paperFocusY}
+              position-z={paperFocusZ}
+              scale-x={paperFocusScale}
+              scale-y={paperFocusScale}
+              scale-z={paperFocusScale}
+            >
+              <SinglePaper isFolded={isFolded} onReady={handlePaperReady} />
+            </a.group>
+            {/*
+             * Config-bound subtrees rebuild in place per content revision —
+             * far cheaper than remounting the whole scene, and it guarantees
+             * no per-paper state leaks across switches.
+             *
+             * CRITICAL: this Suspense boundary is local to this group. Verse
+             * and section textures (useTexture) are config-dependent, so a
+             * fresh paper — the FIRST time its specific asset URLs are
+             * requested — suspends while they load. Without a boundary HERE,
+             * that suspense bubbles all the way up to the outer
+             * <Suspense fallback={null}> wrapping the whole canvas-wrapper
+             * and unmounts EVERYTHING (camera, lights, the transition sheet,
+             * the folded paper itself) — a full black flash. Catching it here
+             * means only this small group defers for a moment while the
+             * paper mesh, lights and any in-flight transition sheet keep
+             * rendering normally.
+             */}
+            <Suspense fallback={null}>
+              <group key={storyRevision}>
+                {config.features.hasElevatedSections && (
+                  <>
+                    <ElevatedSectionSurfaces />
+                    <ElevatedSectionLabels />
+                  </>
+                )}
+                {!isAllSectionsMode && <VerseClickHitboxes />}
+                <VersesRenderer />
+              </group>
+            </Suspense>
+          </PaperSlideGroup>
+          {/*
+           * The flying page-turn sheet — a sibling of the slide group so it
+           * stays visible while the real content is hidden. Renders null
+           * outside of the "exit" phase.
+           */}
+          <PaperTransitionLayer />
+        </group>
       </a.group>
 
       {hasIntro && <IntroSectionAnimationController />}

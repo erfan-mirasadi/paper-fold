@@ -793,13 +793,18 @@ export interface SideInfoCapsules {
   frame?: boolean | string;
 }
 
+export interface SideInfoSubtitle {
+  /** A smaller heading inserted between paragraphs. */
+  subtitle: string;
+}
+
 /**
  * One item of an entry's reading flow: a plain string renders as a body
  * paragraph, a `{ capsules: [...] }` object renders as a capsule group —
  * placed exactly where it sits in the array, so capsules can go before,
- * between or after any paragraph.
+ * between or after any paragraph. A `{ subtitle: "..." }` object renders as a subheading.
  */
-export type SideInfoFlowItem = string | SideInfoCapsules;
+export type SideInfoFlowItem = string | SideInfoCapsules | SideInfoSubtitle;
 
 export interface SideInfoEntry {
   /**

@@ -103,7 +103,6 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
     byVerse: {
       // ── Verse 3: "Doğurmamış ve doğurulmamıştır" — Allahın ailesi yoktur ──
       3: {
-        title: "O Tek'dir ve Samet'tir.",
         paragraphs: [
           "(O Tek'dir ve Samet'tir. ; Allah baba, Rab baba, Anne Tanrı, Oğul Tanrı, Kız Tanrı gibi bir ailesi de yoktur.)",
           "Eski Yunanda da insanlar Olimpus dağında yaşayan böyle kalabalık bir tanrılar ailesini tasavvur ediyorlardı. İnsanlık bu saçmalıklardan kurtulmalıdır.",

@@ -9,8 +9,10 @@ import {
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { useSideInfoStore } from "@/app/stores/useSideInfoStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
+import { FoldedEntry } from "@/app/_components/dom/ui-overlay/FoldedEntry";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
+import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
 import type {
   SideInfoAudio,
   SideInfoCapsuleItem,
@@ -170,7 +172,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
           className="uppercase text-foreground/45 text-[8px] lg:text-[clamp(9px,0.62vw,14px)]"
           style={{
             letterSpacing: "0.22em",
-            fontFamily: "var(--font-sans)",
+            fontFamily: "var(--font-inter)",
             marginBottom: "clamp(7px, 0.6vw, 11px)",
           }}
         >
@@ -236,7 +238,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
 
         <span
           className="flex-shrink-0 tabular-nums text-foreground/50 text-[9px] lg:text-[clamp(10px,0.68vw,15px)]"
-          style={{ fontFamily: "var(--font-sans)", letterSpacing: "0.04em" }}
+          style={{ fontFamily: "var(--font-inter)", letterSpacing: "0.04em" }}
         >
           {fmt(currentTime)} / {fmt(duration)}
         </span>
@@ -275,7 +277,7 @@ function InkImage({ src, caption, alt }: SideInfoImage) {
         <figcaption
           className="italic text-foreground/50 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
           style={{
-            fontFamily: "var(--font-cormorant), serif",
+            fontFamily: "var(--font-inter)",
             marginTop: "clamp(6px, 0.5vw, 10px)",
             letterSpacing: "0.04em",
           }}
@@ -380,18 +382,19 @@ function InkCapsule({
               : "text-[10.5px] lg:text-[clamp(11px,0.78vw,18px)]"
           }`}
         style={{
-          fontFamily: "var(--font-sans)",
+          fontFamily: "var(--font-inter)",
           lineHeight: isPill ? 1.6 : 1.9,
           letterSpacing: "0.01em",
-          color: textColor,
+          color: item.textColor || textColor,
         }}
       >
         {!chipNumber && item.n !== undefined && (
           <span className="font-semibold" style={{ color: accent }}>
-            {item.n}.{" "}
+            {item.n}
+            {typeof item.n === "number" ? "." : ""} 
           </span>
         )}
-        {item.text}
+        <span dangerouslySetInnerHTML={{ __html: item.text }} />
       </p>
     </motion.div>
   );
@@ -431,7 +434,12 @@ function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
   );
 
   return (
-    <div style={{ marginTop: "clamp(13px, 1.2vw, 22px)" }}>
+    <div
+      style={{ marginTop: "clamp(13px, 1.2vw, 22px)" }}
+      // The panel backdrop watches these to tint its wash with whatever
+      // colored content is currently scrolled into view (see SideInfoPanel).
+      data-pb-accent={accent}
+    >
       {frameColor ? (
         <div
           style={{
@@ -458,6 +466,7 @@ function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
 interface ResolvedEntry {
   key: string;
   verseId?: number;
+  stepIdx: number;
   entry: SideInfoEntry;
 }
 
@@ -484,7 +493,7 @@ function resolveEntries(
     const stepId = steps[i].id;
 
     const stepEntry = side.byFoldStep?.[stepId];
-    if (stepEntry) out.push({ key: `step-${stepId}`, entry: stepEntry });
+    if (stepEntry) out.push({ key: `step-${stepId}`, stepIdx: i, entry: stepEntry });
 
     const fresh = (config.scriptHighlights?.[stepId] ?? [])
       .filter((v) => !seenVerses.has(v))
@@ -492,7 +501,7 @@ function resolveEntries(
     for (const v of fresh) {
       seenVerses.add(v);
       const entry = side.byVerse?.[v];
-      if (entry) out.push({ key: `verse-${v}`, verseId: v, entry });
+      if (entry) out.push({ key: `verse-${v}`, verseId: v, stepIdx: i, entry });
     }
   }
   return out;
@@ -500,17 +509,95 @@ function resolveEntries(
 
 // ── One entry — kicker, title, paragraphs, images, audio; all animated with
 // the same intro text animation (AnimatedText, cinematic word-by-word). ─────
-function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
-  const kicker = entry.kicker ?? (verseId !== undefined ? `${verseId}. Ayet` : undefined);
+function SideInfoEntryView({
+  verseId,
+  entry,
+  hideVerseNumbers,
+}: Omit<ResolvedEntry, "key" | "stepIdx"> & { hideVerseNumbers?: boolean }) {
+  const kicker = entry.kicker ?? (!hideVerseNumbers && verseId !== undefined ? `${verseId}. Ayet` : undefined);
+
+  // The entry's reading flow, built on demand because it renders up to
+  // twice: once as the real body, and once more as the fold window's
+  // preview copy (see FoldedEntry) — identical markup keeps both copies
+  // wrapping (and even word-animating) in perfect sync.
+  const renderFlow = () =>
+    entry.paragraphs?.map((item, i) =>
+      typeof item === "string" ? (
+        <AnimatedText
+          key={i}
+          text={item}
+          as="p"
+          variant="body"
+          animationType="fadeIn"
+          cinematic
+          splitLevel="word"
+          staggerDelay={0.008}
+          once
+          blurPx={0}
+          durationS={0.7}
+          inViewMargin="0px"
+          className="!text-left w-full font-normal text-foreground/80
+            text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+          style={{
+            textShadow: "none",
+            fontFamily: "var(--font-inter)",
+            lineHeight: 1.95,
+            marginTop: "clamp(10px, 1vw, 18px)",
+          }}
+        />
+      ) : "subtitle" in item ? (
+        <AnimatedText
+          key={i}
+          text={item.subtitle}
+          as="h4"
+          variant="subtitle"
+          animationType="flyInBottom"
+          cinematic
+          splitLevel="word"
+          staggerDelay={0.06}
+          once
+          blurPx={8}
+          durationS={0.9}
+          inViewMargin="0px"
+          className="!text-left w-full font-medium tracking-tight text-foreground
+            text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
+          style={{
+            textShadow: "none",
+            fontFamily: "var(--font-roboto)",
+            lineHeight: 1.3,
+            marginTop: "clamp(18px, 2vw, 32px)",
+          }}
+        />
+      ) : (
+        <InkCapsuleGroup key={i} group={item} />
+      ),
+    );
+
+  const body = (
+    <>
+      {renderFlow()}
+
+      {entry.images?.map((img, i) => (
+        <InkImage key={i} {...img} />
+      ))}
+
+      {entry.audio && <InkAudioPlayer {...entry.audio} />}
+    </>
+  );
+
+  // Entries that open with a body paragraph ship folded at the 4th line —
+  // kicker and title stay visible above the fold (see FoldedEntry.tsx for
+  // every tunable). Capsule-first entries (e.g. summary pages) stay whole.
+  const foldable = typeof entry.paragraphs?.[0] === "string";
 
   return (
     <div>
-      {(kicker || verseId !== undefined) && (
+      {(kicker || (!hideVerseNumbers && verseId !== undefined)) && (
         <div
           className="flex items-center"
           style={{ gap: "clamp(6px, 0.5vw, 10px)", marginBottom: "clamp(6px, 0.55vw, 12px)" }}
         >
-          {verseId !== undefined && (
+          {!hideVerseNumbers && verseId !== undefined && (
             <span
               className="text-[11px] lg:text-[clamp(12px,0.85vw,19px)]"
               style={{ color: GOLD }}
@@ -527,6 +614,10 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
               cinematic
               splitLevel="word"
               staggerDelay={0.05}
+              once
+              blurPx={0}
+              durationS={0.8}
+              inViewMargin="0px"
               className="!text-left w-full uppercase font-medium text-[8.5px] lg:text-[clamp(9.5px,0.66vw,15px)]"
               spanClassName="tracking-[0.26em]"
               style={{ textShadow: "none", color: GOLD }}
@@ -544,46 +635,25 @@ function SideInfoEntryView({ verseId, entry }: Omit<ResolvedEntry, "key">) {
           cinematic
           splitLevel="word"
           staggerDelay={0.06}
+          once
+          blurPx={8}
+          durationS={0.9}
+          inViewMargin="0px"
           className="!text-left w-full font-light tracking-tight text-foreground
             text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-fraunces), serif",
+            fontFamily: "var(--font-roboto)",
             lineHeight: 1.2,
           }}
         />
       )}
 
-      {entry.paragraphs?.map((item, i) =>
-        typeof item === "string" ? (
-          <AnimatedText
-            key={i}
-            text={item}
-            as="p"
-            variant="body"
-            animationType="fadeIn"
-            cinematic
-            splitLevel="word"
-            staggerDelay={0.008}
-            className="!text-left w-full font-normal text-foreground/80
-              text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
-            style={{
-              textShadow: "none",
-              fontFamily: "var(--font-sans)",
-              lineHeight: 1.95,
-              marginTop: "clamp(10px, 1vw, 18px)",
-            }}
-          />
-        ) : (
-          <InkCapsuleGroup key={i} group={item} />
-        ),
+      {foldable ? (
+        <FoldedEntry preview={renderFlow()}>{body}</FoldedEntry>
+      ) : (
+        body
       )}
-
-      {entry.images?.map((img, i) => (
-        <InkImage key={i} {...img} />
-      ))}
-
-      {entry.audio && <InkAudioPlayer {...entry.audio} />}
     </div>
   );
 }
@@ -620,6 +690,9 @@ export function SideInfoPanel() {
     check();
     const ro = new ResizeObserver(check);
     ro.observe(el);
+    // Content growth (e.g. a FoldedParagraph expanding) changes scrollHeight
+    // without resizing the container itself — watch the entries too.
+    for (const child of Array.from(el.children)) ro.observe(child);
     return () => ro.disconnect();
   }, [isOpen, activeConfig.id, entries.length]);
 
@@ -645,6 +718,30 @@ export function SideInfoPanel() {
     return () => window.clearTimeout(t);
   }, [entries, isOpen]);
 
+  // Backdrop accent — removed IntersectionObserver logic per request.
+  // Now we mirror the exact same fast, synchronous logic used by the script side:
+  // we pick the dominant color of the currently highlighted verses in the active fold step.
+  const GOLD = "#C4963B";
+  const activeStepId = activeConfig.animations.foldSteps[stepIdx]?.id;
+  const highlightArray = (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
+  const highlighted = new Set(highlightArray);
+
+  // Backdrop accent — compare current step vs previous to find newly added verses.
+  const prevStepId = stepIdx > 0
+    ? activeConfig.animations.foldSteps[stepIdx - 1]?.id
+    : null;
+  const prevHighlightSet = new Set(
+    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || []
+  );
+  const newlyAdded = highlightArray.filter((n) => !prevHighlightSet.has(n));
+
+  let scrollAccent: string | null = null;
+  if (newlyAdded.length > 0) {
+    scrollAccent = activeConfig.verseOverrides?.[newlyAdded[0]]?.border ?? GOLD;
+  } else if (highlightArray.length > 0) {
+    scrollAccent = activeConfig.verseOverrides?.[highlightArray[highlightArray.length - 1]]?.border ?? GOLD;
+  }
+
   const side = activeConfig.sideInfo;
   if (!side || (!side.byFoldStep && !side.byVerse)) return null;
 
@@ -669,7 +766,7 @@ export function SideInfoPanel() {
         <div
           className="fixed right-3 lg:right-5 z-[99] pointer-events-none hidden sm:block"
           style={{
-            top: "clamp(68px, 5vw, 84px)",
+            top: "clamp(42px, 4vw, 68px)",
             width: "clamp(140px, 18vw, 320px)",
           }}
         >
@@ -702,8 +799,8 @@ export function SideInfoPanel() {
                     width: "min(28vw, 520px)",
                   }
                 : {
-                    top: "clamp(84px, 6.5vw, 260px)",
-                    bottom: "clamp(20px, 2.5vw, 48px)",
+                    top: "clamp(54px, 5vw, 82px)",
+                    bottom: "0px",
                   }
             }
             className={`fixed z-[90] pointer-events-auto hidden sm:flex flex-col
@@ -713,13 +810,15 @@ export function SideInfoPanel() {
                   : "right-2 w-[160px] lg:right-[2vw] lg:w-[22vw]"
               }`}
           >
+            <PanelBackdrop accent={scrollAccent} side="right" />
+
             {/* ── Panel heading — quiet small caps, centered ──────────── */}
             <div
               className="flex-shrink-0 text-center uppercase text-foreground/50
                 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
               style={{
                 letterSpacing: "0.28em",
-                fontFamily: "var(--font-sans)",
+                fontFamily: "var(--font-roboto)",
                 marginBottom: "clamp(14px, 1.4vw, 24px)",
                 paddingRight: "0.1em",
               }}
@@ -746,7 +845,7 @@ export function SideInfoPanel() {
                     className="italic text-foreground/40
                       text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
                     style={{
-                      fontFamily: "var(--font-cormorant), serif",
+                      fontFamily: "var(--font-inter)",
                       lineHeight: 1.8,
                       margin: 0,
                     }}
@@ -754,27 +853,39 @@ export function SideInfoPanel() {
                     {emptyText}
                   </motion.p>
                 ) : (
-                  entries.map((resolved) => (
-                    <motion.article
-                      key={resolved.key}
-                      data-entry-key={resolved.key}
-                      initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={{
-                        opacity: 0,
-                        y: 10,
-                        filter: "blur(6px)",
-                        transition: { duration: 0.35, ease: "easeIn" },
-                      }}
-                      transition={{ duration: 0.85, ease: [0.25, 1, 0.5, 1] }}
-                      style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
-                    >
-                      <SideInfoEntryView
-                        verseId={resolved.verseId}
-                        entry={resolved.entry}
-                      />
-                    </motion.article>
-                  ))
+                  entries.map((resolved) => {
+                    // The entry the fold story just revealed stays at full
+                    // ink; everything the reader has already moved past
+                    // settles back — quieter and greyed, like older writing
+                    // on the same page — so the newest story keeps the eye.
+                    const isNewest = resolved.stepIdx === stepIdx;
+                    return (
+                      <motion.article
+                        key={resolved.key}
+                        data-entry-key={resolved.key}
+                        initial={{ opacity: 0, y: 18, filter: "blur(6px) grayscale(0)" }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px) grayscale(0)",
+                        }}
+                        exit={{
+                          opacity: 0,
+                          y: 10,
+                          filter: "blur(6px) grayscale(0)",
+                          transition: { duration: 0.35, ease: "easeIn" },
+                        }}
+                        transition={{ duration: isNewest ? 0.85 : 1.1, ease: [0.25, 1, 0.5, 1] }}
+                        style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
+                      >
+                        <SideInfoEntryView
+                          verseId={resolved.verseId}
+                          entry={resolved.entry}
+                          hideVerseNumbers={activeConfig.features?.hideVerseNumbers}
+                        />
+                      </motion.article>
+                    );
+                  })
                 )}
               </AnimatePresence>
             </div>

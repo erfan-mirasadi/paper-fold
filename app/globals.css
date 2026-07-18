@@ -11,17 +11,35 @@
   --safe-right: env(safe-area-inset-right, 0px);
 
   /* Homepage Theme - Light Mode */
-  --home-bg: #121A16; /* Still dark, but lighter than pitch black */
-  --home-text: #EFEFEF;
+  --home-bg: #121a16; /* Still dark, but lighter than pitch black */
+  --home-text: #efefef;
   --home-hero-opacity: 1; /* Fully visible details */
   --home-hero-filter: brightness(1.2) saturate(1.1); /* Brighter, more colorful */
   --home-hero-blend: normal;
   --home-light-glow-opacity: 0;
   --home-dark-overlay: 0; /* No darkening overlay */
-  --home-gradient-start: #121A16;
-  --home-title: #FFFFFF;
+  --home-gradient-start: #121a16;
+  --home-title: #ffffff;
   --home-subtitle: rgba(255, 255, 255, 0.9);
-  --home-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --home-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+
+  /* Illuminated-glass sidebar frame (SurahScriptSidebar / SideInfoPanel) */
+  --glass-panel-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.58) 0%,
+    rgba(255, 251, 242, 0.34) 45%,
+    rgba(196, 150, 59, 0.1) 100%
+  );
+  --glass-panel-border-outer: rgba(196, 150, 59, 0.34);
+  --glass-panel-border-inner: rgba(255, 255, 255, 0.65);
+  --glass-panel-sheen: rgba(255, 253, 245, 0.55);
+  --glass-panel-grain-opacity: 0.05;
+  --glass-panel-shadow:
+    0 18px 46px rgba(90, 68, 24, 0.14), 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  --glass-handle-bg: rgba(196, 150, 59, 0.18);
+  --glass-handle-bg-hover: rgba(196, 150, 59, 0.4);
+  --glass-handle-line: rgba(196, 150, 59, 0.5);
 }
 
 @theme inline {
@@ -54,9 +72,165 @@
   --home-light-glow-opacity: 0;
   --home-dark-overlay: 0.4;
   --home-gradient-start: #050907;
-  --home-title: #EFEFEF;
+  --home-title: #efefef;
   --home-subtitle: rgba(239, 239, 239, 0.9);
-  --home-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --home-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+
+  --glass-panel-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(22, 19, 14, 0.46) 45%,
+    rgba(196, 150, 59, 0.08) 100%
+  );
+  --glass-panel-border-outer: rgba(196, 150, 59, 0.38);
+  --glass-panel-border-inner: rgba(255, 255, 255, 0.09);
+  --glass-panel-sheen: rgba(255, 250, 238, 0.14);
+  --glass-panel-grain-opacity: 0.07;
+  --glass-panel-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.55), 0 2px 12px rgba(0, 0, 0, 0.35);
+
+  --glass-handle-bg: rgba(196, 150, 59, 0.2);
+  --glass-handle-bg-hover: rgba(196, 150, 59, 0.48);
+  --glass-handle-line: rgba(196, 150, 59, 0.55);
+}
+
+/* ── Side-panel backdrop ────────────────────────────────────────────────────
+   A whisper of a gradient behind each reading panel (script sidebar left,
+   tafsir panel right). Pure radial washes with no hard edge anywhere, so
+   they read as part of the page itself: white + gray on the light page,
+   black + gray on the dark one. An optional accent layer breathes a faint
+   halo of the story's current color into the wash (`--pb-accent`, animated
+   as a registered <color> so hue changes glide instead of snapping). */
+@property --pb-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+:root {
+  /* warm gray ink on the white page */
+  --pb-tint: 96, 93, 87;
+  --pb-strength: 0.10;
+  --pb-accent-mix: 25%;
+}
+
+.dark {
+  /* cool gray lift on the black page */
+  --pb-tint: 196, 199, 206;
+  --pb-strength: 0.07;
+  --pb-accent-mix: 18%;
+}
+
+.panel-backdrop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.dark .panel-backdrop {
+  mix-blend-mode: screen;
+}
+
+/* ── Left panel (script sidebar): gradient pours in from the LEFT edge ── */
+.panel-backdrop--left {
+  left: 0;
+  width: clamp(200px, 28vw, 480px);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+}
+
+/* ── Right panel (tafsir/info): gradient pours in from the RIGHT edge ── */
+.panel-backdrop--right {
+  right: 0;
+  width: clamp(200px, 28vw, 480px);
+  -webkit-mask-image: linear-gradient(
+    to left,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to left,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+}
+
+.panel-backdrop::before,
+.panel-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Base wash — a full-height solid-to-transparent color band */
+.panel-backdrop--left::before {
+  background: linear-gradient(
+    to right,
+    rgba(var(--pb-tint), var(--pb-strength)) 0%,
+    rgba(var(--pb-tint), calc(var(--pb-strength) * 0.6)) 50%,
+    transparent 100%
+  );
+}
+
+.panel-backdrop--right::before {
+  background: linear-gradient(
+    to left,
+    rgba(var(--pb-tint), var(--pb-strength)) 0%,
+    rgba(var(--pb-tint), calc(var(--pb-strength) * 0.6)) 50%,
+    transparent 100%
+  );
+}
+
+/* Accent halo */
+.panel-backdrop--left::after {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--pb-accent) var(--pb-accent-mix), transparent) 0%,
+    color-mix(
+        in srgb,
+        var(--pb-accent) calc(var(--pb-accent-mix) * 0.5),
+        transparent
+      )
+      50%,
+    transparent 100%
+  );
+  opacity: var(--pb-accent-on, 0);
+  transition: opacity 0.15s ease;
+}
+
+.panel-backdrop--right::after {
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--pb-accent) var(--pb-accent-mix), transparent) 0%,
+    color-mix(
+        in srgb,
+        var(--pb-accent) calc(var(--pb-accent-mix) * 0.5),
+        transparent
+      )
+      50%,
+    transparent 100%
+  );
+  opacity: var(--pb-accent-on, 0);
+  transition: opacity 0.15s ease;
 }
 
 .overlay-btn {
@@ -366,4 +540,88 @@ html.dark .canvas-wrapper {
 
 .canvas-wrapper.is-mobile {
   filter: none;
+}
+
+/* Glass sidebar frame — slow drifting light band across the frosted glass,
+   like a page catching ambient light. Barely perceptible; never distracts
+   from the reading content it sits behind. */
+@keyframes glass-sheen-drift {
+  0%,
+  100% {
+    background-position: 130% 50%;
+  }
+  50% {
+    background-position: -30% 50%;
+  }
+}
+
+.glass-panel-sheen {
+  background-image: linear-gradient(
+    105deg,
+    transparent 42%,
+    var(--glass-panel-sheen) 50%,
+    transparent 58%
+  );
+  background-size: 260% 100%;
+  animation: glass-sheen-drift 16s ease-in-out infinite;
+}
+
+/* AnimatedText — CSS-driven word/char entrance. Runs on the compositor and
+   leaves no filter, transform, or will-change behind once finished (the
+   `backwards` fill means spans return to plain, layer-free text). Per-span
+   timing comes from custom properties set inline by the component. */
+@keyframes at-child-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--at-x, 0px), var(--at-y, 0px), 0)
+      rotateX(var(--at-rx, 0deg));
+    filter: blur(var(--at-blur, 0px));
+  }
+}
+
+@keyframes at-credits-in {
+  from {
+    transform: translate3d(0, 400px, 0);
+  }
+}
+
+.at-container {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.at-container.at-visible {
+  opacity: 1;
+}
+
+.at-container.at-credits.at-visible {
+  animation: at-credits-in 4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.at-child {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.at-visible .at-child {
+  opacity: 1;
+  animation: at-child-in var(--at-dur, 1.2s)
+    var(--at-ease, cubic-bezier(0.16, 1, 0.3, 1)) var(--at-delay, 0s) backwards;
+}
+
+/* FoldedParagraph — when a folded tafsir paragraph expands, the words below
+   the crease re-run their entrance with fresh delays (a new animation-name
+   restarts the animation), so the paragraph reads as if it keeps being
+   written. Same compositor-only pattern as at-child-in. */
+@keyframes fp-write-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    filter: blur(4px);
+  }
+}
+
+.at-visible .at-child.fp-rewrite {
+  animation: fp-write-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--fp-delay, 0s)
+    backwards;
 }

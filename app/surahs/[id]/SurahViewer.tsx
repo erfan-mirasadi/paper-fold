@@ -50,6 +50,7 @@ import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
 import { isWebGLSupported } from "@/app/utils/gpuTier";
+import { useAutoCollapsePanelsOnElevate } from "@/app/hooks/useAutoCollapsePanelsOnElevate";
 
 // @react-three/fiber's <Canvas> still creates a THREE.Clock internally to
 // drive its render loop; three r183 deprecated Clock in favor of Timer but
@@ -222,6 +223,8 @@ function SurahViewerInner({
 }: InnerProps) {
   const lenis = useLenis();
 
+  useAutoCollapsePanelsOnElevate();
+
   // ── Lock scroll during loading so user cannot scroll before scene is ready ──
   // Part 1: Immediately lock native scroll on mount (before Lenis is ready)
   useEffect(() => {
@@ -313,6 +316,7 @@ function SurahViewerInner({
         position: "relative",
       }}
     >
+      <div className="surah-bg-image" />
       <div
         aria-hidden="true"
         style={{
@@ -456,48 +460,14 @@ function SurahViewerInner({
                     transition={{ duration: 0.45, ease: "easeOut" }}
                     className="flex flex-row-reverse items-center gap-0 pointer-events-none"
                   >
+                    <NavigationOverlay />
+                    <AllSectionsOverlay />
                     <SideInfoToggle />
                   </motion.div>
                 )}
               </AnimatePresence>
             )}
           </div>
-
-          {/* Fold/unfold ("Aç"/"Katla") + show-all-sections controls, parked
-              in the paper's top-right margin with a plain static offset —
-              same clamp/vw technique SideInfoPanel already uses to line up
-              with the paper's edge, no per-frame position math. */}
-          {mountMainOverlays && (
-            <AnimatePresence>
-              {showPostIntroUI && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                  className="fixed z-100 flex flex-col items-end gap-0 pointer-events-none"
-                  style={{
-                    top: "clamp(50px, 4vw, 68px)",
-                    // SideInfoPanel (the Tefsir column) sits at
-                    // `right: 2vw, width: 22vw` on desktop, i.e. its left
-                    // edge is always exactly `right: 24vw` — uncapped, so
-                    // this has to scale with it (not clamp to a fixed max)
-                    // to stay clear of it on wide screens too.
-                    right: "max(280px, 28vw)",
-                  }}
-                >
-                  <AllSectionsOverlay />
-                  {/* Pulled up to close the empty padding each 56px button
-                      box carries around its (much smaller) icon glyph —
-                      gap-0 alone still leaves the boxes' own padding as
-                      visible space. */}
-                  <div style={{ marginTop: "-20px" }}>
-                    <NavigationOverlay />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
 
           <SkipIntroButton />
 

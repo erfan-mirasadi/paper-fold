@@ -10,8 +10,6 @@ import {
 import { resetAllDrags } from "../../../utils/dragEngine";
 import { OverlayButton } from "./OverlayButton";
 
-const iconColor = "#000";
-
 function StackIcon() {
   return (
     <svg
@@ -23,7 +21,6 @@ function StackIcon() {
       strokeWidth="1.45"
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ color: iconColor }}
       aria-hidden="true"
     >
       <path
@@ -51,7 +48,6 @@ function RestoreIcon() {
       strokeWidth="1.65"
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ color: iconColor }}
       aria-hidden="true"
     >
       <path d="M5 8v5h5" />
@@ -68,6 +64,8 @@ export function AllSectionsOverlay() {
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const showAllSections = useElevatedStore((s) => s.showAllSections);
   const restoreAllSections = useElevatedStore((s) => s.restoreAllSections);
+
+  const rightOffset = "clamp(250px, 35vw, 340px)";
 
   const canShowControl = isAllSectionsMode || isPastThreshold;
 
@@ -89,28 +87,17 @@ export function AllSectionsOverlay() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 170, damping: 22 }}
-          className="relative pointer-events-auto flex items-center justify-center"
+          className="pointer-events-auto flex items-center justify-center"
         >
-          {/* Glass frame is an absolutely-positioned layer, not padding on
-              the flex item — so it never changes this button's footprint,
-              meaning it can never add/remove gap between it and the
-              NavigationOverlay button below, in either mode. */}
-          <div
-            aria-hidden="true"
-            className={`absolute -inset-1.5 rounded-[24px] transition-opacity duration-300 pointer-events-none ${
-              isAllSectionsMode
-                ? "opacity-100 bg-white/50 dark:bg-black/50 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-xl"
-                : "opacity-0"
-            }`}
-          />
           <OverlayButton
+            key={isAllSectionsMode ? "restore" : "show-all"}
             aria-label={
               isAllSectionsMode
                 ? "Restore paper and sections"
                 : "Show all elevated sections"
             }
             onClick={handleClick}
-            className="relative w-14 h-14"
+            className="w-14 h-14"
           >
             {isAllSectionsMode ? <RestoreIcon /> : <StackIcon />}
           </OverlayButton>

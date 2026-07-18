@@ -57,7 +57,7 @@ export const paperBowAmount = { value: 0 };
 // 🚀 OPTIMIZATION 1: Static materials created ONCE as module-level singletons.
 // Prevents continuous WebGL shader recompilation on mobile GPUs.
 const paperBaseColor = new Color(PAGE_BG_COLOR);
-const paperBackColor = new Color("#ffffff");
+const paperBackColor = new Color("#f4f2ee");
 
 const staticSideL = new MeshStandardMaterial({ color: paperBaseColor });
 const staticSideR = new MeshStandardMaterial({
@@ -153,10 +153,10 @@ export function createPanelGeometry(
 interface PaperPanelProps {
   panel: PaperPanelConfig;
   isFolded?: boolean;
-  toggles: TextureToggles;                              // required — fixes TS build error
+  toggles: TextureToggles; // required — fixes TS build error
   globalFoldAngles: React.MutableRefObject<Float32Array | null>;
   onReady?: () => void;
-  isPrimary?: boolean;                                  // only primary renders PaperMaterial
+  isPrimary?: boolean; // only primary renders PaperMaterial
   sharedMatRef?: React.RefObject<PaperMaterialHandle | null>; // texture source for siblings
 }
 
@@ -180,10 +180,7 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
   // 🚀 OPTIMIZATION 3: Per-panel materials array (shallow copy of SHARED_MATERIALS).
   // Each panel independently owns slot 4 so the primary's PaperMaterial instance can
   // be injected into sibling panels without contaminating the module-level array.
-  const panelMaterials = useMemo(
-    () => [...SHARED_MATERIALS] as Material[],
-    [],
-  );
+  const panelMaterials = useMemo(() => [...SHARED_MATERIALS] as Material[], []);
 
   // 🚀 OPTIMIZATION 4: Pre-convert ignoreFolds → Set for O(1) lookup in the hot
   // useFrame path. With 15 folds × 3 panels, this replaces 45 O(n) Array.includes
@@ -245,7 +242,16 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
     mesh.bind(skeleton);
     return mesh;
     // All deps are primitives — mesh is NEVER recreated on global state updates.
-  }, [w, h, offsetX, offsetY, isStatic, PAGE_WIDTH, PAGE_HEIGHT, panelMaterials]);
+  }, [
+    w,
+    h,
+    offsetX,
+    offsetY,
+    isStatic,
+    PAGE_WIDTH,
+    PAGE_HEIGHT,
+    panelMaterials,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -328,7 +334,8 @@ const PaperPanelMesh: FC<PaperPanelProps> = ({
     const bow = paperBowAmount.value;
     if (bow !== 0) {
       for (let i = 0; i < bones.length; i++) {
-        foldContributions[i] += bow * Math.sin((2 * Math.PI * i) / PAGE_SEGMENTS);
+        foldContributions[i] +=
+          bow * Math.sin((2 * Math.PI * i) / PAGE_SEGMENTS);
       }
     }
 
