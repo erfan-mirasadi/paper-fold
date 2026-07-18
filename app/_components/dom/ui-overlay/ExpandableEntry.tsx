@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CSSProperties,
   ReactNode,
   useLayoutEffect,
   useRef,
@@ -10,8 +9,6 @@ import {
 import {
   AnimatePresence,
   motion,
-  useMotionValue,
-  useSpring,
 } from "framer-motion";
 
 
@@ -44,10 +41,6 @@ const MIN_HIDDEN_LINES = 1; // don't fold for less reveal than this
 // No 3D angle — the fold window is a flat continuation that fades out.
 // A bottom-weighted gradient mask does the fade instead of perspective.
 
-// The magnetic hint.
-const MAGNET_RADIUS = 180; // px — cursor distance where the pull begins
-const MAGNET_REACH = 0.8; // how far toward the cursor the hint leans
-
 // The rewrite ("keeps being written") reveal on expand.
 const EXPAND_DURATION_S = 1.1;
 const REWRITE_BASE_DELAY = 0.18; // s before the first hidden word re-inks
@@ -59,8 +52,6 @@ const GOLD = "#C4963B";
 // fully transparent at the bottom edge of the fold window.
 const FOLD_MASK =
   "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.52) 35%, rgba(0,0,0,0.32) 65%, rgba(0,0,0,0.14) 88%, transparent 100%)";
-
-const smoothstep = (t: number) => t * t * (3 - 2 * t);
 
 interface FoldMetrics {
   /** Top of the body text to the bottom of line CRISP_LINES, in px. */
@@ -81,24 +72,15 @@ export function ExpandableEntry({
   preview: ReactNode;
 }) {
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const anchorRef = useRef<HTMLDivElement | null>(null);
 
   const [metrics, setMetrics] = useState<FoldMetrics | null>(null);
   const [phase, setPhase] = useState<"folded" | "expanding" | "settled">(
     "folded",
   );
   const [targetHeight, setTargetHeight] = useState(0);
-  const [near, setNear] = useState(false);
 
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
-
-  // The magnetic hint's offset from its rest point, springed for the
-  // rubber-band feel.
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const hintX = useSpring(mx, { stiffness: 260, damping: 22, mass: 0.7 });
-  const hintY = useSpring(my, { stiffness: 260, damping: 22, mass: 0.7 });
 
   // Measure the crisp/fold window off the body's first paragraph (its
   // line-height and top margin decide where line 4 ends) and whether the
@@ -171,9 +153,6 @@ export function ExpandableEntry({
     );
     setTargetHeight(c.scrollHeight);
     setPhase("expanding");
-    setNear(false);
-    mx.set(0);
-    my.set(0);
     // transitionend can be dropped (occluded tab, interrupted transition) —
     // settle regardless so the body never stays clipped.
     window.setTimeout(() => {
@@ -181,39 +160,8 @@ export function ExpandableEntry({
     }, EXPAND_DURATION_S * 1000 + 300);
   };
 
-  // Magnet — track the pointer over the whole entry body; the hint rests at
-  // the anchor (an untransformed zero-size point, so its rect is the true
-  // rest position) and leans toward the cursor within MAGNET_RADIUS.
-  const onPointerMove = (e: React.MouseEvent) => {
-    const anchor = anchorRef.current;
-    if (!anchor || phaseRef.current !== "folded") return;
-    const rect = anchor.getBoundingClientRect();
-    const dx = e.clientX - rect.left;
-    const dy = e.clientY - rect.top;
-    const d = Math.hypot(dx, dy);
-    if (d < MAGNET_RADIUS) {
-      const pull = MAGNET_REACH * smoothstep(1 - d / MAGNET_RADIUS);
-      mx.set(dx * pull);
-      my.set(dy * pull);
-      setNear(true);
-    } else {
-      mx.set(0);
-      my.set(0);
-      setNear(false);
-    }
-  };
-  const onPointerLeave = () => {
-    mx.set(0);
-    my.set(0);
-    setNear(false);
-  };
-
   return (
-    <div
-      className="relative"
-      onMouseMove={folded ? onPointerMove : undefined}
-      onMouseLeave={folded ? onPointerLeave : undefined}
-    >
+    <div className="relative">
       {/* ── The real body — clipped to the crisp lines while folded, then
           grown to its full height on expand while the words below the
           crease re-ink. ──────────────────────────────────────────────── */}
@@ -242,18 +190,7 @@ export function ExpandableEntry({
         {folded && (
           <motion.div
             key="fold"
-            role="button"
-            tabIndex={0}
-            aria-label="Devamını oku"
-            aria-expanded={false}
-            onClick={expand}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                expand();
-              }
-            }}
-            className="relative block w-full cursor-pointer select-none outline-none"
+            className="relative block w-full select-none outline-none"
             style={{
               overflow: "hidden",
               WebkitMaskImage: FOLD_MASK,
@@ -287,60 +224,56 @@ export function ExpandableEntry({
         )}
       </AnimatePresence>
 
-      {/* ── Magnetic hint — rests over the fold, invisible until the cursor
-          comes near, then leans toward it. Pointer events stay off so the
-          fold below keeps the click. ─────────────────────────────────── */}
+      {/* ── Read more button ─────────────────────────────────────────────────── */}
       <AnimatePresence>
         {folded && (
           <div
             key="hint"
-            ref={anchorRef}
-            className="pointer-events-none absolute z-[5]"
-            style={{ left: "50%", top: crispHeight + foldHeight * 0.32 }}
+            className="absolute bottom-[-10px] left-0 z-[5] flex w-full justify-center"
           >
-            <motion.div
-              style={{ x: hintX, y: hintY }}
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: near ? 1 : 0,
-                scale: near ? 1 : 0.86,
-                filter: near ? "blur(0px)" : "blur(4px)",
+            <motion.button
+              onClick={expand}
+              role="button"
+              aria-label="Devamını oku"
+              className="inline-flex items-center whitespace-nowrap cursor-pointer border-none outline-none"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0, filter: "brightness(1) blur(0px)" }}
+              exit={{ opacity: 0, y: 10, filter: "brightness(1) blur(4px)" }}
+              whileHover={{ scale: 1.05, filter: "brightness(1.15) blur(0px)" }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              style={{
+                gap: 8,
+                padding: "7px 22px",
+                borderRadius: 999,
+                background: "color-mix(in srgb, var(--foreground) 6%, transparent)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                fontFamily: "var(--font-inter)",
+                color: GOLD,
+                fontSize: "12px",
+                fontWeight: 500,
+                letterSpacing: "0.08em",
+                boxShadow: "0 6px 20px color-mix(in srgb, var(--foreground) 8%, transparent)",
               }}
-              exit={{ opacity: 0, scale: 0.86, filter: "blur(4px)" }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
             >
-              <span
-                className="inline-flex -translate-x-1/2 -translate-y-1/2 items-center whitespace-nowrap italic"
-                style={{
-                  gap: 7,
-                  padding: "5px 11px",
-                  borderRadius: 999,
-                  background:
-                    "color-mix(in srgb, var(--background) 82%, transparent)",
-                  backdropFilter: "blur(2.5px)",
-                  WebkitBackdropFilter: "blur(2.5px)",
-                  fontFamily: "var(--font-inter)",
-                  color: GOLD,
-                  fontSize: "clamp(10px, 0.72vw, 15px)",
-                  letterSpacing: "0.06em",
-                }}
+              devamını oku
+              <motion.svg
+                width="11"
+                height="11"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={{ y: [0, 3, 0] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
               >
-                <svg
-                  width="10"
-                  height="11"
-                  viewBox="0 0 10 11"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="1.5,1.5 5,4.5 8.5,1.5" />
-                  <polyline points="1.5,6 5,9 8.5,6" opacity="0.45" />
-                </svg>
-                devamını oku
-              </span>
-            </motion.div>
+                <polyline points="2,3 6,7 10,3" />
+                <polyline points="2,7 6,11 10,7" opacity="0.4" />
+              </motion.svg>
+            </motion.button>
           </div>
         )}
       </AnimatePresence>
