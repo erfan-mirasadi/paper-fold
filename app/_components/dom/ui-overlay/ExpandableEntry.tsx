@@ -14,7 +14,8 @@ import {
   useSpring,
 } from "framer-motion";
 
-// ── FoldedEntry — a whole tafsir entry's body, shipped folded ───────────────
+
+// ── ExpandableEntry — a whole tafsir entry's body, shipped folded ───────────────
 //
 // Wraps everything below an entry's kicker/title (paragraphs, subtitles,
 // capsule groups, images, audio). The first CRISP_LINES lines of body text
@@ -37,17 +38,11 @@ import {
 
 // How much stays readable while folded.
 const CRISP_LINES = 4; // fully-inked body lines
-const FOLD_LINES = 5; // receding preview lines (ends mid-line on purpose)
+const FOLD_LINES = 5; // fading preview lines below the crisp region
 const MIN_HIDDEN_LINES = 1; // don't fold for less reveal than this
 
-// The fold's geometry. Negative rotateX with a top origin tips the bottom
-// edge away from the reader, into the page. The shallow angle keeps the
-// preview lines separated enough to count 4-5 of them; the tight perspective
-// still draws the trapezoid — each line projects visibly narrower than the
-// one above, converging toward the crease.
-const FOLD_ANGLE = -35;
-const FOLD_ANGLE_NEAR = -20; // the fold lifts when the cursor comes close
-const FOLD_PERSPECTIVE = 150;
+// No 3D angle — the fold window is a flat continuation that fades out.
+// A bottom-weighted gradient mask does the fade instead of perspective.
 
 // The magnetic hint.
 const MAGNET_RADIUS = 180; // px — cursor distance where the pull begins
@@ -60,10 +55,8 @@ const REWRITE_STAGGER = 0.014; // s between words…
 const REWRITE_MAX_SPAN = 2.4; // …capped so huge entries stay brisk
 
 const GOLD = "#C4963B";
-// Painted in the fold's own (pre-transform) space, so the fade rides the
-// receding plane itself: strongest ink at the crease, gone by the last line.
-// Kept bright deep into the window so all 4-5 preview lines stay readable
-// before the final dissolve.
+// Flat gradient mask — fades the preview lines from readable at top to
+// fully transparent at the bottom edge of the fold window.
 const FOLD_MASK =
   "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.52) 35%, rgba(0,0,0,0.32) 65%, rgba(0,0,0,0.14) 88%, transparent 100%)";
 
@@ -78,7 +71,7 @@ interface FoldMetrics {
   overflowing: boolean;
 }
 
-export function FoldedEntry({
+export function ExpandableEntry({
   children,
   preview,
 }: {
@@ -262,35 +255,27 @@ export function FoldedEntry({
             }}
             className="relative block w-full cursor-pointer select-none outline-none"
             style={{
-              transformPerspective: FOLD_PERSPECTIVE,
-              transformOrigin: "50% 0%",
               overflow: "hidden",
               WebkitMaskImage: FOLD_MASK,
               maskImage: FOLD_MASK,
             }}
-            initial={{ opacity: 0, height: foldHeight, rotateX: FOLD_ANGLE }}
+            initial={{ opacity: 0, height: foldHeight }}
             animate={{
               opacity: 1,
               height: foldHeight,
-              rotateX: near ? FOLD_ANGLE_NEAR : FOLD_ANGLE,
               transition: {
                 opacity: { delay: 0.35, duration: 1.1 },
-                rotateX: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
                 height: { duration: 0 },
               },
             }}
             exit={{
-              // Pressed flat and dissolved while the real words write in
-              // underneath — the unfold moment.
               opacity: 0,
               height: 0,
-              rotateX: 0,
-              transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] },
+              transition: { duration: 0.45, ease: [0.25, 1, 0.5, 1] },
             }}
           >
-            {/* The continuation — the same flow re-rendered, shifted up so
-                the lines after the crease show through this window. Purely
-                visual; even its word delays mirror the crisp copy. */}
+            {/* The continuation — same flow re-rendered, shifted up so
+                the lines after the crease show through this window. */}
             <div
               aria-hidden
               className="pointer-events-none"
@@ -298,15 +283,6 @@ export function FoldedEntry({
             >
               {preview}
             </div>
-            {/* Crease shadow right under the last crisp line. */}
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0"
-              style={{
-                height: 14,
-                background:
-                  "linear-gradient(to bottom, rgba(60, 45, 20, 0.08), transparent)",
-              }}
-            />
           </motion.div>
         )}
       </AnimatePresence>

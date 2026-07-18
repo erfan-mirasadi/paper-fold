@@ -9,7 +9,7 @@ import {
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { useSideInfoStore } from "@/app/stores/useSideInfoStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
-import { FoldedEntry } from "@/app/_components/dom/ui-overlay/FoldedEntry";
+import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntry";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
@@ -671,7 +671,7 @@ function SideInfoEntryView({
       )}
 
       {foldable ? (
-        <FoldedEntry preview={renderFlow()}>{body}</FoldedEntry>
+        <ExpandableEntry preview={renderFlow()}>{body}</ExpandableEntry>
       ) : (
         body
       )}

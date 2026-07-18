@@ -40,6 +40,15 @@
   --glass-handle-bg: rgba(196, 150, 59, 0.18);
   --glass-handle-bg-hover: rgba(196, 150, 59, 0.4);
   --glass-handle-line: rgba(196, 150, 59, 0.5);
+
+  /* Loading Overlay (Light Mode) - Black, Gray, Dark Gray (Toosi) */
+  --loader-stroke: #222222;
+  --loader-color-1: #000000;
+  --loader-color-2: #808080;
+  --loader-color-3: #404040;
+  --loader-glow-none: rgba(128, 128, 128, 0);
+  --loader-glow-full: rgba(128, 128, 128, 0.6);
+  --loader-glow-mid: rgba(128, 128, 128, 0.3);
 }
 
 @theme inline {
@@ -92,6 +101,15 @@
   --glass-handle-bg: rgba(196, 150, 59, 0.2);
   --glass-handle-bg-hover: rgba(196, 150, 59, 0.48);
   --glass-handle-line: rgba(196, 150, 59, 0.55);
+
+  /* Loading Overlay (Dark Mode) - White/Silver Gradient */
+  --loader-stroke: #efefef;
+  --loader-color-1: #ffffff;
+  --loader-color-2: #d1d5db;
+  --loader-color-3: #9ca3af;
+  --loader-glow-none: rgba(255, 255, 255, 0);
+  --loader-glow-full: rgba(255, 255, 255, 0.6);
+  --loader-glow-mid: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Side-panel backdrop ────────────────────────────────────────────────────
