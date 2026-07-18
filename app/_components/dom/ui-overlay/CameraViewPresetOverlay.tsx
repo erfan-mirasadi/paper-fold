@@ -22,12 +22,12 @@ export function CameraViewPresetOverlay() {
   // Knob X position: -120 to 120 (for a 240px wide track)
   const x = useMotionValue(0);
 
-  // Parabola math: M 0 10 Q 120 70 240 10
+  // Parabola math: M 0 10 Q 120 50 240 10
   // t goes from 0 to 1 as x goes from -120 to 120
   const y = useTransform(x, (xVal) => {
     const t = (xVal + 120) / 240;
     const clampedT = Math.max(0, Math.min(1, t));
-    const rawY = -120 * clampedT * clampedT + 120 * clampedT + 10;
+    const rawY = -80 * clampedT * clampedT + 80 * clampedT + 10;
     return rawY - 8; // subtract half knob height (16px) to center it
   });
 
@@ -83,7 +83,7 @@ export function CameraViewPresetOverlay() {
 
   return (
     <div
-      className="fixed left-[calc(var(--safe-left)+16px)] md:left-[calc(var(--safe-left)+24px)] bottom-[calc(var(--safe-bottom)+24px)] md:bottom-[calc(var(--safe-bottom)+32px)] z-999993 w-[240px] h-[60px] text-foreground"
+      className="fixed left-1/2 -translate-x-1/2 bottom-[calc(var(--safe-bottom)+2px)] md:bottom-[calc(var(--safe-bottom)+6px)] z-999993 w-[240px] h-[60px] text-foreground scale-[0.8] origin-bottom"
       onPointerEnter={() => !isLocked && setIsHovered(true)}
       onPointerLeave={() => setIsHovered(false)}
       style={{ opacity: isLocked ? 0.4 : 1, transition: "opacity 0.3s" }}
@@ -94,7 +94,7 @@ export function CameraViewPresetOverlay() {
         viewBox="0 0 240 60"
       >
         <path
-          d="M 0 10 Q 120 70 240 10"
+          d="M 0 10 Q 120 50 240 10"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
@@ -103,7 +103,7 @@ export function CameraViewPresetOverlay() {
         />
         {/* Preset tick dots */}
         <circle cx="0" cy="10" r="2.5" fill="currentColor" opacity="0.5" />
-        <circle cx="120" cy="40" r="2.5" fill="currentColor" opacity="0.5" />
+        <circle cx="120" cy="30" r="2.5" fill="currentColor" opacity="0.5" />
         <circle cx="240" cy="10" r="2.5" fill="currentColor" opacity="0.5" />
       </svg>
 
@@ -134,13 +134,13 @@ export function CameraViewPresetOverlay() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
         transition={{ duration: 0.3 }}
-        className="absolute top-[56px] left-1/2 -ml-[12px] pointer-events-none"
+        className="absolute top-[24px] left-[calc(50%+30px)] -ml-[15px] pointer-events-none"
       >
         <motion.svg
-          animate={isHovered ? { x: [-8, 8, -8] } : { x: 0 }}
+          animate={isHovered ? { x: [-10, 10, -10] } : { x: 0 }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-          width="24"
-          height="24"
+          width="30"
+          height="30"
           viewBox="0 0 512 512"
           fill="currentColor"
           className="opacity-70"

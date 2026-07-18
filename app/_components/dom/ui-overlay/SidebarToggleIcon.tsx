@@ -11,51 +11,57 @@ export function SidebarToggleIcon({
 }) {
   const isLeft = side === "left";
 
+  // LEFT SIDEBAR: Tall line on the left (edge), short line on the right (handle)
+  const leftClosed = {
+    line1: { x1: 8, y1: 5, x2: 8, y2: 19 },
+    line2: { x1: 16, y1: 10, x2: 16, y2: 14 },
+  };
+
+  // RIGHT SIDEBAR: Short line on the left (handle), tall line on the right (edge)
+  const rightClosed = {
+    line1: { x1: 8, y1: 10, x2: 8, y2: 14 },
+    line2: { x1: 16, y1: 5, x2: 16, y2: 19 },
+  };
+
+  // OPEN STATE: A perfect minimal 'X' for both to indicate 'Close'
+  const openState = {
+    line1: { x1: 7, y1: 7, x2: 17, y2: 17 },
+    line2: { x1: 17, y1: 7, x2: 7, y2: 17 },
+  };
+
+  const line1Props = isOpen
+    ? openState.line1
+    : isLeft
+      ? leftClosed.line1
+      : rightClosed.line1;
+
+  const line2Props = isOpen
+    ? openState.line2
+    : isLeft
+      ? leftClosed.line2
+      : rightClosed.line2;
+
   return (
     <svg
-      width="23"
-      height="23"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.55"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      overflow="visible"
+      style={{ overflow: "visible" }}
     >
-      {/* Outer frame — always present */}
-      <motion.rect x="3" y="4.5" width="18" height="15" rx="2.8" />
-
-      {/* Divider */}
       <motion.line
-        animate={{ opacity: isOpen ? 1 : 0.3 }}
-        x1={isLeft ? 9.5 : 14.5}
-        y1="4.5"
-        x2={isLeft ? 9.5 : 14.5}
-        y2="19.5"
+        initial={false}
+        animate={line1Props}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
       />
-
-      {/* Chevron — morphs direction */}
-      <motion.polyline
-        animate={{
-          points: isOpen
-            ? isLeft
-              ? "7,9.5 4.5,12 7,14.5"
-              : "17,9.5 19.5,12 17,14.5"
-            : isLeft
-              ? "13.5,9.5 16,12 13.5,14.5"
-              : "10.5,9.5 8,12 10.5,14.5",
-        }}
-        points={
-          isOpen
-            ? isLeft
-              ? "7,9.5 4.5,12 7,14.5"
-              : "17,9.5 19.5,12 17,14.5"
-            : isLeft
-              ? "13.5,9.5 16,12 13.5,14.5"
-              : "10.5,9.5 8,12 10.5,14.5"
-        }
-        fill="none"
+      <motion.line
+        initial={false}
+        animate={line2Props}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
       />
     </svg>
   );
