@@ -186,7 +186,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
         scale-y={sceneScale}
         scale-z={sceneScale}
       >
-        <group position={[0, 0.02, 0]} scale={0.9}>
+        <group position={[0, 0.03, 0]} scale={0.9}>
           {/*
            * PaperSlideGroup owns the switch choreography for the REAL content:
            * hidden during "exit" (the transition sheet is an exact stand-in),

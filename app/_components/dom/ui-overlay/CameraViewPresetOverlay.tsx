@@ -55,23 +55,34 @@ export function CameraViewPresetOverlay() {
     setIsHovered(false);
   };
 
+  const clamp = (v: number) => Math.max(-120, Math.min(120, v));
+
+  const moveLeft = () => {
+    if (isLocked) return;
+    animate(x, clamp(x.get() - KNOB_STEP), {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+    });
+  };
+
+  const moveRight = () => {
+    if (isLocked) return;
+    animate(x, clamp(x.get() + KNOB_STEP), {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (isLocked) return;
-    const clamp = (v: number) => Math.max(-120, Math.min(120, v));
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      animate(x, clamp(x.get() - KNOB_STEP), {
-        type: "spring",
-        stiffness: 400,
-        damping: 30,
-      });
+      moveLeft();
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
-      animate(x, clamp(x.get() + KNOB_STEP), {
-        type: "spring",
-        stiffness: 400,
-        damping: 30,
-      });
+      moveRight();
     } else if (e.key === "Home") {
       e.preventDefault();
       animate(x, -120, { type: "spring", stiffness: 400, damping: 30 });
@@ -88,6 +99,30 @@ export function CameraViewPresetOverlay() {
       onPointerLeave={() => setIsHovered(false)}
       style={{ opacity: isLocked ? 0.4 : 1, transition: "opacity 0.3s" }}
     >
+      {/* Left Button */}
+      <button
+        onClick={moveLeft}
+        disabled={isLocked}
+        className="absolute -top-[2px] -left-[32px] w-6 h-6 flex items-center justify-center text-foreground cursor-pointer pointer-events-auto opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Rotate left"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+
+      {/* Right Button */}
+      <button
+        onClick={moveRight}
+        disabled={isLocked}
+        className="absolute -top-[2px] -right-[32px] w-6 h-6 flex items-center justify-center text-foreground cursor-pointer pointer-events-auto opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Rotate right"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+
       {/* SVG Curved Track */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"

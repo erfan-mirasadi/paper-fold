@@ -77,6 +77,17 @@ export const ScrollHintOverlay: React.FC = () => {
           transition={{ duration: 1.2, ease: "easeInOut" }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-100 flex flex-col items-center pointer-events-none"
         >
+          {/* Soft-edged backdrop blur to ensure readability without sharp borders */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%] w-[300px] h-[400px] -z-10 backdrop-blur-[3px]"
+            style={{
+              maskImage:
+                "radial-gradient(ellipse at 50% 40%, black 10%, transparent 60%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse at 50% 40%, black 10%, transparent 60%)",
+            }}
+          />
+
           <motion.span
             className="mb-3 opacity-100 dark:opacity-60 font-light font-(family-name:--font-fraunces) tracking-tight text-lg"
             style={{
