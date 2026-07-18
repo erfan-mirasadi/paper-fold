@@ -2,8 +2,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --page-bg: #f4f2ee;
-  --background: #f4f2ee;
+  --page-bg: #ffffff;
+  --background: #ffffff;
   --foreground: #000000;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -94,23 +94,143 @@
   --glass-handle-line: rgba(196, 150, 59, 0.55);
 }
 
-.surah-bg-image {
-  position: fixed;
-  inset: -20px; /* Extend slightly to hide blurry edges */
-  pointer-events: none;
-  background-image: url("/bg.jpeg");
-  background-size: cover;
-  background-position: center;
-  opacity: 0.15;
-  filter: blur(2.5px);
-  z-index: 0;
-  transition: opacity 0.5s ease;
+/* ── Side-panel backdrop ────────────────────────────────────────────────────
+   A whisper of a gradient behind each reading panel (script sidebar left,
+   tafsir panel right). Pure radial washes with no hard edge anywhere, so
+   they read as part of the page itself: white + gray on the light page,
+   black + gray on the dark one. An optional accent layer breathes a faint
+   halo of the story's current color into the wash (`--pb-accent`, animated
+   as a registered <color> so hue changes glide instead of snapping). */
+@property --pb-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
 }
 
-.dark .surah-bg-image {
-  background-image: url("/bg-dark.png");
-  opacity: 0.15;
-  filter: blur(1.5px);
+:root {
+  /* warm gray ink on the white page */
+  --pb-tint: 96, 93, 87;
+  --pb-strength: 0.10;
+  --pb-accent-mix: 25%;
+}
+
+.dark {
+  /* cool gray lift on the black page */
+  --pb-tint: 196, 199, 206;
+  --pb-strength: 0.07;
+  --pb-accent-mix: 18%;
+}
+
+.panel-backdrop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.dark .panel-backdrop {
+  mix-blend-mode: screen;
+}
+
+/* ── Left panel (script sidebar): gradient pours in from the LEFT edge ── */
+.panel-backdrop--left {
+  left: 0;
+  width: clamp(200px, 28vw, 480px);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+}
+
+/* ── Right panel (tafsir/info): gradient pours in from the RIGHT edge ── */
+.panel-backdrop--right {
+  right: 0;
+  width: clamp(200px, 28vw, 480px);
+  -webkit-mask-image: linear-gradient(
+    to left,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to left,
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 100%
+  );
+}
+
+.panel-backdrop::before,
+.panel-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Base wash — a full-height solid-to-transparent color band */
+.panel-backdrop--left::before {
+  background: linear-gradient(
+    to right,
+    rgba(var(--pb-tint), var(--pb-strength)) 0%,
+    rgba(var(--pb-tint), calc(var(--pb-strength) * 0.6)) 50%,
+    transparent 100%
+  );
+}
+
+.panel-backdrop--right::before {
+  background: linear-gradient(
+    to left,
+    rgba(var(--pb-tint), var(--pb-strength)) 0%,
+    rgba(var(--pb-tint), calc(var(--pb-strength) * 0.6)) 50%,
+    transparent 100%
+  );
+}
+
+/* Accent halo */
+.panel-backdrop--left::after {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--pb-accent) var(--pb-accent-mix), transparent) 0%,
+    color-mix(
+        in srgb,
+        var(--pb-accent) calc(var(--pb-accent-mix) * 0.5),
+        transparent
+      )
+      50%,
+    transparent 100%
+  );
+  opacity: var(--pb-accent-on, 0);
+  transition: opacity 0.15s ease;
+}
+
+.panel-backdrop--right::after {
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--pb-accent) var(--pb-accent-mix), transparent) 0%,
+    color-mix(
+        in srgb,
+        var(--pb-accent) calc(var(--pb-accent-mix) * 0.5),
+        transparent
+      )
+      50%,
+    transparent 100%
+  );
+  opacity: var(--pb-accent-on, 0);
+  transition: opacity 0.15s ease;
 }
 
 .overlay-btn {

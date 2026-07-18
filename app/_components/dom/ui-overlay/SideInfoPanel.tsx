@@ -12,6 +12,7 @@ import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
 import { FoldedEntry } from "@/app/_components/dom/ui-overlay/FoldedEntry";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
+import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
 import type {
   SideInfoAudio,
   SideInfoCapsuleItem,
@@ -171,7 +172,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
           className="uppercase text-foreground/45 text-[8px] lg:text-[clamp(9px,0.62vw,14px)]"
           style={{
             letterSpacing: "0.22em",
-            fontFamily: "var(--font-handlee)",
+            fontFamily: "var(--font-inter)",
             marginBottom: "clamp(7px, 0.6vw, 11px)",
           }}
         >
@@ -237,7 +238,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
 
         <span
           className="flex-shrink-0 tabular-nums text-foreground/50 text-[9px] lg:text-[clamp(10px,0.68vw,15px)]"
-          style={{ fontFamily: "var(--font-handlee)", letterSpacing: "0.04em" }}
+          style={{ fontFamily: "var(--font-inter)", letterSpacing: "0.04em" }}
         >
           {fmt(currentTime)} / {fmt(duration)}
         </span>
@@ -276,7 +277,7 @@ function InkImage({ src, caption, alt }: SideInfoImage) {
         <figcaption
           className="italic text-foreground/50 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
           style={{
-            fontFamily: "var(--font-handlee)",
+            fontFamily: "var(--font-inter)",
             marginTop: "clamp(6px, 0.5vw, 10px)",
             letterSpacing: "0.04em",
           }}
@@ -381,7 +382,7 @@ function InkCapsule({
               : "text-[10.5px] lg:text-[clamp(11px,0.78vw,18px)]"
           }`}
         style={{
-          fontFamily: "var(--font-handlee)",
+          fontFamily: "var(--font-inter)",
           lineHeight: isPill ? 1.6 : 1.9,
           letterSpacing: "0.01em",
           color: item.textColor || textColor,
@@ -433,7 +434,12 @@ function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
   );
 
   return (
-    <div style={{ marginTop: "clamp(13px, 1.2vw, 22px)" }}>
+    <div
+      style={{ marginTop: "clamp(13px, 1.2vw, 22px)" }}
+      // The panel backdrop watches these to tint its wash with whatever
+      // colored content is currently scrolled into view (see SideInfoPanel).
+      data-pb-accent={accent}
+    >
       {frameColor ? (
         <div
           style={{
@@ -534,7 +540,7 @@ function SideInfoEntryView({
             text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-handlee)",
+            fontFamily: "var(--font-inter)",
             lineHeight: 1.95,
             marginTop: "clamp(10px, 1vw, 18px)",
           }}
@@ -557,7 +563,7 @@ function SideInfoEntryView({
             text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-handlee)",
+            fontFamily: "var(--font-roboto)",
             lineHeight: 1.3,
             marginTop: "clamp(18px, 2vw, 32px)",
           }}
@@ -637,7 +643,7 @@ function SideInfoEntryView({
             text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-handlee)",
+            fontFamily: "var(--font-roboto)",
             lineHeight: 1.2,
           }}
         />
@@ -712,6 +718,30 @@ export function SideInfoPanel() {
     return () => window.clearTimeout(t);
   }, [entries, isOpen]);
 
+  // Backdrop accent — removed IntersectionObserver logic per request.
+  // Now we mirror the exact same fast, synchronous logic used by the script side:
+  // we pick the dominant color of the currently highlighted verses in the active fold step.
+  const GOLD = "#C4963B";
+  const activeStepId = activeConfig.animations.foldSteps[stepIdx]?.id;
+  const highlightArray = (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
+  const highlighted = new Set(highlightArray);
+
+  // Backdrop accent — compare current step vs previous to find newly added verses.
+  const prevStepId = stepIdx > 0
+    ? activeConfig.animations.foldSteps[stepIdx - 1]?.id
+    : null;
+  const prevHighlightSet = new Set(
+    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || []
+  );
+  const newlyAdded = highlightArray.filter((n) => !prevHighlightSet.has(n));
+
+  let scrollAccent: string | null = null;
+  if (newlyAdded.length > 0) {
+    scrollAccent = activeConfig.verseOverrides?.[newlyAdded[0]]?.border ?? GOLD;
+  } else if (highlightArray.length > 0) {
+    scrollAccent = activeConfig.verseOverrides?.[highlightArray[highlightArray.length - 1]]?.border ?? GOLD;
+  }
+
   const side = activeConfig.sideInfo;
   if (!side || (!side.byFoldStep && !side.byVerse)) return null;
 
@@ -736,7 +766,7 @@ export function SideInfoPanel() {
         <div
           className="fixed right-3 lg:right-5 z-[99] pointer-events-none hidden sm:block"
           style={{
-            top: "clamp(68px, 5vw, 84px)",
+            top: "clamp(42px, 4vw, 68px)",
             width: "clamp(140px, 18vw, 320px)",
           }}
         >
@@ -769,8 +799,8 @@ export function SideInfoPanel() {
                     width: "min(28vw, 520px)",
                   }
                 : {
-                    top: "clamp(84px, 6.5vw, 260px)",
-                    bottom: "clamp(20px, 2.5vw, 48px)",
+                    top: "clamp(54px, 5vw, 82px)",
+                    bottom: "0px",
                   }
             }
             className={`fixed z-[90] pointer-events-auto hidden sm:flex flex-col
@@ -780,13 +810,15 @@ export function SideInfoPanel() {
                   : "right-2 w-[160px] lg:right-[2vw] lg:w-[22vw]"
               }`}
           >
+            <PanelBackdrop accent={scrollAccent} side="right" />
+
             {/* ── Panel heading — quiet small caps, centered ──────────── */}
             <div
               className="flex-shrink-0 text-center uppercase text-foreground/50
                 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
               style={{
                 letterSpacing: "0.28em",
-                fontFamily: "var(--font-handlee)",
+                fontFamily: "var(--font-roboto)",
                 marginBottom: "clamp(14px, 1.4vw, 24px)",
                 paddingRight: "0.1em",
               }}
@@ -813,7 +845,7 @@ export function SideInfoPanel() {
                     className="italic text-foreground/40
                       text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
                     style={{
-                      fontFamily: "var(--font-handlee)",
+                      fontFamily: "var(--font-inter)",
                       lineHeight: 1.8,
                       margin: 0,
                     }}

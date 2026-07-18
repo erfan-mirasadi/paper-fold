@@ -343,7 +343,7 @@ export function FoldedEntry({
                     "color-mix(in srgb, var(--background) 82%, transparent)",
                   backdropFilter: "blur(2.5px)",
                   WebkitBackdropFilter: "blur(2.5px)",
-                  fontFamily: "var(--font-handlee)",
+                  fontFamily: "var(--font-inter)",
                   color: GOLD,
                   fontSize: "clamp(10px, 0.72vw, 15px)",
                   letterSpacing: "0.06em",

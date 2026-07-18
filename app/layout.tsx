@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
-import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text, Fraunces } from "next/font/google";
+import { Manrope, Cormorant_Garamond, Poppins, DM_Serif_Text, Fraunces, Roboto } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import GrainOverlay from "./_components/dom/ui-overlay/GrainOverlay";
@@ -40,10 +40,17 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
 });
 
-const handlee = localFont({
-  src: "../public/fonts/Handlee-Regular.ttf",
-  variable: "--font-handlee",
+const inter = localFont({
+  src: "../public/fonts/Inter-VariableFont_opsz,wght.ttf",
+  variable: "--font-inter",
   display: "swap",
+});
+
+const roboto = Roboto({
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto",
 });
 
 const SITE_NAME = "Quran Patterns";
@@ -101,7 +108,7 @@ export default function RootLayout({
     <html
       lang="tr"
       suppressHydrationWarning
-      className={`light ${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} ${handlee.variable} h-full antialiased`}
+      className={`light ${manrope.variable} ${cormorantGaramond.variable} ${poppins.variable} ${dmSerifText.variable} ${fraunces.variable} ${inter.variable} ${roboto.variable} h-full antialiased`}
     >
       <head>
         <script
