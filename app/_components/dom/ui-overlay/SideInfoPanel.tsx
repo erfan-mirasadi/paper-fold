@@ -865,11 +865,9 @@ export function SideInfoPanel() {
                         data-entry-key={resolved.key}
                         initial={{ opacity: 0, y: 18, filter: "blur(6px) grayscale(0)" }}
                         animate={{
-                          opacity: isNewest ? 1 : 0.4,
+                          opacity: 1,
                           y: 0,
-                          filter: isNewest
-                            ? "blur(0px) grayscale(0)"
-                            : "blur(0px) grayscale(0.85)",
+                          filter: "blur(0px) grayscale(0)",
                         }}
                         exit={{
                           opacity: 0,
