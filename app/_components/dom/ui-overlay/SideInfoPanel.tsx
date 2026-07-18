@@ -170,7 +170,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
           className="uppercase text-foreground/45 text-[8px] lg:text-[clamp(9px,0.62vw,14px)]"
           style={{
             letterSpacing: "0.22em",
-            fontFamily: "var(--font-quintessential)",
+            fontFamily: "var(--font-handlee)",
             marginBottom: "clamp(7px, 0.6vw, 11px)",
           }}
         >
@@ -236,7 +236,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
 
         <span
           className="flex-shrink-0 tabular-nums text-foreground/50 text-[9px] lg:text-[clamp(10px,0.68vw,15px)]"
-          style={{ fontFamily: "var(--font-quintessential)", letterSpacing: "0.04em" }}
+          style={{ fontFamily: "var(--font-handlee)", letterSpacing: "0.04em" }}
         >
           {fmt(currentTime)} / {fmt(duration)}
         </span>
@@ -275,7 +275,7 @@ function InkImage({ src, caption, alt }: SideInfoImage) {
         <figcaption
           className="italic text-foreground/50 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
           style={{
-            fontFamily: "var(--font-quintessential)",
+            fontFamily: "var(--font-handlee)",
             marginTop: "clamp(6px, 0.5vw, 10px)",
             letterSpacing: "0.04em",
           }}
@@ -380,7 +380,7 @@ function InkCapsule({
               : "text-[10.5px] lg:text-[clamp(11px,0.78vw,18px)]"
           }`}
         style={{
-          fontFamily: "var(--font-quintessential)",
+          fontFamily: "var(--font-handlee)",
           lineHeight: isPill ? 1.6 : 1.9,
           letterSpacing: "0.01em",
           color: item.textColor || textColor,
@@ -562,7 +562,7 @@ function SideInfoEntryView({
             text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-quintessential)",
+            fontFamily: "var(--font-handlee)",
             lineHeight: 1.2,
           }}
         />
@@ -587,7 +587,7 @@ function SideInfoEntryView({
               text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
             style={{
               textShadow: "none",
-              fontFamily: "var(--font-quintessential)",
+              fontFamily: "var(--font-handlee)",
               lineHeight: 1.95,
               marginTop: "clamp(10px, 1vw, 18px)",
             }}
@@ -610,7 +610,7 @@ function SideInfoEntryView({
               text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
             style={{
               textShadow: "none",
-              fontFamily: "var(--font-quintessential)",
+              fontFamily: "var(--font-handlee)",
               lineHeight: 1.3,
               marginTop: "clamp(18px, 2vw, 32px)",
             }}
@@ -760,7 +760,7 @@ export function SideInfoPanel() {
                 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
               style={{
                 letterSpacing: "0.28em",
-                fontFamily: "var(--font-quintessential)",
+                fontFamily: "var(--font-handlee)",
                 marginBottom: "clamp(14px, 1.4vw, 24px)",
                 paddingRight: "0.1em",
               }}
@@ -787,7 +787,7 @@ export function SideInfoPanel() {
                     className="italic text-foreground/40
                       text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
                     style={{
-                      fontFamily: "var(--font-quintessential)",
+                      fontFamily: "var(--font-handlee)",
                       lineHeight: 1.8,
                       margin: 0,
                     }}
