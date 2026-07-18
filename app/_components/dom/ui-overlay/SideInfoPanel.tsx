@@ -20,6 +20,7 @@ import type {
   SideInfoCapsules,
   SideInfoEntry,
   SideInfoImage,
+  SideInfoFlowItem,
   SurahLayoutConfig,
 } from "@/app/data/schema";
 
@@ -479,13 +480,24 @@ function SideInfoEntryView({
       ? `${verseId}. Ayet`
       : undefined);
 
-  // The entry's reading flow, built on demand because it renders up to
-  // twice: once as the real body, and once more as the fold window's
-  // preview copy (see FoldedEntry) — identical markup keeps both copies
-  // wrapping (and even word-animating) in perfect sync.
-  const renderFlow = () =>
-    entry.paragraphs?.map((item, i) =>
-      typeof item === "string" ? (
+  // Chunk the paragraphs by subtitle so each section can fold independently
+  const chunks: SideInfoFlowItem[][] = [];
+  let currentChunk: SideInfoFlowItem[] = [];
+
+  entry.paragraphs?.forEach((item) => {
+    if (typeof item === "object" && item !== null && "subtitle" in item) {
+      if (currentChunk.length > 0) chunks.push(currentChunk);
+      currentChunk = [item];
+    } else {
+      currentChunk.push(item);
+    }
+  });
+  if (currentChunk.length > 0) chunks.push(currentChunk);
+
+  const renderChunkItems = (chunk: SideInfoFlowItem[], startIndex: number) =>
+    chunk.map((item, localIndex) => {
+      const i = startIndex + localIndex;
+      return typeof item === "string" ? (
         <AnimatedText
           key={i}
           text={item}
@@ -503,6 +515,21 @@ function SideInfoEntryView({
             text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
           style={{
             textShadow: "none",
+            fontFamily: "var(--font-inter)",
+            lineHeight: 1.95,
+            marginTop: "clamp(10px, 1vw, 18px)",
+          }}
+        />
+      ) : "html" in item ? (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: i * 0.1, ease: "easeOut" }}
+          dangerouslySetInnerHTML={{ __html: item.html }}
+          className="!text-left w-full font-normal text-foreground/80
+            text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+          style={{
             fontFamily: "var(--font-inter)",
             lineHeight: 1.95,
             marginTop: "clamp(10px, 1vw, 18px)",
@@ -533,25 +560,43 @@ function SideInfoEntryView({
         />
       ) : (
         <InkCapsuleGroup key={i} group={item} />
-      ),
+      );
+    });
+
+  const renderedChunks = chunks.map((chunk, chunkIdx) => {
+    const startIndex = chunks.slice(0, chunkIdx).reduce((acc, c) => acc + c.length, 0);
+    const isFoldable = true; // Always allow ExpandableEntry to fold if the content is long enough
+
+    const renderedItems = renderChunkItems(chunk, startIndex);
+    const isLastChunk = chunkIdx === chunks.length - 1;
+
+    const body = (
+      <>
+        {renderedItems}
+        {isLastChunk &&
+          entry.images?.map((img, i) => <InkImage key={`img-${i}`} {...img} />)}
+        {isLastChunk && entry.audio && <InkAudioPlayer {...entry.audio} />}
+      </>
     );
 
-  const body = (
-    <>
-      {renderFlow()}
+    const chunkStyle = {
+      marginBottom: chunks.length > 1 && !isLastChunk ? "clamp(12px, 1vw, 20px)" : undefined,
+    };
 
-      {entry.images?.map((img, i) => (
-        <InkImage key={i} {...img} />
-      ))}
-
-      {entry.audio && <InkAudioPlayer {...entry.audio} />}
-    </>
-  );
-
-  // Entries that open with a body paragraph ship folded at the 4th line —
-  // kicker and title stay visible above the fold (see FoldedEntry.tsx for
-  // every tunable). Capsule-first entries (e.g. summary pages) stay whole.
-  const foldable = typeof entry.paragraphs?.[0] === "string";
+    if (isFoldable) {
+      return (
+        <div key={`chunk-${chunkIdx}`} style={chunkStyle}>
+          <ExpandableEntry preview={renderedItems}>{body}</ExpandableEntry>
+        </div>
+      );
+    } else {
+      return (
+        <div key={`chunk-${chunkIdx}`} style={chunkStyle}>
+          {body}
+        </div>
+      );
+    }
+  });
 
   return (
     <div>
@@ -615,11 +660,7 @@ function SideInfoEntryView({
         />
       )}
 
-      {foldable ? (
-        <ExpandableEntry preview={renderFlow()}>{body}</ExpandableEntry>
-      ) : (
-        body
-      )}
+      {renderedChunks}
     </div>
   );
 }
@@ -811,70 +852,70 @@ export function SideInfoPanel() {
                   [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
                   ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
               >
-              <AnimatePresence initial={false}>
-                {entries.length === 0 ? (
-                  <motion.p
-                    key="side-info-empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="italic text-foreground/40
+                <AnimatePresence initial={false}>
+                  {entries.length === 0 ? (
+                    <motion.p
+                      key="side-info-empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8 }}
+                      className="italic text-foreground/40
                       text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
-                    style={{
-                      fontFamily: "var(--font-inter)",
-                      lineHeight: 1.8,
-                      margin: 0,
-                    }}
-                  >
-                    {emptyText}
-                  </motion.p>
-                ) : (
-                  entries.map((resolved) => {
-                    // The entry the fold story just revealed stays at full
-                    // ink; everything the reader has already moved past
-                    // settles back — quieter and greyed, like older writing
-                    // on the same page — so the newest story keeps the eye.
-                    const isNewest = resolved.stepIdx === stepIdx;
-                    return (
-                      <motion.article
-                        key={resolved.key}
-                        data-entry-key={resolved.key}
-                        initial={{
-                          opacity: 0,
-                          y: 18,
-                          filter: "blur(6px) grayscale(0)",
-                        }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                          filter: "blur(0px) grayscale(0)",
-                        }}
-                        exit={{
-                          opacity: 0,
-                          y: 10,
-                          filter: "blur(6px) grayscale(0)",
-                          transition: { duration: 0.35, ease: "easeIn" },
-                        }}
-                        transition={{
-                          duration: isNewest ? 0.85 : 1.1,
-                          ease: [0.25, 1, 0.5, 1],
-                        }}
-                        style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
-                      >
-                        <SideInfoEntryView
-                          verseId={resolved.verseId}
-                          entry={resolved.entry}
-                          hideVerseNumbers={
-                            activeConfig.features?.hideVerseNumbers
-                          }
-                        />
-                      </motion.article>
-                    );
-                  })
-                )}
-              </AnimatePresence>
-            </div>
+                      style={{
+                        fontFamily: "var(--font-inter)",
+                        lineHeight: 1.8,
+                        margin: 0,
+                      }}
+                    >
+                      {emptyText}
+                    </motion.p>
+                  ) : (
+                    entries.map((resolved) => {
+                      // The entry the fold story just revealed stays at full
+                      // ink; everything the reader has already moved past
+                      // settles back — quieter and greyed, like older writing
+                      // on the same page — so the newest story keeps the eye.
+                      const isNewest = resolved.stepIdx === stepIdx;
+                      return (
+                        <motion.article
+                          key={resolved.key}
+                          data-entry-key={resolved.key}
+                          initial={{
+                            opacity: 0,
+                            y: 18,
+                            filter: "blur(6px) grayscale(0)",
+                          }}
+                          animate={{
+                            opacity: 1,
+                            y: 0,
+                            filter: "blur(0px) grayscale(0)",
+                          }}
+                          exit={{
+                            opacity: 0,
+                            y: 10,
+                            filter: "blur(6px) grayscale(0)",
+                            transition: { duration: 0.35, ease: "easeIn" },
+                          }}
+                          transition={{
+                            duration: isNewest ? 0.85 : 1.1,
+                            ease: [0.25, 1, 0.5, 1],
+                          }}
+                          style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
+                        >
+                          <SideInfoEntryView
+                            verseId={resolved.verseId}
+                            entry={resolved.entry}
+                            hideVerseNumbers={
+                              activeConfig.features?.hideVerseNumbers
+                            }
+                          />
+                        </motion.article>
+                      );
+                    })
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
           </motion.aside>
         )}

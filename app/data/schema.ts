@@ -218,7 +218,7 @@ export interface LayoutBlock {
    * - `'grid'`    → Alak-style 2-column grid with a full-width AnaAyet verse below.
    * - `'spacer'`  → Invisible gap of `fixedHeight` (for intro/outro verse slots).
    */
-  type: 'group' | 'grid' | 'spacer';
+  type: "group" | "grid" | "spacer";
 
   // ── CONTENT ──────────────────────────────────────────────────────────────
 
@@ -386,7 +386,7 @@ export interface LayoutBlock {
   // ── INTERACTION ──────────────────────────────────────────────────────────
 
   /** Drag/click interaction mode for verses in this block. */
-  dragBehavior?: 'group' | 'pair' | 'single' | 'individual';
+  dragBehavior?: "group" | "pair" | "single" | "individual";
 
   /** When `true`, the popup interaction is disabled for all verses in this block. */
   disablePopUp?: boolean;
@@ -798,13 +798,23 @@ export interface SideInfoSubtitle {
   subtitle: string;
 }
 
+export interface SideInfoHtml {
+  /** Raw HTML string rendered exactly as-is (bypasses text animation). */
+  html: string;
+}
+
 /**
  * One item of an entry's reading flow: a plain string renders as a body
  * paragraph, a `{ capsules: [...] }` object renders as a capsule group —
  * placed exactly where it sits in the array, so capsules can go before,
  * between or after any paragraph. A `{ subtitle: "..." }` object renders as a subheading.
+ * A `{ html: "..." }` object renders raw HTML and bypasses word-by-word animation.
  */
-export type SideInfoFlowItem = string | SideInfoCapsules | SideInfoSubtitle;
+export type SideInfoFlowItem =
+  | string
+  | SideInfoCapsules
+  | SideInfoSubtitle
+  | SideInfoHtml;
 
 export interface SideInfoEntry {
   /**

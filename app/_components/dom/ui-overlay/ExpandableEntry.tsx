@@ -92,16 +92,22 @@ export function ExpandableEntry({
     const measure = () => {
       const el = contentRef.current;
       if (phaseRef.current !== "folded" || !el) return;
-      const firstP = el.querySelector("p.at-container");
-      if (!firstP) {
+      let referenceEl = el.querySelector("p.at-container");
+      if (!referenceEl) {
+        referenceEl = el.firstElementChild;
+      }
+      if (!referenceEl) {
         setMetrics({ crispHeight: 0, foldHeight: 0, overflowing: false });
         return;
       }
-      const cs = getComputedStyle(firstP);
+      const cs = getComputedStyle(referenceEl);
       let lineHeight = parseFloat(cs.lineHeight);
-      if (!isFinite(lineHeight)) lineHeight = parseFloat(cs.fontSize) * 1.95;
+      if (!isFinite(lineHeight) || isNaN(lineHeight)) {
+        const fontSize = parseFloat(cs.fontSize);
+        lineHeight = isFinite(fontSize) ? fontSize * 1.95 : 24;
+      }
       const topOffset =
-        firstP.getBoundingClientRect().top - el.getBoundingClientRect().top;
+        referenceEl.getBoundingClientRect().top - el.getBoundingClientRect().top;
       const crispHeight = topOffset + CRISP_LINES * lineHeight;
       const foldHeight = FOLD_LINES * lineHeight;
       setMetrics({

@@ -49,400 +49,426 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
   sideInfo: {
     panelTitle: "Tefsir",
     byFoldStep: {
-      // ── Folded page: only the five-verse Ana Bölüm is visible ──────────
       "pre-start": {
-        kicker: "Beş Ayetlik Ana Bölüm",
-        title: "Kur'anın İlk Suresi",
+        title: "Bütün varlıklar konuşur.",
         paragraphs: [
-          "Bütün canlı varlıkları kendilerine mahsus bir dil ile konuşturan Allah elbette kendisi de konuşmayı bilir. (Hiç yaratan bilmez mi?) Konuşmayı bilen elbette konuşur ve konuşmuştur. Onun konuşması vahiy ve ilham şeklindedir.",
-          "İşte Yüce Yaratıcı peygamberlerine vahiy yoluyla hitap etmiştir. İnsanlar içinde, yaratılışça en ileri, ahlakça en mükemmel olan Hz. Muhammet AS. ile de vahiy yoluyla ve Alemlerin Rabbi sıfatıyla konuşmuştur. Konuşmuş ve bütün insanlığa Onunla mesaj göndermiştir.",
-          "Arıları ve karıncaları kraliçesiz, göçmen kuşları ve küçük balıkları öndersiz, dünyaya yeni gelen yavruları ana-babasız, rehbersiz bırakmayan Ezeli Kudret, elbette insanları da Peygambersiz bırakmayacaktır. Cenab-ı Hak Peygamberimize gelinceye kadar 120 bin peygamber göndermiştir. Peygamber Efendimiz Hz. Muhammet Aleyhisselam son peygamberdir. Ondan sonra peygamber gelmeyecektir.",
-          "Hazret-i Muhammed Sallallahü aleyhi ve sellem 40 yaşında Hıra mağarasında inzivada bulunduğu bir sırada herşeyin yaratıcısı yüce Allah, melek yani Cebrail Aleyhisselam vasıtasıyla yani vahiy yoluyla konuştu ve ona ilk mesajını gönderdi. Bu mesaj Alak suresinin ilk beş ayetiydi.",
-          "İşte böylece Allahın indirdiği son kitap olan Kur'an-ı Kerim nazil olmaya başladı ve ondan sonra Kur'anın nüzulü (inişi) 23 yıl devam etti. Ayet ayet indi, sure sure indi ve 23 yılda tamamlandı.",
-          "Alak Suresi: İlk beş ayeti ile insanların bilmeleri ve inanmaları gereken müspet hakikati vaz'ediyor, değişmez doğruyu ortaya koyuyor. Sonra gelen iki tafsil bölümü ise; olmaması gereken menfi olaylardan, yüzlerce küfür ve zulüm hadiselerinden bir örnek veriyor.",
-          "Beş ayetlik birinci bölüm bu surenin ana bölümüdür. Bu surede verilmek istenen esas mesaj bu bölümde veciz bir şekilde veriliyor. Kur'anın Mekkedeki muhatapları Mekkeli müşrikler ve Hıristiyan ve Yahudilerdi. Allah C.C. her ifadesinde bu iki muhatabı gözetmiştir. Burada sırayla onlardan bahsediliyor.",
+          "Canlı varlıkların vücutlarında görev yapan bütün organlar birbirleriyle etkileşirler, bilgi alışverişinde bulunurlar. Beyin de bütün organlarla iletişim içindedir, özel bir dil ile onlarla konuşur.",
+          "Hayvanların ve insanların vücudu, sanki medeni birer şehir gibidir. O vücut şehrinde her an sayısız telefon, faks ve özel ulak mesaj taşımakta, bilgi taşımaktadır.",
+          "Ayrıca hayvanlar kendi aralarında iletişim kurarak, kendi dilleriyle konuşarak duygularını anlatabilmektedirler.",
+          "Bitkiler de renkleriyle ve yaydıkları kokularla böceklere mesaj gönderirler. Rüzgâr çiçeklerin kokularını, mesajlarını uzaklara taşır, onlara özel ulak olur.",
+          "İnsanlara gelince; insanların konuşması hayvanların çok üzerindedir çünkü insanlar üstün bir beyin ile donatılmış, özel varlıklardır. Allah, insanlara çeşitli diller öğretmiştir.",
+          { subtitle: 'ALLAH’IN KONUŞMASI: "VAHİY"' },
+          "Bütün canlıları kendilerine mahsus bir dil ile konuşturan Allah, elbette kendisi de konuşmayı bilir. (Hiç yaratan bilmez mi?) Konuşmayı bilen elbette konuşur ve konuşmuştur. Onun konuşması vahiy ve ilham şeklindedir.",
+          "İşte Yüce Yaratıcı, peygamberlerine vahiy yoluyla hitap etmiştir. İnsanlar içinde, yaradılışça en ileri, ahlakça en mükemmel olan Hz. Muhammed Aleyhisselam ile de vahiy yoluyla ve Âlemlerin Rabbi sıfatıyla konuşmuştur.",
+          "Konuşmuş ve bütün insanlığa onunla mesaj göndermiştir.",
+          { subtitle: "PEYGAMBER GÖNDERMEK" },
+          "Arıları ve karıncaları kraliçesiz, göçmen kuşları ve küçük balıkları öndersiz, dünyaya yeni gelen yavruları ana-babasız, rehbersiz bırakmayan ezeli kudret, elbette insanları da peygambersiz bırakmayacaktır. Onlara da kendi içlerinden en üstün yaratılışlı, en duyarlı, en şefkatli, en güzel ahlaklı olanları rehber olarak görevlendirip insanlara yol gösterecektir.",
+          "Bu açıdan bakılırsa peygamberler, insan topluluklarının ana kraliçeleridir, fıtri rehberleridir. Peygamber göndermek ilahi hikmete gayet yakışmaktadır.",
+          "Peygamberleri ve dâhileri çıkarırsanız, insanların medeniyet adına, insanlık adına ciddi bir sıçrama yapamayacaklarını tarih bize gösteriyor.",
+          "Cenab-ı Hak Peygamberimize gelinceye kadar 120 bin peygamber göndermiştir. Hemen her topluma onları Allah'a ve ibadete davet eden bir peygamber göndermiştir. Peygamber Efendimiz Hz. Muhammed Aleyhisselam son peygamberdir. Ondan sonra peygamber gelmeyecektir.",
+          { subtitle: "KUR’AN’IN İLK SURESİ:" },
+          "Hazret-i Muhammed Sallallahü aleyhi ve sellem 40 yaşında Hira mağarasında inzivada bulunduğu bir sırada her şeyin yaratıcısı Yüce Allah, melek yani Cebrail Aleyhisselam vasıtasıyla yani vahiy yoluyla konuştu ve ona ilk mesajını gönderdi. Bu mesaj Alak suresinin ilk beş ayetiydi.",
+          "İşte böylece Allah’ın indirdiği son kitap olan Kur’an-ı Kerim nazil olmaya başladı ve ondan sonra Kur’an’ın nüzulü (inişi) 23 yıl devam etti. Ayet ayet indi, sure sure indi ve 23 yılda tamamlandı.",
+          "Kur'an ayetleri ve sureler daima birer ihtiyaç anında gelmiştir. Her sure veya ayet, ya İslamiyet’in inanç ve ibadet esaslarından birini getirmiş ya müminlere bir ümit vermiş ya inanmayanları davet etmiş ya o anda çözülmesi gereken bir problemi çözmüş ya da müminlerin söylemi ve mesajı olmuş gündemi oluşturmuştur.",
+          "Değişik olaylar ve farklı ihtiyaçlar sebebiyle parça parça nazil olan bir kitabın ayetleri arasında bir insicam, bir anlam bağı bulunmaması beklenir. Halbuki Kur'an öyle bir Allah kelamıdır ki sanki tamamı bir defada nazil olmuş gibi hem ayetler arasında hem sureler arasında olağanüstü bir bütünlük ve o bütünlük içinde mükemmel bir sistem vardır. Bu kitapta, bu gerçeğin pek çok örneğini göreceğiz.",
+          "Bu surenin ilk sure ve bu vahyin ilk vahiy oluşu sebebiyle burada Kur'an ve vahiy hakkında biraz bilgi verelim:",
+          "Kur’an’da 114 sure vardır. Bu surelerden bazıları çok kısa ve bazıları çok uzundur.",
+          "Vahyi (Allah sözünü) Peygamber Efendimize, melek-elçi Hazret-i Cibril (Cebrail) Aleyhisselam getirirdi. Peygamberimiz de gelen vahyi anında ezberler ve sonra da vahiy kâtiplerine yazdırırdı. Müslümanlar her yeni nazil olan ayeti hem kendileri için yazarlar hem ezberler hem de onu namazda okurlardı.",
+          "Peygamber Efendimize vahiy geldiği zamanlar vahyin gelişi belli olurdu: Soğuk mevsimde bile terlemeye başlar, kendinden geçer gibi olur ve ağırlaşırdı. Deve üzerindeyse, devesi de bu ağırlığı hisseder, yere çökerdi.",
+          "Allah elçisi (Sallallahü aleyhi ve selem): “Bana vahiy değişik tarzlarda gelir. Bazen Cebrail, insan şekline girer ve benimle konuşur. Bazen kanatlarıyla beraber, özel şekliyle görünür ve bana söylediklerinin tamamını aklımda tutarım. Bazen de arı uğultusu veya çan sesi gibi gelir. Bu sonuncusu en ağır gelenidir.” buyurmuştur.",
+          "Kur'an, bütünüyle Allah sözüdür. Ne Peygamberimizin ve ne de başka hiçbir kimsenin kendiliğinden Kur’an’a müdahalesi olmamıştır. Surelerin sıralanışı da ayetlerin dizilişi de tamamen ilahi emirle olmuştur.",
+          "Alak suresi, ilk beş ayeti ile insanların bilmeleri ve inanmaları gereken müspet hakikati vaz'ediyor, değişmez doğruyu ortaya koyuyor.",
+          "Sonra gelen iki tafsil bölümü ise; olmaması gereken menfi şeylerden, küfür ve zulüm hadiselerinden bir örnek veriyor.",
         ],
       },
-      // ── First unfold: verses 6 and 19 frame the two Açıklama sections ──
       start: {
-        kicker: "Tafsil Bölümleri",
-        title: "İkinci Bölüm: Açıklama Bölümüdür",
+        kicker: "İkinci Bölüm:",
+        title: "Tafsil, Açıklama Bölümüdür",
         paragraphs: [
-          "Ana bölüm, muhkem bölüm burada bitti. Şimdi benzeşen ikiz bölümlere bakalım. Bu iki tafsil bölümü, değişebilen olaylardan bahsediyorlar.",
-          "Bakalım Mekkede, müşrikler içinden bir adam bu iki büyük nimete nasıl karşılık veriyor? Bu sorunun cevabını ikinci bölümde bulacağız.",
           {
+            columns: 2,
+            frame: true,
+            color: ORANGE_THEME,
+            bg: CAPSULE_BG_6_19,
+            corners: "soft",
+            textColor: "#2B2B2B",
             capsules: [
               {
                 n: 6,
-                text: "Şimdi Bak, şu adam (Ebu Cehil) Peygambere iman etmediği gibi, ileri gidiyor, taşkınlık yapıyor, zulmediyor.",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
+                text: " Şimdi Bak, şu adam (Ebu Cehil) Peygambere iman etmediği gibi, ileri gidiyor, taşkınlık yapıyor, zulmediyor.",
+                span: true,
+                textColor: "#A30000",
               },
-            ],
-            corners: "soft",
-            textColor: "#A30000",
-          },
-          {
-            capsules: [
               {
                 n: 7,
-                text: "Adam kendini yaratan Allaha iman edeceğine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
+                text: " Adam kendini yaratan Allaha iman edeceğine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
                 color: MAROON_THEME,
                 bg: CAPSULE_BG_7_8_17_18,
               },
               {
                 n: 8,
-                text: "(Halbuki) sonunda yine yaratan Rabbin huzuruna dönülecek. Hem de her şeyini dünyada bırakarak.",
+                text: " (Halbuki) sonunda yine yaratan Rabbin huzuruna dönülecek. Hem de her şeyini dünyada bırakarak..",
                 color: MAROON_THEME,
                 bg: CAPSULE_BG_7_8_17_18,
               },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-          {
-            capsules: [
               {
                 n: 9,
-                text: "Gördün mü şu, türlü zulümler eden, hatta en masum bir ibadet olan namazı bile engelleyen adamı. İbadet edeceği yerde ibadeti engelliyor.",
+                text: " Gördün mü şu, türlü zulümler eden, hatta en masum bir ibadet olan namazı bile engelleyen adamı. İbadet edeceği yerde ibadeti engelliyor.",
                 color: MAROON_THEME,
                 bg: CAPSULE_BG_9_10_15_16,
               },
               {
                 n: 10,
-                text: "Namaz kılan bir Allah kuluna (peygambere) güç kullanarak yasaklar getiriyor. İnsanların inanma ve ibadet etme haklarını ellerinden almaya çalışıyor.",
+                text: " Namaz kılan bir Allah kuluna (peygambere) güç kullanarak yasaklar getiriyor. İnsanların inanma ve ibadet etme haklarını ellerinden almaya çalışıyor.",
                 color: MAROON_THEME,
                 bg: CAPSULE_BG_9_10_15_16,
               },
             ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Fully open: the four-verse middle section appears last ─────────
-      end: {
-        kicker: "Dört Ayetlik Ara Bölüm",
-        title: "Akıl ve Vicdan Sahiplerine",
-        paragraphs: [
-          "Dört ayetlik ara bölüm; akıl ve vicdan sahiplerini insafa ve muhakemeye davet ediyor. Evet Ebu Cehil gibiler sözden anlamasalar da elbette insanların içinde Peygambere ve Onun haklı mesajına vicdanıyla bakanlar ve düşünenler olacaktır. Kur'an bu gelen dört ayetle onlara sesleniyor.",
-          "Bu tamam da ey henüz aklını ve vicdanını kaybetmemiş makul insanlar siz ne yapacaksınız? Siz kimin yanındasınız? Yeri göğü yaratan, sizleri yaratan bir Allahın ve Rasulünün tarafında mı, insan hak ve özgürlüklerinden yana mı, yoksa fazla gürültü çıkaran, Allaha saygısız, insana saygısız bir takım güç sahiplerinden yana mı duruyorsunuz?",
-          "Tercih size kalmıştır. Yalnız şunu iyi bilin ki bu tercih, sizin dünya ve ahiretinizi etkileyen en önemli kararınız olacaktır.",
-          {
-            capsules: [
-              {
-                n: 11,
-                text: "Ya bu (Peygamber) doğru yoldaysa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-              {
-                n: 12,
-                text: "Allah'a itaat edin diyorsa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
           },
           {
-            capsules: [
-              {
-                n: 13,
-                text: "Ya şu yalanlıyor ve sırtını dönüyorsa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-              {
-                n: 14,
-                text: "Allahın kendisini gördüğünü bilmiyor mu yoksa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-        ],
-      },
-    },
-    byVerse: {
-      // ── Ana Bölüm: ikiz ayetler 1-2 → müşriklere ───────────────────────
-      1: {
-        kicker: "1-2. Ayetler",
-        title: "Müşriklere: Yaratılış Nimeti",
-        paragraphs: [
-          "Allah gerçek bir din nedir bilmeyen müşriklere yaratılış nimetini ve yaratılış mucizesini hatırlatıyor. Biz de buradan kendimize bir ders çıkarıyoruz: Allahın birinci nimeti bizi harika bir surette insan olarak yaratması ve dünyaya getirmesidir. Buna karşılık bizden yalnız kendisine ibadet etmemizi istiyor. İstemek de Onun hakkıdır.",
-          "Allahın yarattığı bir insan olarak Yaratanımızdan gelen bu davete cevabımız hemen can-u gönülden iman ve itaat olmalı değil midir?",
-          {
-            capsules: [
-              {
-                n: 1,
-                text: "Sen Rabbinin elçisi olarak şu ayetleri puta tapan müşriklere oku ki herşeyi Rabbin yarattı. Putlar değil! Onlar da başka şeylere değil, Yalnızca Allaha ibadet etsinler.",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
-              },
-              {
-                n: 2,
-                text: "Evet Rabbin insanı, ana rahmine tutunan bir hücrecikten yarattı. Bu harika olayı gerçekleştiren ve sizi dünyaya getiren Rabbinizi bırakıp nasıl başka şeylere taparsınız?",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Ana Bölüm: ikiz ayetler 3-4 → Ehl-i Kitaba ─────────────────────
-      3: {
-        kicker: "3-4. Ayetler",
-        title: "Ehl-i Kitaba: Hidayet Nimeti",
-        paragraphs: [
-          "Allahın ikinci büyük nimeti hidayet nimetidir, Kitap gönderme nimetidir.",
-          "Bu ikiz ayetlerden de anlıyoruz ki Kur'anın ve Peygamber Efendimizin yine o günün şartlarında müşriklerden sonra gelen muhatabı Arap yarımadasında yaşayan Ehl-i Kitap dediğimiz Hıristiyanlar ve Yahudilerdir. Evet Kur'an-ı Kerimin birçok ayetlerinden anlıyoruz ki Kur'anın Mekkede iki gurup muhatabı var: Müşrikler ve Ehl-i Kitap (Hıristiyanlar ve Yahudiler).",
-          {
-            capsules: [
-              {
-                n: 3,
-                text: "Yine bu ayetleri Rabbin adına Hıristiyan ve Yahudilere oku ki Rabbin onlara çok lütuflarda bulundu, (yani onlara peygamber ve kitap gönderdi.)",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
-              },
-              {
-                n: 4,
-                text: "Rabbin, Tevrat ve İncili (Ehl-i Kitap alimlerine kalemle) öğretti! Yani onlar zaten kitaba ve Peygambere yabancı değiller.",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Ana Ayet ───────────────────────────────────────────────────────
-      5: {
-        kicker: "Ana Ayet",
-        title: "Bütün Surenin Ana Ayeti",
-        paragraphs: [
-          "Bu birinci bölümün de ana ayeti 5. ayettir. Dolayısıyla bütün surenin ana ayetidir 5. ayet. Evet Peygamber Efendimize nazil olan ilk ayetlerin bütün insanlığa Efendimizin nübüvvet ve risaletini ilan etmesi kadar güzel ve isabetli bir mesaj olabilir mi? Bu tek ayetin içinde çok cümleler gizli:",
-          "Hz. Muhammet bir insandır; daha önceki peygamberlerin de birer insan oldukları gibi. O şimdi vahiy olarak kendisine gelen ve gelecek olan ayetleri daha önceden bilen bir insan değildi. Tevrat ve İncili okuyup yazarak öğrenen din bilginlerinden biri de değil o. Okuduğu şu ayetleri ona öğreten Allahtır. O şimdi kendisine nazil olan ayetleri size okumakla görevli bir Allah Elçisidir.",
-          {
-            capsules: [
-              {
-                n: 5,
-                text: "Ey insanlar! Allah şimdi ümmi bir kuluna (Muhammede vahyederek) Ona, daha önce hiç bilmediği şeyleri öğretti ve Onu size rehber yaptı. Haydi hepiniz Allaha ve Onun Elçisine iman ve itaat ediniz.",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
-              },
-            ],
+            frame: true,
+            color: ORANGE_THEME,
+            bg: CAPSULE_BG_6_19,
             corners: "soft",
             textColor: "#A30000",
-          },
-        ],
-      },
-      // ── İkinci Bölümün ana ayeti ───────────────────────────────────────
-      6: {
-        kicker: "1. Açıklama Bölümü",
-        title: "Şimdi Bak Şu Adama",
-        paragraphs: [
-          {
             capsules: [
               {
                 n: 6,
-                text: "Şimdi Bak, şu adam (Ebu Cehil) Peygambere iman etmediği gibi, ileri gidiyor, taşkınlık yapıyor, zulmediyor.",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
+                text: " Şimdi Bak, şu adam (Ebu Cehil) Peygambere iman etmediği gibi, ileri gidiyor, taşkınlık yapıyor, zulmediyor.",
               },
             ],
-            corners: "soft",
-            textColor: "#A30000",
           },
-        ],
-      },
-      // ── İnkar safhası: 7-8 ─────────────────────────────────────────────
-      7: {
-        kicker: "7-8. Ayetler · İnkar Safhası",
-        title: "Kendini Müstağni Görüyor",
-        paragraphs: [
-          "Ne yapıyor bu adam? Bu ana ayeti açıklayan şu iki ayet Ebu Cehilin ve onun gibilerin inkâr ve istiğnalarını haber veriyor:",
           {
+            html: 'Ne yapıyor bu adam? Bu ana ayeti açıklayan şu iki ayet Ebu Cehilin ve onun gibilerin inkâr ve istiğnalarını haber veriyor. <span style="color: #A30000">(inkar safhası)</span>',
+          },
+          {
+            columns: 2,
+            frame: true,
+            color: MAROON_THEME,
+            bg: CAPSULE_BG_7_8_17_18,
+            corners: "soft",
+            textColor: "#2B2B2B",
             capsules: [
               {
                 n: 7,
-                text: "Adam kendini yaratan Allaha karşı iman yerine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
-                color: MAROON_THEME,
-                bg: CAPSULE_BG_7_8_17_18,
+                text: " Adam kendini yaratan Allaha karşı iman yerine istiğna ediyor, çevresine güvenerek, (Allaha, dine) ihtiyacım yok diyor, inkar ediyor.",
               },
               {
                 n: 8,
-                text: "(Halbuki başta Allah yarattığı gibi) sonunda yine yaratan Rabbin huzuruna dönülecek.",
-                color: MAROON_THEME,
-                bg: CAPSULE_BG_7_8_17_18,
+                text: " (Halbuki başta Allah yarattığı gibi) sonunda yine yaratan Rabbin huzuruna dönülecek.",
               },
             ],
+          },
+          {
+            html: 'Bundan sonra gelen iki ayet ise Ebu Cehilin ve Onun gibilerin inkardan da öteye geçerek zulüm ve tuğyan ve taşkınlık yaptıklarını anlatıyor: <span style="color: #A30000">(Tuğyan safhası)</span>',
+          },
+          {
+            columns: 2,
+            frame: true,
+            color: MAROON_THEME,
+            bg: CAPSULE_BG_9_10_15_16,
             corners: "soft",
             textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Tuğyan safhası: 9-10 ───────────────────────────────────────────
-      9: {
-        kicker: "9-10. Ayetler · Tuğyan Safhası",
-        title: "Namaza Engel Olan Adam",
-        paragraphs: [
-          "Bundan sonra gelen iki ayet ise Ebu Cehilin ve onun gibilerin inkardan da öteye geçerek zulüm ve tuğyan ve taşkınlık yaptıklarını anlatıyor:",
-          "Bu surede anlatılan inkarcı insan tipinin önemli bir özelliği tuğyandır. Tuğyanın önemli bir göstergesi de başkasına tahakkümdür, zulümdür, hayata kastetmektir. Kendi inanç ve düşüncesine uymayan farklı görüş ve inançları yasaklama ve yok etme gayretidir. İslam dini ise başka inanç ve görüşleri yasaklayıcı değildir. Peygamberler vazifelerini yapar, tebliğ eder ve hatırlatırlar ama kimseye hiçbir şeyi dayatmazlar, zorlamazlar.",
-          {
             capsules: [
               {
                 n: 9,
-                text: "Gördün mü şu, türlü zulümler eden, hatta en masum bir ibadet olan namazı bile engelleyen adamı. İbadet edeceği yerde ibadeti engelliyor.",
-                color: MAROON_THEME,
-                bg: CAPSULE_BG_9_10_15_16,
+                text: " Gördün mü şu, türlü zulümler eden, hatta en masum bir ibadet olan namazı bile engelleyen adamı. İbadet edeceği yerde ibadeti engelliyor.",
               },
               {
                 n: 10,
-                text: "Namaz kılan bir Allah kuluna (peygambere) güç kullanarak yasaklar getiriyor. Başkalarının inanma ve ibadet etme haklarını ellerinden almaya çalışıyor.",
-                color: MAROON_THEME,
-                bg: CAPSULE_BG_9_10_15_16,
+                text: " Namaz kılan bir Allah kuluna (peygambere) güç kullanarak yasaklar getiriyor. Başkalarının inanma ve ibadet etme haklarını ellerinden almaya çalışıyor.",
               },
             ],
-            corners: "soft",
-            textColor: "#2B2B2B",
           },
         ],
       },
-      // ── Ara Bölüm: 11-12 ───────────────────────────────────────────────
-      11: {
-        kicker: "11-12. Ayetler · Ara Bölüm",
-        title: "Ya O Kul Doğru Yoldaysa?",
+      "inner-open": {
+        kicker: "ÜÇÜNCÜ BÖLÜM:",
+        title: "",
         paragraphs: [
-          "Bu ayet: Muhammed Aleyhisselamın sıdk ve doğruluğuna ve davet ettiği La ilâhe illallah inancının güzelliğine bakarak anlayınız ki dava ve daveti haktır. Ona iman ediniz! Peygamberin sizden istediği ikinci şey yalnız bir olan Allaha ibadetle itaattir. Sizden başka bir şey istemiyor ki!",
           {
-            capsules: [
-              {
-                n: 11,
-                text: "Ya bu (Peygamber) doğru yoldaysa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-              {
-                n: 12,
-                text: "Allah'a itaat edin diyorsa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-            ],
+            columns: 2,
+            frame: true,
+            color: MAROON_THEME,
             corners: "soft",
             textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Ara Bölüm: 13-14 ───────────────────────────────────────────────
-      13: {
-        kicker: "13-14. Ayetler · Ara Bölüm",
-        title: "Allahın Gördüğünü Bilmiyor mu?",
-        paragraphs: [
-          "Ebu Cehil ve onun gibileri yukarıdaki iman davetini yalanladılar. Peygamberin davetine sırt döndüler. Kendilerinin başıboş bırakılacaklarını mı sanıyorlar? Allah, elbette kullarının bu inkar ve isyanlarını görüyor. Onlardan bunun hesabını soracaktır.",
-          "Kesin inançsızlar veya inatçı kafirler: Bir kere günlük olaylardan sıyrılıp kendini dinlememiş, tabiata bakmamış, bir kere yaratılış mucizesini düşünmemiş, bir kere evrensel hakikatlerden bahseden peygamberlere ve Allahın gönderdiği kitaplara vicdanıyla kulak vermemiş. Hayata yalnız bedensel ihtiyaçlarının penceresinden bakmış, kendi basit sosyal statüsünü ve basit çıkarlarını korumayı dünyanın en önemli meselesi zannetmiş küçük adamlar…",
-          "Böyle kendi yanlış inanç ve düşüncelerini kesin doğrular olarak kabul eden ve karşı tarafın bütün doğrularını yanlış kabul eden adamlar doğruyu bulamazlar, makul ve mutedil davranamazlar. Zihin yapıları taşlaşmıştır, beyinleri esnemez. Ne olur bir kere makul olabilseler, bir kere de kendi doğrularından azıcık şüphe etseler? Bir kere de karşı tarafa azıcık hak verebilseler dersiniz.",
-          "Bu konuda onların vicdanları kararmış, muhakemeleri bozulmuş olabilir. Ama her şeyi gören, bilen bir de Allah var. Bir de Allahın şaşmaz adaleti var. Allahın her şeyi gördüğünü bilmiyorlar mı yoksa? Bile bile düşmanlık edenleri Allah hiç iflah eder mi?",
-          {
-            capsules: [
-              {
-                n: 13,
-                text: "Ya şu yalanlıyor ve sırtını dönüyorsa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-              {
-                n: 14,
-                text: "Allahın gördüğünü bilmiyor mu yoksa?",
-                color: GREEN_THEME,
-                bg: CAPSULE_BG_12_14,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Üçüncü Bölüm: 15-16 ────────────────────────────────────────────
-      15: {
-        kicker: "15-16. Ayetler · Üçüncü Bölüm",
-        title: "Yalancı, Secdesiz Alnından",
-        paragraphs: [
-          "Böyle zalim başlar, Kahhar-ı Zülcelal tarafından gebertilip sonra da İlahi adaletin eliyle cehenneme atılacaklardır. Böylelerin yapacakları varsa görecekleri de var! diyor, zalimlerin cesaretlerini ve insan haklarına, hukuka tecavüzlerini kırıyor.",
-          {
             capsules: [
               {
                 n: 15,
-                text: "Hayır, eğer vazgeçmezse biz onu alnından tutar sürükleriz!",
-                color: MAROON_THEME,
+                text: " Hayır, eğer vazgeçmezse biz onu alnından tutar sürükleriz !",
                 bg: CAPSULE_BG_9_10_15_16,
               },
               {
                 n: 16,
-                text: "O yalancı, o secdesiz alnından tutar cehenneme atarız.",
-                color: MAROON_THEME,
+                text: " O yalancı, o secdesiz alnından tutar cehenneme atarız.",
                 bg: CAPSULE_BG_9_10_15_16,
               },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-        ],
-      },
-      // ── Üçüncü Bölüm: 17-18 ────────────────────────────────────────────
-      17: {
-        kicker: "17-18. Ayetler · Üçüncü Bölüm",
-        title: "Çağırsın Çevresini",
-        paragraphs: [
-          "Dünyada böyle inkar ve böyle zulmedenlerin ahirette cezaları nasıl olacak? Üçüncü bölüm onların ahiretteki durumlarını haber veriyor.",
-          {
-            capsules: [
               {
                 n: 17,
-                text: "Çağırsın o zaman, o çok güvendiği çevresini;",
-                color: MAROON_THEME,
+                text: " Çağırsın o zaman, o çok güvendiği çevresini;",
                 bg: CAPSULE_BG_7_8_17_18,
               },
               {
                 n: 18,
-                text: "Elbette biz de çağıracağız o zaman Zebanileri.",
-                color: MAROON_THEME,
+                text: " Elbette biz de çağıracağız o zaman Zebanileri.",
                 bg: CAPSULE_BG_7_8_17_18,
               },
+              {
+                n: 19,
+                text: " Hayır, sakın onun mahkumu olma! Yalnız Rabbine secde et (yani namaz kıl) ve ona yaklaş.",
+                span: true,
+                textColor: "#A30000",
+                bg: CAPSULE_BG_6_19,
+                color: ORANGE_THEME,
+              },
             ],
-            corners: "soft",
-            textColor: "#2B2B2B",
           },
+          "Bu surenin son iki tafsil bölümü ve iki bölüm arasında yer alan dört ayetlik değerlendirme bölümü bir yönüyle şöyle diyor:",
+          "Böyle zalim başlar, Kahhar-ı Zülcelal tarafından gebertilip sonra da İlahi adaletin eliyle cehenneme atılacaklardır. Böylelerin yapacakları varsa görecekleri de var ! diyor, zalimlerin cesaretlerini ve İNSAN HAKLARINA, hukuka tecavüzlerini kırıyor.",
+          "1., 2. ve 3. bölümlerin ana ayetlerini arka arkaya okuyalım:",
+          {
+            columns: 1,
+            frame: true,
+            color: ORANGE_THEME,
+            bg: CAPSULE_BG_6_19,
+            corners: "soft",
+            textColor: "#A30000",
+            capsules: [
+              {
+                n: 5,
+                text: " Allah şimdi ümmi bir insana yani Kulu Muhammede bilmediği şeyleri vahyederek öğretti. Onu insanlığa peygamber olarak gönderdi.",
+              },
+              {
+                n: 6,
+                text: " Şimdi Bak, şu adam (Ebu Cehil) Peygambere iman etmediği gibi, ileri giderek taşkınlık yapıyor ve zulümler ediyor",
+              },
+              {
+                n: 19,
+                text: " Hayır ey Rasulüm, sakın onun mahkumu olma! Yalnız Rabbine secde et ve ona yaklaş.",
+              },
+            ],
+          },
+          "Evet dünyada böyle çılgın, böyle zalim adamlar her zaman vardır. Allah Rasulü böyle zalim adamlara mahkum olmayacak, onlara itaat de etmeyecek, Allah davasını onların keyiflerine bırakmayacak; her türlü zulüm ve engellemelere rağmen mukaddes vazifesine devam edecektir.",
+          "Bu tamam da ey henüz aklını ve vicdanını kaybetmemiş makul insanlar siz ne yapacaksınız? Siz kimin yanındasınız ?",
+          "Yeri göğü yaratan, sizleri yaratan bir Allahın ve Rasulünün tarafında mı, insan hak ve özgürlüklerinden yana mı, yoksa fazla gürültü çıkaran, Allaha saygısız, insana saygısız bir takım güç sahiplerinden yana mı duruyorsunuz?",
+          "Tercih size kalmıştır. Yalnız şunu iyi bilin ki bu tercih, sizin dünya ve ahiretini etkileyen en önemli kararınız olacaktır.",
+          { html: "<span style=\"color: #A30000; font-weight: bold;\">Tuğyan:</span>" },
+          "Bu surede anlatılan inkarcı insan tipinin önemli bir özelliği tuğyandır. Tuğyanın önemli bir göstergesi de başkasına tahakkümdür, zulümdür, hayata kastetmektir. Kendi inanç ve düşüncesine uymayan farklı görüş ve inançları yasaklama ve yok etme gayretidir. Kendisinin ve daracık çevresinin inandığı putperestliği dünyanın en doğru, en değişmez gerçeği sanarak, taşkınlık derecesinde, cinnet ve hatta paranoya derecesinde davranış bozukluğudur.",
+          "İslam dini, başka inanç ve görüşleri yasaklayıcı değildir.",
+          "Peygamberler vazifelerini yapar, tebliğ eder ve hatırlatırlar ama kimseye hiçbir şeyi dayatmazlar, zorlamazlar.",
+          { html: "<div style=\"border: 1px solid #777; border-radius: 8px; padding: 6px 14px; margin-top: 4px; color: #2b2b2b; text-align: center;\">Sen hatırlatıcı ve uyarıcısın. Onları zorlayıcı değilsin Leste aleyhim bimusaytır.</div>" },
         ],
       },
-      // ── Surenin son ayeti ──────────────────────────────────────────────
-      19: {
-        kicker: "Surenin Son Ayeti",
-        title: "Secde Et ve Yaklaş",
+      end: {
+        kicker: "DÖRT AYETLİK ARA BÖLÜM:",
+        title: "AKIL VE VİCDAN SAHİPLERİNİ İNSAFA VE MUHAKEMEYE DAVET EDİYOR.",
         paragraphs: [
-          "Evet dünyada böyle çılgın, böyle zalim adamlar her zaman vardır. Allah Rasulü böyle zalim adamlara mahkum olmayacak, onlara itaat de etmeyecek, Allah davasını onların keyiflerine bırakmayacak; her türlü zulüm ve engellemelere rağmen mukaddes vazifesine devam edecektir.",
-          "Sen hatırlatıcı ve uyarıcısın. Onları zorlayıcı değilsin. (Leste aleyhim bimusaytır)",
+          "Evet Ebu Cehil gibiler sözden anlamasalar da elbette insanların içinde Peygambere ve Onun haklı mesajına vicdanıyla bakanlar ve düşünenler olacaktır. Kur'an bu gelen dört ayetle onlara sesleniyor:",
+          {
+            columns: 2,
+            frame: true,
+            color: GREEN_THEME,
+            bg: CAPSULE_BG_12_14,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 11,
+                text: " Ya bu (Peygamber) doğru yoldaysa?",
+              },
+              {
+                n: 12,
+                text: " Allah'a itaat edin diyorsa?",
+              },
+              {
+                n: 13,
+                text: " Ya şu yalanlıyor ve sırtını dönüyorsa?",
+              },
+              {
+                n: 14,
+                text: " Allahın kendisini gördüğünü bilmiyor mu yoksa ?",
+              },
+            ],
+          },
+          {
+            frame: true,
+            color: GREEN_THEME,
+            bg: CAPSULE_BG_12_14,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 11,
+                text: " Ya bu (Peygamber) doğru yoldaysa?",
+              },
+            ],
+          },
+          "Bu ayet: Muhammed Aleyhisselamın sıdk ve doğruluğuna ve davet ettiği La ilâhe illallah inancının güzelliğine bakarak anlayınız ki dava ve daveti haktır. Ona iman ediniz! Diyor.",
+          {
+            frame: true,
+            color: GREEN_THEME,
+            bg: CAPSULE_BG_12_14,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 12,
+                text: " Yalnızca Allah'a itaat edin diyorsa?",
+              },
+            ],
+          },
+          "Bu ayet: Peygamberin sizden istediği ikinci şey yalnız bir olan Allaha ibadetle itaattir. Sizden başka bir şey istemiyor ki !",
+          {
+            frame: true,
+            color: GREEN_THEME,
+            bg: CAPSULE_BG_12_14,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 13,
+                text: " Ya şu yalanlıyor ve sırtını dönüyorsa?",
+              },
+            ],
+          },
+          "Ebu Cehil ve onun gibileri yukarıdaki iman davetini yalanladılar. Peygamberin davetine sırt döndüler.",
+          {
+            frame: true,
+            color: GREEN_THEME,
+            bg: CAPSULE_BG_12_14,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 14,
+                text: " Allahın gördüğünü bilmiyor mu yoksa?",
+              },
+            ],
+          },
+          "Kendilerinin başıboş bırakılacaklarını mı sanıyorlar.. Allah, elbette kullarının bu inkar ve isyanların görüyor. Onlardan bunu hesabını soracaktır.",
+          { subtitle: "KESİN İNANÇSIZLAR veya İNATÇI KAFİRLER:" },
+          "Bir kere günlük olaylardan sıyrılıp kendini dinlememiş, tabiata bakmamış,",
+          "bir kere yaratılış mucizesini düşünmemiş, bir kere evrensel hakikatlerden bahseden peygamberlere ve Allahın gönderdiği kitaplara vicdanıyla kulak vermemiş.",
+          "Hayata yalnız bedensel ihtiyaçlarının penceresinden bakmış, kendi basit sosyal statüsünü ve basit çıkarlarını korumayı dünyanın en önemli meselesi zannetmiş, batıl geleneklerin, yanlış önyargıların ve kel gururlarının mahkumu olmuş küçük adamlar.. Yalnız bu kadar olsa onların bir gün düşünüp taşınarak doğruyu bulabileceklerine ihtimal verilebilir ama inkarın da çok ötesinde bazılarının ruhlarını din düşmanlığı sarmış ve onların akıl dengelerini bozmuştur.",
+          "Böyle kendi yanlış inanç ve düşüncelerini kesin doğrular olarak kabul eden ve karşı tarafın bütün doğrularını yanlış kabul eden adamlar doğruyu bulamazlar, makul ve mutedil davranamazlar. Zihin yapıları taşlaşmıştır, beyinleri esnemez. Onlara delil göstermenin ve inkarlarını kırmak için ispatlar yapmanın da faydası yoktur. Karşı tarafın haklı olması, güzel işler yapması onları ancak çileden çıkarır. Ne olur bir kere makul olabilseler, bir kere de kendi doğrularından azıcık şüphe etseler ? Bir kere de karşı tarafa azıcık hak verebilseler dersiniz.",
+          "Bu konuda onların vicdanları kararmış, muhakemeleri bozulmuş olabilir. Ama her şeyi gören, bilen bir de Allah var. Bir de Allahın şaşmaz adaleti var. Allahın her şeyi gördüğünü bilmiyorlar mı yoksa? Bile bile düşmanlık edenleri Allah hiç iflah eder mi?",
+          "Dünyada böyle inkar ve böyle zulmedenlerin Ahirette cezaları nasıl olacak?",
+          "Üçüncü bölüm onların ahiretteki durumlarını haber veriyor.",
+        ],
+      },
+    },
+    byVerse: {
+      1: {
+        kicker: "BİRİNCİ BÖLÜM:",
+        title: "ANA BÖLÜMDÜR. BEŞ AYETTİR.",
+        paragraphs: [
+          "Beş ayetlik birinci bölüm bu surenin ana bölümüdür. Bu surede verilmek istenen esas mesaj bu bölümde veciz bir şekilde veriliyor.",
+          "Kur'anın Mekkedeki muhatapları Mekkeli müşrikler ve Hıristiyan ve Yahudilerdi. Allah C.C. her ifadesinde bu iki muhatabı gözetmiştir. Burada sırayla onlardan bahsediliyor. Bu beş ayetlik ana bölüm biraz açılarak şöyle ifade edilebilir:",
+          {
+            columns: 2,
+            frame: true,
+            color: ORANGE_THEME,
+            bg: CAPSULE_BG_6_19,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 1,
+                text: " Sen Rabbinin elçisi olarak şu ayetleri puta tapan müşriklere oku ki herşeyi Rabbin yarattı. Putlar değil! Onlar da başka şeylere değil, Yalnızca Allaha ibadet etsinler.",
+              },
+              {
+                n: 2,
+                text: " Evet Rabbin insanı, ana rahmine tutunan bir hücrecikten yarattı. Bu harika olayı gerçekleştiren ve sizi dünyaya getiren Rabbinizi bırakıp nasıl başka şeylere taparsınız !",
+              },
+              {
+                n: 3,
+                text: " Yine bu ayetleri Rabbin adına Hıristiyan ve Yahudilere oku ki Rabbin onlara çok lütuflarda bulundu, (yani onlara peygamber ve kitap gönderdi.)",
+              },
+              {
+                n: 4,
+                text: " Rabbin, Tevrat ve İncili (Ehl-i Kitap alimlerine kalemle) öğretti! Yani onlar zaten kitaba ve Peygambere yabancı değiller.",
+              },
+              {
+                n: 5,
+                text: " Ey insanlar! Allah şimdi ümmi bir kuluna (Muhammede vahyederek) Ona, daha önce hiç bilmediği şeyleri öğretti ve Onu size rehber yaptı Haydi hepiniz Allaha ve Onun Elçisine iman ve itaat ediniz.",
+                span: true,
+                textColor: "#A30000",
+              },
+            ],
+          },
+          "Bu birinci bölümün de ana ayeti 5. ayettir. Dolayısıyla bütün surenin ana ayetidir 5. ayet.",
           {
             capsules: [
               {
-                n: 19,
-                text: "Hayır ey Rasulüm, sakın onun mahkumu olma! Yalnız Rabbine secde et (yani namaz kıl) ve ona yaklaş.",
-                color: ORANGE_THEME,
-                bg: CAPSULE_BG_6_19,
+                n: 5,
+                text: " Ey insanlar! Allah şimdi ümmi bir kuluna (Muhammede vahyederek) Ona, daha önce hiç bilmediği şeyleri öğretti ve Onu size rehber yaptı Haydi hepiniz Allaha ve Onun Elçisine iman ve itaat ediniz.",
+                textColor: "#A30000",
               },
             ],
             corners: "soft",
-            textColor: "#A30000",
+            frame: "#A30000",
           },
+          "Evet Peygamber Efendimize nazil olan ilk ayetlerin bütün insanlığa Efendimizin nübüvvet ve risaletini ilan etmesi kadar güzel ve isabetli bir mesaj olabilir mi? Bu tek ayetin içinde çok cümleler gizli:",
+          "1. Hz. Muhammet bir insandır.",
+          "2. Daha önceki peygamberlerin de birer insan oldukları gibi.",
+          "3. O şimdi vahiy olarak kendisine gelen ve gelecek olan ayetleri daha önceden bilen bir insan değildi.",
+          "4. Tevrat ve İncili okuyup yazarak öğrenen din bilginlerinden biri de değil o.",
+          "5. Okuduğu şu ayetleri ona öğreten Allahtır.",
+          "6. O şimdi kendisine nazil olan ayetleri size okumakla görevli bir Allah Elçisidir.",
+          "Şimdi de ana ayeti tafsil eden açan ikiz ayetlere bakalım:",
+          {
+            columns: 2,
+            frame: true,
+            color: ORANGE_THEME,
+            bg: CAPSULE_BG_6_19,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 1,
+                text: "Sen Rabbinin elçisi olarak şu ayetleri puta tapan müşriklere oku ki onları yaratan Rabbin Allahtır. Putlar değil. Bu yüzden onlar putlara değil her şeyi yaratan Allaha iman ve ibadet etmelidirler.",
+              },
+              {
+                n: 2,
+                text: "Evet Rabbin insanı, ana rahmine tutunan bir hücrecikten yarattı. Bu harika olayı gerçekleştiren ve sizi dünyaya getiren Rabbinizi bırakıp nasıl başka şeylere taparsınız?",
+              },
+            ],
+          },
+          "Allah gerçek bir din nedir bilmeyen müşriklere yaratılış nimetini ve yaratılış mucizesini hatırlatıyor. Biz de buradan kendimize bir ders çıkarıyoruz.",
+          "Allahın birinci nimeti bizi harika bir surette insan olarak yaratması ve dünyaya getirmesidir. Buna karşılık bizden yalnız kendisine ibadet etmemizi istiyor. İstemek de Onun hakkıdır..",
+          "Allahın yarattığı bir insan olarak Yaratanımızdan gelen bu davete cevabımız hemen can-u gönülden iman ve itaat olmalı değil midir?",
+          "Yine ana ayeti tafsil eden, açan ikiz ayetlerden ikisine daha bakalım:",
+          {
+            columns: 2,
+            frame: true,
+            color: ORANGE_THEME,
+            bg: CAPSULE_BG_6_19,
+            corners: "soft",
+            textColor: "#2B2B2B",
+            capsules: [
+              {
+                n: 3,
+                text: "Yine bu ayetleri Rabbin adına Hıristiyan ve Yahudilere oku ki Rabbin onların peygamberlerine lütuflarda bulundu, (yani peygamberlere vahyetti, kitap verdi.)",
+              },
+              {
+                n: 4,
+                text: "İnsanlara da Tevratı ve İncili (kalemle) öğretti. Onlar da kitaba ve Peygambere yabancı değiller. Kur'ana da uzak durmamalıdırlar.",
+              },
+            ],
+          },
+          "Allahın ikinci büyük nimeti hidayet nimetidir. Kitap gönderme nimetidir.",
+          "Bu ikiz ayetlerden de anlıyoruz ki Kur'anın ve Peygamber Efendimizin yine o günün şartlarında müşriklerden sonra gelen muhatabı Arap yarımadasında yaşayan Ehl-i Kitap dediğimiz Hıristiyanlar ve Yahudilerdir. Bu iki ayetin de onlara hitap etmesi gayet normaldir.",
+          "Evet Kur'an-ı Kerimin birçok ayetlerinden anlıyoruz ki Kur'anın Mekkede iki gurup muhatabı var.",
+          {
+            html: 'Bunlar : <span style="border: 1px solid #777; border-radius: 6px; padding: 2px 8px;">Müşrikler</span> ve <span style="border: 1px solid #777; border-radius: 6px; padding: 2px 8px;">Ehl-i Kitap (Hıristiyanlar ve Yahudiler)</span>',
+          },
+          "Allahın bizleri insan olarak yaratması onun birinci nimetidir demiştik. Yaratma nimetinden sonra Allahın insanlara ikinci nimeti Kitap ve Peygamber göndererek onlara yol göstermesidir. Ana bölüm, muhkem bölüm burada bitti. Şimdi benzeşen ikiz bölümlere bakalım. Bu iki tafsil bölümü, değişebilen olaylardan bahsediyorlar. ",
+          "Bakalım Mekkede, müşrikler içinden bir adam bu iki büyük nimete nasıl karşılık veriyor? Bu sorunun cevabını ikinci bölümde bulacağız.",
         ],
       },
+
+
+
     },
   },
   features: {
