@@ -13,6 +13,7 @@ import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntr
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
+import { SidebarToggleIcon } from "@/app/_components/dom/ui-overlay/SidebarToggleIcon";
 import type {
   SideInfoAudio,
   SideInfoCapsuleItem,
@@ -59,63 +60,7 @@ export function SideInfoToggle() {
       // hidden below sm: the top-right row already fills the smallest screens
       className="hidden sm:flex w-14 h-14 text-foreground"
     >
-      <svg
-        width="23"
-        height="23"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.55"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        overflow="visible"
-      >
-        {/* Outer frame — always present */}
-        <motion.rect x="3" y="4.5" width="18" height="15" rx="2.8" />
-
-        {/* Right divider (the panel lives on the right) */}
-        <motion.line
-          animate={{ opacity: isOpen ? 1 : 0.3 }}
-          x1="14.5"
-          y1="4.5"
-          x2="14.5"
-          y2="19.5"
-        />
-
-        {/* Chevron — morphs direction */}
-        <motion.polyline
-          animate={{
-            points: isOpen
-              ? "17,9.5 19.5,12 17,14.5"
-              : "10.5,9.5 8,12 10.5,14.5",
-          }}
-          points="17,9.5 19.5,12 17,14.5"
-          fill="none"
-        />
-
-        {/* Subtle content lines (visible when open) */}
-        <motion.line
-          animate={{ opacity: isOpen ? 0.35 : 0 }}
-          x1="6"
-          y1="9"
-          x2="11.5"
-          y2="9"
-        />
-        <motion.line
-          animate={{ opacity: isOpen ? 0.35 : 0 }}
-          x1="7"
-          y1="12"
-          x2="11.5"
-          y2="12"
-        />
-        <motion.line
-          animate={{ opacity: isOpen ? 0.35 : 0 }}
-          x1="6"
-          y1="15"
-          x2="11.5"
-          y2="15"
-        />
-      </svg>
+      <SidebarToggleIcon isOpen={isOpen} side="right" />
     </OverlayButton>
   );
 }

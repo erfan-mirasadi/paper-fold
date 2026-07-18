@@ -11,6 +11,7 @@ import { useSurahScriptStore } from "@/app/stores/useSurahScriptStore";
 import type { SurahDataShape, Verse } from "@/app/data/SurahConfig";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
+import { SidebarToggleIcon } from "@/app/_components/dom/ui-overlay/SidebarToggleIcon";
 
 const GOLD = "#C4963B";
 
@@ -230,63 +231,7 @@ function SidebarToggle({
         aria-expanded={isOpen}
         className="w-[23px] h-[23px] text-foreground"
       >
-        <svg
-          width="23"
-          height="23"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.55"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          overflow="visible"
-        >
-          {/* Outer frame — always present */}
-          <motion.rect x="3" y="4.5" width="18" height="15" rx="2.8" />
-
-          {/* Left divider */}
-          <motion.line
-            animate={{ opacity: isOpen ? 1 : 0.3 }}
-            x1="9.5"
-            y1="4.5"
-            x2="9.5"
-            y2="19.5"
-          />
-
-          {/* Chevron — morphs direction */}
-          <motion.polyline
-            animate={{
-              points: isOpen
-                ? "7,9.5 4.5,12 7,14.5"
-                : "13.5,9.5 16,12 13.5,14.5",
-            }}
-            points="7,9.5 4.5,12 7,14.5"
-            fill="none"
-          />
-
-          {/* Subtle content lines (visible when open) */}
-          <motion.line
-            animate={{ opacity: isOpen ? 0.35 : 0 }}
-            x1="12.5"
-            y1="9"
-            x2="18"
-            y2="9"
-          />
-          <motion.line
-            animate={{ opacity: isOpen ? 0.35 : 0 }}
-            x1="12.5"
-            y1="12"
-            x2="17"
-            y2="12"
-          />
-          <motion.line
-            animate={{ opacity: isOpen ? 0.35 : 0 }}
-            x1="12.5"
-            y1="15"
-            x2="18"
-            y2="15"
-          />
-        </svg>
+        <SidebarToggleIcon isOpen={isOpen} side="left" />
       </OverlayButton>
     </MotionConfig>
   );
