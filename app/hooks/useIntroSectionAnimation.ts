@@ -64,7 +64,7 @@ function getIntroSectionScatter(): Record<
   const s2b = getS2BotId();
   return {
     //     x      y      z      rx(°)    ry(°)    rz(°)
-    [s1]: [0.82, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
+    [s1]: [1.1, -0.75, 2.04, deg(5), deg(-40), deg(-28)],
     [s2t]: [0, -0.6, -0.4],
     [s2c]: [0.06, -0.55, -1.2],
     [s2b]: [0, -0.63, 0.5],

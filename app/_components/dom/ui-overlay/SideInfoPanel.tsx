@@ -29,7 +29,13 @@ const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 /** "#RGB"/"#RRGGBB" → rgba() with the given alpha (used for accent tints). */
 const hexToRgba = (hex: string, alpha: number) => {
   const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const full =
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h;
   const num = parseInt(full, 16);
   return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
 };
@@ -192,7 +198,10 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
             rounded-full transition-opacity duration-300
             opacity-60 hover:opacity-100
             w-[28px] h-[28px] lg:w-[clamp(30px,2.1vw,44px)] lg:h-[clamp(30px,2.1vw,44px)]"
-          style={{ border: "1px solid currentColor", background: "transparent" }}
+          style={{
+            border: "1px solid currentColor",
+            background: "transparent",
+          }}
         >
           {isPlaying ? (
             <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor">
@@ -334,7 +343,11 @@ function InkCapsule({
       initial={{ opacity: 0, y: 12, scale: 0.97, filter: "blur(6px)" }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
       viewport={{ once: false, margin: "-4% 0px -4% 0px" }}
-      transition={{ duration: 0.7, delay: index * 0.07, ease: [0.25, 1, 0.5, 1] }}
+      transition={{
+        duration: 0.7,
+        delay: index * 0.07,
+        ease: [0.25, 1, 0.5, 1],
+      }}
       className={`relative flex min-w-0 ${spanClass} ${
         isPill
           ? "items-center justify-center text-center"
@@ -391,7 +404,7 @@ function InkCapsule({
         {!chipNumber && item.n !== undefined && (
           <span className="font-semibold" style={{ color: accent }}>
             {item.n}
-            {typeof item.n === "number" ? "." : ""} 
+            {typeof item.n === "number" ? "." : ""}
           </span>
         )}
         <span dangerouslySetInnerHTML={{ __html: item.text }} />
@@ -493,7 +506,8 @@ function resolveEntries(
     const stepId = steps[i].id;
 
     const stepEntry = side.byFoldStep?.[stepId];
-    if (stepEntry) out.push({ key: `step-${stepId}`, stepIdx: i, entry: stepEntry });
+    if (stepEntry)
+      out.push({ key: `step-${stepId}`, stepIdx: i, entry: stepEntry });
 
     const fresh = (config.scriptHighlights?.[stepId] ?? [])
       .filter((v) => !seenVerses.has(v))
@@ -514,7 +528,11 @@ function SideInfoEntryView({
   entry,
   hideVerseNumbers,
 }: Omit<ResolvedEntry, "key" | "stepIdx"> & { hideVerseNumbers?: boolean }) {
-  const kicker = entry.kicker ?? (!hideVerseNumbers && verseId !== undefined ? `${verseId}. Ayet` : undefined);
+  const kicker =
+    entry.kicker ??
+    (!hideVerseNumbers && verseId !== undefined
+      ? `${verseId}. Ayet`
+      : undefined);
 
   // The entry's reading flow, built on demand because it renders up to
   // twice: once as the real body, and once more as the fold window's
@@ -595,7 +613,10 @@ function SideInfoEntryView({
       {(kicker || (!hideVerseNumbers && verseId !== undefined)) && (
         <div
           className="flex items-center"
-          style={{ gap: "clamp(6px, 0.5vw, 10px)", marginBottom: "clamp(6px, 0.55vw, 12px)" }}
+          style={{
+            gap: "clamp(6px, 0.5vw, 10px)",
+            marginBottom: "clamp(6px, 0.55vw, 12px)",
+          }}
         >
           {!hideVerseNumbers && verseId !== undefined && (
             <span
@@ -713,7 +734,10 @@ export function SideInfoPanel() {
         `[data-entry-key="${firstNewKey}"]`,
       );
       if (!node) return;
-      el.scrollTo({ top: Math.max(node.offsetTop - 12, 0), behavior: "smooth" });
+      el.scrollTo({
+        top: Math.max(node.offsetTop - 12, 0),
+        behavior: "smooth",
+      });
     }, 420);
     return () => window.clearTimeout(t);
   }, [entries, isOpen]);
@@ -723,15 +747,15 @@ export function SideInfoPanel() {
   // we pick the dominant color of the currently highlighted verses in the active fold step.
   const GOLD = "#C4963B";
   const activeStepId = activeConfig.animations.foldSteps[stepIdx]?.id;
-  const highlightArray = (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
+  const highlightArray =
+    (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
   const highlighted = new Set(highlightArray);
 
   // Backdrop accent — compare current step vs previous to find newly added verses.
-  const prevStepId = stepIdx > 0
-    ? activeConfig.animations.foldSteps[stepIdx - 1]?.id
-    : null;
+  const prevStepId =
+    stepIdx > 0 ? activeConfig.animations.foldSteps[stepIdx - 1]?.id : null;
   const prevHighlightSet = new Set(
-    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || []
+    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || [],
   );
   const newlyAdded = highlightArray.filter((n) => !prevHighlightSet.has(n));
 
@@ -739,7 +763,9 @@ export function SideInfoPanel() {
   if (newlyAdded.length > 0) {
     scrollAccent = activeConfig.verseOverrides?.[newlyAdded[0]]?.border ?? GOLD;
   } else if (highlightArray.length > 0) {
-    scrollAccent = activeConfig.verseOverrides?.[highlightArray[highlightArray.length - 1]]?.border ?? GOLD;
+    scrollAccent =
+      activeConfig.verseOverrides?.[highlightArray[highlightArray.length - 1]]
+        ?.border ?? GOLD;
   }
 
   const side = activeConfig.sideInfo;
@@ -754,8 +780,7 @@ export function SideInfoPanel() {
 
   const panelTitle = side.panelTitle ?? "Tefsir";
   const emptyText =
-    side.emptyText ??
-    "Kağıt açıldıkça ayetlerin kıssaları burada belirecek.";
+    side.emptyText ?? "Kağıt açıldıkça ayetlerin kıssaları burada belirecek.";
 
   return (
     <>
@@ -782,9 +807,9 @@ export function SideInfoPanel() {
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            initial={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: 24 }}
-            animate={isLandscapePaper ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
-            exit={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: 24 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
             style={
               isLandscapePaper
@@ -812,28 +837,35 @@ export function SideInfoPanel() {
           >
             <PanelBackdrop accent={scrollAccent} side="right" />
 
-            {/* ── Panel heading — quiet small caps, centered ──────────── */}
-            <div
-              className="flex-shrink-0 text-center uppercase text-foreground/50
-                text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
-              style={{
-                letterSpacing: "0.28em",
-                fontFamily: "var(--font-roboto)",
-                marginBottom: "clamp(14px, 1.4vw, 24px)",
-                paddingRight: "0.1em",
-              }}
+            <motion.div
+              initial={isLandscapePaper ? { y: 24 } : { x: 24 }}
+              animate={isLandscapePaper ? { y: 0 } : { x: 0 }}
+              exit={isLandscapePaper ? { y: 24 } : { x: 24 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="flex-1 min-h-0 flex flex-col"
             >
-              {panelTitle}
-            </div>
+              {/* ── Panel heading — quiet small caps, centered ──────────── */}
+              <div
+                className="flex-shrink-0 text-center uppercase text-foreground/50
+                  text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
+                style={{
+                  letterSpacing: "0.28em",
+                  fontFamily: "var(--font-roboto)",
+                  marginBottom: "clamp(14px, 1.4vw, 24px)",
+                  paddingRight: "0.1em",
+                }}
+              >
+                {panelTitle}
+              </div>
 
-            {/* ── Reading log — grows to fill the aside, scrolls on its own */}
-            <div
-              ref={scrollRef}
-              {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
-              className={`relative flex-1 min-h-0 overscroll-contain
-                [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
-            >
+              {/* ── Reading log — grows to fill the aside, scrolls on its own */}
+              <div
+                ref={scrollRef}
+                {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
+                className={`relative flex-1 min-h-0 overscroll-contain
+                  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+                  ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
+              >
               <AnimatePresence initial={false}>
                 {entries.length === 0 ? (
                   <motion.p
@@ -863,7 +895,11 @@ export function SideInfoPanel() {
                       <motion.article
                         key={resolved.key}
                         data-entry-key={resolved.key}
-                        initial={{ opacity: 0, y: 18, filter: "blur(6px) grayscale(0)" }}
+                        initial={{
+                          opacity: 0,
+                          y: 18,
+                          filter: "blur(6px) grayscale(0)",
+                        }}
                         animate={{
                           opacity: 1,
                           y: 0,
@@ -875,13 +911,18 @@ export function SideInfoPanel() {
                           filter: "blur(6px) grayscale(0)",
                           transition: { duration: 0.35, ease: "easeIn" },
                         }}
-                        transition={{ duration: isNewest ? 0.85 : 1.1, ease: [0.25, 1, 0.5, 1] }}
+                        transition={{
+                          duration: isNewest ? 0.85 : 1.1,
+                          ease: [0.25, 1, 0.5, 1],
+                        }}
                         style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
                       >
                         <SideInfoEntryView
                           verseId={resolved.verseId}
                           entry={resolved.entry}
-                          hideVerseNumbers={activeConfig.features?.hideVerseNumbers}
+                          hideVerseNumbers={
+                            activeConfig.features?.hideVerseNumbers
+                          }
                         />
                       </motion.article>
                     );
@@ -889,6 +930,7 @@ export function SideInfoPanel() {
                 )}
               </AnimatePresence>
             </div>
+            </motion.div>
           </motion.aside>
         )}
       </AnimatePresence>

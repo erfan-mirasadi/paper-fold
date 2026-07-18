@@ -412,7 +412,8 @@ export function SurahScriptSidebar() {
   // Keep the decorative kashida elongation used by the 3D overlay so it appears wider and elegant.
   const bismillah = arData.bismillah;
 
-  const highlightArray = (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
+  const highlightArray =
+    (activeStepId && activeConfig.scriptHighlights?.[activeStepId]) || [];
   const highlighted = new Set(highlightArray);
 
   // Highlight border mirrors the verse's paper capsule (shape + color).
@@ -424,11 +425,10 @@ export function SurahScriptSidebar() {
   // Backdrop accent — picks the color of the *newly added* verses in this
   // step vs the previous step. This way the gradient always matches what just
   // appeared on the paper, not whatever happens to be last in the full array.
-  const prevStepId = stepIdx > 0
-    ? activeConfig.animations.foldSteps[stepIdx - 1]?.id
-    : null;
+  const prevStepId =
+    stepIdx > 0 ? activeConfig.animations.foldSteps[stepIdx - 1]?.id : null;
   const prevHighlightSet = new Set(
-    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || []
+    (prevStepId && activeConfig.scriptHighlights?.[prevStepId]) || [],
   );
   // Newly added = in current step but NOT in previous step
   const newlyAdded = highlightArray.filter((n) => !prevHighlightSet.has(n));
@@ -439,7 +439,9 @@ export function SurahScriptSidebar() {
     backdropAccent = chunkAppearance(newlyAdded[0]).color;
   } else if (highlightArray.length > 0) {
     // Fallback: no new verses in this step — use the most recent existing one
-    backdropAccent = chunkAppearance(highlightArray[highlightArray.length - 1]).color;
+    backdropAccent = chunkAppearance(
+      highlightArray[highlightArray.length - 1],
+    ).color;
   }
 
   return (
@@ -490,9 +492,9 @@ export function SurahScriptSidebar() {
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            initial={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: -24 }}
-            animate={isLandscapePaper ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
-            exit={isLandscapePaper ? { opacity: 0, y: 24 } : { opacity: 0, x: -24 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
             style={
               isLandscapePaper
@@ -556,7 +558,11 @@ export function SurahScriptSidebar() {
             ── */}
 
             {/* ── Flowing script text — grows to fill remaining aside height */}
-            <div
+            <motion.div
+              initial={isLandscapePaper ? { y: 24 } : { x: -24 }}
+              animate={isLandscapePaper ? { y: 0 } : { x: 0 }}
+              exit={isLandscapePaper ? { y: 24 } : { x: -24 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
               ref={scrollRef}
               {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
               className={`flex-1 min-h-0 overscroll-contain
@@ -607,8 +613,7 @@ export function SurahScriptSidebar() {
                         {...chunkAppearance(v.number)}
                       >
                         {v.text}
-                      </HighlightChunk>
-                      {" "}
+                      </HighlightChunk>{" "}
                     </span>
                   ))}
                   <AyahNumber n={singleAyahNumber} />
@@ -647,7 +652,7 @@ export function SurahScriptSidebar() {
                   })}
                 </p>
               )}
-            </div>
+            </motion.div>
           </motion.aside>
         )}
       </AnimatePresence>
