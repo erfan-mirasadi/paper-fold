@@ -254,6 +254,7 @@ export function ExpandableEntry({
                 background: "color-mix(in srgb, var(--foreground) 6%, transparent)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
+                fontFamily: "var(--font-inter)",
                 color: GOLD,
                 boxShadow: "0 6px 20px color-mix(in srgb, var(--foreground) 8%, transparent)",
               }}

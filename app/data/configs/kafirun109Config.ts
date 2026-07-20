@@ -24,30 +24,47 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
     end: [1, 2, 3, 4, 5, 6],
   },
 
-  // Right-hand tafsir panel (SideInfoPanel). Content transcribed verbatim
-  // from the reference tafsir book, pages 355-359 (read in page order:
-  // 355, 356, 357, 358, 359).
   sideInfo: {
     panelTitle: "Tefsir",
     byFoldStep: {
       "pre-start": {
-        kicker: "1 ve 6. Ayetler",
-        title: "Kafirun Suresi: Uzlaşma Çağrısı",
+        kicker: "KAFİRUN SURESİ",
+        title:
+          "MAKUL, MEDENİ VE TEVHİT'DEN TAVİZ VERMEDEN, BİR DİYALOG VE TOPLUMSAL UZLAŞMA METNİ:",
         paragraphs: [
+          {
+            html: `<div style="display:flex;align-items:center;justify-content:center;gap:6px;background:#e5e9ec;border-radius:12px;padding:12px;border:1px solid #9aa0a6;font-size:12px;width:100%;box-sizing:border-box;">
+            <div style="background:#faeeba;border:1px solid #ccc;border-radius:4px;padding:4px 12px;color:#333;">6</div>
+            <div style="display:flex;align-items:center;gap:4px;border:1px solid #aebac1;border-radius:8px;padding:4px;background:#f3f6f8;">
+              <div style="background:#cce2f1;border:1px solid #aebac1;border-radius:4px;padding:4px 12px;color:#333;">5</div>
+              <span style="font-weight:bold;color:#666;">+</span>
+              <div style="background:#cce2f1;border:1px solid #aebac1;border-radius:4px;padding:4px 12px;color:#333;">4</div>
+            </div>
+            <div style="font-size:12px;font-weight:bold;color:#666;margin-top:-14px;">+</div>
+            <div style="display:flex;align-items:center;gap:4px;border:1px solid #aebac1;border-radius:8px;padding:4px;background:#f3f6f8;">
+              <div style="background:#cce2f1;border:1px solid #aebac1;border-radius:4px;padding:4px 12px;color:#333;">3</div>
+              <span style="font-weight:bold;color:#666;">+</span>
+              <div style="background:#cce2f1;border:1px solid #aebac1;border-radius:4px;padding:4px 12px;color:#333;">2</div>
+            </div>
+            <div style="background:#faeeba;border:1px solid #ccc;border-radius:4px;padding:4px 12px;color:#333;">1</div>
+          </div>`,
+          },
           'Bu Sure İslam dinine karşı kesin tavır almış, inanmamakta kararlı olan bir kısım Mekkeli kafirlere; "HERKES KENDİ YOLUNA GİTSİN, MEKKEDE BERABER ve BARIŞ İÇİNDE YAŞAYALIM" DİYOR..',
           "Kimse kimseyi inancından ve ibadetinden dolayı kınamasın, alay etmesin, taciz etmesin.",
-          "Alemlere Rahmet Hz. Muhammed AS. Efendimiz Mekke'de Peygamberlikle görevlendirilince insanları bir olan Allah'a inanmaya ve yalnız Allah'a ibadet etmeye çağırdı.",
+          "Alemlere Rahmet HZ. Muhammed AS. Efendimiz Mekke'de Peygamberlikle görevlendirilince insanları bir olan Allah'a inanmaya ve yalnız Allah'a ibadet etmeye çağırdı.",
           "Hasbi gönüller Rasulullah'ın bu davetine kulak verip ona iman ediyorlar ve müslüman olanların sayısı her geçen gün artıyordu. Belli ki yeni bir dinin ve yeni bir dünya görüşünün temelleri atılıyordu.",
           "Bazı müşrikler kendi eski inanç ve ibadetlerine uymayan bu dine karşı tavır aldılar ve hatta Müslümanlara Mekkede hayat hakkı tanımak istemediler. Zayıf Müslümanlara işkence ediyor, hepsine akıl almaz sıkıntılar veriyorlardı.",
           "Bu bitmeyen işkenceler ve sıkıntılar sonucunda Müslümanlar Mekke'de, kendi öz yurtlarında yaşayamaz duruma gelmişler, büyük guruplar halinde önce Habeşistan'a ve sonra da Medine'ye hicret etmişlerdir. Aileler bölünmüştür. Ancak yaptıkları bunca zulüm bile Mekke kafirlerinin hırslarını tatmin etmemiştir.",
-          "Halbuki Mekke'de Müslümanların istekleri gayet masum ve anlaşılır bir şeydi; 1. (Doğup büyüdükleri memleketlerinde) insanca yaşamak istiyorlardı. 2. Özgürce seçtikleri İslam dinini özgürce yaşamak istiyorlardı.",
+          { subtitle: "Halbuki Mekke'de Müslümanların istekleri gayet masum ve anlaşılır bir şeydi;" },
+          "1. (Doğup büyüdükleri memleketlerinde) insanca yaşamak istiyorlardı.",
+          "2. Özgürce seçtikleri İslam dinini özgürce yaşamak istiyorlardı,",
           "Kur'an-ı Kerim, en olumsuz, en yanlış inanış ve davranışlardan bile evrensel doğrular çıkaran bir üsluba sahiptir. Hiçbir problemi çözümsüz bırakmaz. Bu Surede de, çeşitli inanç ve görüşteki insanların ve birbirlerine zarar vermeden beraberce yaşamaları teklifini getiriyor.",
           "Kafirun Suresi önce Allah Rasulünün putlara tapmama tavrını açıkça ifade ediyor. Bu tavır, en doğal bireysel haktır. Kur'an bu hakka vurgu yapıyor peygamber efendimize de bu hakkı kullandırıyor.",
-          'Herkesin, "Ben sizin gibi düşünmüyorum, ben sizin inandığınız şeye inanmıyorum, ben sizin taptığınız şeylere tapmıyorum" deme hakkı vardır.',
-          "Müslümanların ikinci talepleri de; Mekke'de herkes neye inanmak istiyorsa öyle yaşamak istiyorsa öyle yaşasın ve Mekke'de beraberce barış içinde yaşayalım. Kimse kimseye karışmasın, şeklindeydi.",
+          'Herkesin, "Ben sizin gibi düşünmüyorum, ben sizin inandığınız şeye inanmıyorum, ben sizin taptığınız şeylere tapmıyorum deme hakkı vardır.',
+          "Müslümanların ikinci talepleri de; Mekke'de herkes neye inanmak istiyorsa ona inansın, nasıl yaşamak istiyorsa öyle yaşasın ve Mekke'de beraberce barış içinde yaşayalım. Kimse kimseye karışmasın, şeklindeydi.",
           "Bu makul, bu medeni teklif dünya var oldukça değerinden hiçbir şey kaybetmeyecek doğru bir tekliftir. Doğru bir duruştur.",
           "Yukarıdaki yazılış Kur'an-ı Kerimin pek çok yerinde gördüğümüz şekle daha uygundur. Buna göre şu kısa surenin içinde iki bölüm var. Her iki bölümde de bir ayeti iki ayet açıyor, tafsil ediyor.",
-          'Sure mealinin sistematik olarak yazılışı: "1. De ki, Ey (benim dinime) inanmayanlar! 2. Ben sizin taptıklarınıza (tapmadım), tapmıyorum. 3. Siz de benim ibadet ettiğim Allah\'a ibadet etmiyorsunuz. 4. Ben sizin taptıklarınıza tapacak değilim. 5. Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiz. 6. Sizin dininiz size, benim dinim bana !"',
+          { subtitle: "Sure mealinin sistematik olarak yazılışı:" },
           {
             capsules: [
               {
@@ -108,65 +125,73 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
             corners: "soft",
             textColor: "#2B2B2B",
           },
-          "Surenin ana manasını sarı renkle gösterdiğimiz ayetler veriyor. Açık mavi ve açık yeşil renklerle gösterdiğimiz çift ayet Ayetler benzeşen (müteşabih) ayetlerdir. Açıklama ayetleridir. Ana ayetin gerekçesini açıklıyorlar.",
-          'Evet surenin ana ayeti birinci ve altıncı ayetlerdir: "1. De ki, Ey (benim dinime) inanmayanlar!" → "6. Sizin dininiz size, benim dinim bana !"',
+          {
+            html: `<div style="display: flex; gap: 12px; margin-top: 16px; font-size: 14px; align-items: stretch;">
+              <div style="flex: 0.8; position: relative; background-color: #e7dfc8; border: 1px solid #999; border-radius: 4px; padding: 10px; color: #000;">
+                <div style="position: absolute; top: -12px; right: 30px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 12px solid #999;"></div>
+                <div style="position: absolute; top: -10px; right: 31px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 11px solid #e7dfc8;"></div>
+                Surenin ana manasını sarı renkle gösterdiğimiz ayetler veriyor.
+              </div>
+              <div style="flex: 1.2; position: relative; background-color: #d0dae1; border: 1px solid #999; border-radius: 4px; padding: 10px; color: #000;">
+                <div style="position: absolute; top: -120px; right: 25px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 120px solid #999;"></div>
+                <div style="position: absolute; top: -118px; right: 26px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 119px solid #d0dae1;"></div>
+                Açık mavi ve açık yeşil renklerle gösterdiğimiz çift ayet<br />Ayetler benzeşen (müteşabih) ayetlerdir Açıklama<br />ayetleridir. Ana ayetin gerekçesini açıklıyorlar.
+              </div>
+            </div>`,
+          },
+          "Evet surenin ana ayeti birinci ve altıncı ayetlerdir.",
+          {
+            html: `<div style="display:flex; flex-direction:column; align-items:center; gap: 4px; margin-top: 16px; margin-bottom: 16px;">
+              <div style="background-color:#fbe4d5; border:1px solid #c0504d; border-radius:16px; padding:6px 16px; color:#c0504d;">
+                1. De ki, Ey (benim dinime) inanmayanlar!
+              </div>
+              <div style="color: #c00000; font-size: 24px; line-height: 1; font-weight: bold;">↓</div>
+              <div style="background-color:#fbe4d5; border:1px solid #c0504d; border-radius:16px; padding:6px 16px; color:#c0504d;">
+                6. Sizin dininiz size, benim dinim bana !
+              </div>
+            </div>`,
+          },
         ],
       },
-    },
-    byVerse: {
-      // ── Verses 2-5: the twin tafsil (açıklama) ayet pairs ────────────────
-      2: {
-        kicker: "2-5. Ayetler",
-        title: "Muhkem ve Müteşabih Ayetler",
+      end: {
         paragraphs: [
-          "Dikkat edilirse bu iki ayet bulundukları yerde tek ayet olarak duruyorlar. Fakat baştaki tek ayet sondaki tek ayetle bütünleşip çift ayet gibi haline geliyorlar. Başka bir ifadeyle: tek ayetler muhkem ayetlerdir. Değişmez gerçeği söylerler. Aradaki çift ayetler ise müteşabih benzeşen ayetlerdir. Benzeşen ayetler daima çift ayetlerdir, biri diğerine benzer ve biri diğerini tamamlar.",
-          "Bu ayetlerin muhatabı olan kafirler, Kur'ana ve Peygamber Efendimize inanmamakta kesin kararlı olan Peygamberimizle sürekli mücadele içinde ki Kureyşin ileri gelenleridir. Bunlar muannit kafirlerdir. Yoksa henüz iman etmemiş olan fakat düşmanlık içinde olmayan halkı değildir.",
-          'Yukarıdaki ana ayetleri okuduktan sonra: Rabbim senin bu emrini daha iyi anlayabilmemiz için biraz daha açar mısın diye soruyoruz. Cenab-ı Hak bu mukadder soruya cevaben şu dört ayetle emrinin gerekçesini de lütfediyor. De ki: "2. Ey Kafirler, Ben sizin taptığınız şeylere tapmıyorum. 3. Siz de benim ibadet ettiğim tek Allah\'a ibadet etmiyorsunuz. 4. Ben sizin Allahtan başka taptıklarınıza da tapacak değilim 5. Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiniz.."',
+          "Dikkat edilirse bu iki ayet bulundukları yerde tek ayet olarak duruyorlar. Fakat baştaki tek ayet sondaki tek ayetle bütünleşip çift ayet haline geliyorlar. Başka bir ifadeyle: tek ayetler muhkem ayetlerdir. Değişmez gerçeği söylerler. Aradaki çift ayetler ise müteşabih benzeşen ayetlerdir. Benzeşen ayetler daima çift ayetlerdir. biri diğerine benzer ve biri diğerini tamamlar.",
+          "Bu ayetlerin muhatabı olan kafirler, Kur'ana ve Peygamber Efendimize inanmamakta kesin kararlı olan ve Peygamberimizle sürekli mücadele içinde ki Kureyşin ileri gelenleridir. Bunlar muannit kafirlerdir. Yoksa henüz iman etmemiş olan fakat bir düşmanlık içinde de olmayan halk değildir.",
+          "Yukarıdaki ana ayetleri okuduktan sonra : Rabbim senin bu emrini daha iyi anlayabilmemiz için biraz daha açar mısın diye soruyoruz. Cenab-ı Hak bu mukadder soruya cevaben şu dört ayetle emrinin gerekçesini de lütfediyor. De ki:",
           {
-            capsules: [
-              {
-                n: 2,
-                text: "Ey Kafirler, Ben sizin taptığınız şeylere tapmıyorum.",
-                color: CENTER_GROUP_BORDER,
-                bg: CENTER_GROUP_BG,
-              },
-              {
-                n: 3,
-                text: "Siz de benim ibadet ettiğim tek Allah'a ibadet etmiyorsunuz.",
-                color: CENTER_GROUP_BORDER,
-                bg: CENTER_GROUP_BG,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
+            html: `<div style="background-color: #e5e3d7; border: 1px solid #c7c5ba; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin: 16px 0;">
+              <div style="display: flex; gap: 8px; align-items: stretch;">
+                <div style="flex: 1; background-color: #eaf1e7; border: 1px solid #94a3b8; border-radius: 8px; padding: 12px; color: #334155; font-size: 15px;">
+                  <span style="color: #64748b; font-weight: bold;">2.</span> Ey Kafirler, Ben sizin taptığınız şeylere tapmıyorum.
+                </div>
+                <div style="flex: 1; background-color: #eaf1e7; border: 1px solid #94a3b8; border-radius: 8px; padding: 12px; color: #334155; font-size: 15px;">
+                  <span style="color: #64748b; font-weight: bold;">3.</span> Siz de benim ibadet ettiğim tek Allah'a ibadet etmiyorsunuz.
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: stretch;">
+                <div style="flex: 1; background-color: #eaf1e7; border: 1px solid #94a3b8; border-radius: 8px; padding: 12px; color: #334155; font-size: 15px;">
+                  <span style="color: #64748b; font-weight: bold;">4.</span> Ben sizin Allahtan başka taptıklarınıza da tapacak değilim
+                </div>
+                <div style="flex: 1; background-color: #eaf1e7; border: 1px solid #94a3b8; border-radius: 8px; padding: 12px; color: #334155; font-size: 15px;">
+                  <span style="color: #64748b; font-weight: bold;">5.</span> Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiniz..
+                </div>
+              </div>
+            </div>`,
           },
-          {
-            capsules: [
-              {
-                n: 4,
-                text: "Ben sizin Allahtan başka taptıklarınıza da tapacak değilim",
-                color: CENTER_GROUP_BORDER,
-                bg: CENTER_GROUP_BG,
-              },
-              {
-                n: 5,
-                text: "Siz de benim ibadet ettiğim tek Allaha ibadet edici değilsiniz..",
-                color: CENTER_GROUP_BORDER,
-                bg: CENTER_GROUP_BG,
-              },
-            ],
-            corners: "soft",
-            textColor: "#2B2B2B",
-          },
-          "Bu ayetlerden son ayetten anlıyoruz ki kafirlerle, müşriklerle din ve inanç konusunda katiyen hiçbir uzlaşma ve anlaşma yok. Peygamber Efendimiz müşriklere; Ey müşrikler; dinlerimizi ve ibadetlerimizi birleştirelim, ben sizin taptıklarınıza da benim Allahıma ibadet edin demiyor. Aksine Peygamber Efendimiz Allahın emriyle: Ben sizin yanlış anlaşılacak tek teklifinize asla tapmayacağım, diyor. Kendi inancı ve ibadetinden hiçbir taviz vermiyor. Yalnızca; Mekke'de sizin benimle sürekli kavga halinde olmanıza hiçbir faydası yok, siz de zaten kendi yolunuza gidiyorsunuz, bırakın ben de yoluma gideyim diyor.",
-          "Peygamber Efendimiz Sallahü aleyhi ve sellem, bütün cihana ulaştırılması gereken bir mesaj sahibidir. Mekke'de bir avuç kafirle kavga ederek vakit kaybetmek istemiyor. Onun mesajını bekleyen koca bir dünya var. Onun için Mekke'deki 'kavgacı kafirler' problemini, bir sulh anlaşmasıyla çözmek istiyor. Ancak zalim kafirlerin böyle bir barış anlaşmasına yanaşmaları karşısında Peygamber Efendimiz Medineye hicret etmek zorunda kalmış ve bu problemi ancak hicretle aşabilmiştir. Mekke'nin azılı kafirleri Efendimizi ve Müslümanları Mekke'de daima zorla bırakmamışlardır. Ama artık şartlar değişmiştir.",
-          "Dikkat edilirse bu surede kafirlere, siz yanlış yoldasınız, siz batıl tanrılara tapıyorsunuz gibi bir suçlama ve tarizde bulunulmuyor. İnançlar değerlendirilmiyor. Bu surenin bu ince ifadeleri, başka din ve milletlerle görüşerek, tanışarak insanları Allahın dinine, tevhit dinine çağıracak olan müminlere, cedelleşmeden hizmet etme yolunu gösteriyor.",
+          "Bu ayetlerden ve son ayetten anlıyoruz ki kafirlerle, müşriklerle din ve inanç konusunda katiyen hiçbir uzlaşma ve anlaşma yok. Peygamber Efendimiz müşriklere; Ey müşrikler; dinlerimizi ve ibadetlerimizi birleştirelim, ben sizin taptıklarınıza tapayım, siz de benim Allahıma ibadet edin demiyor. Asla böyle yanlış anlaşılacak bir teklif yok. Aksine Peygamber Efendimiz Allahın emriyle : Ben sizin taptıklarınıza asla tapmayacağım, diyor. Kendi inanç ve ibadetinden hiçbir taviz vermiyor. Yalnızca; Mekke'de sizin benimle sürekli kavga halinde olmanızın kimseye faydası yok, siz zaten kendi yolunuza gidiyorsunuz, bırakın ben de yoluma gideyim diyor.",
+          "Peygamber Efendimiz Sallahü aleyhi ve sellem, bütün cihana ulaştırılması gereken bir mesajın sahibidir. Mekke'de bir avuç kafirle kavga ederek vakit kaybetmek istemiyor. Onun mesajını bekleyen koca bir dünya var. Onun için Mekke'deki 'kavgacı kafirler' problemini, bir sulh anlaşmasıyla çözmek istiyor. Ancak zalim kafirlerin böyle bir barış anlaşmasına yanaşmamaları karşısında Efendimiz Medineye hicret etmek zorunda kalmış ve bu problemi ancak hicretle aşabilmiştir. Mekke'nin azılı kafirleri Efendimizi ve Müslümanları Mekke'de daima ta'ciz ettikleri gibi, Medine'de de rahat bırakmamışlardır. Ama artık şartlar değişmiştir.",
+          "Dikkat edilirse bu surede kafirlere, siz yanlış yoldasınız, siz batıl tanrılara tapıyorsunuz gibi bir suçlama ve tarizde de bulunulmuyor. İnançlar değerlendirilmiyor. Bu surenin bu ince ifadeleri, başka din ve milletlerle görüşerek, tanışarak insanları Allahın dinine, tevhit dinine çağıracak olan müminlere, cedelleşmeden hizmet etme yolunu gösteriyor.",
           "İkinci ayet, üçüncü ayetin ikizi yani benzeşenidir. Anlamca benzeşen ayetler oldukları kolayca anlaşılıyor.",
           "4. ayetle 5. ayetin de anlamca hatta lafızca benzeşen ikili ayet oldukları gayet açık.",
           "Sonra da her iki ayet diğer iki ayetle benzeşen ikiz guruplar oluşturuyorlar.",
           '"Suredeki ayetler ikili olduğu gibi, "Benim taptığım Allah ve sizin taptığınız putlar", "Ben tapmıyorum ve siz tapmıyorsunuz", "benim dinim" ve "sizin dininiz" gibi her şey birbirine zıt simetrik ve ikili bir şekilde anlatılıyor.',
-          "Katlanabilir simetrik Kur'an: Bu sureyi de tam ortasından, yukarıdan aşağıya sarı renkli ayetleri üst üste getirerek katlayınız. Ana manayı ifade eden ayetlerin ve geçmiş zamanla gelecek zamanın üst üste geldiğini göreceksiniz. Sonra bir de da sağdan sola katlayınız ve simetrik anlamların nasıl üst üste geldiğine bakınız. Bu durumun bütün Kur'an için geçerli olduğunu diğer sureleri incelerken de görüyoruz.",
-          "Sonra bu sureyi biraz farklı bir ifadeyle açarak şöyle de yazabiliriz: \"1. De ki, Ey (benim dinime) inanmayan ve sürekli benimle mücadele edip duranlar! 2. (Görüyorsunuz ki ben bugüne kadar) sizin taptığınız putlara tapmadım, tapmıyorum. 3. Siz de benim ibadet ettiğim tek Allah'a ibadet etmediniz, etmiyorsunuz. 4. Madem ben bundan sonra da sizin taptıklarınıza tapmayacağım, 5. Ve madem siz de benim taptığım tek Allah'a tapmayacaksınız. 6. (O halde) Sizin dininiz size, benim dinim bana! Sizin putlara inandığınız ve taptığınız gibi, benim de inanma ve ibadet etme hakkım vardır. (Bırakalım herkes kendi iradesiyle seçimini yapsın ve dilediği yola gitsin. Gelin böyle, vicdanları özgür bırakan bir prensipte anlaşalım, huzur içinde bir arada yaşayalım.) Aramızdaki beşeri ilişkiler eskisi gibi devam etsin. Gerçekler zaman içinde daha iyi görülecektir. Aksine benim görevim Allah'ın emrini insanlara tebliğ etmek ve uyarmaktır, gerisi kendilerinin bilecekleri bir iştir. İster iman eder kendilerini kurtarırlar, ister müşrik olarak kalır kendilerini ebedi helakete atarlar.\"",
+          {
+            html: `<div style="background-color: #e6e9ef; border: 1px solid #94a3b8; border-radius: 8px; padding: 12px; margin: 16px 0;">
+              <div style="font-weight: bold; color: #334155; margin-bottom: 4px;">Katlanabilir simetrik Kur'an:</div>
+              <div style="color: #334155; font-size: 14px;">Bu sureyi de tam ortasından, yukarıdan aşağıya sarı renkli ayetleri üst üste getirerek katlayınız Ana manayı ifade eden ayetlerin ve geçmiş zamanla gelecek zamanın üst üste geldiğini göreceksiniz. Sonra bir de da sağdan sola katlayınız ve simetrik anlamların nasıl üst üste geldiğine bakınız. Bu durumun bütün Kur'an için geçerli olduğunu diğer sureleri incelerken de görüyoruz.</div>
+            </div>`,
+          },
+          { subtitle: "Bu sureyi biraz farklı bir ifadeyle açarak şöyle de yazabiliriz" },
           {
             capsules: [
               {
@@ -219,7 +244,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
             capsules: [
               {
                 n: 6,
-                text: "(O halde) Sizin dininiz size, benim dinim bana! Sizin putlara inandığınız ve taptığınız gibi, benim de inanma ve ibadet etme hakkım vardır. (Bırakalım herkes kendi hür iradesiyle seçimini yapsın ve dilediği yola gitsin! Gelin böyle, vicdanları özgür bırakan bir prensipte anlaşalım ve huzur içinde Mekke'de bir arada yaşayalım.) Aramızdaki beşeri ilişkiler eski gibi devam etsin. Gerçekler zaman içinde daha iyi görülecektir. Aksine benim görevim Allah'ın emrini insanlara tebliğ etmek ve uyarmaktır, gerisi kendilerinin bilecekleri bir iştir. İster iman eder kendilerini kurtarırlar, ister müşrik olarak kalır kendilerini ebedi helakete atarlar.",
+                text: "(O halde) Sizin dininiz size, benim dinim bana! Sizin putlara inandığınız ve taptığınız gibi, benim de Tek olan Allah'a inanma ve ibadet etme hakkım vardır. (Bırakalım herkes kendi hür iradesiyle seçimini yapsın ve dilediği yola gitsin! Gelin böyle, vicdanları özgür bırakan bir prensipte anlaşalım ve huzur içinde Mekke'de bir arada yaşayalım. Aramızdaki beşeri ilişkiler eskisi gibi devam etsin. Gerçekler zaman içinde daha iyi görülecektir. Ben zaten insanları cebren belli bir yola sokmakla görevli değilim. Aksine benim görevim Allah'ın emrini insanlara tebliğ etmek ve uyarmaktır, gerisi kendilerinin bilecekleri bir iştir. İster iman eder kendilerini kurtarırlar, ister müşrik olarak kalır kendilerini ebedi helakete atarlar.",
                 color: ORANGE_THEME,
                 bg: CAPSULE_BG_6_19,
               },
@@ -227,13 +252,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
             corners: "soft",
             textColor: "#2B2B2B",
           },
-        ],
-      },
-      // ── Verse 6: "Sizin dininiz size, benim dinim bana!" — sonuç ilkeleri ─
-      6: {
-        kicker: "6. Ayet",
-        title: "Sonuç: Birlikte Yaşama İlkeleri",
-        paragraphs: [
+
           "Bir memlekette yaşayan farklı inanca, düşünceye veya dine mensup insanlardan bir gurup, güç kullanarak diğer gurubu kendi inanç ve görüşlerini kabule zorlamalı mı? Gücüne dayanarak farklı görüşleri yasaklamalı mı?",
           "Farklı düşünenleri hapsedip işkence mi etmeli?",
           "Veya yönetimden, ticaretten, sosyal hayattan tecrit mi etmeli?",
@@ -246,18 +265,17 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
           "Farklılıkları dışlayan, sürekli bir sürtüşme ve kavga sebebi yapan toplumlar huzurlarını ve yıllarını kaybettikleri gibi çoğu zaman da kendileri için şans olan farklı değerleri kaybederler.",
           "Güce dayanarak kendi düşünce ve inancını herkese dayatmak, kabule zorlamak zulümdür. Farklı olanları yok etme hırsına kapılmak ise bir cinnettir. Sevinecek bir husustur ki Müslüman toplumlar hiçbir zaman böyle bir cinnete kapılmamışlardır.",
           "Kendi düşünce ve inancını, kendi güzelliklerini müspet bir şekilde ortaya koymak, yapıcı ıslahçı tavırlarla başkalarını da inancına davet etmek meşru bir yoldur.",
-          "Barışçı üslupta ısrar etmek bir sabır işidir ve bir kahramanlıktır. Haksızlık yapanların haksızlık yaparak karşılık vermek meşruiyetini kaybetmektir.",
+          "Barışçı üslupta ısrar etmek bir sabır işidir ve bir kahramanlıktır. Haksızlık yapanlara haksızlık yaparak karşılık vermek meşruiyetini kaybetmektir.",
           "Bugün insanlık geçmişe göre olgunlaşma yolundadır. Hukuk gelişmiş, insan haklarına saygı önem kazanmış, hemen her yerde güvenlik sağlanmış, bilim ve teknoloji gelişmiş, insanlar özgürleşmiş ve zenginleşmiştir.",
-          'İnsana baktığımız zaman onun ırkını, rengini veya inancını değil; kendisini yani "insanı" görmenin zemini ve şartları da hazır sayılır.',
+          'Bir insana baktığımız zaman onun ırkını, rengini veya inancını değil; kendisini yani "insanı" görmenin zemini ve şartları da hazır sayılır.',
           "Ayrıca bugün dünya küçülmüş, ülkeler arası mesafeler kısalmıştır. Ticaret sınır tanımıyor. Her ülkenin ürettiği şeyler başka milletler tarafından tüketiliyor. Ulaşım ve iletişim imkanları tasavvurların bile ötesine geçmiştir.",
-          "Peygamber Efendimizin ve ilk Müslümanların hukuku olmadığı o zamanlarda karşılaştıkları pek çok zorluklar bugün bazı gelişmemiş ülkelerde devam etse de, gelişmiş ülkelerde büyük oranda ortadan kalkmıştır, kalkmaktadır.. Böylece Müslümanların, kendi seviyelerini yükselterek, insan kalitesini artırarak, evrensel değerleri bünyesinde taşıyan İslam dinini iyi bir temsille dünyaya tanıtmalarının önü açılmıştır.",
-          "Ey Müslümanlar, Bir olan Allahın adını herkese duyurmak, Kur'anın mesajını her yere taşımak, her müslümanın görevidir. Bu görevi yaparken kesinlikle İslamın özünden taviz vermediğiniz gibi İslamın özünde var olmayan sertlikten, şiddetten de uzak durunuz. Hakkın vesilesi de hak olmalıdır. Sakın doğru yolda giderken batıl vesilelere tevessül etmeyiniz.",
-          "Haklı davanızda haksız duruma düşmeyiniz.",
+          "Peygamber Efendimizin ve ilk Müslümanların hukukun olmadığı o zamanlarda karşılaştıkları pek çok zorluklar bugün bazı gelişmemiş ülkelerde devam etse de, gelişmiş ülkelerde büyük oranda ortadan kalkmıştır, kalkmaktadır. Böylece Müslümanların, kendi seviyelerini yükselterek, insan kalitesini artırarak, evrensel değerleri bünyesinde taşıyan İslam dinini iyi bir temsille dünyaya tanıtmalarının önü açılmıştır.",
+          "Ey Müslümanlar, Bir olan Allahın adını herkese duyurmak, Kur'anın mesajını her yere taşımak, her müslümanın görevidir. Bu görevi yaparken kesinlikle İslamın özünden taviz vermediğiniz gibi İslamın özünde var olmayan sertlikten, şiddetten de uzak durunuz. Hakkın vesilesi de hak olmalıdır. Sakın doğru yolda giderken batıl vesilelere tevessül etmeyiniz. Haklı davanızda haksız duruma düşmeyiniz.",
           "İslamın üslubu sevgi ve şefkat boyutludur. Bu ölçüyü kaybetmeden güzelliklerinizi insanlığa ulaştırınız.",
           "Ayrıca, inanç ve ibadet selametinizi bahane ederek kendinizi toplumdan soyutlamayınız. Bölünmüş alanlarda yaşama gayreti içinde olmayınız. Tam bunun aksine, iyi komşuluk ilişkileri içinde başkalarıyla beraber yaşamak görevinizdir.",
-          "Bu makul teklif, dünya var oldukça değerinden hiçbir şey kaybetmeyecek doğru bir tekliftir. Doğru bir duruştur.",
-          "Bütün insanlığı isteyen Kur'anın maksadı kavga olamaz. Kur'an, bir kaşık suda fırtına koparılmasına ve bu büyük davanın küçük bir coğrafyada, küçük insanlarla kavga ederek enerji tüketmesine, küçük meselelerde boğulmasına müsaade etmez.",
-          "Müşrikler Peygamber Efendimizi kendi şehri olan Mekkede barındırmamış ve onu öldürmeye çalışmışlar ve sonunda Onu Medineye hicret etmeye mecbur bırakmışlardır. Ama Peygamber Efendimiz ne önce ne de Mekke' fethettikten sonra Mekkelileri Mekkeden sürüp çıkarma planları yapmamıştır ve çıkarmamıştır. Aksine onlara bütün beşeri haklarını vererek beraberce barış içinde yaşamanın şartlarını hazırlamış, yalnızca onları İslama davet etmiştir. İslamiyet hukukun, insan hak ve özgürlüklerinin ve bunun da ötesinde bir güzel ahlakın davacısıdır.",
+          "Bu makul, bu medeni teklif, dünya var oldukça değerinden hiçbir şey kaybetmeyecek doğru bir tekliftir. Doğru bir duruştur.",
+          "Bütün insanlığı aydınlatmak isteyen Kur'anın maksadı kavga olamaz. Kur'an, bir kaşık suda fırtına koparılmasına ve bu büyük davanın küçük bir coğrafyada, küçük insanlarla kavga ederek enerji tüketmesine, küçük meselelerde boğulmasına müsaade etmez.",
+          "Müşrikler Peygamber Efendimizi kendi şehri olan Mekkede barındırmamış ve onu öldürmeye çalışmışlar ve sonunda Onu Medineye hicret etmeye mecbur bırakmışlardır. Ama Peygamber Efendimiz ne önce ve ne de Mekke' fethettikten sonra Mekkelileri Mekkeden sürüp çıkarma planları yapmamıştır ve çıkarmamıştır.. Aksine onlara bütün beşeri haklarını vererek beraberce barış içinde yaşamanın şartlarını hazırlamış, yalnızca onları İslama davet etmiştir. İslamiyet hukukun, insan hak ve özgürlüklerinin ve bunun da ötesinde bir güzel ahlakın davacısıdır.",
         ],
       },
     },

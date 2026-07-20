@@ -39,7 +39,10 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
       "pre-start": {
         kicker: "İhlas Suresi",
         paragraphs: [
-          "İlk iki ayet müspet cümlelerle ezeli ebedi değişmez muhkem hakikati ilan ediyorlar.",
+          {
+            subtitle:
+              "İlk iki ayet müspet cümlelerle ezeli ebedi değişmez muhkem hakikati ilan ediyorlar.",
+          },
           {
             capsules: [
               {
@@ -47,6 +50,7 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
                 text: "Söyle, O Allah tek'tir.",
                 color: YELLOW_BORDER,
                 bg: YELLOW_BG,
+                textColor: "#A30000",
               },
               {
                 n: 2,
@@ -58,7 +62,10 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
             corners: "soft",
             textColor: TAFSIR_CAPSULE_INK,
           },
-          "Son iki ayet de menfi cümlelerle insanların yanıldıkları noktaları düzeltiyorlar",
+          {
+            subtitle:
+              "Son iki ayet de menfi cümlelerle insanların yanıldıkları noktaları düzeltiyorlar",
+          },
           {
             capsules: [
               {
@@ -80,18 +87,19 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
           "Sure; iki müspet ve iki menfi cümle şeklinde de ikili bir düzen içinde gelmiş",
           "İhlas suresinin ilk ayeti ana ayettir. Surenin ana manasını veriyor: Allah birdir. Diyor. Ezelden ebede değişmez gerçeği, en muhkem hakikati ifade ediyor.",
           {
+            columns: 1,
             capsules: [
               {
                 n: 1,
-                text: "Müşriklere söyle O Allah birdir, tek'tir.",
+                text: "Müşriklere <span style='color: #A30000'>söyle O Allah birdir, tek'tir.</span>",
                 color: YELLOW_BORDER,
                 bg: YELLOW_BG,
               },
               {
                 n: 4,
                 text: "Başka hiçbir şey Onun eşit ve dengi değildir.",
-                color: TAFSIR_BLUE_BORDER,
-                bg: TAFSIR_BLUE_BG,
+                color: YELLOW_BORDER,
+                bg: YELLOW_BG,
               },
             ],
             corners: "soft",
@@ -99,15 +107,33 @@ export const IHLAS_112_CONFIG: SurahLayoutConfig = {
           },
         ],
       },
-    },
-    byVerse: {
-      // ── Verse 3: "Doğurmamış ve doğurulmamıştır" — Allahın ailesi yoktur ──
-      3: {
+      end: {
         paragraphs: [
+          { subtitle: "Kur'an-ı Kerim’in Mekke’de iki muhatabı vardır:" },
+          "• Mekkeli müşrik Araplar,",
+          "• Ehl-i Kitap dediği Hristiyanlar ve Yahudiler",
+          "Birinci ve dördüncü ayetlerin birincil manayı söylemelerinden anlıyoruz ki Kur'an, tevhid hakikatini önce puta tapan müşriklere ilan ediyor.",
+          "Sonra da parantez içi cümle şeklinde Hristiyanlara hitap ediyor.",
+          "1. Müşriklere söyle ki, O Allah, birdir.",
+          "• Hristiyanlara da şunu söyle ki Allah Samed’dir. Bütün varlıkların ihtiyaçlarını veren fakat kendisi hiçbir şeye muhtaç olmayan Allah’ın varlığı kendindendir. Babaya ve de oğula ihtiyacı yoktur.",
+          "• Hem O, doğurmadı ki O’na ana tanrı veya Rab Baba denilsin ve doğurulmadı ki O’na Oğul Tanrı denilsin. Hristiyanlar baba ve oğul gibi sıfatları Allah’a yakıştırmakla saygısızlık yapıyorlar. Allah, bu yakıştırmalardan uzaktır, münezzehtir",
+          "• Hiçbir şey O’nun eşiti, dengi olamaz. Yani ey müşrikler, Allah’ı bırakıp da taptığınız ay, güneş, yıldızlar, taşlar, ağaçlar, putlar kısacası varlık âleminden hiçbir şey Allah değildir. Allah yerine konulamaz. İbadet edilemez.",
+          {
+            subtitle:
+              "Hristiyanlar Hz. İsa’nın dünyadan ayrılışından bir zaman sonra tevhid inançlarını bozdular.",
+          },
+          "Allah’a Rab Baba diyorlar. O’nu Baba Tanrı kabul ediyorlar.",
+          "Hz. Meryem’i de ilah kabul edip ona da Ana Tanrı diyorlar.",
+          "Hz. İsa’yı da tanrılaştırıp ona da Oğul Tanrı diyorlar.",
+          "Allah, sonsuz hikmet ve kudretiyle, canlı varlıkların nesillerinin devamını anne babaya ve onlardan dünyaya gelecek bebeklere bağlamış. Bu yüzden bütün canlı varlıklar doğurmuşlar ve doğurulmuşlardır.",
+          "Hâlbuki Allah, fâni bir varlık değil ki kendinden sonra varlığını, neslini devam ettirecek bir oğul tanrı doğursun veya Allah, bir bebek gibi dünyaya sonradan gelmedi ki, ana tanrıya, baba tanrıya ihtiyacı olsun!",
           "(O Tek'dir ve Samet'tir. ; Allah baba, Rab baba, Anne Tanrı, Oğul Tanrı, Kız Tanrı gibi bir ailesi de yoktur.)",
           "Eski Yunanda da insanlar Olimpus dağında yaşayan böyle kalabalık bir tanrılar ailesini tasavvur ediyorlardı. İnsanlık bu saçmalıklardan kurtulmalıdır.",
           "Allah birdir. Allahın yanında ana tanrı, oğul tanrı var diyerek Allah'a iftira edenler Allahın hiç razı olmadığı büyük bir şirk suçu işlemektedirler.",
-          "İhlas Suresini şöyle de yazabiliriz:",
+          { subtitle: "İhlas Suresini şöyle de yazabiliriz:" },
+          {
+            html: `<div style="background-color: #fceade; border: 1px solid #e8d6cb; border-radius: 16px; padding: 24px 12px; display: flex; justify-content: center; overflow-x: auto; width: 100%; font-family: sans-serif;"><svg width="0" height="0" style="position: absolute;"><defs><marker id="red-arrow-ihlas" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#c00000" /></marker></defs></svg><div style="position: relative; width: 340px; min-width: 340px; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px 0;"><div style="position: relative; width: 220px; background-color: #fbe4d5; border: 1px solid #c0504d; border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: center; gap: 12px; z-index: 2;"><div style="width: 20px; height: 20px; border-radius: 50%; border: 1px solid #777; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #555; background: #fff; flex-shrink: 0;">1</div><div style="font-size: 17px; font-weight: bold; color: #000; font-family: 'Amiri', serif;" dir="rtl">قُلْ هُوَ اللَّهُ أَحَدٌ</div><svg style="position: absolute; right: -90px; top: 50%; width: 90px; height: 128px; pointer-events: none; overflow: visible;"><path d="M 0,0 C 90,20 90,108 0,128" fill="none" stroke="#c00000" stroke-width="1.5" marker-end="url(#red-arrow-ihlas)" /></svg></div><div style="width: 340px; background-color: #d0dae1; border: 1px solid #aebac1; border-radius: 8px; padding: 12px; display: flex; justify-content: center; gap: 12px; z-index: 1;"><div style="flex: 1; background-color: #ecf1f4; border: 1px solid #7a9cad; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; gap: 10px;"><div style="width: 20px; height: 20px; border-radius: 50%; border: 1px solid #777; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #555; background: #fff; flex-shrink: 0;">3</div><div style="font-size: 15px; font-weight: bold; color: #000; font-family: 'Amiri', serif;" dir="rtl">لَمْ يَلِدْ وَلَمْ يُولَدْ</div></div><div style="flex: 1; position: relative; background-color: #ecf1f4; border: 1px solid #7a9cad; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; gap: 10px;"><div style="width: 20px; height: 20px; border-radius: 50%; border: 1px solid #777; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #555; background: #fff; flex-shrink: 0;">2</div><div style="font-size: 15px; font-weight: bold; color: #000; font-family: 'Amiri', serif;" dir="rtl">اللَّهُ الصَّمَدُ</div></div></div><div style="position: relative; width: 220px; background-color: #fbe4d5; border: 1px solid #c0504d; border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: center; gap: 12px; z-index: 2;"><div style="width: 20px; height: 20px; border-radius: 50%; border: 1px solid #777; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #555; background: #fff; flex-shrink: 0;">4</div><div style="font-size: 17px; font-weight: bold; color: #000; font-family: 'Amiri', serif;" dir="rtl">وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ</div></div></div></div>`,
+          },
         ],
       },
     },
