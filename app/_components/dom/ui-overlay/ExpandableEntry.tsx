@@ -249,21 +249,15 @@ export function ExpandableEntry({
               whileTap={{ scale: 0.96 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               style={{
-                gap: 8,
-                padding: "7px 22px",
+                padding: "10px",
                 borderRadius: 999,
                 background: "color-mix(in srgb, var(--foreground) 6%, transparent)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
-                fontFamily: "var(--font-inter)",
                 color: GOLD,
-                fontSize: "12px",
-                fontWeight: 500,
-                letterSpacing: "0.08em",
                 boxShadow: "0 6px 20px color-mix(in srgb, var(--foreground) 8%, transparent)",
               }}
             >
-              devamını oku
               <motion.svg
                 width="11"
                 height="11"

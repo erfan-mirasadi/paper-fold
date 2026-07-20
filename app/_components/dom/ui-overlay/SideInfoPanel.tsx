@@ -124,7 +124,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
           className="uppercase text-foreground/45 text-[7px] lg:text-[clamp(8px,0.5vw,12px)]"
           style={{
             letterSpacing: "0.22em",
-            fontFamily: "var(--font-inter)",
+            fontFamily: "var(--font-fraunces)",
             marginBottom: "clamp(7px, 0.6vw, 11px)",
           }}
         >
@@ -193,7 +193,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
 
         <span
           className="flex-shrink-0 tabular-nums text-foreground/50 text-[8px] lg:text-[clamp(9px,0.6vw,13px)]"
-          style={{ fontFamily: "var(--font-inter)", letterSpacing: "0.04em" }}
+          style={{ fontFamily: "var(--font-fraunces)", letterSpacing: "0.04em" }}
         >
           {fmt(currentTime)} / {fmt(duration)}
         </span>
@@ -232,7 +232,7 @@ function InkImage({ src, caption, alt }: SideInfoImage) {
         <figcaption
           className="italic text-foreground/50 text-[8.5px] lg:text-[clamp(9px,0.6vw,14px)]"
           style={{
-            fontFamily: "var(--font-inter)",
+            fontFamily: "var(--font-fraunces)",
             marginTop: "clamp(6px, 0.5vw, 10px)",
             letterSpacing: "0.04em",
           }}
@@ -341,7 +341,7 @@ function InkCapsule({
               : "text-[9.5px] lg:text-[clamp(10px,0.68vw,16px)]"
           }`}
         style={{
-          fontFamily: "var(--font-inter)",
+          fontFamily: "var(--font-fraunces)",
           lineHeight: isPill ? 1.6 : 1.9,
           letterSpacing: "0.01em",
           color: item.textColor || textColor,
@@ -515,7 +515,7 @@ function SideInfoEntryView({
             text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-inter)",
+            fontFamily: "var(--font-fraunces)",
             lineHeight: 1.95,
             marginTop: "clamp(10px, 1vw, 18px)",
           }}
@@ -530,7 +530,7 @@ function SideInfoEntryView({
           className="!text-left w-full font-normal text-foreground/80
             text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]"
           style={{
-            fontFamily: "var(--font-inter)",
+            fontFamily: "var(--font-fraunces)",
             lineHeight: 1.95,
             marginTop: "clamp(10px, 1vw, 18px)",
           }}
@@ -553,7 +553,7 @@ function SideInfoEntryView({
             text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-roboto)",
+            fontFamily: "var(--font-fraunces)",
             lineHeight: 1.3,
             marginTop: "clamp(18px, 2vw, 32px)",
           }}
@@ -654,7 +654,7 @@ function SideInfoEntryView({
             text-[15px] lg:text-[clamp(17px,1.2vw,30px)]"
           style={{
             textShadow: "none",
-            fontFamily: "var(--font-roboto)",
+            fontFamily: "var(--font-fraunces)",
             lineHeight: 1.2,
           }}
         />
@@ -836,7 +836,7 @@ export function SideInfoPanel() {
                   text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
                 style={{
                   letterSpacing: "0.28em",
-                  fontFamily: "var(--font-roboto)",
+                  fontFamily: "var(--font-fraunces)",
                   marginBottom: "clamp(14px, 1.4vw, 24px)",
                   paddingRight: "0.1em",
                 }}
@@ -863,7 +863,7 @@ export function SideInfoPanel() {
                       className="italic text-foreground/40
                       text-[11px] lg:text-[clamp(12px,0.85vw,20px)]"
                       style={{
-                        fontFamily: "var(--font-inter)",
+                        fontFamily: "var(--font-fraunces)",
                         lineHeight: 1.8,
                         margin: 0,
                       }}
