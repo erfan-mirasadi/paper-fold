@@ -57,12 +57,10 @@ const draggedSectionIds = new Set<ElevatedSectionId>();
 
 export const useDragState = create<{
   hasDragged: boolean;
-  isPaperDocked: boolean;
   draggedVerseIds: number[];
   draggedSectionIds: ElevatedSectionId[];
   separatedVerseOffsets: Record<number, { x: number; y: number }>;
   markDragged: () => void;
-  dockPaper: () => void;
   markVerseDragged: (
     verseId: number,
     offset?: { x: number; y: number },
@@ -73,14 +71,11 @@ export const useDragState = create<{
   reset: () => void;
 }>((set) => ({
   hasDragged: false,
-  isPaperDocked: false,
   draggedVerseIds: [],
   draggedSectionIds: [],
   separatedVerseOffsets: {},
   markDragged: () =>
     set((state) => (state.hasDragged ? state : { hasDragged: true })),
-  dockPaper: () =>
-    set((state) => (state.isPaperDocked ? state : { isPaperDocked: true })),
   markVerseDragged: (verseId, offset) =>
     set((state) => {
       if (state.draggedVerseIds.includes(verseId)) return state;
@@ -111,7 +106,6 @@ export const useDragState = create<{
       return {
         draggedVerseIds: newDraggedVerseIds,
         hasDragged: isAnyDragged ? state.hasDragged : false,
-        isPaperDocked: isAnyDragged ? state.isPaperDocked : false,
       };
     }),
   unmarkSectionDragged: (sectionId) =>
@@ -124,13 +118,11 @@ export const useDragState = create<{
       return {
         draggedSectionIds: newDraggedSectionIds,
         hasDragged: isAnyDragged ? state.hasDragged : false,
-        isPaperDocked: isAnyDragged ? state.isPaperDocked : false,
       };
     }),
   reset: () =>
     set({
       hasDragged: false,
-      isPaperDocked: false,
       draggedVerseIds: [],
       draggedSectionIds: [],
       separatedVerseOffsets: {},
@@ -178,37 +170,6 @@ export function unmarkSectionDragged(sectionId: ElevatedSectionId) {
   // Remove from Set regardless (handles docked sections being re-dragged back)
   draggedSectionIds.delete(sectionId);
   useDragState.getState().unmarkSectionDragged(sectionId);
-}
-
-/**
- * Called when a section/verse is docked (not snapped back).
- * Removes from the "actively dragging" sets so re-dragging works correctly,
- * while keeping isPaperDocked=true for camera zoom-out.
- */
-export function dockElement(
-  sectionId?: ElevatedSectionId,
-  verseId?: number,
-) {
-  // Remove from active drag tracking (so next drag works cleanly)
-  if (sectionId) draggedSectionIds.delete(sectionId);
-  if (typeof verseId === "number") draggedVerseIds.delete(verseId);
-
-  // Mark paper as docked and clear hasDragged
-  // isPaperDocked keeps camera zoomed out; hasDragged resets so spring checks work
-  useDragState.setState((state) => {
-    const stillDraggingSections = state.draggedSectionIds.filter(
-      (id) => id !== sectionId,
-    );
-    const stillDraggingVerses = state.draggedVerseIds.filter(
-      (id) => id !== verseId,
-    );
-    return {
-      draggedSectionIds: stillDraggingSections,
-      draggedVerseIds: stillDraggingVerses,
-      hasDragged: stillDraggingSections.length > 0 || stillDraggingVerses.length > 0,
-      isPaperDocked: true,
-    };
-  });
 }
 
 export function resetAllDrags() {

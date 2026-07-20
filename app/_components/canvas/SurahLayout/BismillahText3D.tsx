@@ -112,7 +112,10 @@ function createDepthCanvasTexture(
 }
 
 export function BismillahText3D({ surfaceZ }: BismillahText3DProps) {
-  const isElevatedPhase = useElevatedStore((s) => s.phase === "elevated");
+  // The render-order shuffle only matters when sections physically lift off
+  // the paper (all-sections mode / intro). A plain paper click just zooms the
+  // camera and leaves the paper flat, so keep the default ordering there.
+  const isElevatedPhase = useElevatedStore((s) => s.isAllSectionsMode);
 
   const layers = 4;
   const step = 0.0006;

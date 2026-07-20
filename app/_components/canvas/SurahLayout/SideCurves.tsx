@@ -14,11 +14,9 @@ import {
 } from "../../../data/theme";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { usePopUpStore } from "../../../stores/usePopUpStore";
-import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFrame } from "@react-three/fiber";
 import type { LayoutConfig } from "../../../data/SurahConfig";
 import type { GroupTransforms } from "../../../data/schema";
-import { getIntroGridSectionId } from "../../../utils/sectionResolver";
 
 export const CURVE_GAP = 0.1;
 export const CURVE_INWARD_OFFSET = 0.015;
@@ -542,9 +540,6 @@ export const SideCurves = ({
   introOutro,
 }: any) => {
   const popUpGroups = usePopUpStore((state) => state.popUpGroups);
-  const isAllSectionsMode = useElevatedStore(
-    (state) => state.isAllSectionsMode,
-  );
 
   const configColors = useStoryStore(
     (state) => state.activeConfig.styling.colors,
@@ -564,19 +559,6 @@ export const SideCurves = ({
     : FALLBACK_CENTER_COLOR;
 
   const activeConfig = useStoryStore((s) => s.activeConfig);
-  // Grid section (Alak's Section 1) has its own separate elevation zone,
-  // unrelated to these side curves (which only ever wrap Section 2's
-  // groups) — exclude it from both the "should hide" check and the popup
-  // skip-set below. Surahs with no grid block (most of them) have no such
-  // zone, so every active section counts, same as before.
-  const gridSectionId = useMemo(
-    () => getIntroGridSectionId(activeConfig),
-    [activeConfig],
-  );
-
-  const hasActiveS2Section = useElevatedStore((state) =>
-    state.activeSectionIds.some((id) => id !== gridSectionId),
-  );
 
   // Build set of section-1 (grid) popup group IDs so we can exclude them
   // from hide logic — e.g. Alak's g_5_6 anaAyet↔introVerse bridge group.
@@ -594,9 +576,11 @@ export const SideCurves = ({
     );
   }, [activeConfig, popUpGroups]);
 
-  const shouldHide =
-    popUpGroups.some((g) => g.isOpen && !s1GroupIds.has(g.id)) ||
-    (!isAllSectionsMode && hasActiveS2Section);
+  // Side curves only hide behind an open pop-up now. A plain paper click no
+  // longer lifts the section off the paper, so the curves stay in place.
+  const shouldHide = popUpGroups.some(
+    (g) => g.isOpen && !s1GroupIds.has(g.id),
+  );
 
   const borderDelta = borderWidth - DEFAULT_VERSE_BORDER_WIDTH;
   // Curve anchor pad — legacy reused `s2VerticalPad` (now `framePad`) here,

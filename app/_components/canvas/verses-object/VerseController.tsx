@@ -128,8 +128,12 @@ export function VerseController({ config }: { config: VerseConfig }) {
     ? middleHorizontalFolded
     : null;
 
+  // Physical elevation (lift/tilt/drag + the raised 3D verse card) only ever
+  // happens in all-sections mode — which also covers the intro (it enters via
+  // forceShowAllSections). A plain paper click keeps activeVerseIds populated
+  // for the camera zoom (SectionZoomCamera), but must NOT lift the verse.
   const isElevated = useElevatedStore((state) =>
-    state.activeVerseIds.includes(config.id),
+    state.isAllSectionsMode && state.activeVerseIds.includes(config.id),
   );
   const sectionId = getVerseSectionId(config.id);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
@@ -141,6 +145,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
   }
 
   const isSectionSurfaceRaised = useElevatedStore((state) =>
+    state.isAllSectionsMode &&
     shadowSurfaceSectionId !== null &&
     state.activeSectionIds.includes(shadowSurfaceSectionId)
   );
@@ -226,6 +231,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
   const isSectionRaised = useElevatedStore((state) =>
+    state.isAllSectionsMode &&
     sectionId !== null && state.activeSectionIds.includes(sectionId)
   );
   let useSectionGroupDrag = false;
@@ -247,28 +253,19 @@ export function VerseController({ config }: { config: VerseConfig }) {
     (s) => s.separatedVerseOffsets[leadVerseId] || ZERO_OFFSET,
   );
 
-  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
-
-  // ── Snap mode + bounds ────────────────────────────────────────────────────
+  // ── Snap mode + bounds (all-sections mode only) ───────────────────────────
   //
-  // Paper mode + group/section drag (useSectionGroupDrag=true):
-  //   → "page": snap back if section hasn't moved outside the page.
-  //
-  // All-sections mode + individual verse drag (useSectionGroupDrag=false):
+  // Individual verse drag (useSectionGroupDrag=false):
   //   → "section": snap verse back if it hasn't moved outside its section frame.
   //   springX here = leadVerseDrag.x (verse's own displacement from its section-relative rest).
   //
-  // All other cases (all-sections + group drag, paper + individual):
-  //   → undefined: element stays wherever dropped.
+  // Group/section drag (useSectionGroupDrag=true):
+  //   → undefined: section stays wherever dropped.
 
-  const snapMode: "page" | "section" | undefined = useMemo(() => {
-    // Paper mode + section/group drag → snap back to page if section center is on paper
-    if (!isAllSectionsMode && useSectionGroupDrag) return "page";
-    // Individual verse drag (paper or all-sections mode) → snap back to section frame
+  const snapMode: "section" | undefined = useMemo(() => {
     if (!useSectionGroupDrag) return "section";
-    // All-sections mode + group drag → section placed freely (no auto snap)
     return undefined;
-  }, [isAllSectionsMode, useSectionGroupDrag]);
+  }, [useSectionGroupDrag]);
 
   // sectionBounds only needed for "section" snap (individual verse in all-sections mode)
   const sectionBounds = useMemo(() => {

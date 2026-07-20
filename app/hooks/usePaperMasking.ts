@@ -280,7 +280,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
         const g = s.popUpGroups.find((group) => group.verseIds.includes(id));
         const isHidden =
-          (!isFoldedMainPaperNow && e.activeVerseIds.includes(id)) ||
+          (!isFoldedMainPaperNow &&
+            e.isAllSectionsMode &&
+            e.activeVerseIds.includes(id)) ||
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(s, id);
 
@@ -308,7 +310,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     uniforms.uSectionVisibility.value.fill(1.0);
 
     for (let i = 1; i <= MAX_VERSE_ID; i++) {
-      let hidden = !isFoldedMainPaper && e.activeVerseIds.includes(i);
+      let hidden =
+        !isFoldedMainPaper && e.isAllSectionsMode && e.activeVerseIds.includes(i);
       if (!hidden) {
         const g = s.popUpGroups.find((group) => group.verseIds.includes(i));
         if (g?.isOpen) hidden = true;
@@ -329,7 +332,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     Object.entries(sectionMap).forEach(([id, idx]) => {
       const isElevated = e.activeSectionIds.includes(id);
       uniforms.uSectionVisibility.value[idx] =
-        isElevated && !isIntroActive && !isFoldedMainPaper ? 0.0 : 1.0;
+        isElevated && e.isAllSectionsMode && !isIntroActive && !isFoldedMainPaper
+          ? 0.0
+          : 1.0;
     });
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
@@ -365,6 +370,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(state, id) ||
           (!isFoldedMainPaperNow &&
+            useElevatedStore.getState().isAllSectionsMode &&
             useElevatedStore.getState().activeVerseIds.includes(id));
 
         const delay = shouldBeHidden
@@ -394,7 +400,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         const isFoldedMainPaper = !isIntroActive && currentOffset < 0.98;
 
         const shouldBeHidden =
-          (!isFoldedMainPaper && state.activeVerseIds.includes(id)) ||
+          (!isFoldedMainPaper &&
+            state.isAllSectionsMode &&
+            state.activeVerseIds.includes(id)) ||
           (g?.isOpen ?? false) ||
           isMiddleHorizontalFoldedForVerse(usePopUpStore.getState(), id);
 
@@ -412,7 +420,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           const introNow = useFoldStore.getState().isIntroActive;
           const currentOffset = useFoldStore.getState().currentOffset;
           const isFoldedMainPaper = !introNow && currentOffset < 0.98;
-          const shouldBeVisible = !now || introNow || isFoldedMainPaper;
+          const shouldBeVisible =
+            !now || introNow || isFoldedMainPaper || !state.isAllSectionsMode;
           updateSection(
             idx,
             shouldBeVisible,

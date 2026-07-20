@@ -4,7 +4,6 @@ import { useFrame } from "@react-three/fiber";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
-import { useDragState } from "../../../utils/dragEngine";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { CameraTargetConfig } from "../../../data/schema";
 
@@ -73,7 +72,6 @@ export function SectionZoomCamera() {
     // 1. Only run zoom logic when in paper mode
     const isIntroActive = useFoldStore.getState().isIntroActive;
     const { phase, isAllSectionsMode } = useElevatedStore.getState();
-    const { hasDragged, isPaperDocked } = useDragState.getState();
 
     // 1. If we are in intro and NOT elevated, do nothing here so IntroCameraScrollController can handle it.
     if (isIntroActive && phase === "idle") return;
@@ -94,12 +92,10 @@ export function SectionZoomCamera() {
     // Infer section if we only clicked a verse and activeSectionId is null
     let targetSectionId = fallbackSectionId;
 
-    // 3. Zoom into the active section when elevated and NOT dragging/docked.
-    // hasDragged=true → camera zooms out so user can see the full paper to drop outside.
-    // isPaperDocked=true → stays zoomed out (section is docked outside the page).
-    // Both reset to false when section snaps back → camera automatically zooms in again.
-    const shouldZoomOut = hasDragged || isPaperDocked;
-    if (phase === "elevated" && !isAllSectionsMode && targetSectionId && !shouldZoomOut) {
+    // 3. Zoom into the active section on a plain paper click (elevated phase,
+    // not all-sections mode). No paper dragging happens anymore, so there is no
+    // zoom-out-to-drop state to consider — a click always zooms in.
+    if (phase === "elevated" && !isAllSectionsMode && targetSectionId) {
       const zoomCoords = zoomTargets[targetSectionId];
       if (zoomCoords) {
         targetCamY = zoomCoords.y;

@@ -64,8 +64,10 @@ function AnimatedElevatedLabel({
 }: AnimatedLabelProps) {
   const PAGE_WIDTH = useSurahLayoutRuntime().PAGE_WIDTH;
 
+  // Elevated section labels only lift in all-sections mode / intro — a plain
+  // paper click just zooms the camera and leaves the paper flat.
   const isActive = useElevatedStore((s) =>
-    s.activeSectionIds.includes(sectionId),
+    s.isAllSectionsMode && s.activeSectionIds.includes(sectionId),
   );
 
   const isIntroActive = useFoldStore((s) => s.isIntroActive);

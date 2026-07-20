@@ -11,7 +11,6 @@ export function NavigationOverlay() {
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
   const hasDragged = useDragState((s) => s.hasDragged);
-  const isPaperDocked = useDragState((s) => s.isPaperDocked);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
 
   const isEndStage = useFoldStore((s) => s.currentOffset < 0.5);
@@ -119,7 +118,7 @@ export function NavigationOverlay() {
       animate="visible"
       className="pointer-events-auto flex flex-row-reverse gap-2 items-center"
     >
-      {!isPaperDocked && !isAllSectionsMode && (
+      {!isAllSectionsMode && (
         <NavButton
           onClick={handleSmartTransition}
           icon={activeIcon}

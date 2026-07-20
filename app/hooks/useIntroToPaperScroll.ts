@@ -3,13 +3,9 @@
 import { useSpring } from "@react-spring/three";
 import { useCallback, useEffect, useRef } from "react";
 import { useElevatedStore } from "../stores/useElevatedStore";
-import { useDragState } from "../utils/dragEngine";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
 import { useLenis } from "../_components/dom/LenisProvider";
 
-// Transition targets when elevated verse is dragged and paper is docked.
-const PAPER_DOCK_X = -0.9;
-const PAPER_DOCK_SCALE = 0.9;
 const PAPER_FOCUS_Y = 0;
 const PAPER_FOCUS_Z = -0.7;
 const PAPER_FOCUS_SCALE = 0;
@@ -20,9 +16,7 @@ const SCENE_SPRING = { mass: 1.4, tension: 170, friction: 31 };
 const computeTargets = (
   handoff: number,
   introNowActive: boolean,
-  dockedNow: boolean,
   allSections: boolean,
-  barrierProgress: number,
 ) => {
   // 🚨 FIX BUG 3a: به جای 1 از 0.999 استفاده کن تا خطای پیکسلیِ اعشاری نادیده گرفته بشه
   if (introNowActive || handoff < 0.999) {
@@ -44,20 +38,17 @@ const computeTargets = (
   }
 
   const showAllSections = allSections;
-  const docked = dockedNow && !showAllSections;
 
-  const baseTargets = {
+  return {
     isHandoff: false,
     paperFocusY: showAllSections ? PAPER_FOCUS_Y : 0,
     paperFocusZ: showAllSections ? PAPER_FOCUS_Z : 0,
     paperFocusScale: showAllSections ? PAPER_FOCUS_SCALE : 1,
     paperConfig: showAllSections ? PAPER_HIDE_SPRING : PAPER_RESTORE_SPRING,
-    sceneOffsetX: docked ? PAPER_DOCK_X : 0,
-    sceneScale: docked ? PAPER_DOCK_SCALE : 1,
+    sceneOffsetX: 0,
+    sceneScale: 1,
     sceneConfig: SCENE_SPRING,
   };
-
-  return baseTargets;
 };
 
 export function useIntroToPaperScroll() {
@@ -67,9 +58,7 @@ export function useIntroToPaperScroll() {
     const t = computeTargets(
       useFoldStore.getState().introHandoffProgress,
       useFoldStore.getState().isIntroActive,
-      useDragState.getState().isPaperDocked,
       useElevatedStore.getState().isAllSectionsMode,
-      useFoldStore.getState().barrierProgress,
     );
     return {
       sceneOffsetX: t.sceneOffsetX,
@@ -82,9 +71,7 @@ export function useIntroToPaperScroll() {
     const t = computeTargets(
       useFoldStore.getState().introHandoffProgress,
       useFoldStore.getState().isIntroActive,
-      useDragState.getState().isPaperDocked,
       useElevatedStore.getState().isAllSectionsMode,
-      useFoldStore.getState().barrierProgress,
     );
     return {
       paperFocusY: t.paperFocusY,
@@ -99,15 +86,12 @@ export function useIntroToPaperScroll() {
 
   const syncSceneTargets = useCallback(() => {
     const store = useFoldStore.getState();
-    const dockedNow = useDragState.getState().isPaperDocked;
     let allSections = useElevatedStore.getState().isAllSectionsMode;
 
     let targets = computeTargets(
       store.introHandoffProgress,
       store.isIntroActive,
-      dockedNow,
       allSections,
-      store.barrierProgress,
     );
 
     if (targets.isHandoff) {
@@ -125,9 +109,7 @@ export function useIntroToPaperScroll() {
       targets = computeTargets(
         store.introHandoffProgress,
         store.isIntroActive,
-        dockedNow,
         allSections,
-        store.barrierProgress,
       );
     }
 
@@ -164,38 +146,15 @@ export function useIntroToPaperScroll() {
   }, [lenis, syncSceneTargets]);
 
   useEffect(() => {
-    // Gate subscriptions: only call syncSceneTargets when there's actually
-    // intro/handoff/allSections/dock state that could affect the paper position.
-    // After the handoff completes and paper is in its default state, these are no-ops.
-    const guardedSync = () => {
-      const store = useFoldStore.getState();
-      const elevated = useElevatedStore.getState();
-      const drag = useDragState.getState();
-
-      // Still need sync during intro, handoff, allSectionsMode, or paper docked
-      if (
-        store.isIntroActive ||
-        store.introHandoffProgress < 1 ||
-        elevated.isAllSectionsMode ||
-        drag.isPaperDocked ||
-        store.barrierProgress > 0
-      ) {
-        syncSceneTargets();
-        return;
-      }
-
-      // After handoff: only react to allSectionsMode or dock state changes
-      syncSceneTargets();
-    };
-
-    const unsubscribeFold = useFoldStore.subscribe(guardedSync);
-    const unsubscribeElevated = useElevatedStore.subscribe(guardedSync);
-    const unsubscribeDrag = useDragState.subscribe(guardedSync);
+    // Paper position depends only on intro/handoff and all-sections state now,
+    // so react to those two stores. After the handoff completes and the paper
+    // is in its default resting state these fire but resolve to no-op targets.
+    const unsubscribeFold = useFoldStore.subscribe(syncSceneTargets);
+    const unsubscribeElevated = useElevatedStore.subscribe(syncSceneTargets);
 
     return () => {
       unsubscribeFold();
       unsubscribeElevated();
-      unsubscribeDrag();
     };
   }, [syncSceneTargets]);
 

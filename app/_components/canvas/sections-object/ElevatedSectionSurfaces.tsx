@@ -57,10 +57,6 @@ import {
 import { dragEngine } from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
-import {
-  calculateSectionBounds,
-  type SectionBounds,
-} from "../../../utils/boundsHelper";
 
 import { PAPER_MATERIAL_CONFIG } from "../3d-scene/PaperMaterial";
 import { useStoryStore } from "../../../stores/useStoryStore";
@@ -453,32 +449,23 @@ function ElevatedSvgFrame({
 
 // ─── Draggable section wrapper ─────────────────────────────────────────
 // Groups all layers of a section under ONE drag handle, so the whole
-// section moves together when dragged from any point.
-// snapMode="page" in paper mode → snap back when the section center is still over the paper.
-// sectionBounds needed to compute the section's original center position.
-// In all-sections mode: no snap (sections float freely wherever dropped).
+// section moves together when dragged from any point. Only active in
+// all-sections mode, where sections float freely wherever dropped (no snap).
 function DraggableSectionGroup({
   sectionId,
   isActive,
-  sectionBounds,
   children,
 }: {
   sectionId: ElevatedSectionId;
   isActive: boolean;
-  sectionBounds?: SectionBounds;
   children: React.ReactNode;
 }) {
   const sectionDrag = dragEngine.sections[sectionId];
-  // In all-sections mode, sections are placed freely — no snap back.
-  // In paper mode, sections snap back if released within the page bounds.
-  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
   const dragBind = useElevatedDrag({
     enabled: isActive && !useFoldStore.getState().isIntroActive,
     springX: sectionDrag.x,
     springY: sectionDrag.y,
     dragSectionId: sectionId,
-    sectionBounds: isAllSectionsMode ? undefined : sectionBounds,
-    snapMode: isAllSectionsMode ? undefined : "page",
   });
 
   return (
@@ -607,8 +594,10 @@ function DynamicElevatedBlock({
   const sectionId =
     getSectionIdForVerseId(block.verseIds?.[0] ?? -1) ?? block.id;
 
+  // Raised section surfaces (background plates, connectors, frames) only show
+  // in all-sections mode / intro. A plain paper click no longer lifts them.
   const isActive = useElevatedStore((s) =>
-    s.activeSectionIds.includes(sectionId),
+    s.isAllSectionsMode && s.activeSectionIds.includes(sectionId),
   );
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
@@ -624,18 +613,6 @@ function DynamicElevatedBlock({
     ...baseSpring,
     opacity: useHandoffOpacity(baseSpring.opacity, sectionId),
   };
-
-  const bounds = useMemo(
-    () =>
-      isAllSectionsMode
-        ? undefined
-        : calculateSectionBounds(
-            sectionId,
-            runtime.SURAH_TRANSFORMS,
-            runtime.PAGE_WIDTH,
-          ),
-    [isAllSectionsMode, runtime.PAGE_WIDTH, sectionId, runtime.SURAH_TRANSFORMS],
-  );
 
   const group = sTransform.groups?.[0];
   const frame = group
@@ -694,11 +671,7 @@ function DynamicElevatedBlock({
 
   return (
     <group ref={introRef}>
-      <DraggableSectionGroup
-        sectionId={sectionId}
-        isActive={isActive}
-        sectionBounds={bounds}
-      >
+      <DraggableSectionGroup sectionId={sectionId} isActive={isActive}>
         {isIntroActive && !block.introOutroRole && (
           <IntroGuide3DReporter
             guideId={sectionId}
@@ -857,8 +830,9 @@ export function ElevatedSectionSurfaces() {
   // helper used for the opacity-snap fix.
   const gridBlockIndex = config.blocks?.findIndex((b) => b.type === "grid") ?? -1;
   const S1_ID = getIntroGridSectionId(config) ?? "__no_s1__";
-  const s1Active = useElevatedStore((s) => s.activeSectionIds.includes(S1_ID));
-  const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  const s1Active = useElevatedStore(
+    (s) => s.isAllSectionsMode && s.activeSectionIds.includes(S1_ID),
+  );
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
 
   const s1BaseSpring = useSectionSurfaceSpring(s1Active, S1_ID);
@@ -874,16 +848,6 @@ export function ElevatedSectionSurfaces() {
         ] as Required<SectionTransforms>)
       : undefined;
 
-  // S1 bounds for "page" snap: the section's resting position on paper
-  const s1Bounds = useMemo(
-    () =>
-      isAllSectionsMode || !s1
-        ? undefined
-        : calculateSectionBounds(S1_ID, SURAH_TRANSFORMS, runtime.PAGE_WIDTH),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isAllSectionsMode, runtime.PAGE_WIDTH, S1_ID, !!s1],
-  );
-
   const getTextureForColor = (color: string): Texture | null =>
     color === SECTION_BG_TEXTURE || color === HOLLOW_CONNECTOR_INNER_BG_1_3
       ? sectionBgTexture
@@ -896,11 +860,7 @@ export function ElevatedSectionSurfaces() {
       {/* ─── Section 1 (Grid + AnaAyet) ──────────────────────────────── */}
       {s1 && (
         <group ref={s1IntroRef}>
-          <DraggableSectionGroup
-            sectionId={S1_ID}
-            isActive={s1Active}
-            sectionBounds={s1Bounds}
-          >
+          <DraggableSectionGroup sectionId={S1_ID} isActive={s1Active}>
             {isIntroActive && (
               <IntroGuide3DReporter
                 guideId={S1_ID}
