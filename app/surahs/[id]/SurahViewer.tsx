@@ -35,6 +35,7 @@ import { IntroBackgroundTextOverlay } from "@/app/_components/dom/IntroBackgroun
 import { HeroTitleOverlay } from "@/app/_components/dom/ui-overlay/HeroTitleOverlay";
 import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButton";
 import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOverlay";
+import { FoldSliderOverlay } from "@/app/_components/dom/ui-overlay/FoldSliderOverlay";
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
@@ -483,6 +484,7 @@ function SurahViewerInner({
                 >
                   <CameraViewPresetOverlay />
                   <ScrollHintOverlay />
+                  <FoldSliderOverlay />
                   <PaperArrowsOverlay />
                   <PaperPaginationOverlay />
                 </motion.div>

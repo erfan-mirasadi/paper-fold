@@ -120,7 +120,7 @@ const getStoryOffsetForRaw = (rawOffset: number, config: any): number => {
   );
 };
 
-const getRawOffsetForStory = (storyOffset: number, config: any): number => {
+export const getRawOffsetForStory = (storyOffset: number, config: any): number => {
   if (!config.features.hasIntro) return clamp01(storyOffset);
   const start = config.animations.scrollTimeline!.story.start / 100;
   const end = config.animations.scrollTimeline!.story.end / 100;

@@ -11,6 +11,7 @@ import {
 } from "react";
 import { ThreeEvent, useThree } from "@react-three/fiber";
 import { SinglePaper } from "./SinglePaper";
+import { FoldSliderTracker } from "./FoldSliderTracker";
 import {
   PaperTransitionLayer,
   PaperSlideGroup,
@@ -202,6 +203,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
               scale-z={paperFocusScale}
             >
               <SinglePaper isFolded={isFolded} onReady={handlePaperReady} />
+              <FoldSliderTracker />
             </a.group>
             {/*
              * Config-bound subtrees rebuild in place per content revision —
