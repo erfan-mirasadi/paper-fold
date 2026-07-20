@@ -30,6 +30,7 @@ export interface VerseConfig {
   textScaleOverride?: number;
   translationTextScaleOverride?: number | null;
   translationTextAlign?: "left" | "center" | "right";
+  translationPadding?: number;
   isPill?: boolean;
   /** See `VerseOverrideConfig.showNumber` — forces the number badge on even
    * when `features.hideVerseNumbers` is globally true. */
@@ -142,6 +143,7 @@ export function buildVerseConfigs(
         const textScaleOverride = override?.textScaleOverride;
         const translationTextScaleOverride = override?.translationTextScaleOverride;
         const translationTextAlign = override?.translationTextAlign;
+        const translationPadding = override?.translationPadding;
 
         let direction: "left" | "right";
         let hingeX: number;
@@ -191,6 +193,7 @@ export function buildVerseConfigs(
           textScaleOverride,
           translationTextScaleOverride,
           translationTextAlign,
+          translationPadding,
           isPill,
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
@@ -215,6 +218,8 @@ export function buildVerseConfigs(
           ? surahData.section2?.introVerse
           : surahData.section2?.outroVerse;
       if (t && verseData?.number) {
+        const override = runtime.config.verseOverrides?.[verseData.number];
+
         configs.push({
           id: verseData.number,
           verse: verseData.text || "",
@@ -224,12 +229,19 @@ export function buildVerseConfigs(
           h: t.h,
           hingeX: t.x - PAGE_WIDTH / 2,
           direction: "right",
-          bg: CAPSULE_BG_6_19,
-          border: ORANGE_THEME,
-          circleBorderCol: ORANGE_THEME,
-          circleBg: CAPSULE_BG_6_19,
-          circleTextCol: ORANGE_THEME,
-          isPill: false,
+          bg: override?.bg ?? CAPSULE_BG_6_19,
+          border: override?.border ?? ORANGE_THEME,
+          circleBorderCol: override?.circleBorderCol ?? ORANGE_THEME,
+          circleBg: override?.circleBg ?? CAPSULE_BG_6_19,
+          circleTextCol: override?.circleTextCol ?? ORANGE_THEME,
+          textColor: override?.textColor,
+          textScaleOverride: override?.textScaleOverride,
+          translationTextScaleOverride: override?.translationTextScaleOverride,
+          translationTextAlign: override?.translationTextAlign,
+          translationPadding: override?.translationPadding,
+          isPill: override?.isPill ?? false,
+          customFrameSvg: override?.customFrameSvg,
+          frameScaleLTR: override?.frameScaleLTR,
         });
       }
       return;
@@ -278,6 +290,7 @@ export function buildVerseConfigs(
       const textScaleOverride = override?.textScaleOverride;
       const translationTextScaleOverride = override?.translationTextScaleOverride;
       const translationTextAlign = override?.translationTextAlign;
+      const translationPadding = override?.translationPadding;
 
       const worldX = t.x - expandW - PAGE_WIDTH / 2;
       const expandedW = t.w + expandW * 2;
@@ -335,6 +348,7 @@ export function buildVerseConfigs(
         textScaleOverride,
         translationTextScaleOverride,
         translationTextAlign,
+        translationPadding,
         isPill: override?.isPill,
         forceShowNumber: override?.showNumber,
         capsuleLabel,

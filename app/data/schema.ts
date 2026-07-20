@@ -501,6 +501,8 @@ export interface VerseOverrideConfig {
   frameScaleLTR?: number;
   /** When false, the verse renders as a rounded rectangle instead of a pill */
   isPill?: boolean;
+  /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
+  translationPadding?: number;
   /** Direct hex color for the verse box background (also used by paper masking) */
   bg?: string;
   /** Direct hex color for the verse border / circle decorations */

@@ -295,6 +295,7 @@ export function VerseGroup({
                 circleTextCol={finalCircleText}
                 textScaleOverride={finalTextScale}
                 textColor={override?.textColor}
+                translationPadding={override?.translationPadding}
               />
             ) : (
               <VerseBox
@@ -317,6 +318,7 @@ export function VerseGroup({
                 isPill={override?.isPill ?? true}
                 textScaleOverride={finalTextScale}
                 textColor={override?.textColor}
+                translationPadding={override?.translationPadding}
                 textAlignOverride={override?.translationTextAlign}
                 forceShowNumber={override?.showNumber}
               />

@@ -367,10 +367,11 @@ export function VerseController({ config }: { config: VerseConfig }) {
           textColor={config.textColor}
           textScaleOverride={finalVerseTextScale}
           translationTextAlign={config.translationTextAlign}
+          translationPadding={config.translationPadding}
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}
           customFrameSvg={config.customFrameSvg}
-          frameScaleLTR={config.frameScaleLTR}
+          frameScaleLTR={activeStoryConfig?.dimensions?.fixedWidthAcrossLanguages === true ? 1.0 : config.frameScaleLTR}
           capsuleLabel={config.capsuleLabel}
           baseRenderOrder={dynamicRenderOrder}
         />

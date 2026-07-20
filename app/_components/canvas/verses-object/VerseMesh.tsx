@@ -51,6 +51,7 @@ export interface VerseMeshProps {
   textColor?: string;
   textScaleOverride?: number;
   translationTextAlign?: "left" | "center" | "right";
+  translationPadding?: number;
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
   customFrameSvg?: string;
@@ -102,7 +103,7 @@ function BorderSvg({
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder + 2 : 102;
 
   return (
-    <mesh position={[w / 2, -h / 2, 0.01]} renderOrder={zOrder}>
+    <mesh position={[w / 2, -h / 2, 0.002]} renderOrder={zOrder}>
       <planeGeometry args={[renderW, renderH]} />
       <a.meshBasicMaterial
         map={texture as any}
@@ -150,6 +151,7 @@ export function VerseMesh({
   textColor,
   textScaleOverride,
   translationTextAlign,
+  translationPadding,
   suppressShadow = false,
   shadowRenderOrder,
   customFrameSvg,
@@ -394,6 +396,7 @@ export function VerseMesh({
                         circleTextCol={circleTextCol}
                         textColor={textColor}
                         textScaleOverride={textScaleOverride}
+                        translationPadding={translationPadding}
                         opacity={combinedOpacity}
                         baseRenderOrder={baseRenderOrder}
                       />
@@ -414,6 +417,7 @@ export function VerseMesh({
                         textColor={textColor}
                         textScaleOverride={textScaleOverride}
                         textAlignOverride={translationTextAlign}
+                        translationPadding={translationPadding}
                         isPill={isPill}
                         shadow={false}
                         opacity={combinedOpacity}

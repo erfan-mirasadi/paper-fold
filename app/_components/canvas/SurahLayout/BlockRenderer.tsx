@@ -253,16 +253,28 @@ function GridBlock({
         const labelW = t.capsuleLabelW ?? 0.2;
         const labelH = t.capsuleLabelH ?? 0.032;
 
+        let finalTextScale = override?.textScaleOverride ?? config.globalSettings?.verseTextScale;
+        if (activeLanguage !== "ar") {
+          if (override?.translationTextScaleOverride !== undefined) {
+            finalTextScale = override.translationTextScaleOverride;
+          } else if (config.globalSettings?.translationVerseTextScale !== undefined) {
+            finalTextScale = config.globalSettings.translationVerseTextScale === null ? undefined : config.globalSettings.translationVerseTextScale;
+          }
+        }
+
         return (
           <group key={actualVerseId}>
             <VerseBox x={expandedX} y={expandedY} z={rawT.z} w={w} h={h}
               verse={verseTextMap[actualVerseId] ?? ""} number={actualVerseId}
               bg={bg} border={border} circleBorderCol={circleBorderCol}
               circleBg={circleBg} circleTextCol={circleTextCol}
-              isPill={isPill} textColor={override?.textColor} />
+              isPill={isPill} textColor={override?.textColor}
+              translationPadding={override?.translationPadding}
+              textScaleOverride={finalTextScale} />
             {svgUrl && (() => {
               const isArabic = activeLanguage === "ar";
-              const frameScaleMult = (!isArabic && override?.frameScaleLTR) ? override.frameScaleLTR : 1.0;
+              const isFixed = config?.dimensions?.fixedWidthAcrossLanguages === true;
+              const frameScaleMult = (!isArabic && !isFixed && override?.frameScaleLTR) ? override.frameScaleLTR : 1.0;
               return (
                 <SvgFrameOverlay
                   x={expandedX - BW + shrinkX} y={expandedY + BW} z={rawT.z + 0.003}
@@ -308,6 +320,7 @@ export function BlockRenderer({
   sections, layout, surahData, startX, PW,
 }: BlockRendererProps) {
   const config = useStoryStore((state) => state.activeConfig);
+  const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   // Grid section: has non-empty verses record
   const gridSection = sections.find(
@@ -413,7 +426,9 @@ export function BlockRenderer({
           circleBorderCol={introOverride?.circleBorderCol ?? introBorder}
           circleBg={introOverride?.circleBg ?? introBg}
           circleTextCol={introOverride?.circleTextCol ?? introBorder}
-          isPill={false} borderWidth={edgeVerseBorderWidth} textColor={introOverride?.textColor} />
+          isPill={false} borderWidth={edgeVerseBorderWidth} textColor={introOverride?.textColor}
+          textScaleOverride={activeLanguage !== "ar" ? (introOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (introOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
+          translationPadding={introOverride?.translationPadding} />
       )}
 
       {/* All verse groups — keyed by flat index for both engines */}
@@ -435,7 +450,9 @@ export function BlockRenderer({
           circleBorderCol={outroOverride?.circleBorderCol ?? outroBorder}
           circleBg={outroOverride?.circleBg ?? outroBg}
           circleTextCol={outroOverride?.circleTextCol ?? outroBorder}
-          isPill={false} borderWidth={edgeVerseBorderWidth} textColor={outroOverride?.textColor} />
+          isPill={false} borderWidth={edgeVerseBorderWidth} textColor={outroOverride?.textColor}
+          textScaleOverride={activeLanguage !== "ar" ? (outroOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (outroOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
+          translationPadding={outroOverride?.translationPadding} />
       )}
 
       {/* SideCurves — single instance spanning ALL groups */}

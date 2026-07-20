@@ -526,6 +526,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       circleBorderCol: CENTER_GROUP_BORDER,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
+      translationTextScaleOverride: 0.65,
     },
     6: {
       border: CENTER_GROUP_BORDER,

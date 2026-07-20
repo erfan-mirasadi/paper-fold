@@ -252,11 +252,15 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
           "Bu tamam da ey henüz aklını ve vicdanını kaybetmemiş makul insanlar siz ne yapacaksınız? Siz kimin yanındasınız ?",
           "Yeri göğü yaratan, sizleri yaratan bir Allahın ve Rasulünün tarafında mı, insan hak ve özgürlüklerinden yana mı, yoksa fazla gürültü çıkaran, Allaha saygısız, insana saygısız bir takım güç sahiplerinden yana mı duruyorsunuz?",
           "Tercih size kalmıştır. Yalnız şunu iyi bilin ki bu tercih, sizin dünya ve ahiretini etkileyen en önemli kararınız olacaktır.",
-          { html: "<span style=\"color: #A30000; font-weight: bold;\">Tuğyan:</span>" },
+          {
+            html: '<span style="color: #A30000; font-weight: bold;">Tuğyan:</span>',
+          },
           "Bu surede anlatılan inkarcı insan tipinin önemli bir özelliği tuğyandır. Tuğyanın önemli bir göstergesi de başkasına tahakkümdür, zulümdür, hayata kastetmektir. Kendi inanç ve düşüncesine uymayan farklı görüş ve inançları yasaklama ve yok etme gayretidir. Kendisinin ve daracık çevresinin inandığı putperestliği dünyanın en doğru, en değişmez gerçeği sanarak, taşkınlık derecesinde, cinnet ve hatta paranoya derecesinde davranış bozukluğudur.",
           "İslam dini, başka inanç ve görüşleri yasaklayıcı değildir.",
           "Peygamberler vazifelerini yapar, tebliğ eder ve hatırlatırlar ama kimseye hiçbir şeyi dayatmazlar, zorlamazlar.",
-          { html: "<div style=\"border: 1px solid #777; border-radius: 8px; padding: 6px 14px; margin-top: 4px; color: #2b2b2b; text-align: center;\">Sen hatırlatıcı ve uyarıcısın. Onları zorlayıcı değilsin Leste aleyhim bimusaytır.</div>" },
+          {
+            html: '<div style="border: 1px solid #777; border-radius: 8px; padding: 6px 14px; margin-top: 4px; color: #2b2b2b; text-align: center;">Sen hatırlatıcı ve uyarıcısın. Onları zorlayıcı değilsin Leste aleyhim bimusaytır.</div>',
+          },
         ],
       },
       end: {
@@ -466,9 +470,6 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
           "Bakalım Mekkede, müşrikler içinden bir adam bu iki büyük nimete nasıl karşılık veriyor? Bu sorunun cevabını ikinci bölümde bulacağız.",
         ],
       },
-
-
-
     },
   },
   features: {
@@ -593,6 +594,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
   },
   assets: {},
   verseOverrides: {
+    // ── Section 1 verse 1 ─────────────────────────────────────────────────
+    1: {
+      translationTextScaleOverride: 0.6, // Slightly smaller text for EN/TR
+    },
     // ── Section 1 verse 5 ─────────────────────────────────────────────────
     5: {
       customFrameSvg: "/alak/Group 11.svg",
@@ -600,6 +605,8 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       expandH: 0.01,
       frameScaleLTR: 1.1,
       isPill: false,
+      translationTextScaleOverride: 0.45,
+      translationPadding: 0.045, // Custom padding for EN/TR (default is 0.07)
       bg: CAPSULE_BG_6_19,
       border: CAPSULE_BG_6_19,
       circleBorderCol: S1_VERSE_NUMBER_BORDER,
@@ -619,6 +626,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       circleBg: CAPSULE_BG_6_19,
       circleTextCol: ORANGE_THEME,
       isPill: false,
+      translationPadding: 0.02, // Custom padding for EN/TR (default is 0.07)
     },
     // ── Group 1 outer rows (7, 8) ─────────────────────────────────────────
     7: {
@@ -1189,7 +1197,7 @@ export const ALAK_TEXT_TR: SurahDataShape = {
           },
           {
             number: 17,
-            text: "Çağırsın o zaman o (çok güvendiği) çevresini,",
+            text: "Çağırsın o zaman o\n(çok güvendiği) çevresini,",
           },
           {
             number: 18,
@@ -1213,102 +1221,57 @@ export const ALAK_TEXT_EN: SurahDataShape = {
   section1: {
     label: "Five-verse Main Section",
     gridVerses: [
-      {
-        number: 1,
-        text: "(O Muhammad, read these verses revealed to you to people in the name of your Lord: He created",
-      },
-      {
-        number: 2,
-        text: "Yes, your Lord created man from an 'alaq, that is, a single cell.",
-      },
-      {
-        number: 3,
-        text: "Read these verses again in the name of your Lord, for He is most generous.",
-      },
-      {
-        number: 4,
-        text: "He taught people (the knowledge in the Torah and the Gospel) by the pen.",
-      },
+      { number: 1, text: "O Muhammad, read these revealed verses to people in your Lord's name: He created (man)." },
+      { number: 2, text: "Yes, your Lord created man from an 'alaq, a single cell." },
+      { number: 3, text: "Read again in your Lord's name; He is most generous." },
+      { number: 4, text: "He taught people (Torah and Gospel knowledge) by the pen." },
     ],
     anaAyet: {
       number: 5,
-      text: "Now Allah has taught an unlettered man, Muhammad (PBUH), by revelation, things he did not know before, that is, He made him a Messenger for Himself.",
+      text: "Allah taught the unlettered Muhammad by revelation what he didn't know, making him His Messenger.",
     },
   },
 
   section2: {
-    topLabel: "Five-verse 1st Explanation Section",
+    topLabel: "Five-verse 1st Expl. Section",
     introVerse: {
       number: 6,
-      text: "Look now at another man (Abu Jahl), who denies and rebels against the Prophethood of Muhammad, which is as clear as the sun:",
+      text: "Look at another man (Abu Jahl) who denies and rebels against Muhammad's sun-clear Prophethood:",
     },
     colorGroups: [
       {
         // Group 1 — Upper maroon block (verses 7–10)
         verses: [
-          {
-            number: 7,
-            text: "(Relying on his surroundings) he sees himself as self-sufficient against Allah.",
-          },
-          {
-            number: 8,
-            text: "However, in the end, there will be a return to the Creator Lord.",
-          },
-          {
-            number: 9,
-            text: "Have you seen the one who goes too far and prevents (prayer).",
-          },
-          {
-            number: 10,
-            text: "He prevents a servant (prophet) while he is praying.",
-          },
+          { number: 7, text: "(Trusting his circle) he feels independent of Allah." },
+          { number: 8, text: "Yet in the end, all return to the Creator Lord." },
+          { number: 9, text: "Have you seen the one who goes too far and prevents (prayer)?" },
+          { number: 10, text: "He prevents a servant (prophet) while praying." },
         ],
       },
       {
         // Group 2 — Center green block (verses 11–14), indented/pushed in
         verses: [
-          {
-            number: 11,
-            text: "What if that Servant is on the right path?",
-          },
+          { number: 11, text: "What if that Servant is on the right path?" },
           { number: 12, text: "Or if he commands obedience to Allah?" },
-          {
-            number: 13,
-            text: "What if the other denies the religion and turns away from worship?",
-          },
-          {
-            number: 14,
-            text: "Does he not know that Allah sees everything?",
-          },
+          { number: 13, text: "What if the other denies religion and shuns worship?" },
+          { number: 14, text: "Does he not know that Allah sees everything?" },
         ],
       },
       {
         // Group 3 — Lower maroon block (verses 15–18)
         verses: [
-          {
-            number: 15,
-            text: "No! If he does not desist, We will grab him by his forelock and drag him.",
-          },
-          {
-            number: 16,
-            text: "That lying, prostration-less forelock, We will grab it and throw it into hell.",
-          },
-          {
-            number: 17,
-            text: "Let him call then upon his (trusted) associates,",
-          },
-          {
-            number: 18,
-            text: "Then We too, will certainly call the guards of hell (Zabaniya).",
-          },
+          { number: 15, text: "No! If he doesn't desist, We'll grab his forelock and drag him." },
+          { number: 16, text: "We'll cast that lying, unbowing forelock into hell." },
+          { number: 17, text: "Let him call then upon his (trusted) circle," },
+          { number: 18, text: "Then We too will certainly call the guards of hell (Zabaniya)." },
         ],
       },
     ],
     outroVerse: {
       number: 19,
-      text: "No! Beware, do not be subjected to him! Prostrate (to Allah) and draw near to Him.",
+      text: "No! Never submit to him! Prostrate (to Allah) and draw near to Him.",
     },
-    bottomLabel: "Five-verse 2nd Explanation Section",
+    bottomLabel: "Five-verse 2nd Expl. Section",
   },
 };
 

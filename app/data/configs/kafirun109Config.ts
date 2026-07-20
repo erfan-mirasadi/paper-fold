@@ -55,7 +55,10 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
           "Hasbi gönüller Rasulullah'ın bu davetine kulak verip ona iman ediyorlar ve müslüman olanların sayısı her geçen gün artıyordu. Belli ki yeni bir dinin ve yeni bir dünya görüşünün temelleri atılıyordu.",
           "Bazı müşrikler kendi eski inanç ve ibadetlerine uymayan bu dine karşı tavır aldılar ve hatta Müslümanlara Mekkede hayat hakkı tanımak istemediler. Zayıf Müslümanlara işkence ediyor, hepsine akıl almaz sıkıntılar veriyorlardı.",
           "Bu bitmeyen işkenceler ve sıkıntılar sonucunda Müslümanlar Mekke'de, kendi öz yurtlarında yaşayamaz duruma gelmişler, büyük guruplar halinde önce Habeşistan'a ve sonra da Medine'ye hicret etmişlerdir. Aileler bölünmüştür. Ancak yaptıkları bunca zulüm bile Mekke kafirlerinin hırslarını tatmin etmemiştir.",
-          { subtitle: "Halbuki Mekke'de Müslümanların istekleri gayet masum ve anlaşılır bir şeydi;" },
+          {
+            subtitle:
+              "Halbuki Mekke'de Müslümanların istekleri gayet masum ve anlaşılır bir şeydi;",
+          },
           "1. (Doğup büyüdükleri memleketlerinde) insanca yaşamak istiyorlardı.",
           "2. Özgürce seçtikleri İslam dinini özgürce yaşamak istiyorlardı,",
           "Kur'an-ı Kerim, en olumsuz, en yanlış inanış ve davranışlardan bile evrensel doğrular çıkaran bir üsluba sahiptir. Hiçbir problemi çözümsüz bırakmaz. Bu Surede de, çeşitli inanç ve görüşteki insanların ve birbirlerine zarar vermeden beraberce yaşamaları teklifini getiriyor.",
@@ -191,7 +194,10 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
               <div style="color: #334155; font-size: 14px;">Bu sureyi de tam ortasından, yukarıdan aşağıya sarı renkli ayetleri üst üste getirerek katlayınız Ana manayı ifade eden ayetlerin ve geçmiş zamanla gelecek zamanın üst üste geldiğini göreceksiniz. Sonra bir de da sağdan sola katlayınız ve simetrik anlamların nasıl üst üste geldiğine bakınız. Bu durumun bütün Kur'an için geçerli olduğunu diğer sureleri incelerken de görüyoruz.</div>
             </div>`,
           },
-          { subtitle: "Bu sureyi biraz farklı bir ifadeyle açarak şöyle de yazabiliriz" },
+          {
+            subtitle:
+              "Bu sureyi biraz farklı bir ifadeyle açarak şöyle de yazabiliriz",
+          },
           {
             capsules: [
               {
@@ -316,7 +322,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
       expandW: 0.2,
       expandH: 0.028,
       textScaleOverride: 0.9,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -357,7 +363,7 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
       expandW: 0.2,
       expandH: 0.028,
       textScaleOverride: 0.9,
-      translationTextScaleOverride: 0.6,
+      translationTextScaleOverride: 0.55,
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBorderCol: ORANGE_THEME,
@@ -648,9 +654,7 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       {
-        verses: [
-          { number: 1, text: "De ki, Ey (benim dinime) inanmayanlar !" },
-        ],
+        verses: [{ number: 1, text: "De ki, Ey (benim dinime) inanmayanlar!" }],
       },
       {
         verses: [
@@ -670,7 +674,7 @@ export const KAFIRUN_109_TEXT_TR: SurahDataShape = {
         ],
       },
       {
-        verses: [{ number: 6, text: "Sizin dininiz size, benim dinim bana !" }],
+        verses: [{ number: 6, text: "Sizin dininiz size, benim dinim bana!" }],
       },
     ],
     outroVerse: { number: 0, text: "" },

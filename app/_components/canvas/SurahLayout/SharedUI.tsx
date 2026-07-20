@@ -332,8 +332,10 @@ export function TopLabel({
   isSimpleText,
 }: TopLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
-  const topLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
-  const labelWidthScale = LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1;
+  const activeConfig = useStoryStore((s) => s.activeConfig);
+  const isFixed = activeConfig?.dimensions?.fixedWidthAcrossLanguages === true;
+  const topLabelScale = isFixed ? 1 : LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
+  const labelWidthScale = isFixed ? 1 : (LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1);
 
   const w = labelWidth * labelWidthScale;
   const h = labelHeight ?? 0.046;
@@ -445,6 +447,9 @@ export function CapsuleLabel({
   opacity,
 }: CapsuleLabelProps) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const activeConfig = useStoryStore((s) => s.activeConfig);
+  const isFixed = activeConfig?.dimensions?.fixedWidthAcrossLanguages === true;
+  const capsuleLabelScale = isFixed ? 1 : LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   let resolvedCustomText: string | undefined;
   if (typeof customText === "object" && customText !== null) {
@@ -455,7 +460,6 @@ export function CapsuleLabel({
 
   const labelText =
     resolvedCustomText ?? ANA_AYET_LABEL_BY_LANGUAGE[activeLanguage];
-  const capsuleLabelScale = LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   const radius = h / 2;
   const borderThickness = borderWidth ?? 0.004;
@@ -608,6 +612,8 @@ interface VerseBoxProps {
   /** When true, shows the number badge even if `features.hideVerseNumbers`
    * is globally true — see `VerseOverrideConfig.showNumber`. */
   forceShowNumber?: boolean;
+  /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
+  translationPadding?: number;
 }
 export const VerseBox = ({
   x,
@@ -635,15 +641,17 @@ export const VerseBox = ({
   textAlignOverride,
   hideNumber = false,
   forceShowNumber = false,
+  translationPadding,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
+  const activeStoryConfig = useStoryStore((s) => s.activeConfig);
+  const isFixed = activeStoryConfig?.dimensions?.fixedWidthAcrossLanguages === true;
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
   const textScale =
     textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
 
-  const activeStoryConfig = useStoryStore((s) => s.activeConfig);
   const showVerseNumber =
     forceShowNumber ||
     (!hideNumber && !(activeStoryConfig?.features?.hideVerseNumbers ?? false));
@@ -676,7 +684,8 @@ export const VerseBox = ({
 
   const safeMargin = 0.0;
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
-  const EXTRA_BIG_VERSE_PADDING = !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
+  const defaultExtraPadding = !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
+  const EXTRA_BIG_VERSE_PADDING = (translationPadding !== undefined && !isArabic) ? translationPadding : defaultExtraPadding;
   const centeredSidePadding = centerTextInCapsule
     ? (showVerseNumber ? numberSidePadding : (isTightPadding ? 0.005 : 0.012)) + EXTRA_BIG_VERSE_PADDING
     : 0;
@@ -811,6 +820,7 @@ interface SplitVerseCapsulesProps {
   textScaleOverride?: number;
   opacity?: any;
   baseRenderOrder?: number;
+  translationPadding?: number;
 }
 export const SplitVerseCapsules = ({
   x,
@@ -830,6 +840,7 @@ export const SplitVerseCapsules = ({
   textScaleOverride,
   opacity,
   baseRenderOrder,
+  translationPadding,
 }: SplitVerseCapsulesProps) => {
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
 
@@ -896,6 +907,7 @@ export const SplitVerseCapsules = ({
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
+        translationPadding={translationPadding}
       />
       <VerseBox
         x={farX}
@@ -913,6 +925,7 @@ export const SplitVerseCapsules = ({
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
+        translationPadding={translationPadding}
       />
     </group>
   );
