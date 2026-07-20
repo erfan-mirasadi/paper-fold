@@ -121,7 +121,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
 
       {title && (
         <div
-          className="uppercase text-foreground/45 text-[8px] lg:text-[clamp(9px,0.62vw,14px)]"
+          className="uppercase text-foreground/45 text-[7px] lg:text-[clamp(8px,0.5vw,12px)]"
           style={{
             letterSpacing: "0.22em",
             fontFamily: "var(--font-inter)",
@@ -192,7 +192,7 @@ function InkAudioPlayer({ src, title }: SideInfoAudio) {
         </div>
 
         <span
-          className="flex-shrink-0 tabular-nums text-foreground/50 text-[9px] lg:text-[clamp(10px,0.68vw,15px)]"
+          className="flex-shrink-0 tabular-nums text-foreground/50 text-[8px] lg:text-[clamp(9px,0.6vw,13px)]"
           style={{ fontFamily: "var(--font-inter)", letterSpacing: "0.04em" }}
         >
           {fmt(currentTime)} / {fmt(duration)}
@@ -230,7 +230,7 @@ function InkImage({ src, caption, alt }: SideInfoImage) {
       />
       {caption && (
         <figcaption
-          className="italic text-foreground/50 text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
+          className="italic text-foreground/50 text-[8.5px] lg:text-[clamp(9px,0.6vw,14px)]"
           style={{
             fontFamily: "var(--font-inter)",
             marginTop: "clamp(6px, 0.5vw, 10px)",
@@ -314,7 +314,7 @@ function InkCapsule({
       {chipNumber && (
         <span
           className="absolute font-medium tabular-nums
-            text-[8.5px] lg:text-[clamp(9.5px,0.66vw,15px)]"
+            text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]"
           style={{
             top: 0,
             left: "clamp(12px, 1vw, 18px)",
@@ -337,8 +337,8 @@ function InkCapsule({
         className={`m-0 break-words ${textColor ? "" : "text-foreground/85"}
           ${
             isPill
-              ? "text-[10.5px] lg:text-[clamp(11.5px,0.82vw,19px)]"
-              : "text-[10.5px] lg:text-[clamp(11px,0.78vw,18px)]"
+              ? "text-[9.5px] lg:text-[clamp(10.5px,0.72vw,17px)]"
+              : "text-[9.5px] lg:text-[clamp(10px,0.68vw,16px)]"
           }`}
         style={{
           fontFamily: "var(--font-inter)",
@@ -512,7 +512,7 @@ function SideInfoEntryView({
           durationS={0.7}
           inViewMargin="0px"
           className="!text-left w-full font-normal text-foreground/80
-            text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+            text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]"
           style={{
             textShadow: "none",
             fontFamily: "var(--font-inter)",
@@ -528,7 +528,7 @@ function SideInfoEntryView({
           transition={{ duration: 0.7, delay: i * 0.1, ease: "easeOut" }}
           dangerouslySetInnerHTML={{ __html: item.html }}
           className="!text-left w-full font-normal text-foreground/80
-            text-[11.5px] lg:text-[clamp(12.5px,0.9vw,21px)]"
+            text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]"
           style={{
             fontFamily: "var(--font-inter)",
             lineHeight: 1.95,
@@ -550,7 +550,7 @@ function SideInfoEntryView({
           durationS={0.9}
           inViewMargin="0px"
           className="!text-left w-full font-medium tracking-tight text-foreground
-            text-[15px] lg:text-[clamp(17px,1.2vw,28px)]"
+            text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]"
           style={{
             textShadow: "none",
             fontFamily: "var(--font-roboto)",
@@ -610,7 +610,7 @@ function SideInfoEntryView({
         >
           {!hideVerseNumbers && verseId !== undefined && (
             <span
-              className="text-[11px] lg:text-[clamp(12px,0.85vw,19px)]"
+              className="text-[10px] lg:text-[clamp(11px,0.75vw,17px)]"
               style={{ color: GOLD }}
             >
               <AyahNumber n={verseId} />
@@ -629,7 +629,7 @@ function SideInfoEntryView({
               blurPx={0}
               durationS={0.8}
               inViewMargin="0px"
-              className="!text-left w-full uppercase font-medium text-[8.5px] lg:text-[clamp(9.5px,0.66vw,15px)]"
+              className="!text-left w-full uppercase font-medium text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]"
               spanClassName="tracking-[0.26em]"
               style={{ textShadow: "none", color: GOLD }}
             />
@@ -651,7 +651,7 @@ function SideInfoEntryView({
           durationS={0.9}
           inViewMargin="0px"
           className="!text-left w-full font-light tracking-tight text-foreground
-            text-[17px] lg:text-[clamp(19px,1.4vw,34px)]"
+            text-[15px] lg:text-[clamp(17px,1.2vw,30px)]"
           style={{
             textShadow: "none",
             fontFamily: "var(--font-roboto)",
