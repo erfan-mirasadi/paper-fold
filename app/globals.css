@@ -643,3 +643,20 @@ html.dark .canvas-wrapper {
   animation: fp-write-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--fp-delay, 0s)
     backwards;
 }
+
+/* SyncedRecitation — karaoke reading sync. A gold ink wash fills the recited
+   text continuously left → right in step with the voice. Every character AND
+   every inter-word gap is its own span whose background grows in width, so the
+   finished spans merge into one seamless, unbroken band. Riding the fill's
+   leading edge is a soft warm "crest" of light (glow + brightness) that sweeps
+   along like a candle following the reading — no per-letter jumps. Both are
+   written straight onto each span's inline style from JS, only for the handful
+   of spans around the read head each frame. Pausing / finishing adds
+   `.rw-fade`, which slows the transitions so the wash recedes and the light
+   settles gently back to plain ink. */
+.rw-root.rw-fade .rw-l {
+  transition:
+    background-size 0.7s ease,
+    filter 0.6s ease,
+    text-shadow 0.6s ease !important;
+}

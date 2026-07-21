@@ -10,6 +10,14 @@ import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManage
 import { useSideInfoStore } from "@/app/stores/useSideInfoStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
 import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntry";
+import {
+  SyncedRecitation,
+  type RecitedBlock,
+} from "@/app/_components/dom/ui-overlay/SyncedRecitation";
+import {
+  lastMatchedWordIndex,
+  normalizeWord,
+} from "@/app/data/recitations/align";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
@@ -480,11 +488,134 @@ function SideInfoEntryView({
       ? `${verseId}. Ayet`
       : undefined);
 
-  // Chunk the paragraphs by subtitle so each section can fold independently
+  // ── Recitation ────────────────────────────────────────────────────────────
+  // The spoken portion is a run of typed blocks — the kicker, the title, then
+  // leading prose paragraphs / subtitles — all highlighted by the karaoke
+  // sync (not just the paragraphs). How FAR it reaches is decided by the
+  // transcript's own coverage: we recite through the block holding the last
+  // word the transcript matches, and everything after (e.g. the "VAHİY"
+  // section, whose audio hasn't been recorded) flows normally below.
+  const allParagraphs = entry.paragraphs ?? [];
+  const recitedBlocks: RecitedBlock[] = [];
+  let remainderStart = 0;
+  let kickerRecited = false;
+  let titleRecited = false;
+
+  if (entry.recitation) {
+    interface Cand {
+      block: RecitedBlock;
+      paraIndex: number; // −1 for kicker / title
+      kind: "kicker" | "title" | "subtitle" | "paragraph";
+    }
+    const cands: Cand[] = [];
+    if (kicker)
+      cands.push({
+        kind: "kicker",
+        paraIndex: -1,
+        block: {
+          text: kicker,
+          as: "div",
+          className:
+            "!text-left w-full uppercase font-medium text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]",
+          style: {
+            color: GOLD,
+            fontFamily: "var(--font-roboto)",
+            letterSpacing: "0.26em",
+          },
+        },
+      });
+    if (entry.title)
+      cands.push({
+        kind: "title",
+        paraIndex: -1,
+        block: {
+          text: entry.title,
+          as: "h3",
+          className:
+            "!text-left w-full font-light tracking-tight text-foreground text-[15px] lg:text-[clamp(17px,1.2vw,30px)]",
+          style: {
+            fontFamily: "var(--font-roboto)",
+            lineHeight: 1.2,
+            marginTop: "clamp(6px, 0.55vw, 12px)",
+          },
+        },
+      });
+    for (let i = 0; i < allParagraphs.length; i++) {
+      const it = allParagraphs[i];
+      if (typeof it === "string")
+        cands.push({
+          kind: "paragraph",
+          paraIndex: i,
+          block: {
+            text: it,
+            as: "p",
+            className:
+              "!text-left w-full font-normal text-foreground/80 text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]",
+            style: {
+              fontFamily: "var(--font-inter)",
+              lineHeight: 1.95,
+              marginTop: "clamp(10px, 1vw, 18px)",
+            },
+          },
+        });
+      else if (typeof it === "object" && it !== null && "subtitle" in it)
+        cands.push({
+          kind: "subtitle",
+          paraIndex: i,
+          block: {
+            text: it.subtitle,
+            as: "h4",
+            className:
+              "!text-left w-full font-medium tracking-tight text-foreground text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]",
+            style: {
+              fontFamily: "var(--font-roboto)",
+              lineHeight: 1.3,
+              marginTop: "clamp(18px, 2vw, 32px)",
+            },
+          },
+        });
+      else break; // capsule / html / image — can't be recited
+    }
+
+    // Recite through the block that holds the transcript's last matched word
+    // (or every candidate if nothing matched — a bad transcript still degrades
+    // to an even sweep rather than dropping the whole block).
+    let count = cands.length;
+    if (cands.length > 0) {
+      const norms: string[] = [];
+      const wordBlock: number[] = [];
+      cands.forEach((c, ci) =>
+        c.block.text.split(/\s+/).forEach((tok) => {
+          if (tok) {
+            norms.push(normalizeWord(tok));
+            wordBlock.push(ci);
+          }
+        }),
+      );
+      const lm = lastMatchedWordIndex(norms, entry.recitation.words);
+      count = lm >= 0 ? wordBlock[lm] + 1 : cands.length;
+    }
+
+    cands.slice(0, count).forEach((c, idx) => {
+      recitedBlocks.push(
+        idx === 0
+          ? { ...c.block, style: { ...c.block.style, marginTop: 0 } }
+          : c.block,
+      );
+      if (c.kind === "kicker") kickerRecited = true;
+      if (c.kind === "title") titleRecited = true;
+      if (c.paraIndex >= 0) remainderStart = c.paraIndex + 1;
+    });
+  }
+
+  const flowParagraphs = allParagraphs.slice(remainderStart);
+
+  // Chunk the remaining paragraphs by subtitle so each section can fold
+  // independently
   const chunks: SideInfoFlowItem[][] = [];
   let currentChunk: SideInfoFlowItem[] = [];
 
-  entry.paragraphs?.forEach((item) => {
+  flowParagraphs.forEach((item) => {
     if (typeof item === "object" && item !== null && "subtitle" in item) {
       if (currentChunk.length > 0) chunks.push(currentChunk);
       currentChunk = [item];
@@ -616,7 +747,7 @@ function SideInfoEntryView({
               <AyahNumber n={verseId} />
             </span>
           )}
-          {kicker && (
+          {kicker && !kickerRecited && (
             <AnimatedText
               text={kicker}
               as="div"
@@ -637,7 +768,7 @@ function SideInfoEntryView({
         </div>
       )}
 
-      {entry.title && (
+      {entry.title && !titleRecited && (
         <AnimatedText
           text={entry.title}
           as="h3"
@@ -658,6 +789,17 @@ function SideInfoEntryView({
             lineHeight: 1.2,
           }}
         />
+      )}
+
+      {/* ── Time-aligned recitation — the entry's spoken opening (kicker,
+          title, prose). The text is the authored blocks; the transcript only
+          times them. Rendered above the written flow and outside
+          ExpandableEntry so its highlight-synced words are never folded out of
+          view. ──────────────────────────────────────────────────────────── */}
+      {entry.recitation && recitedBlocks.length > 0 && (
+        <div style={{ marginTop: "clamp(8px, 0.8vw, 14px)" }}>
+          <SyncedRecitation transcript={entry.recitation} blocks={recitedBlocks} />
+        </div>
       )}
 
       {renderedChunks}

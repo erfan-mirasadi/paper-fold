@@ -1,3 +1,5 @@
+import type { RecitationTranscript } from "./recitations/types";
+
 export interface Verse {
   number: number;
   text: string;
@@ -836,6 +838,14 @@ export interface SideInfoEntry {
   images?: SideInfoImage[];
   /** Optional audio (e.g. recitation) rendered as a minimal player at the entry's end. */
   audio?: SideInfoAudio;
+  /**
+   * Optional time-aligned recitation. When present, its transcript is rendered
+   * as the entry's opening body — live, karaoke-synced text with an inline
+   * player that highlights each word as it's spoken and keeps the panel
+   * scrolled to it (see SyncedRecitation.tsx). Sits above `paragraphs`, and,
+   * unlike them, is never folded away by the "read more" collapse.
+   */
+  recitation?: RecitationTranscript;
 }
 
 export interface SurahSideInfoConfig {

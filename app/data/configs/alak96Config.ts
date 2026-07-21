@@ -1,6 +1,7 @@
 import { SurahLayoutConfig } from "../schema";
 import type { SurahDataShape } from "../SurahConfig";
 import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
+import { ALAK_RECITATIONS } from "../recitations/alak";
 import {
   S1_VERSE_NUMBER_BORDER,
   S1_VERSE_NUMBER_TEXT,
@@ -51,6 +52,10 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
     byFoldStep: {
       "pre-start": {
         title: "Bütün varlıklar konuşur.",
+        // The opening prose paragraphs below are the source of truth for what's
+        // shown; `recitation` only TIMES them (aligned at render), so a wrong or
+        // missing transcript word never changes the displayed tafsir.
+        recitation: ALAK_RECITATIONS.intro,
         paragraphs: [
           "Canlı varlıkların vücutlarında görev yapan bütün organlar birbirleriyle etkileşirler, bilgi alışverişinde bulunurlar. Beyin de bütün organlarla iletişim içindedir, özel bir dil ile onlarla konuşur.",
           "Hayvanların ve insanların vücudu, sanki medeni birer şehir gibidir. O vücut şehrinde her an sayısız telefon, faks ve özel ulak mesaj taşımakta, bilgi taşımaktadır.",
