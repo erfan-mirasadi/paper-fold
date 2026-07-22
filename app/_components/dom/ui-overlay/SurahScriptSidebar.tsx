@@ -391,31 +391,14 @@ export function SurahScriptSidebar() {
 
   return (
     <>
-      {/* ── Top bar — wordmark + single animated sidebar toggle ─────────── */}
+      {/* ── Top bar — wordmark only. The sidebar toggle lives below the
+          divider (see next block), sliding along the line's own length
+          instead of flanking the brand. ──────────────────────────────── */}
       <div
         className="fixed top-[clamp(10px,1.2vw,16px)] left-3 lg:left-5 z-[100]
-          pointer-events-auto flex items-center
-          gap-8
-          lg:gap-[clamp(3.5rem,6.2vw,11rem)]
-          [@media(min-width:2000px)]:gap-[clamp(5rem,6.5vw,12rem)]
-          [@media(min-width:3000px)]:gap-[clamp(7rem,8vw,18rem)]"
+          pointer-events-auto flex items-center"
       >
-        {/* LEFT slot — button lives here when sidebar is CLOSED */}
-        <div className="w-[22px] flex justify-start">
-          {!isOpen && (
-            <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(true)} />
-          )}
-        </div>
-
-        {/* Animated brand — alternates between logo and surah title */}
         <AnimatedBrand title={info?.title} />
-
-        {/* RIGHT slot — button lives here when sidebar is OPEN */}
-        <div className="w-[22px] flex justify-end">
-          {isOpen && (
-            <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(false)} />
-          )}
-        </div>
       </div>
 
       {/* ── Fold-story divider — thin line below the top bar ─────────────── */}
@@ -432,6 +415,35 @@ export function SurahScriptSidebar() {
             background: `linear-gradient(to right, rgba(180,180,180,0.35), rgba(180,180,180,0.08) 60%, transparent 100%)`,
           }}
         />
+      </div>
+
+      {/* ── Sidebar toggle — slides between two independent slots at the
+          same Y, just below the divider: flush with the page edge when
+          CLOSED, flush with the panel's own inner edge when OPEN (so the
+          open position always lines up with the panel it opens, at any
+          viewport width — mirrors the tafsir panel's toggle exactly). ──── */}
+      <div
+        className="fixed left-3 lg:left-5 z-[99] pointer-events-none"
+        style={{ top: "clamp(50px, 5vw, 83px)" }}
+      >
+        {!isOpen && (
+          <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(true)} />
+        )}
+      </div>
+      <div
+        className={`fixed z-[99] pointer-events-none flex justify-end ${
+          isLandscapePaper ? "" : "left-2 w-[160px] lg:left-[2vw] lg:w-[22vw]"
+        }`}
+        style={{
+          top: "clamp(50px, 5vw, 83px)",
+          ...(isLandscapePaper
+            ? { left: "clamp(48px, 17vw, 380px)", width: "min(28vw, 520px)" }
+            : {}),
+        }}
+      >
+        {isOpen && (
+          <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(false)} />
+        )}
       </div>
 
       <AnimatePresence>

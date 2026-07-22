@@ -40,10 +40,7 @@ import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrows
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
 import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
-import {
-  SideInfoPanel,
-  SideInfoToggle,
-} from "@/app/_components/dom/ui-overlay/SideInfoPanel";
+import { SideInfoPanel } from "@/app/_components/dom/ui-overlay/SideInfoPanel";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
@@ -463,7 +460,6 @@ function SurahViewerInner({
                   >
                     <NavigationOverlay />
                     <AllSectionsOverlay />
-                    <SideInfoToggle />
                   </motion.div>
                 )}
               </AnimatePresence>

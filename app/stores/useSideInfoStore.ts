@@ -3,9 +3,9 @@ import { create } from "zustand";
 /**
  * Open/close state of the right-hand tafsir panel (SideInfoPanel).
  *
- * Lives in a store (rather than component state) because the toggle button
- * sits in the top-right overlay button row — a different subtree from the
- * panel itself.
+ * Lives in a store (rather than component state) so
+ * useAutoCollapsePanelsOnElevate can read/close/restore it from outside the
+ * panel's component tree.
  */
 interface SideInfoState {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import {
   useStoryStore,
   getActiveStoryConfig,
@@ -50,27 +50,29 @@ const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
 };
 
-// ── Toggle — mirrored twin of the left sidebar's SidebarToggle ──────────────
-// Rendered inside the top-right overlay button row (SurahViewer), so it lives
-// in a different subtree from the panel — state is shared via useSideInfoStore.
-export function SideInfoToggle() {
-  const activeConfig = useStoryStore((s) => s.activeConfig);
-  const isOpen = useSideInfoStore((s) => s.isOpen);
-  const toggle = useSideInfoStore((s) => s.toggle);
-
-  const side = activeConfig.sideInfo;
-  if (!side || (!side.byFoldStep && !side.byVerse)) return null;
-
+// ── Toggle — mirrored twin of the left sidebar's SidebarToggle. Rendered by
+// SideInfoPanel itself, sliding along its own divider line (see below)
+// instead of sitting in the shared top-right overlay button row. ───────────
+function InfoSidebarToggle({
+  isOpen,
+  onToggle,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <OverlayButton
-      onClick={toggle}
-      aria-label={isOpen ? "Collapse tafsir panel" : "Expand tafsir panel"}
-      aria-expanded={isOpen}
-      // hidden below sm: the top-right row already fills the smallest screens
-      className="hidden sm:flex w-14 h-14 text-foreground"
-    >
-      <SidebarToggleIcon isOpen={isOpen} side="right" />
-    </OverlayButton>
+    <MotionConfig transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}>
+      <OverlayButton
+        layoutId="info-sidebar-toggle"
+        layout
+        onClick={onToggle}
+        aria-label={isOpen ? "Collapse tafsir panel" : "Expand tafsir panel"}
+        aria-expanded={isOpen}
+        className="w-[23px] h-[23px] text-foreground"
+      >
+        <SidebarToggleIcon isOpen={isOpen} side="right" />
+      </OverlayButton>
+    </MotionConfig>
   );
 }
 
@@ -811,6 +813,7 @@ function SideInfoEntryView({
 export function SideInfoPanel() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const isOpen = useSideInfoStore((s) => s.isOpen);
+  const toggle = useSideInfoStore((s) => s.toggle);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
 
@@ -931,6 +934,33 @@ export function SideInfoPanel() {
           />
         </div>
       )}
+
+      {/* ── Toggle — slides between two independent slots at the same Y,
+          just below the divider: flush with the page edge when CLOSED,
+          flush with the panel's own inner edge when OPEN (so the open
+          position always lines up with the panel it opens, at any
+          viewport width — mirrors the script sidebar's toggle exactly,
+          just flipped). Rendered regardless of landscape/portrait, like
+          the original top-right toggle was. ─────────────────────────────── */}
+      <div
+        className="fixed right-3 lg:right-5 z-[99] pointer-events-none hidden sm:block"
+        style={{ top: "clamp(50px, 5vw, 83px)" }}
+      >
+        {!isOpen && <InfoSidebarToggle isOpen={isOpen} onToggle={toggle} />}
+      </div>
+      <div
+        className={`fixed z-[99] pointer-events-none hidden sm:flex justify-start ${
+          isLandscapePaper ? "" : "right-2 w-[160px] lg:right-[2vw] lg:w-[22vw]"
+        }`}
+        style={{
+          top: "clamp(50px, 5vw, 83px)",
+          ...(isLandscapePaper
+            ? { right: "clamp(48px, 17vw, 380px)", width: "min(28vw, 520px)" }
+            : {}),
+        }}
+      >
+        {isOpen && <InfoSidebarToggle isOpen={isOpen} onToggle={toggle} />}
+      </div>
 
       <AnimatePresence>
         {isOpen && (
