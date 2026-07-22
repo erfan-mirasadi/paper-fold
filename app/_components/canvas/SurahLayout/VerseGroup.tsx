@@ -325,6 +325,14 @@ export function VerseGroup({
                 translationPadding={override?.translationPadding}
                 textAlignOverride={override?.translationTextAlign}
                 forceShowNumber={override?.showNumber}
+                domeDir={
+                  override?.verseShape === "dome-up"
+                    ? "up"
+                    : override?.verseShape === "dome-down"
+                      ? "down"
+                      : undefined
+                }
+                domeSideRatio={override?.domeSideRatio}
               />
             )}
             {hasTab && (

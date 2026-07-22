@@ -354,6 +354,8 @@ export function VerseController({ config }: { config: VerseConfig }) {
           elevateShadowOpacity={elevateShadowOpacity}
           elevateOpacity={handoffElevateOpacity}
           isPill={config.isPill !== false}
+          verseShape={config.verseShape}
+          domeSideRatio={config.domeSideRatio}
           backfaceColor={backfaceColor}
           verse={config.verse}
           splitTexts={config.splitTexts}

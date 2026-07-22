@@ -504,6 +504,23 @@ export interface VerseOverrideConfig {
   frameScaleLTR?: number;
   /** When false, the verse renders as a rounded rectangle instead of a pill */
   isPill?: boolean;
+  /**
+   * NEW AYAH MODEL — renders the verse capsule as a half-oval / dome instead of
+   * the usual pill or rounded rectangle. The flat side always carries the verse
+   * text; the domed side is a smooth arch (like the Tevbe:24 shield/dome ayahs).
+   *
+   *  'dome-up'   → flat BOTTOM, domed TOP    (e.g. Tevbe verse 8, points up)
+   *  'dome-down' → flat TOP,    domed BOTTOM (e.g. Tevbe verses 4 & 7, point down)
+   *
+   * Works in both the resting SVG-section view and the elevated mesh view.
+   */
+  verseShape?: "capsule" | "dome-up" | "dome-down";
+  /**
+   * For `verseShape` domes only — fraction of the capsule height (0–1) that
+   * stays a straight vertical wall before the arch begins. Smaller = a taller,
+   * rounder dome; larger = a flatter dome. Defaults to 0.35.
+   */
+  domeSideRatio?: number;
   /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
   translationPadding?: number;
   /** Direct hex color for the verse box background (also used by paper masking) */

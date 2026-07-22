@@ -8,6 +8,7 @@ import {
   RoundedShapeComponent,
   CapsuleLabel,
   SplitVerseCapsules,
+  buildDomeShape,
 } from "../SurahLayout/SharedUI";
 import { SHADOW_CONFIG } from "../../../hooks/useFoldAnimation";
 import {
@@ -38,6 +39,8 @@ export interface VerseMeshProps {
   elevateShadowOpacity: SpringValue<number>;
   elevateOpacity: any;
   isPill?: boolean;
+  verseShape?: "capsule" | "dome-up" | "dome-down";
+  domeSideRatio?: number;
   backfaceColor: string;
   verse: string;
   splitTexts?: [string, string];
@@ -139,6 +142,8 @@ export function VerseMesh({
   elevateShadowOpacity,
   elevateOpacity,
   isPill = true,
+  verseShape,
+  domeSideRatio,
   verse,
   splitTexts,
   number,
@@ -180,7 +185,13 @@ export function VerseMesh({
   const alignX = bw - shrinkX;
   const alignY = -bw;
 
+  const domeDir =
+    verseShape === "dome-up" ? "up" : verseShape === "dome-down" ? "down" : undefined;
+
   const shape = useMemo(() => {
+    if (domeDir) {
+      return buildDomeShape(outerW, outerH, domeDir, domeSideRatio ?? 0.2);
+    }
     const s = new THREE.Shape();
     const r = outerRadius;
     s.moveTo(r, 0);
@@ -193,7 +204,7 @@ export function VerseMesh({
     s.lineTo(0, -r);
     s.quadraticCurveTo(0, 0, r, 0);
     return s;
-  }, [outerW, outerH, outerRadius]);
+  }, [outerW, outerH, outerRadius, domeDir, domeSideRatio]);
 
   const extrudeSettings = useMemo(
     () => ({ depth: 0.008, bevelEnabled: false }),
@@ -342,7 +353,13 @@ export function VerseMesh({
               scale-x={shadowScaleX}
               scale-y={shadowScaleY}
             >
-              <RoundedShapeComponent w={w} h={h} radius={boxRadius} />
+              <RoundedShapeComponent
+                w={w}
+                h={h}
+                radius={boxRadius}
+                dome={domeDir}
+                domeSideRatio={domeSideRatio}
+              />
               <a.meshBasicMaterial
                 {...materialsProps.shadow}
                 opacity={finalShadowOpacity}
@@ -419,6 +436,8 @@ export function VerseMesh({
                         textAlignOverride={translationTextAlign}
                         translationPadding={translationPadding}
                         isPill={isPill}
+                        domeDir={domeDir}
+                        domeSideRatio={domeSideRatio}
                         shadow={false}
                         opacity={combinedOpacity}
                         baseRenderOrder={baseRenderOrder}

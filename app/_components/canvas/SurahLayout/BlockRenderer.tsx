@@ -270,6 +270,8 @@ function GridBlock({
               circleBg={circleBg} circleTextCol={circleTextCol}
               isPill={isPill} textColor={override?.textColor}
               translationPadding={override?.translationPadding}
+              domeDir={override?.verseShape === "dome-up" ? "up" : override?.verseShape === "dome-down" ? "down" : undefined}
+              domeSideRatio={override?.domeSideRatio}
               textScaleOverride={finalTextScale} />
             {svgUrl && (() => {
               const isArabic = activeLanguage === "ar";

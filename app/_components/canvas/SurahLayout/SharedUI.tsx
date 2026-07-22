@@ -41,6 +41,49 @@ import { CanvasText } from "../shared/CanvasText";
 import { useStoryStore } from "../../../stores/useStoryStore";
 
 // ROUNDED SHAPE GEOMETRY
+/**
+ * Builds a half-oval / dome THREE.Shape (flat side + a true elliptical arc).
+ *
+ *  dome "up"   → flat BOTTOM, elliptical arch bulging UP    (verse 8)
+ *  dome "down" → flat TOP,    elliptical arch bulging DOWN  (verses 4 & 7)
+ *
+ * The arc springs straight off the flat edge's corners (i.e. it meets the
+ * rectangle's connecting edge), so it reads as an oval, not a boxed-in
+ * rounded rectangle.
+ *
+ * `sideRatio` (0–0.9) = the fraction of the height that stays a straight
+ * vertical wall before the arc begins. Smaller ⇒ a taller, rounder dome;
+ * larger ⇒ a flatter, shallower dome. This is the tunable "dome amount".
+ *
+ * Drawn in shape space: top edge at y = 0, bottom edge at y = -h.
+ */
+export function buildDomeShape(
+  w: number,
+  h: number,
+  dome: "up" | "down",
+  sideRatio: number,
+): THREE.Shape {
+  const s = new THREE.Shape();
+  const wall = Math.max(0, Math.min(0.9, sideRatio)) * h; // straight wall
+  const archH = h - wall; // vertical radius of the elliptical arc
+  if (dome === "up") {
+    // flat bottom → up the walls → elliptical arch over the top
+    s.moveTo(0, -h);
+    s.lineTo(w, -h);
+    s.lineTo(w, -archH);
+    s.absellipse(w / 2, -archH, w / 2, archH, 0, Math.PI, false);
+    s.lineTo(0, -h);
+  } else {
+    // flat top → down the walls → elliptical arch bulging out the bottom
+    s.moveTo(0, 0);
+    s.lineTo(w, 0);
+    s.lineTo(w, -wall);
+    s.absellipse(w / 2, -wall, w / 2, archH, 0, -Math.PI, true);
+    s.lineTo(0, 0);
+  }
+  return s;
+}
+
 interface RoundedShapeProps {
   w: number;
   h: number;
@@ -48,6 +91,14 @@ interface RoundedShapeProps {
   topOnly?: boolean;
   bottomOnly?: boolean;
   xMultiplier?: number;
+  /**
+   * When set, ignore the rounded-rect logic and build a half-oval / dome:
+   *  'up'   → flat bottom, arched top.
+   *  'down' → flat top, arched bottom.
+   */
+  dome?: "up" | "down";
+  /** Straight-wall fraction (0–1) before the arch begins. Defaults to 0.35. */
+  domeSideRatio?: number;
 }
 export function RoundedShapeComponent({
   w,
@@ -56,8 +107,13 @@ export function RoundedShapeComponent({
   topOnly = false,
   bottomOnly = false,
   xMultiplier = 1,
+  dome,
+  domeSideRatio = 0.2,
 }: RoundedShapeProps) {
   const shape = useMemo(() => {
+    if (dome) {
+      return buildDomeShape(w, h, dome, domeSideRatio);
+    }
     const s = new THREE.Shape();
     const r = Math.min(radius, w / 2, h / 2);
 
@@ -93,7 +149,7 @@ export function RoundedShapeComponent({
       s.quadraticCurveTo(0, 0, rx, 0);
     }
     return s;
-  }, [w, h, radius, topOnly, bottomOnly, xMultiplier]);
+  }, [w, h, radius, topOnly, bottomOnly, xMultiplier, dome, domeSideRatio]);
   return <shapeGeometry args={[shape]} />;
 }
 
@@ -116,6 +172,8 @@ interface UiRectProps {
   emissiveIntensity?: number;
   toneMapped?: boolean;
   xMultiplier?: number;
+  dome?: "up" | "down";
+  domeSideRatio?: number;
 }
 
 interface TexturedMaterialProps {
@@ -204,6 +262,8 @@ export const UiRect = ({
   emissiveIntensity,
   toneMapped,
   xMultiplier = 1,
+  dome,
+  domeSideRatio,
 }: UiRectProps) => {
   const finalColor = color;
   const resolvedTransparent =
@@ -224,6 +284,8 @@ export const UiRect = ({
             topOnly={topOnly}
             bottomOnly={bottomOnly}
             xMultiplier={xMultiplier}
+            dome={dome}
+            domeSideRatio={domeSideRatio}
           />
           <a.meshBasicMaterial
             color={SHADOW_BLACK}
@@ -243,6 +305,8 @@ export const UiRect = ({
           topOnly={topOnly}
           bottomOnly={bottomOnly}
           xMultiplier={xMultiplier}
+          dome={dome}
+          domeSideRatio={domeSideRatio}
         />
         {isImage ? (
           <TexturedMaterial
@@ -614,6 +678,10 @@ interface VerseBoxProps {
   forceShowNumber?: boolean;
   /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
   translationPadding?: number;
+  /** Renders the capsule as a half-oval / dome — 'up' (domed top) or 'down' (domed bottom). */
+  domeDir?: "up" | "down";
+  /** Straight-wall fraction for the dome (0–1). Defaults to 0.35. */
+  domeSideRatio?: number;
 }
 export const VerseBox = ({
   x,
@@ -642,6 +710,8 @@ export const VerseBox = ({
   hideNumber = false,
   forceShowNumber = false,
   translationPadding,
+  domeDir,
+  domeSideRatio,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
@@ -738,6 +808,8 @@ export const VerseBox = ({
         depthTest={true}
         opacity={opacity}
         renderOrder={zOrder}
+        dome={domeDir}
+        domeSideRatio={domeSideRatio}
       />
       {/* 2. پسزمینه (1 میلیمتر بالاتر z=0.001) */}
       <UiRect
@@ -751,6 +823,8 @@ export const VerseBox = ({
         depthTest={true}
         opacity={opacity !== undefined ? opacity : bgOpacity}
         renderOrder={zOrder + 1}
+        dome={domeDir}
+        domeSideRatio={domeSideRatio}
       />
 
       {/* 3. دایرهها (z=0.002 و z=0.003) */}
@@ -773,6 +847,8 @@ export const VerseBox = ({
       <group
         position={[
           textAlign === "center" ? versePosX : versePosX + textMaxW / 2,
+          // Domes keep the text at the exact vertical centre of the capsule
+          // (matches the verse-number badge, which also sits at -h/2).
           -h / 2 + verticalShift + textOffsetY,
           0.005,
         ]}

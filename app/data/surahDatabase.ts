@@ -78,6 +78,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "الكافرون ١٠٩",
     reference: "Al-Kafirun 109",
   },
+  {
+    id: "tevbe24",
+    displayName: "At-Tawbah 24",
+    arabicName: "التوبة ٢٤",
+    reference: "Tevbe: 24",
+  },
 ] as const;
 
 /**
@@ -167,6 +173,13 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/kafirun109Config").then((m) => ({
         config: m.KAFIRUN_109_CONFIG,
         textData: m.KAFIRUN_109_TEXT_DATA,
+      })),
+  ],
+  tevbe24: [
+    () =>
+      import("./configs/tevbe24Config").then((m) => ({
+        config: m.TEVBE_24_CONFIG,
+        textData: m.TEVBE_24_TEXT_DATA,
       })),
   ],
 };

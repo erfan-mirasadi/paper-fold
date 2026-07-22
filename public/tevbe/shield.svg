@@ -1,0 +1,8 @@
+<svg width="200" height="220" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Downward-pointing "shield": flat top over the two side verses, tapering
+       to a rounded point at the bottom for the dome-down verse. Fill sits
+       BEHIND the capsules; the config tints the capsules the same lavender. -->
+  <path d="M8 10 H192 V150 Q192 168 150 196 Q100 222 50 196 Q8 168 8 150 Z"
+        fill="#E4E6F5" fill-opacity="0.55" stroke="#8E93C8" stroke-width="3.2"
+        stroke-linejoin="round"/>
+</svg>

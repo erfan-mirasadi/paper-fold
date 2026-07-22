@@ -1,0 +1,13 @@
+<svg width="200" height="220" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="nisa-border-gradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#968428"/>
+      <stop offset="0.503741" stop-color="#CDC577"/>
+      <stop offset="1" stop-color="#968428"/>
+    </linearGradient>
+  </defs>
+  <!-- Upward dome (for verse 8) over the body holding verses 9 & 10. -->
+  <path d="M10 214 V96 Q10 44 100 14 Q190 44 190 96 V214 Z"
+        fill="#F5EEDC" fill-opacity="0.6" stroke="url(#nisa-border-gradient)" stroke-width="2"
+        stroke-linejoin="round"/>
+</svg>

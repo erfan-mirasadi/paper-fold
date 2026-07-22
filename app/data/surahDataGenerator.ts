@@ -32,6 +32,10 @@ export interface VerseConfig {
   translationTextAlign?: "left" | "center" | "right";
   translationPadding?: number;
   isPill?: boolean;
+  /** Half-oval/dome shape for the capsule — see `VerseOverrideConfig.verseShape`. */
+  verseShape?: "capsule" | "dome-up" | "dome-down";
+  /** Dome straight-wall fraction (0–1) — see `VerseOverrideConfig.domeSideRatio`. */
+  domeSideRatio?: number;
   /** See `VerseOverrideConfig.showNumber` — forces the number badge on even
    * when `features.hideVerseNumbers` is globally true. */
   forceShowNumber?: boolean;
@@ -352,6 +356,8 @@ export function buildVerseConfigs(
         isPill: override?.isPill,
         forceShowNumber: override?.showNumber,
         capsuleLabel,
+        verseShape: override?.verseShape,
+        domeSideRatio: override?.domeSideRatio,
       });
     });
   });
