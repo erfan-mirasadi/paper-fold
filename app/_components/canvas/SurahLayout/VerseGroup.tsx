@@ -134,7 +134,11 @@ export function VerseGroup({
           shadow={topLabelConfig.shadow}
           isSimpleText={topLabelConfig.isSimpleText}
           renderOrder={20}
-          textScaleOverride={topLabelConfig.textScaleOverride}
+          textScaleOverride={
+            activeLanguage !== "ar" && topLabelConfig.translationTextScaleOverride !== undefined
+              ? topLabelConfig.translationTextScaleOverride
+              : topLabelConfig.textScaleOverride
+          }
         />
       )}
       {/* Row Connectors for opposite verses — the engine already omits

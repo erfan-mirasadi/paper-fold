@@ -424,6 +424,7 @@ export interface LayoutBlock {
     yOffset?: number;
     textOffsetY?: number;
     textScaleOverride?: number;
+    translationTextScaleOverride?: number;
     bgColor?: string;
     borderColor?: string;
     textColor?: string;
@@ -1047,6 +1048,7 @@ export interface GroupTransforms {
     yOffset?: number;
     textOffsetY?: number;
     textScaleOverride?: number;
+    translationTextScaleOverride?: number;
     bgColor?: string;
     borderColor?: string;
     textColor?: string;

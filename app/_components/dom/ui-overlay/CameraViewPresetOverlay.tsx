@@ -94,7 +94,7 @@ export function CameraViewPresetOverlay() {
 
   return (
     <div
-      className="fixed left-1/2 -translate-x-1/2 bottom-[calc(var(--safe-bottom)+2px)] md:bottom-[calc(var(--safe-bottom)+6px)] z-999993 w-[240px] h-[60px] text-foreground scale-[0.8] origin-bottom"
+      className="fixed left-1/2 -translate-x-1/2 bottom-[calc(var(--safe-bottom)+2px)] md:bottom-[calc(var(--safe-bottom)+6px)] z-999993 w-[240px] h-[60px] text-[var(--slider-gold)] scale-[0.8] origin-bottom"
       onPointerEnter={() => !isLocked && setIsHovered(true)}
       onPointerLeave={() => setIsHovered(false)}
       style={{ opacity: isLocked ? 0.4 : 1, transition: "opacity 0.3s" }}
@@ -103,7 +103,7 @@ export function CameraViewPresetOverlay() {
       <button
         onClick={moveLeft}
         disabled={isLocked}
-        className="absolute -top-[2px] -left-[32px] w-6 h-6 flex items-center justify-center text-foreground cursor-pointer pointer-events-auto opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+        className="absolute -top-[2px] -left-[32px] w-6 h-6 flex items-center justify-center text-[var(--slider-gold)] cursor-pointer pointer-events-auto opacity-75 hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Rotate left"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -115,7 +115,7 @@ export function CameraViewPresetOverlay() {
       <button
         onClick={moveRight}
         disabled={isLocked}
-        className="absolute -top-[2px] -right-[32px] w-6 h-6 flex items-center justify-center text-foreground cursor-pointer pointer-events-auto opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+        className="absolute -top-[2px] -right-[32px] w-6 h-6 flex items-center justify-center text-[var(--slider-gold)] cursor-pointer pointer-events-auto opacity-75 hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Rotate right"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -134,12 +134,12 @@ export function CameraViewPresetOverlay() {
           stroke="currentColor"
           strokeWidth="1.5"
           strokeDasharray="4 6"
-          opacity="0.3"
+          opacity="0.45"
         />
         {/* Preset tick dots */}
-        <circle cx="0" cy="10" r="2.5" fill="currentColor" opacity="0.5" />
-        <circle cx="120" cy="30" r="2.5" fill="currentColor" opacity="0.5" />
-        <circle cx="240" cy="10" r="2.5" fill="currentColor" opacity="0.5" />
+        <circle cx="0" cy="10" r="2.5" fill="currentColor" opacity="0.75" />
+        <circle cx="120" cy="30" r="2.5" fill="currentColor" opacity="0.75" />
+        <circle cx="240" cy="10" r="2.5" fill="currentColor" opacity="0.75" />
       </svg>
 
       {/* Draggable Knob */}
@@ -159,7 +159,7 @@ export function CameraViewPresetOverlay() {
         aria-valuemax={1}
         aria-valuenow={0}
         tabIndex={isLocked ? -1 : 0}
-        className="absolute top-0 left-1/2 -ml-[8px] w-4 h-4 rounded-full bg-foreground cursor-grab active:cursor-grabbing pointer-events-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        className="absolute top-0 left-1/2 -ml-[8px] w-4 h-4 rounded-full bg-[var(--slider-gold)] border-[1.5px] border-[var(--slider-handle-border)] shadow-[var(--slider-handle-shadow)] cursor-grab active:cursor-grabbing pointer-events-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--slider-gold)]"
         whileHover={{ scale: 1.25 }}
         whileTap={{ scale: 0.9 }}
       />
@@ -178,7 +178,7 @@ export function CameraViewPresetOverlay() {
           height="30"
           viewBox="0 0 512 512"
           fill="currentColor"
-          className="opacity-70"
+          className="text-foreground opacity-70"
         >
           <g transform="translate(1 1)">
             <path

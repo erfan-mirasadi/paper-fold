@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 
-
 export type SurahLanguage = "ar" | "en" | "tr";
 
 export const SURAH_LANGUAGE_ORDER: readonly SurahLanguage[] = [
@@ -11,10 +10,9 @@ export const SURAH_LANGUAGE_ORDER: readonly SurahLanguage[] = [
   "tr",
 ];
 
-
 export const ANA_AYET_LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
   ar: "Ana Ayet",
-  en: "Ana Ayet",
+  en: "Main verse",
   tr: "Ana Ayet",
 };
 

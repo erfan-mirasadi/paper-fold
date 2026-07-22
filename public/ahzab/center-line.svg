@@ -1,4 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="4" height="1000" viewBox="0 0 4 1000" xmlns="http://www.w3.org/2000/svg">
-  <rect width="4" height="1000" fill="#A30000"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 1000" width="300" height="1000">
+  <path 
+    d="M 148,15 L 148,985" 
+    fill="none" 
+    stroke="#A30000" 
+    stroke-width="2" 
+    stroke-dasharray="10 12" 
+    stroke-linecap="round" 
+  />
 </svg>

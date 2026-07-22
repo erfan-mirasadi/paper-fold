@@ -619,6 +619,11 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       circleTextCol: S1_VERSE_NUMBER_TEXT,
       textColor: S1_VERSE_5_TEXT,
       hasCapsuleLabel: true,
+      customCapsuleLabel: {
+        tr: "Ana ayet",
+        en: "Main verse",
+        ar: "Ana ayet",
+      },
     },
     // ── Section 2 intro verse (6) ─────────────────────────────────────────
     // isPill:false is needed so the paper-mask radius (VERSE_5_6_19_RADIUS)
@@ -1226,10 +1231,22 @@ export const ALAK_TEXT_EN: SurahDataShape = {
   section1: {
     label: "Five-verse Main Section",
     gridVerses: [
-      { number: 1, text: "O Muhammad, read these revealed verses to people in your Lord's name: He created (man)." },
-      { number: 2, text: "Yes, your Lord created man from an 'alaq, a single cell." },
-      { number: 3, text: "Read again in your Lord's name; He is most generous." },
-      { number: 4, text: "He taught people (Torah and Gospel knowledge) by the pen." },
+      {
+        number: 1,
+        text: "O Muhammad, read these revealed verses to people in your Lord's name: He created (man).",
+      },
+      {
+        number: 2,
+        text: "Yes, your Lord created man from an 'alaq, a single cell.",
+      },
+      {
+        number: 3,
+        text: "Read again in your Lord's name; He is most generous.",
+      },
+      {
+        number: 4,
+        text: "He taught people (Torah and Gospel knowledge) by the pen.",
+      },
     ],
     anaAyet: {
       number: 5,
@@ -1247,10 +1264,22 @@ export const ALAK_TEXT_EN: SurahDataShape = {
       {
         // Group 1 — Upper maroon block (verses 7–10)
         verses: [
-          { number: 7, text: "(Trusting his circle) he feels independent of Allah." },
-          { number: 8, text: "Yet in the end, all return to the Creator Lord." },
-          { number: 9, text: "Have you seen the one who goes too far and prevents (prayer)?" },
-          { number: 10, text: "He prevents a servant (prophet) while praying." },
+          {
+            number: 7,
+            text: "(Trusting his circle) he feels independent of Allah.",
+          },
+          {
+            number: 8,
+            text: "Yet in the end, all return to the Creator Lord.",
+          },
+          {
+            number: 9,
+            text: "Have you seen the one who goes too far and prevents (prayer)?",
+          },
+          {
+            number: 10,
+            text: "He prevents a servant (prophet) while praying.",
+          },
         ],
       },
       {
@@ -1258,17 +1287,29 @@ export const ALAK_TEXT_EN: SurahDataShape = {
         verses: [
           { number: 11, text: "What if that Servant is on the right path?" },
           { number: 12, text: "Or if he commands obedience to Allah?" },
-          { number: 13, text: "What if the other denies religion and shuns worship?" },
+          {
+            number: 13,
+            text: "What if the other denies religion and shuns worship?",
+          },
           { number: 14, text: "Does he not know that Allah sees everything?" },
         ],
       },
       {
         // Group 3 — Lower maroon block (verses 15–18)
         verses: [
-          { number: 15, text: "No! If he doesn't desist, We'll grab his forelock and drag him." },
-          { number: 16, text: "We'll cast that lying, unbowing forelock into hell." },
+          {
+            number: 15,
+            text: "No! If he doesn't desist, We'll grab his forelock and drag him.",
+          },
+          {
+            number: 16,
+            text: "We'll cast that lying, unbowing forelock into hell.",
+          },
           { number: 17, text: "Let him call then upon his (trusted) circle," },
-          { number: 18, text: "Then We too will certainly call the guards of hell (Zabaniya)." },
+          {
+            number: 18,
+            text: "Then We too will certainly call the guards of hell (Zabaniya).",
+          },
         ],
       },
     ],

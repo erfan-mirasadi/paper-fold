@@ -49,6 +49,12 @@
   --loader-glow-none: rgba(128, 128, 128, 0);
   --loader-glow-full: rgba(128, 128, 128, 0.6);
   --loader-glow-mid: rgba(128, 128, 128, 0.3);
+
+  /* Sliders Theme - Light Mode (Darker Gold #9B7023 & Subtle Black Border) */
+  --slider-gold: #9B7023;
+  --slider-gold-track: rgba(155, 112, 35, 0.35);
+  --slider-handle-border: rgba(0, 0, 0, 0.15);
+  --slider-handle-shadow: 0 0 8px rgba(155, 112, 35, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 @theme inline {
@@ -103,13 +109,19 @@
   --glass-handle-line: rgba(196, 150, 59, 0.55);
 
   /* Loading Overlay (Dark Mode) - White/Silver Gradient */
-  --loader-stroke: #efefef;
+  --loader-stroke: #cccccc;
   --loader-color-1: #ffffff;
-  --loader-color-2: #d1d5db;
-  --loader-color-3: #9ca3af;
+  --loader-color-2: #808080;
+  --loader-color-3: #c0c0c0;
   --loader-glow-none: rgba(255, 255, 255, 0);
-  --loader-glow-full: rgba(255, 255, 255, 0.6);
-  --loader-glow-mid: rgba(255, 255, 255, 0.3);
+  --loader-glow-full: rgba(255, 255, 255, 0.7);
+  --loader-glow-mid: rgba(255, 255, 255, 0.35);
+
+  /* Sliders Theme - Dark Mode (Page Gold #C4963B & Subtle White Border) */
+  --slider-gold: #C4963B;
+  --slider-gold-track: rgba(196, 150, 59, 0.35);
+  --slider-handle-border: rgba(255, 255, 255, 0.25);
+  --slider-handle-shadow: 0 0 10px rgba(196, 150, 59, 0.6), 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Side-panel backdrop ────────────────────────────────────────────────────

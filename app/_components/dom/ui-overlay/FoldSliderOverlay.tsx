@@ -25,9 +25,9 @@ const TRACK_FRACTION = 0.4;
  */
 const DRAG_SMOOTH_TAU = 0.09;
 
-/** Neutral ink shade at a given opacity — flips with the light/dark theme. */
-const ink = (a: number) =>
-  `color-mix(in srgb, var(--foreground) ${a}%, transparent)`;
+/** Manuscript gold accent color — identical across light and dark modes. */
+const GOLD = "#C4963B";
+const gold = (a: number) => `color-mix(in srgb, ${GOLD} ${a}%, transparent)`;
 
 /**
  * FoldSliderOverlay — a compact vertical scrubber pinned just outside the
@@ -39,8 +39,8 @@ const ink = (a: number) =>
  * It renders only a short centered segment of that edge. The handle's position
  * along the segment mirrors the fold progress (useFoldStore.currentOffset), and
  * dragging it drives that same scroll-backed progress — so fold-by-slider and
- * fold-by-scroll are one unified story. Palette is pure ink (no accent color),
- * so it sits quietly inside the manuscript aesthetic in both themes.
+ * fold-by-scroll are one unified story. Palette is manuscript gold (#C4963B),
+ * matching the theme accent across both light and dark modes.
  */
 export const FoldSliderOverlay: React.FC = () => {
   const runtime = useSurahLayoutRuntime();
@@ -372,7 +372,7 @@ export const FoldSliderOverlay: React.FC = () => {
             transform: "translateY(-50%)",
             height: 1.5,
             borderRadius: 2,
-            background: ink(16),
+            background: "var(--slider-gold-track)",
           }}
         />
         {/* Traveled portion */}
@@ -386,7 +386,7 @@ export const FoldSliderOverlay: React.FC = () => {
             transform: "translateY(-50%)",
             height: 1.5,
             borderRadius: 2,
-            background: ink(42),
+            background: "var(--slider-gold)",
           }}
         />
         {/* Fold-step notches */}
@@ -404,14 +404,15 @@ export const FoldSliderOverlay: React.FC = () => {
                 marginLeft: -1.5,
                 transform: "translateY(-50%)",
                 borderRadius: "50%",
-                background: ink(30),
+                background: "var(--slider-gold)",
+                opacity: 0.85,
               }}
             />
           );
         })}
       </div>
 
-      {/* Handle — a compact ink knob with a fold crease; stays upright. */}
+      {/* Handle — a compact gold knob with a fold crease; stays upright. */}
       <div
         ref={handleRef}
         role="slider"
@@ -447,12 +448,12 @@ export const FoldSliderOverlay: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: ink(6),
-            border: `1px solid ${ink(active ? 58 : 34)}`,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.14)",
+            background: "var(--slider-gold)",
+            border: "1.5px solid var(--slider-handle-border)",
+            boxShadow: "var(--slider-handle-shadow)",
             transform: active ? "scale(1.18)" : "scale(1)",
             transition:
-              "transform 0.16s ease, border-color 0.16s ease",
+              "transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease",
           }}
         >
           {/* Fold crease — a single thin line the page pivots on. */}
@@ -461,7 +462,8 @@ export const FoldSliderOverlay: React.FC = () => {
               width: 7,
               height: 1.5,
               borderRadius: 1,
-              background: ink(active ? 72 : 46),
+              background: "#FFFFFF",
+              opacity: active ? 1 : 0.85,
             }}
           />
         </div>
