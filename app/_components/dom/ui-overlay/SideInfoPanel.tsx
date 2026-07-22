@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import {
   useStoryStore,
@@ -809,6 +809,239 @@ function SideInfoEntryView({
   );
 }
 
+// ── InkScrollbar — the panel's own scrollbar ────────────────────────────────
+//
+// Native bars are hidden app-wide (globals.css), and the page itself scrolls
+// through Lenis with no visible track — so the reading log had nothing to grab
+// and its scroll kept getting confused with the page's. This is a slim,
+// self-drawn bar that rides the panel's right margin (never the left, so it
+// never crowds the paper): a faint hairline track with a fixed-length ink
+// handle. It auto-hides — fading fully out when the log is idle, summoned
+// again by a scroll, a hover of the edge, or a drag — and its fill takes the
+// current section's accent, cross-fading to the next colour as you read past
+// it. It reads `scrollRef` and writes only the handle's position imperatively,
+// so following the scroll costs no React re-renders.
+function InkScrollbar({
+  targetRef,
+  accent = GOLD,
+  visible,
+  revision,
+}: {
+  targetRef: React.RefObject<HTMLDivElement | null>;
+  accent?: string;
+  /** Only shown when the log actually overflows (mirrors data-lenis-prevent). */
+  visible: boolean;
+  /** Bump to re-measure when the entry list changes (mount/unmount). */
+  revision: number;
+}) {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const thumbRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{ startY: number; startScroll: number } | null>(null);
+  const hoverRef = useRef(false);
+  const idleRef = useRef<number | null>(null);
+  const rafRef = useRef(false);
+  const [canScroll, setCanScroll] = useState(false);
+  const [active, setActive] = useState(false); // revealed — scrolling / hover / drag
+  const [dragging, setDragging] = useState(false);
+
+  // A fixed-length handle — the same size in every surah and at every scroll
+  // depth (a longer log doesn't shrink it), so it always reads as one
+  // deliberate object rather than a proportion bar.
+  const THUMB_H = 46; // px
+  const IDLE_MS = 900; // fade back out this long after the last scroll
+
+  const recompute = useCallback(() => {
+    const el = targetRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!el || !track || !thumb) return;
+    const trackH = track.clientHeight;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    const scrollable = maxScroll > 1 && trackH > 0;
+    setCanScroll((prev) => (prev !== scrollable ? scrollable : prev));
+    if (!scrollable) return;
+    const denom = trackH - Math.min(THUMB_H, trackH);
+    const top = denom > 0 ? (el.scrollTop / maxScroll) * denom : 0;
+    thumb.style.transform = `translate(-50%, ${top}px)`;
+  }, [targetRef]);
+
+  const schedule = useCallback(() => {
+    if (rafRef.current) return;
+    rafRef.current = true;
+    requestAnimationFrame(() => {
+      rafRef.current = false;
+      recompute();
+    });
+  }, [recompute]);
+
+  // Flash the bar awake, then auto-hide after a short idle — unless the reader
+  // is still hovering the lane or dragging the handle.
+  const wake = useCallback(() => {
+    setActive(true);
+    if (idleRef.current) window.clearTimeout(idleRef.current);
+    idleRef.current = window.setTimeout(() => {
+      if (!dragRef.current && !hoverRef.current) setActive(false);
+    }, IDLE_MS);
+  }, []);
+
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    schedule();
+    const onScroll = () => {
+      schedule();
+      wake();
+    };
+    const onLoad = () => schedule(); // images finishing settle the height
+    el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("load", onLoad, { capture: true });
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+    // ExpandableEntry animates its own max-height (inline style) and entries
+    // mount/unmount — watch the subtree so the thumb tracks every reflow.
+    const mo = new MutationObserver(schedule);
+    mo.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+    window.addEventListener("resize", schedule);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("load", onLoad, { capture: true } as EventListenerOptions);
+      ro.disconnect();
+      mo.disconnect();
+      window.removeEventListener("resize", schedule);
+      if (idleRef.current) window.clearTimeout(idleRef.current);
+    };
+  }, [targetRef, schedule, wake, visible, revision]);
+
+  // ── Drag the thumb ────────────────────────────────────────────────────────
+  const onThumbDown = (e: React.PointerEvent) => {
+    const el = targetRef.current;
+    if (!el) return;
+    e.preventDefault();
+    e.stopPropagation(); // don't let the track's jump-scroll also fire
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    dragRef.current = { startY: e.clientY, startScroll: el.scrollTop };
+    setActive(true);
+    setDragging(true); // pin the handle to the pointer (no position easing)
+  };
+  const onThumbMove = (e: React.PointerEvent) => {
+    const el = targetRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    const d = dragRef.current;
+    if (!el || !track || !thumb || !d) return;
+    const denom = track.clientHeight - thumb.offsetHeight;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    const dy = e.clientY - d.startY;
+    el.scrollTop = d.startScroll + (denom > 0 ? (dy * maxScroll) / denom : 0);
+  };
+  const onThumbUp = (e: React.PointerEvent) => {
+    (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+    dragRef.current = null;
+    setDragging(false);
+    wake();
+  };
+
+  // ── Click the track → glide the thumb to that spot ─────────────────────────
+  const onTrackDown = (e: React.PointerEvent) => {
+    const el = targetRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!el || !track || !thumb) return;
+    const rect = track.getBoundingClientRect();
+    const denom = rect.height - thumb.offsetHeight;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    const target =
+      denom > 0
+        ? ((e.clientY - rect.top - thumb.offsetHeight / 2) / denom) * maxScroll
+        : 0;
+    el.scrollTo({
+      top: Math.max(0, Math.min(target, maxScroll)),
+      behavior: "smooth",
+    });
+  };
+
+  const show = visible && canScroll;
+  // Auto-hide: the lane still receives the pointer whenever the log is
+  // scrollable (so hovering the edge summons it), but the bar only paints
+  // itself while it's awake — otherwise it fades out and leaves the page clean.
+  const revealed = show && active;
+
+  return (
+    <div
+      ref={trackRef}
+      data-lenis-prevent=""
+      onPointerDown={onTrackDown}
+      onPointerEnter={() => {
+        hoverRef.current = true;
+        setActive(true);
+      }}
+      onPointerLeave={() => {
+        hoverRef.current = false;
+        if (!dragRef.current) setActive(false);
+      }}
+      aria-hidden
+      className="absolute top-0 bottom-0 right-0 z-10"
+      style={{
+        width: 12,
+        opacity: revealed ? 1 : 0,
+        pointerEvents: show ? "auto" : "none",
+        transition: "opacity 0.5s ease",
+        cursor: "pointer",
+        touchAction: "none",
+      }}
+    >
+      {/* Faint track — a hairline that melts out at both ends */}
+      <div
+        className="absolute top-1 bottom-1 left-1/2"
+        style={{
+          width: 2,
+          transform: "translateX(-50%)",
+          borderRadius: 999,
+          background:
+            "linear-gradient(to bottom, transparent, rgba(150,150,150,0.22) 14%, rgba(150,150,150,0.22) 86%, transparent)",
+        }}
+      />
+      {/* Ink handle — a fixed-length capsule. Its solid fill (not a gradient)
+          is what lets the accent CROSS-FADE to the next section's colour; the
+          top/bottom feather is a mask, so the colour underneath is free to
+          transition. Position is written imperatively in recompute() and eased
+          via the transform transition (killed only while dragging). */}
+      <div
+        ref={thumbRef}
+        onPointerDown={onThumbDown}
+        onPointerMove={onThumbMove}
+        onPointerUp={onThumbUp}
+        onPointerCancel={onThumbUp}
+        className="absolute left-1/2 top-0"
+        style={{
+          width: active ? 5 : 3,
+          height: THUMB_H,
+          borderRadius: 999,
+          transform: "translate(-50%, 0)",
+          backgroundColor: accent,
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, #000 24%, #000 76%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, #000 24%, #000 76%, transparent 100%)",
+          boxShadow: active ? `0 0 12px ${hexToRgba(accent, 0.55)}` : "none",
+          cursor: "grab",
+          transition: [
+            "width 0.25s ease",
+            "background-color 0.6s ease",
+            "box-shadow 0.45s ease",
+            `transform ${dragging ? "0s" : "0.16s cubic-bezier(0.22, 1, 0.36, 1)"}`,
+          ].join(", "),
+        }}
+      />
+    </div>
+  );
+}
+
 // ── The panel itself ────────────────────────────────────────────────────────
 export function SideInfoPanel() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
@@ -835,17 +1068,43 @@ export function SideInfoPanel() {
   // Only claim the wheel (data-lenis-prevent + inner scroll) when the text
   // actually overflows — otherwise wheel events over the panel must keep
   // driving the page's fold-story scroll (mirrors the left sidebar).
+  //
+  // Turning overflow ON is instant, but turning it OFF is deferred: entries
+  // animate in (blur/translate) and ExpandableEntry transitions its own
+  // max-height, so scrollHeight briefly dips below clientHeight mid-animation.
+  // Without this hysteresis, data-lenis-prevent would flicker off for a frame
+  // and hand that wheel tick to the page — the "scroll bleeding into the page"
+  // the reader feels. We only concede the wheel once the log has genuinely
+  // settled short of its box.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const check = () => setHasOverflow(el.scrollHeight > el.clientHeight + 1);
+    let offTimer: number | null = null;
+    const check = () => {
+      const over = el.scrollHeight > el.clientHeight + 1;
+      if (over) {
+        if (offTimer) {
+          window.clearTimeout(offTimer);
+          offTimer = null;
+        }
+        setHasOverflow(true);
+      } else if (offTimer === null) {
+        offTimer = window.setTimeout(() => {
+          offTimer = null;
+          setHasOverflow(false);
+        }, 450);
+      }
+    };
     check();
     const ro = new ResizeObserver(check);
     ro.observe(el);
     // Content growth (e.g. a FoldedParagraph expanding) changes scrollHeight
     // without resizing the container itself — watch the entries too.
     for (const child of Array.from(el.children)) ro.observe(child);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      if (offTimer) window.clearTimeout(offTimer);
+    };
   }, [isOpen, activeConfig.id, entries.length]);
 
   // When new entries arrive on a fold-step change, glide the panel's own
@@ -1016,14 +1275,21 @@ export function SideInfoPanel() {
                 {panelTitle}
               </div>
 
-              {/* ── Reading log — grows to fill the aside, scrolls on its own */}
-              <div
-                ref={scrollRef}
-                {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
-                className={`relative flex-1 min-h-0 overscroll-contain
-                  [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                  ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
-              >
+              {/* ── Reading log — grows to fill the aside and scrolls on its
+                  own, fully isolated from the page's Lenis scroll, with its
+                  own slim gold bar riding the right gutter (see InkScrollbar).
+                  The scroller is absolutely stretched inside this relative
+                  frame so the bar can sit beside it without ever scrolling
+                  along with the text. ─────────────────────────────────────── */}
+              <div className="relative flex-1 min-h-0">
+                <div
+                  ref={scrollRef}
+                  {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
+                  className={`absolute inset-0 overscroll-contain
+                    [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+                    ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
+                  style={{ paddingRight: "clamp(10px, 0.9vw, 16px)" }}
+                >
                 <AnimatePresence initial={false}>
                   {entries.length === 0 ? (
                     <motion.p
@@ -1087,6 +1353,13 @@ export function SideInfoPanel() {
                     })
                   )}
                 </AnimatePresence>
+                </div>
+                <InkScrollbar
+                  targetRef={scrollRef}
+                  accent={scrollAccent ?? GOLD}
+                  visible={hasOverflow}
+                  revision={entries.length}
+                />
               </div>
             </motion.div>
           </motion.aside>
