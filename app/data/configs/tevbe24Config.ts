@@ -992,11 +992,11 @@ export const TEVBE_24_TEXT_AR: SurahDataShape = {
       // 6 — center row [10, 9]
       {
         verses: [
-          { number: 10, text: "مِنَ اللَّهِ وَرَسُولِهِ" },
-          { number: 9, text: "وَجِهَادٍ فِي سَبِيلِهِ" },
+          { number: 10, text: "وَجِهَادٍ فِي سَبِيلِهِ" },
+          { number: 9, text: "مِنَ اللَّهِ وَرَسُولِهِ" },
         ],
       },
-      // 7 — v11
+      // 7 — v11§
       {
         verses: [
           {
