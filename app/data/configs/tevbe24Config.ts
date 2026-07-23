@@ -196,6 +196,8 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       verseShape: "dome-down",
       domeSideRatio: 0.2,
       expandH: 0.02,
+      textScaleOverride: 0.72,
+      translationTextScaleOverride: 0.5,
     },
 
     // ── CENTER dome 8-9-10 ────────────────────────────────────────────────
@@ -327,6 +329,76 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [{ text: "Tevbe: 24" }],
     },
+    // ── "1. Bölüm" — family group (RIGHT shield: 2,3,4) ────────────────────
+    {
+      x: 1.15,
+      y: -0.25,
+      fontSize: 0.032,
+      color: "#000000",
+      lineSpacing: 1.4,
+      maxWidth: 0.6,
+      textAlign: "center",
+      rotationZ: 0.03,
+      lines: [{ text: "1. Bölüm" }],
+      svgs: [
+        {
+          src: "/ahzab/arrows.svg",
+          anchor: "end",
+          offsetX: -0.01,
+          offsetY: -0.075,
+          scaleX: 0.075,
+          scaleY: 0.075,
+          rotationZ: Math.PI * 0.15,
+        },
+      ],
+    },
+    // ── "2. Bölüm" — possessions group (LEFT shield: 5,6,7) ────────────────
+    {
+      x: 0.4,
+      y: -0.25,
+      fontSize: 0.032,
+      color: "#000000",
+      lineSpacing: 1.4,
+      maxWidth: 0.6,
+      textAlign: "center",
+      rotationZ: -0.03,
+      lines: [{ text: "2. Bölüm" }],
+      svgs: [
+        {
+          src: "/ahzab/arrows.svg",
+          anchor: "end",
+          offsetX: 0.01,
+          offsetY: -0.075,
+          scaleX: -0.075,
+          scaleY: 0.075,
+          rotationZ: -Math.PI * 0.15,
+        },
+      ],
+    },
+    // ── "3. Bölüm (Ana Bölüm)" — comparison group / crux of the ayah
+    //     (CENTER dome: 8,9,10 — Allah & His Messenger vs. everything above)
+    {
+      x: 0.24,
+      y: -0.95,
+      fontSize: 0.032,
+      color: "#000000",
+      lineSpacing: 1.3,
+      maxWidth: 0.7,
+      textAlign: "center",
+      rotationZ: 0.03,
+      lines: [{ text: "3. Bölüm" }, { text: "(Ana Bölüm)", scale: 0.85 }],
+      svgs: [
+        {
+          src: "/ahzab/arrows.svg",
+          anchor: "end",
+          offsetX: 0.07,
+          offsetY: -0.1,
+          scaleX: 0.075,
+          scaleY: 0.075,
+          rotationZ: Math.PI * 0.2,
+        },
+      ],
+    },
   ],
 
   // ── BLOCKS — one group per colorGroup, in this exact order ───────────────
@@ -382,7 +454,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       columns: 2,
       capsuleHeight: 0.18,
       horizontalInset: 0.155,
-      xOffset: -0.33,
+      xOffset: -0.34,
       isCenter: false,
       columnGap: 0.015,
       dragBehavior: "group",
@@ -398,7 +470,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       columns: 1,
       capsuleHeight: 0.12,
       horizontalInset: 0.05,
-      xOffset: -0.33,
+      xOffset: -0.34,
       isCenter: false,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -438,7 +510,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.035,
+      gapBefore: 0.07,
     },
     // 8 — Verse 12 (maroon full-width bar, carries the ۲٤ ayah marker)
     {
@@ -472,9 +544,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 0,
       anchorEdge: "top",
       scaleX: 1.15,
-      scaleY: 1.05,
+      scaleY: 1.08,
       offsetX: 0,
-      offsetY: -0.395,
+      offsetY: -0.405,
       renderOrder: 2,
       customSectionId: null,
     },
@@ -497,7 +569,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       anchorEdge: "center",
       scaleX: 0.72,
       scaleY: -0.45,
-      offsetX: -0.33,
+      offsetX: -0.34,
       offsetY: -0.105,
       renderOrder: 3,
       customSectionId: "g_top",
@@ -515,6 +587,300 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       customSectionId: "g_top",
     },
   ],
+
+  sideInfo: {
+    panelTitle: "Tefsir",
+    byFoldStep: {
+      "pre-start": {
+        kicker: "TEVBE: 24",
+        paragraphs: [
+          "Dünyada bütün milletler barış ve huzur içinde yaşamayı ister. Savaş genellikle istisnadır. Müslümanlar için de durum bundan farklı değildir. Eski zamanlarda çokça yaşanan fetih düşüncesi ve fetih savaşları da artık tarihte kalmıştır.",
+          "Dinine hizmet etmek isteyen, İslam’ın adını, mesajını bütün insanlığa duyurmak isteyen insan, bunu sivil, meşru ve müspet yollarla yapacaktır. Eğitim yoluyla yapacaktır. Özellikle de bilime katkılarıyla, hukuka katkılarıyla, sosyal adalete ve barışa katkılarıyla, sevgiye ve diyaloğa katkılarıyla yapacaktır. Allah’ın dinini en yüksek seviyede temsil ederek, yani iyi insan ve iyi mümin olarak yaşamakla yapacaktır.",
+          "Burada bir sistem dahilinde dizilişini gördüğünüz kelimeler bir tek ayettir. Kur’an-ı Kerim’de yirmi bir sayfa yer tutan ve tamamı 129 ayet olan büyük bir surenin, yani Tövbe suresinin yalnızca bir ayetidir. Bir ayetin içindeki kelimelerin bile ne kadar manidar dizildiklerini hayranlıkla seyrediniz. Düşününüz ki bu ayet başka ayetlerle bir araya gelerek daha üst bir sistemin parçası olmaktadır. O sistem de daha üst bir sistemin belki bir surenin parçası olmaktadır. Sonunda Tevbe suresi de surelerin teşkil ettiği daha geniş, mükemmel bir sistem içinde yerini almaktadır. Peygamber Efendimize bir anda nazil oluveren bu ayetlerin ve surelerin böyle akıl almaz derecede iç içe sistemlerle gelmesi, Kur’an’ın Allah kelamı olduğunu gösteriyor. Birçok edip, şair, sosyolog, psikolog, hukukçu gibi kendi alanlarında uzman insanlar bir araya gelseler ne böyle bir dizilişi ne böyle insanların ruhunu saran ve onları motive eden, güzel tatlı bir ahenkle okunan böyle bir Kitabın benzerini yazmaya güç yetiremezler. Halbuki Kur'an yalnız kelime ve ayetlerinin dizilişindeki güzellikle değil, çok yönleriyle mucizedir.",
+        ],
+      },
+      end: {
+        paragraphs: [
+          "Şimdi ayeti okuyalım. Okurken numara sırasını takip ediniz. Bu ayet aslında tek ayet olduğu için elbette onun kelimeleri numaralı değildir. Biz okunuş sırasını göstermek amacıyla numaralar koyduk.",
+          "1. Bölüm",
+          "2. Bölüm",
+          {
+            capsules: [
+              {
+                n: 1,
+                text: "De ki eğer,",
+                bg: CREAM_BG,
+                color: GOLD_BORDER,
+                textColor: "#5A3D12",
+              },
+              {
+                n: 2,
+                text: "Babalarınızı ve çocuklarınızı,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 3,
+                text: "Kardeşlerinizi ve eşlerinizi,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 5,
+                text: "Kazandığınız malları,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 6,
+                text: "Bozulmasından korktuğunuz ticareti,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 4,
+                text: "Ve yakınlarınızla beraber olmayı,",
+                bg: DOME_BG,
+                color: "#6B8EAD",
+                textColor: "#634E73",
+              },
+              {
+                n: 7,
+                text: "Ve hoşlandığınız evlerde oturmayı,",
+                bg: DOME_BG,
+                color: "#6B8EAD",
+                textColor: GREEN_THEME,
+              },
+              {
+                n: 8,
+                text: "Allah ve Resulünden,",
+                bg: DOME_BG,
+                color: DOME_BORDER,
+                textColor: "#634E73",
+              },
+              {
+                n: 9,
+                text: "Ve Allah yolunda savaşmaktan,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: GREEN_THEME,
+              },
+            ],
+            corners: "soft",
+          },
+          "3. Bölüm Ana Bölüm",
+          {
+            capsules: [
+              {
+                n: 10,
+                text: "(olmaz ya) Daha çok seviyorsanız…",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#A30000",
+              },
+              {
+                n: 11,
+                text: "O zaman hakkınızda Allah'ın hükmü gelinceye kadar bekleyin.",
+                bg: CAPSULE_BG_12_14,
+                color: GREEN_THEME,
+                textColor: "#2B2B2B",
+              },
+              {
+                n: 12,
+                text: "Allah, (fasık) itaatsiz bir topluluğa yol göstermez.",
+                bg: CAPSULE_BG_6_19,
+                color: ORANGE_THEME,
+                textColor: "#A30000",
+              },
+            ],
+            corners: "soft",
+          },
+          "Bu ayetin ana bölümü 3. bölümdür: Şimdi tekrar onu inceleyelim:",
+          {
+            capsules: [
+              {
+                n: 8,
+                text: "Allah ve Resulünden,",
+                bg: DOME_BG,
+                color: DOME_BORDER,
+                textColor: "#634E73",
+              },
+              {
+                n: 9,
+                text: "Ve Allah yolunda savaşmaktan,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: GREEN_THEME,
+              },
+              {
+                n: 10,
+                text: "(olmaz ya) Daha çok seviyorsanız…",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#A30000",
+              },
+            ],
+            corners: "soft",
+          },
+          "3. Bölüm",
+          {
+            capsules: [
+              {
+                n: 11,
+                text: "O zaman hakkınızda Allah'ın hükmü gelinceye kadar bekleyin.",
+                bg: CAPSULE_BG_12_14,
+                color: GREEN_THEME,
+                textColor: "#2B2B2B",
+              },
+              {
+                n: 12,
+                text: "Allah, (fasık) itaatsiz bir topluluğa yol göstermez.",
+                bg: CAPSULE_BG_6_19,
+                color: ORANGE_THEME,
+                textColor: "#A30000",
+              },
+            ],
+            corners: "soft",
+          },
+          "Bu ana bölüm de üç cümleden oluşmaktadır. Bu bölümün ana cümlesi şu gelen bölümdür:",
+          {
+            capsules: [
+              {
+                n: 8,
+                text: "Allah ve Resulünden,",
+                bg: DOME_BG,
+                color: DOME_BORDER,
+                textColor: "#634E73",
+              },
+              {
+                n: 9,
+                text: "Ve Allah yolunda savaşmaktan,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: GREEN_THEME,
+              },
+              {
+                n: 10,
+                text: "(olmaz ya) Daha çok seviyorsanız…",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#A30000",
+              },
+            ],
+            corners: "soft",
+          },
+          "Evet bir Müslüman için en olmayacak şey dünyadaki herhangi bir varlığı Allah ve Resulünden ve Allah yolunda savaşmaktan daha çok sevmektir.",
+          "Bir ana bölümü daima iki bölüm açıklar. Bir ana kelimeyi de iki kelime açıklar. Burada esas olan ve tek olan mana: “Allah yolunda savaşmak” sözüdür. Tek olan odur.",
+          {
+            capsules: [
+              {
+                n: 8,
+                text: "Allah ve Resulünden",
+                bg: DOME_BG,
+                color: DOME_BORDER,
+                textColor: "#634E73",
+              },
+              {
+                n: 9,
+                text: "Ve Allah yolunda savaşmaktan",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: GREEN_THEME,
+              },
+            ],
+            corners: "soft",
+          },
+          "Allah yolunda savaşmanın anlamı ise: “Allah ve Resulünü her şeyden daha çok sevmektir.” şeklinde açıklanmış oluyor.",
+          "Bunu şöyle de ifade edebiliriz: Allah ve Resulünü her şeyden çok seven bir mümin, Allah yolunda savaşmaktan çekinmez ve Allah yolunda hiçbir hizmetten geri durmaz.",
+          "Şimdi de en sondaki iki ilahi tehdit, kaderin vereceği fetvaya, karara dikkat çekiyor:",
+          {
+            capsules: [
+              {
+                n: 11,
+                text: "O zaman hakkınızda Allah'ın hükmü gelinceye kadar bekleyin.",
+                bg: CAPSULE_BG_12_14,
+                color: GREEN_THEME,
+                textColor: "#2B2B2B",
+              },
+            ],
+            corners: "soft",
+          },
+          "Savaşın farz olduğu bir zamanda savaştan kaçan bir topluluğa Allah da başka bir çıkış yolu göstermez.",
+          {
+            capsules: [
+              {
+                n: 12,
+                text: "Allah, (fasık) itaatsiz bir topluluğa yol göstermez.",
+                bg: CAPSULE_BG_6_19,
+                color: ORANGE_THEME,
+                textColor: "#A30000",
+              },
+            ],
+            corners: "soft",
+          },
+          "Her zamanın bir hükmü vardır; her zamanın bir ihtiyacı, bir gereği vardır. Zamanın, şartların ihtiyacına kulak vermeyen, bugüne cevap olmayan ve bugün yapılması gereken doğru işi yapmayanlara Allah, bir çıkış yolu göstermez. Allah, kimseyi o durumlara düşürmesin.",
+          "Savaşa gelince;",
+          "Her devlet halkını ve haklarını savunmak için ordu kurar. Eskiden beri her devletin düzenli ordusu vardır. Müslümanlar da yüzyıllardır çeşitli devletler kurmuşlar ve elbette düzenli ordulara sahip olmuşlardır. Savaş, istenen bir durum değildir ama devlet savaşa karar verdikten sonra askerden kaçmak, hele savaştan kaçmak büyük suçtur.",
+          "Günümüzde din adına savaşlara ihtiyaç yok. İnşallah bundan sonra kıyamete kadar da dileriz ki din adına bir savaş olmasın. Çünkü dinin amacı savaş değil barıştır. İnsanlığın mutluluğunu temin etmektir, düzen ve hukuk içinde yaşamasını sağlamaktır.",
+          "Biz inanıyoruz ki bugün de bundan sonra da insanların inanç ve ahlakının gelişmesi, huzur ve güvenin korunması, sosyal yaralara merhem olma yönünde yapılabilecek pek çok sivil hizmete ihtiyaç vardır. Böyle sivil hizmetlerden geri kalmak da bizi bu ayetin tehdidine dahil eder, Allah katında bizi sorumlu duruma düşürür.",
+          "Bu ilahi tahditten kendimizi kurtarmanın yolu; bizi bu sivil ve meşru faaliyetlerden uzaklaştıracak olan rahata düşkünlükten, ev düşkünlüğünden, aile düşkünlüğünden, kazanma düşkünlüğünden Allah için biraz feragat ve fedakârlıkta bulunarak manen, maddeten ve bedenen milletimizin ve insanlığın Allah’ı tanımasına, dinin şefkatli kanatları altında gelişmesine ve kalite kazanmasına hizmet etmektir.",
+          "Bütün vaktini, bütün kazancını, bütün himmetini kendine ve yakınlarına hasredenler bir kere daha düşünmelidir.",
+          "Elbette insanın üzerinde; kendi vücudunun bir hakkı var. Aile fertlerinin de bir hakkı var. Bunların haklarını verecektir ama bundan başka Allah’ın da bir hakkı vardır. Milletin de insanlığın da bir hakkı vardır. Mahrum ve muhtaçların da bir hakkı vardır. Her mümin, vaktini de parasını da herkesin hakkını ödeyecek şekilde planlamalıdır. Ayeti bu açıdan tekrar okumalıyız.",
+          "Aşağıdaki bölüme dikkat etmeliyiz:",
+          {
+            capsules: [
+              {
+                n: 2,
+                text: "Babalarınızı ve çocuklarınızı,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 3,
+                text: "Kardeşlerinizi ve eşlerinizi,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 4,
+                text: "Ve yakınlarınızla beraber olmayı…",
+                bg: DOME_BG,
+                color: "#6B8EAD",
+                textColor: "#634E73",
+              },
+            ],
+            corners: "soft",
+          },
+          "“Yakınlarınız” kelimesi bu küçük bölümün ana kelimesidir. Onun açılımı daha küçük iki bölümle yapılmıştır:",
+          {
+            capsules: [
+              {
+                n: 2,
+                text: "Babalarınızı ve çocuklarınızı,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+              {
+                n: 3,
+                text: "Kardeşlerinizi ve eşlerinizi,",
+                bg: WHITE_BG,
+                color: WHITE_BORDER,
+                textColor: "#2C2A22",
+              },
+            ],
+            corners: "soft",
+          },
+        ],
+      },
+    },
+  },
 
   animations: {
     computeFoldYPositions: (lm) => {
@@ -615,7 +981,7 @@ export const TEVBE_24_TEXT_AR: SurahDataShape = {
       // 3 — left row [6, 5]  (6 = ticaret on the left, 5 = mallar on the right)
       {
         verses: [
-          { number: 6, text: "وَتِجَارَةٌ تَخْشَوْنَ كَسَادَهَا" },
+          { number: 6, text: "وَتِجَارَةٌ\nتَخْشَوْنَ كَسَادَهَا" },
           { number: 5, text: "وَأَمْوَالٌ اقْتَرَفْتُمُوهَا" },
         ],
       },
