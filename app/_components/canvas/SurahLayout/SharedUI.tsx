@@ -740,6 +740,18 @@ export const VerseBox = ({
   const isTightPadding = activeStoryConfig?.globalSettings?.tightVersePadding === true;
   const cx = isPill ? cr + SMALL_PILL_OFFSET : (isTightPadding ? cr + 0.005 : 0.05);
 
+  // DOME CAPSULES — the number never sits on a side wall (the arch eats it).
+  // It is horizontally centred and pinned to the FLAT edge, i.e. the edge
+  // opposite the dome: 'dome-down' (flat top) → top, 'dome-up' → bottom.
+  // Sits right up against the flat edge — the circle only clears the border.
+  const domeBadgeInset = Math.min(cr + bw, h / 2);
+  const badgeX = domeDir ? finalW / 2 : cx;
+  const badgeY = domeDir
+    ? domeDir === "down"
+      ? -domeBadgeInset
+      : -(h - domeBadgeInset)
+    : -h / 2;
+
   const isTranslationCenterOverride =
     !isArabic && textAlignOverride === "center";
   const centerTextInCapsule =
@@ -830,8 +842,8 @@ export const VerseBox = ({
       {/* 3. دایرهها (z=0.002 و z=0.003) */}
       {showVerseNumber && (
         <VerseNumberBadge
-          x={cx}
-          y={-h / 2}
+          x={badgeX}
+          y={badgeY}
           z={0.002}
           cr={cr}
           number={number}
@@ -847,8 +859,8 @@ export const VerseBox = ({
       <group
         position={[
           textAlign === "center" ? versePosX : versePosX + textMaxW / 2,
-          // Domes keep the text at the exact vertical centre of the capsule
-          // (matches the verse-number badge, which also sits at -h/2).
+          // Text stays at the exact vertical centre of the capsule; on domes the
+          // number badge moves off-centre to the flat edge instead (see badgeY).
           -h / 2 + verticalShift + textOffsetY,
           0.005,
         ]}
