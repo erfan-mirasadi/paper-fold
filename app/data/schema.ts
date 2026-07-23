@@ -576,6 +576,17 @@ export interface VerseOverrideConfig {
    * (first in Arabic reading) while the same spatial slot shows "2" in LTR.
    */
   arDisplayNumber?: number | string;
+  /**
+   * SINGLE-AYAH PAGES ONLY (`scriptInfo.singleAyahNumber` set) — this verse's
+   * badge slot carries BOTH numbers stacked on top of each other: the chunk
+   * counter on top (plain, no circle) and the page's real mushaf ayah number
+   * underneath it in the normal badge design. Mirrors how a mushaf prints the
+   * ayah-ending marker next to the last chunk of the ayah.
+   *
+   * Ignored when the config has no `singleAyahNumber` — there is no single
+   * ayah number to show, so the badge just keeps the counter.
+   */
+  showAyahNumber?: boolean;
 }
 
 export interface SurahAssets {

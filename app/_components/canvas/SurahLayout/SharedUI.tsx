@@ -589,6 +589,8 @@ interface VerseNumberBadgeProps {
   circleTextCol: string;
   opacity?: any;
   renderOrder?: number;
+  /** Draws the numeral alone, without the two circle discs behind it. */
+  hideCircle?: boolean;
 }
 export function VerseNumberBadge({
   x,
@@ -601,30 +603,35 @@ export function VerseNumberBadge({
   circleTextCol,
   opacity,
   renderOrder,
+  hideCircle = false,
 }: VerseNumberBadgeProps) {
   const zOrder = renderOrder ?? 12;
   return (
     <group position={[x, y, z]}>
-      <mesh renderOrder={zOrder}>
-        <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
-        <a.meshBasicMaterial
-          color={circleBg}
-          depthTest={true}
-          depthWrite={false}
-          transparent
-          opacity={opacity ?? 0.999}
-        />
-      </mesh>
-      <mesh position={[0, 0, -0.001]} renderOrder={zOrder}>
-        <circleGeometry args={[cr, 48]} />
-        <a.meshBasicMaterial
-          color={circleBorderCol}
-          depthTest={true}
-          depthWrite={false}
-          transparent
-          opacity={opacity ?? 0.999}
-        />
-      </mesh>
+      {!hideCircle && (
+        <>
+          <mesh renderOrder={zOrder}>
+            <circleGeometry args={[cr - CIRCLE_BORDER_WIDTH, 48]} />
+            <a.meshBasicMaterial
+              color={circleBg}
+              depthTest={true}
+              depthWrite={false}
+              transparent
+              opacity={opacity ?? 0.999}
+            />
+          </mesh>
+          <mesh position={[0, 0, -0.001]} renderOrder={zOrder}>
+            <circleGeometry args={[cr, 48]} />
+            <a.meshBasicMaterial
+              color={circleBorderCol}
+              depthTest={true}
+              depthWrite={false}
+              transparent
+              opacity={opacity ?? 0.999}
+            />
+          </mesh>
+        </>
+      )}
       <group position={[0, 0, 0.002]}>
         <CanvasText
           text={String(number)}
@@ -678,6 +685,9 @@ interface VerseBoxProps {
   forceShowNumber?: boolean;
   /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
   translationPadding?: number;
+  /** Stacks the page's single ayah number under the chunk counter — see
+   * `VerseOverrideConfig.showAyahNumber`. */
+  showAyahNumber?: boolean;
   /** Renders the capsule as a half-oval / dome — 'up' (domed top) or 'down' (domed bottom). */
   domeDir?: "up" | "down";
   /** Straight-wall fraction for the dome (0–1). Defaults to 0.35. */
@@ -710,6 +720,7 @@ export const VerseBox = ({
   hideNumber = false,
   forceShowNumber = false,
   translationPadding,
+  showAyahNumber = false,
   domeDir,
   domeSideRatio,
 }: VerseBoxProps) => {
@@ -751,6 +762,17 @@ export const VerseBox = ({
       ? -domeBadgeInset
       : -(h - domeBadgeInset)
     : -h / 2;
+
+  // SINGLE-AYAH PAGES — the badge slot can carry two numbers stacked: the real
+  // mushaf ayah number keeps the normal badge design in the normal spot, and
+  // the chunk counter rides above it as a bare numeral. Only a page that
+  // declares `singleAyahNumber` has a second number to show.
+  const singleAyahNumber = activeStoryConfig?.scriptInfo?.singleAyahNumber;
+  const stackedAyahNumber =
+    showAyahNumber && singleAyahNumber !== undefined ? singleAyahNumber : undefined;
+  // A dome-down capsule already pins its badge to the top edge, so the counter
+  // stacks downward there; everywhere else it stacks upward.
+  const counterStackY = badgeY + (domeDir === "down" ? -1 : 1) * cr * 1.55;
 
   const isTranslationCenterOverride =
     !isArabic && textAlignOverride === "center";
@@ -841,18 +863,35 @@ export const VerseBox = ({
 
       {/* 3. دایرهها (z=0.002 و z=0.003) */}
       {showVerseNumber && (
-        <VerseNumberBadge
-          x={badgeX}
-          y={badgeY}
-          z={0.002}
-          cr={cr}
-          number={number}
-          circleBg={circleBg ?? bg}
-          circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
-          circleTextCol={circleTextCol ?? TEXT_DARK}
-          opacity={opacity}
-          renderOrder={zOrder + 2}
-        />
+        <>
+          <VerseNumberBadge
+            x={badgeX}
+            y={badgeY}
+            z={0.002}
+            cr={cr}
+            number={stackedAyahNumber ?? number}
+            circleBg={circleBg ?? bg}
+            circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
+            circleTextCol={circleTextCol ?? TEXT_DARK}
+            opacity={opacity}
+            renderOrder={zOrder + 2}
+          />
+          {stackedAyahNumber !== undefined && (
+            <VerseNumberBadge
+              x={badgeX}
+              y={counterStackY}
+              z={0.002}
+              cr={cr}
+              number={number}
+              hideCircle
+              circleBg={circleBg ?? bg}
+              circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
+              circleTextCol={circleTextCol ?? TEXT_DARK}
+              opacity={opacity}
+              renderOrder={zOrder + 2}
+            />
+          )}
+        </>
       )}
 
       {/* 4. متن عربی یا انگلیسی (بالاترین لایه z=0.005) */}

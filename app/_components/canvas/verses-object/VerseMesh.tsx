@@ -46,6 +46,7 @@ export interface VerseMeshProps {
   splitTexts?: [string, string];
   number: number | string;
   forceShowNumber?: boolean;
+  showAyahNumber?: boolean;
   bg: string;
   border: string;
   circleBorderCol: string;
@@ -148,6 +149,7 @@ export function VerseMesh({
   splitTexts,
   number,
   forceShowNumber,
+  showAyahNumber,
   bg,
   border,
   circleBorderCol,
@@ -442,6 +444,7 @@ export function VerseMesh({
                         opacity={combinedOpacity}
                         baseRenderOrder={baseRenderOrder}
                         forceShowNumber={forceShowNumber}
+                        showAyahNumber={showAyahNumber}
                       />
                     )}
                   </a.group>

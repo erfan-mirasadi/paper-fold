@@ -325,6 +325,7 @@ export function VerseGroup({
                 translationPadding={override?.translationPadding}
                 textAlignOverride={override?.translationTextAlign}
                 forceShowNumber={override?.showNumber}
+                showAyahNumber={override?.showAyahNumber}
                 domeDir={
                   override?.verseShape === "dome-up"
                     ? "up"

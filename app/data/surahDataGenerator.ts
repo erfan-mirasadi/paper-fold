@@ -39,6 +39,9 @@ export interface VerseConfig {
   /** See `VerseOverrideConfig.showNumber` — forces the number badge on even
    * when `features.hideVerseNumbers` is globally true. */
   forceShowNumber?: boolean;
+  /** See `VerseOverrideConfig.showAyahNumber` — stacks the page's single ayah
+   * number under the chunk counter. */
+  showAyahNumber?: boolean;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
   frameScaleLTR?: number;
@@ -355,6 +358,7 @@ export function buildVerseConfigs(
         translationPadding,
         isPill: override?.isPill,
         forceShowNumber: override?.showNumber,
+        showAyahNumber: override?.showAyahNumber,
         capsuleLabel,
         verseShape: override?.verseShape,
         domeSideRatio: override?.domeSideRatio,

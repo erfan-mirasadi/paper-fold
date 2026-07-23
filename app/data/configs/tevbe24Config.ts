@@ -38,7 +38,12 @@
 import type { SurahLayoutConfig } from "../schema";
 import type { SurahDataShape } from "../SurahConfig";
 import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
-import { ORANGE_THEME, CAPSULE_BG_6_19, GREEN_THEME, CAPSULE_BG_12_14 } from "../theme";
+import {
+  ORANGE_THEME,
+  CAPSULE_BG_6_19,
+  GREEN_THEME,
+  CAPSULE_BG_12_14,
+} from "../theme";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — matches the photo
@@ -238,10 +243,13 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       bg: CAPSULE_BG_6_19,
       border: ORANGE_THEME,
       circleBg: CAPSULE_BG_6_19,
-      circleBorderCol: CAPSULE_BG_6_19,
+      circleBorderCol: ORANGE_THEME,
       circleTextCol: ORANGE_THEME,
       textColor: "#A30000",
       isPill: false,
+      // Last chunk of the ayah → carries the mushaf ayah marker (24) with the
+      // chunk counter (12) stacked above it.
+      showAyahNumber: true,
     },
   },
 
@@ -510,45 +518,58 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
 
   animations: {
     computeFoldYPositions: (lm) => {
-      // 8 fold lines for 9 stacked blocks. The left shield is collapsed onto
-      // the right-shield band, but the fold math still walks the reserved
-      // stacked positions — simplest is the midpoint between neighbours.
-      const y = lm.groupYPositions as number[];
-      const h = lm.groupHeights as number[];
-      const mids: number[] = [];
-      for (let i = 0; i < y.length - 1; i++) {
-        mids.push((y[i] - h[i] + y[i + 1]) / 2);
-      }
-      return mids;
+      // ── fold0: midpoint between g0 (v1) and g1 (v3,2) ───────────────────
+      const fold0 =
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+        2;
+
+      // ── fold1: moved to fold0 (was between top row and bottom dome of shields)
+      const fold1 = fold0 - 0.1;
+
+      // ── fold2: moved to original fold1 (was below verses 7 and 4) ────────
+      const fold2 =
+        (lm.groupYPositions[1] - lm.groupHeights[1] + lm.groupYPositions[2]) /
+        2;
+
+      // ── fold3: midpoint between g5 (v8) and g6 (v10,9) ──────────────────
+      const fold3 =
+        (lm.groupYPositions[5] - lm.groupHeights[5] + lm.groupYPositions[6]) /
+        2;
+
+      // ── fold4: midpoint between g6 (v10,9) and g7 (v11) ─────────────────
+      const fold4 =
+        (lm.groupYPositions[6] - lm.groupHeights[6] + lm.groupYPositions[7]) /
+          2 +
+        0.1;
+
+      // ── fold5: midpoint between g7 (v11) and g8 (v12) ───────────────────
+      const fold5 = fold4 - 0.1;
+
+      return [fold0, fold1, fold2, fold3, fold4, fold5];
     },
 
     foldSteps: [
       {
-        // Kept flat — the page rests exactly like the reference image. (The
-        // fold-story can be re-introduced later once the flat layout is final.)
+        // Kept flat — the page rests exactly like the reference image.
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0.5 }, // fold0
+          { direction: -1, angleFactor: 1.05 }, // fold1
+          { direction: 1, angleFactor: 0.6 }, // fold2
+          { direction: 1, angleFactor: 0.5 }, // fold3
+          { direction: -1, angleFactor: 1.05 }, // fold4
+          { direction: 1, angleFactor: 0.55 }, // fold5
         ],
       },
       {
         id: "end",
         folds: [
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 }, // fold0
+          { direction: -1, angleFactor: 0 }, // fold1
+          { direction: 1, angleFactor: 0 }, // fold2
+          { direction: -1, angleFactor: 0 }, // fold3
+          { direction: 1, angleFactor: 0 }, // fold4
+          { direction: -1, angleFactor: 0 }, // fold5
         ],
       },
     ] as const,
