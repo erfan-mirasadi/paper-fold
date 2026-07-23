@@ -372,7 +372,7 @@ export const FoldSliderOverlay: React.FC = () => {
             transform: "translateY(-50%)",
             height: 1.5,
             borderRadius: 2,
-            background: "var(--slider-gold-track)",
+            background: "var(--slider-track)",
           }}
         />
         {/* Traveled portion */}
@@ -386,7 +386,7 @@ export const FoldSliderOverlay: React.FC = () => {
             transform: "translateY(-50%)",
             height: 1.5,
             borderRadius: 2,
-            background: "var(--slider-gold)",
+            background: "var(--slider-color)",
           }}
         />
         {/* Fold-step notches */}
@@ -404,7 +404,7 @@ export const FoldSliderOverlay: React.FC = () => {
                 marginLeft: -1.5,
                 transform: "translateY(-50%)",
                 borderRadius: "50%",
-                background: "var(--slider-gold)",
+                background: "var(--slider-color)",
                 opacity: 0.85,
               }}
             />
@@ -448,7 +448,7 @@ export const FoldSliderOverlay: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--slider-gold)",
+            background: "var(--slider-color)",
             border: "1.5px solid var(--slider-handle-border)",
             boxShadow: "var(--slider-handle-shadow)",
             transform: active ? "scale(1.18)" : "scale(1)",

@@ -50,11 +50,11 @@
   --loader-glow-full: rgba(128, 128, 128, 0.6);
   --loader-glow-mid: rgba(128, 128, 128, 0.3);
 
-  /* Sliders Theme - Light Mode (Darker Gold #9B7023 & Subtle Black Border) */
-  --slider-gold: #9B7023;
-  --slider-gold-track: rgba(155, 112, 35, 0.35);
+  /* Sliders Theme - Light Mode (Gray & Subtle Black Border) */
+  --slider-color: rgba(102, 102, 102, 0.6);
+  --slider-track: rgba(128, 128, 128, 0.6);
   --slider-handle-border: rgba(0, 0, 0, 0.15);
-  --slider-handle-shadow: 0 0 8px rgba(155, 112, 35, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --slider-handle-shadow: 0 0 12px rgba(196, 150, 59, 0.8), 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 @theme inline {
@@ -117,11 +117,11 @@
   --loader-glow-full: rgba(255, 255, 255, 0.7);
   --loader-glow-mid: rgba(255, 255, 255, 0.35);
 
-  /* Sliders Theme - Dark Mode (Page Gold #C4963B & Subtle White Border) */
-  --slider-gold: #C4963B;
-  --slider-gold-track: rgba(196, 150, 59, 0.35);
+  /* Sliders Theme - Dark Mode (Gray & Subtle White Border) */
+  --slider-color: rgba(160, 160, 160, 0.6);
+  --slider-track: rgba(160, 160, 160, 0.6);
   --slider-handle-border: rgba(255, 255, 255, 0.25);
-  --slider-handle-shadow: 0 0 10px rgba(196, 150, 59, 0.6), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --slider-handle-shadow: 0 0 14px rgba(255, 180, 50, 0.9), 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Side-panel backdrop ────────────────────────────────────────────────────
