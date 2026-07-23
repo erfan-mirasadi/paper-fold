@@ -99,7 +99,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
 
   // Fold-story → script sync (left ayah-list sidebar).
   scriptHighlights: {
-    "pre-start": [1, 11, 12],
+    "pre-start": [1, 4, 7, 8, 11, 12],
     end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   },
 
@@ -662,33 +662,33 @@ export const TEVBE_24_TEXT_TR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      { verses: [{ number: 1, text: "De ki: Eğer" }] },
+      { verses: [{ number: 1, text: "De ki eğer," }] },
       {
         verses: [
-          { number: 3, text: "kardeşleriniz, eşleriniz," },
-          { number: 2, text: "babalarınız, oğullarınız," },
+          { number: 5, text: "Kazandığınız\nmalları" },
+          { number: 6, text: "Bozulmasından korktuğunuz ticareti," },
         ],
       },
-      { verses: [{ number: 4, text: "aşiretiniz," }] },
+      { verses: [{ number: 7, text: "Ve hoşlandığınız evlerde oturmayı" }] },
       {
         verses: [
-          { number: 6, text: "durgunlaşmasından korktuğunuz ticaret," },
-          { number: 5, text: "kazandığınız mallar," },
+          { number: 2, text: "Babalarınızı ve çocuklarınızı," },
+          { number: 3, text: "Kardeşlerinizi\nve eşlerinizi," },
         ],
       },
-      { verses: [{ number: 7, text: "hoşnut olduğunuz konutlar," }] },
-      { verses: [{ number: 8, text: "size daha sevgili ise;" }] },
+      { verses: [{ number: 4, text: "Ve yakınlarınızla beraber olmayı" }] },
+      { verses: [{ number: 8, text: "Allah ve Rasulünden" }] },
       {
         verses: [
-          { number: 10, text: "Allah'tan, Peygamberinden" },
-          { number: 9, text: "ve O'nun yolunda cihaddan" },
+          { number: 9, text: "Ve Allah yolunda savaşmaktan" },
+          { number: 10, text: "(olmaz ya) Daha çok seviyorsanız" },
         ],
       },
       {
         verses: [
           {
             number: 11,
-            text: "artık Allah emrini getirinceye kadar bekleyin.",
+            text: "O zaman hakkınızda Allah'ın\nhükmü gelinceye kadar bekleyin!",
           },
         ],
       },
@@ -696,7 +696,7 @@ export const TEVBE_24_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 12,
-            text: "Allah, fasıklar topluluğunu doğru yola iletmez.",
+            text: "Allah, (fasık), itaatsiz bir topluluğa yol göstermez.",
           },
         ],
       },
@@ -720,35 +720,44 @@ export const TEVBE_24_TEXT_EN: SurahDataShape = {
       { verses: [{ number: 1, text: "Say, if" }] },
       {
         verses: [
-          { number: 3, text: "your brothers, your spouses," },
-          { number: 2, text: "your fathers, your sons," },
-        ],
-      },
-      { verses: [{ number: 4, text: "your kindred," }] },
-      {
-        verses: [
-          { number: 6, text: "commerce you fear may slacken," },
-          { number: 5, text: "the wealth you have acquired," },
-        ],
-      },
-      { verses: [{ number: 7, text: "dwellings you are content with," }] },
-      { verses: [{ number: 8, text: "are dearer to you," }] },
-      {
-        verses: [
-          { number: 10, text: "than Allah and His Messenger" },
-          { number: 9, text: "and striving in His cause," },
+          { number: 5, text: "the wealth\nyou have\nearned" },
+          { number: 6, text: "the commerce\nyou fear\nmay decline," },
         ],
       },
       {
         verses: [
-          { number: 11, text: "then wait until Allah brings His command." },
+          { number: 7, text: "and living in dwellings you are fond of" },
+        ],
+      },
+      {
+        verses: [
+          { number: 2, text: "your fathers\nand your\nchildren," },
+          { number: 3, text: "your brothers\nand your\nspouses," },
+        ],
+      },
+      {
+        verses: [{ number: 4, text: "and being together with your relatives" }],
+      },
+      { verses: [{ number: 8, text: "than Allah\nand His Messenger" }] },
+      {
+        verses: [
+          { number: 9, text: "and striving\nin His cause" },
+          { number: 10, text: "(though unthinkable)\nyou love more" },
+        ],
+      },
+      {
+        verses: [
+          {
+            number: 11,
+            text: "then wait until Allah's decree comes regarding you!",
+          },
         ],
       },
       {
         verses: [
           {
             number: 12,
-            text: "And Allah does not guide the defiantly disobedient people.",
+            text: "Allah does not guide a (fasik), disobedient people.",
           },
         ],
       },
