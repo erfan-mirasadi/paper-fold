@@ -57,7 +57,12 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
         // word never changes the displayed tafsir. List them in reading order:
         // each takes the section it speaks, and pressing play on the first
         // reads the entry through, one voice handing over to the next.
-        recitation: [ALAK_RECITATIONS.butun, ALAK_RECITATIONS.vahiy],
+        recitation: [
+          ALAK_RECITATIONS.butun,
+          ALAK_RECITATIONS.vahiy,
+          ALAK_RECITATIONS.peygamber,
+          ALAK_RECITATIONS.kuran,
+        ],
         paragraphs: [
           "Canlı varlıkların vücutlarında görev yapan bütün organlar birbirleriyle etkileşirler, bilgi alışverişinde bulunurlar. Beyin de bütün organlarla iletişim içindedir, özel bir dil ile onlarla konuşur.",
           "Hayvanların ve insanların vücudu, sanki medeni birer şehir gibidir. O vücut şehrinde her an sayısız telefon, faks ve özel ulak mesaj taşımakta, bilgi taşımaktadır.",

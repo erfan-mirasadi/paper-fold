@@ -111,9 +111,10 @@ export interface SyncedRecitationProps {
  * inline audio player runs, an ink wash fills them as one continuous band,
  * left → right, in step with the voice — with a soft warm light riding the
  * leading edge — and the nearest scroll container glides to follow along.
- * Pausing or finishing fades it back to plain ink. Clicking any word jumps to
- * it. The displayed text is always the authored copy; the transcript only
- * times it (aligned tolerantly), so a bad transcript never changes what shows.
+ * Pausing or finishing fades it back to plain ink. The text doubles as the
+ * control: click a word to hear from there, click again anywhere to hush it.
+ * The displayed text is always the authored copy; the transcript only times it
+ * (aligned tolerantly), so a bad transcript never changes what shows.
  *
  * Drop it anywhere; it finds its own scroll parent. Per frame it only touches
  * the handful of spans around the read head, so it stays light.
@@ -410,15 +411,22 @@ export function SyncedRecitation({
     else a.pause();
   };
 
-  // Clicking any span jumps the voice there (event-delegated — one handler).
+  // The text is one big toggle (event-delegated — one handler). Clicking a word
+  // while it's quiet starts the voice from exactly that word; clicking again —
+  // anywhere in the text — stops it where it is, and the next click starts from
+  // whichever word was struck. So the reading surface itself is the control:
+  // tap to hear from here, tap to hush, tap to hear from there.
   const onTextClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = (e.target as HTMLElement).closest<HTMLElement>("[data-t]");
     if (!el) return;
     const a = audioRef.current;
     if (!a) return;
+    if (!a.paused) {
+      a.pause();
+      return;
+    }
     a.currentTime = parseFloat(el.dataset.t || "0");
-    if (a.paused) a.play().catch(() => {});
-    else reconcile(a.currentTime);
+    a.play().catch(() => {});
   };
 
   const seekBar = (e: React.PointerEvent<HTMLDivElement>) => {
