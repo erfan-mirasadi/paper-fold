@@ -5,6 +5,7 @@ import { usePopUpStore } from "../../../stores/usePopUpStore";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useLenis } from "../../dom/LenisProvider";
+import { isOverSelfScrollingOverlay } from "../../../utils/overlayScroll";
 
 const FOLD_SCROLL_THRESHOLD_PX = 4;
 const FOLD_TRIGGER_COOLDOWN_MS = 80;
@@ -20,6 +21,8 @@ export function PopUpHoverScrollController() {
   useEffect(() => {
     if (isIntroActive) return;
     const handleWheel = (event: WheelEvent) => {
+      // A wheel inside a panel that scrolls itself is the reader's, not ours.
+      if (isOverSelfScrollingOverlay(event.target)) return;
       const hoveredGroupId = usePopUpStore.getState().hoveredGroupId;
       if (!hoveredGroupId) return;
 

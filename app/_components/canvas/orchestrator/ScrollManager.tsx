@@ -11,6 +11,7 @@ import { usePaperStore } from "../../../stores/usePaperStore";
 import { useLenis } from "../../dom/LenisProvider";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { getActiveStoryConfig } from "../../../stores/useStoryStore";
+import { isOverSelfScrollingOverlay } from "../../../utils/overlayScroll";
 
 const STEP_SCROLL_DURATION_MS = 820;
 const STEP_PAUSE_MS = 450;
@@ -392,6 +393,8 @@ export function ScrollManager() {
       lenis.start();
     }
     const handleKey = (e: KeyboardEvent) => {
+      // Arrow / Page keys belong to whatever panel has focus, if any.
+      if (isOverSelfScrollingOverlay(e.target)) return;
       if (shouldLockScroll) {
         const keys = [
           "ArrowUp",
@@ -512,7 +515,15 @@ export function ScrollManager() {
       }
     };
 
+    // These listen on `window` in the capture phase — before the overlays see
+    // their own events — so every one of them asks first whether the gesture
+    // belongs to a panel that scrolls itself (the tafsir log, the script
+    // sidebar). Reading those is independent of the page: the scroll lock
+    // doesn't freeze them, and pushing against the intro barrier is only ever
+    // about the page. Without this the barrier quietly eats a reader's wheel
+    // — and its arm/disarm state drifts on scrolls that were never the page's.
     const handleWheel = (e: WheelEvent) => {
+      if (isOverSelfScrollingOverlay(e.target)) return;
       if (shouldLockScroll) {
         e.preventDefault();
         e.stopPropagation();
@@ -527,6 +538,7 @@ export function ScrollManager() {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (isOverSelfScrollingOverlay(e.target)) return;
       if (shouldLockScroll) {
         e.preventDefault();
         e.stopPropagation();
