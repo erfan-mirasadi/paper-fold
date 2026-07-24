@@ -14,6 +14,10 @@ export interface WordTime {
   e: number;
 }
 
+/** A block that fell below this share of matched words is treated as NOT
+ *  spoken by the transcript — that's how a recitation finds its own extent. */
+const MIN_BLOCK_MATCH = 0.5;
+
 /** Fold away case, punctuation and diacritics so a heard word can be matched
  *  to an authored one despite spelling/punctuation drift (Turkish-aware). */
 export function normalizeWord(s: string): string {
@@ -22,6 +26,35 @@ export function normalizeWord(s: string): string {
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+/** Normalized, space-joined form of a whole line — for matching an anchor
+ *  ("subtitle" / "startsWith") against authored text despite punctuation. */
+export function normalizeText(s: string): string {
+  return s
+    .split(/\s+/)
+    .map(normalizeWord)
+    .filter(Boolean)
+    .join(" ");
+}
+
+/**
+ * A monotonic copy of the transcript: starts never go backwards and a word
+ * never runs past the next one's start. Speech-to-text output sometimes
+ * overlaps two neighbouring words, which would otherwise leave the rendered
+ * spans out of time order and confuse the read-head lookup.
+ */
+function monotonic(trans: RecitationWord[]): RecitationWord[] {
+  const out: RecitationWord[] = new Array(trans.length);
+  let prev = -Infinity;
+  for (let i = 0; i < trans.length; i++) {
+    const s = Math.max(trans[i].s, prev);
+    out[i] = { w: trans[i].w, s, e: Math.max(trans[i].e, s) };
+    prev = s;
+  }
+  for (let i = 0; i < out.length - 1; i++)
+    if (out[i].e > out[i + 1].s) out[i].e = out[i + 1].s;
+  return out;
 }
 
 /** LCS length table (built from the end) for two normalized word lists. */
@@ -41,32 +74,72 @@ function lcsTable(a: string[], b: string[]): Uint16Array[] {
   return dp;
 }
 
+/** An inclusive run of authored blocks that one recitation speaks. */
+export interface RecitedRange {
+  start: number;
+  end: number;
+}
+
 /**
- * The index of the LAST display word that a transcript word actually matches
- * (via LCS), or −1 if none. Used to decide how far the recitation reaches —
- * i.e. which authored blocks are spoken vs. which follow after the audio.
+ * Which authored blocks a transcript actually speaks.
+ *
+ * `blocks` is a candidate run of authored lines (each already tokenized into
+ * normalized words), in reading order. We align the transcript across the
+ * whole run, then measure per block what share of its words the voice hit:
+ * a spoken block lands near 100%, a block the audio never reaches only picks
+ * up incidental matches. The answer is the first well-matched block and every
+ * well-matched block right after it — so a recitation finds its own extent in
+ * the tafsir, and several recitations can sit in one entry without any of them
+ * swallowing the text that belongs to the next.
+ *
+ * With `pinnedStart` the run is taken to begin at block 0 no matter how well
+ * it matches (an authored `from:` anchor wins over the measurement).
+ *
+ * Returns null when nothing matched well enough — the caller decides how to
+ * degrade (see SideInfoPanel: it recites the first block only).
  */
-export function lastMatchedWordIndex(
-  displayNorms: string[],
+export function recitedBlockRange(
+  blocks: string[][],
   trans: RecitationWord[],
-): number {
-  const D = displayNorms.length;
-  const T = trans.length;
-  if (D === 0 || T === 0) return -1;
-  const transNorm = trans.map((w) => normalizeWord(w.w));
-  const dp = lcsTable(displayNorms, transNorm);
+  opts: { pinnedStart?: boolean; minRatio?: number } = {},
+): RecitedRange | null {
+  const minRatio = opts.minRatio ?? MIN_BLOCK_MATCH;
+  if (blocks.length === 0 || trans.length === 0) return null;
+
+  const flat: string[] = [];
+  const owner: number[] = [];
+  blocks.forEach((words, bi) =>
+    words.forEach((w) => {
+      flat.push(w);
+      owner.push(bi);
+    }),
+  );
+
+  const transNorm = monotonic(trans).map((w) => normalizeWord(w.w));
+  const dp = lcsTable(flat, transNorm);
+  const hits = new Array<number>(blocks.length).fill(0);
   let i = 0,
-    j = 0,
-    last = -1;
-  while (i < D && j < T) {
-    if (displayNorms[i] && displayNorms[i] === transNorm[j]) {
-      last = i;
+    j = 0;
+  while (i < flat.length && j < transNorm.length) {
+    if (flat[i] && flat[i] === transNorm[j]) {
+      hits[owner[i]]++;
       i++;
       j++;
     } else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
     else j++;
   }
-  return last;
+
+  const spoken = (b: number) =>
+    blocks[b].length > 0 && hits[b] / blocks[b].length >= minRatio;
+
+  let start = 0;
+  if (!opts.pinnedStart) {
+    while (start < blocks.length && !spoken(start)) start++;
+    if (start === blocks.length) return null;
+  }
+  let end = start;
+  while (end + 1 < blocks.length && spoken(end + 1)) end++;
+  return { start, end };
 }
 
 /** Spread [start, end) evenly across the null slots in [from, to). */
@@ -95,11 +168,12 @@ function fillGap(
  */
 export function alignWordTimes(
   displayNorms: string[],
-  trans: RecitationWord[],
+  rawTrans: RecitationWord[],
   duration: number,
 ): WordTime[] {
   const D = displayNorms.length;
   if (D === 0) return [];
+  const trans = monotonic(rawTrans);
   const T = trans.length;
   const times: (WordTime | null)[] = new Array(D).fill(null);
 

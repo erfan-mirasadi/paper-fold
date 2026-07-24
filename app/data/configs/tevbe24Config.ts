@@ -586,6 +586,32 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       renderOrder: 3,
       customSectionId: "g_top",
     },
+    // GREEN arrow (sabz) — left side, between left dome (v7) → center dome (v8)
+    {
+      src: "/tevbe/arrow-green.svg",
+      anchorGroupIndex: 5,
+      anchorEdge: "top",
+      scaleX: -0.06,
+      scaleY: 0.06,
+      offsetX: -0.28,
+      offsetY: 0.01,
+      rotationZ: -Math.PI * 0.15,
+      renderOrder: 5,
+      customSectionId: "g_top",
+    },
+    // PURPLE arrow (banafsh) — right side, between right dome (v4) → center dome (v8)
+    {
+      src: "/tevbe/arrow-purple.svg",
+      anchorGroupIndex: 5,
+      anchorEdge: "top",
+      scaleX: 0.06,
+      scaleY: 0.06,
+      offsetX: 0.28,
+      offsetY: 0.01,
+      rotationZ: Math.PI * 0.15,
+      renderOrder: 5,
+      customSectionId: "g_top",
+    },
   ],
 
   sideInfo: {

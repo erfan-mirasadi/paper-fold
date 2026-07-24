@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import {
   useStoryStore,
@@ -14,10 +21,16 @@ import {
   SyncedRecitation,
   type RecitedBlock,
 } from "@/app/_components/dom/ui-overlay/SyncedRecitation";
+import { RecitationChainProvider } from "@/app/_components/dom/ui-overlay/RecitationChain";
 import {
-  lastMatchedWordIndex,
+  normalizeText,
   normalizeWord,
+  recitedBlockRange,
 } from "@/app/data/recitations/align";
+import type {
+  RecitationAnchor,
+  RecitationTranscript,
+} from "@/app/data/recitations/types";
 import { AyahNumber } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { OverlayButton } from "@/app/_components/dom/ui-overlay/OverlayButton";
 import { PanelBackdrop } from "@/app/_components/dom/ui-overlay/PanelBackdrop";
@@ -29,10 +42,16 @@ import type {
   SideInfoEntry,
   SideInfoImage,
   SideInfoFlowItem,
+  SideInfoSubtitle,
   SurahLayoutConfig,
 } from "@/app/data/schema";
 
 const GOLD = "#C4963B";
+
+// Stable empties — an entry without paragraphs / recitations must not hand a
+// fresh array to the placement memos on every render.
+const EMPTY_FLOW: SideInfoFlowItem[] = [];
+const EMPTY_RECITATIONS: RecitationTranscript[] = [];
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 
@@ -477,155 +496,253 @@ function resolveEntries(
   return out;
 }
 
+// ── Recitation placement ────────────────────────────────────────────────────
+//
+// An entry's reading flow is a row of SLOTS: the kicker, the title, then each
+// `paragraphs` item. A recitation claims a contiguous run of them and renders
+// that run live — karaoke text with its own player — while everything it
+// doesn't claim flows normally around it. An entry can hold as many
+// recitations as it likes: each takes its own run, in array order, and they
+// play as a chain (see RecitationChain.tsx).
+//
+// Placement is automatic — a transcript is aligned over the slots left after
+// the one before it and keeps the lines it actually speaks (recitedBlockRange)
+// — until the transcript carries `from` / `to` anchors, which pin it exactly.
+
+type SlotKind = "kicker" | "title" | "paragraph" | "subtitle" | "other";
+
+interface FlowSlot {
+  kind: SlotKind;
+  /** Index into `entry.paragraphs`, or −1 for the kicker / title. */
+  paraIndex: number;
+  /** The flow item this slot renders (absent for the kicker / title). */
+  item?: SideInfoFlowItem;
+  /** Set when the slot is plain text, and can therefore be recited. */
+  block?: RecitedBlock;
+}
+
+const isSubtitleItem = (it: SideInfoFlowItem): it is SideInfoSubtitle =>
+  typeof it === "object" && it !== null && "subtitle" in it;
+
+/** The entry's flow as slots — the shared coordinate system for placing
+ *  recitations and for rendering whatever they leave to the written flow. */
+function buildFlowSlots(
+  kicker: string | undefined,
+  title: string | undefined,
+  items: SideInfoFlowItem[],
+): FlowSlot[] {
+  const slots: FlowSlot[] = [];
+  if (kicker)
+    slots.push({
+      kind: "kicker",
+      paraIndex: -1,
+      block: {
+        text: kicker,
+        as: "div",
+        className:
+          "!text-left w-full uppercase font-medium text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]",
+        style: {
+          color: GOLD,
+          fontFamily: "var(--font-roboto)",
+          letterSpacing: "0.26em",
+        },
+      },
+    });
+  if (title)
+    slots.push({
+      kind: "title",
+      paraIndex: -1,
+      block: {
+        text: title,
+        as: "h3",
+        className:
+          "!text-left w-full font-light tracking-tight text-foreground text-[15px] lg:text-[clamp(17px,1.2vw,30px)]",
+        style: {
+          fontFamily: "var(--font-roboto)",
+          lineHeight: 1.2,
+          marginTop: "clamp(6px, 0.55vw, 12px)",
+        },
+      },
+    });
+  items.forEach((item, i) => {
+    if (typeof item === "string")
+      slots.push({
+        kind: "paragraph",
+        paraIndex: i,
+        item,
+        block: {
+          text: item,
+          as: "p",
+          className:
+            "!text-left w-full font-normal text-foreground/80 text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]",
+          style: {
+            fontFamily: "var(--font-inter)",
+            lineHeight: 1.95,
+            marginTop: "clamp(10px, 1vw, 18px)",
+          },
+        },
+      });
+    else if (isSubtitleItem(item))
+      slots.push({
+        kind: "subtitle",
+        paraIndex: i,
+        item,
+        block: {
+          text: item.subtitle,
+          as: "h4",
+          className:
+            "!text-left w-full font-medium tracking-tight text-foreground text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]",
+          style: {
+            fontFamily: "var(--font-roboto)",
+            lineHeight: 1.3,
+            marginTop: "clamp(18px, 2vw, 32px)",
+          },
+        },
+      });
+    // Capsule groups / raw HTML have no plain text to recite — they still take
+    // a slot, so they keep their place and break a spoken run.
+    else slots.push({ kind: "other", paraIndex: i, item });
+  });
+  return slots;
+}
+
+/** The slot an authored anchor points at, or −1 when it matches nothing. */
+function resolveAnchor(slots: FlowSlot[], anchor: RecitationAnchor): number {
+  if (anchor === "kicker" || anchor === "title")
+    return slots.findIndex((s) => s.kind === anchor);
+  if (typeof anchor === "number")
+    return slots.findIndex((s) => s.paraIndex === anchor);
+  if ("subtitle" in anchor) {
+    const want = normalizeText(anchor.subtitle);
+    return want
+      ? slots.findIndex(
+          (s) => s.kind === "subtitle" && normalizeText(s.block!.text) === want,
+        )
+      : -1;
+  }
+  const want = normalizeText(anchor.startsWith);
+  return want
+    ? slots.findIndex((s) => !!s.block && normalizeText(s.block.text).startsWith(want))
+    : -1;
+}
+
+const slotWords = (slot: FlowSlot) =>
+  slot.block!.text.split(/\s+/).map(normalizeWord).filter(Boolean);
+
+/**
+ * Which recitation owns each slot (null = written flow). Recitations are laid
+ * down in order, each starting where the last one ended, so they can never
+ * overlap or run backwards however the anchors are written.
+ */
+function placeRecitations(
+  slots: FlowSlot[],
+  recitations: RecitationTranscript[],
+): (number | null)[] {
+  const owner: (number | null)[] = new Array(slots.length).fill(null);
+  let cursor = 0;
+
+  recitations.forEach((r, ri) => {
+    // Earliest slot it may take: its own `from` anchor, else wherever the
+    // previous recitation left off.
+    let from = cursor;
+    let pinnedStart = false;
+    if (r.from !== undefined) {
+      const at = resolveAnchor(slots, r.from);
+      if (at >= cursor) {
+        from = at;
+        pinnedStart = true;
+      }
+    }
+    while (from < slots.length && !slots[from].block) from++;
+    if (from >= slots.length) return;
+
+    // A spoken run stops at the first thing that can't be recited (a capsule
+    // group, an image, raw HTML) — and at a pinned `to`, if there is one.
+    let runEnd = from;
+    while (runEnd + 1 < slots.length && slots[runEnd + 1].block) runEnd++;
+    const pinnedEnd = r.to !== undefined ? resolveAnchor(slots, r.to) : -1;
+    const limit = pinnedEnd >= from ? Math.min(pinnedEnd, runEnd) : runEnd;
+
+    // Both ends pinned — the authored anchors settle it, no alignment needed.
+    const range =
+      pinnedStart && pinnedEnd >= from
+        ? null
+        : recitedBlockRange(slots.slice(from, limit + 1).map(slotWords), r.words, {
+            pinnedStart,
+          });
+    // Nothing matched well enough: keep the voice to its first line rather
+    // than letting a bad transcript swallow the tafsir behind it.
+    const start = from + (range?.start ?? 0);
+    const end = pinnedEnd >= from ? limit : from + (range?.end ?? 0);
+
+    for (let i = start; i <= end; i++) owner[i] = ri;
+    cursor = end + 1;
+  });
+
+  return owner;
+}
+
 // ── One entry — kicker, title, paragraphs, images, audio; all animated with
-// the same intro text animation (AnimatedText, cinematic word-by-word). ─────
+// the same intro text animation (AnimatedText, cinematic word-by-word) —
+// except the runs a recitation claims, which are read aloud instead. ────────
 function SideInfoEntryView({
+  entryKey,
   verseId,
   entry,
   hideVerseNumbers,
-}: Omit<ResolvedEntry, "key" | "stepIdx"> & { hideVerseNumbers?: boolean }) {
+}: Omit<ResolvedEntry, "key" | "stepIdx"> & {
+  /** The entry's id — scopes its recitations' play-in-turn chain. */
+  entryKey: string;
+  hideVerseNumbers?: boolean;
+}) {
   const kicker =
     entry.kicker ??
     (!hideVerseNumbers && verseId !== undefined
       ? `${verseId}. Ayet`
       : undefined);
 
-  // ── Recitation ────────────────────────────────────────────────────────────
-  // The spoken portion is a run of typed blocks — the kicker, the title, then
-  // leading prose paragraphs / subtitles — all highlighted by the karaoke
-  // sync (not just the paragraphs). How FAR it reaches is decided by the
-  // transcript's own coverage: we recite through the block holding the last
-  // word the transcript matches, and everything after (e.g. the "VAHİY"
-  // section, whose audio hasn't been recorded) flows normally below.
-  const allParagraphs = entry.paragraphs ?? [];
-  const recitedBlocks: RecitedBlock[] = [];
-  let remainderStart = 0;
-  let kickerRecited = false;
-  let titleRecited = false;
+  const allParagraphs = useMemo(
+    () => entry.paragraphs ?? EMPTY_FLOW,
+    [entry.paragraphs],
+  );
 
-  if (entry.recitation) {
-    interface Cand {
-      block: RecitedBlock;
-      paraIndex: number; // −1 for kicker / title
-      kind: "kicker" | "title" | "subtitle" | "paragraph";
-    }
-    const cands: Cand[] = [];
-    if (kicker)
-      cands.push({
-        kind: "kicker",
-        paraIndex: -1,
-        block: {
-          text: kicker,
-          as: "div",
-          className:
-            "!text-left w-full uppercase font-medium text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]",
-          style: {
-            color: GOLD,
-            fontFamily: "var(--font-roboto)",
-            letterSpacing: "0.26em",
-          },
-        },
-      });
-    if (entry.title)
-      cands.push({
-        kind: "title",
-        paraIndex: -1,
-        block: {
-          text: entry.title,
-          as: "h3",
-          className:
-            "!text-left w-full font-light tracking-tight text-foreground text-[15px] lg:text-[clamp(17px,1.2vw,30px)]",
-          style: {
-            fontFamily: "var(--font-roboto)",
-            lineHeight: 1.2,
-            marginTop: "clamp(6px, 0.55vw, 12px)",
-          },
-        },
-      });
-    for (let i = 0; i < allParagraphs.length; i++) {
-      const it = allParagraphs[i];
-      if (typeof it === "string")
-        cands.push({
-          kind: "paragraph",
-          paraIndex: i,
-          block: {
-            text: it,
-            as: "p",
-            className:
-              "!text-left w-full font-normal text-foreground/80 text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]",
-            style: {
-              fontFamily: "var(--font-inter)",
-              lineHeight: 1.95,
-              marginTop: "clamp(10px, 1vw, 18px)",
-            },
-          },
-        });
-      else if (typeof it === "object" && it !== null && "subtitle" in it)
-        cands.push({
-          kind: "subtitle",
-          paraIndex: i,
-          block: {
-            text: it.subtitle,
-            as: "h4",
-            className:
-              "!text-left w-full font-medium tracking-tight text-foreground text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]",
-            style: {
-              fontFamily: "var(--font-roboto)",
-              lineHeight: 1.3,
-              marginTop: "clamp(18px, 2vw, 32px)",
-            },
-          },
-        });
-      else break; // capsule / html / image — can't be recited
-    }
+  /** One entry, one or many recitations — a bare transcript still works. */
+  const recitations = useMemo<RecitationTranscript[]>(() => {
+    const r = entry.recitation;
+    if (!r) return EMPTY_RECITATIONS;
+    return Array.isArray(r) ? r : [r];
+  }, [entry.recitation]);
 
-    // Recite through the block that holds the transcript's last matched word
-    // (or every candidate if nothing matched — a bad transcript still degrades
-    // to an even sweep rather than dropping the whole block).
-    let count = cands.length;
-    if (cands.length > 0) {
-      const norms: string[] = [];
-      const wordBlock: number[] = [];
-      cands.forEach((c, ci) =>
-        c.block.text.split(/\s+/).forEach((tok) => {
-          if (tok) {
-            norms.push(normalizeWord(tok));
-            wordBlock.push(ci);
-          }
-        }),
-      );
-      const lm = lastMatchedWordIndex(norms, entry.recitation.words);
-      count = lm >= 0 ? wordBlock[lm] + 1 : cands.length;
-    }
+  const slots = useMemo(
+    () => buildFlowSlots(kicker, entry.title, allParagraphs),
+    [kicker, entry.title, allParagraphs],
+  );
 
-    cands.slice(0, count).forEach((c, idx) => {
-      recitedBlocks.push(
-        idx === 0
-          ? { ...c.block, style: { ...c.block.style, marginTop: 0 } }
-          : c.block,
-      );
-      if (c.kind === "kicker") kickerRecited = true;
-      if (c.kind === "title") titleRecited = true;
-      if (c.paraIndex >= 0) remainderStart = c.paraIndex + 1;
+  // Alignment is the expensive part (an LCS pass per recitation), so it runs
+  // only when the entry or its recitations actually change.
+  const owner = useMemo(
+    () => placeRecitations(slots, recitations),
+    [slots, recitations],
+  );
+
+  // Neighbouring slots with the same owner read as one block: a recited run
+  // (played and highlighted together) or a stretch of written flow.
+  const groups = useMemo(() => {
+    const out: { rec: number | null; from: number; to: number }[] = [];
+    slots.forEach((_, i) => {
+      const last = out[out.length - 1];
+      if (last && last.rec === owner[i]) last.to = i;
+      else out.push({ rec: owner[i], from: i, to: i });
     });
-  }
+    return out;
+  }, [slots, owner]);
 
-  const flowParagraphs = allParagraphs.slice(remainderStart);
-
-  // Chunk the remaining paragraphs by subtitle so each section can fold
-  // independently
-  const chunks: SideInfoFlowItem[][] = [];
-  let currentChunk: SideInfoFlowItem[] = [];
-
-  flowParagraphs.forEach((item) => {
-    if (typeof item === "object" && item !== null && "subtitle" in item) {
-      if (currentChunk.length > 0) chunks.push(currentChunk);
-      currentChunk = [item];
-    } else {
-      currentChunk.push(item);
-    }
-  });
-  if (currentChunk.length > 0) chunks.push(currentChunk);
+  const kickerRecited = slots.some(
+    (s, i) => s.kind === "kicker" && owner[i] !== null,
+  );
+  const titleRecited = slots.some(
+    (s, i) => s.kind === "title" && owner[i] !== null,
+  );
 
   const renderChunkItems = (chunk: SideInfoFlowItem[], startIndex: number) =>
     chunk.map((item, localIndex) => {
@@ -696,43 +813,95 @@ function SideInfoEntryView({
       );
     });
 
-  const renderedChunks = chunks.map((chunk, chunkIdx) => {
-    const startIndex = chunks.slice(0, chunkIdx).reduce((acc, c) => acc + c.length, 0);
-    const isFoldable = true; // Always allow ExpandableEntry to fold if the content is long enough
+  // The entry's trailing furniture — hung off the last written chunk so the
+  // "read more" fold keeps covering it, exactly as before.
+  const tail = (
+    <>
+      {entry.images?.map((img, i) => <InkImage key={`img-${i}`} {...img} />)}
+      {entry.audio && <InkAudioPlayer {...entry.audio} />}
+    </>
+  );
 
-    const renderedItems = renderChunkItems(chunk, startIndex);
-    const isLastChunk = chunkIdx === chunks.length - 1;
+  /** A stretch of written flow: chunked by subtitle so each section folds on
+   *  its own. `startIndex` keys off the paragraph index, so keys stay unique
+   *  however the recited runs cut the flow up. */
+  const renderFlowGroup = (
+    groupSlots: FlowSlot[],
+    withTail: boolean,
+  ): ReactNode[] => {
+    const chunks: { items: SideInfoFlowItem[]; startIndex: number }[] = [];
+    for (const slot of groupSlots) {
+      const item = slot.item!;
+      const last = chunks[chunks.length - 1];
+      if (!last || isSubtitleItem(item))
+        chunks.push({ items: [item], startIndex: slot.paraIndex });
+      else last.items.push(item);
+    }
 
-    const body = (
-      <>
-        {renderedItems}
-        {isLastChunk &&
-          entry.images?.map((img, i) => <InkImage key={`img-${i}`} {...img} />)}
-        {isLastChunk && entry.audio && <InkAudioPlayer {...entry.audio} />}
-      </>
-    );
-
-    const chunkStyle = {
-      marginBottom: chunks.length > 1 && !isLastChunk ? "clamp(12px, 1vw, 20px)" : undefined,
-    };
-
-    if (isFoldable) {
+    return chunks.map((chunk, chunkIdx) => {
+      const renderedItems = renderChunkItems(chunk.items, chunk.startIndex);
+      const isLastChunk = chunkIdx === chunks.length - 1;
+      const body = (
+        <>
+          {renderedItems}
+          {isLastChunk && withTail && tail}
+        </>
+      );
       return (
-        <div key={`chunk-${chunkIdx}`} style={chunkStyle}>
+        <div
+          key={`chunk-${chunk.startIndex}`}
+          style={{
+            marginBottom:
+              chunks.length > 1 && !isLastChunk
+                ? "clamp(12px, 1vw, 20px)"
+                : undefined,
+          }}
+        >
           <ExpandableEntry preview={renderedItems}>{body}</ExpandableEntry>
         </div>
       );
-    } else {
+    });
+  };
+
+  // Written groups carry real flow items; a group holding only the kicker /
+  // title has nothing to render here (the header below draws those).
+  const flowSlotsOf = (g: { from: number; to: number }) =>
+    slots.slice(g.from, g.to + 1).filter((s) => s.paraIndex >= 0);
+  const lastFlowGroup = [...groups]
+    .reverse()
+    .find((g) => g.rec === null && flowSlotsOf(g).length > 0);
+
+  const renderedFlow = groups.map((g) => {
+    if (g.rec !== null) {
+      const groupSlots = slots.slice(g.from, g.to + 1);
       return (
-        <div key={`chunk-${chunkIdx}`} style={chunkStyle}>
-          {body}
+        <div key={`rec-${g.rec}`} style={{ marginTop: "clamp(8px, 0.8vw, 14px)" }}>
+          <SyncedRecitation
+            transcript={recitations[g.rec]}
+            blocks={groupSlots.map((s, i) =>
+              // The wrapper above already spaces the run — let its first line
+              // sit flush so a recitation lands where the flow left off.
+              i === 0
+                ? { ...s.block!, style: { ...s.block!.style, marginTop: 0 } }
+                : s.block!,
+            )}
+            chain={{ group: entryKey, order: g.rec }}
+          />
         </div>
       );
     }
+    const groupSlots = flowSlotsOf(g);
+    if (groupSlots.length === 0) return null;
+    return (
+      <div key={`flow-${g.from}`}>
+        {renderFlowGroup(groupSlots, g === lastFlowGroup)}
+      </div>
+    );
   });
 
   return (
-    <div>
+    <RecitationChainProvider>
+      <div>
       {(kicker || (!hideVerseNumbers && verseId !== undefined)) && (
         <div
           className="flex items-center"
@@ -793,19 +962,17 @@ function SideInfoEntryView({
         />
       )}
 
-      {/* ── Time-aligned recitation — the entry's spoken opening (kicker,
-          title, prose). The text is the authored blocks; the transcript only
-          times them. Rendered above the written flow and outside
-          ExpandableEntry so its highlight-synced words are never folded out of
+      {/* ── The body, in reading order: written stretches folded as ever, and
+          each recited run in its place — the text is always the authored copy,
+          the transcript only times it. Recited runs sit outside
+          ExpandableEntry, so words being spoken are never folded out of
           view. ──────────────────────────────────────────────────────────── */}
-      {entry.recitation && recitedBlocks.length > 0 && (
-        <div style={{ marginTop: "clamp(8px, 0.8vw, 14px)" }}>
-          <SyncedRecitation transcript={entry.recitation} blocks={recitedBlocks} />
-        </div>
-      )}
+      {renderedFlow}
 
-      {renderedChunks}
-    </div>
+      {/* Nothing written to hang them off (an entry read cover to cover). */}
+      {!lastFlowGroup && tail}
+      </div>
+    </RecitationChainProvider>
   );
 }
 
@@ -1342,6 +1509,7 @@ export function SideInfoPanel() {
                           style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
                         >
                           <SideInfoEntryView
+                            entryKey={resolved.key}
                             verseId={resolved.verseId}
                             entry={resolved.entry}
                             hideVerseNumbers={

@@ -52,10 +52,12 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
     byFoldStep: {
       "pre-start": {
         title: "Bütün varlıklar konuşur.",
-        // The opening prose paragraphs below are the source of truth for what's
-        // shown; `recitation` only TIMES them (aligned at render), so a wrong or
-        // missing transcript word never changes the displayed tafsir.
-        recitation: ALAK_RECITATIONS.vahiy,
+        // The prose below is the source of truth for what's shown; a recitation
+        // only TIMES it (aligned at render), so a wrong or missing transcript
+        // word never changes the displayed tafsir. List them in reading order:
+        // each takes the section it speaks, and pressing play on the first
+        // reads the entry through, one voice handing over to the next.
+        recitation: [ALAK_RECITATIONS.butun, ALAK_RECITATIONS.vahiy],
         paragraphs: [
           "Canlı varlıkların vücutlarında görev yapan bütün organlar birbirleriyle etkileşirler, bilgi alışverişinde bulunurlar. Beyin de bütün organlarla iletişim içindedir, özel bir dil ile onlarla konuşur.",
           "Hayvanların ve insanların vücudu, sanki medeni birer şehir gibidir. O vücut şehrinde her an sayısız telefon, faks ve özel ulak mesaj taşımakta, bilgi taşımaktadır.",

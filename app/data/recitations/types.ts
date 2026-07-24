@@ -20,6 +20,13 @@
 // One surah can have MANY recitations (per section / reciter), so each surah
 // keeps a `Record<key, RecitationTranscript>` (see e.g. ./alak.ts). Times are
 // in SECONDS.
+//
+// A single tafsir entry can carry as many recitations as it needs — pass an
+// array to `SideInfoEntry.recitation`. They are laid out in array order, each
+// one claiming the run of authored lines it actually speaks, and they play as
+// a chain: when one finishes the next starts on its own (see
+// RecitationChain.tsx). Placement is automatic by default; `from` / `to` below
+// pin it by hand when you want a voice somewhere specific.
 // ---------------------------------------------------------------------------
 
 /** A single spoken word with its span in the audio timeline (seconds). */
@@ -33,12 +40,32 @@ export interface RecitationWord {
 }
 
 /**
+ * A place in a tafsir entry's reading flow, used to pin where a recitation
+ * starts / ends instead of letting it find itself:
+ *
+ *   "kicker" | "title"        the entry's lead-in line / heading
+ *   3                          `paragraphs[3]`
+ *   { subtitle: "VAHİY" }      the `{ subtitle }` item with that text
+ *   { startsWith: "Bütün v" }  the first paragraph beginning with that text
+ *
+ * Text forms are matched loosely (case, punctuation and diacritics folded),
+ * so they keep working through small copy edits. An anchor that resolves to
+ * nothing is ignored and the recitation falls back to automatic placement.
+ */
+export type RecitationAnchor =
+  | "kicker"
+  | "title"
+  | number
+  | { subtitle: string }
+  | { startsWith: string };
+
+/**
  * One time-aligned recitation: an audio file plus a flat, in-reading-order
  * list of time-stamped words. Purely a timing source — the displayed copy is
  * the tafsir's own authored text, onto which these words are aligned.
  */
 export interface RecitationTranscript {
-  /** Path to the audio asset (relative to /public), e.g. "/test-speech.wav". */
+  /** Path to the audio asset (relative to /public), e.g. "/alak/alak-vahiy.mp3". */
   src: string;
   /** Small label rendered above the player (e.g. reciter / section name). */
   title?: string;
@@ -46,4 +73,15 @@ export interface RecitationTranscript {
   durationS?: number;
   /** Time-stamped words, in reading order. Timing only — see file header. */
   words: RecitationWord[];
+  /**
+   * Where the spoken run STARTS. Omit for automatic placement: the recitation
+   * takes the first authored line its words actually match, searching from
+   * wherever the previous recitation of the entry left off.
+   */
+  from?: RecitationAnchor;
+  /**
+   * Where the spoken run ENDS (inclusive). Omit for automatic placement: it
+   * reaches through the last consecutive line the transcript covers.
+   */
+  to?: RecitationAnchor;
 }

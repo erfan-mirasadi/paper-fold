@@ -868,13 +868,19 @@ export interface SideInfoEntry {
   /** Optional audio (e.g. recitation) rendered as a minimal player at the entry's end. */
   audio?: SideInfoAudio;
   /**
-   * Optional time-aligned recitation. When present, its transcript is rendered
-   * as the entry's opening body — live, karaoke-synced text with an inline
-   * player that highlights each word as it's spoken and keeps the panel
-   * scrolled to it (see SyncedRecitation.tsx). Sits above `paragraphs`, and,
-   * unlike them, is never folded away by the "read more" collapse.
+   * Optional time-aligned recitation(s) — pass one, or an array of as many as
+   * the entry needs. Each claims the run of authored lines it actually speaks
+   * and renders them live: karaoke-synced text with an inline player that
+   * highlights every word as it's spoken and keeps the panel scrolled to it
+   * (see SyncedRecitation.tsx). A recited run sits exactly where its lines sit
+   * in the flow, and — unlike the rest — is never folded away by the "read
+   * more" collapse.
+   *
+   * With several, they play as a chain: finishing one starts the next by
+   * itself, in array order. Placement is automatic; give a transcript
+   * `from` / `to` anchors (see RecitationAnchor) to pin it by hand.
    */
-  recitation?: RecitationTranscript;
+  recitation?: RecitationTranscript | RecitationTranscript[];
 }
 
 export interface SurahSideInfoConfig {

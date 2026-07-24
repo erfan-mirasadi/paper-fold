@@ -12,6 +12,10 @@ import {
 } from "react";
 import type { RecitationTranscript } from "@/app/data/recitations/types";
 import { alignWordTimes, normalizeWord } from "@/app/data/recitations/align";
+import {
+  useRecitationChain,
+  type RecitationChainSlot,
+} from "@/app/_components/dom/ui-overlay/RecitationChain";
 
 const GOLD = "#C4963B";
 
@@ -92,6 +96,13 @@ export interface SyncedRecitationProps {
   transcript: RecitationTranscript;
   /** Highlight / wash accent. Defaults to the panel gold. */
   accent?: string;
+  /**
+   * Position in the surrounding RecitationChain — which entry this player
+   * belongs to and where it falls within it. Given one, the player hushes the
+   * others when it starts and hands over to the next when it ends. Omit for a
+   * standalone player.
+   */
+  chain?: RecitationChainSlot;
 }
 
 /**
@@ -111,7 +122,9 @@ export function SyncedRecitation({
   blocks,
   transcript,
   accent = GOLD,
+  chain: slot,
 }: SyncedRecitationProps) {
+  const chain = useRecitationChain();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const scrollElRef = useRef<HTMLElement | null>(null);
@@ -356,16 +369,45 @@ export function SyncedRecitation({
     };
   }, []);
 
+  // Start from the top if it had already finished. Shared by the play button
+  // and by the chain, which calls it when the previous voice hands over.
+  const start = useCallback(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    const end = isFinite(a.duration) && a.duration > 0 ? a.duration : duration;
+    if (a.ended || (end && a.currentTime >= end - 0.05)) a.currentTime = 0;
+    a.play().catch(() => {});
+  }, [duration]);
+
+  const startRef = useRef(start);
+  useEffect(() => {
+    startRef.current = start;
+  }, [start]);
+
+  // Join the entry's chain — kept on primitives so a re-render never
+  // re-registers, and `startRef` so the entry always gets the current player.
+  const group = slot?.group;
+  const order = slot?.order;
+  useEffect(() => {
+    if (!chain || group === undefined || order === undefined) return;
+    return chain.register(
+      { group, order },
+      {
+        play: () => startRef.current(),
+        pause: () => audioRef.current?.pause(),
+        prime: () => {
+          const a = audioRef.current;
+          if (a && a.preload !== "auto") a.preload = "auto";
+        },
+      },
+    );
+  }, [chain, group, order]);
+
   const togglePlay = () => {
     const a = audioRef.current;
     if (!a) return;
-    if (a.paused) {
-      if (a.ended || (duration && a.currentTime >= duration - 0.05))
-        a.currentTime = 0;
-      a.play().catch(() => {});
-    } else {
-      a.pause();
-    }
+    if (a.paused) start();
+    else a.pause();
   };
 
   // Clicking any span jumps the voice there (event-delegated — one handler).
@@ -399,9 +441,17 @@ export function SyncedRecitation({
         ref={audioRef}
         src={transcript.src}
         preload="metadata"
-        onPlay={() => setIsPlaying(true)}
+        onPlay={() => {
+          setIsPlaying(true);
+          if (chain && group !== undefined && order !== undefined)
+            chain.claim({ group, order });
+        }}
         onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={() => {
+          setIsPlaying(false);
+          if (chain && group !== undefined && order !== undefined)
+            chain.advance({ group, order });
+        }}
         onLoadedMetadata={(e) => {
           const d = e.currentTarget.duration;
           if (isFinite(d) && d > 0) setDuration(d);
