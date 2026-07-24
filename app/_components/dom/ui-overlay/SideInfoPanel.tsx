@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
@@ -19,9 +21,10 @@ import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
 import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntry";
 import {
   SyncedRecitation,
-  type RecitedBlock,
+  type InkRenderer,
 } from "@/app/_components/dom/ui-overlay/SyncedRecitation";
 import { RecitationChainProvider } from "@/app/_components/dom/ui-overlay/RecitationChain";
+import { parseInlineHtml } from "@/app/_components/dom/ui-overlay/InlineHtml";
 import {
   normalizeText,
   normalizeWord,
@@ -290,6 +293,7 @@ function InkCapsule({
   groupBg,
   groupTextColor,
   spanClass,
+  ink,
 }: {
   item: SideInfoCapsuleItem;
   index: number;
@@ -299,6 +303,9 @@ function InkCapsule({
   groupBg?: string;
   groupTextColor?: string;
   spanClass: string;
+  /** When a recitation speaks this capsule, its karaoke spans replace the
+   *  plain text — the capsule keeps every bit of its own styling. */
+  ink?: ReactNode;
 }) {
   const accent = item.color ?? groupAccent ?? GOLD;
   const bg = item.bg ?? groupBg ?? hexToRgba(accent, 0.06);
@@ -382,13 +389,32 @@ function InkCapsule({
             {typeof item.n === "number" ? "." : ""}
           </span>
         )}
-        <span dangerouslySetInnerHTML={{ __html: item.text }} />
+        {ink ? (
+          // The spans drop the text's own leading space, so put it back —
+          // otherwise the number prefix collides with the first word.
+          <>
+            {/^\s/.test(item.text) ? " " : null}
+            {ink}
+          </>
+        ) : (
+          <span dangerouslySetInnerHTML={{ __html: item.text }} />
+        )}
       </p>
     </motion.div>
   );
 }
 
-function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
+function InkCapsuleGroup({
+  group,
+  ink,
+  flush,
+}: {
+  group: SideInfoCapsules;
+  /** Supplied when a recitation speaks this group — one unit per capsule. */
+  ink?: InkRenderer;
+  /** Drop the top margin (the group opens a recited run). */
+  flush?: boolean;
+}) {
   const accent = group.color ?? GOLD;
   const cols = group.columns ?? (group.capsules.length > 1 ? 2 : 1);
   const frameColor =
@@ -416,6 +442,9 @@ function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
           groupBg={group.bg}
           groupTextColor={group.textColor}
           spanClass={cols === 2 && item.span ? "lg:col-span-2" : ""}
+          // A capsule whose own text carries markup can't take per-character
+          // spans, so it renders as authored; its words still pass in time.
+          ink={ink && !item.text.includes("<") ? ink(i) : undefined}
         />
       ))}
     </div>
@@ -423,7 +452,7 @@ function InkCapsuleGroup({ group }: { group: SideInfoCapsules }) {
 
   return (
     <div
-      style={{ marginTop: "clamp(13px, 1.2vw, 22px)" }}
+      style={{ marginTop: flush ? 0 : "clamp(13px, 1.2vw, 22px)" }}
       // The panel backdrop watches these to tint its wash with whatever
       // colored content is currently scrolled into view (see SideInfoPanel).
       data-pb-accent={accent}
@@ -509,7 +538,13 @@ function resolveEntries(
 // the one before it and keeps the lines it actually speaks (recitedBlockRange)
 // — until the transcript carries `from` / `to` anchors, which pin it exactly.
 
-type SlotKind = "kicker" | "title" | "paragraph" | "subtitle" | "other";
+type SlotKind =
+  | "kicker"
+  | "title"
+  | "paragraph"
+  | "subtitle"
+  | "capsules"
+  | "html";
 
 interface FlowSlot {
   kind: SlotKind;
@@ -517,12 +552,66 @@ interface FlowSlot {
   paraIndex: number;
   /** The flow item this slot renders (absent for the kicker / title). */
   item?: SideInfoFlowItem;
-  /** Set when the slot is plain text, and can therefore be recited. */
-  block?: RecitedBlock;
+  /**
+   * The slot's text, split the way the LAYOUT needs to place it: one piece for
+   * a paragraph, one per capsule for a capsule grid. In speaking order.
+   */
+  units: string[];
+  /**
+   * Renders the slot as part of a spoken run: `ink(k)` is unit k's karaoke
+   * text, `flush` drops the top margin (this slot opens the run). Absent when
+   * the slot can't take part in a recitation at all.
+   */
+  recite?: (ink: InkRenderer, flush: boolean) => ReactNode;
 }
 
 const isSubtitleItem = (it: SideInfoFlowItem): it is SideInfoSubtitle =>
   typeof it === "object" && it !== null && "subtitle" in it;
+
+// The recited copy wears exactly the typography the written flow wears — same
+// classes, same rhythm — so a spoken section reads as the same page, only lit.
+const KICKER_CLASS =
+  "!text-left w-full uppercase font-medium text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]";
+const KICKER_STYLE: CSSProperties = {
+  color: GOLD,
+  fontFamily: "var(--font-roboto)",
+  letterSpacing: "0.26em",
+};
+const TITLE_CLASS =
+  "!text-left w-full font-light tracking-tight text-foreground text-[15px] lg:text-[clamp(17px,1.2vw,30px)]";
+const TITLE_STYLE: CSSProperties = {
+  fontFamily: "var(--font-roboto)",
+  lineHeight: 1.2,
+  marginTop: "clamp(6px, 0.55vw, 12px)",
+};
+const PARA_CLASS =
+  "!text-left w-full font-normal text-foreground/80 text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]";
+const PARA_STYLE: CSSProperties = {
+  fontFamily: "var(--font-inter)",
+  lineHeight: 1.95,
+  marginTop: "clamp(10px, 1vw, 18px)",
+};
+const SUBTITLE_CLASS =
+  "!text-left w-full font-medium tracking-tight text-foreground text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]";
+const SUBTITLE_STYLE: CSSProperties = {
+  fontFamily: "var(--font-roboto)",
+  lineHeight: 1.3,
+  marginTop: "clamp(18px, 2vw, 32px)",
+};
+
+/** Style for a recited line — margins collapsed when it opens the run. */
+const lineStyle = (style: CSSProperties, flush: boolean): CSSProperties => ({
+  margin: 0,
+  ...style,
+  ...(flush ? { marginTop: 0 } : null),
+});
+
+/** An HTML block's words, for alignment only (the markup renders as authored). */
+const stripTags = (html: string) =>
+  html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 /** The entry's flow as slots — the shared coordinate system for placing
  *  recitations and for rendering whatever they leave to the written flow. */
@@ -536,33 +625,31 @@ function buildFlowSlots(
     slots.push({
       kind: "kicker",
       paraIndex: -1,
-      block: {
-        text: kicker,
-        as: "div",
-        className:
-          "!text-left w-full uppercase font-medium text-[7.5px] lg:text-[clamp(8.5px,0.55vw,13px)]",
-        style: {
-          color: GOLD,
-          fontFamily: "var(--font-roboto)",
-          letterSpacing: "0.26em",
-        },
-      },
+      units: [kicker],
+      recite: (ink, flush) => (
+        <div
+          lang="tr"
+          className={KICKER_CLASS}
+          style={lineStyle(KICKER_STYLE, flush)}
+        >
+          {ink(0)}
+        </div>
+      ),
     });
   if (title)
     slots.push({
       kind: "title",
       paraIndex: -1,
-      block: {
-        text: title,
-        as: "h3",
-        className:
-          "!text-left w-full font-light tracking-tight text-foreground text-[15px] lg:text-[clamp(17px,1.2vw,30px)]",
-        style: {
-          fontFamily: "var(--font-roboto)",
-          lineHeight: 1.2,
-          marginTop: "clamp(6px, 0.55vw, 12px)",
-        },
-      },
+      units: [title],
+      recite: (ink, flush) => (
+        <h3
+          lang="tr"
+          className={TITLE_CLASS}
+          style={lineStyle(TITLE_STYLE, flush)}
+        >
+          {ink(0)}
+        </h3>
+      ),
     });
   items.forEach((item, i) => {
     if (typeof item === "string")
@@ -570,38 +657,67 @@ function buildFlowSlots(
         kind: "paragraph",
         paraIndex: i,
         item,
-        block: {
-          text: item,
-          as: "p",
-          className:
-            "!text-left w-full font-normal text-foreground/80 text-[10.5px] lg:text-[clamp(11.5px,0.8vw,19px)]",
-          style: {
-            fontFamily: "var(--font-inter)",
-            lineHeight: 1.95,
-            marginTop: "clamp(10px, 1vw, 18px)",
-          },
-        },
+        units: [item],
+        recite: (ink, flush) => (
+          <p
+            lang="tr"
+            className={PARA_CLASS}
+            style={lineStyle(PARA_STYLE, flush)}
+          >
+            {ink(0)}
+          </p>
+        ),
       });
     else if (isSubtitleItem(item))
       slots.push({
         kind: "subtitle",
         paraIndex: i,
         item,
-        block: {
-          text: item.subtitle,
-          as: "h4",
-          className:
-            "!text-left w-full font-medium tracking-tight text-foreground text-[13.5px] lg:text-[clamp(15px,1.05vw,25px)]",
-          style: {
-            fontFamily: "var(--font-roboto)",
-            lineHeight: 1.3,
-            marginTop: "clamp(18px, 2vw, 32px)",
-          },
-        },
+        units: [item.subtitle],
+        recite: (ink, flush) => (
+          <h4
+            lang="tr"
+            className={SUBTITLE_CLASS}
+            style={lineStyle(SUBTITLE_STYLE, flush)}
+          >
+            {ink(0)}
+          </h4>
+        ),
       });
-    // Capsule groups / raw HTML have no plain text to recite — they still take
-    // a slot, so they keep their place and break a spoken run.
-    else slots.push({ kind: "other", paraIndex: i, item });
+    // A capsule grid is recited capsule by capsule — each one its own unit, so
+    // the light travels through the grid exactly as the voice reads it.
+    else if ("capsules" in item)
+      slots.push({
+        kind: "capsules",
+        paraIndex: i,
+        item,
+        units: item.capsules.map((c) => c.text),
+        recite: (ink, flush) => (
+          <InkCapsuleGroup group={item} ink={ink} flush={flush} />
+        ),
+      });
+    // Authored HTML lights up too: the markup is read into a tree that keeps
+    // every tag and attribute, and each run of text inside it takes the
+    // karaoke spans (see InlineHtml). Markup that parser can't make sense of
+    // renders as authored — its words still pass in time, just unlit.
+    else {
+      const parsed = parseInlineHtml(item.html);
+      slots.push({
+        kind: "html",
+        paraIndex: i,
+        item,
+        units: parsed ? parsed.units : [stripTags(item.html)],
+        recite: (ink, flush) => (
+          <div className={PARA_CLASS} style={lineStyle(PARA_STYLE, flush)}>
+            {parsed ? (
+              parsed.render(ink)
+            ) : (
+              <span dangerouslySetInnerHTML={{ __html: item.html }} />
+            )}
+          </div>
+        ),
+      });
+    }
   });
   return slots;
 }
@@ -616,18 +732,20 @@ function resolveAnchor(slots: FlowSlot[], anchor: RecitationAnchor): number {
     const want = normalizeText(anchor.subtitle);
     return want
       ? slots.findIndex(
-          (s) => s.kind === "subtitle" && normalizeText(s.block!.text) === want,
+          (s) => s.kind === "subtitle" && normalizeText(s.units[0]) === want,
         )
       : -1;
   }
   const want = normalizeText(anchor.startsWith);
   return want
-    ? slots.findIndex((s) => !!s.block && normalizeText(s.block.text).startsWith(want))
+    ? slots.findIndex((s) =>
+        normalizeText(s.units[0] ?? "").startsWith(want),
+      )
     : -1;
 }
 
 const slotWords = (slot: FlowSlot) =>
-  slot.block!.text.split(/\s+/).map(normalizeWord).filter(Boolean);
+  slot.units.join(" ").split(/\s+/).map(normalizeWord).filter(Boolean);
 
 /**
  * Which recitation owns each slot (null = written flow). Recitations are laid
@@ -653,13 +771,13 @@ function placeRecitations(
         pinnedStart = true;
       }
     }
-    while (from < slots.length && !slots[from].block) from++;
+    while (from < slots.length && !slots[from].recite) from++;
     if (from >= slots.length) return;
 
-    // A spoken run stops at the first thing that can't be recited (a capsule
-    // group, an image, raw HTML) — and at a pinned `to`, if there is one.
+    // A spoken run stops at the first thing that can't be recited at all —
+    // and at a pinned `to`, if there is one.
     let runEnd = from;
-    while (runEnd + 1 < slots.length && slots[runEnd + 1].block) runEnd++;
+    while (runEnd + 1 < slots.length && slots[runEnd + 1].recite) runEnd++;
     const pinnedEnd = r.to !== undefined ? resolveAnchor(slots, r.to) : -1;
     const limit = pinnedEnd >= from ? Math.min(pinnedEnd, runEnd) : runEnd;
 
@@ -736,6 +854,24 @@ function SideInfoEntryView({
     });
     return out;
   }, [slots, owner]);
+
+  // Each recited run's text units, flattened in speaking order, plus where
+  // each slot's own units begin — that offset is how a slot asks for its ink
+  // without knowing what came before it.
+  const recitedUnits = useMemo(() => {
+    const byGroup = new Map<number, { units: string[]; offsets: number[] }>();
+    groups.forEach((g, gi) => {
+      if (g.rec === null) return;
+      const units: string[] = [];
+      const offsets: number[] = [];
+      for (let i = g.from; i <= g.to; i++) {
+        offsets.push(units.length);
+        units.push(...slots[i].units);
+      }
+      byGroup.set(gi, { units, offsets });
+    });
+    return byGroup;
+  }, [groups, slots]);
 
   const kickerRecited = slots.some(
     (s, i) => s.kind === "kicker" && owner[i] !== null,
@@ -871,22 +1007,27 @@ function SideInfoEntryView({
     .reverse()
     .find((g) => g.rec === null && flowSlotsOf(g).length > 0);
 
-  const renderedFlow = groups.map((g) => {
+  const renderedFlow = groups.map((g, gi) => {
     if (g.rec !== null) {
       const groupSlots = slots.slice(g.from, g.to + 1);
+      const { units, offsets } = recitedUnits.get(gi)!;
       return (
         <div key={`rec-${g.rec}`} style={{ marginTop: "clamp(8px, 0.8vw, 14px)" }}>
           <SyncedRecitation
             transcript={recitations[g.rec]}
-            blocks={groupSlots.map((s, i) =>
-              // The wrapper above already spaces the run — let its first line
-              // sit flush so a recitation lands where the flow left off.
-              i === 0
-                ? { ...s.block!, style: { ...s.block!.style, marginTop: 0 } }
-                : s.block!,
-            )}
+            units={units}
             chain={{ group: entryKey, order: g.rec }}
-          />
+          >
+            {(ink) =>
+              groupSlots.map((s, i) => (
+                // The wrapper above already spaces the run — let its first
+                // line sit flush so a recitation lands where the flow left off.
+                <Fragment key={i}>
+                  {s.recite!((k) => ink(offsets[i] + k), i === 0)}
+                </Fragment>
+              ))
+            }
+          </SyncedRecitation>
         </div>
       );
     }
@@ -900,8 +1041,7 @@ function SideInfoEntryView({
   });
 
   return (
-    <RecitationChainProvider>
-      <div>
+    <div>
       {(kicker || (!hideVerseNumbers && verseId !== undefined)) && (
         <div
           className="flex items-center"
@@ -971,8 +1111,7 @@ function SideInfoEntryView({
 
       {/* Nothing written to hang them off (an entry read cover to cover). */}
       {!lastFlowGroup && tail}
-      </div>
-    </RecitationChainProvider>
+    </div>
   );
 }
 
@@ -1457,6 +1596,10 @@ export function SideInfoPanel() {
                     ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
                   style={{ paddingRight: "clamp(10px, 0.9vw, 16px)" }}
                 >
+                {/* One chain for the whole log: starting any voice hushes
+                    every other one on the page, while the hand-over at the end
+                    stays inside its own entry (see RecitationChain). */}
+                <RecitationChainProvider>
                 <AnimatePresence initial={false}>
                   {entries.length === 0 ? (
                     <motion.p
@@ -1521,6 +1664,7 @@ export function SideInfoPanel() {
                     })
                   )}
                 </AnimatePresence>
+                </RecitationChainProvider>
                 </div>
                 <InkScrollbar
                   targetRef={scrollRef}

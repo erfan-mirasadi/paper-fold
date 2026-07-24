@@ -86,11 +86,17 @@ export interface RecitedRange {
  * `blocks` is a candidate run of authored lines (each already tokenized into
  * normalized words), in reading order. We align the transcript across the
  * whole run, then measure per block what share of its words the voice hit:
- * a spoken block lands near 100%, a block the audio never reaches only picks
- * up incidental matches. The answer is the first well-matched block and every
- * well-matched block right after it — so a recitation finds its own extent in
- * the tafsir, and several recitations can sit in one entry without any of them
- * swallowing the text that belongs to the next.
+ * a spoken block lands near 100%, while a block the audio never reaches picks
+ * up only incidental matches — and none at all once the transcript is spent.
+ * The answer is everything from the FIRST well-matched block through the LAST
+ * one, so a recitation finds its own extent in the tafsir and several of them
+ * can sit in one entry without swallowing each other's text.
+ *
+ * Reaching through to the last match (rather than stopping at the first weak
+ * line) is deliberate: a line the voice reads in different words — "1. Hz.
+ * Muhammet" against a spoken "Birinci Hazreti Muhammed" — scores poorly on its
+ * own but is plainly inside the recitation, and cutting there would strand
+ * everything after it.
  *
  * With `pinnedStart` the run is taken to begin at block 0 no matter how well
  * it matches (an authored `from:` anchor wins over the measurement).
@@ -138,7 +144,7 @@ export function recitedBlockRange(
     if (start === blocks.length) return null;
   }
   let end = start;
-  while (end + 1 < blocks.length && spoken(end + 1)) end++;
+  for (let b = start + 1; b < blocks.length; b++) if (spoken(b)) end = b;
   return { start, end };
 }
 
@@ -209,9 +215,21 @@ export function alignWordTimes(
       a = k;
     }
   }
+  // Final monotonic pass. Interpolating between anchors can leave a word
+  // ending after the next one starts (or, where two anchors coincide, no
+  // duration at all). The renderer lays its per-character spans out in this
+  // order and finds the read head by binary search over their start times, so
+  // the sequence has to be non-decreasing end to end.
+  for (let k = 1; k < D; k++) {
+    const prev = times[k - 1] as WordTime;
+    const t = times[k] as WordTime;
+    if (t.s < prev.s) t.s = prev.s;
+  }
   for (let k = 0; k < D; k++) {
     const t = times[k] as WordTime;
+    const next = k + 1 < D ? (times[k + 1] as WordTime).s : Infinity;
     if (!(t.e > t.s)) t.e = t.s + 0.04;
+    if (t.e > next) t.e = next;
   }
   return times as WordTime[];
 }

@@ -96,6 +96,9 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       start: {
         kicker: "İkinci Bölüm:",
         title: "Tafsil, Açıklama Bölümüdür",
+        // Read end to end — the ayet capsules light up one by one as the voice
+        // reaches them, same as the prose does.
+        recitation: ALAK_RECITATIONS.ikinciBolum,
         paragraphs: [
           {
             columns: 2,
@@ -197,6 +200,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       "inner-open": {
         kicker: "ÜÇÜNCÜ BÖLÜM:",
         title: "",
+        recitation: ALAK_RECITATIONS.ucuncuBolum,
         paragraphs: [
           {
             columns: 2,
@@ -278,6 +282,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       end: {
         kicker: "DÖRT AYETLİK ARA BÖLÜM:",
         title: "AKIL VE VİCDAN SAHİPLERİNİ İNSAFA VE MUHAKEMEYE DAVET EDİYOR.",
+        recitation: ALAK_RECITATIONS.araBolum,
         paragraphs: [
           "Evet Ebu Cehil gibiler sözden anlamasalar da elbette insanların içinde Peygambere ve Onun haklı mesajına vicdanıyla bakanlar ve düşünenler olacaktır. Kur'an bu gelen dört ayetle onlara sesleniyor:",
           {
@@ -377,6 +382,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
       1: {
         kicker: "BİRİNCİ BÖLÜM:",
         title: "ANA BÖLÜMDÜR. BEŞ AYETTİR.",
+        recitation: ALAK_RECITATIONS.birinciBolum,
         paragraphs: [
           "Beş ayetlik birinci bölüm bu surenin ana bölümüdür. Bu surede verilmek istenen esas mesaj bu bölümde veciz bir şekilde veriliyor.",
           "Kur'anın Mekkedeki muhatapları Mekkeli müşrikler ve Hıristiyan ve Yahudilerdi. Allah C.C. her ifadesinde bu iki muhatabı gözetmiştir. Burada sırayla onlardan bahsediliyor. Bu beş ayetlik ana bölüm biraz açılarak şöyle ifade edilebilir:",

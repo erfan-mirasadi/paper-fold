@@ -2,8 +2,7 @@
 
 import {
   CSSProperties,
-  ElementType,
-  createElement,
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -74,24 +73,26 @@ interface Segment {
 }
 
 /**
- * One authored line of the recitation, with its own tag + typography. Blocks
- * are recited (and highlighted) in order — a kicker, a title, a subtitle and
- * body paragraphs all take the same karaoke treatment, each in its own style.
+ * Renders unit `i`'s karaoke text — the characters, wrapped in the spans this
+ * component drives. Drop it wherever that unit's words belong on screen.
  */
-export interface RecitedBlock {
-  text: string;
-  /** Element tag (default "p"). e.g. "h3" for a title, "h4" for a subtitle. */
-  as?: ElementType;
-  className?: string;
-  style?: CSSProperties;
-}
+export type InkRenderer = (unit: number) => ReactNode;
 
 export interface SyncedRecitationProps {
   /**
-   * The authored blocks to recite, in order — the source of truth for what's
-   * shown and how it's styled. The transcript is aligned onto their words.
+   * The spoken text, split into units IN SPEAKING ORDER — the alignment
+   * target. A unit is however small a piece the layout needs to place on its
+   * own: a whole paragraph, or a single capsule inside a capsule grid.
    */
-  blocks: RecitedBlock[];
+  units: string[];
+  /**
+   * Renders the body. Call `ink(i)` where unit i's words belong and this
+   * component takes over their highlighting; a unit whose ink is never placed
+   * still consumes its time, so everything after it stays in sync — that's how
+   * a block that can't be highlighted (raw HTML, say) reads as a quiet pause
+   * rather than knocking the rest of the recitation out of step.
+   */
+  children: (ink: InkRenderer) => ReactNode;
   /** Time-aligned transcript (timing only — see RecitationTranscript). */
   transcript: RecitationTranscript;
   /** Highlight / wash accent. Defaults to the panel gold. */
@@ -120,7 +121,8 @@ export interface SyncedRecitationProps {
  * the handful of spans around the read head, so it stays light.
  */
 export function SyncedRecitation({
-  blocks,
+  units,
+  children,
   transcript,
   accent = GOLD,
   chain: slot,
@@ -167,12 +169,12 @@ export function SyncedRecitation({
     [wash],
   );
 
-  // Tokenize the authored blocks into display words (source of truth), align
+  // Tokenize the authored units into display words (source of truth), align
   // the transcript's timings onto them, then split each word into per-character
   // segments plus an inter-word gap segment carrying the silence between words
-  // (so the fill flows through the spaces too). `blockSegs[i]` is block i's
+  // (so the fill flows through the spaces too). `unitSegs[i]` is unit i's
   // segments; `starts`/`durs`/`centers` are the flat arrays the loop reads.
-  const { blockSegs, starts, durs, centers, N } = useMemo(() => {
+  const { unitSegs, starts, durs, centers, N } = useMemo(() => {
     const starts: number[] = [];
     const durs: number[] = [];
     const centers: number[] = [];
@@ -185,10 +187,10 @@ export function SyncedRecitation({
       return gi;
     };
 
-    const words: { text: string; block: number }[] = [];
-    blocks.forEach((b, bi) =>
-      b.text.split(/\s+/).forEach((tok) => {
-        if (tok) words.push({ text: tok, block: bi });
+    const words: { text: string; unit: number }[] = [];
+    units.forEach((u, ui) =>
+      u.split(/\s+/).forEach((tok) => {
+        if (tok) words.push({ text: tok, unit: ui });
       }),
     );
     const times = alignWordTimes(
@@ -197,9 +199,9 @@ export function SyncedRecitation({
       duration || transcript.durationS || 0,
     );
 
-    const blockSegs: Segment[][] = blocks.map(() => []);
+    const unitSegs: Segment[][] = units.map(() => []);
     words.forEach((word, wi) => {
-      const segs = blockSegs[word.block];
+      const segs = unitSegs[word.unit];
       const { s, e } = times[wi];
       const chars = Array.from(word.text);
       const L = Math.max(chars.length, 1);
@@ -208,15 +210,39 @@ export function SyncedRecitation({
         segs.push({ ch, gi: push(s + j * d, d), space: false });
       });
       const next = words[wi + 1];
-      if (next && next.block === word.block)
+      if (next && next.unit === word.unit)
         segs.push({
           ch: " ",
           gi: push(e, Math.max(times[wi + 1].s - e, 0.001)),
           space: true,
         });
     });
-    return { blockSegs, starts, durs, centers, N: starts.length };
-  }, [blocks, transcript, duration]);
+    return { unitSegs, starts, durs, centers, N: starts.length };
+  }, [units, transcript, duration]);
+
+  // A unit's characters as live spans. The caller drops these wherever the
+  // layout wants the words — inside a paragraph, a capsule, anywhere — and we
+  // keep hold of the elements to drive the fill.
+  const ink = useCallback<InkRenderer>(
+    (unit) => {
+      const segs = unitSegs[unit];
+      if (!segs || segs.length === 0) return null;
+      return segs.map((seg) => (
+        <span
+          key={seg.gi}
+          ref={(el) => {
+            spanEls.current[seg.gi] = el;
+          }}
+          className="rw-l"
+          data-t={starts[seg.gi]}
+          style={spanBaseStyle}
+        >
+          {seg.ch}
+        </span>
+      ));
+    },
+    [unitSegs, starts, spanBaseStyle],
+  );
 
   // Fractional head position in span-index units: `floor` is the span the
   // voice is on, the fraction is how far through it we are. −1 before the
@@ -475,38 +501,9 @@ export function SyncedRecitation({
         }}
       />
 
-      {/* ── The recited blocks — one span per character and per word-gap ──── */}
-      <div onClick={onTextClick}>
-        {blocks.map((block, bi) => {
-          const segs = blockSegs[bi];
-          if (!segs || segs.length === 0) return null;
-          const Tag: ElementType = block.as ?? "p";
-          // createElement (not <Tag/>) so a dynamic tag keeps normal HTML prop
-          // typing instead of collapsing children/props to `never`.
-          return createElement(
-            Tag,
-            {
-              key: bi,
-              lang: "tr",
-              className: block.className,
-              style: { margin: 0, ...block.style },
-            },
-            segs.map((seg) => (
-              <span
-                key={seg.gi}
-                ref={(el) => {
-                  spanEls.current[seg.gi] = el;
-                }}
-                className="rw-l"
-                data-t={starts[seg.gi]}
-                style={spanBaseStyle}
-              >
-                {seg.ch}
-              </span>
-            )),
-          );
-        })}
-      </div>
+      {/* ── The recited body — the caller lays it out; we only supply each
+          unit's spans, one per character and per word-gap. ────────────────── */}
+      <div onClick={onTextClick}>{children(ink)}</div>
 
       {/* ── Inline ink player — sits directly under the recited lines ─────── */}
       <div style={{ marginTop: "clamp(14px, 1.3vw, 22px)" }}>
