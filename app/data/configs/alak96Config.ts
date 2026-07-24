@@ -69,7 +69,7 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
           "Ayrıca hayvanlar kendi aralarında iletişim kurarak, kendi dilleriyle konuşarak duygularını anlatabilmektedirler.",
           "Bitkiler de renkleriyle ve yaydıkları kokularla böceklere mesaj gönderirler. Rüzgâr çiçeklerin kokularını, mesajlarını uzaklara taşır, onlara özel ulak olur.",
           "İnsanlara gelince; insanların konuşması hayvanların çok üzerindedir çünkü insanlar üstün bir beyin ile donatılmış, özel varlıklardır. Allah, insanlara çeşitli diller öğretmiştir.",
-          { subtitle: 'ALLAH’IN KONUŞMASI: "VAHİY"' },
+          { subtitle: 'allah’ın konuşması: "vahiy"' },
           "Bütün canlıları kendilerine mahsus bir dil ile konuşturan Allah, elbette kendisi de konuşmayı bilir. (Hiç yaratan bilmez mi?) Konuşmayı bilen elbette konuşur ve konuşmuştur. Onun konuşması vahiy ve ilham şeklindedir.",
           "İşte Yüce Yaratıcı, peygamberlerine vahiy yoluyla hitap etmiştir. İnsanlar içinde, yaradılışça en ileri, ahlakça en mükemmel olan Hz. Muhammed Aleyhisselam ile de vahiy yoluyla ve Âlemlerin Rabbi sıfatıyla konuşmuştur.",
           "Konuşmuş ve bütün insanlığa onunla mesaj göndermiştir.",
