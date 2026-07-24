@@ -2,7 +2,7 @@
 
 import { Fragment, createElement } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import type { InkRenderer } from "@/app/_components/dom/ui-overlay/SyncedRecitation";
+import type { InkRenderer } from "@/app/_components/dom/recitation/SyncedRecitation";
 
 // ---------------------------------------------------------------------------
 // Authored HTML, recited.

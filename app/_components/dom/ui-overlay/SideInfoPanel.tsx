@@ -22,9 +22,9 @@ import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntr
 import {
   SyncedRecitation,
   type InkRenderer,
-} from "@/app/_components/dom/ui-overlay/SyncedRecitation";
-import { RecitationChainProvider } from "@/app/_components/dom/ui-overlay/RecitationChain";
-import { parseInlineHtml } from "@/app/_components/dom/ui-overlay/InlineHtml";
+} from "@/app/_components/dom/recitation/SyncedRecitation";
+import { RecitationChainProvider } from "@/app/_components/dom/recitation/RecitationChain";
+import { parseInlineHtml } from "@/app/_components/dom/recitation/InlineHtml";
 import {
   normalizeText,
   normalizeWord,
@@ -804,13 +804,10 @@ function placeRecitations(
 // the same intro text animation (AnimatedText, cinematic word-by-word) —
 // except the runs a recitation claims, which are read aloud instead. ────────
 function SideInfoEntryView({
-  entryKey,
   verseId,
   entry,
   hideVerseNumbers,
 }: Omit<ResolvedEntry, "key" | "stepIdx"> & {
-  /** The entry's id — scopes its recitations' play-in-turn chain. */
-  entryKey: string;
   hideVerseNumbers?: boolean;
 }) {
   const kicker =
@@ -1013,11 +1010,7 @@ function SideInfoEntryView({
       const { units, offsets } = recitedUnits.get(gi)!;
       return (
         <div key={`rec-${g.rec}`} style={{ marginTop: "clamp(8px, 0.8vw, 14px)" }}>
-          <SyncedRecitation
-            transcript={recitations[g.rec]}
-            units={units}
-            chain={{ group: entryKey, order: g.rec }}
-          >
+          <SyncedRecitation transcript={recitations[g.rec]} units={units}>
             {(ink) =>
               groupSlots.map((s, i) => (
                 // The wrapper above already spaces the run — let its first
@@ -1597,8 +1590,9 @@ export function SideInfoPanel() {
                   style={{ paddingRight: "clamp(10px, 0.9vw, 16px)" }}
                 >
                 {/* One chain for the whole log: starting any voice hushes
-                    every other one on the page, while the hand-over at the end
-                    stays inside its own entry (see RecitationChain). */}
+                    every other one, and finishing one hands over to the next
+                    down the page — so play at the top reads the log through,
+                    entry after entry (see RecitationChain). */}
                 <RecitationChainProvider>
                 <AnimatePresence initial={false}>
                   {entries.length === 0 ? (
@@ -1652,7 +1646,6 @@ export function SideInfoPanel() {
                           style={{ marginBottom: "clamp(30px, 3vw, 54px)" }}
                         >
                           <SideInfoEntryView
-                            entryKey={resolved.key}
                             verseId={resolved.verseId}
                             entry={resolved.entry}
                             hideVerseNumbers={

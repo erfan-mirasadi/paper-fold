@@ -13,8 +13,8 @@ import type { RecitationTranscript } from "@/app/data/recitations/types";
 import { alignWordTimes, normalizeWord } from "@/app/data/recitations/align";
 import {
   useRecitationChain,
-  type RecitationChainSlot,
-} from "@/app/_components/dom/ui-overlay/RecitationChain";
+  type RecitationChainHandle,
+} from "@/app/_components/dom/recitation/RecitationChain";
 
 const GOLD = "#C4963B";
 
@@ -97,13 +97,6 @@ export interface SyncedRecitationProps {
   transcript: RecitationTranscript;
   /** Highlight / wash accent. Defaults to the panel gold. */
   accent?: string;
-  /**
-   * Position in the surrounding RecitationChain — which entry this player
-   * belongs to and where it falls within it. Given one, the player hushes the
-   * others when it starts and hands over to the next when it ends. Omit for a
-   * standalone player.
-   */
-  chain?: RecitationChainSlot;
 }
 
 /**
@@ -117,15 +110,16 @@ export interface SyncedRecitationProps {
  * The displayed text is always the authored copy; the transcript only times it
  * (aligned tolerantly), so a bad transcript never changes what shows.
  *
- * Drop it anywhere; it finds its own scroll parent. Per frame it only touches
- * the handful of spans around the read head, so it stays light.
+ * Drop it anywhere; it finds its own scroll parent, and joins the surrounding
+ * RecitationChain if there is one — hushing the others when it starts and
+ * handing over to the next player down the page when it ends. Per frame it
+ * only touches the handful of spans around the read head, so it stays light.
  */
 export function SyncedRecitation({
   units,
   children,
   transcript,
   accent = GOLD,
-  chain: slot,
 }: SyncedRecitationProps) {
   const chain = useRecitationChain();
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -411,24 +405,28 @@ export function SyncedRecitation({
     startRef.current = start;
   }, [start]);
 
-  // Join the entry's chain — kept on primitives so a re-render never
-  // re-registers, and `startRef` so the entry always gets the current player.
-  const group = slot?.group;
-  const order = slot?.order;
+  // Join the chain once, for as long as we're mounted. Our turn comes from
+  // where `rootRef` sits on the page, read fresh each time — so the order
+  // always matches what the reader sees. `startRef` keeps the chain calling
+  // the current player without ever needing to re-register.
+  const chainRef = useRef<RecitationChainHandle | null>(null);
   useEffect(() => {
-    if (!chain || group === undefined || order === undefined) return;
-    return chain.register(
-      { group, order },
-      {
-        play: () => startRef.current(),
-        pause: () => audioRef.current?.pause(),
-        prime: () => {
-          const a = audioRef.current;
-          if (a && a.preload !== "auto") a.preload = "auto";
-        },
+    if (!chain) return;
+    const handle = chain.register({
+      node: () => rootRef.current,
+      play: () => startRef.current(),
+      pause: () => audioRef.current?.pause(),
+      prime: () => {
+        const a = audioRef.current;
+        if (a && a.preload !== "auto") a.preload = "auto";
       },
-    );
-  }, [chain, group, order]);
+    });
+    chainRef.current = handle;
+    return () => {
+      handle.release();
+      chainRef.current = null;
+    };
+  }, [chain]);
 
   const togglePlay = () => {
     const a = audioRef.current;
@@ -477,14 +475,12 @@ export function SyncedRecitation({
         preload="metadata"
         onPlay={() => {
           setIsPlaying(true);
-          if (chain && group !== undefined && order !== undefined)
-            chain.claim({ group, order });
+          chainRef.current?.claim();
         }}
         onPause={() => setIsPlaying(false)}
         onEnded={() => {
           setIsPlaying(false);
-          if (chain && group !== undefined && order !== undefined)
-            chain.advance({ group, order });
+          chainRef.current?.advance();
         }}
         onLoadedMetadata={(e) => {
           const d = e.currentTarget.duration;
