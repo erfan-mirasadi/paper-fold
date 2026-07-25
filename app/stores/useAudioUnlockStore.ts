@@ -12,6 +12,7 @@
  */
 
 import { create } from "zustand";
+import { primeAudioContext } from "@/app/utils/audioGraph";
 
 interface AudioUnlockState {
   hasInteracted: boolean;
@@ -39,6 +40,11 @@ export function attachGlobalAudioUnlockListeners(): void {
 
   const onInteract = () => {
     useAudioUnlockStore.getState().markInteracted();
+    // Open the shared audio graph on this same gesture. Anything routed
+    // through it (the voice's gain lift, the music bed) needs a RUNNING
+    // context to be heard, and resuming one is asynchronous — doing it here
+    // means it is long since ready by the time a play button is pressed.
+    primeAudioContext();
   };
   window.addEventListener("pointerdown", onInteract, { once: true });
   window.addEventListener("keydown", onInteract, { once: true });

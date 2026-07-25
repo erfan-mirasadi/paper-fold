@@ -15,8 +15,21 @@ import {
   useRecitationChain,
   type RecitationChainHandle,
 } from "@/app/_components/dom/recitation/RecitationChain";
+import { backgroundMusic } from "@/app/utils/backgroundMusic";
+import { amplify } from "@/app/utils/audioGraph";
 
 const GOLD = "#C4963B";
+
+/**
+ * How much to lift the spoken voice. An <audio> element tops out at volume 1,
+ * so the extra comes from a gain node in the shared audio graph.
+ *
+ * 1.45 is +3.2 dB. The recitation masters run about −28 dB mean and peak no
+ * hotter than −4.6 dBFS, so this stays clear of clipping on every one of them
+ * with better than a decibel still in hand — measure again before raising it
+ * if louder masters are ever added.
+ */
+const VOICE_GAIN = 1.45;
 
 // Crest half-window, in seconds: a span glows as the voice comes within this
 // much of its center and dims as it moves past — so a soft light rides the
@@ -132,6 +145,11 @@ export function SyncedRecitation({
   const frameRef = useRef<() => void>(() => {});
   const finalizedRef = useRef(0); // spans [0, finalized) are locked to full fill
   const suspendUntilRef = useRef(0);
+  // This player's identity to the background bed. An object, not an index, so
+  // it stays unique however the panel reorders around us.
+  const bedIdRef = useRef({});
+  // Set once this player's voice has been routed for its gain lift.
+  const boostRef = useRef<(() => void) | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(transcript.durationS ?? 0);
@@ -374,6 +392,17 @@ export function SyncedRecitation({
     };
   }, [isPlaying, frame, reconcile, setSpan, N]);
 
+  // Leave the background bed on unmount — the panel closes, the fold story
+  // swaps entries out, a surah is navigated away from. Without this the bed
+  // would keep counting us as speaking and never settle.
+  useEffect(
+    () => () => {
+      backgroundMusic.voiceStopped(bedIdRef.current);
+      boostRef.current?.();
+    },
+    [],
+  );
+
   // Pause auto-scroll for a beat whenever the reader scrolls the panel by hand.
   useEffect(() => {
     scrollElRef.current = getScrollParent(rootRef.current);
@@ -475,11 +504,25 @@ export function SyncedRecitation({
         preload="metadata"
         onPlay={() => {
           setIsPlaying(true);
+          // Lift this voice the first time it actually speaks, so a panel full
+          // of players only builds nodes for the ones the reader uses.
+          if (!boostRef.current && audioRef.current)
+            boostRef.current = amplify(audioRef.current, VOICE_GAIN);
+          // Raise the bed BEFORE the chain hushes the others: their pause
+          // events then land while this voice is already counted, so the
+          // music rides straight through the hand-over without a dip.
+          backgroundMusic.voiceStarted(bedIdRef.current);
           chainRef.current?.claim();
         }}
-        onPause={() => setIsPlaying(false)}
+        onPause={() => {
+          setIsPlaying(false);
+          backgroundMusic.voiceStopped(bedIdRef.current);
+        }}
         onEnded={() => {
           setIsPlaying(false);
+          // The chain's hand-over pause is shorter than the bed's grace beat,
+          // so the next voice re-claims the music before it starts to fade.
+          backgroundMusic.voiceStopped(bedIdRef.current);
           chainRef.current?.advance();
         }}
         onLoadedMetadata={(e) => {

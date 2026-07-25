@@ -24,6 +24,7 @@ import {
   type InkRenderer,
 } from "@/app/_components/dom/recitation/SyncedRecitation";
 import { RecitationChainProvider } from "@/app/_components/dom/recitation/RecitationChain";
+import { BackgroundMusicToggle } from "@/app/_components/dom/ui-overlay/BackgroundMusicToggle";
 import { parseInlineHtml } from "@/app/_components/dom/recitation/InlineHtml";
 import {
   normalizeText,
@@ -1560,18 +1561,28 @@ export function SideInfoPanel() {
               transition={{ duration: 0.45, ease: "easeOut" }}
               className="flex-1 min-h-0 flex flex-col"
             >
-              {/* ── Panel heading — quiet small caps, centered ──────────── */}
+              {/* ── Panel heading — quiet small caps, centered. The music
+                  toggle rides the right edge, absolutely placed so the
+                  title stays centred on the panel whether it's there or
+                  not. ───────────────────────────────────────────────────── */}
               <div
-                className="flex-shrink-0 text-center uppercase text-foreground/50
-                  text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
-                style={{
-                  letterSpacing: "0.28em",
-                  fontFamily: "var(--font-roboto)",
-                  marginBottom: "clamp(14px, 1.4vw, 24px)",
-                  paddingRight: "0.1em",
-                }}
+                className="relative flex-shrink-0"
+                style={{ marginBottom: "clamp(14px, 1.4vw, 24px)" }}
               >
-                {panelTitle}
+                <div
+                  className="text-center uppercase text-foreground/50
+                    text-[9px] lg:text-[clamp(10px,0.72vw,16px)]"
+                  style={{
+                    letterSpacing: "0.28em",
+                    fontFamily: "var(--font-roboto)",
+                    paddingRight: "0.1em",
+                  }}
+                >
+                  {panelTitle}
+                </div>
+                <div className="absolute inset-y-0 right-0 flex items-center">
+                  <BackgroundMusicToggle />
+                </div>
               </div>
 
               {/* ── Reading log — grows to fill the aside and scrolls on its
