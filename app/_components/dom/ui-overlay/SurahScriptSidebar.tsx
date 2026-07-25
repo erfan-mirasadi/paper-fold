@@ -395,8 +395,8 @@ export function SurahScriptSidebar() {
           divider (see next block), sliding along the line's own length
           instead of flanking the brand. ──────────────────────────────── */}
       <div
-        className="fixed top-[clamp(10px,1.2vw,16px)] left-3 lg:left-5 z-[100]
-          pointer-events-auto flex items-center"
+        className="fixed top-[clamp(10px,1.2vw,16px)] left-2 w-[160px] lg:left-[2vw] lg:w-[22vw] z-[100]
+          pointer-events-auto flex items-center justify-center"
       >
         <AnimatedBrand title={info?.title} />
       </div>
