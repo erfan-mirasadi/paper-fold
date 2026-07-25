@@ -362,6 +362,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
           number={config.number}
           forceShowNumber={config.forceShowNumber}
           showAyahNumber={config.showAyahNumber}
+          ayahBadgeBg={config.ayahBadgeBg}
+          ayahBadgeBorderCol={config.ayahBadgeBorderCol}
+          ayahBadgeTextCol={config.ayahBadgeTextCol}
           bg={config.bg}
           border={config.border}
           circleBorderCol={config.circleBorderCol}

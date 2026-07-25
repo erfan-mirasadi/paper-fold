@@ -234,11 +234,12 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
 
     // ── Bottom bars ───────────────────────────────────────────────────────
     11: {
-      bg: CAPSULE_BG_12_14,
-      border: GREEN_THEME,
-      circleBg: CAPSULE_BG_12_14,
-      circleBorderCol: CAPSULE_BG_12_14,
-      circleTextCol: GREEN_THEME,
+      bg: CREAM_BG,
+      border: GOLD_BORDER,
+      circleBg: CREAM_BG,
+      circleBorderCol: CREAM_BG,
+      circleTextCol: "#7A5A18",
+      textColor: "#A30000",
       isPill: false,
     },
     12: {
@@ -246,7 +247,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       border: ORANGE_THEME,
       circleBg: CAPSULE_BG_6_19,
       circleBorderCol: ORANGE_THEME,
-      circleTextCol: ORANGE_THEME,
+      circleTextCol: "#1A1A1A",
+      // The "24" ayah badge gets its own colors, independent of the "12" counter:
+      ayahBadgeTextCol: ORANGE_THEME,
       textColor: "#A30000",
       isPill: false,
       textScaleOverride: 0.95,
@@ -255,6 +258,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       // chunk counter (12) stacked above it.
       showAyahNumber: true,
     },
+
   },
 
   styling: {
@@ -380,7 +384,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
     // ── "3. Bölüm (Ana Bölüm)" — comparison group / crux of the ayah
     //     (CENTER dome: 8,9,10 — Allah & His Messenger vs. everything above)
     {
-      x: 0.24,
+      x: 0.22,
       y: -0.95,
       fontSize: 0.032,
       color: "#000000",
@@ -508,11 +512,11 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [11],
       columns: 1,
-      horizontalInset: -0.4,
+      horizontalInset: -0.35,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.03,
+      gapBefore: 0.01,
     },
     // 8 — Verse 12 (maroon full-width bar, carries the ۲٤ ayah marker)
     {
@@ -525,7 +529,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.045,
+      gapBefore: 0.06,
     },
   ],
 
@@ -582,10 +586,10 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       src: "/tevbe/dome-section.svg",
       anchorGroupIndex: 5,
       anchorEdge: "top",
-      scaleX: 0.935,
-      scaleY: 0.4,
+      scaleX: 1,
+      scaleY: 0.57,
       offsetX: 0.0,
-      offsetY: -0.132,
+      offsetY: -0.21,
       renderOrder: 3,
       customSectionId: "g_top",
     },
@@ -714,9 +718,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
               {
                 n: 11,
                 text: "O zaman hakkınızda Allah'ın hükmü gelinceye kadar bekleyin.",
-                bg: CAPSULE_BG_12_14,
-                color: GREEN_THEME,
-                textColor: "#2B2B2B",
+                bg: CREAM_BG,
+                color: GOLD_BORDER,
+                textColor: "#A30000",
               },
               {
                 n: 12,
@@ -761,9 +765,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
               {
                 n: 11,
                 text: "O zaman hakkınızda Allah'ın hükmü gelinceye kadar bekleyin.",
-                bg: CAPSULE_BG_12_14,
-                color: GREEN_THEME,
-                textColor: "#2B2B2B",
+                bg: CREAM_BG,
+                color: GOLD_BORDER,
+                textColor: "#A30000",
               },
               {
                 n: 12,
@@ -831,9 +835,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
               {
                 n: 11,
                 text: "O zaman hakkınızda Allah'ın hükmü gelinceye kadar bekleyin.",
-                bg: CAPSULE_BG_12_14,
-                color: GREEN_THEME,
-                textColor: "#2B2B2B",
+                bg: CREAM_BG,
+                color: GOLD_BORDER,
+                textColor: "#A30000",
               },
             ],
             corners: "soft",

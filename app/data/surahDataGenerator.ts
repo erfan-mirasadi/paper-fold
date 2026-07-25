@@ -42,6 +42,12 @@ export interface VerseConfig {
   /** See `VerseOverrideConfig.showAyahNumber` — stacks the page's single ayah
    * number under the chunk counter. */
   showAyahNumber?: boolean;
+  /** See `VerseOverrideConfig.ayahBadgeBg` — separate bg for the ayah badge. */
+  ayahBadgeBg?: string;
+  /** See `VerseOverrideConfig.ayahBadgeBorderCol` — separate border for the ayah badge. */
+  ayahBadgeBorderCol?: string;
+  /** See `VerseOverrideConfig.ayahBadgeTextCol` — separate text color for the ayah badge. */
+  ayahBadgeTextCol?: string;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
   frameScaleLTR?: number;
@@ -359,6 +365,9 @@ export function buildVerseConfigs(
         isPill: override?.isPill,
         forceShowNumber: override?.showNumber,
         showAyahNumber: override?.showAyahNumber,
+        ayahBadgeBg: override?.ayahBadgeBg,
+        ayahBadgeBorderCol: override?.ayahBadgeBorderCol,
+        ayahBadgeTextCol: override?.ayahBadgeTextCol,
         capsuleLabel,
         verseShape: override?.verseShape,
         domeSideRatio: override?.domeSideRatio,

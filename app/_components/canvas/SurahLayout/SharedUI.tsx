@@ -398,8 +398,12 @@ export function TopLabel({
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const isFixed = activeConfig?.dimensions?.fixedWidthAcrossLanguages === true;
-  const topLabelScale = isFixed ? 1 : LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
-  const labelWidthScale = isFixed ? 1 : (LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1);
+  const topLabelScale = isFixed
+    ? 1
+    : LANGUAGE_TEXT_SCALE[activeLanguage].topLabel;
+  const labelWidthScale = isFixed
+    ? 1
+    : LANGUAGE_TEXT_SCALE[activeLanguage].labelWidth || 1;
 
   const w = labelWidth * labelWidthScale;
   const h = labelHeight ?? 0.046;
@@ -513,7 +517,9 @@ export function CapsuleLabel({
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const activeConfig = useStoryStore((s) => s.activeConfig);
   const isFixed = activeConfig?.dimensions?.fixedWidthAcrossLanguages === true;
-  const capsuleLabelScale = isFixed ? 1 : LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
+  const capsuleLabelScale = isFixed
+    ? 1
+    : LANGUAGE_TEXT_SCALE[activeLanguage].capsuleLabel;
 
   let resolvedCustomText: string | undefined;
   if (typeof customText === "object" && customText !== null) {
@@ -688,6 +694,12 @@ interface VerseBoxProps {
   /** Stacks the page's single ayah number under the chunk counter — see
    * `VerseOverrideConfig.showAyahNumber`. */
   showAyahNumber?: boolean;
+  /** Optional separate bg for the stacked ayah number badge (e.g. "24"). Falls back to circleBg. */
+  ayahBadgeBg?: string;
+  /** Optional separate border color for the stacked ayah number badge (e.g. "24"). Falls back to circleBorderCol. */
+  ayahBadgeBorderCol?: string;
+  /** Optional separate text color for the stacked ayah number badge (e.g. "24"). Falls back to circleTextCol. */
+  ayahBadgeTextCol?: string;
   /** Renders the capsule as a half-oval / dome — 'up' (domed top) or 'down' (domed bottom). */
   domeDir?: "up" | "down";
   /** Straight-wall fraction for the dome (0–1). Defaults to 0.35. */
@@ -721,13 +733,17 @@ export const VerseBox = ({
   forceShowNumber = false,
   translationPadding,
   showAyahNumber = false,
+  ayahBadgeBg,
+  ayahBadgeBorderCol,
+  ayahBadgeTextCol,
   domeDir,
   domeSideRatio,
 }: VerseBoxProps) => {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const isArabic = activeLanguage === "ar";
   const activeStoryConfig = useStoryStore((s) => s.activeConfig);
-  const isFixed = activeStoryConfig?.dimensions?.fixedWidthAcrossLanguages === true;
+  const isFixed =
+    activeStoryConfig?.dimensions?.fixedWidthAcrossLanguages === true;
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
   const textScale =
     textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
@@ -748,8 +764,13 @@ export const VerseBox = ({
   const rad = isPill ? h / 2 : VERSE_5_6_19_RADIUS;
   const cr = Math.min(h * 0.28, 0.021);
   const SMALL_PILL_OFFSET = 0.002;
-  const isTightPadding = activeStoryConfig?.globalSettings?.tightVersePadding === true;
-  const cx = isPill ? cr + SMALL_PILL_OFFSET : (isTightPadding ? cr + 0.005 : 0.05);
+  const isTightPadding =
+    activeStoryConfig?.globalSettings?.tightVersePadding === true;
+  const cx = isPill
+    ? cr + SMALL_PILL_OFFSET
+    : isTightPadding
+      ? cr + 0.005
+      : 0.05;
 
   // DOME CAPSULES — the number never sits on a side wall (the arch eats it).
   // It is horizontally centred and pinned to the FLAT edge, i.e. the edge
@@ -769,10 +790,12 @@ export const VerseBox = ({
   // declares `singleAyahNumber` has a second number to show.
   const singleAyahNumber = activeStoryConfig?.scriptInfo?.singleAyahNumber;
   const stackedAyahNumber =
-    showAyahNumber && singleAyahNumber !== undefined ? singleAyahNumber : undefined;
+    showAyahNumber && singleAyahNumber !== undefined
+      ? singleAyahNumber
+      : undefined;
   // A dome-down capsule already pins its badge to the top edge, so the counter
   // stacks downward there; everywhere else it stacks upward.
-  const counterStackY = badgeY + (domeDir === "down" ? -1 : 1) * cr * 1.55;
+  const counterStackY = badgeY + (domeDir === "down" ? -1 : 1) * cr * 2;
 
   const isTranslationCenterOverride =
     !isArabic && textAlignOverride === "center";
@@ -781,17 +804,26 @@ export const VerseBox = ({
 
   // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
   const circleEnd = cx + cr;
-  const numberSidePadding = showVerseNumber ? circleEnd + (isTightPadding ? 0.005 : 0.012) : (isTightPadding ? 0.005 : 0.012);
+  const numberSidePadding = showVerseNumber
+    ? circleEnd + (isTightPadding ? 0.005 : 0.012)
+    : isTightPadding
+      ? 0.005
+      : 0.012;
   const textPaddingX = isArabic || centerTextInCapsule ? 0 : numberSidePadding;
 
   const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
 
   const safeMargin = 0.0;
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
-  const defaultExtraPadding = !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
-  const EXTRA_BIG_VERSE_PADDING = (translationPadding !== undefined && !isArabic) ? translationPadding : defaultExtraPadding;
+  const defaultExtraPadding =
+    !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
+  const EXTRA_BIG_VERSE_PADDING =
+    translationPadding !== undefined && !isArabic
+      ? translationPadding
+      : defaultExtraPadding;
   const centeredSidePadding = centerTextInCapsule
-    ? (showVerseNumber ? numberSidePadding : (isTightPadding ? 0.005 : 0.012)) + EXTRA_BIG_VERSE_PADDING
+    ? (showVerseNumber ? numberSidePadding : isTightPadding ? 0.005 : 0.012) +
+      EXTRA_BIG_VERSE_PADDING
     : 0;
   const textMaxW = isTightPadding
     ? finalW // remove wrapping limit so user can freely scale text to borders
@@ -870,9 +902,9 @@ export const VerseBox = ({
             z={0.002}
             cr={cr}
             number={stackedAyahNumber ?? number}
-            circleBg={circleBg ?? bg}
-            circleBorderCol={circleBorderCol ?? border ?? CIRCLE_BORDER}
-            circleTextCol={circleTextCol ?? TEXT_DARK}
+            circleBg={ayahBadgeBg ?? circleBg ?? bg}
+            circleBorderCol={ayahBadgeBorderCol ?? circleBorderCol ?? border ?? CIRCLE_BORDER}
+            circleTextCol={ayahBadgeTextCol ?? circleTextCol ?? TEXT_DARK}
             opacity={opacity}
             renderOrder={zOrder + 2}
           />

@@ -47,6 +47,9 @@ export interface VerseMeshProps {
   number: number | string;
   forceShowNumber?: boolean;
   showAyahNumber?: boolean;
+  ayahBadgeBg?: string;
+  ayahBadgeBorderCol?: string;
+  ayahBadgeTextCol?: string;
   bg: string;
   border: string;
   circleBorderCol: string;
@@ -150,6 +153,9 @@ export function VerseMesh({
   number,
   forceShowNumber,
   showAyahNumber,
+  ayahBadgeBg,
+  ayahBadgeBorderCol,
+  ayahBadgeTextCol,
   bg,
   border,
   circleBorderCol,
@@ -445,6 +451,9 @@ export function VerseMesh({
                         baseRenderOrder={baseRenderOrder}
                         forceShowNumber={forceShowNumber}
                         showAyahNumber={showAyahNumber}
+                        ayahBadgeBg={ayahBadgeBg}
+                        ayahBadgeBorderCol={ayahBadgeBorderCol}
+                        ayahBadgeTextCol={ayahBadgeTextCol}
                       />
                     )}
                   </a.group>

@@ -587,6 +587,15 @@ export interface VerseOverrideConfig {
    * ayah number to show, so the badge just keeps the counter.
    */
   showAyahNumber?: boolean;
+  /** Override the background color of the stacked ayah number badge (e.g. "24").
+   * Defaults to `circleBg` when not set. */
+  ayahBadgeBg?: string;
+  /** Override the border color of the stacked ayah number badge (e.g. "24").
+   * Defaults to `circleBorderCol` when not set. */
+  ayahBadgeBorderCol?: string;
+  /** Override the text color of the stacked ayah number badge (e.g. "24").
+   * Defaults to `circleTextCol` when not set. */
+  ayahBadgeTextCol?: string;
 }
 
 export interface SurahAssets {
