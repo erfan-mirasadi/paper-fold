@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { OverlayButton } from "./OverlayButton";
 import { getAllSurahs, SurahMeta } from "@/app/data/surahDatabase";
 import {
@@ -11,6 +11,7 @@ import {
 import { SURAH_LOCAL_NAMES, filterSurahs } from "@/app/utils/surahSearch";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLenis } from "../LenisProvider";
 
 // Placeholder stays Turkish regardless of active language — Arabic script in
 // the input hint reads as a data-entry prompt, not a label, inside this menu.
@@ -87,6 +88,21 @@ export function SurahMenuOverlay() {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const pathname = usePathname();
   const surahs = getAllSurahs();
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (isOpen) {
+      lenis?.stop();
+      document.body.style.overflow = "hidden";
+    } else {
+      lenis?.start();
+      document.body.style.overflow = "";
+    }
+    return () => {
+      lenis?.start();
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, lenis]);
 
   const sortedSurahs = useMemo(
     () =>
@@ -215,6 +231,7 @@ export function SurahMenuOverlay() {
               <div
                 className="overflow-y-auto p-4 space-y-2"
                 style={{ scrollbarWidth: "none" }}
+                data-lenis-prevent="true"
               >
                 {visibleSurahs.length === 0 && (
                   <motion.p
