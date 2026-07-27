@@ -1,0 +1,37 @@
+<svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- ÂL-İ İMRÂN 14 - OUTER SECTION FRAME (wraps verses 1 … 9).
+     Byte-for-byte /nisa/all-section-1.svg except for `ry` and the vertical
+     border inset - see below. Same viewBox, same outer edge, same colours.
+
+     WHY A PRIVATE COPY.  /nisa/all-section-1.svg pre-distorts its `ry` to
+     cancel the non-uniform plane stretch, and that pre-distortion is tuned to
+     ONE scaleX/scaleY ratio:
+
+         ry = rx * (vbH / vbW) * (scaleX / scaleY)
+
+     It is tuned to 1.1 / 1.28 (ry 337.57), which is also close to Tevbe-24's
+     1.15 / 1.24 and is shared by Ayat al-Kursi, Ahzab-35, İhlas, Kafirun,
+     Nisa-36 and Fatiha landscape. Imran-14's frame grew to 1.1 / 1.52603 when
+     the two inner bands became peaked hexagons (see band-peak-up.svg), which
+     is 19% off that tuning - the corners would read as eggs again. Retuning
+     the shared file would have pushed every other surah off instead, so
+     Imran-14 gets its own copy and the shared file is left untouched.
+
+         ry = 800 * (10845 / 22087) * (1.1 / 1.52603) = 283.12
+         vertical border = 90 * same factor           =  31.85
+
+     which lands on screen as a true circle (0.03984 x 0.03984 world) inside a
+     border that is 0.00448 world on all four sides.
+
+     If `svgOverlays[0].scaleY` in imran14Config moves, recompute `ry` AND the
+     inner rect's y / height / ry together - they all share the same factor. -->
+<defs>
+<linearGradient id="imranOuterGold" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="283.12" fill="url(#imranOuterGold)"/>
+<rect x="314.41" y="1115.05" width="21458.19" height="9629.8" rx="710" ry="251.27" fill="#F0E4E5"/>
+</svg>

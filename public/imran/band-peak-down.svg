@@ -1,0 +1,31 @@
+<svg width="2043" height="1000" viewBox="0 0 2043 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- ÂL-İ İMRÂN 14 - LOWER BAND FRAME (verses 6 - 8).
+     Pair file: band-peak-up.svg. This path is that one mirrored about y = 500
+     (every y here is 1000 minus its y there), so the peak points DOWN and the
+     two frames face each other across the fold as one split hexagon - exactly
+     the arrangement on the reference book page.
+
+     Everything else - viewBox, aspect contract, translucent #F5EEDC body,
+     stroke width, corner cutbacks - is identical to band-peak-up.svg; the derivation
+     lives in that file's comment and is not repeated here. Edit the two
+     together or they stop being mirrors. -->
+<defs>
+<linearGradient id="imranBandGoldDown" x1="40.86" y1="500" x2="2002.14" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<path d="M933.16 958.66
+         Q1021.5 975.88 1109.84 958.66
+         L1909.68 802.75
+         Q1998.02 785.53 1998.02 695.53
+         L1998.02 98.12
+         Q1998.02 24.12 1924.02 24.12
+         L118.98 24.12
+         Q44.98 24.12 44.98 98.12
+         L44.98 695.53
+         Q44.98 785.53 133.32 802.75
+         Z"
+      fill="#F5EEDC" fill-opacity="0.6" stroke="url(#imranBandGoldDown)" stroke-width="8.24" stroke-linejoin="round"/>
+</svg>

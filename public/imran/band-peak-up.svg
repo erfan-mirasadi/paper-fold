@@ -1,0 +1,56 @@
+<svg width="2043" height="1000" viewBox="0 0 2043 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- ÂL-İ İMRÂN 14 - UPPER BAND FRAME (verses 3 - 5).
+     Pair file: band-peak-down.svg, which is this exact path mirrored about
+     y = 500. Together the two read as one hexagon split across the fold, the
+     way the reference book page draws them.
+
+     TRANSLUCENT BODY. Unlike /nisa/all-section*.svg (gold rect + an OPAQUE
+     panel rect on top) this frame keeps the book's pale yellow but lets the
+     paper read through it: fill #F5EEDC at 0.6 opacity, byte-for-byte the
+     treatment /tevbe/dome-section.svg uses. Do not swap this back to an opaque
+     fill or to `fill="none"` - the tint is the point.
+
+     ASPECT - the file is drawn AT the aspect it is displayed at, so nothing
+     has to be pre-distorted (contrast /nisa/all-section*.svg, whose rx and ry
+     deliberately disagree to cancel a non-uniform stretch):
+
+         viewBox 2043 x 1000  ->  2.043
+         config  scaleX 0.96 / scaleY 0.47  ->  2.043
+
+     so one SVG unit is 4.699e-4 world units on BOTH axes. A uniform
+     stroke-width therefore arrives uniform, and every corner is a true
+     circular arc on screen. If the config's scaleX/scaleY ratio ever moves,
+     change the viewBox width to match it rather than reshaping the path.
+
+     GEOMETRY (world units at 0.96 x 0.47)
+       outer edge   40.86..2002.14 x 20..980   ->  0.9216 w x 0.4512 h
+       stroke       8.24 units                 ->  0.00387 (same as the
+                                                   /nisa frames' gold band)
+       peak         190.35 units apex->shoulder->  0.0894
+       corner r     74 units at the two flat bottom corners; the apex and the
+                    two shoulders use a 90-unit cutback (their angles are much
+                    shallower, so an equal-radius fillet would read as sharp).
+
+     The 0.0894 peak is the vertical budget the config has to leave above the
+     band: `blocks[1].gapBefore` and the overlay's `offsetY` are derived from
+     it - see the imran14Config comment block. -->
+<defs>
+<linearGradient id="imranBandGold" x1="40.86" y1="500" x2="2002.14" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<path d="M933.16 41.34
+         Q1021.5 24.12 1109.84 41.34
+         L1909.68 197.25
+         Q1998.02 214.47 1998.02 304.47
+         L1998.02 901.88
+         Q1998.02 975.88 1924.02 975.88
+         L118.98 975.88
+         Q44.98 975.88 44.98 901.88
+         L44.98 304.47
+         Q44.98 214.47 133.32 197.25
+         Z"
+      fill="#F5EEDC" fill-opacity="0.6" stroke="url(#imranBandGold)" stroke-width="8.24" stroke-linejoin="round"/>
+</svg>

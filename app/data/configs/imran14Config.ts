@@ -7,18 +7,20 @@
  *   │  ┌─────────────────────────────────┐  │
  *   │  │              (1-2)              │  │   yellow
  *   │  └─────────────────────────────────┘  │
- *   │   ┌─────────────────────────────┐     │  ← inner frame (3–5)
+ *   │              ╱‾‾‾‾‾╲                  │  ← upper band (3–5): peaks UP
+ *   │        ╱‾‾‾‾‾       ‾‾‾‾‾╲            │
  *   │   │            (3)              │     │   yellow
  *   │   │      ┌─────┐ ┌─────┐        │     │
  *   │   │      │ (5) │ │ (4) │        │     │   blue pair (RTL: 4 right)
  *   │   │      └─────┘ └─────┘        │     │
  *   │   └─────────────────────────────┘     │
- *   │   ┌─────────────────────────────┐     │  ← inner frame (6–8)
+ *   │   ┌─────────────────────────────┐     │  ← lower band (6–8): peaks DOWN
  *   │   │      ┌─────┐ ┌─────┐        │     │
  *   │   │      │ (7) │ │ (6) │        │     │   blue pair (RTL: 6 right)
  *   │   │      └─────┘ └─────┘        │     │
  *   │   │            (8)              │     │   yellow
- *   │   └─────────────────────────────┘     │
+ *   │        ╲_____       _____╱            │
+ *   │              ╲_____╱                  │
  *   │  ┌─────────────────────────────────┐  │
  *   │  │              (9)                │  │   yellow (same size as 1-2)
  *   │  └─────────────────────────────────┘  │
@@ -26,6 +28,9 @@
  *      ┌──────────────────────────────┐        ← (10) sits OUTSIDE the frame
  *      │             (10)             │        orange, biggest box
  *      └──────────────────────────────┘
+ *
+ * The two band frames are mirror images, so read together they are one hexagon
+ * cut across the fold — exactly how the reference page draws them.
  *
  * Chunk ids follow the book's own numbering, so there is no chunk "2":
  * the first box carries verses 1 AND 2 together and shows the badge "1-2"
@@ -36,8 +41,10 @@
  * below the 6/7 row. Folding therefore tucks the blue pairs away and brings
  * chunk 3 and chunk 8 face to face.
  *
- * BACKGROUND SECTIONS — the project's standard `/nisa/all-section*.svg`
- * frames, three of them: 1–9 (outer), 3–5 and 6–8 (inner).
+ * BACKGROUND SECTIONS — three frames: 1–9 (outer, a rounded rect) plus the two
+ * peaked hexagon halves for 3–5 and 6–8. The band halves have a TRANSPARENT
+ * body — only the gold outline is drawn, so the paper reads through them the
+ * way `/tevbe/dome-section.svg` does.
  *
  * No SideCurves on this page (a single transparent curveColors entry).
  * Sizing (capsule heights, gaps, paddings, border widths) is Alak's standard
@@ -94,15 +101,22 @@ const bandEdge = (extra: Record<string, unknown> = {}) => ({
   ...extra,
 });
 
-/** Shared shape for the four folded boxes (4, 5, 6, 7) — blue, pill. */
-const foldedPill = (extra: Record<string, unknown> = {}) => ({
+/**
+ * Shared shape for the four folded boxes (4, 5, 6, 7) — blue.
+ *
+ * `isPill: false` like every other box on this page: the book draws these as
+ * rounded rectangles, not capsules, and their proportions are the book's too
+ * (0.317 x 0.105 ≈ 3:1 — measured off the reference page, where all four
+ * boxes are the same height as the yellow ones around them).
+ */
+const foldedBox = (extra: Record<string, unknown> = {}) => ({
   bg: BLUE_BG,
   border: BLUE_BORDER,
   circleBg: BLUE_BG,
   circleBorderCol: BLUE_BG,
   circleTextCol: "#1A1A1A",
   textColor: DARK_TEXT,
-  isPill: true,
+  isPill: false,
   ...extra,
 });
 
@@ -171,17 +185,33 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
     },
 
     // ── Band 3–5 ──────────────────────────────────────────────────────────
-    3: bandEdge(),
-    4: foldedPill({ translationTextScaleOverride: 0.71 }),
-    5: foldedPill({ translationTextScaleOverride: 0.69 }),
+    3: bandEdge({ translationPadding: 0.002 }),
+    4: foldedBox({
+      textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.45,
+      translationPadding: 0.02,
+    }),
+    5: foldedBox({
+      textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.45,
+      translationPadding: 0.02,
+    }),
 
     // ── Band 6–8 ──────────────────────────────────────────────────────────
-    // The two longest pill chunks — only their translations need scaling down.
+    // The two longest blue chunks — only their translations need scaling down.
     // (`textScaleOverride` is the Arabic scale and would leak into the
     // translations, since VerseGroup only replaces it when a translation
     // override exists — so never set one without the other here.)
-    6: foldedPill({ translationTextScaleOverride: 0.71 }),
-    7: foldedPill({ translationTextScaleOverride: 0.69 }),
+    6: foldedBox({
+      textScaleOverride: 0.55,
+      translationTextScaleOverride: 0.45,
+      translationPadding: 0.002,
+    }),
+    7: foldedBox({
+      textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.45,
+      translationPadding: 0.002,
+    }),
     8: bandEdge(),
 
     // ── Closing boxes ─────────────────────────────────────────────────────
@@ -296,8 +326,20 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
   // 0.012, columnGap 0.02) — that identity is how every inset below was chosen.
   //
   // Width ladder, biggest → smallest:
-  //   (10) 0.92  >  (1-2) = (9) 0.86  >  4/5 + 6/7 pair span 0.846  >  (3) = (8) 0.66
-  // The blue pills themselves are 0.413 wide — matching Ayat al-Kursi's middle capsules.
+  //   (10) 0.92  >  (1-2) = (9) 0.86  >  (3) = (8) 0.66  >  4/5 + 6/7 pair span 0.654
+  // The blue boxes are 0.317 x 0.105 — the book's own ≈3:1 proportion, and just
+  // narrow enough as a pair to sit inside the width of (3) / (8) above them.
+  //
+  // VERTICAL BUDGET — the two band frames are now peaked hexagons
+  // (/imran/band-peak-up.svg + its mirror), so a band's frame is NOT flush with
+  // its blocks: it clears them by 0.0269 on the flat side and by a further
+  // 0.0894 of peak on the pointed side. Every `gapBefore` below that touches a
+  // band is `peak + flat pad + 0.018 of air` = 0.134, or, between the two
+  // bands, `2 * flat pad + 0.018` = 0.072. Resulting frame edges (relative to
+  // block 0's top, which is y = 0):
+  //   upper frame   +0.1667 apex … −0.6179 flat     (blocks 1–2 at −0.283 … −0.591)
+  //   lower frame   −0.6361 flat … −1.0873 apex     (blocks 3–4 at −0.663 … −0.971)
+  // Retune `svgOverlays[1..2].offsetY` together with these gaps.
   //
   // allGroups index (used by svgOverlays anchorGroupIndex):
   //   0 = (1-2) · 1 = (3) · 2 = (5,4) · 3 = (7,6) · 4 = (8) · 5 = (9) · 6 = (10)
@@ -315,30 +357,32 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
     },
     // 1 — Band 3–5, head box (3). width 0.66
+    //     gapBefore clears the upper frame's peak, which rises 0.0894 + 0.0269
+    //     above this block's top edge.
     {
       id: "b_v3",
       type: "group",
       verseIds: [3],
       columns: 1,
-      capsuleHeight: 0.125,
-      horizontalInset: -0.237,
+      capsuleHeight: 0.105,
+      horizontalInset: -0.1,
       isCenter: false,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.055,
+      gapBefore: 0.08,
     },
-    // 2 — Band 3–5, blue pair (RTL: left = 5, right = 4).
+    // 2 — Band 3–5, blue pair (RTL: left = 5, right = 4). 0.317 x 0.105 each.
     {
       id: "b_v45",
       type: "group",
       verseIds: [5, 4],
       columns: 2,
-      capsuleHeight: 0.075,
-      horizontalInset: 0.01,
+      capsuleHeight: 0.105,
+      horizontalInset: 0.05,
       isCenter: true,
       dragBehavior: "group",
       hideRowConnectors: true,
-      gapBefore: 0.03,
+      gapBefore: 0.015,
     },
     // 3 — Band 6–8, blue pair (RTL: left = 7, right = 6).
     {
@@ -346,14 +390,14 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [7, 6],
       columns: 2,
-      capsuleHeight: 0.075,
-      horizontalInset: 0.01,
+      capsuleHeight: 0.105,
+      horizontalInset: 0.05,
       isCenter: true,
       dragBehavior: "group",
       hideRowConnectors: true,
       // Also the visible gap between the two band frames: this gap minus the
-      // 2 x 0.022 the frames pad themselves by.
-      gapBefore: 0.07,
+      // 2 x 0.0269 the frames pad themselves by on their flat edges.
+      gapBefore: 0.072,
     },
     // 4 — Band 6–8, foot box (8). width 0.66 (same as block 1)
     {
@@ -361,14 +405,15 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [8],
       columns: 1,
-      capsuleHeight: 0.125,
-      horizontalInset: -0.237,
+      capsuleHeight: 0.105,
+      horizontalInset: -0.1,
       isCenter: false,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.03,
+      gapBefore: 0.015,
     },
     // 5 — Closing box inside the outer frame (9). width 0.86 (same as block 0)
+    //     gapBefore clears the lower frame's downward peak, mirror of block 1's.
     {
       id: "b_v9",
       type: "group",
@@ -379,7 +424,7 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       isCenter: false,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.055,
+      gapBefore: 0.08,
     },
     // 6 — Box OUTSIDE the outer frame (10) — the biggest box on the page.
     //     width 0.92, and the only capsule taller than the 0.125 standard.
@@ -393,7 +438,7 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       isCenter: false,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.085,
+      gapBefore: 0.06,
     },
   ],
 
@@ -416,10 +461,21 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
   ],
 
   // ── BACKGROUND SECTIONS ──────────────────────────────────────────────────
-  // The project's standard section frames. `/nisa/all-section*.svg` draws its
-  // rounded frame across ~98% of the plane's width and from 10%→99.4% of its
-  // height, so each entry's scaleY is the wanted frame height / 0.894 and the
-  // offsetY pushes the plane down by ~4.7% of that height to re-center it.
+  // The two inner bands are the book's split hexagon: a gold outline that
+  // peaks UP over 3–5 and DOWN under 6–8, with a fully transparent body so the
+  // paper shows through (/imran/band-peak-*.svg — mirror images of each other).
+  // Both files are drawn at the aspect they are displayed at, so scaleX/scaleY
+  // MUST keep the ratio 0.96 / 0.47 = 2.043 or the stroke and the corners stop
+  // being uniform. Their frame fills 96% of the plane on both axes and is
+  // centred in it, so:
+  //     frame w = 0.96 * scaleX = 0.9216      peak    = 0.0894
+  //     frame h = 0.96 * scaleY = 0.4512      flat pad = 0.0269
+  //     offsetY = plane centre - anchor       (no re-centring term needed)
+  //
+  // The outer frame keeps the /nisa rounded-rect construction, which draws
+  // across ~98% of the plane's width and from 10%→99.4% of its height, so its
+  // scaleY is the wanted frame height / 0.894 and its offsetY pushes the plane
+  // down by ~4.7% of that height to re-centre it.
   svgOverlays: [
     // Outer frame — wraps 1 … 9 (10 deliberately stays outside), 0.03 of air
     // above block 0 and below block 5.
@@ -430,31 +486,36 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       scaleX: 1.1,
       scaleY: 1.28,
       offsetX: 0,
-      offsetY: -0.463,
+      offsetY: -0.48,
       renderOrder: 2,
       customSectionId: "sec_all",
     },
-    // Inner frame — 3 … 5, 0.022 of air around its two blocks.
+    // Upper band — 3 … 5. Peak points up, over block 1.
+    //   apex   = anchor + 0.0269 + 0.0894
+    //   centre = apex - 0.4512/2  →  anchor - 0.1093
     {
-      src: "/nisa/all-section.svg",
+      src: "/imran/band-peak-up.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: 0.95,
-      scaleY: 0.35,
+      scaleX: 0.86,
+      scaleY: 0.37,
       offsetX: 0,
-      offsetY: -0.125,
+      offsetY: -0.12,
       renderOrder: 3,
       customSectionId: "sec_3_5",
     },
-    // Inner frame — 6 … 8 (same geometry, one band lower).
+    // Lower band — 6 … 8. Same frame mirrored: flat edge on top, peak below
+    // block 4.
+    //   flat top = anchor + 0.0269
+    //   centre   = flat top - 0.4512/2  →  anchor - 0.1987
     {
-      src: "/nisa/all-section.svg",
+      src: "/imran/band-peak-down.svg",
       anchorGroupIndex: 3,
       anchorEdge: "top",
-      scaleX: 0.95,
-      scaleY: 0.35,
+      scaleX: 0.86,
+      scaleY: 0.37,
       offsetX: 0,
-      offsetY: -0.125,
+      offsetY: -0.16,
       renderOrder: 3,
       customSectionId: "sec_6_8",
     },
