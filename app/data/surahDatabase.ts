@@ -84,6 +84,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "التوبة ٢٤",
     reference: "Tevbe: 24",
   },
+  {
+    id: "imran14",
+    displayName: "Al-Imran 14",
+    arabicName: "آل عمران ١٤",
+    reference: "Âl-i İmrân: 14",
+  },
 ] as const;
 
 /**
@@ -180,6 +186,13 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/tevbe24Config").then((m) => ({
         config: m.TEVBE_24_CONFIG,
         textData: m.TEVBE_24_TEXT_DATA,
+      })),
+  ],
+  imran14: [
+    () =>
+      import("./configs/imran14Config").then((m) => ({
+        config: m.IMRAN_14_CONFIG,
+        textData: m.IMRAN_14_TEXT_DATA,
       })),
   ],
 };
