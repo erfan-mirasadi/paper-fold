@@ -1,17 +1,41 @@
-<svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="314.39" y="1173.2" width="21458.21" height="9513.5" rx="800" ry="800" fill="#D9C7CA"/>
-<mask id="mask0_1202_3878" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="224" y="1083" width="21639" height="9694">
-<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="800" fill="white"/>
-<rect x="314.39" y="1173.2" width="21458.21" height="9513.5" rx="800" ry="800" fill="black"/>
-</mask>
-<g mask="url(#mask0_1202_3878)">
-<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="800" fill="url(#paint0_linear_1202_3878)"/>
-</g>
+<svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- INNER SECTION BAND.  Pair file: all-section-1.svg (outer frames) - same
+     construction, different fill and a different ry (see below).
+
+     This file is rasterised once and then stretched onto a 1x1 plane by each
+     config's scaleX/scaleY, so the two axes get DIFFERENT scale factors. A
+     circle drawn here does not arrive on screen as a circle: at Imran-14's
+     0.95 x 0.35 the old rx=ry=800 came out 1.33x wider than it was tall, and
+     a uniform 90-unit border came out 1.33x thicker left/right than
+     top/bottom. That is the "corners aren't round" - it is the stretch, not
+     the rounding.
+
+     So the ellipse here is PRE-DISTORTED to cancel the stretch:
+
+         ry = rx * (vbH / vbW) * (scaleX / scaleY)
+            = 800 * (10845 / 22087) * (0.95 / 0.35) = 1066.20
+         vertical border = 90 * same factor          = 119.95
+
+     which lands on screen as a true circle (0.03441 x 0.03441 world) inside a
+     border that is 0.00387 world on all four sides. Tuned to Imran-14's bands
+     (0.95 x 0.35); Nisa-36's 0.88 x 0.35 wants 988 and is within 8%.
+     Retune ry and the inner rect's y/height together if that changes.
+
+     Note this file's ry is LARGER than rx while all-section-1.svg's is much
+     smaller - the two are stretched in opposite directions, which is exactly
+     why one shared radius could never be round in both.
+
+     Drawn as gold rect + panel rect on top: concentric by construction
+     (outer rx 800 / inner rx 710), and the inner rect's antialiased edge
+     composites straight onto the gold, so there is no mask seam. The outer
+     edge is still 224.41..21862.6 x 1083.2..10776.7, so no config moves. -->
 <defs>
-<linearGradient id="paint0_linear_1202_3878" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">
+<linearGradient id="allSectionGold" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">
 <stop stop-color="#968428"/>
 <stop offset="0.503741" stop-color="#CDC577"/>
 <stop offset="1" stop-color="#968428"/>
 </linearGradient>
 </defs>
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2" fill="url(#allSectionGold)"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25" fill="#D9C7CA"/>
 </svg>
