@@ -172,10 +172,10 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
   // Fold-story → script sync (left ayah-list sidebar). One entry per fold
   // step: exactly the chunks still facing the reader at that step.
   scriptHighlights: {
-    "pre-start": [1, 14, 15],
-    blue: [1, 6, 7, 10, 11, 14, 15],
-    green: [1, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15],
-    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    "pre-start": [1, 14],
+    blue: [1, 6, 7, 10, 11, 14],
+    green: [1, 4, 5, 6, 7, 8, 9, 10, 11, 14],
+    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
   },
 
   features: {
@@ -280,13 +280,6 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       translationTextScaleOverride: 0.48,
       showAyahNumber: true,
     },
-
-    // Chunk 15 — the tail, outside the frame. Scaled down enough that the
-    // long first line clears the number badge on the left edge.
-    15: whiteBox({
-      textScaleOverride: 0.66,
-      translationTextScaleOverride: 0.52,
-    }),
   },
 
   styling: {
@@ -368,6 +361,20 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       textAlign: "center",
       rotationZ: 0,
       lines: [{ text: "Nisâ: 23" }],
+    },
+    {
+      x: 0.77,
+      y: -1.556,
+      fontSize: 0.045,
+      color: "#000000",
+      lineSpacing: 1.4,
+      maxWidth: 1.5,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        { text: "Zifafa girdiğiniz eşlerinizin kızlarını; eğer onlarla" },
+        { text: "zifafa girmemişseniz size bir günah yoktur." },
+      ],
     },
   ],
 
@@ -543,21 +550,6 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
       gapBefore: 0.014,
     },
-    // 8 — Chunk 15, OUTSIDE the outer frame. The widest box on the page; the
-    //     big gapBefore is the air between it and the frame's bottom edge.
-    {
-      id: "b_v15",
-      type: "group",
-      verseIds: [15],
-      columns: 1,
-      capsuleHeight: 0.135,
-      horizontalInset: -0.617, // → capsule width 1.09
-      isCenter: true,
-      dragBehavior: "individual",
-      hideRowConnectors: true,
-      // Clears the bottom dome's apex, which now hangs 0.058 below chunk 14.
-      gapBefore: 0.1,
-    },
   ],
 
   // ── Drag / elevation zones ───────────────────────────────────────────────
@@ -590,11 +582,6 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       id: "sec_all",
       verseIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
       cameraTarget: { y: 1.2, fov: 28, tilt: -1.35 },
-    },
-    {
-      id: "sec_v15",
-      verseIds: [15],
-      cameraTarget: { y: 0.8, fov: 35, tilt: -1.2 },
     },
   ],
 
@@ -996,7 +983,7 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       const y = lm.groupYPositions;
       const h = lm.groupHeights;
       const mid = (a: number, b: number) => (y[a] - h[a] + y[b]) / 2;
-      return [mid(0, 1), mid(1, 2), mid(2, 3), mid(3, 6), mid(6, 7)];
+      return [mid(0, 1) + 0.035, mid(1, 2), mid(2, 3), mid(3, 6), mid(6, 7)];
     },
 
     // Each step's angleFactors sum to zero across the creases it closes, so
@@ -1011,36 +998,36 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
         // edge between them.
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 0.5 }, // fold0
-          { direction: -1, angleFactor: 0.5 }, // fold1
-          { direction: 1, angleFactor: 0 }, // fold2
-          { direction: -1, angleFactor: 0.5 }, // fold3
-          { direction: 1, angleFactor: 0.5 }, // fold4
-        ],
-      },
-      {
-        // BLUE row comes back into plane (pink + green still tucked above it,
-        // white still tucked below).
-        id: "blue",
-        folds: [
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 1.05 },
-          { direction: 1, angleFactor: 0.55 },
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 0.5 },
+          { direction: 1, angleFactor: 1.03 }, // fold0
+          { direction: -1, angleFactor: 1.03 }, // fold1
+          { direction: 1, angleFactor: 1.03 }, // fold2
+          { direction: -1, angleFactor: 1.03 }, // fold3
+          { direction: 1, angleFactor: 0 }, // fold4
         ],
       },
       {
         // GREEN row joins it — the whole middle band is now readable.
         id: "green",
         folds: [
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 0.5 },
           { direction: 1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0.5 },
-          { direction: -1, angleFactor: 0.5 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 0 },
         ],
       },
+      // {
+      //   // BLUE row comes back into plane (pink + green still tucked above it,
+      //   // white still tucked below).
+      //   id: "blue",
+      //   folds: [
+      //     { direction: 1, angleFactor: 0.5 },
+      //     { direction: -1, angleFactor: 1.05 },
+      //     { direction: 1, angleFactor: 0.55 },
+      //     { direction: 1, angleFactor: 0.5 },
+      //     { direction: -1, angleFactor: 0.5 },
+      //   ],
+      // },
       {
         // Flat — pink (2,3) and white (12,13) complete the page.
         id: "end",
@@ -1146,15 +1133,6 @@ export const NISA_23_TEXT_AR: SurahDataShape = {
           { number: 14, text: "إِنَّ اللَّهَ كَانَ غَفُورًا رَّحِيمًا" },
         ],
       },
-      // 8 — chunk 15, outside the frame
-      {
-        verses: [
-          {
-            number: 15,
-            text: "مِّن نِّسَائِكُمُ اللَّاتِي دَخَلْتُم بِهِنَّ فَإِن لَّمْ\nتَكُونُوا دَخَلْتُم بِهِنَّ فَلَا جُنَاحَ عَلَيْكُمْ",
-          },
-        ],
-      },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",
@@ -1234,14 +1212,6 @@ export const NISA_23_TEXT_TR: SurahDataShape = {
           },
         ],
       },
-      {
-        verses: [
-          {
-            number: 15,
-            text: "Zifafa girdiğiniz eşlerinizin kızlarını; eğer onlarla\nzifafa girmemişseniz size bir günah yoktur.",
-          },
-        ],
-      },
     ],
     outroVerse: { number: 0, text: "" },
     bottomLabel: "",
@@ -1311,14 +1281,6 @@ export const NISA_23_TEXT_EN: SurahDataShape = {
           {
             number: 14,
             text: "Indeed Allah is Ever-Forgiving, Most Merciful.",
-          },
-        ],
-      },
-      {
-        verses: [
-          {
-            number: 15,
-            text: "born of the wives you have consummated marriage with; if you have not, there is no blame upon you.",
           },
         ],
       },

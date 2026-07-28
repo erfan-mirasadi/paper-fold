@@ -55,6 +55,10 @@
   --slider-track: rgba(128, 128, 128, 0.6);
   --slider-handle-border: rgba(0, 0, 0, 0.15);
   --slider-handle-shadow: 0 0 12px rgba(196, 150, 59, 0.8), 0 1px 3px rgba(0, 0, 0, 0.25);
+
+  /* Floating script chunk numbers — the house red (#A30000). */
+  --script-num: #a30000;
+  --script-num-glow: rgba(163, 0, 0, 0.45);
 }
 
 @theme inline {
@@ -122,6 +126,11 @@
   --slider-track: rgba(160, 160, 160, 0.6);
   --slider-handle-border: rgba(255, 255, 255, 0.25);
   --slider-handle-shadow: 0 0 14px rgba(255, 180, 50, 0.9), 0 1px 3px rgba(0, 0, 0, 0.25);
+
+  /* Same house red, lifted in lightness only — #A30000 is too deep to read
+     against a near-black page, but the hue must not drift off the brand. */
+  --script-num: #d21208;
+  --script-num-glow: rgba(210, 18, 8, 0.5);
 }
 
 /* ── Side-panel backdrop ────────────────────────────────────────────────────
@@ -715,4 +724,52 @@ html.dark .canvas-wrapper {
     background-size 0.7s ease,
     filter 0.6s ease,
     text-shadow 0.6s ease !important;
+}
+
+/* SurahScriptSidebar — floating chunk numbers (single-ayah pages only).
+   The number is NOT part of the script's text flow: JS measures each chunk's
+   widest line box and drops the numeral above that box's centre, so it reads
+   as a marker hovering over the phrase instead of a digit wedged between two
+   Arabic words. No frame and no rosette — the ayah's own end-of-verse rosette
+   stays the only enclosed number on the page. `qk` = kürsi. */
+.qk-num {
+  /* Block, not inline: the wrapper's height must be exactly the numeral's own
+     box for the lift below it to land where the arithmetic says it does. */
+  display: block;
+  line-height: 1;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--script-num);
+  text-shadow: 0 0 12px var(--script-num-glow);
+  animation: qk-num-float 5.4s ease-in-out infinite;
+  will-change: transform;
+  /* Opacity carries the whole dim/lit difference — glyph and glow rise
+     together, and only one property is ever in flight. */
+  opacity: 0.5;
+  transition: opacity 0.8s ease;
+}
+
+/* The chunk this number belongs to is lit by the fold story — the numeral
+   comes up with it. */
+.qk-num-on {
+  opacity: 1;
+}
+
+/* Drift only — no opacity flicker, so the bob never competes with the
+   highlight fade above. */
+@keyframes qk-num-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0.26em, 0);
+  }
+  50% {
+    transform: translate3d(0, -0.26em, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qk-num {
+    animation: none;
+  }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import {
   useStoryStore,
@@ -67,6 +67,7 @@ function HighlightChunk({
   isPill,
   color,
   solo,
+  elRef,
   children,
 }: {
   active: boolean;
@@ -79,6 +80,9 @@ function HighlightChunk({
    * off and keeps the flowing inline text with per-line cloned borders.
    */
   solo?: boolean;
+  /** Handle on the chunk's own span — used to measure where its floating
+   * number should hover (see `useFloatingChunkNumbers`). */
+  elRef?: (el: HTMLSpanElement | null) => void;
   children: React.ReactNode;
 }) {
   const wash = (a: number) =>
@@ -110,6 +114,7 @@ function HighlightChunk({
 
   return (
     <span
+      ref={elRef}
       style={{
         color: "inherit",
         // Subtle always-visible capsule base
@@ -211,6 +216,103 @@ export function AyahNumber({ n }: { n: number }) {
       <span style={{ position: "relative" }}>{n}</span>
     </span>
   );
+}
+
+// ── Floating chunk numbers ─────────────────────────────────────────────────
+// Where one number comes to rest, in paragraph-local pixels.
+type FloatingNumber = { n: number; x: number; top: number };
+
+/**
+ * Measures the resting place of every chunk number.
+ *
+ * The script is ONE flowing RTL paragraph, so a chunk is an *inline* box that
+ * may break across several lines — there is no single element box to center a
+ * number against, which is why this is measured instead of styled. For each
+ * chunk we take its widest line fragment (visually, that fragment IS the
+ * chunk) and hand back that fragment's horizontal centre and top edge relative
+ * to the paragraph. Every reflow — resize, webfont swap — re-measures.
+ */
+function useFloatingChunkNumbers(
+  enabled: boolean,
+  deps: [boolean, string, number],
+) {
+  // State, not a ref: the paragraph only exists once the panel has mounted,
+  // and the measuring effect has to re-run at that exact moment.
+  const [para, setPara] = useState<HTMLParagraphElement | null>(null);
+  const chunkEls = useRef(new Map<number, HTMLSpanElement>());
+  const [positions, setPositions] = useState<FloatingNumber[]>([]);
+
+  // One stable callback per chunk. A fresh closure each render would make
+  // React detach and re-attach every ref on every fold step, for nothing.
+  const refCbs = useRef(new Map<number, (el: HTMLSpanElement | null) => void>());
+  const registerChunk = useCallback((n: number) => {
+    let cb = refCbs.current.get(n);
+    if (!cb) {
+      cb = (el: HTMLSpanElement | null) => {
+        if (el) chunkEls.current.set(n, el);
+        else chunkEls.current.delete(n);
+      };
+      refCbs.current.set(n, cb);
+    }
+    return cb;
+  }, []);
+
+  useEffect(() => {
+    if (!enabled || !para) return;
+    let cancelled = false;
+
+    const measure = () => {
+      if (cancelled) return;
+      const base = para.getBoundingClientRect();
+      const next: FloatingNumber[] = [];
+      chunkEls.current.forEach((el, n) => {
+        const rects = Array.from(el.getClientRects());
+        if (rects.length === 0) return;
+        const widest = rects.reduce((a, b) => (b.width > a.width ? b : a));
+        next.push({
+          n,
+          x: widest.left - base.left + widest.width / 2,
+          top: widest.top - base.top,
+        });
+      });
+      // Chunk order, not mount order — the drift stagger below indexes into
+      // this, and it should read 1…8 down the ayah.
+      next.sort((a, b) => a.n - b.n);
+      // Same places as last time → skip the render. The observer below fires
+      // far more often than the text actually moves.
+      setPositions((prev) =>
+        prev.length === next.length &&
+        next.every(
+          (p, i) =>
+            prev[i].n === p.n &&
+            Math.abs(prev[i].x - p.x) < 0.5 &&
+            Math.abs(prev[i].top - p.top) < 0.5,
+        )
+          ? prev
+          : next,
+      );
+    };
+
+    // No priming call — a ResizeObserver delivers one observation as soon as
+    // it starts observing, and that is the first measurement.
+    const ro = new ResizeObserver(measure);
+    ro.observe(para);
+    // The Quran webfont lands after first paint and rewraps every line.
+    document.fonts?.ready.then(measure).catch(() => {});
+    return () => {
+      cancelled = true;
+      ro.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, para, ...deps]);
+
+  // Gated on `enabled` rather than cleared on disable, so switching surahs
+  // never paints one frame of the previous surah's numbers.
+  return {
+    paraRef: setPara,
+    registerChunk,
+    positions: enabled ? positions : [],
+  };
 }
 
 // ── Sidebar toggle — single button that physically moves between slots ──
@@ -348,6 +450,23 @@ export function SurahScriptSidebar() {
   const arData = activeTextData.ar;
   const info = activeConfig.scriptInfo;
   const ayahs = collectAyahs(arData);
+
+  // ── Ayetel Kürsi only ────────────────────────────────────────────────────
+  // Its eight "verses" are chunks of ONE ayah, so a mushaf rosette between
+  // them would be a lie and a bare digit in the text just breaks the reading.
+  // The chunk index floats above its own chunk instead — see `.qk-num`.
+  const showFloatingNumbers =
+    activeConfig.id === "ayatalkursi" && !activeConfig.features.hideVerseNumbers;
+  const {
+    paraRef,
+    registerChunk,
+    positions: floatingNumbers,
+  } = useFloatingChunkNumbers(showFloatingNumbers, [
+    isOpen,
+    activeConfig.id,
+    ayahs.length,
+  ]);
+
   if (ayahs.length === 0) return null;
 
   const singleAyahNumber = info?.singleAyahNumber;
@@ -551,6 +670,7 @@ export function SurahScriptSidebar() {
                 // ONE real ayah: chunks flow as inline text (no numbers),
                 // each chunk individually highlightable. RTL paragraph.
                 <p
+                  ref={paraRef}
                   dir="rtl"
                   className="text-[12px] lg:text-[clamp(13px,1vw,20px)] [@media(min-width:2000px)]:text-[clamp(16px,1.25vw,48px)] text-foreground"
                   style={{
@@ -558,29 +678,62 @@ export function SurahScriptSidebar() {
                     padding: "0 0.5em",
                     textAlign: "center",
                     fontFamily: '"QuranFont", serif',
-                    lineHeight: 2.3,
+                    // Floating numbers live in the leading above each line, so
+                    // the lines have to be given that room to hover in.
+                    lineHeight: showFloatingNumbers ? 3.45 : 2.3,
                     overflowWrap: "break-word",
                     opacity: 0.85,
+                    // Anchor for the measured numbers below.
+                    ...(showFloatingNumbers ? { position: "relative" } : {}),
                   }}
                 >
                   {ayahs.map((v) => (
                     <span key={v.number}>
                       <HighlightChunk
                         active={highlighted.has(v.number)}
+                        elRef={
+                          showFloatingNumbers
+                            ? registerChunk(v.number)
+                            : undefined
+                        }
                         {...chunkAppearance(v.number)}
                       >
                         {v.text}
-                      </HighlightChunk>
-                      {activeConfig.id === "ayatalkursi" && !activeConfig.features.hideVerseNumbers ? (
-                        <span className="mx-1 text-[1.3em] opacity-70">
-                          {v.number}
-                        </span>
-                      ) : (
-                        " "
-                      )}
+                      </HighlightChunk>{" "}
                     </span>
                   ))}
                   <AyahNumber n={singleAyahNumber} />
+
+                  {floatingNumbers.map(({ n, x, top }, i) => (
+                    <span
+                      key={n}
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        left: x,
+                        top,
+                        // Lifts the numeral clear of its chunk's top edge; the
+                        // rest of the gap is the line's own leading.
+                        transform: "translate(-50%, -132%)",
+                        direction: "ltr",
+                        pointerEvents: "none",
+                        // Sized off the script itself, so the numeral scales
+                        // with the chunk it belongs to at every viewport width.
+                        fontSize: "0.62em",
+                      }}
+                    >
+                      <span
+                        className={`qk-num${
+                          highlighted.has(n) ? " qk-num-on" : ""
+                        }`}
+                        // Offsetting into the loop keeps the eight numbers out
+                        // of lockstep — a drift, not a pulse.
+                        style={{ animationDelay: `${-1.35 * i}s` }}
+                      >
+                        {n}
+                      </span>
+                    </span>
+                  ))}
                 </p>
               ) : (
                 // Full surah: ONE flowing RTL paragraph — verses flow like
