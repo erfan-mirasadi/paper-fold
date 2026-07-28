@@ -37,6 +37,11 @@ export interface CurveConfig {
   innerBowGap?: number;
   inwardOffset?: number;
   lineWidth?: number;
+  /**
+   * Overall opacity of the curve fill and outline lines, 0 (invisible) → 1 (solid).
+   * Defaults to 1 when omitted. Use e.g. 0.5 to see content behind the bracket.
+   */
+  opacity?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
   /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
@@ -415,6 +420,7 @@ const CurveComponent = ({
   shouldHide,
   lineWidth,
   arrowTip,
+  opacity = 1,
 }: any) => {
   const fillShape = useMemo(() => {
     const s = new THREE.Shape();
@@ -470,14 +476,18 @@ const CurveComponent = ({
     if (!isAnim.current) return;
     const target = shouldHide ? 0 : 1;
     opRef.current = THREE.MathUtils.damp(opRef.current, target, 4, delta);
-    const go = opRef.current;
+    const hideOp = opRef.current; // hide/show factor — always full for lines
 
-    if (fillMatRef.current) fillMatRef.current.opacity = 0.999 * go;
-    if (line1Ref.current?.material) line1Ref.current.material.opacity = go;
-    if (line2Ref.current?.material) line2Ref.current.material.opacity = go;
-    if (arrowLineRef.current?.material) arrowLineRef.current.material.opacity = go;
+    // Lines stay fully opaque (only fades on hide/show popup animation)
+    if (line1Ref.current?.material) line1Ref.current.material.opacity = hideOp;
+    if (line2Ref.current?.material) line2Ref.current.material.opacity = hideOp;
+    if (arrowLineRef.current?.material) arrowLineRef.current.material.opacity = hideOp;
 
-    if (Math.abs(go - target) < 0.01) {
+    // Fill is multiplied by the per-bracket base opacity (e.g. 0.5 for semi-transparent)
+    const baseOp = Math.min(1, Math.max(0, opacity));
+    if (fillMatRef.current) fillMatRef.current.opacity = hideOp * baseOp;
+
+    if (Math.abs(opRef.current - target) < 0.01) {
       isAnim.current = false;
       if (shouldHide && groupRef.current) groupRef.current.visible = false;
     }
@@ -522,7 +532,7 @@ const CurveComponent = ({
           ref={fillMatRef}
           color={hasFill ? fillColor : "#ffffff"}
           transparent
-          opacity={0.999}
+          opacity={Math.min(1, Math.max(0, opacity))}
           depthTest={false}
           depthWrite={false}
         />
@@ -837,6 +847,7 @@ export const SideCurves = ({
                   fillColor={twistTopFill}
                   shouldHide={shouldHide}
                   lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                  opacity={b.opacity}
                 />
                 <CurveComponent
                   outerPoints={seg1.bottom.outPts}
@@ -846,6 +857,7 @@ export const SideCurves = ({
                   shouldHide={shouldHide}
                   lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                   arrowTip={arrowTip1}
+                  opacity={b.opacity}
                 />
               </>
             ) : (
@@ -857,6 +869,7 @@ export const SideCurves = ({
                 shouldHide={shouldHide}
                 lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                 arrowTip={arrowTip1}
+                opacity={b.opacity}
               />
             )}
             {seg2 ? (
@@ -868,6 +881,7 @@ export const SideCurves = ({
                   fillColor={twistTopFill}
                   shouldHide={shouldHide}
                   lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                  opacity={b.opacity}
                 />
                 <CurveComponent
                   outerPoints={seg2.bottom.outPts}
@@ -877,6 +891,7 @@ export const SideCurves = ({
                   shouldHide={shouldHide}
                   lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                   arrowTip={arrowTip2}
+                  opacity={b.opacity}
                 />
               </>
             ) : (
@@ -888,6 +903,7 @@ export const SideCurves = ({
                 shouldHide={shouldHide}
                 lineWidth={b.lineWidth ?? configColors.curveLineWidth}
                 arrowTip={arrowTip2}
+                opacity={b.opacity}
               />
             )}
             {b.drawInnerCurves && innerCurve1 && (
@@ -898,6 +914,7 @@ export const SideCurves = ({
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
                 lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                opacity={b.opacity}
               />
             )}
             {b.drawInnerCurves && innerCurve2 && (
@@ -908,6 +925,7 @@ export const SideCurves = ({
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
                 lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                opacity={b.opacity}
               />
             )}
           </Fragment>

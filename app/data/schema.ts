@@ -47,6 +47,12 @@ export interface CurveColorConfig {
   innerBowGap?: number;
   inwardOffset?: number;
   lineWidth?: number;
+  /**
+   * Overall opacity of the curve fill (and its outline lines), from 0 (fully
+   * transparent) to 1 (fully opaque). Defaults to 1 when omitted.
+   * Use e.g. 0.5 to let content behind the bracket show through.
+   */
+  opacity?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
   /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
