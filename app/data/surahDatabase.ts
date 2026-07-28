@@ -90,6 +90,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "آل عمران ١٤",
     reference: "Âl-i İmrân: 14",
   },
+  {
+    id: "nisa23",
+    displayName: "An-Nisa 23",
+    arabicName: "النساء ٢٣",
+    reference: "Nisâ: 23",
+  },
 ] as const;
 
 /**
@@ -193,6 +199,13 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/imran14Config").then((m) => ({
         config: m.IMRAN_14_CONFIG,
         textData: m.IMRAN_14_TEXT_DATA,
+      })),
+  ],
+  nisa23: [
+    () =>
+      import("./configs/nisa23Config").then((m) => ({
+        config: m.NISA_23_CONFIG,
+        textData: m.NISA_23_TEXT_DATA,
       })),
   ],
 };

@@ -1,0 +1,38 @@
+<svg width="1514" height="1000" viewBox="0 0 1514 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- NİSÂ 23 - HALF-WIDTH SECTION FRAME. Used TWICE by nisa23Config, once per
+     side of the middle band, both sitting on top of frame-band.svg's darker
+     wrapper plate:
+       - chunks 4 - 7   (Arabic: the RIGHT half - it is read first)
+       - chunks 8 - 11  (Arabic: the LEFT half)
+     Turkish/English swap which side each group is drawn on (the text data
+     does the mirroring, the geometry never moves), so one file serves both.
+
+     COLOUR. Cream #F5EEDC at 0.6, /tevbe/dome-section.svg's exact treatment,
+     over the project's gold gradient outline. It must stay LIGHTER than
+     frame-band.svg behind it (#E3D7BD at 0.5) — that contrast is the only
+     thing separating the two halves from the plate they sit on.
+
+     ASPECT - drawn AT the aspect it is displayed at:
+
+         viewBox 1514 x 1000                  ->  1.514
+         config  scaleX 0.545 / scaleY 0.360  ->  1.514
+
+     one SVG unit = 3.5997e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 0.545 x 0.360)
+       outer edge  flush with the plane  ->  0.545 w x 0.360 h
+       stroke      10.75 units           ->  0.00387
+       corner r    139 units             ->  0.05
+
+     Rect inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="nisa23SideGold" x1="0" y1="500" x2="1514" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="5.375" y="5.375" width="1503.25" height="989.25" rx="139" ry="139"
+      fill="#F5EEDC" fill-opacity="0.6" stroke="url(#nisa23SideGold)" stroke-width="10.75"
+      stroke-linejoin="round"/>
+</svg>

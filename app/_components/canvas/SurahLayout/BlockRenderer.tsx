@@ -125,7 +125,10 @@ function SingleSvgOverlay({
 
 function SvgOverlays({ startX, layout, groups }: { startX: number; layout: any; groups: GroupTransforms[] }) {
   const config = useStoryStore((state) => state.activeConfig);
-  const overlays = config.svgOverlays;
+  const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
+  const overlays = config.svgOverlays?.filter(
+    (item) => !item.languages || item.languages.includes(activeLanguage),
+  );
   if (!overlays || overlays.length === 0) return null;
   const centerX = startX + layout.sectionW / 2;
   return (

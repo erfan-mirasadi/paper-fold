@@ -54,6 +54,7 @@ import {
   getSectionIdForVerseId,
   getIntroGridSectionId,
 } from "../../../utils/sectionResolver";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
   dragEngine,
   getSectionChainSprings,
@@ -827,6 +828,7 @@ export function ElevatedSectionSurfaces() {
   });
 
   const config = useStoryStore((state) => state.activeConfig);
+  const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
 
   // S1 ("grid" block, e.g. Alak's Section 1) — via the shared resolver, same
   // helper used for the opacity-snap fix.
@@ -917,7 +919,12 @@ export function ElevatedSectionSurfaces() {
           {/* SVG overlays with customSectionId — each in its own drag group
               (all-sections mode only). */}
           {config.svgOverlays
-            ?.filter((overlay: any) => overlay.customSectionId != null)
+            ?.filter(
+              (overlay: any) =>
+                overlay.customSectionId != null &&
+                (!overlay.languages ||
+                  overlay.languages.includes(activeLanguage)),
+            )
             .map((overlay: any, idx: number) => {
               const gIdx = overlay.anchorGroupIndex ?? 0;
               const blockSection = SURAH_TRANSFORMS.sections[gIdx] as

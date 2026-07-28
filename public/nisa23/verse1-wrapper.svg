@@ -1,0 +1,49 @@
+<svg width="4767" height="1000" viewBox="0 0 4767 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- NİSÂ 23 - THE BOX AROUND CHUNK 1, i.e. the "capsule inside a capsule" the
+     reference page draws at the top: a wide cream box whose first line is the
+     shared opener ("Şunları nikahlamanız size haram kılındı;") and whose
+     second line is chunk 1's own capsule sitting inside it.
+
+     PROPORTION. 0.92 world wide against chunk 1's 0.62 capsule, i.e. the
+     capsule fills 67% of it - the reference page's own ratio, and the reason
+     the box reads as a box at all. Widen the capsule (or narrow this) and the
+     two outlines collapse onto each other.
+
+     TRANSLATIONS ONLY. Arabic says the opener and chunk 1 in one breath
+     (حُرِّمَتْ عَلَيْكُمْ أُمَّهَاتُكُمْ), so there is nothing to wrap: the config
+     gives this overlay `languages: ["tr", "en"]` and Arabic renders chunk 1
+     as a plain capsule with an empty band above it, exactly like the Arabic
+     reference page. The opener text itself is the group's `topLabel`, which
+     is per-language data and is simply "" in Arabic.
+
+     COLOUR. Cream #F5EEDC at 0.6, /tevbe/dome-section.svg's exact treatment.
+     It sits on the blue top-section dome (frame-oval-top.svg), which is what
+     makes it read as its own box the way the reference prints it. Its top
+     edge is 0.0847 below that dome's apex - the exact depth at which the arch
+     is still wide enough to clear these corners, so this box's WIDTH and the
+     dome's arch depth are a matched pair. See frame-oval-top.svg.
+
+     ASPECT - drawn AT the aspect it is displayed at:
+
+         viewBox 4767 x 1000                  ->  4.767
+         config  scaleX 0.92 / scaleY 0.193   ->  4.767
+
+     one SVG unit = 1.9299e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 0.92 x 0.193)
+       outer edge  flush with the plane  ->  0.92 w x 0.193 h
+       stroke      20.05 units           ->  0.00387
+       corner r    311 units             ->  0.06
+
+     Rect inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="nisa23WrapGold" x1="0" y1="500" x2="4767" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="10.025" y="10.025" width="4746.95" height="979.95" rx="311" ry="311"
+      fill="#F5EEDC" fill-opacity="0.6" stroke="url(#nisa23WrapGold)" stroke-width="20.05"
+      stroke-linejoin="round"/>
+</svg>

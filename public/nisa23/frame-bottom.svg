@@ -1,0 +1,33 @@
+<svg width="2535" height="1000" viewBox="0 0 2535 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- NİSÂ 23 - BOTTOM SECTION FRAME (chunks 12 - 14). Shorter than the two
+     bands above it (frame-band.svg), so it needs its own viewBox aspect -
+     see the ASPECT note there for why an aspect-matched file is the whole
+     point of this family.
+
+     TREATMENT. Identical to /tevbe/dome-section.svg: fill #F5EEDC at 0.6
+     opacity, gold gradient outline. See frame-band.svg for the full note.
+
+     ASPECT - drawn AT the aspect it is displayed at:
+
+         viewBox 2535 x 1000                  ->  2.535
+         config  scaleX 0.90 / scaleY 0.355   ->  2.535
+
+     one SVG unit = 3.5503e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 0.90 x 0.355)
+       outer edge  flush with the plane  ->  0.90 w x 0.355 h
+       stroke      10.90 units           ->  0.00387
+       corner r    90 units              ->  0.032
+
+     Rect inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="nisa23BottomGold" x1="0" y1="500" x2="2535" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="5.45" y="5.45" width="2524.10" height="989.10" rx="90" ry="90"
+      fill="#F5EEDC" fill-opacity="0.6" stroke="url(#nisa23BottomGold)" stroke-width="10.90"
+      stroke-linejoin="round"/>
+</svg>

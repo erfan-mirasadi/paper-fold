@@ -1,0 +1,50 @@
+<svg width="3050" height="1000" viewBox="0 0 3050 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- NİSÂ 23 - BOTTOM SECTION FRAME (chunks 12 - 14).
+
+     SHAPE. frame-oval-top.svg's arch, mirrored: flat TOP, straight side
+     walls, then two quadratics arching DOWN to an apex at the bottom centre.
+     Read together with the top frame, the page opens and closes on the same
+     curve. Same construction as /tevbe/dome-section.svg.
+
+     The arch is 420 units of the 990 available (42% of the height), controls
+     at 63% of shoulder-to-apex - identical proportions to the top frame, so
+     the two curves match on screen despite the different heights. The budget
+     here is chunk 14: it is 0.80 wide with 0.032 corners and its bottom edge
+     sits 0.058 above the apex, which is exactly where the arch is still 0.388
+     half-wide. Deepen the arch and chunk 14's bottom corners break out of it.
+
+     COLOUR. Blue #CEE0E9 at 0.6 opacity (/tevbe/dome-section-1.svg's
+     treatment), over the project's gold gradient outline. See
+     frame-oval-top.svg for the full note.
+
+     ASPECT - drawn AT the aspect it is displayed at:
+
+         viewBox 3050 x 1000                  ->  3.050
+         config  scaleX 1.15 / scaleY 0.377   ->  3.050
+
+     one SVG unit = 3.7705e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 1.15 x 0.377)
+       outer edge  flush with the plane  ->  1.15 w x 0.377 h
+       stroke      10.26 units           ->  0.00387
+       apex        y 994.87              ->  frame bottom
+       shoulder    y 574.87              ->  0.1583 above the apex
+       wall        y 5.13 … 574.87       ->  58% of the height
+
+     Path inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="nisa23DomeBottomGold" x1="0" y1="500" x2="3050" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<path d="M5.13 5.13
+         V574.87
+         Q5.13 839.47 1525 994.87
+         Q3044.87 839.47 3044.87 574.87
+         V5.13
+         Z"
+      fill="#CEE0E9" fill-opacity="0.6" stroke="url(#nisa23DomeBottomGold)" stroke-width="10.26"
+      stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,62 @@
+<svg width="2371" height="1000" viewBox="0 0 2371 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- NİSÂ 23 - TOP SECTION FRAME (chunks 1 - 3).
+
+     SHAPE. A DOME, exactly the /tevbe/dome-section.svg construction: flat
+     bottom, straight side walls, then two quadratics arching over to an apex
+     at the top centre. Not a rounded rect and not a stadium - the reference
+     page draws this section as an arch, and its twin frame-oval-bottom.svg
+     (chunks 12 - 14) is the same arch mirrored, opening downward.
+
+     The arch is 420 units (0.2037 world) of the 992 available, i.e. 42% of
+     the height, with the Bezier controls at 63% of the way from shoulder to
+     apex - the same shoulder/control proportions Tevbe's dome uses. That 42%
+     is not free: the chunk-1 wrapper box below it is 0.92 wide with 0.06
+     corners, so its top edge needs the arch to still be 0.42 half-wide there,
+     which happens exactly 0.0847 below the apex. Deepen the arch or widen the
+     wrapper and the wrapper's top corners start poking through the curve.
+
+     COLOUR. Blue #CEE0E9 at 0.6 opacity, byte-for-byte /tevbe/dome-section-1.svg's
+     treatment, over the project's gold gradient outline. The middle band's
+     frames (frame-side.svg, frame-band.svg) stay in the cream family so the
+     three sections read apart at a glance. Do not swap the fill for an opaque
+     one or for `fill="none"`; the translucent tint is the point.
+
+     ASPECT - drawn AT the aspect it is displayed at, the same way
+     /imran/band-peak-up.svg is (and unlike /nisa/all-section*.svg, whose rx
+     and ry deliberately disagree to cancel a non-uniform stretch):
+
+         viewBox 2371 x 1000                  ->  2.371
+         config  scaleX 1.15 / scaleY 0.485   ->  2.371
+
+     so one SVG unit is 4.8503e-4 world units on BOTH axes: a uniform stroke
+     arrives uniform and the arch is a true curve on screen, not a squashed
+     one. If the config's scaleX/scaleY ratio moves, change the viewBox WIDTH
+     to match it rather than reshaping the path.
+
+     GEOMETRY (world units at 1.15 x 0.485)
+       outer edge  flush with the plane  ->  1.15 w x 0.485 h
+       stroke      7.98 units            ->  0.00387 (the /nisa frames' gold
+                                                      band, to the micron)
+       apex        y 3.99                ->  frame top
+       shoulder    y 423.99              ->  0.2037 below the apex
+       wall        y 423.99 … 996.01     ->  58% of the height
+
+     The path is inset by half a stroke on every side, so the stroke's OUTER
+     edge lands exactly on the plane edge: frame size == (scaleX, scaleY),
+     which is what the config's offsetY arithmetic assumes. -->
+<defs>
+<linearGradient id="nisa23DomeTopGold" x1="0" y1="500" x2="2371" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<path d="M3.99 996.01
+         V423.99
+         Q3.99 159.39 1185.5 3.99
+         Q2367.01 159.39 2367.01 423.99
+         V996.01
+         Z"
+      fill="#CEE0E9" fill-opacity="0.6" stroke="url(#nisa23DomeTopGold)" stroke-width="7.98"
+      stroke-linejoin="round"/>
+</svg>

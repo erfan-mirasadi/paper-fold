@@ -799,8 +799,7 @@ export const VerseBox = ({
 
   const isTranslationCenterOverride =
     !isArabic && textAlignOverride === "center";
-  const isTranslationLeftOverride =
-    !isArabic && textAlignOverride === "left";
+  const isTranslationLeftOverride = !isArabic && textAlignOverride === "left";
   const centerTextInCapsule =
     (!isPill || !showVerseNumber || isTranslationCenterOverride) &&
     !isTranslationLeftOverride;
@@ -906,7 +905,9 @@ export const VerseBox = ({
             cr={cr}
             number={stackedAyahNumber ?? number}
             circleBg={ayahBadgeBg ?? circleBg ?? bg}
-            circleBorderCol={ayahBadgeBorderCol ?? circleBorderCol ?? border ?? CIRCLE_BORDER}
+            circleBorderCol={
+              ayahBadgeBorderCol ?? circleBorderCol ?? border ?? CIRCLE_BORDER
+            }
             circleTextCol={ayahBadgeTextCol ?? circleTextCol ?? TEXT_DARK}
             opacity={opacity}
             renderOrder={zOrder + 2}

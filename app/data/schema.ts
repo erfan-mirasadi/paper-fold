@@ -675,6 +675,16 @@ export interface SvgOverlayItem {
    * When null or omitted, the overlay is static (glued to the background frame).
    */
   customSectionId?: string | null;
+  /**
+   * Restricts this overlay to the listed languages. Omitted → drawn in all of
+   * them (the normal case: the geometry is shared and only the text changes).
+   *
+   * Set it when a decoration only makes sense for some translations — e.g.
+   * Nisa-23's chunk-1 wrapper box, which exists because Turkish and English
+   * split the ayah's opener onto its own line while Arabic says the opener
+   * and chunk 1 in one breath and needs no box at all.
+   */
+  languages?: ("ar" | "en" | "tr")[];
 }
 
 // ---------------------------------------------------------------------------

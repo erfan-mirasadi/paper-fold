@@ -1,0 +1,42 @@
+<svg width="3059" height="1000" viewBox="0 0 3059 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- NİSÂ 23 - MIDDLE BAND WRAPPER (the frame drawn around BOTH half frames,
+     i.e. chunks 4 - 11 together).
+
+     COLOUR. This one sits BEHIND the two frame-side.svg halves, so it is
+     deliberately a full step darker than they are - #E3D7BD at 0.5 vs their
+     #F5EEDC at 0.6. Same cream family, but the band reads as its own plate
+     instead of melting into the frames on top of it. Keep the two apart if
+     either is ever retinted. Do not swap the fill for an opaque one or for
+     `fill="none"`; the translucency is what lets the paper grain through.
+
+     SHAPE. A quiet rounded rect (0.05 world radius), not an oval: the ovals
+     on this page are the top and bottom sections (frame-oval-*.svg), and this
+     plate should stay visually subordinate to the two frames it carries.
+
+     ASPECT - drawn AT the aspect it is displayed at, the same way
+     /imran/band-peak-up.svg is (and unlike /nisa/all-section*.svg, whose rx
+     and ry deliberately disagree to cancel a non-uniform stretch):
+
+         viewBox 3059 x 1000                  ->  3.059
+         config  scaleX 1.15 / scaleY 0.376   ->  3.059
+
+     one SVG unit = 3.7594e-4 world units on BOTH axes, so a uniform stroke
+     arrives uniform and every corner is a true circular arc on screen.
+
+     GEOMETRY (world units at 1.15 x 0.376)
+       outer edge  flush with the plane  ->  1.15 w x 0.376 h
+       stroke      10.29 units           ->  0.00387
+       corner r    133 units             ->  0.05
+
+     Rect inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="nisa23BandGold" x1="0" y1="500" x2="3059" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="5.145" y="5.145" width="3048.71" height="989.71" rx="133" ry="133"
+      fill="#E3D7BD" fill-opacity="0.5" stroke="url(#nisa23BandGold)" stroke-width="10.29"
+      stroke-linejoin="round"/>
+</svg>
