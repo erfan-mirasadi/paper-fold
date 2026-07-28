@@ -1091,8 +1091,8 @@ export const TEVBE_24_TEXT_TR: SurahDataShape = {
       { verses: [{ number: 8, text: "(olmaz ya) Daha çok seviyorsanız" }] },
       {
         verses: [
-          { number: 9, text: "Ve Allah yolunda savaşmaktan" },
-          { number: 10, text: "Allah ve Rasulünden" },
+          { number: 9, text: "Allah ve Rasulünden" },
+          { number: 10, text: "Ve Allah yolunda savaşmaktan" },
         ],
       },
       {
@@ -1152,8 +1152,8 @@ export const TEVBE_24_TEXT_EN: SurahDataShape = {
       { verses: [{ number: 8, text: "(though unthinkable)\nyou love more" }] },
       {
         verses: [
-          { number: 9, text: "and striving\nin His cause" },
-          { number: 10, text: "than Allah\nand His Messenger" },
+          { number: 9, text: "than Allah\nand His Messenger" },
+          { number: 10, text: "and striving\nin His cause" },
         ],
       },
       {

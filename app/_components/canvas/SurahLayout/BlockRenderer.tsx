@@ -270,6 +270,7 @@ function GridBlock({
               circleBg={circleBg} circleTextCol={circleTextCol}
               isPill={isPill} textColor={override?.textColor}
               translationPadding={override?.translationPadding}
+              textAlignOverride={override?.translationTextAlign}
               domeDir={override?.verseShape === "dome-up" ? "up" : override?.verseShape === "dome-down" ? "down" : undefined}
               domeSideRatio={override?.domeSideRatio}
               textScaleOverride={finalTextScale} />

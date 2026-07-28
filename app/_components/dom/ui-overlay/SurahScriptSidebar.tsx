@@ -570,7 +570,14 @@ export function SurahScriptSidebar() {
                         {...chunkAppearance(v.number)}
                       >
                         {v.text}
-                      </HighlightChunk>{" "}
+                      </HighlightChunk>
+                      {activeConfig.id === "ayatalkursi" && !activeConfig.features.hideVerseNumbers ? (
+                        <span className="mx-1 text-[1.3em] opacity-70">
+                          {v.number}
+                        </span>
+                      ) : (
+                        " "
+                      )}
                     </span>
                   ))}
                   <AyahNumber n={singleAyahNumber} />

@@ -468,7 +468,7 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
     hasIntro: false,
     hasElevatedSections: true,
     hasPopUps: true,
-    hideVerseNumbers: true,
+    hideVerseNumbers: false,
   },
 
   dimensions: {
@@ -499,50 +499,50 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   verseOverrides: {
     1: {
       border: OUTER_GROUP_BORDER,
-      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BG,
       circleBg: OUTER_GROUP_BG,
       circleTextCol: OUTER_GROUP_BORDER,
     },
     2: {
       border: OUTER_GROUP_BORDER,
-      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BG,
       circleBg: OUTER_GROUP_BG,
       circleTextCol: OUTER_GROUP_BORDER,
     },
     3: {
       border: CENTER_GROUP_BORDER,
-      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BG,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
     },
     4: {
       border: CENTER_GROUP_BORDER,
-      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BG,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
     },
     5: {
       border: CENTER_GROUP_BORDER,
-      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BG,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
       translationTextScaleOverride: 0.65,
     },
     6: {
       border: CENTER_GROUP_BORDER,
-      circleBorderCol: CENTER_GROUP_BORDER,
+      circleBorderCol: CENTER_GROUP_BG,
       circleBg: CENTER_GROUP_BG,
       circleTextCol: CENTER_GROUP_BORDER,
     },
     7: {
       border: OUTER_GROUP_BORDER,
-      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BG,
       circleBg: OUTER_GROUP_BG,
       circleTextCol: OUTER_GROUP_BORDER,
     },
     8: {
       border: OUTER_GROUP_BORDER,
-      circleBorderCol: OUTER_GROUP_BORDER,
+      circleBorderCol: OUTER_GROUP_BG,
       circleBg: OUTER_GROUP_BG,
       circleTextCol: OUTER_GROUP_BORDER,
     },

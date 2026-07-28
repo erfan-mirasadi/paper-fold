@@ -80,8 +80,8 @@ const YELLOW_BORDER = S1_INNER_BORDER; // #d2ae84
 const ORANGE_BG = CAPSULE_BG_6_19; // #EFE2C7
 const ORANGE_BORDER = ORANGE_THEME; // #C4963B
 
-const BLUE_BG = CAPSULE_BG_9_10_15_16; // #AECCDB
-const BLUE_BORDER = MAROON_THEME; // #7c8cb0
+const WHITE_BG = "#FBFAF4";
+const WHITE_BORDER = "#C7C1AC";
 
 const DARK_TEXT = "#2B2B2B";
 const RED_TEXT = "#A30000";
@@ -110,12 +110,12 @@ const bandEdge = (extra: Record<string, unknown> = {}) => ({
  * boxes are the same height as the yellow ones around them).
  */
 const foldedBox = (extra: Record<string, unknown> = {}) => ({
-  bg: BLUE_BG,
-  border: BLUE_BORDER,
-  circleBg: BLUE_BG,
-  circleBorderCol: BLUE_BG,
-  circleTextCol: "#1A1A1A",
-  textColor: DARK_TEXT,
+  bg: WHITE_BG,
+  border: WHITE_BORDER,
+  circleBg: WHITE_BG,
+  circleBorderCol: WHITE_BG,
+  circleTextCol: "#4A4636",
+  textColor: "#2C2A22",
   isPill: false,
   ...extra,
 });
@@ -182,6 +182,7 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       textScaleOverride: 0.71,
       translationTextScaleOverride: 0.46,
       translationPadding: 0.02,
+      translationTextAlign: "left",
     },
 
     // ── Band 3–5 ──────────────────────────────────────────────────────────
@@ -267,12 +268,12 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       innerCard: "#eeeeee",
       sectionBgTexture: "#fcfcfc",
       hollowConnectorInnerBg: "#e3e3e3",
-      maroonTheme: BLUE_BORDER,
-      greenTheme: BLUE_BORDER,
+      maroonTheme: WHITE_BORDER,
+      greenTheme: WHITE_BORDER,
       s1InnerBorder: "#cccccc",
       s2IntroOutroBg: ORANGE_BG,
       s2Group1Bg: YELLOW_BG,
-      s2Group2Bg: BLUE_BG,
+      s2Group2Bg: WHITE_BG,
       s2Group3Bg: YELLOW_BG,
       // No side brackets/curves on this page. A single fully-transparent entry
       // makes SideCurves emit nothing (an empty [] would instead fall back to
@@ -556,10 +557,10 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
           {
             columns: 2,
             frame: true,
-            color: BLUE_BORDER,
-            bg: BLUE_BG,
+            color: WHITE_BORDER,
+            bg: WHITE_BG,
             corners: "soft",
-            textColor: DARK_TEXT,
+            textColor: "#2C2A22",
             capsules: [
               { n: 4, text: "Altınlar" },
               { n: 5, text: "Ve gümüşler" },
@@ -726,7 +727,7 @@ export const IMRAN_14_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 1,
-            text: "1. Bütün insanlara, çocuk sevgisi ve\n2. Kadınlara karşı bir ilgi verildi.",
+            text: "Bütün insanlara, çocuk sevgisi ve\nKadınlara karşı bir ilgi verildi.",
           },
         ],
       },
@@ -782,7 +783,7 @@ export const IMRAN_14_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 1,
-            text: "1. All people were given a love of children and\n2. an attraction toward women.",
+            text: "All people were given a love of children and\n an attraction toward women.",
           },
         ],
       },

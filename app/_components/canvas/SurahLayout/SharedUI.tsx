@@ -799,8 +799,11 @@ export const VerseBox = ({
 
   const isTranslationCenterOverride =
     !isArabic && textAlignOverride === "center";
+  const isTranslationLeftOverride =
+    !isArabic && textAlignOverride === "left";
   const centerTextInCapsule =
-    !isPill || !showVerseNumber || isTranslationCenterOverride;
+    (!isPill || !showVerseNumber || isTranslationCenterOverride) &&
+    !isTranslationLeftOverride;
 
   // For non-Arabic (LTR) pill capsules, shift text away from the verse number.
   const circleEnd = cx + cr;
