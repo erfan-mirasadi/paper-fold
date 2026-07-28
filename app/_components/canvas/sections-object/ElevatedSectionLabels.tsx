@@ -19,7 +19,11 @@ import {
   ELEVATED_RETURN_SYNC_MS,
   useElevatedStore,
 } from "../../../stores/useElevatedStore";
-import { dragEngine } from "../../../utils/dragEngine";
+import {
+  dragEngine,
+  getSectionChainSprings,
+  sumSprings,
+} from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
@@ -104,13 +108,16 @@ function AnimatedElevatedLabel({
     delay: actuallyActive ? delayMs : 0,
   });
 
-  // Drag: label drags the entire section
+  // Drag: label drags the entire section, and rides along with any zone
+  // enclosing it.
   const sectionDrag = dragEngine.sections[sectionId];
+  const chain = getSectionChainSprings(sectionId);
   const dragBind = useElevatedDrag({
     enabled: actuallyActive && !isIntroActive,
     springX: sectionDrag.x,
     springY: sectionDrag.y,
     dragSectionId: sectionId,
+    snapMode: "magnet",
   });
 
   const introRef = useIntroSectionOffset(sectionId);
@@ -121,8 +128,8 @@ function AnimatedElevatedLabel({
     <group ref={introRef}>
       <a.group
         {...dragBind}
-        position-x={sectionDrag.x}
-        position-y={sectionDrag.y}
+        position-x={to(chain.x, sumSprings)}
+        position-y={to(chain.y, sumSprings)}
       >
         <a.group
           // Convert from paper-local (0..PAGE_WIDTH) to centered world space.

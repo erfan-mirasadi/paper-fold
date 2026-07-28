@@ -54,7 +54,11 @@ import {
   getSectionIdForVerseId,
   getIntroGridSectionId,
 } from "../../../utils/sectionResolver";
-import { dragEngine } from "../../../utils/dragEngine";
+import {
+  dragEngine,
+  getSectionChainSprings,
+  sumSprings,
+} from "../../../utils/dragEngine";
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 
@@ -461,18 +465,20 @@ function DraggableSectionGroup({
   children: React.ReactNode;
 }) {
   const sectionDrag = dragEngine.sections[sectionId];
+  const chain = getSectionChainSprings(sectionId);
   const dragBind = useElevatedDrag({
     enabled: isActive && !useFoldStore.getState().isIntroActive,
     springX: sectionDrag.x,
     springY: sectionDrag.y,
     dragSectionId: sectionId,
+    snapMode: "magnet",
   });
 
   return (
     <a.group
       {...dragBind}
-      position-x={sectionDrag.x}
-      position-y={sectionDrag.y}
+      position-x={to(chain.x, sumSprings)}
+      position-y={to(chain.y, sumSprings)}
     >
       {children}
     </a.group>
@@ -526,7 +532,7 @@ function ElevatedSvgOverlay({ overlay, spring, s2, groupTransforms }: any) {
 
 // ── Draggable SVG overlay — wraps ElevatedSvgOverlay in its own drag section ─
 // Only rendered in all-sections mode
-function DraggableElevatedSvgOverlay({ overlay, s2, groupTransforms, parentSectionId }: any) {
+function DraggableElevatedSvgOverlay({ overlay, s2, groupTransforms }: any) {
   const sectionId = overlay.customSectionId as string;
   const isActive = useElevatedStore((s) =>
     s.activeSectionIds.includes(sectionId),
@@ -541,14 +547,16 @@ function DraggableElevatedSvgOverlay({ overlay, s2, groupTransforms, parentSecti
   };
 
   const sectionDrag = dragEngine.sections[sectionId];
-  // Also read the parent (overall frame) spring so SVG brackets follow frame drag
-  const parentDrag = parentSectionId ? dragEngine.sections[parentSectionId] : null;
+  // Enclosing zones are read off the section index, so a band frame follows the
+  // outer frame that wraps it without either side naming the other.
+  const chain = getSectionChainSprings(sectionId);
 
   const dragBind = useElevatedDrag({
     enabled: isActive && !isIntroActive,
     springX: sectionDrag?.x,
     springY: sectionDrag?.y,
     dragSectionId: sectionId,
+    snapMode: "magnet",
   });
 
   // Only render SVG section frames in all-sections mode
@@ -558,14 +566,8 @@ function DraggableElevatedSvgOverlay({ overlay, s2, groupTransforms, parentSecti
   return (
     <a.group
       {...dragBind}
-      position-x={to(
-        [sectionDrag.x, parentDrag ? parentDrag.x : sectionDrag.x],
-        (sx, px) => sx + (parentDrag ? px : 0),
-      )}
-      position-y={to(
-        [sectionDrag.y, parentDrag ? parentDrag.y : sectionDrag.y],
-        (sy, py) => sy + (parentDrag ? py : 0),
-      )}
+      position-x={to(chain.x, sumSprings)}
+      position-y={to(chain.y, sumSprings)}
     >
       <ElevatedSvgOverlay
         overlay={overlay}
@@ -932,7 +934,6 @@ export function ElevatedSectionSurfaces() {
                   overlay={overlay}
                   s2={anyBlockSection}
                   groupTransforms={groupTransforms}
-                  parentSectionId={null}
                 />
               );
             })}

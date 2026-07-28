@@ -13,10 +13,17 @@ import {
 import { useElevatedDrag } from "../../../hooks/useElevatedDrag";
 import {
   dragEngine,
+  getSectionChainSprings,
   getVerseSectionId,
+  sumSprings,
   useDragState,
 } from "../../../utils/dragEngine";
-import { calculateSectionBounds } from "../../../utils/boundsHelper";
+import { calculateVerseSnapBounds } from "../../../utils/boundsHelper";
+import { getSectionVerseIds } from "../../../utils/sectionResolver";
+import {
+  getLeadVerseId,
+  shouldUseGroupDrag,
+} from "../../../utils/verseDragPolicy";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import { useIntroSectionOffset } from "../../../hooks/useIntroSectionAnimation";
@@ -34,47 +41,6 @@ const SECTION_SURFACE_SHADOW_MOTION = {
     friction: 22,
   },
 } as const;
-
-/** Dynamic verse pair lead: the smaller ID of the two paired verses. */
-function getLeadVerseId(
-  configId: number,
-  pairings: Record<number, number> | undefined,
-) {
-  const pairedVerseId = pairings?.[configId];
-  return pairedVerseId ? Math.min(configId, pairedVerseId) : configId;
-}
-
-/**
- * Resolves the drag-behavior info ("group" vs "individual" vs custom-section)
- * for whichever block a verse belongs to.
- */
-function resolveSectionDragInfo(
-  config: any,
-  leadVerseId: number,
-): { dragBehavior?: string; isCenter?: boolean; hasCustomSections: boolean } {
-  // Drag behavior is a per-block property, found by verse membership —
-  // independent of which elevation section id the verse resolves to (a
-  // cross-block customSection can span verses from several blocks). Grid
-  // blocks (Alak) don't carry `dragBehavior`/`isCenter`, so a lookup miss
-  // for the anaAyet (not part of `verseIds`) resolves to the same
-  // all-undefined result a grid block would return anyway.
-  const block = config.blocks?.find((b: any) => b.verseIds?.includes(leadVerseId));
-  return {
-    dragBehavior: block?.dragBehavior,
-    isCenter: block?.isCenter,
-    hasCustomSections: Boolean(config.customSections?.length),
-  };
-}
-
-function shouldUseGroupDrag(info: {
-  dragBehavior?: string;
-  isCenter?: boolean;
-  hasCustomSections: boolean;
-}): boolean {
-  if (info.dragBehavior === "individual") return false;
-  if (info.hasCustomSections) return true;
-  return info.dragBehavior === "group" || !!info.isCenter;
-}
 
 const ZERO_OFFSET = { x: 0, y: 0 };
 
@@ -223,10 +189,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
       ? middleGapHalf
       : 0;
 
-  const leadVerseId = getLeadVerseId(
-    config.id,
-    activeStoryConfig.specialVerses?.versePairings,
-  );
+  const leadVerseId = getLeadVerseId(config.id, activeStoryConfig);
   const leadVerseDrag = dragEngine.verses[leadVerseId];
 
   const sectionDrag = sectionId ? dragEngine.sections[sectionId] : null;
@@ -237,7 +200,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
   let useSectionGroupDrag = false;
   if (sectionId && sectionDrag && isSectionRaised) {
     useSectionGroupDrag = shouldUseGroupDrag(
-      resolveSectionDragInfo(activeStoryConfig, leadVerseId),
+      activeStoryConfig,
+      leadVerseId,
+      getSectionVerseIds(sectionId),
     );
   }
 
@@ -267,16 +232,18 @@ export function VerseController({ config }: { config: VerseConfig }) {
     return undefined;
   }, [useSectionGroupDrag]);
 
-  // sectionBounds only needed for "section" snap (individual verse in all-sections mode)
+  // Snap bounds only needed for "section" snap (individual verse in
+  // all-sections mode) — measured against the verse's own block, see
+  // `calculateVerseSnapBounds`.
   const sectionBounds = useMemo(() => {
     if (snapMode !== "section") return undefined;
-    if (!sectionId || !runtime.SURAH_TRANSFORMS) return undefined;
-    return calculateSectionBounds(
-      sectionId,
+    if (!runtime.SURAH_TRANSFORMS) return undefined;
+    return calculateVerseSnapBounds(
+      leadVerseId,
       runtime.SURAH_TRANSFORMS,
       runtime.PAGE_WIDTH,
     );
-  }, [snapMode, sectionId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
+  }, [snapMode, leadVerseId, runtime.SURAH_TRANSFORMS, runtime.PAGE_WIDTH]);
 
   const dragBind = useElevatedDrag({
     enabled:
@@ -292,16 +259,22 @@ export function VerseController({ config }: { config: VerseConfig }) {
     snapMode,
   });
 
+  // A verse rides its own spring plus its section's whole chain (own zone +
+  // every enclosing zone), so dragging an outer frame carries its inner bands
+  // and their verses along. Once pulled out on its own it keeps the frozen
+  // offset captured at separation time and stops following the chain entirely.
+  const sectionChain = sectionId ? getSectionChainSprings(sectionId) : null;
+
   const dragX = to(
-    [leadVerseDrag.x, sectionDrag ? sectionDrag.x : leadVerseDrag.x],
-    (vx, sx) =>
-      vx + (isVerseSeparated ? separationOffset.x : sectionDrag ? sx : 0),
+    [leadVerseDrag.x, ...(sectionChain ? sectionChain.x : [])],
+    (vx, ...sectionXs) =>
+      vx + (isVerseSeparated ? separationOffset.x : sumSprings(...sectionXs)),
   );
 
   const dragY = to(
-    [leadVerseDrag.y, sectionDrag ? sectionDrag.y : leadVerseDrag.y],
-    (vy, sy) =>
-      vy + (isVerseSeparated ? separationOffset.y : sectionDrag ? sy : 0),
+    [leadVerseDrag.y, ...(sectionChain ? sectionChain.y : [])],
+    (vy, ...sectionYs) =>
+      vy + (isVerseSeparated ? separationOffset.y : sumSprings(...sectionYs)),
   );
 
   const introSectionMotionRef = useIntroSectionOffset(sectionId);

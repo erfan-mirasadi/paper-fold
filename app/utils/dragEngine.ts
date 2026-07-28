@@ -1,7 +1,10 @@
 import { SpringValue } from "@react-spring/three";
 import { create } from "zustand";
 import { type ElevatedSectionId } from "../stores/useElevatedStore";
-import { getSectionIdForVerseId } from "./sectionResolver";
+import {
+  getSectionIdForVerseId,
+  getSectionAncestorIds,
+} from "./sectionResolver";
 
 export const DRAG_SPRING_CONFIG = { mass: 1.5, tension: 350, friction: 35 };
 
@@ -54,6 +57,34 @@ export const dragEngine = {
 
 const draggedVerseIds = new Set<number>();
 const draggedSectionIds = new Set<ElevatedSectionId>();
+
+/**
+ * Every spring whose displacement a member of `sectionId` has to inherit: the
+ * section's own, plus one per enclosing section (see `getSectionAncestorIds`).
+ * Both axes come back as flat arrays so callers can feed them straight into
+ * `to([...], (...vals) => sum)`. The chain length is config-derived and stable
+ * for a given surah, so the animated `to()` graph never changes shape.
+ */
+export function getSectionChainSprings(sectionId: ElevatedSectionId) {
+  const ids = [sectionId, ...getSectionAncestorIds(sectionId)];
+  return {
+    ids,
+    x: ids.map((id) => dragEngine.sections[id].x),
+    y: ids.map((id) => dragEngine.sections[id].y),
+  };
+}
+
+/** Current summed displacement of a section's whole drag chain. */
+export function getSectionChainOffset(sectionId: ElevatedSectionId) {
+  const { x, y } = getSectionChainSprings(sectionId);
+  return {
+    x: x.reduce((sum, s) => sum + s.get(), 0),
+    y: y.reduce((sum, s) => sum + s.get(), 0),
+  };
+}
+
+export const sumSprings = (...values: number[]) =>
+  values.reduce((sum, v) => sum + v, 0);
 
 export const useDragState = create<{
   hasDragged: boolean;
@@ -134,13 +165,10 @@ export function markVerseDragged(verseId: number) {
   draggedVerseIds.add(verseId);
 
   const sectionId = getVerseSectionId(verseId);
-  let offset = undefined;
-  if (sectionId) {
-    const sDrag = dragEngine.sections[sectionId];
-    if (sDrag) {
-      offset = { x: sDrag.x.get(), y: sDrag.y.get() };
-    }
-  }
+  // Freeze the section chain (own zone + every enclosing zone) at the moment
+  // the verse is pulled out, so a verse dropped on its own stays put when its
+  // former section — or the frame around it — is dragged afterwards.
+  const offset = sectionId ? getSectionChainOffset(sectionId) : undefined;
 
   useDragState.getState().markVerseDragged(verseId, offset);
 }

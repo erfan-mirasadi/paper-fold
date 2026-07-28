@@ -541,7 +541,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
       columnGap: 0.25, // was xGap
       bgThemeKey: "s2Group1Bg",
       verticalNudge: -0.03, // was pushDown (negative pushes UP)
-      dragBehavior: "group",
+      dragBehavior: "individual",
       hideRowConnectors: true,
     },
     // ── Block 1 — Blue (1 row) ──────────────────────────────────────────────
@@ -554,7 +554,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       columnGap: 0.22,
       bgThemeKey: "s2Group2Bg",
-      dragBehavior: "group",
+      dragBehavior: "individual",
       hideRowConnectors: true,
     },
     // ── Block 2 — Green / pushed in (2 rows) ───────────────────────────────
@@ -564,7 +564,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
       verseIds: [6, 5, 8, 7],
       horizontalInset: 0.2,
       isCenter: true,
-      dragBehavior: "group",
+      dragBehavior: "individual",
       extraRowGap: 0.01, // affects only the within-block row offset, not frame height
       columnGap: 0.35,
       bgThemeKey: "s2Group3Bg",
@@ -580,7 +580,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       columnGap: 0.22,
       bgThemeKey: "s2Group2Bg",
-      dragBehavior: "group",
+      dragBehavior: "individual",
       hideRowConnectors: true,
     },
     // ── Block 4 — Yellow / dome text (1 row, smaller capsules) ────────────
@@ -593,7 +593,7 @@ export const AHZAB_35_CONFIG: SurahLayoutConfig = {
       columnGap: 0.16, // Change this value to adjust the horizontal distance between the capsules!
       bgThemeKey: "s2Group1Bg",
       verticalNudge: 0.08,
-      dragBehavior: "group",
+      dragBehavior: "individual",
       hideRowConnectors: true,
       topLabelConfig: {
         width: 0.3,

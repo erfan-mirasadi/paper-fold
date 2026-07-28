@@ -38,6 +38,17 @@ type DragBindings = {
 
 const EMPTY_DRAG_BINDINGS: DragBindings = {};
 
+/**
+ * Capture radius of the section magnet, in world units (≈ one capsule height,
+ * ~5% of the page). Drop a section frame within this of the slot it came from
+ * and it clicks back into place; past it, it stays where it was put.
+ *
+ * Deliberately a fixed distance rather than a fraction of the section: a zone
+ * spanning the whole page would otherwise get a page-sized magnet and could
+ * never be moved off its home at all.
+ */
+export const SECTION_MAGNET_RADIUS = 0.09;
+
 function setBodyCursor(cursor: string) {
   if (typeof document === "undefined") return;
   if (document.body.style.cursor !== cursor) {
@@ -70,13 +81,17 @@ export function useElevatedDrag({
   springY: SpringValue<number>;
   dragVerseId?: number;
   dragSectionId?: ElevatedSectionId;
-  /** "section" mode: section frame bounds (to compute snap threshold from frame size). */
+  /** "section" mode: the dragged verse's own block frame (see `calculateVerseSnapBounds`). */
   sectionBounds?: SectionBounds;
   /**
-   * "section" → Snap if |springX| < sectionWidth * 0.6 (verse hasn't left its frame).
+   * "section" → Snap if |springX| < frameWidth * 0.6 (verse hasn't left its box).
+   * "magnet"  → Snap if the drop landed within `SECTION_MAGNET_RADIUS` of home.
+   *             Used for whole sections: a band dropped near the slot it came
+   *             from clicks back into its parent frame instead of hanging
+   *             slightly off it.
    * undefined → No snap; element stays where dropped.
    */
-  snapMode?: "section";
+  snapMode?: "section" | "magnet";
 }) {
   const ref = useRef({
     active: false,
@@ -165,14 +180,21 @@ export function useElevatedDrag({
       if (snapMode === "section" && sectionBounds) {
         // Individual verse drag in all-sections mode:
         // springX/Y here is the verse's OWN spring (leadVerseDrag), which is the
-        // displacement of this verse RELATIVE to its section's resting position.
-        // (The section's own spring offset is handled separately in the position formula.)
-        // So we just check: has the verse moved outside its section frame?
+        // displacement of this verse RELATIVE to its resting position.
+        // (Section drag offsets are handled separately in the position formula.)
+        // So we just check: has the verse moved outside its own block's frame?
         const sectionWidth = sectionBounds.maxX - sectionBounds.minX;
         const sectionHeight = sectionBounds.maxY - sectionBounds.minY;
         shouldSnapHome =
           Math.abs(springX.get()) <= sectionWidth * 0.6 &&
           Math.abs(springY.get()) <= sectionHeight * 0.6;
+      } else if (snapMode === "magnet") {
+        // Whole-section drag: springX/Y is this section's displacement from its
+        // resting slot (any enclosing section's offset is added separately in
+        // the position formula), so zero really is "back where it belongs".
+        shouldSnapHome =
+          Math.abs(springX.get()) <= SECTION_MAGNET_RADIUS &&
+          Math.abs(springY.get()) <= SECTION_MAGNET_RADIUS;
       }
 
       if (shouldSnapHome) {

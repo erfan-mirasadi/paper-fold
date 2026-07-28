@@ -1,7 +1,6 @@
 import { BlockSurahTransforms as SurahTransforms } from "../data/SurahConfig";
 import { SectionTransforms } from "../data/schema";
 import { getActiveStoryConfig } from "../stores/useStoryStore";
-import { getSectionVerseIds } from "./sectionResolver";
 
 export type SectionBounds = {
   minX: number;
@@ -12,81 +11,46 @@ export type SectionBounds = {
 
 export const BOUNDS_PAD = 0.06;
 
-export function calculateSectionBounds(
-  sectionId: string,
+/**
+ * Snap-home bounds for a verse (or verse row) dragged on its own: the frame of
+ * the BLOCK it lives in — never its elevation section.
+ *
+ * `useElevatedDrag` snaps a verse back when it hasn't travelled past ~60% of
+ * these bounds, i.e. "it never really left its box". With per-block elevation
+ * zones (Alak) the section frame *is* the block's box, so the two agree. With a
+ * cross-block `customSections` zone the section is one to two orders of
+ * magnitude bigger than the capsule being dragged — Tevbe declares a single
+ * zone over all 12 verses, Imran's `sec_all` spans 1…9 — so the snap radius
+ * grows to roughly a full page and every individual drag springs straight back
+ * home. Measuring against the block keeps the rule identical everywhere.
+ */
+export function calculateVerseSnapBounds(
+  verseId: number,
   transforms: SurahTransforms,
   pageWidth: number,
-): SectionBounds {
+): SectionBounds | undefined {
   const config = getActiveStoryConfig();
-  const hasCustomSections = !!(
-    config.customSections && config.customSections.length > 0
+  const blockIdx = (config.blocks ?? []).findIndex(
+    (b: any) => b.verseIds?.includes(verseId) || b.anaAyetId === verseId,
   );
+  if (blockIdx < 0) return undefined;
 
-  if (hasCustomSections) {
-    // Cross-block custom section — bounds = tight union of its verse
-    // transforms (verses can live in different block transforms).
-    const verseIds = getSectionVerseIds(sectionId);
-    if (verseIds.length === 0) return undefined as any;
+  const sTransform = transforms.sections[blockIdx] as
+    | Required<SectionTransforms>
+    | undefined;
+  if (!sTransform) return undefined;
 
-    let minX = Infinity, maxX = -Infinity;
-    let minY = Infinity, maxY = -Infinity;
-    transforms.sections.forEach((sTransform: any) => {
-      const verseMaps = [
-        sTransform.verses,
-        ...((sTransform.groups ?? []) as any[]).map((g) => g.verses),
-      ].filter(Boolean);
-      verseMaps.forEach((verses) => {
-        verseIds.forEach((vId) => {
-          const vt = verses[vId];
-          if (!vt) return;
-          minX = Math.min(minX, vt.x);
-          maxX = Math.max(maxX, vt.x + vt.w);
-          minY = Math.min(minY, vt.y - vt.h);
-          maxY = Math.max(maxY, vt.y);
-        });
-      });
-    });
-
-    if (minX === Infinity) return undefined as any;
-    return {
-      minX: minX - pageWidth / 2 - BOUNDS_PAD,
-      maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
-      maxY: maxY + BOUNDS_PAD,
-      minY: minY - BOUNDS_PAD,
-    };
-  }
-
-  // Per-block elevation zone, keyed by block.id (or `customSectionId` when
-  // a block merges into a neighboring zone, e.g. Alak's intro/outro) — union
-  // of every merged block's own (inset-adjusted) frame.
-  const zoneBlocks = (config.blocks ?? [])
-    .map((b, idx) => ({ b, idx }))
-    .filter(({ b }) => (b.customSectionId ?? b.id) === sectionId);
-  if (zoneBlocks.length === 0) return undefined as any;
-
-  let minX = Infinity, maxX = -Infinity;
-  let minY = Infinity, maxY = -Infinity;
-  zoneBlocks.forEach(({ idx }) => {
-    const sTransform = transforms.sections[idx] as
-      | Required<SectionTransforms>
-      | undefined;
-    if (!sTransform) return;
-    const group = sTransform.groups?.[0];
-    const frameX = group ? group.frameX : sTransform.frameX;
-    const frameY = group ? group.frameY : (sTransform.frameY ?? 0);
-    const frameW = group ? group.frameW : sTransform.frameW;
-    const frameH = group ? group.frameH : (sTransform.frameH ?? 0);
-    minX = Math.min(minX, frameX);
-    maxX = Math.max(maxX, frameX + frameW);
-    minY = Math.min(minY, frameY - frameH);
-    maxY = Math.max(maxY, frameY);
-  });
-  if (minX === Infinity) return undefined as any;
+  const group = sTransform.groups?.[0];
+  const frameX = group ? group.frameX : sTransform.frameX;
+  const frameY = group ? group.frameY : (sTransform.frameY ?? 0);
+  const frameW = group ? group.frameW : sTransform.frameW;
+  const frameH = group ? group.frameH : (sTransform.frameH ?? 0);
+  if (frameW === undefined || frameH === undefined) return undefined;
 
   return {
-    minX: minX - pageWidth / 2 - BOUNDS_PAD,
-    maxX: maxX - pageWidth / 2 + BOUNDS_PAD,
-    maxY: maxY + BOUNDS_PAD,
-    minY: minY - BOUNDS_PAD,
+    minX: frameX - pageWidth / 2 - BOUNDS_PAD,
+    maxX: frameX + frameW - pageWidth / 2 + BOUNDS_PAD,
+    maxY: frameY + BOUNDS_PAD,
+    minY: frameY - frameH - BOUNDS_PAD,
   };
 }

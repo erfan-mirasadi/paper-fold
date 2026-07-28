@@ -533,7 +533,19 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
     },
   ],
 
+  // ── Drag / elevation zones ───────────────────────────────────────────────
+  // One zone per decorative frame below, so each shield carries exactly the
+  // verses drawn inside it. Order matters: the reverse index is first-wins, so
+  // the three shields claim 2…10 and `g_top` keeps 1, 11 and 12 — plus its own
+  // outer frame, which encloses the shields and therefore drags all of them.
+  // The three shields reuse `g_top`'s camera target rather than inventing their
+  // own framing — clicking a shield zooms exactly where clicking anything in
+  // this composition zoomed before. Tighten per shield if a closer read is
+  // wanted.
   customSections: [
+    { id: "sec_right", verseIds: [2, 3, 4], cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 } },
+    { id: "sec_left", verseIds: [5, 6, 7], cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 } },
+    { id: "sec_center", verseIds: [8, 9, 10], cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 } },
     {
       id: "g_top",
       verseIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -555,7 +567,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       offsetX: 0,
       offsetY: -0.47,
       renderOrder: 2,
-      customSectionId: null,
+      customSectionId: "g_top",
     },
     // RIGHT shield 2-3-4 (offsetX = the block xOffset, pushes it right)
     {
@@ -567,7 +579,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       offsetX: 0.34,
       offsetY: -0.105,
       renderOrder: 3,
-      customSectionId: "g_top",
+      customSectionId: "sec_right",
     },
     // LEFT shield 5-6-7
     {
@@ -579,7 +591,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       offsetX: -0.34,
       offsetY: -0.105,
       renderOrder: 3,
-      customSectionId: "g_top",
+      customSectionId: "sec_left",
     },
     // CENTER dome 8-9-10
     {
@@ -591,7 +603,7 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       offsetX: 0.0,
       offsetY: -0.21,
       renderOrder: 3,
-      customSectionId: "g_top",
+      customSectionId: "sec_center",
     },
     // GREEN arrow (sabz) — left side, between left dome (v7) → center dome (v8)
     {

@@ -487,7 +487,9 @@ export const KAFIRUN_109_CONFIG: SurahLayoutConfig = {
       // g2Scale: 0.01 → pushed in by 0.01 on each side
       horizontalInset: 0.01,
       isCenter: true,
-      dragBehavior: "group",
+      // Per-verse drag: the row connector plate below is the handle for moving
+      // the whole section.
+      dragBehavior: "individual",
       hideRowConnectors: false,
     },
     // Block 2 — Verse 6 (full-width, yellow closing verse)

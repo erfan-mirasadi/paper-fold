@@ -13,6 +13,7 @@ export type SectionId = string;
 let SECTION_VERSE_IDS: Record<string, number[]> = {};
 let SECTION_PRIORITY: SectionId[] = [];
 let VERSE_TO_SECTION_ID: Record<number, SectionId> = {};
+let SECTION_ANCESTORS: Record<SectionId, SectionId[]> = {};
 
 export function initSectionResolverForStory(config: SurahLayoutConfig) {
   SECTION_VERSE_IDS = {};
@@ -55,6 +56,22 @@ export function initSectionResolverForStory(config: SurahLayoutConfig) {
       if (!(vId in VERSE_TO_SECTION_ID)) VERSE_TO_SECTION_ID[vId] = sectionId;
     }
   }
+
+  // Nesting index. `customSections` may declare an outer zone that wraps
+  // inner ones (Imran: `sec_all` spans 1…9, the two bands claim 3–5 and 6–8),
+  // and the reverse index above is first-wins, so the outer zone only ever
+  // *owns* the verses no inner zone claimed. Without this index, dragging the
+  // outer frame would slide it off its own contents. A section's ancestors are
+  // every section whose verse set strictly contains it.
+  SECTION_ANCESTORS = {};
+  for (const sectionId of SECTION_PRIORITY) {
+    const own = new Set(SECTION_VERSE_IDS[sectionId]);
+    SECTION_ANCESTORS[sectionId] = SECTION_PRIORITY.filter((otherId) => {
+      if (otherId === sectionId) return false;
+      const other = SECTION_VERSE_IDS[otherId];
+      return other.length > own.size && [...own].every((v) => other.includes(v));
+    });
+  }
 }
 
 /** All elevation section IDs, in priority order. */
@@ -70,6 +87,15 @@ export function getSectionVerseIds(sectionId: SectionId): number[] {
 /** The elevation section a given verse belongs to. */
 export function getSectionIdForVerseId(verseId: number): SectionId | null {
   return VERSE_TO_SECTION_ID[verseId] ?? null;
+}
+
+/**
+ * Sections that strictly contain the given one, outermost-first order not
+ * guaranteed (they compose additively, so order is irrelevant). Dragging an
+ * ancestor must carry this section and its verses along.
+ */
+export function getSectionAncestorIds(sectionId: SectionId): SectionId[] {
+  return SECTION_ANCESTORS[sectionId] ?? [];
 }
 
 /** Every verse ID covered by any elevation section, flattened. */
