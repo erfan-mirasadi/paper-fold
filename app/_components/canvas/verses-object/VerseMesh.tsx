@@ -16,6 +16,7 @@ import {
   SECTION_ELEVATION_HEIGHT,
 } from "../../../hooks/useElevateAnimation";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
+import type { AyahBadgeLayout } from "../../../data/schema";
 
 export interface VerseMeshProps {
   hingeX: number;
@@ -50,6 +51,8 @@ export interface VerseMeshProps {
   ayahBadgeBg?: string;
   ayahBadgeBorderCol?: string;
   ayahBadgeTextCol?: string;
+  ayahBadgeLayout?: AyahBadgeLayout;
+  translationAyahBadgeLayout?: AyahBadgeLayout;
   bg: string;
   border: string;
   circleBorderCol: string;
@@ -156,6 +159,8 @@ export function VerseMesh({
   ayahBadgeBg,
   ayahBadgeBorderCol,
   ayahBadgeTextCol,
+  ayahBadgeLayout,
+  translationAyahBadgeLayout,
   bg,
   border,
   circleBorderCol,
@@ -454,6 +459,8 @@ export function VerseMesh({
                         ayahBadgeBg={ayahBadgeBg}
                         ayahBadgeBorderCol={ayahBadgeBorderCol}
                         ayahBadgeTextCol={ayahBadgeTextCol}
+                        ayahBadgeLayout={ayahBadgeLayout}
+                        translationAyahBadgeLayout={translationAyahBadgeLayout}
                       />
                     )}
                   </a.group>

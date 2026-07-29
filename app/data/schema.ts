@@ -602,6 +602,41 @@ export interface VerseOverrideConfig {
   /** Override the text color of the stacked ayah number badge (e.g. "24").
    * Defaults to `circleTextCol` when not set. */
   ayahBadgeTextCol?: string;
+  /**
+   * STACKED BADGE ONLY (`showAyahNumber: true`) — where the two numbers sit
+   * inside the capsule. Unset, they keep the default: the ayah marker on the
+   * same slot a plain counter badge takes, the chunk counter one badge diameter
+   * above it.
+   */
+  ayahBadgeLayout?: AyahBadgeLayout;
+  /**
+   * STACKED BADGE ONLY — the EN/TR layout, merged field by field over
+   * `ayahBadgeLayout`. The same capsule holds a short Arabic phrase and a
+   * wrapped translation, so the room left beside the badge differs by language;
+   * this is where a page says so.
+   */
+  translationAyahBadgeLayout?: AyahBadgeLayout;
+}
+
+/**
+ * Placement of the two numbers a single-ayah page stacks in one badge slot —
+ * the mushaf ayah marker and the chunk counter above it. Every value is a world
+ * -unit offset from the spot that number takes by default, so `{}` is exactly
+ * today's stack. Positive X → right, positive Y → up.
+ */
+export interface AyahBadgeLayout {
+  /** Moves the ayah marker (e.g. "23"). */
+  offsetX?: number;
+  /** Moves the ayah marker. */
+  offsetY?: number;
+  /**
+   * Moves the chunk counter (e.g. "14") independently of the marker — a roomy
+   * capsule can drop the marker in beside the text and leave the counter out in
+   * the corner. Defaults to `offsetX`, i.e. the counter rides above the marker.
+   */
+  counterOffsetX?: number;
+  /** Moves the chunk counter. Defaults to `offsetY`. */
+  counterOffsetY?: number;
 }
 
 export interface SurahAssets {

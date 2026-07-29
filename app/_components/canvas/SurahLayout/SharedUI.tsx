@@ -39,6 +39,7 @@ import {
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { CanvasText } from "../shared/CanvasText";
 import { useStoryStore } from "../../../stores/useStoryStore";
+import type { AyahBadgeLayout } from "../../../data/schema";
 
 // ROUNDED SHAPE GEOMETRY
 /**
@@ -700,6 +701,12 @@ interface VerseBoxProps {
   ayahBadgeBorderCol?: string;
   /** Optional separate text color for the stacked ayah number badge (e.g. "24"). Falls back to circleTextCol. */
   ayahBadgeTextCol?: string;
+  /** Stacked badge only — where the two numbers sit in the capsule. See
+   * `VerseOverrideConfig.ayahBadgeLayout`. */
+  ayahBadgeLayout?: AyahBadgeLayout;
+  /** Stacked badge only — the EN/TR layout, merged over `ayahBadgeLayout`. See
+   * `VerseOverrideConfig.translationAyahBadgeLayout`. */
+  translationAyahBadgeLayout?: AyahBadgeLayout;
   /** Renders the capsule as a half-oval / dome — 'up' (domed top) or 'down' (domed bottom). */
   domeDir?: "up" | "down";
   /** Straight-wall fraction for the dome (0–1). Defaults to 0.35. */
@@ -736,6 +743,8 @@ export const VerseBox = ({
   ayahBadgeBg,
   ayahBadgeBorderCol,
   ayahBadgeTextCol,
+  ayahBadgeLayout,
+  translationAyahBadgeLayout,
   domeDir,
   domeSideRatio,
 }: VerseBoxProps) => {
@@ -777,8 +786,8 @@ export const VerseBox = ({
   // opposite the dome: 'dome-down' (flat top) → top, 'dome-up' → bottom.
   // Sits right up against the flat edge — the circle only clears the border.
   const domeBadgeInset = Math.min(cr + bw, h / 2);
-  const badgeX = domeDir ? finalW / 2 : cx;
-  const badgeY = domeDir
+  const baseBadgeX = domeDir ? finalW / 2 : cx;
+  const baseBadgeY = domeDir
     ? domeDir === "down"
       ? -domeBadgeInset
       : -(h - domeBadgeInset)
@@ -793,9 +802,30 @@ export const VerseBox = ({
     showAyahNumber && singleAyahNumber !== undefined
       ? singleAyahNumber
       : undefined;
-  // A dome-down capsule already pins its badge to the top edge, so the counter
-  // stacks downward there; everywhere else it stacks upward.
-  const counterStackY = badgeY + (domeDir === "down" ? -1 : 1) * cr * 2;
+  const isStacked = stackedAyahNumber !== undefined;
+
+  // Two numbers need more room than one, so the stack — and only the stack —
+  // can be walked off that shared spot by `ayahBadgeLayout`: the marker and the
+  // counter each carry their own offset, measured from the slot each would take
+  // by default, so a roomy capsule can drop the marker beside the text and
+  // leave the counter in the corner (see nisa23Config's chunk 14). Translations
+  // read their own layout on top — the same capsule holds a short Arabic phrase
+  // and a wrapped translation, so the room beside the badge is never the same.
+  const badgeLayout = isArabic
+    ? (ayahBadgeLayout ?? {})
+    : { ...ayahBadgeLayout, ...translationAyahBadgeLayout };
+  const badgeOffsetX = isStacked ? (badgeLayout.offsetX ?? 0) : 0;
+  const badgeOffsetY = isStacked ? (badgeLayout.offsetY ?? 0) : 0;
+  const badgeX = baseBadgeX + badgeOffsetX;
+  const badgeY = baseBadgeY + badgeOffsetY;
+  // The counter falls back to the marker's own offsets, i.e. it rides directly
+  // above it. A dome-down capsule already pins its badge to the top edge, so
+  // the counter stacks downward there; everywhere else it stacks upward.
+  const counterStackX = baseBadgeX + (badgeLayout.counterOffsetX ?? badgeOffsetX);
+  const counterStackY =
+    baseBadgeY +
+    (domeDir === "down" ? -1 : 1) * cr * 2 +
+    (badgeLayout.counterOffsetY ?? badgeOffsetY);
 
   const isTranslationCenterOverride =
     !isArabic && textAlignOverride === "center";
@@ -912,9 +942,9 @@ export const VerseBox = ({
             opacity={opacity}
             renderOrder={zOrder + 2}
           />
-          {stackedAyahNumber !== undefined && (
+          {isStacked && (
             <VerseNumberBadge
-              x={badgeX}
+              x={counterStackX}
               y={counterStackY}
               z={0.002}
               cr={cr}

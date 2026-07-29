@@ -272,6 +272,26 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       circleBorderCol: YELLOW_BG,
       circleTextCol: "#7A5A18",
       ayahBadgeTextCol: YELLOW_BORDER,
+      // The one badge on the page that keeps a visible ring — the mushaf ayah
+      // marker. Every chunk counter takes `circleBorderCol = its own capsule
+      // bg` and disappears into it; 23 is the mushaf's own number, so it gets
+      // the gold outline the reference page prints around it.
+      ayahBadgeBorderCol: YELLOW_BORDER,
+      // The pair sits on a 0.105-high capsule. The ayah marker (23) is placed
+      // on the vertical middle (offsetY: 0) and shifted in (offsetX: 0.06).
+      // The counter (14) keeps its Y dropped by 0.017 to avoid the top border,
+      // but its X is pushed to the wall (counterOffsetX: 0).
+      ayahBadgeLayout: {
+        offsetX: 0.06,
+        offsetY: 0,
+        counterOffsetX: 0,
+        counterOffsetY: -0.017,
+      },
+      translationAyahBadgeLayout: {
+        offsetX: 0,
+        offsetY: -0.01, // Moves 23 slightly lower
+        counterOffsetY: -0.012,
+      },
       textColor: "#000000",
       isPill: false,
       textScaleOverride: 0.75,
@@ -373,7 +393,10 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [
         {
-          text: "Not: 11. cümlenin devamı: Eşlerinizin kızları: Zifafa",
+          segments: [
+            { text: "NOT: 11. cümlenin devamı: ", color: RED_TEXT },
+            { text: "Eşlerinizin kızları: Zifafa" },
+          ],
         },
         {
           text: "girdiğiniz eşlerinizin kızlanını yani evinizde bulunan",
@@ -427,7 +450,7 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [1],
       columns: 1,
-      capsuleHeight: 0.115,
+      capsuleHeight: 0.105,
       blockPadding: 0.075,
       // → capsule width 0.66, which is 67% of the 0.96 wrapper box drawn
       //   around it — the reference page's own ratio. Widening this capsule
@@ -553,7 +576,7 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [14],
       columns: 1,
-      capsuleHeight: 0.115,
+      capsuleHeight: 0.105,
       horizontalInset: -0.187, // → capsule width 0.66
       isCenter: true,
       dragBehavior: "individual",
@@ -653,10 +676,10 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       src: "/nisa23/verse1-wrapper.svg",
       anchorGroupIndex: 0,
       anchorEdge: "top",
-      scaleX: 0.8,
-      scaleY: 0.2,
+      scaleX: 0.77,
+      scaleY: 0.195,
       offsetX: 0,
-      offsetY: -0.1145,
+      offsetY: -0.105,
       renderOrder: 4,
       customSectionId: "sec_top",
       languages: ["tr", "en"],
@@ -879,7 +902,7 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
             ],
             corners: "soft",
           },
-          "Not: 11. cümlenin devamı şöyledir: “Eşlerinizin kızları: Zifafa girdiğiniz eşlerinizin kızlarını yani evinizde bulunan üvey kızlarınızı nikahlamanız haramdır. Ancak zifafa girmediğiniz eşlerinizin kızlarını nikahlayabilirsiniz.”",
+          "NOT: 11. cümlenin devamı şöyledir: “Eşlerinizin kızları: Zifafa girdiğiniz eşlerinizin kızlarını yani evinizde bulunan üvey kızlarınızı nikahlamanız haramdır. Ancak zifafa girmediğiniz eşlerinizin kızlarını nikahlayabilirsiniz.”",
           "Yukarıdaki sistemi iyi anlamak ve zevkine varabilmek için tam ortasından aşağıdan yukarıya ve sağdan sola katlayarak simetrik durumları ve ne kadar uygun olduklarını görünüz. Kur’an’ın kelimelerine varıncaya kadar incelen fakat kopmayan diziliş mucizesini görüp, Rabbim Sen’in Kitabın da yarattığın her varlık kadar mucizedir. Sen’i tesbih ile hamdederiz diyelim.",
           {
             capsules: [
@@ -1008,10 +1031,10 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
         // edge between them.
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 1.03 }, // fold0
+          { direction: 1, angleFactor: 1 }, // fold0
           { direction: -1, angleFactor: 1.03 }, // fold1
           { direction: 1, angleFactor: 1.03 }, // fold2
-          { direction: -1, angleFactor: 1.03 }, // fold3
+          { direction: -1, angleFactor: 1 }, // fold3
           { direction: 1, angleFactor: 0 }, // fold4
         ],
       },
@@ -1120,7 +1143,7 @@ export const NISA_23_TEXT_AR: SurahDataShape = {
       // 5 — LEFT half, lower row [left = 11, right = 10]
       {
         verses: [
-          { number: 11, text: "وَرَبَائِبُكُمُ\nاللَّاتِي فِي حُجُورِكُمْ" },
+          { number: 11, text: "وَرَبَائِبُكُمُ\n*اللَّاتِي فِي حُجُورِكُمْ" },
           { number: 10, text: "وَأُمَّهَاتُ\nنِسَائِكُمْ" },
         ],
       },
@@ -1187,7 +1210,7 @@ export const NISA_23_TEXT_TR: SurahDataShape = {
       {
         verses: [
           { number: 10, text: "Eşlerinizin\nannelerini," },
-          { number: 11, text: "Eşlerinizin\nkızlarını,(not)" },
+          { number: 11, text: "Eşlerinizin\nkızlarını,(NOT)" },
         ],
       },
       // 4 — LEFT half, upper row → chunks 4, 5
@@ -1289,8 +1312,11 @@ export const NISA_23_TEXT_EN: SurahDataShape = {
       {
         verses: [
           {
+            // Broken onto two lines like the Turkish, so the line does not run
+            // the full width of the capsule and under the stacked 14 / 23 badge
+            // on its left edge.
             number: 14,
-            text: "Indeed Allah is Ever-Forgiving, Most Merciful.",
+            text: "Indeed Allah is Ever-Forgiving,\nMost Merciful.",
           },
         ],
       },

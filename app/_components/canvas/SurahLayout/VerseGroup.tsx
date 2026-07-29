@@ -329,6 +329,8 @@ export function VerseGroup({
                 ayahBadgeBg={override?.ayahBadgeBg}
                 ayahBadgeBorderCol={override?.ayahBadgeBorderCol}
                 ayahBadgeTextCol={override?.ayahBadgeTextCol}
+                ayahBadgeLayout={override?.ayahBadgeLayout}
+                translationAyahBadgeLayout={override?.translationAyahBadgeLayout}
                 domeDir={
                   override?.verseShape === "dome-up"
                     ? "up"

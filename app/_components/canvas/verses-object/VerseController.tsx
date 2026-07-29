@@ -338,6 +338,8 @@ export function VerseController({ config }: { config: VerseConfig }) {
           ayahBadgeBg={config.ayahBadgeBg}
           ayahBadgeBorderCol={config.ayahBadgeBorderCol}
           ayahBadgeTextCol={config.ayahBadgeTextCol}
+          ayahBadgeLayout={config.ayahBadgeLayout}
+          translationAyahBadgeLayout={config.translationAyahBadgeLayout}
           bg={config.bg}
           border={config.border}
           circleBorderCol={config.circleBorderCol}

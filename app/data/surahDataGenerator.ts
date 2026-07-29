@@ -7,6 +7,7 @@ import {
   CAPSULE_BG_6_19,
 } from "./theme";
 import { SurahDataShape } from "./SurahConfig";
+import type { AyahBadgeLayout } from "./schema";
 import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
 
 export interface VerseConfig {
@@ -48,6 +49,10 @@ export interface VerseConfig {
   ayahBadgeBorderCol?: string;
   /** See `VerseOverrideConfig.ayahBadgeTextCol` — separate text color for the ayah badge. */
   ayahBadgeTextCol?: string;
+  /** See `VerseOverrideConfig.ayahBadgeLayout` — where the two stacked numbers sit. */
+  ayahBadgeLayout?: AyahBadgeLayout;
+  /** See `VerseOverrideConfig.translationAyahBadgeLayout` — its EN/TR counterpart. */
+  translationAyahBadgeLayout?: AyahBadgeLayout;
   isSectionIntroOutro?: boolean;
   customFrameSvg?: string;
   frameScaleLTR?: number;
@@ -368,6 +373,8 @@ export function buildVerseConfigs(
         ayahBadgeBg: override?.ayahBadgeBg,
         ayahBadgeBorderCol: override?.ayahBadgeBorderCol,
         ayahBadgeTextCol: override?.ayahBadgeTextCol,
+        ayahBadgeLayout: override?.ayahBadgeLayout,
+        translationAyahBadgeLayout: override?.translationAyahBadgeLayout,
         capsuleLabel,
         verseShape: override?.verseShape,
         domeSideRatio: override?.domeSideRatio,
