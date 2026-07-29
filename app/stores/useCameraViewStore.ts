@@ -6,11 +6,10 @@ import {
 
 export type CameraViewPreset = CameraViewPresetType;
 
-// Left/right are offsets from the initial camera azimuth at app start.
+// How far the page yaws about its OWN vertical axis for each preset (radians).
 // Keep center on 0 so the default button returns to exact initial state.
-export const CAMERA_VIEW_AZIMUTH_OFFSETS: Readonly<
-  Record<CameraViewPreset, number>
-> = CAMERA_CONFIG.viewPresetOffsets.azimuth;
+export const SCENE_SPIN_OFFSETS: Readonly<Record<CameraViewPreset, number>> =
+  CAMERA_CONFIG.viewPresetOffsets.azimuth;
 
 // Optional per-preset vertical tweaks (radians) relative to initial polar angle.
 export const CAMERA_VIEW_POLAR_OFFSETS: Readonly<
