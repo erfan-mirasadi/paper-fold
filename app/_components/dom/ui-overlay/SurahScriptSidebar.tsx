@@ -244,7 +244,9 @@ function useFloatingChunkNumbers(
 
   // One stable callback per chunk. A fresh closure each render would make
   // React detach and re-attach every ref on every fold step, for nothing.
-  const refCbs = useRef(new Map<number, (el: HTMLSpanElement | null) => void>());
+  const refCbs = useRef(
+    new Map<number, (el: HTMLSpanElement | null) => void>(),
+  );
   const registerChunk = useCallback((n: number) => {
     let cb = refCbs.current.get(n);
     if (!cb) {
@@ -456,7 +458,8 @@ export function SurahScriptSidebar() {
   // them would be a lie and a bare digit in the text just breaks the reading.
   // The chunk index floats above its own chunk instead — see `.qk-num`.
   const showFloatingNumbers =
-    activeConfig.id === "ayatalkursi" && !activeConfig.features.hideVerseNumbers;
+    activeConfig.id === "ayatalkursi" &&
+    !activeConfig.features.hideVerseNumbers;
   const {
     paraRef,
     registerChunk,

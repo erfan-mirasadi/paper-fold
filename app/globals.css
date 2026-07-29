@@ -54,7 +54,8 @@
   --slider-color: rgba(102, 102, 102, 0.6);
   --slider-track: rgba(128, 128, 128, 0.6);
   --slider-handle-border: rgba(0, 0, 0, 0.15);
-  --slider-handle-shadow: 0 0 12px rgba(196, 150, 59, 0.8), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --slider-handle-shadow:
+    0 0 12px rgba(196, 150, 59, 0.8), 0 1px 3px rgba(0, 0, 0, 0.25);
 
   /* Floating script chunk numbers — the house red (#A30000). */
   --script-num: #a30000;
@@ -125,7 +126,8 @@
   --slider-color: rgba(160, 160, 160, 0.6);
   --slider-track: rgba(160, 160, 160, 0.6);
   --slider-handle-border: rgba(255, 255, 255, 0.25);
-  --slider-handle-shadow: 0 0 14px rgba(255, 180, 50, 0.9), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --slider-handle-shadow:
+    0 0 14px rgba(255, 180, 50, 0.9), 0 1px 3px rgba(0, 0, 0, 0.25);
 
   /* Same house red, lifted in lightness only — #A30000 is too deep to read
      against a near-black page, but the hue must not drift off the brand. */
@@ -149,7 +151,7 @@
 :root {
   /* warm gray ink on the white page */
   --pb-tint: 96, 93, 87;
-  --pb-strength: 0.10;
+  --pb-strength: 0.1;
   --pb-accent-mix: 25%;
 }
 
@@ -742,8 +744,7 @@ html.dark .canvas-wrapper {
   letter-spacing: 0.02em;
   color: var(--script-num);
   text-shadow: 0 0 12px var(--script-num-glow);
-  animation: qk-num-float 5.4s ease-in-out infinite;
-  will-change: transform;
+
   /* Opacity carries the whole dim/lit difference — glyph and glow rise
      together, and only one property is ever in flight. */
   opacity: 0.5;
@@ -756,20 +757,3 @@ html.dark .canvas-wrapper {
   opacity: 1;
 }
 
-/* Drift only — no opacity flicker, so the bob never competes with the
-   highlight fade above. */
-@keyframes qk-num-float {
-  0%,
-  100% {
-    transform: translate3d(0, 0.26em, 0);
-  }
-  50% {
-    transform: translate3d(0, -0.26em, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .qk-num {
-    animation: none;
-  }
-}

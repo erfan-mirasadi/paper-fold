@@ -364,16 +364,26 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
     },
     {
       x: 0.77,
-      y: -1.556,
-      fontSize: 0.045,
+      y: -1.546,
+      fontSize: 0.038,
       color: "#000000",
       lineSpacing: 1.4,
       maxWidth: 1.5,
       textAlign: "center",
       rotationZ: 0,
       lines: [
-        { text: "Zifafa girdiğiniz eşlerinizin kızlarını; eğer onlarla" },
-        { text: "zifafa girmemişseniz size bir günah yoktur." },
+        {
+          text: "Not: 11. cümlenin devamı: Eşlerinizin kızları: Zifafa",
+        },
+        {
+          text: "girdiğiniz eşlerinizin kızlanını yani evinizde bulunan",
+        },
+        {
+          text: "üvey kızlarınızı nikahlamanız haramdır. Ancak zifafa",
+        },
+        {
+          text: "girmediğiniz eşlerinizin kızlanını nikahlayabılirsiniz.",
+        },
       ],
     },
   ],
@@ -1177,7 +1187,7 @@ export const NISA_23_TEXT_TR: SurahDataShape = {
       {
         verses: [
           { number: 10, text: "Eşlerinizin\nannelerini," },
-          { number: 11, text: "Eşlerinizin\nkızlarını," },
+          { number: 11, text: "Eşlerinizin\nkızlarını,(not)" },
         ],
       },
       // 4 — LEFT half, upper row → chunks 4, 5

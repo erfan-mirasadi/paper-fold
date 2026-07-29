@@ -382,7 +382,7 @@ export const IMRAN_14_CONFIG: SurahLayoutConfig = {
       horizontalInset: 0.05,
       isCenter: true,
       dragBehavior: "group",
-      hideRowConnectors: true,
+      hideRowConnectors: false,
       gapBefore: 0.015,
     },
     // 3 — Band 6–8, blue pair (RTL: left = 7, right = 6).
