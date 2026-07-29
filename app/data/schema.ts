@@ -539,8 +539,34 @@ export interface VerseOverrideConfig {
   circleBg?: string;
   /** Explicit hex color for the verse number text */
   circleTextCol?: string;
-  /** Explicit hex color for the Arabic and Latin verse text */
+  /**
+   * Explicit hex color for this verse's text. Applies to every language unless
+   * `translationTextColor` narrows it — so on a page that colors Arabic and
+   * translation differently, this is the ARABIC color.
+   */
   textColor?: string;
+  /**
+   * EN/TR color for this verse's text, replacing `textColor` there. Set it
+   * when the Arabic and the translation of the same chunk are printed in
+   * different inks — e.g. Nisâ 23's chunk 1, where the translation is fully
+   * red but the Arabic is black apart from one red word (`textHighlights`).
+   */
+  translationTextColor?: string;
+  /**
+   * Recolors substrings INSIDE this verse's text, on top of `textColor` — the
+   * way the reference pages print one word of a phrase in red and the rest in
+   * black. Each entry matches against the text of the language being drawn, so
+   * an Arabic phrase listed here simply finds nothing in EN/TR and no-ops;
+   * `translationTextHighlights` is where those languages say their own.
+   *
+   * Line breaks, wrapping and position are untouched — only the ink changes.
+   */
+  textHighlights?: VerseTextHighlight[];
+  /**
+   * EN/TR counterpart to `textHighlights`, replacing it wholesale in those
+   * languages (an empty array therefore means "no highlights in translation").
+   */
+  translationTextHighlights?: VerseTextHighlight[];
   /** When true, a CapsuleLabel is rendered above this verse in section and mesh views */
   hasCapsuleLabel?: boolean;
   /** Optional custom text to display in the CapsuleLabel instead of the default 'Ana Ayet' */
@@ -616,6 +642,29 @@ export interface VerseOverrideConfig {
    * this is where a page says so.
    */
   translationAyahBadgeLayout?: AyahBadgeLayout;
+}
+
+/**
+ * One recolored stretch of a verse's own text — see
+ * `VerseOverrideConfig.textHighlights`.
+ */
+export interface VerseTextHighlight {
+  /**
+   * The exact substring to recolor, copied from this verse's entry in the
+   * TEXT DATA — diacritics and all, since that is what gets matched. Splitting
+   * on a word boundary is the safe choice: Arabic letters join inside a word,
+   * so cutting mid-word would break the shaping.
+   */
+  text: string;
+  /** Color for every character of the match. */
+  color: string;
+  /**
+   * Which occurrence to recolor, 1-based. Omit to recolor every occurrence —
+   * which is what you want for a word that appears once, and what you must
+   * NOT leave off for a single letter like the `*` footnote marker if it also
+   * appears elsewhere in the same verse.
+   */
+  occurrence?: number;
 }
 
 /**

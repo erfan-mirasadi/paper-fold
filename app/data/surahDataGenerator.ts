@@ -7,7 +7,7 @@ import {
   CAPSULE_BG_6_19,
 } from "./theme";
 import { SurahDataShape } from "./SurahConfig";
-import type { AyahBadgeLayout } from "./schema";
+import type { AyahBadgeLayout, VerseTextHighlight } from "./schema";
 import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
 
 export interface VerseConfig {
@@ -28,6 +28,12 @@ export interface VerseConfig {
   circleBg: string;
   circleTextCol: string;
   textColor?: string;
+  /** See `VerseOverrideConfig.translationTextColor` — the EN/TR text color. */
+  translationTextColor?: string;
+  /** See `VerseOverrideConfig.textHighlights` — recolored substrings. */
+  textHighlights?: VerseTextHighlight[];
+  /** See `VerseOverrideConfig.translationTextHighlights` — the EN/TR set. */
+  translationTextHighlights?: VerseTextHighlight[];
   textScaleOverride?: number;
   translationTextScaleOverride?: number | null;
   translationTextAlign?: "left" | "center" | "right";
@@ -158,6 +164,9 @@ export function buildVerseConfigs(
         const circleTextCol =
           override?.circleTextCol ?? override?.border ?? S1_VERSE_NUMBER_BORDER;
         const textColor = override?.textColor;
+        const translationTextColor = override?.translationTextColor;
+        const textHighlights = override?.textHighlights;
+        const translationTextHighlights = override?.translationTextHighlights;
         const textScaleOverride = override?.textScaleOverride;
         const translationTextScaleOverride = override?.translationTextScaleOverride;
         const translationTextAlign = override?.translationTextAlign;
@@ -208,6 +217,9 @@ export function buildVerseConfigs(
           circleBg,
           circleTextCol,
           textColor,
+          translationTextColor,
+          textHighlights,
+          translationTextHighlights,
           textScaleOverride,
           translationTextScaleOverride,
           translationTextAlign,
@@ -253,6 +265,9 @@ export function buildVerseConfigs(
           circleBg: override?.circleBg ?? CAPSULE_BG_6_19,
           circleTextCol: override?.circleTextCol ?? ORANGE_THEME,
           textColor: override?.textColor,
+          translationTextColor: override?.translationTextColor,
+          textHighlights: override?.textHighlights,
+          translationTextHighlights: override?.translationTextHighlights,
           textScaleOverride: override?.textScaleOverride,
           translationTextScaleOverride: override?.translationTextScaleOverride,
           translationTextAlign: override?.translationTextAlign,
@@ -363,6 +378,9 @@ export function buildVerseConfigs(
         circleBg: finalCircleBg,
         circleTextCol: finalCircleTextCol,
         textColor: finalTextColor,
+        translationTextColor: override?.translationTextColor,
+        textHighlights: override?.textHighlights,
+        translationTextHighlights: override?.translationTextHighlights,
         textScaleOverride,
         translationTextScaleOverride,
         translationTextAlign,

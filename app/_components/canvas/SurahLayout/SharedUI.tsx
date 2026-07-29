@@ -39,7 +39,7 @@ import {
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
 import { CanvasText } from "../shared/CanvasText";
 import { useStoryStore } from "../../../stores/useStoryStore";
-import type { AyahBadgeLayout } from "../../../data/schema";
+import type { AyahBadgeLayout, VerseTextHighlight } from "../../../data/schema";
 
 // ROUNDED SHAPE GEOMETRY
 /**
@@ -677,6 +677,15 @@ interface VerseBoxProps {
   shadow?: boolean;
   bgOpacity?: number;
   textColor?: string;
+  /** EN/TR text color, replacing `textColor` there — see
+   * `VerseOverrideConfig.translationTextColor`. */
+  translationTextColor?: string;
+  /** Substrings of `verse` drawn in their own color — see
+   * `VerseOverrideConfig.textHighlights`. */
+  textHighlights?: VerseTextHighlight[];
+  /** The EN/TR set, replacing `textHighlights` there — see
+   * `VerseOverrideConfig.translationTextHighlights`. */
+  translationTextHighlights?: VerseTextHighlight[];
   /** 0 avoids capturing invisible text inside finite-frame RenderTextures. */
   textOffsetY?: number;
   textScaleOverride?: number;
@@ -730,6 +739,9 @@ export const VerseBox = ({
   shadow = true,
   bgOpacity = 1,
   textColor,
+  translationTextColor,
+  textHighlights,
+  translationTextHighlights,
   textOffsetY = 0,
   textScaleOverride,
   opacity,
@@ -757,6 +769,16 @@ export const VerseBox = ({
   const textScale =
     textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
+
+  // TEXT INK — Arabic reads `textColor`; the translations read it too unless
+  // they were given their own. The highlights ride on top of whichever won,
+  // recoloring named substrings of this capsule's text (the reference pages
+  // print e.g. one word of a phrase in red, the rest in black).
+  const resolvedTextColor =
+    (isArabic ? textColor : (translationTextColor ?? textColor)) ?? TEXT_DARK;
+  const resolvedHighlights = isArabic
+    ? textHighlights
+    : (translationTextHighlights ?? textHighlights);
 
   const showVerseNumber =
     forceShowNumber ||
@@ -977,7 +999,8 @@ export const VerseBox = ({
             (isPill ? TEXT_SIZES.VERSE_TEXT_SMALL : TEXT_SIZES.VERSE_TEXT_BIG) *
             textScale
           }
-          color={textColor || TEXT_DARK}
+          color={resolvedTextColor}
+          highlights={resolvedHighlights}
           maxWidth={textMaxW}
           lineHeight={textLineHeight}
           textAlign={textAlign}
@@ -1010,6 +1033,9 @@ interface SplitVerseCapsulesProps {
   circleTextCol?: string;
   borderWidth?: number;
   textColor?: string;
+  translationTextColor?: string;
+  textHighlights?: VerseTextHighlight[];
+  translationTextHighlights?: VerseTextHighlight[];
   textScaleOverride?: number;
   opacity?: any;
   baseRenderOrder?: number;
@@ -1030,6 +1056,9 @@ export const SplitVerseCapsules = ({
   circleTextCol,
   borderWidth,
   textColor,
+  translationTextColor,
+  textHighlights,
+  translationTextHighlights,
   textScaleOverride,
   opacity,
   baseRenderOrder,
@@ -1096,6 +1125,9 @@ export const SplitVerseCapsules = ({
         border={border}
         borderWidth={borderWidth}
         textColor={textColor}
+        translationTextColor={translationTextColor}
+        textHighlights={textHighlights}
+        translationTextHighlights={translationTextHighlights}
         textScaleOverride={textScaleOverride}
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
@@ -1114,6 +1146,9 @@ export const SplitVerseCapsules = ({
         border={border}
         borderWidth={borderWidth}
         textColor={textColor}
+        translationTextColor={translationTextColor}
+        textHighlights={textHighlights}
+        translationTextHighlights={translationTextHighlights}
         textScaleOverride={textScaleOverride}
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}

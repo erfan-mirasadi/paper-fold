@@ -16,7 +16,7 @@ import {
   SECTION_ELEVATION_HEIGHT,
 } from "../../../hooks/useElevateAnimation";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
-import type { AyahBadgeLayout } from "../../../data/schema";
+import type { AyahBadgeLayout, VerseTextHighlight } from "../../../data/schema";
 
 export interface VerseMeshProps {
   hingeX: number;
@@ -59,6 +59,12 @@ export interface VerseMeshProps {
   circleBg?: string;
   circleTextCol: string;
   textColor?: string;
+  /** See `VerseOverrideConfig.translationTextColor`. */
+  translationTextColor?: string;
+  /** See `VerseOverrideConfig.textHighlights`. */
+  textHighlights?: VerseTextHighlight[];
+  /** See `VerseOverrideConfig.translationTextHighlights`. */
+  translationTextHighlights?: VerseTextHighlight[];
   textScaleOverride?: number;
   translationTextAlign?: "left" | "center" | "right";
   translationPadding?: number;
@@ -167,6 +173,9 @@ export function VerseMesh({
   circleBg,
   circleTextCol,
   textColor,
+  translationTextColor,
+  textHighlights,
+  translationTextHighlights,
   textScaleOverride,
   translationTextAlign,
   translationPadding,
@@ -425,6 +434,9 @@ export function VerseMesh({
                         circleBg={circleBg}
                         circleTextCol={circleTextCol}
                         textColor={textColor}
+                        translationTextColor={translationTextColor}
+                        textHighlights={textHighlights}
+                        translationTextHighlights={translationTextHighlights}
                         textScaleOverride={textScaleOverride}
                         translationPadding={translationPadding}
                         opacity={combinedOpacity}
@@ -445,6 +457,9 @@ export function VerseMesh({
                         circleBg={circleBg}
                         circleTextCol={circleTextCol}
                         textColor={textColor}
+                        translationTextColor={translationTextColor}
+                        textHighlights={textHighlights}
+                        translationTextHighlights={translationTextHighlights}
                         textScaleOverride={textScaleOverride}
                         textAlignOverride={translationTextAlign}
                         translationPadding={translationPadding}

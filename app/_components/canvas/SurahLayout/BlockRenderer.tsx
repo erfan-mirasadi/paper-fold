@@ -272,6 +272,9 @@ function GridBlock({
               bg={bg} border={border} circleBorderCol={circleBorderCol}
               circleBg={circleBg} circleTextCol={circleTextCol}
               isPill={isPill} textColor={override?.textColor}
+              translationTextColor={override?.translationTextColor}
+              textHighlights={override?.textHighlights}
+              translationTextHighlights={override?.translationTextHighlights}
               translationPadding={override?.translationPadding}
               textAlignOverride={override?.translationTextAlign}
               domeDir={override?.verseShape === "dome-up" ? "up" : override?.verseShape === "dome-down" ? "down" : undefined}
@@ -433,6 +436,9 @@ export function BlockRenderer({
           circleBg={introOverride?.circleBg ?? introBg}
           circleTextCol={introOverride?.circleTextCol ?? introBorder}
           isPill={false} borderWidth={edgeVerseBorderWidth} textColor={introOverride?.textColor}
+          translationTextColor={introOverride?.translationTextColor}
+          textHighlights={introOverride?.textHighlights}
+          translationTextHighlights={introOverride?.translationTextHighlights}
           textScaleOverride={activeLanguage !== "ar" ? (introOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (introOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
           translationPadding={introOverride?.translationPadding} />
       )}
@@ -457,6 +463,9 @@ export function BlockRenderer({
           circleBg={outroOverride?.circleBg ?? outroBg}
           circleTextCol={outroOverride?.circleTextCol ?? outroBorder}
           isPill={false} borderWidth={edgeVerseBorderWidth} textColor={outroOverride?.textColor}
+          translationTextColor={outroOverride?.translationTextColor}
+          textHighlights={outroOverride?.textHighlights}
+          translationTextHighlights={outroOverride?.translationTextHighlights}
           textScaleOverride={activeLanguage !== "ar" ? (outroOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (outroOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
           translationPadding={outroOverride?.translationPadding} />
       )}

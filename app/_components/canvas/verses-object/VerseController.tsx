@@ -346,6 +346,9 @@ export function VerseController({ config }: { config: VerseConfig }) {
           circleBg={config.circleBg}
           circleTextCol={config.circleTextCol}
           textColor={config.textColor}
+          translationTextColor={config.translationTextColor}
+          textHighlights={config.textHighlights}
+          translationTextHighlights={config.translationTextHighlights}
           textScaleOverride={finalVerseTextScale}
           translationTextAlign={config.translationTextAlign}
           translationPadding={config.translationPadding}

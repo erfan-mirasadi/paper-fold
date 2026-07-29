@@ -198,14 +198,24 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
 
   // ── Per-verse appearance ───────────────────────────────────────────────
   verseOverrides: {
-    // Chunk 1 — the opener. Red text, matching the reference page.
+    // Chunk 1 — the opener.
+    //
+    // The two languages ink this capsule differently, which is why the color
+    // is split here. Arabic keeps the opener (حُرِّمَتْ عَلَيْكُمْ, "forbidden to
+    // you") in black and prints only the first forbidden relative — أُمَّهَاتُكُمْ,
+    // "your mothers" — in red, so the red picks out the list item rather than
+    // the sentence around it. The translations carry the opener in their own
+    // `topLabel` line instead, so their capsule holds nothing BUT the list
+    // item and goes red end to end, the way the reference page prints it.
     1: {
       bg: YELLOW_BG,
       border: YELLOW_BORDER,
       circleBg: YELLOW_BG,
       circleBorderCol: YELLOW_BG,
       circleTextCol: "#7A5A18",
-      textColor: RED_TEXT,
+      textColor: "#000000",
+      translationTextColor: RED_TEXT,
+      textHighlights: [{ text: "أُمَّهَاتُكُمْ", color: RED_TEXT }],
       isPill: false,
       textScaleOverride: 0.75,
       translationTextScaleOverride: 0.48,
@@ -251,7 +261,16 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       textScaleOverride: 0.72,
       translationTextScaleOverride: 0.48,
     }),
-    11: blueBox({ textScaleOverride: 0.6, translationTextScaleOverride: 0.48 }),
+    // Chunk 11 carries the footnote marker for the "NOT:" tail printed under
+    // the page (chunk 15's continuation). Arabic marks it with a bare `*` in
+    // its text data; red is what makes it read as a marker rather than a stray
+    // glyph in the phrase. Turkish spells the same marker out as "(NOT)" and
+    // is left in the capsule's own ink.
+    11: blueBox({
+      textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.48,
+      textHighlights: [{ text: "*", color: RED_TEXT }],
+    }),
 
     // Chunks 12, 13 — white pair. 13 carries the longest text on the page.
     12: whiteBox({

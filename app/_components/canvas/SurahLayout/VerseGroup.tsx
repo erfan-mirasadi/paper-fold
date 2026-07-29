@@ -299,6 +299,9 @@ export function VerseGroup({
                 circleTextCol={finalCircleText}
                 textScaleOverride={finalTextScale}
                 textColor={override?.textColor}
+                translationTextColor={override?.translationTextColor}
+                textHighlights={override?.textHighlights}
+                translationTextHighlights={override?.translationTextHighlights}
                 translationPadding={override?.translationPadding}
               />
             ) : (
@@ -322,6 +325,9 @@ export function VerseGroup({
                 isPill={override?.isPill ?? true}
                 textScaleOverride={finalTextScale}
                 textColor={override?.textColor}
+                translationTextColor={override?.translationTextColor}
+                textHighlights={override?.textHighlights}
+                translationTextHighlights={override?.translationTextHighlights}
                 translationPadding={override?.translationPadding}
                 textAlignOverride={override?.translationTextAlign}
                 forceShowNumber={override?.showNumber}

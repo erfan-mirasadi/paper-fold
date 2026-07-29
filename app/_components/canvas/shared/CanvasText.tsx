@@ -13,6 +13,91 @@ interface CanvasTextSegment {
   color?: string;
 }
 
+interface CanvasTextHighlight {
+  /** Exact substring of `text` to recolor — see `VerseOverrideConfig.textHighlights`. */
+  text: string;
+  /** Color for every character of that substring. */
+  color: string;
+  /** 1-based occurrence to recolor. Omit to recolor every occurrence. */
+  occurrence?: number;
+}
+
+/** Arabic block + its supplements/presentation forms. */
+const RTL_CHARS = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+/**
+ * A strongly-directional character. Anything else (punctuation, digits, the
+ * `*` footnote marker, whitespace) is a bidi NEUTRAL, which is what decides
+ * whether a run stays put or travels with the reversed RTL block below.
+ */
+const STRONG_DIR_CHARS =
+  /[A-Za-zÀ-ɏ؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+/** One stretch of a single line that is drawn in one color. */
+interface ColorRun {
+  text: string;
+  color: string;
+}
+
+/**
+ * Splits `line` into per-color runs, then peels any whitespace sitting on a
+ * run's edge into a run of its own.
+ *
+ * The peeling matters only for RTL. Canvas lays each run out on its own, and a
+ * space left dangling on the edge of an Arabic run is a neutral next to that
+ * run's boundary, so it renders on the wrong side of the words and the gap
+ * between two recolored phrases collapses. As its own run it simply becomes
+ * the gap, wherever the two phrases end up.
+ */
+function buildColorRuns(
+  line: string,
+  lineStart: number,
+  charColors: (string | undefined)[],
+  baseColor: string,
+): ColorRun[] {
+  const byColor: ColorRun[] = [];
+  for (let i = 0; i < line.length; i++) {
+    const c = charColors[lineStart + i] ?? baseColor;
+    const last = byColor[byColor.length - 1];
+    if (last && last.color === c) last.text += line[i];
+    else byColor.push({ text: line[i], color: c });
+  }
+
+  const runs: ColorRun[] = [];
+  for (const run of byColor) {
+    const lead = /^\s+/.exec(run.text)?.[0] ?? "";
+    const tail = /\s+$/.exec(run.text.slice(lead.length))?.[0] ?? "";
+    const core = run.text.slice(lead.length, run.text.length - tail.length);
+    if (lead) runs.push({ text: lead, color: run.color });
+    if (core) runs.push({ text: core, color: run.color });
+    if (tail) runs.push({ text: tail, color: run.color });
+  }
+  return runs;
+}
+
+/**
+ * Visual left→right order of `runs` on one line, following the Unicode bidi
+ * algorithm for the LTR base direction a detached canvas always uses:
+ * the strong RTL block reverses, while neutrals hanging off either END of the
+ * line keep the base direction and stay on that end. That last part is why the
+ * `*` footnote marker opening an Arabic line still renders on the left.
+ */
+function visualRunOrder(runs: ColorRun[], line: string): number[] {
+  const order = runs.map((_, i) => i);
+  if (!RTL_CHARS.test(line)) return order;
+
+  let lead = 0;
+  while (lead < runs.length && !STRONG_DIR_CHARS.test(runs[lead].text)) lead++;
+  let tail = runs.length - 1;
+  while (tail >= lead && !STRONG_DIR_CHARS.test(runs[tail].text)) tail--;
+  if (tail <= lead) return order;
+
+  return [
+    ...order.slice(0, lead),
+    ...order.slice(lead, tail + 1).reverse(),
+    ...order.slice(tail + 1),
+  ];
+}
+
 interface CanvasTextProps {
   text?: string;
   font: string;
@@ -33,11 +118,15 @@ interface CanvasTextProps {
   opacity?: any;
   children?: React.ReactNode;
   /**
-   * Renders a single un-wrapped row made of differently-colored segments
-   * instead of `text` (e.g. to highlight one word in a line). When set,
-   * `text` is ignored.
+   * Renders a row made of differently-colored segments instead of `text`
+   * (e.g. to highlight one word in a line). When set, `text` is ignored.
    */
   segments?: CanvasTextSegment[];
+  /**
+   * Recolors substrings of `text` in place — same wrapping, same line breaks,
+   * same position, only the ink of the matched characters changes.
+   */
+  highlights?: CanvasTextHighlight[];
 }
 
 export function CanvasText({
@@ -60,6 +149,7 @@ export function CanvasText({
   opacity,
   children,
   segments,
+  highlights,
 }: CanvasTextProps) {
   const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
 
@@ -88,6 +178,48 @@ export function CanvasText({
       active = false;
     };
   }, []);
+
+  // `text`, `segments` and `highlights` all boil down to the same thing: one
+  // string plus a per-character color, where `undefined` means "use `color`".
+  // A null map is the common case — no recoloring anywhere in the string.
+  const source = useMemo(() => {
+    if (segments && segments.length > 0) {
+      let joined = "";
+      const charColors: (string | undefined)[] = [];
+      for (const seg of segments) {
+        joined += seg.text;
+        for (let i = 0; i < seg.text.length; i++) charColors.push(seg.color);
+      }
+      return { text: joined, charColors };
+    }
+
+    if (highlights && highlights.length > 0) {
+      const charColors: (string | undefined)[] = new Array(text.length);
+      let matched = false;
+      for (const hl of highlights) {
+        if (!hl.text) continue;
+        let from = 0;
+        let seen = 0;
+        for (;;) {
+          const at = text.indexOf(hl.text, from);
+          if (at === -1) break;
+          seen += 1;
+          if (hl.occurrence === undefined || hl.occurrence === seen) {
+            for (let i = at; i < at + hl.text.length; i++) {
+              charColors[i] = hl.color;
+            }
+            matched = true;
+          }
+          from = at + hl.text.length;
+        }
+      }
+      // A highlight that matches nothing (e.g. an Arabic phrase looked up in
+      // the Turkish text) leaves the string on the untouched fast path.
+      if (matched) return { text, charColors };
+    }
+
+    return { text, charColors: null as (string | undefined)[] | null };
+  }, [text, segments, highlights]);
 
   const texture = useMemo(() => {
     if (fontsLoadedKey < 0) return null;
@@ -142,72 +274,82 @@ export function CanvasText({
           ? "bottom"
           : "middle";
 
-    if (segments && segments.length > 0) {
-      // Single un-wrapped row, drawn segment-by-segment so each can carry its
-      // own color (e.g. highlighting one word in a handwritten line).
-      const fullText = segments.map((s) => s.text).join("");
-      const totalWidth = ctx.measureText(fullText).width;
-      const startX =
-        textAlign === "center"
-          ? (w - totalWidth) / 2
-          : textAlign === "right"
-            ? w - totalWidth
-            : 0;
-      const rowY =
-        verticalAlign === "top"
-          ? (scaledFontSize * lineHeight) / 2
-          : verticalAlign === "bottom"
-            ? h - (scaledFontSize * lineHeight) / 2
-            : h / 2;
+    const x = textAlign === "center" ? w / 2 : textAlign === "right" ? w : 0;
+    const y =
+      verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
 
-      ctx.textAlign = "left";
-      let cursorX = startX;
-      segments.forEach((seg) => {
-        ctx.fillStyle = seg.color ?? color;
-        ctx.fillText(seg.text, cursorX, rowY);
-        cursorX += ctx.measureText(seg.text).width;
-      });
-    } else {
-      const x = textAlign === "center" ? w / 2 : textAlign === "right" ? w : 0;
-      const y =
-        verticalAlign === "top" ? 0 : verticalAlign === "bottom" ? h : h / 2;
+    const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
+    const paragraphs = source.text.split("\n");
+    // Every line carries its offset into `source.text`, so the per-character
+    // colors survive the wrap and land on the right line.
+    const lines: { text: string; start: number }[] = [];
 
-      const finalMaxWidth = (maxWidth || width) * activeScaleFactor;
-      const paragraphs = text.split("\n");
-      const lines = [];
+    let paragraphStart = 0;
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(" ");
+      let currentLine = "";
+      let currentStart = paragraphStart;
+      let wordStart = paragraphStart;
 
-      for (const paragraph of paragraphs) {
-        const words = paragraph.split(" ");
-        let currentLine = "";
-
-        for (let i = 0; i < words.length; i++) {
-          const testLine = currentLine ? currentLine + " " + words[i] : words[i];
-          const metrics = ctx.measureText(testLine);
-          if (metrics.width > finalMaxWidth && i > 0) {
-            lines.push(currentLine);
-            currentLine = words[i];
-          } else {
-            currentLine = testLine;
-          }
+      for (let i = 0; i < words.length; i++) {
+        const testLine = currentLine ? currentLine + " " + words[i] : words[i];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > finalMaxWidth && i > 0) {
+          lines.push({ text: currentLine, start: currentStart });
+          currentLine = words[i];
+          currentStart = wordStart;
+        } else {
+          currentLine = testLine;
         }
-        lines.push(currentLine);
+        wordStart += words[i].length + 1; // + the space split() consumed
       }
-
-      const totalHeight = lines.length * scaledFontSize * lineHeight;
-      let startY = y;
-      if (verticalAlign === "middle") {
-        startY = (h - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
-      } else if (verticalAlign === "top") {
-        startY = (scaledFontSize * lineHeight) / 2;
-      } else {
-        startY = h - totalHeight + (scaledFontSize * lineHeight) / 2;
-      }
-
-      lines.forEach((line) => {
-        ctx.fillText(line, x, startY);
-        startY += scaledFontSize * lineHeight;
-      });
+      lines.push({ text: currentLine, start: currentStart });
+      paragraphStart += paragraph.length + 1; // + the "\n"
     }
+
+    const totalHeight = lines.length * scaledFontSize * lineHeight;
+    let startY = y;
+    if (verticalAlign === "middle") {
+      startY = (h - totalHeight) / 2 + (scaledFontSize * lineHeight) / 2;
+    } else if (verticalAlign === "top") {
+      startY = (scaledFontSize * lineHeight) / 2;
+    } else {
+      startY = h - totalHeight + (scaledFontSize * lineHeight) / 2;
+    }
+
+    lines.forEach((line) => {
+      const runs = source.charColors
+        ? buildColorRuns(line.text, line.start, source.charColors, color)
+        : null;
+
+      if (!runs || runs.length <= 1) {
+        // Nothing to recolor on this line — one fillText, laid out by the
+        // browser's own bidi pass, exactly as before.
+        ctx.textAlign = textAlign;
+        ctx.fillStyle = runs?.[0]?.color ?? color;
+        ctx.fillText(line.text, x, startY);
+      } else {
+        // Two or more colors on one line: each run is drawn on its own, so
+        // their visual order is ours to get right (see `visualRunOrder`).
+        const widths = runs.map((run) => ctx.measureText(run.text).width);
+        const total = widths.reduce((sum, runW) => sum + runW, 0);
+        // Starts the run train on the same left edge the single-fillText
+        // branch above would have put this line's ink box on.
+        let cursorX =
+          textAlign === "center"
+            ? (w - total) / 2
+            : textAlign === "right"
+              ? w - total
+              : 0;
+        ctx.textAlign = "left";
+        for (const i of visualRunOrder(runs, line.text)) {
+          ctx.fillStyle = runs[i].color;
+          ctx.fillText(runs[i].text, cursorX, startY);
+          cursorX += widths[i];
+        }
+      }
+      startY += scaledFontSize * lineHeight;
+    });
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -220,7 +362,7 @@ export function CanvasText({
 
     return tex;
   }, [
-    text,
+    source,
     font,
     fontSize,
     color,
@@ -234,7 +376,6 @@ export function CanvasText({
     fontsLoadedKey,
     fontWeight,
     fontStyle,
-    segments,
   ]);
 
   useEffect(() => {
