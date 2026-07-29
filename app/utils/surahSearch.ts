@@ -15,6 +15,7 @@ export const SURAH_LOCAL_NAMES: Record<string, { tr: string; en: string }> = {
   tevbe24: { tr: "Tevbe Suresi 24", en: "At-Tawbah 24" },
   imran14: { tr: "Âl-i İmrân 14", en: "Al-Imran 14" },
   nisa23: { tr: "Nisâ Suresi 23", en: "An-Nisa 23" },
+  maun107: { tr: "Mâûn Suresi", en: "Al-Ma'un" },
 };
 
 // ---------------------------------------------------------------------------

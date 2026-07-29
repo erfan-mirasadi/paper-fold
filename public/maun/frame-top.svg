@@ -1,0 +1,40 @@
+<svg width="3029" height="1000" viewBox="0 0 3029 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- MÂÛN 107 - FIRST SECTION FRAME (the box drawn around ayahs 1, 2 and 3).
+
+     COLOUR. The reference page prints this box WARM (peach) and the two boxes
+     under it COOL (pale blue) - that contrast is what tells the reader the
+     first section is the "ana bölüm" and the two below it are its two
+     accusations. So: peach #F6EAD2 at 0.7 over the project's gold gradient
+     outline, against frame-side.svg's pale blue at the same opacity. Keep the
+     two apart if either is ever retinted, and keep both translucent - the
+     paper grain showing through is what stops them reading as flat plates
+     stuck on the outer frame's cream panel.
+
+     ASPECT - drawn AT the aspect it is displayed at (same discipline as
+     /nisa23/frame-*.svg, and unlike /nisa/all-section*.svg whose rx and ry
+     deliberately disagree to cancel a non-uniform stretch):
+
+         viewBox 3029 x 1000                  ->  3.029
+         config  scaleX 1.06 / scaleY 0.350   ->  3.029
+
+     one SVG unit = 3.50e-4 world units on BOTH axes, so a uniform stroke
+     arrives uniform and every corner is a true circular arc on screen.
+
+     GEOMETRY (world units at 1.06 x 0.350)
+       outer edge  flush with the plane  ->  1.06 w x 0.350 h
+       stroke      11.06 units           ->  0.00387  (the project's frame stroke)
+       corner r    143 units             ->  0.05
+       inner air   0.034 above ayah 1, 0.034 under ayahs 2-3, 0.035 each side
+
+     Rect inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="maunTopGold" x1="0" y1="500" x2="3029" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="5.53" y="5.53" width="3017.94" height="988.94" rx="143" ry="143"
+      fill="#F6EAD2" fill-opacity="0.7" stroke="url(#maunTopGold)" stroke-width="11.06"
+      stroke-linejoin="round"/>
+</svg>

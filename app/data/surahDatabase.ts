@@ -96,6 +96,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "النساء ٢٣",
     reference: "Nisa 23",
   },
+  {
+    id: "maun107",
+    displayName: "Mâûn 107",
+    arabicName: "المَاعُون ١٠٧",
+    reference: "Mâûn 107",
+  },
 ] as const;
 
 /**
@@ -206,6 +212,13 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/nisa23Config").then((m) => ({
         config: m.NISA_23_CONFIG,
         textData: m.NISA_23_TEXT_DATA,
+      })),
+  ],
+  maun107: [
+    () =>
+      import("./configs/maun107Config").then((m) => ({
+        config: m.MAUN_107_CONFIG,
+        textData: m.MAUN_107_TEXT_DATA,
       })),
   ],
 };

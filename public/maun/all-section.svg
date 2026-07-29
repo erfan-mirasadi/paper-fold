@@ -1,0 +1,38 @@
+<svg width="1267" height="1000" viewBox="0 0 1267 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- MÂÛN 107 - OUTER SECTION FRAME. The project's own "all-section" frame
+     (/nisa/all-section-1.svg): a solid gold rim with a cream panel inside it,
+     same gradient, same world-unit rim thickness, same corner radius.
+
+     WHY A PAGE-LOCAL COPY. /nisa/all-section-1.svg pre-distorts its corner
+     ellipse (rx != ry) to cancel a NON-UNIFORM plane stretch, and that
+     pre-distortion is tuned to Imran-14's scaleX/scaleY = 1.1 / 1.28 = 0.859.
+     Mâûn's frame is landscape (1.14 x 0.90 -> 1.267), so re-using that file
+     would land its corners ~47% wider than tall and its top/bottom rim that
+     much thinner than the sides. This file dodges the problem the way the
+     newer frames do (/nisa23/frame-*.svg, /imran/band-peak-*.svg): it is
+     DRAWN AT THE ASPECT IT IS DISPLAYED AT, so rx = ry here arrives as a true
+     circle on screen and a uniform rim arrives uniform.
+
+         viewBox 1267 x 1000                 ->  1.267
+         config  scaleX 1.14 / scaleY 0.90   ->  1.267
+
+     one SVG unit = 9.0e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 1.14 x 0.90)
+       outer edge  flush with the plane  ->  1.14 w x 0.90 h
+       gold rim    5.0 units             ->  0.0045   (Imran's is 0.00448)
+       corner r    44.4 units            ->  0.04     (Imran's is 0.03984)
+
+     Drawn as gold rect + panel rect on top, concentric by construction
+     (outer r 44.4 / inner r 39.4 = 44.4 - rim): the panel's antialiased edge
+     composites straight onto the gold, so there is no mask seam. -->
+<defs>
+<linearGradient id="maunOuterGold" x1="0" y1="500" x2="1267" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="0" y="0" width="1267" height="1000" rx="44.4" ry="44.4" fill="url(#maunOuterGold)"/>
+<rect x="5" y="5" width="1257" height="990" rx="39.4" ry="39.4" fill="#F0E4E5"/>
+</svg>

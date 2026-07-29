@@ -1,0 +1,39 @@
+<svg width="1250" height="1000" viewBox="0 0 1250 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- MÂÛN 107 - HALF-WIDTH SECTION FRAME. Used TWICE by maun107Config, once per
+     side of the lower band:
+       - ayahs 4 - 5   (Arabic: the RIGHT half - it is read first)
+       - ayahs 6 - 7   (Arabic: the LEFT half)
+     Turkish/English swap which side each pair is drawn on (the text data does
+     the mirroring, the geometry never moves), so one file serves both.
+
+     COLOUR. Pale blue #DDE9F0 at 0.7 - the cool half of this page's two-family
+     palette, against frame-top.svg's peach at the same opacity. Its outline is
+     the only one on the page that is NOT gold: a blue-grey gradient of the same
+     family as the capsules inside it (#79A7AC), because the reference page draws
+     these two boxes and their capsules in one ink.
+
+     ASPECT - drawn AT the aspect it is displayed at:
+
+         viewBox 1250 x 1000                  ->  1.25
+         config  scaleX 0.50 / scaleY 0.400   ->  1.25
+
+     one SVG unit = 4.0e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 0.50 x 0.400)
+       outer edge  flush with the plane  ->  0.50 w x 0.400 h
+       stroke      9.68 units            ->  0.00387  (the project's frame stroke)
+       corner r    125 units             ->  0.05
+       inner air   0.034 above / under the pair, 0.03 each side
+
+     Rect inset by half a stroke so the stroke's OUTER edge is the plane edge. -->
+<defs>
+<linearGradient id="maunSideBlue" x1="0" y1="500" x2="1250" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#5F8A93"/>
+<stop offset="0.503741" stop-color="#A8CBD3"/>
+<stop offset="1" stop-color="#5F8A93"/>
+</linearGradient>
+</defs>
+<rect x="4.84" y="4.84" width="1240.32" height="990.32" rx="125" ry="125"
+      fill="#DDE9F0" fill-opacity="0.7" stroke="url(#maunSideBlue)" stroke-width="9.68"
+      stroke-linejoin="round"/>
+</svg>
