@@ -17,6 +17,11 @@ import {
 } from "@/app/stores/useStoryStore";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { useSideInfoStore } from "@/app/stores/useSideInfoStore";
+import { useSideInfoContent } from "@/app/hooks/useSideInfoContent";
+import {
+  useSurahLanguageStore,
+  VERSE_KICKER_BY_LANGUAGE,
+} from "@/app/hooks/useSurahLanguageStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
 import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntry";
 import {
@@ -48,6 +53,7 @@ import type {
   SideInfoFlowItem,
   SideInfoSubtitle,
   SurahLayoutConfig,
+  SurahSideInfoConfig,
 } from "@/app/data/schema";
 
 const GOLD = "#C4963B";
@@ -494,12 +500,16 @@ interface ResolvedEntry {
  * own entry, then the entries of verses that first became visible there
  * (per `scriptHighlights`). Earlier entries stay on screen — the reader keeps
  * their place while the paper keeps unfolding.
+ *
+ * `side` is the panel content for the ACTIVE LANGUAGE (see
+ * useSideInfoContent) — the config only supplies the fold steps and the
+ * highlight map, which are the same in every language.
  */
 function resolveEntries(
   config: SurahLayoutConfig,
+  side: SurahSideInfoConfig | null,
   stepIdx: number,
 ): ResolvedEntry[] {
-  const side = config.sideInfo;
   if (!side) return [];
 
   const steps = config.animations.foldSteps;
@@ -811,10 +821,13 @@ function SideInfoEntryView({
 }: Omit<ResolvedEntry, "key" | "stepIdx"> & {
   hideVerseNumbers?: boolean;
 }) {
+  // An entry that authors no kicker gets the verse's own number, worded in
+  // the language the panel is currently written in.
+  const language = useSurahLanguageStore((s) => s.activeLanguage);
   const kicker =
     entry.kicker ??
     (!hideVerseNumbers && verseId !== undefined
-      ? `${verseId}. Ayet`
+      ? VERSE_KICKER_BY_LANGUAGE[language](verseId)
       : undefined);
 
   const allParagraphs = useMemo(
@@ -1345,6 +1358,9 @@ function InkScrollbar({
 // ── The panel itself ────────────────────────────────────────────────────────
 export function SideInfoPanel() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
+  // The panel's copy follows the language switcher; everything else about the
+  // panel (fold steps, highlights, colors) is language-independent.
+  const side = useSideInfoContent(activeConfig);
   const isOpen = useSideInfoStore((s) => s.isOpen);
   const toggle = useSideInfoStore((s) => s.toggle);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -1361,8 +1377,8 @@ export function SideInfoPanel() {
   });
 
   const entries = useMemo(
-    () => resolveEntries(activeConfig, stepIdx),
-    [activeConfig, stepIdx],
+    () => resolveEntries(activeConfig, side, stepIdx),
+    [activeConfig, side, stepIdx],
   );
 
   // Only claim the wheel (data-lenis-prevent + inner scroll) when the text
@@ -1458,7 +1474,6 @@ export function SideInfoPanel() {
         ?.border ?? GOLD;
   }
 
-  const side = activeConfig.sideInfo;
   if (!side || (!side.byFoldStep && !side.byVerse)) return null;
 
   // Landscape papers (wider than tall, e.g. fatihaLandscape) sit high on the

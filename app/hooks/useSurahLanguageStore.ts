@@ -16,6 +16,20 @@ export const ANA_AYET_LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
   tr: "Ana Ayet",
 };
 
+/**
+ * The tafsir panel's automatic lead-in for a verse entry that doesn't author
+ * its own kicker (SideInfoPanel). Arabic reads the Turkish panel, so it keeps
+ * the Turkish form.
+ */
+export const VERSE_KICKER_BY_LANGUAGE: Record<
+  SurahLanguage,
+  (verse: number) => string
+> = {
+  ar: (verse) => `${verse}. Ayet`,
+  en: (verse) => `Verse ${verse}`,
+  tr: (verse) => `${verse}. Ayet`,
+};
+
 interface SurahLanguageState {
   activeLanguage: SurahLanguage;
   setLanguage: (language: SurahLanguage) => void;

@@ -7,6 +7,8 @@ import {
   type SurahLanguage,
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
+import { prefetchSideInfoContent } from "../../../hooks/useSideInfoContent";
+import { useStoryStore } from "@/app/stores/useStoryStore";
 import { OverlayButton } from "./OverlayButton";
 
 const LABEL_BY_LANGUAGE: Record<SurahLanguage, string> = {
@@ -43,34 +45,44 @@ export function LanguageSwitchOverlay() {
 
   const isLoading = isPreparing || isPending;
 
-  const handleLanguageSelect = (lang: SurahLanguage) => {
-    if (isLoading || lang === activeLanguage) return;
+  /**
+   * The tafsir panel's copy for a language lives in its own chunk (see
+   * useSideInfoContent). Warming it here means the fetch happens INSIDE the
+   * loading state this button already shows for the relayout — so the switch
+   * never lands on a half-loaded panel, and hovering the menu usually makes it
+   * free by the time anything is clicked.
+   */
+  const warmSideInfo = (lang: SurahLanguage) =>
+    prefetchSideInfoContent(useStoryStore.getState().activeConfig, lang);
+
+  /** Shared switch path: paint the loading state, warm the chunk, then commit. */
+  const switchTo = (lang: SurahLanguage) => {
     setIsPreparing(true);
     setIsHovered(false);
 
+    const warmed = warmSideInfo(lang);
+
     // Give the browser time to paint the loading state and blur before the heavy transition freezes the thread
     setTimeout(() => {
-      startTransition(() => {
-        setLanguage(lang);
+      warmed.then(() => {
+        startTransition(() => {
+          setLanguage(lang);
+        });
+        setIsPreparing(false);
       });
-      setIsPreparing(false);
     }, 150);
+  };
+
+  const handleLanguageSelect = (lang: SurahLanguage) => {
+    if (isLoading || lang === activeLanguage) return;
+    switchTo(lang);
   };
 
   const nextLanguage = () => {
     if (isLoading) return;
-    setIsPreparing(true);
-    setIsHovered(false);
-
-    setTimeout(() => {
-      const currentIndex = SURAH_LANGUAGE_ORDER.indexOf(activeLanguage);
-      const nextIndex = (currentIndex + 1) % SURAH_LANGUAGE_ORDER.length;
-
-      startTransition(() => {
-        setLanguage(SURAH_LANGUAGE_ORDER[nextIndex]);
-      });
-      setIsPreparing(false);
-    }, 150);
+    const currentIndex = SURAH_LANGUAGE_ORDER.indexOf(activeLanguage);
+    const nextIndex = (currentIndex + 1) % SURAH_LANGUAGE_ORDER.length;
+    switchTo(SURAH_LANGUAGE_ORDER[nextIndex]);
   };
 
   const handleMouseEnter = () => {
@@ -228,6 +240,11 @@ export function LanguageSwitchOverlay() {
                       onClick={(e) => {
                         e.stopPropagation();
                         handleLanguageSelect(lang);
+                      }}
+                      // Pointing at a language is the earliest honest signal
+                      // that it is about to be read — fetch its tafsir chunk now.
+                      onMouseEnter={() => {
+                        if (!isActive) void warmSideInfo(lang);
                       }}
                       className={`h-14 px-3 flex items-center justify-center transition-all duration-300 ${
                         isActive

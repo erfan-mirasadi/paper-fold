@@ -423,7 +423,14 @@ function SurahViewerInner({
       <PaperSwitchCursorSpinner />
 
       {isSceneReady && showPostIntroUI && <SurahScriptSidebar />}
-      {isSceneReady && showPostIntroUI && <SideInfoPanel />}
+      {/* The panel's copy for a non-default language is its own chunk
+          (useSideInfoContent). The language switcher warms it before it
+          flips, so this boundary is only the safety net for a cold read. */}
+      {isSceneReady && showPostIntroUI && (
+        <Suspense fallback={null}>
+          <SideInfoPanel />
+        </Suspense>
+      )}
 
       {isSceneReady && (
         <motion.div

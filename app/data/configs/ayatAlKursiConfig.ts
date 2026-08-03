@@ -12,7 +12,7 @@
  * (i.e. even indices → left/RTL-start column, odd indices → right/RTL-end column)
  */
 
-import type { SurahLayoutConfig } from "../schema";
+import type { SurahLayoutConfig, SurahSideInfoConfig } from "../schema";
 import type { SurahDataShape } from "../SurahConfig";
 import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 
@@ -54,6 +54,10 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
   // Capsule text reuses this file's own AYAT_AL_KURSI_TEXT_TR translations
   // (already canonical in-app copy); the surrounding commentary is an
   // original condensed paraphrase, not a transcription of the book's prose.
+  //
+  // This panel is the TURKISH edition (and what Arabic falls back to). The
+  // English edition is the same panel in `sideInfoTranslations.en` below —
+  // its own chunk, fetched only when a reader switches to English.
   sideInfo: {
     panelTitle: "Tefsir",
     byFoldStep: {
@@ -463,6 +467,12 @@ export const AYAT_AL_KURSI_CONFIG: SurahLayoutConfig = {
       },
     },
   },
+
+  // The tafsir panel in the other languages the switcher offers. Arabic has
+  // no edition of its own, so it keeps the `sideInfo` above; English
+  // (AYAT_AL_KURSI_SIDE_INFO_EN) is defined at the end of this file and wired
+  // in there — it's declared after this object, so it can't be referenced here.
+  sideInfoTranslations: {},
 
   features: {
     hasIntro: false,
@@ -891,7 +901,9 @@ export const AYAT_AL_KURSI_TEXT_AR: SurahDataShape = {
 };
 
 // ---------------------------------------------------------------------------
-// TEXT DATA — English (empty strings per spec)
+// TEXT DATA — English
+// The eight chunks exactly as the English edition of the tafsir prints them
+// (Al-Baqarah 255.docx), i.e. statements A-1 … D-2 in chunk order.
 // ---------------------------------------------------------------------------
 
 export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
@@ -909,28 +921,28 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 1,
-            text: "Allah! (He has no equal or partner). He is the Ever-Living, the Sustainer.",
+            text: "God! There is no partner or equal to Him. He is the Ever-Living and the Self-Subsisting Sustainer of all.",
           },
-          { number: 2, text: "He never slumbers or sleeps." },
+          { number: 2, text: "Neither drowsiness nor sleep overtakes Him." },
         ],
       },
       {
         verses: [
           {
             number: 3,
-            text: "Whatever is in the heavens and on the earth belongs to Him.",
+            text: "To Him belongs whatever is in the heavens and whatever is on earth.",
           },
           {
             number: 4,
-            text: "Without His permission, who can intercede and have a say in His presence?",
+            text: "Who can intercede or speak in His presence except by His permission?",
           },
           {
             number: 5,
-            text: "Only Allah knows their future and their past.",
+            text: "God alone knows what lies before them and what lies behind them.",
           },
           {
             number: 6,
-            text: "Unless Allah wills, have they grasped anything from His knowledge to know the past and the future?",
+            text: "Can they grasp anything of His knowledge—of the past or the future—unless God wills?",
           },
         ],
       },
@@ -938,11 +950,11 @@ export const AYAT_AL_KURSI_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "His throne, His sovereignty is as wide as the heavens and the earth.",
+            text: "His Throne, His dominion, extends over the heavens and the earth.",
           },
           {
             number: 8,
-            text: "Protecting both of them is not burdensome to Him. He is the Most High and the Most Great.",
+            text: "Preserving them does not burden Him. He is the All-Exalted, the Supreme.",
           },
         ],
       },
@@ -1022,4 +1034,278 @@ export const AYAT_AL_KURSI_TEXT_DATA: Record<SurahLanguage, SurahDataShape> = {
   ar: AYAT_AL_KURSI_TEXT_AR,
   en: AYAT_AL_KURSI_TEXT_EN,
   tr: AYAT_AL_KURSI_TEXT_TR,
+};
+
+// ---------------------------------------------------------------------------
+// TAFSIR PANEL — ENGLISH
+//
+// A single, continuous, paragraph-by-paragraph transcription of the English
+// edition of the tafsir (Al-Baqarah 255.docx), top to bottom, in the EXACT
+// order the document prints it — not reorganized around the fold story's own
+// per-verse reveal timing. Every sentence is exactly as printed; nothing
+// paraphrased, added, or omitted. It all lives in `byFoldStep["pre-start"]`
+// alone (no byVerse entries, no other fold-step entries).
+//
+// The docx's own section headings are used verbatim as `{ subtitle }` items.
+// The Verse of the Throne's eight statements (A-1, A-2, B-1, B-2, C-1, C-2,
+// D-1, D-2) are capsuled ONLY the first time they appear, as the short list
+// right after "In brief, we cannot know and comprehend God..." — colored
+// exactly as the Turkish panel colors that same first list (A/D → orange,
+// B/C → blue-grey). Every later restatement of those same eight labels
+// (the docx repeats and re-explains them several times, each in slightly
+// different words) stays plain prose, verbatim, with the label kept inline —
+// mirroring how Alak's repeated verse citations were simplified to plain
+// text rather than boxed again each time.
+//
+// No `recitation` here: the recorded readings exist only in Turkish, so the
+// English panel is written text throughout.
+// ---------------------------------------------------------------------------
+
+// Per-statement capsule colors — used only for the ONE first-occurrence list.
+const EN_A_COLOR = "#C68A69";
+const EN_A_BG = "#F4EAD5";
+const EN_A_TEXT = "#A83C3C";
+const EN_SLEEP_COLOR = "#8CB08D";
+const EN_SLEEP_BG = "#E5EFE2";
+const EN_OWN_COLOR = "#93A5B3";
+const EN_OWN_BG = "#E6EAEF";
+
+const AYAT_AL_KURSI_SIDE_INFO_EN: SurahSideInfoConfig = {
+  byFoldStep: {
+    "pre-start": {
+      paragraphs: [
+        {
+          capsules: [
+            {
+              n: 1,
+              text: "The first affirmative statement declares the truth.",
+              bg: "#F3ECD5",
+              color: "#C4A771",
+            },
+            {
+              n: 2,
+              text: "The second negative statement corrects the error.",
+              bg: "#DAE8EE",
+              color: "#8DAAB6",
+            },
+            {
+              n: 3,
+              text: "The second affirmative statement declares the truth.",
+              bg: "#F3ECD5",
+              color: "#C4A771",
+            },
+            {
+              n: 4,
+              text: "The fourth negative statement corrects the error.",
+              bg: "#DAE8EE",
+              color: "#8DAAB6",
+            },
+            {
+              n: 5,
+              text: "The third affirmative statement declares the truth.",
+              bg: "#F3ECD5",
+              color: "#C4A771",
+            },
+            {
+              n: 6,
+              text: "The sixth negative statement corrects the error.",
+              bg: "#DAE8EE",
+              color: "#8DAAB6",
+            },
+            {
+              n: 7,
+              text: "The fourth affirmative statement declares the truth.",
+              bg: "#F3ECD5",
+              color: "#C4A771",
+            },
+            {
+              n: 8,
+              text: "The eighth negative statement corrects the error.",
+              bg: "#DAE8EE",
+              color: "#8DAAB6",
+            },
+          ],
+          corners: "soft",
+          color: OUTER_GROUP_BORDER,
+          bg: OUTER_GROUP_BG,
+          textColor: "#2B2B2B",
+          frame: OUTER_GROUP_BORDER,
+        },
+
+        { subtitle: "THE UNIVERSE IS A GREAT MIRROR: IT MAKES GOD KNOWN" },
+        "God Almighty creates the entire universe and all beings for many purposes. In creating each thing, He places within it countless benefits and invests every being with many layers of meaning.",
+        "Even if a being has only one function related to its own life, the meanings and wisdom through which it points to the One Who creates it are countless.",
+        "Through their existence and all their activities, all beings express innumerable meanings concerning the Supreme Creator Who brings them into being.",
+        "Indeed, the greatest purposes of creation are those that point to the Creator and convey meanings related to Him.",
+        "Everything in the universe, and living beings in particular, through its coming into existence and the many events of its life, points to and bears witness to the existence of the Supreme Creator and to His many Names and Attributes. All beings speak of Him. Each is, as it were, a mirror that displays His works and makes Him known.",
+        "Every work of art bears the signature of its artist or master, and every technological product reflects the brand, skill, and quality of its engineer and manufacturer. In the same way, everything in the heavens and on earth bears the Name, signature, and craftsmanship of the Supreme Creator and displays Him to us like an exquisitely fashioned sign. All plants and living beings are marvelous works of His art. They reveal the boundlessness of His power, wisdom, knowledge, and compassion and reflect the manifestations of the countless beautiful Names of God Almighty. This is one of the greatest purposes of creation.",
+
+        { subtitle: "THE HUMAN BEING IS A COMPREHENSIVE MIRROR: HE MAKES GOD KNOWN" },
+        "In outward appearance, the human being is small. Yet through the extraordinary faculties placed within his nature—such as intellect and heart—he is, in meaning and potential, greater even than the universe. With all that he has been given, the human being is a sovereign on earth who reflects God’s Names and Attributes and fulfills the role of His vicegerent on earth.",
+        "Many purposes, wisdom, meanings, and benefits related to human life can be discerned in the creation of the human being. Yet the greatest purpose and most meaningful duty of the human being, the sovereign of created beings, is to know the Creator of the universe through His Names and Attributes and, through his life, intellect, heart, and lofty potential, to become a conscious and distinctive mirror reflecting them.",
+
+        {
+          subtitle:
+            "THE PROPHET MUHAMMAD, PEACE AND BLESSINGS BE UPON HIM, IS A PERFECT MIRROR: HE MAKES GOD KNOWN",
+        },
+        "He knew God more fully than anyone else and devoted his entire life to knowing Him and making Him known. Through his way of life, every breath he took, his worship as though he saw God at every moment, and his constant awareness of standing in the Divine presence, he continually reflected God’s Names and Attributes.",
+        "There are many wisdoms and benefits in the sending of a person such as the Prophet Muhammad, upon him be the most perfect peace and blessings, as a Messenger, and many qualities in his life for us to emulate. Yet the greatest purpose of his being honored with Prophethood was to make our Lord known to us.",
+        "How are we to know our Lord, the Majestic Creator of the universe and its Sovereign of absolute perfection?",
+        "How should God be described and praised? How should He be worshiped and obeyed?",
+        "We find the answers to these and many other questions in the Qur’an and in the noble life of the beloved Prophet.",
+        "“This world is a mirror; all things subsist through the Truth. Through the mirror of Muhammad, God is ever seen.” —Aziz Mahmud Hüdayi",
+
+        "The Qur’an is a clear mirror: it reveals God to us and makes Him known.",
+        "The Qur’an has many purposes, profound wisdoms, and countless benefits. Each of its verses addresses different matters and teaches us valuable lessons. We receive every command and every lesson with reverence. In many respects, each verse is a source of light, guidance, and healing for us.",
+        "Yet the Qur’an’s greatest purpose concerns God, the Glorious Author of this Divine Word. It speaks of Him and makes Him known.",
+        "Indeed, through this exalted Book that He revealed, God first and foremost tells us about Himself and makes Himself known. He informs us of His Divine purpose and shows us the paths that lead to His good pleasure.",
+        "Thus, the verses of the Qur’an described as muhkam, those that express firm, unchanging, and established truths, are the verses that speak of God and make Him known.",
+        "In one sense, we may say that the entire Qur’an speaks of God. Every verse that speaks of beings, people, or events continually directs us back to Him. Above all, the Qur’an is a great mirror through which God makes Himself known. Every verse is sacred and precious to us; yet the most important and precious verses are those that speak directly of God and make Him known.",
+        "From this perspective, the Verse of the Throne, Surah al-Ikhlas, the opening verses of Surah al-Fatiha, and the final three verses of Surah al-Hashr form the heart of the Qur’an. In a sense, they are its principal verses.",
+        "Indeed, every statement of the Verse of the Throne makes our Lord known to us while also uprooting a number of false beliefs.",
+        "People understand abstract truths more easily through analogies. In this verse, God Almighty describes His sovereignty through the analogy of a sovereign and his dominion.",
+        "Everyone understands what a sovereign is and what the lofty throne upon which he sits represents. A sovereign has a realm and subjects. He embodies power and authority. His laws and commands prevail throughout his dominion. Everyone respects and obeys him. He shares his sovereignty with no one, and without his permission and will, no one can possess even a span of land.",
+        "With our limited minds and knowledge, we cannot fully comprehend God, Who is infinite and beyond all limits. The scales of our reason and the measures of our understanding cannot encompass His infinite Attributes.",
+        "In brief, we cannot know and comprehend God as He truly deserves to be known. Yet the analogy of sovereignty implied in this verse may serve as a telescope through which we gain some knowledge of our Exalted Lord. Through the lens of this analogy, we may glimpse the truth from afar, to the extent of our capacity.",
+
+        {
+          corners: "soft",
+          textColor: "#2B2B2B",
+          capsules: [
+            {
+              n: "A-1.",
+              text: " God! There is no partner or equal to Him. He is the Ever-Living and the Self-Subsisting Sustainer of all.",
+              color: EN_A_COLOR,
+              bg: EN_A_BG,
+              textColor: EN_A_TEXT,
+            },
+            {
+              n: "A-2.",
+              text: " Neither drowsiness nor sleep overtakes Him.",
+              color: EN_SLEEP_COLOR,
+              bg: EN_SLEEP_BG,
+            },
+            {
+              n: "B-1.",
+              text: " To Him belongs whatever is in the heavens and whatever is on earth.",
+              color: EN_OWN_COLOR,
+              bg: EN_OWN_BG,
+            },
+            {
+              n: "B-2.",
+              text: " Who can intercede or speak in His presence except by His permission?",
+              color: EN_OWN_COLOR,
+              bg: EN_OWN_BG,
+            },
+            {
+              n: "C-1.",
+              text: " God alone knows what lies before them and what lies behind them.",
+              color: EN_OWN_COLOR,
+              bg: EN_OWN_BG,
+            },
+            {
+              n: "C-2.",
+              text: " Can they grasp anything of His knowledge—of the past or the future—unless God wills?",
+              color: EN_OWN_COLOR,
+              bg: EN_OWN_BG,
+            },
+            {
+              n: "D-1.",
+              text: " His Throne, His dominion, extends over the heavens and the earth.",
+              color: EN_A_COLOR,
+              bg: EN_A_BG,
+              textColor: EN_A_TEXT,
+            },
+            {
+              n: "D-2.",
+              text: " Preserving them does not burden Him. He is the All-Exalted, the Supreme.",
+              color: EN_SLEEP_COLOR,
+              bg: EN_SLEEP_BG,
+            },
+          ],
+        },
+
+        "O you who do not know God: when the word “God” is mentioned, do not imagine Him in the form of finite objects of worship confined to temples, fashioned from stone or wood, and lacking all power. God is the One besides whom there is no deity, the Ever-Living and the Self-Subsisting Sustainer. Everything in the heavens and on earth belongs to Him. He is the Sovereign and Owner of the entire universe.",
+        "When He is described as the Ever-Living and the Self-Subsisting Sustainer, He should not be conceived in the manner of created living beings. He does not sleep or lapse into heedlessness. He does not grow weary, become ill, or die. This also corrects the idea that God might need rest after creating the universe. The Qur’anic teaching is that God does not tire and therefore has no need for rest, drowsiness, or sleep.",
+        "The statements B-1 and B-2 likewise clarify that God did not grant Jesus, or anyone else, a share in His Divinity or sovereignty, nor does He share His Divinity with another. Divine unity therefore excludes attributing any partner or participant to God’s absolute sovereignty.",
+
+        "A-1. God, the Supreme Sovereign Who has no equal or partner, is the Ever-Living and the Self-Subsisting Sustainer. In other words, God, the Sovereign of all worlds, is One. He is the Ever-Living. He gives life to beings, gives movement and order to everything, and holds all things in His grasp at every moment.",
+        "A-2. Neither drowsiness nor sleep overtakes Him. He does not tire or become powerless; one task does not prevent Him from carrying out another. Not for a single moment does He relinquish the governance of the universe.",
+        "B-1. He is such a Sovereign that everything in the heavens and on earth is His property. The very things that idolaters set up as gods are nothing but part of God’s dominion.",
+        "B-2. Who can intercede or speak in His presence except by His permission? Did God grant these idols of stone and wood permission or authority so that the idolaters can say, “These idols will mediate between God and human beings”? Since God has granted no such permission, what benefit can idols and false objects of worship bring to anyone? Do not disgrace yourselves by worshiping idols.",
+        "C-1. God alone knows what lies before them and what lies behind them.",
+        "C-2. Mediums, shamans, and spiritists—the representatives of false religions—cannot know anything of His infinite knowledge, which encompasses past and future, unless God wills. Do not humiliate yourselves by asking them about the future.",
+        "D-1. The Throne of that Sovereign, His sovereignty and rule, extends over the heavens and the earth. His command and laws prevail everywhere in the heavens and on earth.",
+        "D-2. Preserving the order of the heavens and the beings on earth does not burden or tire Him. He is the All-Exalted, the Supreme.",
+
+        "First read A-1 and A-2 from left to right. Then read A-1 and D-1 from top to bottom and observe the unity of meaning.",
+        "A-1. God, the Supreme Sovereign Who has no equal or partner, is the Ever-Living and the Self-Subsisting Sustainer. In other words, God, the Sovereign of all worlds, is One. He is Living. He gives life to beings and gives movement and order to everything.",
+        "D-1. The Throne of that Sovereign, His sovereignty and dominion, extends over the heavens and the earth. His command and laws prevail everywhere in the heavens and on earth.",
+        "A-2. Neither drowsiness nor sleep overtakes Him. He does not tire or become powerless; one task does not prevent Him from carrying out another. Not for a single moment does He relinquish the governance of the universe.",
+        "D-2. Preserving the order of the heavens and the beings on earth does not burden or tire Him. He is the All-Exalted, the Supreme.",
+
+        "A-1. In the first statement, the Supreme Creator graciously introduces Himself to us as the Supreme Sovereign Who has no equal or partner in the realm of existence. The greatest and most important reality in existence is the Supreme Creator Himself. To know Him through His true Attributes and to worship Him alone is humanity’s greatest and most important duty.",
+        "A-2. Building on the first statement, the second continues to make God Almighty known by declaring: “Neither sleep nor drowsiness overtakes God.” It prevents possible human misconceptions about Him.",
+        "The main statement A-1 continues in the final two statements, D-1 and D-2.",
+        "One of the principal rules of the binary symmetrical system is this: “The meaning of the first verse continues in the fourth, while the second and third verses in between are explanatory verses of elaboration.”",
+        "This may be expressed schematically as follows:",
+        "(A1 + A2) + [(B1 + B2) + (C1 + C2)] + (D1 + D2)",
+        "Main statement A + explanatory groups B and C + continuation of the main statement D.",
+
+        { subtitle: "Explanatory sections of elaboration" },
+        "These sentences function as parenthetical statements placed between the sentences that convey the main meaning. They present two important truths that need to be stated at precisely that point.",
+        "Indeed, the first explanatory statement that follows delivers a decisive blow to the idols of which the polytheists claimed, “They are our intercessors with God,” leaving no basis for that claim.",
+        "B-1. He is such a Sovereign that everything in the heavens and on earth belongs to Him. Yes, He is your Owner and also the Owner of the things you set up as gods and worship.",
+        "B-2. Since He owns everything, who can intercede or speak in His presence without His permission? Did God grant these idols of stone and wood permission or authority so that the polytheists can say, “These idols will intercede for people before God”? Since God has granted no one such permission, what benefit can idols and false objects of worship bring to anyone?",
+
+        { subtitle: "HOW SHOULD WE UNDERSTAND INTERCESSION?" },
+        "In early Arab society, before the concept of the state had fully developed, social life was shaped by the conditions of the time. A large part of the population was nomadic, and many responsibilities that would later belong to the state were carried out by tribal chiefs. In particular, tribal leaders helped safeguard the lives, property, and freedom of movement of foreigners and vulnerable people.",
+        "Tribal chiefs and other wealthy or influential individuals would take the weak and strangers under their protection and publicly announce that protection. The protected person would then invoke the name of the chief who had granted him protection and travel under that chief’s guarantee.",
+        "One term used for such protection was shafa‘ah, or intercession. The person granting protection assumed responsibility not only for the life and property of the person under his care but also for that person’s other rights. In practical terms, the protection and intercession of a tribal chief functioned somewhat like an official passport, visa, or guarantee of safe conduct.",
+        "Today, these rights and responsibilities generally belong to the state. As social life developed, nations established states, and those states formed institutions responsible for finance, education, policing, defense, and other public needs.",
+        "In the past, a person might say, “I am under the protection of such-and-such a chief and such-and-such a tribe. That chief will intercede for me.”",
+        "Today, one might say, “I am a citizen of a state that protects me through its laws, courts, police, armed forces, hospitals, and social institutions.”",
+        "Registering citizens, issuing identity cards and passports, safeguarding life and property, and guaranteeing legal rights all fall within the authority and responsibility of the state.",
+        "In this limited social and historical sense, such protection may help us understand one aspect of the concept of intercession mentioned in the Qur’an.",
+        "An important point follows. A state exercises its authority through legislative bodies, institutions, and public officials. In other words, it carries out its legislative and executive functions through those to whom it has formally delegated authority. For example, an ambassador receives authority from the state he or she represents, serves in another country on its behalf, and exercises that delegated authority. The ambassador helps protect the legal rights of citizens abroad, handles official matters on their behalf, and safeguards their interests as a representative of the state.",
+        "The conception of idols held by the pagan Arabs of the Age of Ignorance resembled, in some respects, that of ambassadors endowed with delegated authority or officials believed to be capable of granting protection and intercession.",
+        "They imagined that spiritual beings were associated with the idols and described some of these beings as daughters of God. They believed that the idols accepted acts of worship and sacrifice on God’s behalf, conveyed requests to Him, and protected those who appealed to them. In this way, the idols were treated as though they were earthly representatives of Divinity. Similar ideas may arise whenever a created being or object is regarded as possessing independent spiritual authority before God.",
+        "Yet who granted idols or their devotees the authority to establish such a representation, let alone a Divine representation?",
+        "Just as a person who has not been appointed by a state possesses no ambassadorial authority, idols fashioned from stone or wood possess neither authority before God nor any independent power in nature.",
+        "God encompasses the heavens and the earth through His knowledge and power and governs all things by His infinite authority. Is it not, therefore, a grave error for people to invent partners for God and imagine that His dominion and authority have been divided among them?",
+        "A person who has received no authority from the state but falsely claims, “I am a civil servant, a police officer, or an ambassador,” acts fraudulently, as do those who knowingly support such a claim. In the same way, from the Qur’anic perspective, attributing independent Divine authority to idols, statues, or created beings constitutes a grave error.",
+        "Likewise, Jesus, peace be upon him, was a Prophet of God, as were the Prophets before him, and Mary was his honored mother. From the Qur’anic perspective, attributing Divinity or independent Divine powers to either of them constitutes the association of partners with God.",
+
+        "Now let us read the fourth statement of the Verse of the Throne once again:",
+        "Since everything in the heavens and on earth belongs to God, since He is the sole Owner and Sovereign of the heavens and the earth, who can possess authority or exercise influence within His dominion without His permission and without His having granted that person authority?",
+        "The truth is that everyone, in every condition, at every moment, and in every place, may turn directly to his or her Lord, the Sovereign from pre-eternity to post-eternity, without veil, barrier, or intermediary, and ask Him for whatever is needed. No one is required to regard another person or object as an independently empowered intermediary.",
+
+        { subtitle: "The Second Explanatory Statement" },
+        "C-1. God alone knows what lies before them and what lies behind them.",
+        "C-2. Have those who claim knowledge of the unseen somehow acquired a portion of God’s infinite knowledge of the past and future without His willing it, so that they may claim to know what is hidden?",
+        "This second explanatory statement challenges the claims of charlatans, diviners, shamans, and others who confused people by claiming access to hidden knowledge.",
+        "God has neither revealed such knowledge to them nor granted them a share of His knowledge. Without His granting it and without His willing it, how could they have acquired knowledge of the unseen and placed themselves in the position of Prophets? Such claims deceive people and attribute to human beings a knowledge they do not possess.",
+
+        { subtitle: "A-1. THERE IS ONE GOD" },
+        "God, Who has no equal or likeness and is the Sovereign of the entire universe, is One. He is the Ever-Living and the Self-Subsisting Sustainer. Neither drowsiness nor sleep overtakes Him.",
+        { subtitle: "B-1. IDOLS POSSESS NO DIVINE AUTHORITY" },
+        "Everything in the universe belongs to the Supreme Sovereign. He created both the objects people worship and the causes to which they attribute power. Far exalted is He above all such associations. Has God granted any portion of His dominion or infinite power to idols or created beings, such that they may rightly be called gods?",
+        { subtitle: "B-2. CLAIMANTS TO HIDDEN KNOWLEDGE POSSESS NO INDEPENDENT AUTHORITY" },
+        "Since God alone possesses complete knowledge of the past and the future, how should we regard diviners, spiritists, shamans, or self-appointed religious authorities who claim access to hidden knowledge? Their claims have no authority.",
+        { subtitle: "A-2. GOD POSSESSES INFINITE SOVEREIGNTY" },
+        "His dominion extends throughout the heavens and the earth. From the smallest particles to the greatest stars, the entire universe lies under His governance. Sustaining the heavens and the earth is neither difficult nor burdensome for Him. God is the All-Exalted, the Supreme, far beyond all human conception.",
+
+        "The statements in this passage also reject any interpretation of scriptural language about God’s resting after creation that might suggest weariness or physical exhaustion. From the Qur’anic perspective, attributing fatigue to God is incompatible with Divine perfection.",
+        "The principal and explanatory statements of the Verse of the Throne affirm:",
+        "God is the Ever-Living and the Self-Subsisting Sustainer. Neither drowsiness nor sleep overtakes Him. The preservation of the heavens and the earth does not burden Him. He is the All-Exalted, the Supreme.",
+      ],
+    },
+  },
+};
+
+// Wire the English panel in now that it's defined — AYAT_AL_KURSI_CONFIG was
+// built further up this same file, before AYAT_AL_KURSI_SIDE_INFO_EN existed
+// yet.
+AYAT_AL_KURSI_CONFIG.sideInfoTranslations = {
+  en: AYAT_AL_KURSI_SIDE_INFO_EN,
 };

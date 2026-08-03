@@ -1,4 +1,7 @@
 import type { RecitationTranscript } from "./recitations/types";
+// Type-only — erased at build time, so this carries no runtime dependency on
+// the (client-side, zustand-backed) language store.
+import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 
 export interface Verse {
   number: number;
@@ -1010,6 +1013,34 @@ export interface SurahSideInfoConfig {
   byVerse?: Record<number, SideInfoEntry>;
 }
 
+/**
+ * One language's tafsir panel content — normally just the object itself,
+ * defined as its own `const` at the end of the surah's config file (after
+ * the config object, since the config wires it in by mutating
+ * `sideInfoTranslations` once the const exists — see e.g. `ALAK_SIDE_INFO_EN`
+ * at the bottom of alak96Config.ts).
+ *
+ * The `() => import(...)` loader form is also accepted (useSideInfoContent
+ * resolves either), for a future surah whose tafsir gets heavy enough to
+ * deserve its own chunk — nothing in this project needs that yet.
+ */
+export type SideInfoTranslation =
+  | SurahSideInfoConfig
+  | (() => Promise<SurahSideInfoConfig>);
+
+/**
+ * Per-language overrides for the tafsir panel, keyed by the same language ids
+ * the language switcher cycles through ("ar" | "en" | "tr").
+ *
+ * A language listed here replaces `SurahLayoutConfig.sideInfo` wholesale while
+ * it is active; a language NOT listed here falls back to `sideInfo`, which
+ * stays the authored default (Turkish for every surah in this project — that
+ * is also what Arabic shows, since the tafsir prose has no Arabic edition).
+ */
+export type SurahSideInfoTranslations = Partial<
+  Record<SurahLanguage, SideInfoTranslation>
+>;
+
 export interface FoldState {
   direction: -1 | 0 | 1;
   angleFactor: number;
@@ -1099,8 +1130,19 @@ export interface SurahLayoutConfig {
    * Right-hand tafsir/story reading panel (SideInfoPanel), synced to the fold
    * story exactly like `scriptHighlights` syncs the left script sidebar.
    * Author entries per fold step and/or per verse — see SurahSideInfoConfig.
+   *
+   * This is the DEFAULT-language panel (Turkish, as authored from the tafsir
+   * book). Other languages go in `sideInfoTranslations`, and any language
+   * missing there falls back to this one.
    */
   sideInfo?: SurahSideInfoConfig;
+
+  /**
+   * The same panel in the other languages the switcher offers — see
+   * SurahSideInfoTranslations. Each entry should be a `() => import(...)`
+   * loader so a translation only ever ships to a reader who selects it.
+   */
+  sideInfoTranslations?: SurahSideInfoTranslations;
   verseOverrides?: Record<number, VerseOverrideConfig>;
 
   // ── NEW BLOCK-BASED SCHEMA ────────────────────────────────────────────────
