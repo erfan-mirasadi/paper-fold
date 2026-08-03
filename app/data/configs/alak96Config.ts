@@ -1257,7 +1257,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
   bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
 
   section1: {
-    label: "The five-verse principal section",
+    label: "The Five-Verse Principal Section",
     gridVerses: [
       {
         number: 1,
@@ -1278,15 +1278,15 @@ export const ALAK_TEXT_EN: SurahDataShape = {
     ],
     anaAyet: {
       number: 5,
-      text: "By revealing to an unlettered man (Muhammad, peace and blessings be upon him) God taught him what he had not previously known and appointed him as His Messenger.",
+      text: "By revealing to an unlettered man (Muhammad ﷺ) God taught him what he had not previously known and appointed him as His Messenger.",
     },
   },
 
   section2: {
-    topLabel: "The first five-verse explanatory section",
+    topLabel: "The 1st Five-Verse Explanatory Section",
     introVerse: {
       number: 6,
-      text: "Now look: another man, Abu Jahl, denies the Prophethood of Muhammad, peace and blessings be upon him, though it is as evident as the sun, and he transgresses.",
+      text: "Now look: another man, Abu Jahl, denies the Prophethood of Muhammad ﷺ, though it is as evident as the sun, and he transgresses.",
     },
     colorGroups: [
       {
@@ -1348,7 +1348,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
       number: 19,
       text: "No indeed! O Messenger, do not submit to him. Prostrate yourself before God and draw near to Him.",
     },
-    bottomLabel: "The second five-verse explanatory section",
+    bottomLabel: "The 2nd Five-Verse Explanatory Section",
   },
 };
 
