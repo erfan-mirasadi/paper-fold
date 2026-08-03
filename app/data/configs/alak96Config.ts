@@ -1257,7 +1257,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
   bismillah: "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
 
   section1: {
-    label: "THE FIVE-VERSE PRINCIPAL SECTION",
+    label: "The five-verse principal section",
     gridVerses: [
       {
         number: 1,
@@ -1283,7 +1283,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
   },
 
   section2: {
-    topLabel: "THE FIRST FIVE-VERSE EXPLANATORY SECTION",
+    topLabel: "The first five-verse explanatory section",
     introVerse: {
       number: 6,
       text: "Now look: another man, Abu Jahl, denies the Prophethood of Muhammad, peace and blessings be upon him, though it is as evident as the sun, and he transgresses.",
@@ -1348,7 +1348,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
       number: 19,
       text: "No indeed! O Messenger, do not submit to him. Prostrate yourself before God and draw near to Him.",
     },
-    bottomLabel: "THE SECOND FIVE-VERSE EXPLANATORY SECTION",
+    bottomLabel: "The second five-verse explanatory section",
   },
 };
 
@@ -1361,9 +1361,6 @@ export const ALAK_TEXT_DATA: Record<SurahLanguage, SurahDataShape> = {
   en: ALAK_TEXT_EN,
   tr: ALAK_TEXT_TR,
 };
-
-
-
 
 // ---------------------------------------------------------------------------
 // TAFSIR PANEL — ENGLISH
