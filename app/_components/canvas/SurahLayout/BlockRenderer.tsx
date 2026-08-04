@@ -280,7 +280,8 @@ function GridBlock({
               textAlignOverride={override?.translationTextAlign}
               domeDir={override?.verseShape === "dome-up" ? "up" : override?.verseShape === "dome-down" ? "down" : undefined}
               domeSideRatio={override?.domeSideRatio}
-              textScaleOverride={finalTextScale} />
+              textScaleOverride={finalTextScale}
+              verseId={lookupNumber} />
             {svgUrl && (() => {
               const isArabic = activeLanguage === "ar";
               const isFixed = config?.dimensions?.fixedWidthAcrossLanguages === true;
@@ -441,6 +442,7 @@ export function BlockRenderer({
           textHighlights={introOverride?.textHighlights}
           translationTextHighlights={introOverride?.translationTextHighlights}
           textScaleOverride={activeLanguage !== "ar" ? (introOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (introOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
+          verseId={introVerseNum}
           translationPadding={introOverride?.translationPadding} />
       )}
 
@@ -468,6 +470,7 @@ export function BlockRenderer({
           textHighlights={outroOverride?.textHighlights}
           translationTextHighlights={outroOverride?.translationTextHighlights}
           textScaleOverride={activeLanguage !== "ar" ? (outroOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (outroOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
+          verseId={outroVerseNum}
           translationPadding={outroOverride?.translationPadding} />
       )}
 

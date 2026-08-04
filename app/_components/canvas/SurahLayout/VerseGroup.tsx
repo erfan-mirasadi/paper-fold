@@ -298,6 +298,7 @@ export function VerseGroup({
                 circleBg={finalCircleBg}
                 circleTextCol={finalCircleText}
                 textScaleOverride={finalTextScale}
+                verseId={lookupNumber}
                 textColor={override?.textColor}
                 translationTextColor={override?.translationTextColor}
                 textHighlights={override?.textHighlights}
@@ -324,6 +325,7 @@ export function VerseGroup({
                 circleTextCol={finalCircleText}
                 isPill={override?.isPill ?? true}
                 textScaleOverride={finalTextScale}
+                verseId={lookupNumber}
                 textColor={override?.textColor}
                 translationTextColor={override?.translationTextColor}
                 textHighlights={override?.textHighlights}

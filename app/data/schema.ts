@@ -180,6 +180,21 @@ export interface SurahGlobalSettings {
   translationVerseTextScale?: number | null;
 
   /**
+   * Per-language TRIM on the verse text, applied on top of whatever size the
+   * capsule already resolved to (the language baseline in
+   * `LANGUAGE_TEXT_SCALE`, `verseTextScale`, or a verse's own
+   * `textScaleOverride`).
+   *
+   * This exists because a translation is not the same length as the Arabic:
+   * the English of Alak overflows its capsules at the shared baseline even
+   * though the Arabic sits perfectly. Rather than re-authoring every
+   * `textScaleOverride` per language — which would fight the Arabic — a
+   * language states how much SMALLER (or bigger) its own text runs, page-wide
+   * and then per block / per verse. See `LanguageTextScaleConfig`.
+   */
+  languageTextScale?: Partial<Record<SurahLanguage, LanguageTextScaleConfig>>;
+
+  /**
    * Sizing for the small pill-shaped label rendered above/below a verse when
    * `verseOverrides[id].hasCapsuleLabel` is set (e.g. Ahzab's "İman"/"Zekat"
    * tags). Falls back to generic defaults (0.2/0.032/0.0035/0.015) when omitted.
@@ -210,6 +225,41 @@ export interface SurahGlobalSettings {
    * edge and expanding the text's maximum width constraint.
    */
   tightVersePadding?: boolean;
+}
+
+/**
+ * One language's verse-text trim, in three layers that MULTIPLY together:
+ *
+ *   final = resolvedSize × all × blocks[blockId] × verses[verseId]
+ *
+ * Multiplying (rather than the usual "most specific wins") is what makes the
+ * layers readable the way the page is actually judged: `all` is the page-wide
+ * notch — "the English runs one size smaller everywhere" — and a block or
+ * verse entry says how that one differs FROM its neighbours, not from the
+ * Arabic. Nudging `all` later re-sizes the whole page and keeps every
+ * relationship inside it.
+ *
+ * Every layer is optional and defaults to 1, and a language that declares
+ * nothing is untouched — so this stays an opt-in per surah, per language.
+ * Values are multipliers, not sizes: 0.9 = 10% smaller, 1.1 = 10% bigger.
+ */
+export interface LanguageTextScaleConfig {
+  /** Page-wide notch for this language. Multiplies every verse capsule. */
+  all?: number;
+
+  /**
+   * Per-block trim, keyed by `LayoutBlock.id` — every verse the block owns
+   * (its `verseIds` plus a grid's `anaAyetId`) gets it. Use when a whole
+   * region reads too big, e.g. a 2×2 group whose translations all wrap.
+   */
+  blocks?: Record<string, number>;
+
+  /**
+   * Per-verse trim, keyed by the ARABIC verse/chunk id — the same id used by
+   * `verseOverrides` and `blocks[].verseIds`, so the key means the same thing
+   * in every language even where the reading order differs.
+   */
+  verses?: Record<number, number>;
 }
 
 /**

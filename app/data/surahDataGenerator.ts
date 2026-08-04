@@ -12,6 +12,13 @@ import { useSurahLayoutRuntime } from "../hooks/useSurahLayoutRuntime";
 
 export interface VerseConfig {
   id: number;
+  /**
+   * The ARABIC verse/chunk id (the `verseOverrides` / `blocks[].verseIds`
+   * key). `id`/`number` follow the active language's own numbering, which
+   * differs wherever a translation reorders the page — anything that has to
+   * agree with the config across languages keys off THIS.
+   */
+  verseId: number;
   verse: string;
   /** See `Verse.splitTexts` in SurahConfig.ts — renders as two capsules
    * sharing one number badge instead of a single numbered capsule. */
@@ -204,6 +211,7 @@ export function buildVerseConfigs(
 
         configs.push({
           id: actualVerseId,
+          verseId: lookupNumber,
           verse: verseTextMap[actualVerseId] ?? "",
           number: actualVerseId,
           y: rawTransform.y + expandH,
@@ -252,6 +260,7 @@ export function buildVerseConfigs(
 
         configs.push({
           id: verseData.number,
+          verseId: verseData.number,
           verse: verseData.text || "",
           number: verseData.number,
           y: t.y,
@@ -361,6 +370,7 @@ export function buildVerseConfigs(
 
       configs.push({
         id: v.number,
+        verseId: lookupNumber,
         verse: v.text,
         splitTexts: v.splitTexts,
         number:

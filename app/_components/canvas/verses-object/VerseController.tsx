@@ -333,6 +333,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           verse={config.verse}
           splitTexts={config.splitTexts}
           number={config.number}
+          verseId={config.verseId}
           forceShowNumber={config.forceShowNumber}
           showAyahNumber={config.showAyahNumber}
           ayahBadgeBg={config.ayahBadgeBg}

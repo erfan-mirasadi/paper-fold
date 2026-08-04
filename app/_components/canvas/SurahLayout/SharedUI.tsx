@@ -31,6 +31,7 @@ import {
   BIG_VERSE_VERTICAL_SHIFT,
   SMALL_VERSE_VERTICAL_SHIFT,
   OPPOSITE_VERSE_CONNECTOR,
+  resolveVerseTextScaleMultiplier,
 } from "../../../data/SurahConfig";
 import {
   ANA_AYET_LABEL_BY_LANGUAGE,
@@ -689,6 +690,15 @@ interface VerseBoxProps {
   /** 0 avoids capturing invisible text inside finite-frame RenderTextures. */
   textOffsetY?: number;
   textScaleOverride?: number;
+  /**
+   * The ARABIC verse/chunk id this capsule renders — the `verseOverrides` /
+   * `blocks[].verseIds` key, which is NOT always the number on the badge (a
+   * translation can reorder the page, and `displayNumber` can rename it).
+   * Only used to look up the per-language text trim
+   * (`globalSettings.languageTextScale`); pass it from wherever the lookup id
+   * is already resolved.
+   */
+  verseId?: number;
   opacity?: any;
   baseRenderOrder?: number;
   hideBackground?: boolean;
@@ -744,6 +754,7 @@ export const VerseBox = ({
   translationTextHighlights,
   textOffsetY = 0,
   textScaleOverride,
+  verseId,
   opacity,
   baseRenderOrder,
   hideBackground = false,
@@ -766,8 +777,17 @@ export const VerseBox = ({
   const isFixed =
     activeStoryConfig?.dimensions?.fixedWidthAcrossLanguages === true;
   const langScale = LANGUAGE_TEXT_SCALE[activeLanguage];
+  // The per-language trim rides ON TOP of whatever size won here — the shared
+  // baseline, the surah's `verseTextScale`, or this verse's own override — so
+  // a translation can be brought down to fit without touching the Arabic.
+  const langTrim = resolveVerseTextScaleMultiplier(
+    activeStoryConfig,
+    activeLanguage,
+    verseId ?? (typeof number === "number" ? number : undefined),
+  );
   const textScale =
-    textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig);
+    (textScaleOverride ?? (isPill ? langScale.verseSmall : langScale.verseBig)) *
+    langTrim;
   const textFont = isArabic ? QURAN_FONT : LATIN_VERSE_FONT;
 
   // TEXT INK — Arabic reads `textColor`; the translations read it too unless
@@ -1037,6 +1057,8 @@ interface SplitVerseCapsulesProps {
   textHighlights?: VerseTextHighlight[];
   translationTextHighlights?: VerseTextHighlight[];
   textScaleOverride?: number;
+  /** Arabic verse/chunk id — see `VerseBoxProps.verseId`. */
+  verseId?: number;
   opacity?: any;
   baseRenderOrder?: number;
   translationPadding?: number;
@@ -1060,6 +1082,7 @@ export const SplitVerseCapsules = ({
   textHighlights,
   translationTextHighlights,
   textScaleOverride,
+  verseId,
   opacity,
   baseRenderOrder,
   translationPadding,
@@ -1129,6 +1152,7 @@ export const SplitVerseCapsules = ({
         textHighlights={textHighlights}
         translationTextHighlights={translationTextHighlights}
         textScaleOverride={textScaleOverride}
+        verseId={verseId}
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
@@ -1150,6 +1174,7 @@ export const SplitVerseCapsules = ({
         textHighlights={textHighlights}
         translationTextHighlights={translationTextHighlights}
         textScaleOverride={textScaleOverride}
+        verseId={verseId}
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber

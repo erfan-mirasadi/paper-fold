@@ -46,6 +46,8 @@ export interface VerseMeshProps {
   verse: string;
   splitTexts?: [string, string];
   number: number | string;
+  /** Arabic verse/chunk id — see `VerseBoxProps.verseId`. */
+  verseId?: number;
   forceShowNumber?: boolean;
   showAyahNumber?: boolean;
   ayahBadgeBg?: string;
@@ -160,6 +162,7 @@ export function VerseMesh({
   verse,
   splitTexts,
   number,
+  verseId,
   forceShowNumber,
   showAyahNumber,
   ayahBadgeBg,
@@ -428,6 +431,7 @@ export function VerseMesh({
                         h={h}
                         texts={splitTexts}
                         number={number}
+                        verseId={verseId}
                         bg={bg}
                         border={border}
                         circleBorderCol={circleBorderCol}
@@ -451,6 +455,7 @@ export function VerseMesh({
                         h={h}
                         verse={verse}
                         number={number}
+                        verseId={verseId}
                         bg={bg}
                         border={border}
                         circleBorderCol={circleBorderCol}

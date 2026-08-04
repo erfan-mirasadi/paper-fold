@@ -870,6 +870,26 @@ export const ALAK_LAYOUT_CONFIG: SurahLayoutConfig = {
     capsuleLabelH: 0.032,
     capsuleLabelBorderWidth: 0.0035,
     capsuleLabelDrop: 0.015,
+
+    // The English of Alak runs long: at the shared baseline its capsules read
+    // crowded next to the Arabic ones. Every value below is a MULTIPLIER on
+    // the size the capsule already resolved to — the Arabic and Turkish pages
+    // are untouched. Keys are Arabic chunk ids (`blocks[].verseIds`).
+    languageTextScale: {
+      en: {
+        // One notch smaller across the whole page.
+        all: 0.92,
+        verses: {
+          1: 0.91,
+          2: 0.9,
+          3: 0.9,
+          4: 0.91,
+          14: 0.9,
+          15: 0.9,
+          16: 0.9,
+        },
+      },
+    },
   },
 
   blocks: [
@@ -1261,7 +1281,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
     gridVerses: [
       {
         number: 1,
-        text: "(O Muhammad), recite to the people, in the Name of your Lord, the verses now being revealed to you: He created the human being.",
+        text: "(O Muhammad), recite to the people, in\nthe Name of your Lord, the verses now being revealed to you: He created the human being.",
       },
       {
         number: 2,
@@ -1278,7 +1298,7 @@ export const ALAK_TEXT_EN: SurahDataShape = {
     ],
     anaAyet: {
       number: 5,
-      text: "By revealing to an unlettered man (Muhammad ﷺ) God taught him what he had not previously known and appointed him as His Messenger.",
+      text: "By revealing to an unlettered man (Muhammad ﷺ)\nGod taught him what he had not previously known\nand appointed him as His Messenger.",
     },
   },
 

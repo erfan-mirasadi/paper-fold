@@ -164,6 +164,55 @@ export function resolveNoteForLanguage(
   return mergeDefined<HandwrittenNoteConfig>(note, note.languageOverrides?.[language]);
 }
 
+// ── PER-LANGUAGE VERSE TEXT SCALE ───────────────────────────────────────────
+
+/**
+ * verseId → owning block id, derived from `blocks[].verseIds` (plus a grid's
+ * `anaAyetId`). Cached per config object: the blocks array never changes at
+ * runtime, and every capsule on the page asks for this on every render.
+ */
+const blockIdByVerseCache = new WeakMap<object, Map<number, string>>();
+
+function blockIdByVerse(config: SurahLayoutConfig): Map<number, string> {
+  const cached = blockIdByVerseCache.get(config);
+  if (cached) return cached;
+
+  const map = new Map<number, string>();
+  for (const block of config.blocks ?? []) {
+    for (const id of block.verseIds ?? []) map.set(id, block.id);
+    if (block.anaAyetId !== undefined) map.set(block.anaAyetId, block.id);
+  }
+  blockIdByVerseCache.set(config, map);
+  return map;
+}
+
+/**
+ * The multiplier a capsule's verse text carries for the active language —
+ * `globalSettings.languageTextScale`'s three layers multiplied together (see
+ * `LanguageTextScaleConfig`). Returns 1 when the language declares nothing,
+ * which is every surah/language that hasn't opted in.
+ *
+ * `verseId` is the ARABIC id (the `verseOverrides` / `blocks[].verseIds` key),
+ * NOT the number printed on the badge — those differ wherever a translation
+ * reorders the page.
+ */
+export function resolveVerseTextScaleMultiplier(
+  config: SurahLayoutConfig | null | undefined,
+  language: SurahLanguage,
+  verseId?: number,
+): number {
+  const scale = config?.globalSettings?.languageTextScale?.[language];
+  if (!scale) return 1;
+
+  let mult = scale.all ?? 1;
+  if (verseId !== undefined) {
+    const blockId = blockIdByVerse(config!).get(verseId);
+    if (blockId !== undefined) mult *= scale.blocks?.[blockId] ?? 1;
+    mult *= scale.verses?.[verseId] ?? 1;
+  }
+  return mult;
+}
+
 /**
  * Compute the rendered height of a single LayoutBlock.
  *
