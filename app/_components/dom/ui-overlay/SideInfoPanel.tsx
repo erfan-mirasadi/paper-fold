@@ -1346,32 +1346,69 @@ function InkScrollbar({
   );
 }
 
-// ── ScrollFadeEdge — a soft fade over the last few lines at the bottom of the
-// reading log, standing in for the old per-entry "read more" fold + arrow.
-// Its height is a slice of the viewport's own height (so it scales with the
-// device, not with any one entry's text), and it only shows while there's
-// more of the log below: it recedes the instant the reader reaches the true
-// bottom, and returns the moment they scroll back up past text it hasn't
-// covered yet. Like InkScrollbar, it reads `scrollRef` and only ever writes
-// its own opacity — never touches React state that would re-render the log.
-function ScrollFadeEdge({
-  targetRef,
-  visible,
-}: {
-  targetRef: React.RefObject<HTMLDivElement | null>;
-  /** Only shown when the log actually overflows (mirrors InkScrollbar). */
-  visible: boolean;
-}) {
-  const [hasMore, setHasMore] = useState(false);
+// ── Read fades — replace the old per-entry "read more" fold + arrow at the
+// bottom, and soften the hard clip where text now scrolls up under the
+// panel's header at the top. Rather than painting a gradient over the text
+// — which would need to match whatever happens to be rendered behind the
+// panel, and shows up as a hard seam wherever it doesn't — these MASK the
+// log's own text so it fades to true transparency: whatever's actually
+// behind always shows through correctly, no matter the theme or what the 3D
+// scene is doing back there.
+//
+// Each mask image itself never changes: it's a gradient exactly one fade-
+// height taller than the box, opaque everywhere except the edge it softens.
+// Toggling it on/off is done purely with `mask-position` (sliding that
+// gradient so its faded end lands at the box's edge, or off it entirely) —
+// a plain length that transitions smoothly in every browser, unlike trying
+// to animate the gradient itself. Both live on separate elements (the top
+// mask wraps `scrollRef`, the bottom one is `scrollRef`'s own style) so
+// they toggle fully independently without needing multi-layer mask
+// compositing. Their reach is a slice of the viewport's own height (so it
+// scales with the device, not with any one entry's text) — the bottom one
+// generous (it's replacing a multi-line fold), the top one just enough to
+// take the edge off a hard clip line.
+const BOTTOM_FADE_HEIGHT = "clamp(64px, 16vh, 180px)";
+const BOTTOM_FADE_MASK = `linear-gradient(to bottom, #000 0%, #000 calc(100% - var(--fade-h)), transparent 100%)`;
+const TOP_FADE_HEIGHT = "clamp(12px, 3vh, 28px)";
+const TOP_FADE_MASK = `linear-gradient(to bottom, transparent 0, #000 var(--fade-h), #000 100%)`;
+
+// A second, thin layer over that same top strip: a soft `backdrop-filter`
+// blur so text visibly frosts as it slides under the header instead of just
+// thinning into nothing. It's its own overlay (not part of the text's own
+// mask above) because blurring needs something to blur — the panel's own
+// content — not the text's alpha; a mask can't do both jobs on one element.
+// No tint of its own (no background color), so — like the fades above — it
+// never has to match whatever's actually behind the panel to look right.
+const TOP_GLASS_HEIGHT = TOP_FADE_HEIGHT;
+const TOP_GLASS_BLUR = "3px";
+const TOP_GLASS_MASK = "linear-gradient(to bottom, #000 0%, transparent 100%)";
+
+/** Whether `el` has more content above / below its current scroll position. */
+function computeScrollFade(el: HTMLDivElement) {
+  const max = el.scrollHeight - el.clientHeight;
+  return {
+    hasMoreAbove: el.scrollTop > 2,
+    hasMoreBelow: max > 2 && el.scrollTop < max - 2,
+  };
+}
+
+/** Tracks whether the panel's reading log has more text above and/or below
+ *  the fold — each recedes the instant the reader reaches that true edge,
+ *  and returns the moment they scroll back past text it hasn't covered. */
+function useScrollFade(targetRef: React.RefObject<HTMLDivElement | null>) {
+  const [state, setState] = useState({ hasMoreAbove: false, hasMoreBelow: false });
 
   useEffect(() => {
     const el = targetRef.current;
     if (!el) return;
-    const check = () => {
-      const max = el.scrollHeight - el.clientHeight;
-      const next = max > 2 && el.scrollTop < max - 2;
-      setHasMore((prev) => (prev !== next ? next : prev));
-    };
+    const check = () =>
+      setState((prev) => {
+        const next = computeScrollFade(el);
+        return prev.hasMoreAbove === next.hasMoreAbove &&
+          prev.hasMoreBelow === next.hasMoreBelow
+          ? prev
+          : next;
+      });
     check();
     el.addEventListener("scroll", check, { passive: true });
     const ro = new ResizeObserver(check);
@@ -1394,26 +1431,7 @@ function ScrollFadeEdge({
     };
   }, [targetRef]);
 
-  return (
-    <div
-      aria-hidden
-      className="absolute bottom-0 left-0 right-0 z-[6] pointer-events-none"
-      style={{
-        // Tied to the device's own viewport height rather than a line count,
-        // so the fade reads as consistently "the last bit of the panel"
-        // whether the screen is a small laptop or a tall desktop monitor.
-        height: "clamp(64px, 16vh, 180px)",
-        opacity: visible && hasMore ? 1 : 0,
-        transition: "opacity 0.5s ease",
-        background: `linear-gradient(to bottom,
-          transparent 0%,
-          color-mix(in srgb, var(--background) 25%, transparent) 30%,
-          color-mix(in srgb, var(--background) 60%, transparent) 55%,
-          color-mix(in srgb, var(--background) 88%, transparent) 78%,
-          var(--background) 100%)`,
-      }}
-    />
-  );
+  return state;
 }
 
 // ── The panel itself ────────────────────────────────────────────────────────
@@ -1426,6 +1444,7 @@ export function SideInfoPanel() {
   const toggle = useSideInfoStore((s) => s.toggle);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
+  const { hasMoreAbove, hasMoreBelow } = useScrollFade(scrollRef);
 
   // Same fold-step derivation the left script sidebar uses: the selector
   // returns an index, so this only re-renders when the STEP changes, not on
@@ -1668,13 +1687,57 @@ export function SideInfoPanel() {
                   frame so the bar can sit beside it without ever scrolling
                   along with the text. ─────────────────────────────────────── */}
               <div className="relative flex-1 min-h-0">
+                {/* Independent wrapper for the top fade — kept off scrollRef
+                    itself so it can toggle without touching the bottom
+                    mask's own transition (see the comment above both). */}
+                <div
+                  className="absolute inset-0"
+                  style={
+                    {
+                      "--fade-h": TOP_FADE_HEIGHT,
+                      WebkitMaskImage: TOP_FADE_MASK,
+                      maskImage: TOP_FADE_MASK,
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskSize: "100% calc(100% + var(--fade-h))",
+                      maskSize: "100% calc(100% + var(--fade-h))",
+                      WebkitMaskPosition: hasMoreAbove
+                        ? "0 0"
+                        : "0 calc(-1 * var(--fade-h))",
+                      maskPosition: hasMoreAbove
+                        ? "0 0"
+                        : "0 calc(-1 * var(--fade-h))",
+                      transition:
+                        "-webkit-mask-position 0.4s ease, mask-position 0.4s ease",
+                    } as CSSProperties
+                  }
+                >
                 <div
                   ref={scrollRef}
                   {...(hasOverflow ? { "data-lenis-prevent": "" } : {})}
                   className={`absolute inset-0 overscroll-contain
                     [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
                     ${hasOverflow ? "overflow-y-auto" : "overflow-visible"}`}
-                  style={{ paddingRight: "clamp(10px, 0.9vw, 16px)" }}
+                  style={
+                    {
+                      paddingRight: "clamp(10px, 0.9vw, 16px)",
+                      "--fade-h": BOTTOM_FADE_HEIGHT,
+                      WebkitMaskImage: BOTTOM_FADE_MASK,
+                      maskImage: BOTTOM_FADE_MASK,
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskSize: "100% calc(100% + var(--fade-h))",
+                      maskSize: "100% calc(100% + var(--fade-h))",
+                      WebkitMaskPosition: hasMoreBelow
+                        ? "0 calc(-1 * var(--fade-h))"
+                        : "0 0",
+                      maskPosition: hasMoreBelow
+                        ? "0 calc(-1 * var(--fade-h))"
+                        : "0 0",
+                      transition:
+                        "-webkit-mask-position 0.5s ease, mask-position 0.5s ease",
+                    } as CSSProperties
+                  }
                 >
                 {/* One chain for the whole log: starting any voice hushes
                     every other one, and finishing one hands over to the next
@@ -1746,7 +1809,7 @@ export function SideInfoPanel() {
                 </AnimatePresence>
                 </RecitationChainProvider>
                 </div>
-                <ScrollFadeEdge targetRef={scrollRef} visible={hasOverflow} />
+                </div>
                 <InkScrollbar
                   targetRef={scrollRef}
                   accent={scrollAccent ?? GOLD}
