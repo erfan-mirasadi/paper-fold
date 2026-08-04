@@ -1372,16 +1372,20 @@ const BOTTOM_FADE_MASK = `linear-gradient(to bottom, #000 0%, #000 calc(100% - v
 const TOP_FADE_HEIGHT = "clamp(12px, 3vh, 28px)";
 const TOP_FADE_MASK = `linear-gradient(to bottom, transparent 0, #000 var(--fade-h), #000 100%)`;
 
-// A second, thin layer over that same top strip: a soft `backdrop-filter`
-// blur so text visibly frosts as it slides under the header instead of just
-// thinning into nothing. It's its own overlay (not part of the text's own
-// mask above) because blurring needs something to blur — the panel's own
-// content — not the text's alpha; a mask can't do both jobs on one element.
-// No tint of its own (no background color), so — like the fades above — it
-// never has to match whatever's actually behind the panel to look right.
-const TOP_GLASS_HEIGHT = TOP_FADE_HEIGHT;
-const TOP_GLASS_BLUR = "3px";
-const TOP_GLASS_MASK = "linear-gradient(to bottom, #000 0%, transparent 100%)";
+// A second layer over that exact same top strip — no bigger, no separate
+// zone — that only shows the log's own scrollbar accent, and only while the
+// reader is actively scrolling: it wakes the instant they scroll and fades
+// straight back out a short idle beat after they stop, mirroring
+// InkScrollbar's own wake/idle timing (see IDLE_MS there) so the two read
+// as one impulse. The gradient is transparent at BOTH its own top and
+// bottom edges, peaking in between — a true halo with no y-position where
+// its colour starts or stops abruptly, so it never casts a hard edge of
+// its own the way a gradient that starts at full strength right at the
+// boundary would.
+const SCROLL_GLOW_MASK = (rgba: string) =>
+  `linear-gradient(to bottom, transparent 0%, ${rgba} 42%, transparent 100%)`;
+const SCROLL_GLOW_ALPHA = 0.18;
+const SCROLL_GLOW_IDLE_MS = 700;
 
 /** Whether `el` has more content above / below its current scroll position. */
 function computeScrollFade(el: HTMLDivElement) {
@@ -1434,6 +1438,30 @@ function useScrollFade(targetRef: React.RefObject<HTMLDivElement | null>) {
   return state;
 }
 
+/** True while `targetRef` is actively scrolling, false again a short idle
+ *  beat after it stops (see SCROLL_GLOW_IDLE_MS above). */
+function useScrollActivity(targetRef: React.RefObject<HTMLDivElement | null>) {
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    let idle: number | null = null;
+    const onScroll = () => {
+      setActive(true);
+      if (idle) window.clearTimeout(idle);
+      idle = window.setTimeout(() => setActive(false), SCROLL_GLOW_IDLE_MS);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (idle) window.clearTimeout(idle);
+    };
+  }, [targetRef]);
+
+  return active;
+}
+
 // ── The panel itself ────────────────────────────────────────────────────────
 export function SideInfoPanel() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
@@ -1445,6 +1473,7 @@ export function SideInfoPanel() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
   const { hasMoreAbove, hasMoreBelow } = useScrollFade(scrollRef);
+  const isScrolling = useScrollActivity(scrollRef);
 
   // Same fold-step derivation the left script sidebar uses: the selector
   // returns an index, so this only re-renders when the STEP changes, not on
@@ -1569,28 +1598,8 @@ export function SideInfoPanel() {
 
   return (
     <>
-      {/* ── Divider — thin line below the top-right button row, mirroring
-          the left sidebar's divider. Only for the right-side (portrait)
-          panel; the landscape bottom panel carries no top-right divider. ─ */}
-      {!isLandscapePaper && (
-        <div
-          className="fixed right-3 lg:right-5 z-[99] pointer-events-none hidden sm:block"
-          style={{
-            top: "clamp(42px, 4vw, 68px)",
-            width: "clamp(140px, 18vw, 320px)",
-          }}
-        >
-          <div
-            style={{
-              height: "1px",
-              background: `linear-gradient(to left, rgba(180,180,180,0.35), rgba(180,180,180,0.08) 60%, transparent 100%)`,
-            }}
-          />
-        </div>
-      )}
-
-      {/* ── Toggle — slides between two independent slots at the same Y,
-          just below the divider: flush with the page edge when CLOSED,
+      {/* ── Toggle — slides between two independent slots at the same Y:
+          flush with the page edge when CLOSED,
           flush with the panel's own inner edge when OPEN (so the open
           position always lines up with the panel it opens, at any
           viewport width — mirrors the script sidebar's toggle exactly,
@@ -1810,6 +1819,20 @@ export function SideInfoPanel() {
                 </RecitationChainProvider>
                 </div>
                 </div>
+                {/* Scroll-activity glow — see SCROLL_GLOW_* above. Same
+                    footprint as the top fade, not a zone of its own. */}
+                <div
+                  aria-hidden
+                  className="absolute top-0 left-0 right-0 z-[6] pointer-events-none"
+                  style={{
+                    height: TOP_FADE_HEIGHT,
+                    background: SCROLL_GLOW_MASK(
+                      hexToRgba(scrollAccent ?? GOLD, SCROLL_GLOW_ALPHA),
+                    ),
+                    opacity: isScrolling ? 1 : 0,
+                    transition: "opacity 0.6s ease",
+                  }}
+                />
                 <InkScrollbar
                   targetRef={scrollRef}
                   accent={scrollAccent ?? GOLD}
