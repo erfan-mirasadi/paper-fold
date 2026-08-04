@@ -462,6 +462,54 @@ export interface LayoutBlock {
   /** Custom padding overrides for the row connector, allowing it to be larger or smaller. */
   rowConnectorPadX?: number;
   rowConnectorPadY?: number;
+
+  // ── PER-LANGUAGE LAYOUT ──────────────────────────────────────────────────
+
+  /**
+   * Layout tweaks that apply only while a given language is active. The block
+   * itself (its id, verse ids, colors, shapes, drag zones) is untouched — only
+   * the numbers listed in `LayoutBlockLanguageOverride` change, so a
+   * translation can sit somewhere else on the page without becoming a second
+   * block that everything else would have to know about.
+   *
+   * Use it when a translation's own book lays the same chunks out differently
+   * — e.g. Tevbe-24, where the Turkish edition prints the two-capsule row
+   * ABOVE the dome capsule while the Arabic prints the dome first (see
+   * `stackOrder`).
+   */
+  languageOverrides?: Partial<Record<SurahLanguage, LayoutBlockLanguageOverride>>;
+}
+
+/**
+ * The subset of `LayoutBlock` a single language may override. Deliberately
+ * limited to pure positioning/sizing numbers: content, ids, colors, drag
+ * behavior and shapes stay identical across languages, so nothing downstream
+ * (customSections, svgOverlays' `anchorGroupIndex`, colorGroups index
+ * alignment, scriptHighlights) has to be re-authored per language.
+ */
+export interface LayoutBlockLanguageOverride {
+  /**
+   * Where this block sits in the vertical stack for this language, as a sort
+   * key over the blocks array (default: the block's own index). Blocks with
+   * equal keys keep their config order.
+   *
+   * ONLY the top-to-bottom stacking changes: `blocks` keeps its config order
+   * everywhere else, so group indices, `colorGroups` alignment and every
+   * `anchorGroupIndex` stay valid. Give BOTH swapped blocks a key (e.g. 6 and
+   * 5) rather than one, so the intent reads off the config.
+   */
+  stackOrder?: number;
+
+  capsuleHeight?: number;
+  rowGap?: number;
+  extraRowGap?: number;
+  gapBefore?: number;
+  columnGap?: number;
+  blockPadding?: number;
+  rows?: number;
+  verticalNudge?: number;
+  horizontalInset?: number;
+  xOffset?: number;
 }
 
 export interface LayoutStyling {
@@ -772,7 +820,32 @@ export interface SvgOverlayItem {
    * and chunk 1 in one breath and needs no box at all.
    */
   languages?: ("ar" | "en" | "tr")[];
+
+  /**
+   * Per-language placement for an overlay that IS drawn in every language but
+   * doesn't land in the same spot in all of them — typically because a
+   * `LayoutBlock.languageOverrides` entry moved the group it anchors to.
+   *
+   * Merged over the base fields, so a language only states what differs.
+   */
+  languageOverrides?: Partial<Record<SurahLanguage, SvgOverlayLanguageOverride>>;
 }
+
+/** The placement fields of `SvgOverlayItem` a single language may override. */
+export type SvgOverlayLanguageOverride = Partial<
+  Pick<
+    SvgOverlayItem,
+    | "src"
+    | "anchorGroupIndex"
+    | "anchorEdge"
+    | "scaleX"
+    | "scaleY"
+    | "offsetX"
+    | "offsetY"
+    | "rotationZ"
+    | "renderOrder"
+  >
+>;
 
 // ---------------------------------------------------------------------------
 // HANDWRITTEN NOTE CONFIG — per-surah "handwritten margin note" overlay,
@@ -834,7 +907,22 @@ export interface HandwrittenNoteSvg {
   scaleY?: number;
   /** Extra Z rotation in radians, layered on top of the note's overall rotation. */
   rotationZ?: number;
+
+  /**
+   * Per-language placement for this icon — same idea as
+   * `SvgOverlayItem.languageOverrides`: an arrow that points at a chunk has to
+   * follow that chunk when a translation lays the page out differently.
+   */
+  languageOverrides?: Partial<Record<SurahLanguage, HandwrittenNoteSvgLanguageOverride>>;
 }
+
+/** The placement fields of `HandwrittenNoteSvg` a single language may override. */
+export type HandwrittenNoteSvgLanguageOverride = Partial<
+  Pick<
+    HandwrittenNoteSvg,
+    "src" | "anchor" | "offsetX" | "offsetY" | "scaleX" | "scaleY" | "rotationZ"
+  >
+>;
 
 export interface HandwrittenNoteConfig {
   /** Lines of handwritten text, top to bottom. */
@@ -861,7 +949,22 @@ export interface HandwrittenNoteConfig {
   renderOrder?: number;
   /** Optional decorative icons anchored to this note's start/end (e.g. an arrow pointing at a verse). */
   svgs?: HandwrittenNoteSvg[];
+
+  /**
+   * Per-language placement for the note itself (the icons carry their own
+   * `languageOverrides`). Use when a translation moves the chunk this note
+   * labels.
+   */
+  languageOverrides?: Partial<Record<SurahLanguage, HandwrittenNoteLanguageOverride>>;
 }
+
+/** The placement fields of `HandwrittenNoteConfig` a single language may override. */
+export type HandwrittenNoteLanguageOverride = Partial<
+  Pick<
+    HandwrittenNoteConfig,
+    "x" | "y" | "fontSize" | "lineSpacing" | "maxWidth" | "rotationZ"
+  >
+>;
 
 // ---------------------------------------------------------------------------
 // SIDE INFORMATION (TAFSIR) PANEL — right-hand reading panel synced to the

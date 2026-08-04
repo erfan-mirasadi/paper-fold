@@ -27,7 +27,10 @@ import {
   S2_BOTTOM_IMAGE_X_OFFSET,
   S2_BOTTOM_IMAGE_Y_OFFSET,
 } from "../SurahLayout/BlockRenderer";
-import { OPPOSITE_VERSE_CONNECTOR } from "../../../data/SurahConfig";
+import {
+  OPPOSITE_VERSE_CONNECTOR,
+  resolveSvgOverlayForLanguage,
+} from "../../../data/SurahConfig";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { Color, LinearFilter, SRGBColorSpace, type Texture } from "three";
 import {
@@ -925,6 +928,7 @@ export function ElevatedSectionSurfaces() {
                 (!overlay.languages ||
                   overlay.languages.includes(activeLanguage)),
             )
+            .map((item: any) => resolveSvgOverlayForLanguage(item, activeLanguage))
             .map((overlay: any, idx: number) => {
               const gIdx = overlay.anchorGroupIndex ?? 0;
               const blockSection = SURAH_TRANSFORMS.sections[gIdx] as

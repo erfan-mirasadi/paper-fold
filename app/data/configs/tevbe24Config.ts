@@ -258,7 +258,6 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       // chunk counter (12) stacked above it.
       showAyahNumber: true,
     },
-
   },
 
   styling: {
@@ -482,6 +481,13 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
     },
     // 5 — CENTER dome (verse 8, dome-up) — wide shallow dome
+    //
+    // TURKISH: the Turkish edition of the book prints this comparison the
+    // other way round — the two-capsule row first, the dome capsule under it
+    // (see the `tr` text data below, which renumbers them 8·9 / 10 to match).
+    // The two blocks therefore swap stack slots for `tr` only; both bands keep
+    // the exact Y they have in Arabic, because the +0.02 nudge that pushes the
+    // band down travels with the slot, not with the block.
     {
       id: "g_center_dome",
       type: "group",
@@ -493,6 +499,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       dragBehavior: "individual",
       hideRowConnectors: true,
       verticalNudge: 0.02,
+      languageOverrides: {
+        tr: { stackOrder: 6, verticalNudge: 0 },
+      },
     },
     // 6 — CENTER row (left=10, right=9)
     {
@@ -505,6 +514,9 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       columnGap: 0.015,
       dragBehavior: "group",
       hideRowConnectors: true,
+      languageOverrides: {
+        tr: { stackOrder: 5, verticalNudge: 0.02 },
+      },
     },
     // 7 — Verse 11 (teal full-width bar)
     {
@@ -543,9 +555,21 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
   // this composition zoomed before. Tighten per shield if a closer read is
   // wanted.
   customSections: [
-    { id: "sec_right", verseIds: [2, 3, 4], cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 } },
-    { id: "sec_left", verseIds: [5, 6, 7], cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 } },
-    { id: "sec_center", verseIds: [8, 9, 10], cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 } },
+    {
+      id: "sec_right",
+      verseIds: [2, 3, 4],
+      cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+    },
+    {
+      id: "sec_left",
+      verseIds: [5, 6, 7],
+      cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+    },
+    {
+      id: "sec_center",
+      verseIds: [8, 9, 10],
+      cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+    },
     {
       id: "g_top",
       verseIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -594,6 +618,11 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       customSectionId: "sec_left",
     },
     // CENTER dome 8-9-10
+    //
+    // Every overlay in this band anchors to the block that stacks FIRST in the
+    // band — group 5 (the dome) in Arabic/English, group 6 (the row) in
+    // Turkish, where the two swap (see blocks). Since the swap is slot-for-slot
+    // the anchor Y is identical in both, so only `anchorGroupIndex` moves.
     {
       src: "/tevbe/dome-section.svg",
       anchorGroupIndex: 5,
@@ -604,8 +633,15 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       offsetY: -0.21,
       renderOrder: 3,
       customSectionId: "sec_center",
+      languageOverrides: {
+        tr: { anchorGroupIndex: 6 },
+      },
     },
     // GREEN arrow (sabz) — left side, between left dome (v7) → center dome (v8)
+    //
+    // In Turkish the row sits at the top of the band, so the arrow has to stop
+    // at the row's top edge instead of running down past the dome capsule —
+    // hence its own (shorter) scale + offset.
     {
       src: "/tevbe/arrow-green.svg",
       anchorGroupIndex: 5,
@@ -617,6 +653,12 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       rotationZ: -Math.PI,
       renderOrder: 5,
       customSectionId: "g_top",
+      languageOverrides: {
+        // Same arrowhead size as Arabic — the shaft just starts higher so the
+        // part above the dome capsules stays hidden behind them, leaving the
+        // head emerging into the (much shorter) gap above the row.
+        tr: { anchorGroupIndex: 6, scaleX: 0.14, scaleY: 0.2, offsetY: 0.086 },
+      },
     },
     // PURPLE arrow (banafsh) — right side, between right dome (v4) → center dome (v8)
     {
@@ -630,6 +672,12 @@ export const TEVBE_24_CONFIG: SurahLayoutConfig = {
       rotationZ: -Math.PI,
       renderOrder: 5,
       customSectionId: "g_top",
+      languageOverrides: {
+        // Same arrowhead size as Arabic — the shaft just starts higher so the
+        // part above the dome capsules stays hidden behind them, leaving the
+        // head emerging into the (much shorter) gap above the row.
+        tr: { anchorGroupIndex: 6, scaleX: 0.14, scaleY: 0.2, offsetY: 0.084 },
+      },
     },
   ],
 
@@ -1088,11 +1136,16 @@ export const TEVBE_24_TEXT_TR: SurahDataShape = {
         ],
       },
       { verses: [{ number: 4, text: "Ve yakınlarınızla beraber olmayı" }] },
-      { verses: [{ number: 8, text: "(olmaz ya) Daha çok seviyorsanız" }] },
+      // The Turkish book reads this comparison row-first, dome-second, and
+      // numbers it 8·9·10 in that order — the blocks swap stack slots for `tr`
+      // so these land the way they're printed. (The Arabic ids behind the
+      // slots are unchanged: the dome slot is still verse 8, the row still
+      // 10·9, which is what keeps the shapes/colors/drag zones tied to it.)
+      { verses: [{ number: 10, text: "(olmaz ya) Daha çok seviyorsanız" }] },
       {
         verses: [
-          { number: 9, text: "Allah ve Rasulünden" },
-          { number: 10, text: "Ve Allah yolunda savaşmaktan" },
+          { number: 8, text: "Allah ve Rasulünden" },
+          { number: 9, text: "Ve Allah yolunda savaşmaktan" },
         ],
       },
       {

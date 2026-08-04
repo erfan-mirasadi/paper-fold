@@ -28,6 +28,7 @@ import {
   type LayoutConfig,
   S2_LABEL_WIDTH,
   S2_LABEL_Y_OFFSET,
+  resolveSvgOverlayForLanguage,
 } from "../../../data/SurahConfig";
 import type { SectionTransforms, GroupTransforms } from "../../../data/schema";
 import { useStoryStore } from "../../../stores/useStoryStore";
@@ -126,9 +127,9 @@ function SingleSvgOverlay({
 function SvgOverlays({ startX, layout, groups }: { startX: number; layout: any; groups: GroupTransforms[] }) {
   const config = useStoryStore((state) => state.activeConfig);
   const activeLanguage = useSurahLanguageStore((state) => state.activeLanguage);
-  const overlays = config.svgOverlays?.filter(
-    (item) => !item.languages || item.languages.includes(activeLanguage),
-  );
+  const overlays = config.svgOverlays
+    ?.filter((item) => !item.languages || item.languages.includes(activeLanguage))
+    .map((item) => resolveSvgOverlayForLanguage(item, activeLanguage));
   if (!overlays || overlays.length === 0) return null;
   const centerX = startX + layout.sectionW / 2;
   return (

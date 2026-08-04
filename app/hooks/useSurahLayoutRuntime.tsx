@@ -25,13 +25,13 @@ export function useSurahLayoutRuntime() {
   );
 
   const layout = useMemo(
-    () => createBlockLayoutMath(activeConfig, pageWidth),
-    [activeConfig, pageWidth],
+    () => createBlockLayoutMath(activeConfig, pageWidth, activeLanguage),
+    [activeConfig, pageWidth, activeLanguage],
   );
 
   const transforms = useMemo(
-    () => buildBlockTransforms(layout, layout.START_X, activeConfig),
-    [layout, activeConfig],
+    () => buildBlockTransforms(layout, layout.START_X, activeConfig, activeLanguage),
+    [layout, activeConfig, activeLanguage],
   );
   const foldYPositions = useMemo(
     () => activeConfig.animations.computeFoldYPositions(layout),

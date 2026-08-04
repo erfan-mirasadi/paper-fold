@@ -6,9 +6,13 @@ import {
 import type {
   ElementTransform,
   GroupTransforms,
+  HandwrittenNoteConfig,
+  HandwrittenNoteSvg,
   RowConnectorTransform,
   SectionTransforms,
+  SvgOverlayItem,
 } from "./schema";
+import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
 import { ALAK_LAYOUT_CONFIG, ALAK_TEXT_AR as SURAH_DATA } from "./configs/alak96Config";
 export { ALAK_LAYOUT_CONFIG };
 
@@ -91,6 +95,74 @@ export const S1_NEON_CONFIG = ALAK_LAYOUT_CONFIG.styling.s1NeonConfig;
 // ----------------------------------------------------------------------------
 
 // ── BLOCK ENGINE HELPERS ────────────────────────────────────────────────────
+
+/**
+ * A block with its active language's `languageOverrides` folded in.
+ * `stackOrder` is the only field that isn't already a `LayoutBlock` field —
+ * it's consumed by `stackingOrder()` below and never reaches a renderer.
+ */
+export type ResolvedBlock = LayoutBlock & { stackOrder?: number };
+
+/** Drops `undefined` values so a partial override never erases a base field. */
+function mergeDefined<T extends object>(base: T, patch?: Partial<T>): T {
+  if (!patch) return base;
+  const out = { ...base };
+  for (const [k, v] of Object.entries(patch)) {
+    if (v !== undefined) (out as Record<string, unknown>)[k] = v;
+  }
+  return out;
+}
+
+/**
+ * Folds `block.languageOverrides[language]` into each block. The array keeps
+ * its CONFIG order — group indices, `colorGroups` alignment, `customSections`
+ * and every `anchorGroupIndex` are index-based and must stay stable across
+ * languages. Only the numbers inside each block change.
+ */
+export function resolveBlocksForLanguage(
+  blocks: LayoutBlock[],
+  language: SurahLanguage,
+): ResolvedBlock[] {
+  return blocks.map((b) =>
+    mergeDefined<ResolvedBlock>(b as ResolvedBlock, b.languageOverrides?.[language]),
+  );
+}
+
+/**
+ * Config indices in the order the blocks stack down the page for the active
+ * language. Identity (0,1,2,…) unless a block declares `stackOrder`; equal
+ * keys keep config order, so a single swapped pair stays local.
+ */
+function stackingOrder(blocks: ResolvedBlock[]): number[] {
+  return blocks
+    .map((b, i) => ({ i, key: b.stackOrder ?? i }))
+    .sort((a, b) => a.key - b.key || a.i - b.i)
+    .map((e) => e.i);
+}
+
+/** Folds `item.languageOverrides[language]` into an SVG overlay item. */
+export function resolveSvgOverlayForLanguage(
+  item: SvgOverlayItem,
+  language: SurahLanguage,
+): SvgOverlayItem {
+  return mergeDefined<SvgOverlayItem>(item, item.languageOverrides?.[language]);
+}
+
+/** Folds `svg.languageOverrides[language]` into a handwritten-note icon. */
+export function resolveNoteSvgForLanguage(
+  svg: HandwrittenNoteSvg,
+  language: SurahLanguage,
+): HandwrittenNoteSvg {
+  return mergeDefined<HandwrittenNoteSvg>(svg, svg.languageOverrides?.[language]);
+}
+
+/** Folds `note.languageOverrides[language]` into a handwritten note. */
+export function resolveNoteForLanguage(
+  note: HandwrittenNoteConfig,
+  language: SurahLanguage,
+): HandwrittenNoteConfig {
+  return mergeDefined<HandwrittenNoteConfig>(note, note.languageOverrides?.[language]);
+}
 
 /**
  * Compute the rendered height of a single LayoutBlock.
@@ -214,9 +286,12 @@ export interface BlockLayoutConfig {
 export function createBlockLayoutMath(
   config: SurahLayoutConfig,
   dynamicPageWidth: number,
+  language: SurahLanguage = "ar",
 ): BlockLayoutConfig {
   const gs = config.globalSettings!;
-  const blocks = config.blocks ?? [];
+  const blocks = resolveBlocksForLanguage(config.blocks ?? [], language);
+  // Config order for indices, stacking order for geometry — see stackingOrder().
+  const order = stackingOrder(blocks);
   const PAGE_WIDTH = dynamicPageWidth;
   const PADDING = config.dimensions.padding;
   const CONTENT_W = PAGE_WIDTH - PADDING * 2;
@@ -229,9 +304,10 @@ export function createBlockLayoutMath(
   const blockHeights = blocks.map((b) => computeBlockHeight(b, gs));
 
   // ── Pass 2: total content height ─────────────────────────────────────
+  // One gap per block except whichever block stacks first.
   let totalGapsH = 0;
-  for (let i = 1; i < blocks.length; i++) {
-    totalGapsH += blocks[i].gapBefore ?? gs.blockGap;
+  for (let p = 1; p < order.length; p++) {
+    totalGapsH += blocks[order[p]].gapBefore ?? gs.blockGap;
   }
   const totalContentH = blockHeights.reduce((sum, h) => sum + h, 0) + totalGapsH;
 
@@ -245,17 +321,20 @@ export function createBlockLayoutMath(
   const contentStartY = gs.contentStartYOverride ?? (paperCenter + totalContentH / 2);
 
   // ── Pass 4: per-block Y positions ────────────────────────────────────
-  const blockMeta: BlockLayoutConfig['blockMeta'] = [];
+  // Walks the stack top-to-bottom, but writes each entry back at its CONFIG
+  // index so blockMeta[i] always describes blocks[i].
+  const blockMeta: BlockLayoutConfig['blockMeta'] = new Array(blocks.length);
   let cursorY = contentStartY; // walks downward
 
-  for (let i = 0; i < blocks.length; i++) {
+  for (let p = 0; p < order.length; p++) {
+    const i = order[p];
     const nudge = blocks[i].verticalNudge ?? 0;
     const frameH = blockHeights[i];
     let frameY: number;
-    if (i === 0) {
-      // Legacy quirk, preserved exactly: block 0's nudge is isolated and does
-      // NOT cascade to later blocks (it's applied as a post-hoc adjustment
-      // after every other block's position was already computed).
+    if (p === 0) {
+      // Legacy quirk, preserved exactly: the first block's nudge is isolated
+      // and does NOT cascade to later blocks (it's applied as a post-hoc
+      // adjustment after every other block's position was already computed).
       frameY = cursorY - nudge;
     } else {
       cursorY -= nudge; // manual offset, cascades to later blocks
@@ -264,10 +343,10 @@ export function createBlockLayoutMath(
     const bPad = blocks[i].blockPadding ?? gs.blockPadding;
     const contentY = frameY - bPad; // top edge of first capsule row
 
-    blockMeta.push({ id: blocks[i].id, frameY, frameH, contentY });
+    blockMeta[i] = { id: blocks[i].id, frameY, frameH, contentY };
 
     cursorY -= frameH;
-    if (i < blocks.length - 1) cursorY -= blocks[i + 1].gapBefore ?? gs.blockGap;
+    if (p < order.length - 1) cursorY -= blocks[order[p + 1]].gapBefore ?? gs.blockGap;
   }
 
   // ── Compatibility arrays for SideCurves & computeFoldYPositions ───────
@@ -358,9 +437,10 @@ export function buildBlockTransforms(
   lm: BlockLayoutConfig,
   startX: number,
   config: SurahLayoutConfig,
+  language: SurahLanguage = "ar",
 ): BlockSurahTransforms {
   const gs = config.globalSettings!;
-  const blocks = config.blocks ?? [];
+  const blocks = resolveBlocksForLanguage(config.blocks ?? [], language);
   const sections: SectionTransforms[] = [];
 
   // Mirror shift for the outer section frame (cosmetic, same as legacy).
@@ -374,8 +454,10 @@ export function buildBlockTransforms(
   const S2_MIRROR_SHIFT = 0.015;
   const framePad = gs.framePad ?? 0;
   const hasGridBlock = blocks.some((b) => b.type === 'grid');
-  const nonGridMeta = blocks
-    .map((b, i) => ({ b, meta: lm.blockMeta[i] }))
+  // Stacking order, so "first"/"last" below mean top-most / bottom-most on the
+  // page. Identical to config order unless a block declares `stackOrder`.
+  const nonGridMeta = stackingOrder(blocks)
+    .map((i) => ({ b: blocks[i], meta: lm.blockMeta[i] }))
     .filter(({ b }) => b.type !== 'grid');
   const s2StackTop = hasGridBlock
     ? (nonGridMeta[0]?.meta.frameY ?? lm.contentStartY)

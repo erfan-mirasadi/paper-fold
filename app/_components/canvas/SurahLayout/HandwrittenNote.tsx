@@ -4,6 +4,11 @@ import * as THREE from "three";
 import { CanvasText } from "../shared/CanvasText";
 import { HANDWRITTEN_FONT } from "../../../data/theme";
 import type { HandwrittenNoteConfig } from "../../../data/schema";
+import {
+  resolveNoteForLanguage,
+  resolveNoteSvgForLanguage,
+} from "../../../data/SurahConfig";
+import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 
 /**
  * Deterministic per-line "wobble" so untouched lines still look hand-drawn
@@ -40,7 +45,9 @@ function NoteSvg({
  * an independent size/rotation/offset, which is what sells the "actually
  * handwritten" look rather than one perfectly uniform text block.
  */
-export function HandwrittenNote({ note }: { note: HandwrittenNoteConfig }) {
+export function HandwrittenNote({ note: rawNote }: { note: HandwrittenNoteConfig }) {
+  const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
+  const note = resolveNoteForLanguage(rawNote, activeLanguage);
   const {
     lines,
     x,
@@ -98,7 +105,8 @@ export function HandwrittenNote({ note }: { note: HandwrittenNoteConfig }) {
           </group>
         );
       })}
-      {svgs?.map((item, i) => {
+      {svgs?.map((rawItem, i) => {
+        const item = resolveNoteSvgForLanguage(rawItem, activeLanguage);
         const anchor = item.anchor ?? "end";
         const defaultY =
           anchor === "start"
