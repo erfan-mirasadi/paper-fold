@@ -23,7 +23,6 @@ import {
   VERSE_KICKER_BY_LANGUAGE,
 } from "@/app/hooks/useSurahLanguageStore";
 import { AnimatedText } from "@/app/_components/dom/ui-overlay/AnimatedText";
-import { ExpandableEntry } from "@/app/_components/dom/ui-overlay/ExpandableEntry";
 import {
   SyncedRecitation,
   type InkRenderer,
@@ -960,8 +959,7 @@ function SideInfoEntryView({
       );
     });
 
-  // The entry's trailing furniture — hung off the last written chunk so the
-  // "read more" fold keeps covering it, exactly as before.
+  // The entry's trailing furniture — hung off the last written chunk.
   const tail = (
     <>
       {entry.images?.map((img, i) => <InkImage key={`img-${i}`} {...img} />)}
@@ -988,12 +986,6 @@ function SideInfoEntryView({
     return chunks.map((chunk, chunkIdx) => {
       const renderedItems = renderChunkItems(chunk.items, chunk.startIndex);
       const isLastChunk = chunkIdx === chunks.length - 1;
-      const body = (
-        <>
-          {renderedItems}
-          {isLastChunk && withTail && tail}
-        </>
-      );
       return (
         <div
           key={`chunk-${chunk.startIndex}`}
@@ -1004,7 +996,8 @@ function SideInfoEntryView({
                 : undefined,
           }}
         >
-          <ExpandableEntry preview={renderedItems}>{body}</ExpandableEntry>
+          {renderedItems}
+          {isLastChunk && withTail && tail}
         </div>
       );
     });
@@ -1109,11 +1102,9 @@ function SideInfoEntryView({
         />
       )}
 
-      {/* ── The body, in reading order: written stretches folded as ever, and
-          each recited run in its place — the text is always the authored copy,
-          the transcript only times it. Recited runs sit outside
-          ExpandableEntry, so words being spoken are never folded out of
-          view. ──────────────────────────────────────────────────────────── */}
+      {/* ── The body, in reading order: written stretches and each recited
+          run in its place — the text is always the authored copy, the
+          transcript only times it. ────────────────────────────────────── */}
       {renderedFlow}
 
       {/* Nothing written to hang them off (an entry read cover to cover). */}
@@ -1210,8 +1201,8 @@ function InkScrollbar({
     el.addEventListener("load", onLoad, { capture: true });
     const ro = new ResizeObserver(schedule);
     ro.observe(el);
-    // ExpandableEntry animates its own max-height (inline style) and entries
-    // mount/unmount — watch the subtree so the thumb tracks every reflow.
+    // Entries animate in and mount/unmount as the fold story advances —
+    // watch the subtree so the thumb tracks every reflow.
     const mo = new MutationObserver(schedule);
     mo.observe(el, {
       childList: true,
@@ -1355,6 +1346,76 @@ function InkScrollbar({
   );
 }
 
+// ── ScrollFadeEdge — a soft fade over the last few lines at the bottom of the
+// reading log, standing in for the old per-entry "read more" fold + arrow.
+// Its height is a slice of the viewport's own height (so it scales with the
+// device, not with any one entry's text), and it only shows while there's
+// more of the log below: it recedes the instant the reader reaches the true
+// bottom, and returns the moment they scroll back up past text it hasn't
+// covered yet. Like InkScrollbar, it reads `scrollRef` and only ever writes
+// its own opacity — never touches React state that would re-render the log.
+function ScrollFadeEdge({
+  targetRef,
+  visible,
+}: {
+  targetRef: React.RefObject<HTMLDivElement | null>;
+  /** Only shown when the log actually overflows (mirrors InkScrollbar). */
+  visible: boolean;
+}) {
+  const [hasMore, setHasMore] = useState(false);
+
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    const check = () => {
+      const max = el.scrollHeight - el.clientHeight;
+      const next = max > 2 && el.scrollTop < max - 2;
+      setHasMore((prev) => (prev !== next ? next : prev));
+    };
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    // Entries animate in and mount/unmount as the fold story advances —
+    // watch the subtree so this tracks every reflow, same as InkScrollbar.
+    const mo = new MutationObserver(check);
+    mo.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+    window.addEventListener("resize", check);
+    return () => {
+      el.removeEventListener("scroll", check);
+      ro.disconnect();
+      mo.disconnect();
+      window.removeEventListener("resize", check);
+    };
+  }, [targetRef]);
+
+  return (
+    <div
+      aria-hidden
+      className="absolute bottom-0 left-0 right-0 z-[6] pointer-events-none"
+      style={{
+        // Tied to the device's own viewport height rather than a line count,
+        // so the fade reads as consistently "the last bit of the panel"
+        // whether the screen is a small laptop or a tall desktop monitor.
+        height: "clamp(64px, 16vh, 180px)",
+        opacity: visible && hasMore ? 1 : 0,
+        transition: "opacity 0.5s ease",
+        background: `linear-gradient(to bottom,
+          transparent 0%,
+          color-mix(in srgb, var(--background) 25%, transparent) 30%,
+          color-mix(in srgb, var(--background) 60%, transparent) 55%,
+          color-mix(in srgb, var(--background) 88%, transparent) 78%,
+          var(--background) 100%)`,
+      }}
+    />
+  );
+}
+
 // ── The panel itself ────────────────────────────────────────────────────────
 export function SideInfoPanel() {
   const activeConfig = useStoryStore((s) => s.activeConfig);
@@ -1386,8 +1447,8 @@ export function SideInfoPanel() {
   // driving the page's fold-story scroll (mirrors the left sidebar).
   //
   // Turning overflow ON is instant, but turning it OFF is deferred: entries
-  // animate in (blur/translate) and ExpandableEntry transitions its own
-  // max-height, so scrollHeight briefly dips below clientHeight mid-animation.
+  // animate in (blur/translate), so scrollHeight briefly dips below
+  // clientHeight mid-animation.
   // Without this hysteresis, data-lenis-prevent would flicker off for a frame
   // and hand that wheel tick to the page — the "scroll bleeding into the page"
   // the reader feels. We only concede the wheel once the log has genuinely
@@ -1685,6 +1746,7 @@ export function SideInfoPanel() {
                 </AnimatePresence>
                 </RecitationChainProvider>
                 </div>
+                <ScrollFadeEdge targetRef={scrollRef} visible={hasOverflow} />
                 <InkScrollbar
                   targetRef={scrollRef}
                   accent={scrollAccent ?? GOLD}

@@ -694,23 +694,6 @@ html.dark .canvas-wrapper {
     var(--at-ease, cubic-bezier(0.16, 1, 0.3, 1)) var(--at-delay, 0s) backwards;
 }
 
-/* FoldedParagraph — when a folded tafsir paragraph expands, the words below
-   the crease re-run their entrance with fresh delays (a new animation-name
-   restarts the animation), so the paragraph reads as if it keeps being
-   written. Same compositor-only pattern as at-child-in. */
-@keyframes fp-write-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 6px, 0);
-    filter: blur(4px);
-  }
-}
-
-.at-visible .at-child.fp-rewrite {
-  animation: fp-write-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--fp-delay, 0s)
-    backwards;
-}
-
 /* SyncedRecitation — karaoke reading sync. A gold ink wash fills the recited
    text continuously left → right in step with the voice. Every character AND
    every inter-word gap is its own span whose background grows in width, so the
