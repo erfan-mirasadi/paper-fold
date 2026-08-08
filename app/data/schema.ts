@@ -41,6 +41,15 @@ export interface LayoutDimensions {
    * separately. Defaults to false (paper widens as usual).
    */
   fixedWidthAcrossLanguages?: boolean;
+  /**
+   * Pulls the camera back by this factor, for a page too big to be framed by
+   * the app's fixed camera (see `cameraConfig`, which is otherwise page-size
+   * agnostic — every surah sheet is the same 1.54-wide page). Roughly
+   * `paperWidth / 1.54` frames a big paper the way a single sheet is framed;
+   * a smaller number lets it fill more of the screen. Defaults to 1, i.e. the
+   * camera every existing surah uses, untouched.
+   */
+  cameraDistanceScale?: number;
 }
 
 export interface CurveColorConfig {

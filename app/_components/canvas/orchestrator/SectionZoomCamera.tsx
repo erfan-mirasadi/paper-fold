@@ -80,14 +80,19 @@ export function SectionZoomCamera() {
     const controls = state.controls as any;
 
     // 2. Base camera position and target from config
+    // A page big enough to need the camera pulled back (an atlas of several
+    // sheets — see `LayoutDimensions.cameraDistanceScale`) scales the whole
+    // camera triangle, height included: the resting height has to move with
+    // the distance or the view flattens out. 1 for every ordinary surah.
+    const distanceScale = config.dimensions.cameraDistanceScale ?? 1;
     const [, defY] = CAMERA_CONFIG.initialCamera.position;
     const [, defTY] = CAMERA_CONFIG.initialCamera.target;
 
     const defFov = CAMERA_CONFIG.initialCamera.fov;
 
-    let targetCamY = defY;
+    let targetCamY = defY * distanceScale;
     let targetFov = defFov;
-    let lookAtY = defTY;
+    let lookAtY = defTY * distanceScale;
 
     // Infer section if we only clicked a verse and activeSectionId is null
     let targetSectionId = fallbackSectionId;

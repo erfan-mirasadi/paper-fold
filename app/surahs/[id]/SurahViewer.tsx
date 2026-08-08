@@ -221,6 +221,17 @@ function SurahViewerInner({
 }: InnerProps) {
   const lenis = useLenis();
 
+  // A composed atlas page (several sheets on one paper) is several times wider
+  // than a surah sheet and would run straight off the sides of the app's fixed
+  // camera. Every ordinary surah leaves this at 1 and is untouched — see
+  // `LayoutDimensions.cameraDistanceScale`.
+  const cameraDistanceScale = useStoryStore(
+    (s) => s.activeConfig.dimensions.cameraDistanceScale ?? 1,
+  );
+  const cameraPosition = CAMERA_CONFIG.initialCamera.position.map(
+    (v) => v * cameraDistanceScale,
+  ) as [number, number, number];
+
   useAutoCollapsePanelsOnElevate();
 
   // ── Lock scroll during loading so user cannot scroll before scene is ready ──
@@ -364,7 +375,7 @@ function SurahViewerInner({
                   canvasWrapperRef as React.MutableRefObject<HTMLDivElement>
                 }
                 camera={{
-                  position: CAMERA_CONFIG.initialCamera.position,
+                  position: cameraPosition,
                   fov: CAMERA_CONFIG.initialCamera.fov,
                 }}
                 dpr={isMobile ? [1, 1] : [1, 2]}
@@ -385,7 +396,7 @@ function SurahViewerInner({
                  */}
                 <PerspectiveCamera
                   makeDefault
-                  position={CAMERA_CONFIG.initialCamera.position}
+                  position={cameraPosition}
                   fov={CAMERA_CONFIG.initialCamera.fov}
                 />
                 <DynamicControls />

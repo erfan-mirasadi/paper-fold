@@ -114,6 +114,12 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "يس ١٣-١٩",
     reference: "Yâsîn 13-19",
   },
+  {
+    id: "yasin",
+    displayName: "Yâsîn — Tek Levha",
+    arabicName: "يس",
+    reference: "Yâsîn 1-19",
+  },
 ] as const;
 
 /**
@@ -245,6 +251,15 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/yasin1319Config").then((m) => ({
         config: m.YASIN_13_19_CONFIG,
         textData: m.YASIN_13_19_TEXT_DATA,
+      })),
+  ],
+  // Not a page of its own: every Yâsîn sheet composed onto ONE landscape
+  // paper (see yasinPaperConfig). Its chunk pulls both sheet configs in.
+  yasin: [
+    () =>
+      import("./configs/yasinPaperConfig").then((m) => ({
+        config: m.YASIN_PAPER_CONFIG,
+        textData: m.YASIN_PAPER_TEXT_DATA,
       })),
   ],
 };
