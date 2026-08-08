@@ -1,0 +1,40 @@
+<svg width="1611" height="1000" viewBox="0 0 1611 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 1-12 — RING 2 of 3, the MIDDLE band. Encloses ayahs 8 … 10; the
+     capsules against its top and bottom edges are ayah 8 and ayah 10, the
+     middle pair of the chiasm. Painted over ring-outer.svg and painted over in
+     turn by ring-inner.svg — see ring-outer.svg for how the three stack, why
+     the visible band is the leftover margin between two rectangles, why the
+     colours are Tevbe 24's tints rather than the photo's watercolour, and how
+     the corner radius (not the width) sets how wide a capsule may be.
+
+     Lavender #E1E3F3 — Tevbe 24's shield fill — at a higher opacity than the
+     ring outside it, so the middle layer stays legible over the cream it is
+     painted on top of.
+
+     Fit check at r 0.135 world, d 0.038 (ayah 8's top edge under the config's
+     0.030 top pad): 0.041 lost a side, leaving 0.761 usable for a 0.72
+     capsule.
+
+     ASPECT — drawn AT the aspect it is displayed at:
+
+         viewBox 1611 x 1000                  ->  1.611
+         config  scaleX 0.86 / scaleY 0.534    ->  1.611
+
+     one SVG unit = 5.34e-4 world on BOTH axes.
+
+     GEOMETRY (world units at 0.86 x 0.534)
+       outer edge   flush with the plane   ->  0.86 w x 0.534 h
+       stroke       16 units               ->  0.0085  (== the other two rings)
+       corner r     253 units              ->  0.135   (25% of the height) -->
+<defs>
+<linearGradient id="yasinRingMidGold" x1="0" y1="500" x2="1611" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="8.0" y="8.0" width="1595" height="984"
+      rx="253" ry="253"
+      fill="#E1E3F3" fill-opacity="0.82"
+      stroke="url(#yasinRingMidGold)" stroke-width="16"/>
+</svg>

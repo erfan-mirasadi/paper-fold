@@ -1,0 +1,43 @@
+<svg width="846" height="1000" viewBox="0 0 846 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 13-19 — the sheet's MIDDLE BAND: everything the town and the
+     messengers say to each other, ayahs 14 … 19. Ayah 13 stays OUTSIDE it, in
+     the outer frame only, because ayah 13 is the narrator's line — "set out for
+     them the parable of the people of the town" — and not part of the exchange
+     it introduces. That one capsule sitting above this band is the whole point
+     of having a band at all.
+
+     COLOUR. Blue #CEE0E9 at 0.6 opacity over the shared gold gradient —
+     byte-for-byte /tevbe/dome-section-1.svg's treatment, which is also what
+     /nisa23/frame-oval-top.svg uses. Translucent, not opaque: it is painted
+     over the outer frame's cream panel and is painted over in turn by
+     band-inner.svg, and the paper's creases have to keep travelling through all
+     three (see /yasin/ring-outer.svg for the same three-deep stack).
+
+     ASPECT — drawn AT the aspect it is displayed at:
+
+         viewBox 846 x 1000                    ->  0.846
+         config  scaleX 0.95 / scaleY 1.123     ->  0.846
+
+     one SVG unit = 1.123e-3 world on BOTH axes.
+
+     GEOMETRY (world units at 0.95 x 1.123)
+       outer edge   flush with the plane   ->  0.95 w x 1.123 h
+       stroke       8 units                ->  0.0090
+       corner r     80 units               ->  0.0898  (8% of the height)
+
+     Corner radius is small relative to the height here — this is a tall band,
+     not a stadium — so the corner costs a capsule almost nothing: at d 0.044
+     (ayah 14's top edge under the config's 0.036 top pad) it eats 0.013 a side,
+     leaving 0.908 of usable width for the 0.82 capsules. -->
+<defs>
+<linearGradient id="yasin1319BandGold" x1="0" y1="500" x2="846" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="4" y="4" width="838" height="992"
+      rx="80" ry="80"
+      fill="#CEE0E9" fill-opacity="0.6"
+      stroke="url(#yasin1319BandGold)" stroke-width="8"/>
+</svg>

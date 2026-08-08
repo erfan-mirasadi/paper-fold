@@ -102,6 +102,18 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "المَاعُون ١٠٧",
     reference: "Mâûn 107",
   },
+  {
+    id: "yasin36",
+    displayName: "Yâsîn 1-12",
+    arabicName: "يس ١-١٢",
+    reference: "Yâsîn 1-12",
+  },
+  {
+    id: "yasin1319",
+    displayName: "Yâsîn 13-19",
+    arabicName: "يس ١٣-١٩",
+    reference: "Yâsîn 13-19",
+  },
 ] as const;
 
 /**
@@ -219,6 +231,20 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/maun107Config").then((m) => ({
         config: m.MAUN_107_CONFIG,
         textData: m.MAUN_107_TEXT_DATA,
+      })),
+  ],
+  yasin36: [
+    () =>
+      import("./configs/yasin36Config").then((m) => ({
+        config: m.YASIN_36_CONFIG,
+        textData: m.YASIN_36_TEXT_DATA,
+      })),
+  ],
+  yasin1319: [
+    () =>
+      import("./configs/yasin1319Config").then((m) => ({
+        config: m.YASIN_13_19_CONFIG,
+        textData: m.YASIN_13_19_TEXT_DATA,
       })),
   ],
 };
