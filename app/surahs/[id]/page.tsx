@@ -16,12 +16,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 
-import {
-  getSurahMeta,
-  isAtlasSurah,
-  resolveLegacySurahId,
-} from "@/app/data/surahDatabase";
-import { AtlasViewer } from "@/app/_components/canvas/atlas/AtlasViewer";
+import { getSurahMeta, resolveLegacySurahId } from "@/app/data/surahDatabase";
 import { StoreInitializer } from "./StoreInitializer";
 
 // ---------------------------------------------------------------------------
@@ -83,12 +78,6 @@ export default async function SurahPage({ params }: PageProps) {
   const meta = getSurahMeta(id);
   if (!meta) {
     notFound();
-  }
-
-  // A board surah has no single page config to seed, so it skips
-  // StoreInitializer and the whole folding-paper pipeline entirely.
-  if (isAtlasSurah(id)) {
-    return <AtlasViewer />;
   }
 
   return (

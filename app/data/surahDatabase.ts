@@ -102,12 +102,6 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "المَاعُون ١٠٧",
     reference: "Mâûn 107",
   },
-  {
-    id: "yasin",
-    displayName: "Yâsîn 36",
-    arabicName: "يٰسٓ ٣٦",
-    reference: "Yâsîn 36",
-  },
 ] as const;
 
 /**
@@ -227,27 +221,7 @@ const SURAH_PAPER_LOADERS: Readonly<
         textData: m.MAUN_107_TEXT_DATA,
       })),
   ],
-  // Yasin's config lives in a FOLDER rather than a single file: the board is
-  // traced from a photograph (board.ts), its text is authored sheet by sheet
-  // (text.ts), and the layout config wires the two together (index.ts). Same
-  // loader contract as every other surah — only the organization differs.
 };
-
-/**
- * Surahs presented as a BOARD of separate sheets rather than as one folding
- * page — see `_components/canvas/atlas/`.
- *
- * These ids have no entry in `SURAH_PAPER_LOADERS` on purpose: a board has no
- * single `SurahLayoutConfig` to seed, because its sheets are independent
- * objects with their own positions and contents. The route branches on this
- * set before it ever reaches the paper-loading path.
- */
-const ATLAS_SURAH_IDS: ReadonlySet<string> = new Set(["yasin"]);
-
-/** True when this route should mount the board instead of the folding page. */
-export function isAtlasSurah(id: string): boolean {
-  return ATLAS_SURAH_IDS.has(id);
-}
 
 // Memoized in-flight/settled promises. Keeping resolved configs cached makes
 // arrow navigation (and back/forward between papers) instant after the first
