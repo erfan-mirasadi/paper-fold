@@ -47,7 +47,9 @@ const GOLD_STOPS = `
  * The rest are rounded rectangles.
  */
 const PAINTS: Record<
-  Exclude<FrameTone, "outer">,
+  // `none` never arrives here — `buildSheet` keeps those frames out of the list
+  // it hands over, precisely because there is no art to draw for them.
+  Exclude<FrameTone, "outer" | "none">,
   { fill: string; opacity: number; stadium?: boolean; lens?: boolean; ellipse?: boolean }
 > = {
   rose: { fill: "#F3DEDE", opacity: 0.55 },
@@ -62,7 +64,12 @@ const PAINTS: Record<
   circle: { fill: "#DCE9F2", opacity: 0.45, ellipse: true },
 };
 
-function svgFor(tone: FrameTone, w: number, h: number, id: string): string {
+function svgFor(
+  tone: Exclude<FrameTone, "none">,
+  w: number,
+  h: number,
+  id: string,
+): string {
   const vbH = 1000;
   const vbW = Math.round((1000 * w) / h);
   const unit = h / 1000; // world units per SVG unit, both axes

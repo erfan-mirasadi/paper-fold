@@ -161,7 +161,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 35,
-          tone: "maroon",
+          tone: "green",
           shape: "dome-down",
           ar: "أَفَلَا يَشْكُرُونَ",
           tr: "Hâlâ şükretmezler mi?",
@@ -214,13 +214,17 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    // The circle that holds the whole rosette.
+    // The circle that holds the whole rosette — the only frame that is DRAWN.
     { from: 0, to: 6, tone: "circle", label: "Toprak\n(33-36. ayet)", labelSide: "left" },
-    // One lens per ayah. The middle row's two lenses take a side each.
-    { from: 0, to: 2, tone: "lens" },
-    { from: 3, to: 3, tone: "lens", side: "right" },
-    { from: 3, to: 3, tone: "lens", side: "left" },
-    { from: 4, to: 6, tone: "lens" },
+    // One petal per ayah, `none` rather than `lens`: the mandorla outline is
+    // gone, but the grouping it stood for is not. Each petal still gets its own
+    // width, its own air from the petals around it, and its own drag zone and
+    // camera target — and the capsules now draw the lens on their own, arching
+    // up at the top of the group and down at the bottom.
+    { from: 0, to: 2, tone: "none" },
+    { from: 3, to: 3, tone: "none", side: "right" },
+    { from: 3, to: 3, tone: "none", side: "left" },
+    { from: 4, to: 6, tone: "none" },
   ],
 };
 

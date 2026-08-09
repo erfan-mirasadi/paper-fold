@@ -87,7 +87,14 @@ export type FrameTone =
   /** A mandorla — two arcs meeting at a point. One ayah per petal. */
   | "lens"
   /** A plain ellipse, for the ring that holds a rosette of petals. */
-  | "circle";
+  | "circle"
+  /**
+   * GROUPS BUT DOES NOT DRAW. No SVG is emitted and nothing is painted, yet the
+   * frame still narrows the rows it wraps, still opens air around them, and
+   * still gives them their own drag zone and camera target. This is how a page
+   * keeps a group that reads as a group without a rim around it.
+   */
+  | "none";
 
 // ---------------------------------------------------------------------------
 // Declaration
@@ -182,7 +189,8 @@ export interface SheetSpec {
 export interface SheetFrameRect {
   /** Path the config points at, relative to /public. */
   src: string;
-  tone: FrameTone;
+  /** Never `none` — a frame that draws nothing is never handed to the emitter. */
+  tone: Exclude<FrameTone, "none">;
   /** World size — the aspect the SVG must be drawn at. */
   w: number;
   h: number;
@@ -229,6 +237,13 @@ const DEPTH_STEP = 0.055;
 
 /** Air between two capsules under the same frames. */
 const ROW_AIR = 0.018;
+/**
+ * Air where a DOME meets the capsule it sits against. A dome carries its own
+ * separation — the arch pulls away from its neighbour the moment it leaves the
+ * wall — so the two sit flush, and `BLOCK_PADDING` on each side is all that is
+ * left between them. That is what draws a petal's three lines into one group.
+ */
+const DOME_ROW_AIR = 0;
 /** Extra air wherever a frame's rim has to pass between two capsules. */
 const RIM_AIR = 0.012;
 
@@ -337,6 +352,14 @@ const isPair = (row: SheetRow | ColumnItem): row is PairRow =>
 const capsulesOf = (item: SheetRow | ColumnItem): CapsuleSpec[] =>
   isPair(item) ? item.pair : isSplit(item) ? [] : [item];
 
+/** Does this row/column item carry a domed capsule? */
+const isDomed = (item: SheetRow | ColumnItem) =>
+  capsulesOf(item).some((c) => c.shape !== undefined);
+
+/** Air between two items stacked one under the other. */
+const airBetween = (above: SheetRow | ColumnItem, below: SheetRow | ColumnItem) =>
+  isDomed(above) || isDomed(below) ? DOME_ROW_AIR : ROW_AIR;
+
 const capsuleHeight = (item: CapsuleSpec | ColumnItem) =>
   Math.max(
     ...capsulesOf(item).map(
@@ -401,7 +424,11 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   /** Height of a stack of capsules, one under the other. */
   const stackHeight = (caps: ColumnItem[]) =>
     caps.reduce(
-      (sum, c, i) => sum + capsuleHeight(c) + BLOCK_PADDING * 2 + (i ? ROW_AIR : 0),
+      (sum, c, i) =>
+        sum +
+        capsuleHeight(c) +
+        BLOCK_PADDING * 2 +
+        (i ? airBetween(caps[i - 1], c) : 0),
       0,
     );
 
@@ -414,7 +441,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   /** Air above row i: one rim's worth for every frame edge crossing here. */
   const gapAbove = (i: number) => {
     if (i === 0) return 0;
-    let gap = ROW_AIR;
+    let gap = airBetween(rows[i - 1], rows[i]);
     frames.forEach((f, fi) => {
       if (f.to === i - 1 || f.from === i) {
         gap += framePadY(frameDepth[fi]) + RIM_AIR;
@@ -457,7 +484,8 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
 
       const column = (caps: ColumnItem[], w: number, shift: number) => {
         let y = top;
-        for (const c of caps) {
+        caps.forEach((c, ci) => {
+          if (ci) y -= airBetween(caps[ci - 1], c);
           placements.push({
             capsules: capsulesOf(c),
             verseIds: capsulesOf(c).map(() => nextId++),
@@ -467,8 +495,8 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
             xOffset: shift,
             rowIndex: i,
           });
-          y -= capsuleHeight(c) + BLOCK_PADDING * 2 + ROW_AIR;
-        }
+          y -= capsuleHeight(c) + BLOCK_PADDING * 2;
+        });
       };
       // Right first: it reads first, so it takes the lower verse ids and the
       // earlier colorGroups, which is the order the sidebar reads them in.
@@ -614,19 +642,29 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     };
   });
 
-  const svgOverlays: SvgOverlayItem[] = frameRects.map((r, fi) => ({
-    src: r.src,
-    anchorGroupIndex: r.anchor,
-    anchorEdge: "top",
-    scaleX: r.w,
-    scaleY: r.h,
-    offsetX: r.offsetX,
-    offsetY: r.offsetY,
-    // Innermost paints last: each frame paints over the middle of the one
-    // below it, and that overpainting is what makes the nesting read.
-    renderOrder: 2 + frameDepth[fi],
-    customSectionId: `${spec.key}_f${fi}`,
-  }));
+  // A `none` frame contributes no overlay — it has already done its work above,
+  // in the widths, the air and the rectangles, and its zone is declared with
+  // the others below.
+  const svgOverlays: SvgOverlayItem[] = frameRects.flatMap((r, fi) =>
+    r.tone === "none"
+      ? []
+      : [
+          {
+            src: r.src,
+            anchorGroupIndex: r.anchor,
+            anchorEdge: "top" as const,
+            scaleX: r.w,
+            scaleY: r.h,
+            offsetX: r.offsetX,
+            offsetY: r.offsetY,
+            // Innermost paints last: each frame paints over the middle of the
+            // one below it, and that overpainting is what makes the nesting
+            // read.
+            renderOrder: 2 + frameDepth[fi],
+            customSectionId: `${spec.key}_f${fi}`,
+          },
+        ],
+  );
 
   // Innermost FIRST — sectionResolver's reverse index is first-wins, so a
   // capsule lands in the tightest frame around it while the outer frames still
@@ -830,7 +868,10 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   return {
     config,
     textData: { ar: textFor("ar"), en: textFor("en"), tr: textFor("tr") },
-    frames: frameRects.map(({ src, tone, w, h }) => ({ src, tone, w, h })),
+    // `none` frames have no art to draw, so the emitter is never told about them.
+    frames: frameRects.flatMap(({ src, tone, w, h }) =>
+      tone === "none" ? [] : [{ src, tone, w, h }],
+    ),
     paperWidth,
     paperHeight,
   };
