@@ -42,9 +42,9 @@
  * the capsule, so text that does not fit is re-wrapped and then CLIPPED.
  */
 
-import type { SurahLayoutConfig } from "../schema";
-import type { SurahDataShape } from "../SurahConfig";
-import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
+import type { SurahLayoutConfig } from "../../../schema";
+import type { SurahDataShape } from "../../../SurahConfig";
+import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, as in yasin36Config. The reference photo paints

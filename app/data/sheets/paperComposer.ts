@@ -112,6 +112,20 @@ export interface SheetPlacement {
   sheet: ComposableSheet;
   x: number;
   y: number;
+  /**
+   * Draw this sheet smaller (or larger) than it was authored. 1 — the default
+   * — is the sheet at the size it has on its own page.
+   *
+   * EVERYTHING the sheet owns scales together: capsule heights, row and block
+   * gaps, insets, verse text, frame SVGs and handwritten notes, so a scaled
+   * sheet is the same drawing at another size rather than a re-flowed one. Two
+   * things cannot follow, because the renderers read them globally rather than
+   * per sheet: a capsule's corner radius and its border width (SharedUI's
+   * `VERSE_5_6_19_RADIUS` / `CAPSULE_BORDER_WIDTH`, both off Alak). Near 1 that
+   * is invisible; below about 0.6 the corners start to read too round and the
+   * rules too thick.
+   */
+  scale?: number;
 }
 
 export interface PaperCompositionSpec {
@@ -262,7 +276,8 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
   let prevBottom = 0;
 
   for (const placement of spec.sheets) {
-    const { key, sheet, x: dx, y: dy } = placement;
+    const { key, sheet, x: dx, y: dy, scale: rawScale } = placement;
+    const s = rawScale ?? 1;
     const src = sheet.config;
     const srcGs = src.globalSettings;
     const srcBlocks = src.blocks ?? [];
@@ -275,7 +290,7 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
     const srcPageW = src.dimensions.paperWidth;
     const lm = createBlockLayoutMath(src, srcPageW, GEOMETRY_LANGUAGE);
     const srcSectionInnerW = lm.sectionW - srcGs.sectionPadX * 2;
-    const srcPageCenterX = srcPageW / 2;
+    const srcPageCenterX = (srcPageW / 2) * s;
 
     // Everything this sheet draws moves by (dx, dy); an overlay's X is stated
     // relative to the PAGE centre (see BlockRenderer's SvgOverlays), so it
@@ -309,13 +324,15 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
 
     srcBlocks.forEach((block, i) => {
       const meta = lm.blockMeta[i];
-      const wantedFrameY = meta.frameY + dy;
+      const wantedFrameY = meta.frameY * s + dy;
+      const frameH = meta.frameH * s;
 
       // Resolved (never inherited) geometry — see note 1 in the file header.
-      const capsuleHeight = block.capsuleHeight ?? srcGs.capsuleHeight;
-      const rowGap = block.rowGap ?? srcGs.rowGap;
-      const blockPadding = block.blockPadding ?? srcGs.blockPadding;
-      const columnGap = block.columnGap ?? srcGs.columnGap;
+      const rawBlockPadding = block.blockPadding ?? srcGs.blockPadding;
+      const capsuleHeight = (block.capsuleHeight ?? srcGs.capsuleHeight) * s;
+      const rowGap = (block.rowGap ?? srcGs.rowGap) * s;
+      const blockPadding = rawBlockPadding * s;
+      const columnGap = (block.columnGap ?? srcGs.columnGap) * s;
       const cols = block.columns ?? 2;
       const srcInset = block.horizontalInset ?? 0;
       const srcBlockInnerW = srcSectionInnerW - srcInset * 2;
@@ -329,15 +346,15 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       let horizontalInset: number;
       if (cols <= 2) {
         const srcColW =
-          (srcBlockInnerW - blockPadding * 2 - srcGs.columnGap) / 2;
+          ((srcBlockInnerW - rawBlockPadding * 2 - srcGs.columnGap) / 2) * s;
         horizontalInset =
           (sectionInnerW - (srcColW * 2 + blockPadding * 2 + gs.columnGap)) / 2;
       } else {
-        horizontalInset = (sectionInnerW - srcBlockInnerW) / 2;
+        horizontalInset = (sectionInnerW - srcBlockInnerW * s) / 2;
       }
 
       // A block's centre is `pageCentre + xOffset`, on both pages.
-      const xOffset = srcPageCenterX + (block.xOffset ?? 0) + dx - pageCenterX;
+      const xOffset = srcPageCenterX + (block.xOffset ?? 0) * s + dx - pageCenterX;
 
       const composed: LayoutBlock = defined({
         ...block,
@@ -366,7 +383,7 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       });
 
       if (contentStartY === undefined) contentStartY = wantedFrameY;
-      prevBottom = wantedFrameY - meta.frameH;
+      prevBottom = wantedFrameY - frameH;
 
       if (isGroupBlock(block)) {
         groupIndexMap.set(srcGroupIdx, composedGroupCount + srcGroupIdx);
@@ -385,11 +402,16 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       const ov = src.verseOverrides?.[srcId];
       verseOverrides[composedId] = defined({
         ...ov,
-        textScaleOverride: ov?.textScaleOverride ?? srcGs.verseTextScale,
-        translationTextScaleOverride:
+        textScaleOverride: scaleOr(
+          ov?.textScaleOverride ?? srcGs.verseTextScale,
+          s,
+        ),
+        translationTextScaleOverride: scaleOr(
           ov?.translationTextScaleOverride ??
-          srcGs.translationVerseTextScale ??
-          undefined,
+            srcGs.translationVerseTextScale ??
+            undefined,
+          s,
+        ),
         // The composed page hides numbers page-wide, so a sheet that showed
         // them opts each of its verses back in.
         showNumber: sheetHidesNumbers ? ov?.showNumber : true,
@@ -439,7 +461,10 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
             item.anchorGroupIndex !== undefined
               ? groupIndexMap.get(item.anchorGroupIndex)
               : undefined,
-          offsetX: (item.offsetX ?? 0) + overlayShiftX,
+          scaleX: item.scaleX !== undefined ? item.scaleX * s : undefined,
+          scaleY: item.scaleY !== undefined ? item.scaleY * s : undefined,
+          offsetX: (item.offsetX ?? 0) * s + overlayShiftX,
+          offsetY: item.offsetY !== undefined ? item.offsetY * s : undefined,
           customSectionId: item.customSectionId
             ? `${key}__${item.customSectionId}`
             : item.customSectionId,
@@ -473,16 +498,25 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       handwrittenNotes.push(
         defined({
           ...note,
-          x: note.x + dx,
-          y: note.y + dy,
+          x: note.x * s + dx,
+          y: note.y * s + dy,
+          fontSize: note.fontSize * s,
+          maxWidth: note.maxWidth !== undefined ? note.maxWidth * s : undefined,
+          svgs: note.svgs?.map((g) => ({
+            ...g,
+            offsetX: g.offsetX !== undefined ? g.offsetX * s : undefined,
+            offsetY: g.offsetY !== undefined ? g.offsetY * s : undefined,
+            scaleX: g.scaleX !== undefined ? g.scaleX * s : undefined,
+            scaleY: g.scaleY !== undefined ? g.scaleY * s : undefined,
+          })),
           languageOverrides: overrides
             ? Object.fromEntries(
                 Object.entries(overrides).map(([lang, o]) => [
                   lang,
                   defined({
                     ...o,
-                    x: o.x !== undefined ? o.x + dx : undefined,
-                    y: o.y !== undefined ? o.y + dy : undefined,
+                    x: o.x !== undefined ? o.x * s + dx : undefined,
+                    y: o.y !== undefined ? o.y * s + dy : undefined,
                   }),
                 ]),
               )
@@ -638,6 +672,11 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Multiplies a size that may not be there. */
+function scaleOr(v: number | undefined, s: number): number | undefined {
+  return v === undefined ? undefined : v * s;
+}
 
 /**
  * A section's zoom target is a camera HEIGHT, tuned against the fixed camera

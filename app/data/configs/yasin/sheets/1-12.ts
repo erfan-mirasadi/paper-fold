@@ -65,10 +65,10 @@
  * the capsule, so text that does not fit is re-wrapped and then CLIPPED.
  */
 
-import type { SurahLayoutConfig } from "../schema";
-import type { SurahDataShape } from "../SurahConfig";
-import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
-import { GREEN_THEME } from "../theme";
+import type { SurahLayoutConfig } from "../../../schema";
+import type { SurahDataShape } from "../../../SurahConfig";
+import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
+import { GREEN_THEME } from "../../../theme";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, not the reference photo's. The photo paints in

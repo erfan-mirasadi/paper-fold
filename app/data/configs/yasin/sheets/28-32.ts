@@ -1,0 +1,67 @@
+import { buildSheet, type SheetSpec } from "../kit";
+
+// ---------------------------------------------------------------------------
+
+const SPEC: SheetSpec = {
+  id: "yasin2832",
+  key: "yasin2832",
+  title: "YÂSÎN: 28-32",
+  heroSubtitle: "suresi 28-32",
+  noteTitle: "Yâsîn: 28-32",
+  sayfa: 442,
+
+  rows: [
+    {
+      ayah: 28,
+      tone: "cream",
+      ar: "وَمَا أَنزَلْنَا عَلَىٰ قَوْمِهِ مِن بَعْدِهِ\nمِن جُندٍ مِّنَ السَّمَاءِ وَمَا كُنَّا مُنزِلِينَ",
+      tr: "Ondan sonra kavminin üzerine\ngökten bir ordu indirmedik; indirecek de değildik.",
+      en: "After him We sent down no army from heaven\nagainst his people, nor were We to send one.",
+    },
+    {
+      ayah: 29,
+      tone: "white",
+      ar: "إِن كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً\nفَإِذَا هُمْ خَامِدُونَ",
+      tr: "Sadece korkunç bir ses oldu;\nbir de baktılar, sönüp gitmişler.",
+      en: "It was but one shout —\nand at once they were extinguished.",
+    },
+    {
+      ayah: 30,
+      tone: "maroon",
+      ar: "يَا حَسْرَةً عَلَى الْعِبَادِ\nمَا يَأْتِيهِم مِّن رَّسُولٍ إِلَّا كَانُوا بِهِ يَسْتَهْزِئُونَ",
+      tr: "Yazık şu kullara!\nKendilerine gelen her elçiyle mutlaka alay ettiler.",
+      en: "Alas for the servants!\nNo messenger came to them but they mocked him.",
+    },
+    {
+      ayah: 31,
+      tone: "maroon",
+      ar: "أَلَمْ يَرَوْا كَمْ أَهْلَكْنَا قَبْلَهُم مِّنَ الْقُرُونِ\nأَنَّهُمْ إِلَيْهِمْ لَا يَرْجِعُونَ",
+      tr: "Görmediler mi, onlardan önce nice nesilleri helâk ettik;\nartık onlara dönmüyorlar.",
+      en: "Have they not seen how many generations We destroyed before them,\nnone of whom return to them?",
+    },
+    {
+      ayah: 32,
+      tone: "cream",
+      ar: "وَإِن كُلٌّ لَّمَّا جَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
+      tr: "Hepsi de toplanıp huzurumuza getirileceklerdir.",
+      en: "And all of them will be brought before Us together.",
+    },
+  ],
+
+  frames: [
+    { from: 0, to: 4, tone: "ring" },
+    { from: 1, to: 3, tone: "ringMid", label: "Helâk\n(29-31. ayet)", labelSide: "right" },
+    { from: 2, to: 3, tone: "ringInner", label: "Hasret\n(30-31. ayet)", labelSide: "left" },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// 33-36 — the dead earth. Copied off the handwritten sheet, which does NOT
+// stack these four ayahs: it breaks each one into its phrases and lays the
+// phrases inside an ONION of ovals, so the page reads as one round growing
+// thing — earth, seed, fruit, and then the pairs of everything.
+//
+// A long phrase takes a whole row; two short ones sit beside each other. Only
+// the LAST fragment of an ayah carries its number, exactly as on the sheet.
+
+export const SHEET = buildSheet(SPEC);

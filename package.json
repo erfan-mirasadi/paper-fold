@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "emit:frames": "tsc scripts/emitSheetFrames.ts --outDir .frames-build --module commonjs --moduleResolution node --target es2022 --skipLibCheck --esModuleInterop --rootDir . && node .frames-build/scripts/emitSheetFrames.js"
   },
   "dependencies": {
     "@react-spring/three": "^10.0.3",
