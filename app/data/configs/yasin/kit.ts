@@ -166,6 +166,13 @@ export interface FrameSpec {
    * of those ayahs sit side by side in one row.
    */
   side?: "right" | "left";
+  /**
+   * Vertical air this frame opens between itself and whatever is outside it, in
+   * world units. Defaults to its nesting level's padding. Turn it DOWN to pull a
+   * group towards its neighbours — a `none` frame in particular wants far less
+   * than a drawn one, having no rim for the air to clear.
+   */
+  pad?: number;
   /** Margin note pointing at this frame, e.g. "Cevap\n(26-27. ayet)". */
   label?: string;
   labelSide?: "left" | "right";
@@ -438,13 +445,17 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     return Math.max(stackHeight(row.right), stackHeight(row.left));
   };
 
+  /** A frame's own vertical padding — its `pad`, or its nesting level's. */
+  const padOf = (fi: number) => frames[fi].pad ?? framePadY(frameDepth[fi]);
+
   /** Air above row i: one rim's worth for every frame edge crossing here. */
   const gapAbove = (i: number) => {
     if (i === 0) return 0;
     let gap = airBetween(rows[i - 1], rows[i]);
     frames.forEach((f, fi) => {
       if (f.to === i - 1 || f.from === i) {
-        gap += framePadY(frameDepth[fi]) + RIM_AIR;
+        // RIM_AIR is clearance for a rim to pass. A `none` frame has no rim.
+        gap += padOf(fi) + (f.tone === "none" ? 0 : RIM_AIR);
       }
     });
     return gap;
@@ -595,7 +606,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
 
   const frameRects = frames.map((f, fi) => {
     const d = frameDepth[fi];
-    const pad = framePadY(d);
+    const pad = padOf(fi);
 
     // A one-column frame is measured off the capsules in that column alone —
     // its own top, its own bottom, its own width and its own centre line. That

@@ -35,6 +35,15 @@ import { buildSheet, type SheetSpec } from "../kit";
  */
 const PETAL = 0.5;
 
+/**
+ * Air each petal keeps around itself — the gap that separates 33 from the
+ * 34 · 35 band, and that band from 36. THIS is the number that moves the top
+ * and bottom petals towards the centre of the rosette: turn it down and they
+ * close in, up and they spread. Three petal frames meet at each of the two
+ * boundaries, so the gap there is three times this.
+ */
+const PETAL_PAD = 0.01;
+
 const SPEC: SheetSpec = {
   id: "yasin3336",
   key: "yasin3336",
@@ -215,16 +224,25 @@ const SPEC: SheetSpec = {
 
   frames: [
     // The circle that holds the whole rosette — the only frame that is DRAWN.
-    { from: 0, to: 6, tone: "circle", label: "Toprak\n(33-36. ayet)", labelSide: "left" },
+    {
+      from: 0,
+      to: 6,
+      tone: "circle",
+      label: "Toprak\n(33-36. ayet)",
+      labelSide: "left",
+    },
     // One petal per ayah, `none` rather than `lens`: the mandorla outline is
     // gone, but the grouping it stood for is not. Each petal still gets its own
     // width, its own air from the petals around it, and its own drag zone and
     // camera target — and the capsules now draw the lens on their own, arching
     // up at the top of the group and down at the bottom.
-    { from: 0, to: 2, tone: "none" },
-    { from: 3, to: 3, tone: "none", side: "right" },
-    { from: 3, to: 3, tone: "none", side: "left" },
-    { from: 4, to: 6, tone: "none" },
+    // `pad` well under the nesting level's own: three of these frames meet at
+    // each band boundary (one ending, two starting side by side), and without a
+    // rim between them there is nothing there for the default air to clear.
+    { from: 0, to: 2, tone: "none", pad: PETAL_PAD },
+    { from: 3, to: 3, tone: "none", side: "right", pad: PETAL_PAD },
+    { from: 3, to: 3, tone: "none", side: "left", pad: PETAL_PAD },
+    { from: 4, to: 6, tone: "none", pad: PETAL_PAD },
   ],
 };
 
