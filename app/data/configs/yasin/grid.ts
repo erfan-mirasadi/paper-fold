@@ -41,9 +41,19 @@ import type { ComposableSheet, SheetPlacement } from "../../sheets/paperComposer
  */
 export const COL_UNIT = 0.3;
 
+/**
+ * Where a sheet sits across the paper when a column address is the wrong tool:
+ * "centred on the page", "centred in the left half", "centred in the right
+ * half". A cell that declares one ignores its `col`, and — since it is placed
+ * INSIDE a span the paper already has — it never widens the paper.
+ */
+export type GridAlign = "center" | "leftHalf" | "rightHalf";
+
 export interface GridCell {
   /** `[row, col]` — col counts COL_UNIT steps leftwards from the right margin. */
   at: [number, number];
+  /** Centre this sheet on the page, or on one half of it, instead of on `col`. */
+  align?: GridAlign;
   /** Namespaces every id this sheet contributes to the composed paper. */
   key: string;
   sheet: ComposableSheet;
@@ -98,17 +108,37 @@ export function layOutGrid(spec: GridSpec): GridLayout {
 
   // ── Columns: a sheet's RIGHT edge sits on its column line ───────────────
   // The paper's own right margin is column 0, so the widest reach to the LEFT
-  // over all cells is what sets the paper's width.
-  const reach = Math.max(...cells.map((c) => c.at[1] * COL_UNIT + c.w));
+  // over all cells is what sets the paper's width. Centred cells are placed
+  // inside a span the paper already has, so they are left out of that.
+  const addressed = cells.filter((c) => !c.align);
+  const reach = Math.max(
+    ...(addressed.length ? addressed : cells).map(
+      (c) => c.at[1] * COL_UNIT + c.w,
+    ),
+  );
   const paperWidth = spec.margin * 2 + reach;
   const paperHeight = -contentBottom + spec.margin;
 
+  /** The span a centred cell is centred ON. */
+  const spanOf = (align: GridAlign): [number, number] =>
+    align === "leftHalf"
+      ? [spec.margin, paperWidth / 2]
+      : align === "rightHalf"
+        ? [paperWidth / 2, paperWidth - spec.margin]
+        : [spec.margin, paperWidth - spec.margin];
+
   const placements: SheetPlacement[] = cells.map((c) => {
-    const rightEdge = paperWidth - spec.margin - c.at[1] * COL_UNIT;
+    let x: number;
+    if (c.align) {
+      const [from, to] = spanOf(c.align);
+      x = (from + to) / 2 - c.w / 2;
+    } else {
+      x = paperWidth - spec.margin - c.at[1] * COL_UNIT - c.w;
+    }
     return {
       key: c.key,
       sheet: c.sheet,
-      x: rightEdge - c.w,
+      x,
       y: rowTop.get(c.at[0])!,
       scale: c.s === 1 ? undefined : c.s,
     };

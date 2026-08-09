@@ -36,7 +36,6 @@ import { SHEET as S_20_27 } from "./sheets/20-27";
 import { SHEET as S_28_32 } from "./sheets/28-32";
 import { SHEET as S_33_36 } from "./sheets/33-36";
 import { SHEET as S_37_40 } from "./sheets/37-40";
-import { SHEET as S_41_47 } from "./sheets/41-47";
 import { SHEET as S_48_54 } from "./sheets/48-54";
 import { SHEET as S_55_68 } from "./sheets/55-68";
 import { SHEET as S_69_82 } from "./sheets/69-82";
@@ -56,9 +55,12 @@ const S_13_19: ComposableSheet = {
 // The arrangement
 // ---------------------------------------------------------------------------
 
+// 41-47 is authored (./sheets/41-47) but NOT on the paper: the handwritten
+// page has five rows, and this sheet is the one it does not lay out
+// separately. Re-adding it is one cell and its import.
 const CELLS: GridCell[] = [
-  // Row 0 — the opening, alone across the top.
-  { at: [0, 12], key: "s0112", sheet: S_1_12 },
+  // Row 0 — the opening, alone and centred across the top of the sheet.
+  { at: [0, 0], align: "center", key: "s0112", sheet: S_1_12 },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
   { at: [1, 0], key: "s1319", sheet: S_13_19 },
@@ -66,21 +68,18 @@ const CELLS: GridCell[] = [
   { at: [1, 8], key: "s3336", sheet: S_33_36 },
   { at: [1, 13], key: "s3740", sheet: S_37_40 },
 
-  // Row 2 — the one shout.
-  { at: [2, 0], key: "s2832", sheet: S_28_32 },
+  // Row 2 — the one shout and "when is this promise?", side by side: 28-32
+  // takes the right half, 48-54 the left, which is the two-sheet band the
+  // handwritten page has here.
+  { at: [2, 0], align: "rightHalf", key: "s2832", sheet: S_28_32 },
+  { at: [2, 0], align: "leftHalf", key: "s4854", sheet: S_48_54 },
 
-  // Row 3 — the ship, and the refusal to spend.
-  { at: [3, 0], key: "s4147", sheet: S_41_47 },
+  // Row 3 — the two big two-column sheets.
+  { at: [3, 0], key: "s5568", sheet: S_55_68 },
+  { at: [3, 9], key: "s6982", sheet: S_69_82 },
 
-  // Row 4 — "when is this promise?"
-  { at: [4, 0], key: "s4854", sheet: S_48_54 },
-
-  // Row 5 — the two big two-column sheets.
-  { at: [5, 0], key: "s5568", sheet: S_55_68 },
-  { at: [5, 9], key: "s6982", sheet: S_69_82 },
-
-  // Row 6 — the closing glorification, alone on its strip.
-  { at: [6, 12], key: "s83", sheet: S_83 },
+  // Row 4 — the closing glorification, alone and centred at the foot.
+  { at: [4, 0], align: "center", key: "s83", sheet: S_83 },
 ];
 
 const { placements, paperWidth, paperHeight } = layOutGrid({
