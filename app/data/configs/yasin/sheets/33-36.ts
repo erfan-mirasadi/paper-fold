@@ -19,6 +19,12 @@ import { buildSheet, type SheetSpec } from "../kit";
 // lens rather than a stack — the phrase that splits in two sits where the
 // mandorla is widest.
 //
+// THE TOP AND BOTTOM LINES ARE HALF-OVALS — the Tevbe:24 ayah model, arching
+// UP at the top of a petal and DOWN at the bottom, so a petal tapers the way
+// its lens does instead of ending on two flat bars. Only those four pairs of
+// capsules are domed; the bridged pair through the middle stays a rectangle,
+// because that is the widest line of the lens and has nothing to taper into.
+//
 // Only the LAST fragment of an ayah carries its number, as on the sheet.
 // ---------------------------------------------------------------------------
 
@@ -44,6 +50,7 @@ const SPEC: SheetSpec = {
       ayah: 33,
       noNumber: true,
       tone: "green",
+      shape: "dome-up",
       width: PETAL,
       ar: "وَآيَةٌ لَّهُمُ الْأَرْضُ الْمَيْتَةُ",
       tr: "Ölü toprak onlar için bir delildir:",
@@ -73,6 +80,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 33,
       tone: "green",
+      shape: "dome-down",
       width: PETAL,
       ar: "فَمِنْهُ يَأْكُلُونَ",
       tr: "ondan yiyorlar.",
@@ -87,6 +95,7 @@ const SPEC: SheetSpec = {
           ayah: 34,
           noNumber: true,
           tone: "green",
+          shape: "dome-up",
           ar: "وَجَعَلْنَا فِيهَا جَنَّاتٍ",
           tr: "Orada bahçeler var ettik,",
           en: "In it We made gardens,",
@@ -114,6 +123,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 34,
           tone: "green",
+          shape: "dome-down",
           ar: "وَفَجَّرْنَا فِيهَا مِنَ الْعُيُونِ",
           tr: "içinden pınarlar fışkırttık.",
           en: "and made springs gush forth.",
@@ -124,6 +134,7 @@ const SPEC: SheetSpec = {
           ayah: 35,
           noNumber: true,
           tone: "green",
+          shape: "dome-up",
           ar: "لِيَأْكُلُوا مِن ثَمَرِهِ",
           tr: "Ürününden yesinler diye —",
           en: "That they may eat its fruit —",
@@ -151,6 +162,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 35,
           tone: "maroon",
+          shape: "dome-down",
           ar: "أَفَلَا يَشْكُرُونَ",
           tr: "Hâlâ şükretmezler mi?",
           en: "Will they not give thanks?",
@@ -163,6 +175,7 @@ const SPEC: SheetSpec = {
       ayah: 36,
       noNumber: true,
       tone: "green",
+      shape: "dome-up",
       width: PETAL,
       ar: "سُبْحَانَ الَّذِي خَلَقَ الْأَزْوَاجَ كُلَّهَا",
       tr: "Bütün çiftleri yaratanı tesbih ederim:",
@@ -192,6 +205,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 36,
       tone: "green",
+      shape: "dome-down",
       width: PETAL,
       ar: "وَمِمَّا لَا يَعْلَمُونَ",
       tr: "ve bilmediklerinden.",

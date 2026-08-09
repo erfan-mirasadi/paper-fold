@@ -103,6 +103,18 @@ export interface CapsuleSpec {
   /** No badge at all — for a capsule carrying half an ayah. */
   noNumber?: boolean;
   /**
+   * Half-oval instead of a rounded rectangle — the Tevbe:24 ayah model.
+   *
+   *   "dome-up"   → flat bottom, arched top
+   *   "dome-down" → flat top, arched bottom
+   *
+   * On a rosette this is what makes a petal close: the capsule at the top of a
+   * lens arches UP into the lens's point, the one at the bottom arches DOWN
+   * into the other. The capsule is given `DOME_EXTRA_H` of extra height so the
+   * arch is room ADDED above the text, not room taken from it.
+   */
+  shape?: "dome-up" | "dome-down";
+  /**
    * Share of the row's natural width this row takes, centred. Default 1.
    * 0.5 makes a full-width row exactly as wide as one column of a split row
    * beneath it — which is how a rosette gets four petals of equal size.
@@ -198,6 +210,19 @@ const ROW_GAP = 0.014;
 const CAPSULE_H_BASE = 0.062;
 const CAPSULE_H_PER_LINE = 0.043;
 
+/**
+ * DOMES (`CapsuleSpec.shape`). The straight-wall fraction is Tevbe:24's, so a
+ * domed capsule here reads as the same ayah model, not a cousin of it — 0.2
+ * leaves four fifths of the height to the arch, which is what makes it a half
+ * oval rather than a rounded lid.
+ *
+ * The extra height is what keeps the text at a readable size: the arch closes
+ * in over a vertically-centred text block, so without it a domed capsule would
+ * hold noticeably smaller text than the flat one beside it.
+ */
+const DOME_SIDE_RATIO = 0.2;
+const DOME_EXTRA_H = 0.055;
+
 /** How much narrower each frame level makes the capsules inside it. */
 const DEPTH_1_INSET = 0.115;
 const DEPTH_STEP = 0.055;
@@ -256,6 +281,52 @@ function fitLatinScale(text: string, w: number, h: number): number {
   return Math.min(byWidth, byHeight, 0.9) * 0.92;
 }
 
+const LAT_LINE_EM = 1.06;
+
+/**
+ * How much of a domed capsule's width its text can actually reach. VerseBox
+ * centres the text in the BOX, but a dome is only box-wide at the flat edge —
+ * above that the arch (an ellipse of vertical radius `archH`) closes in, so
+ * what binds is the ellipse's half-width at the far edge of the text block.
+ */
+function domeWidthFactor(h: number, textH: number, sideRatio: number): number {
+  const archH = (1 - sideRatio) * h;
+  // Height of the text's far edge above the arch's own centre line, as a
+  // fraction of the arch. Negative ⇒ the text never leaves the straight wall.
+  const reach = Math.max(
+    0,
+    Math.min(0.99, (h * (0.5 - sideRatio) + textH / 2) / archH),
+  );
+  return Math.sqrt(1 - reach * reach);
+}
+
+/**
+ * `fit`, run against the width the dome leaves rather than the capsule's own.
+ * The width depends on how tall the text sets, which depends on the width —
+ * two passes off the flat-capsule answer settle it.
+ *
+ * The HEIGHT bound is deliberately the flat capsule's, not the domed one's:
+ * `DOME_EXTRA_H` is clearance for the arch, not licence for bigger type. Fit to
+ * the full height and a short domed phrase sets half again as large as the
+ * rectangle under it, which is exactly what a page of even capsules must not do.
+ */
+function fitInDome(
+  fit: (text: string, w: number, h: number) => number,
+  text: string,
+  w: number,
+  h: number,
+  lineH: number,
+): number {
+  const fitH = h - DOME_EXTRA_H;
+  const lines = text.split("\n").length;
+  let scale = fit(text, w, fitH);
+  for (let i = 0; i < 2; i++) {
+    const textH = lineH * lines * scale;
+    scale = fit(text, w * domeWidthFactor(h, textH, DOME_SIDE_RATIO), fitH);
+  }
+  return scale;
+}
+
 const isSplit = (row: SheetRow): row is SplitRow =>
   (row as SplitRow).right !== undefined;
 
@@ -269,7 +340,10 @@ const capsulesOf = (item: SheetRow | ColumnItem): CapsuleSpec[] =>
 const capsuleHeight = (item: CapsuleSpec | ColumnItem) =>
   Math.max(
     ...capsulesOf(item).map(
-      (c) => CAPSULE_H_BASE + CAPSULE_H_PER_LINE * c.ar.split("\n").length,
+      (c) =>
+        CAPSULE_H_BASE +
+        CAPSULE_H_PER_LINE * c.ar.split("\n").length +
+        (c.shape ? DOME_EXTRA_H : 0),
     ),
   );
 
@@ -449,6 +523,15 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
      p.capsules.length === 2 ? (p.width - COLUMN_GAP) / 2 : p.width;
    p.capsules.forEach((c, ci) => {
     const tone = SHEET_COLORS[c.tone ?? "white"];
+    // A dome's text is bounded by the arch, not by the capsule's own width.
+    const fitAr = (t: string) =>
+      c.shape
+        ? fitInDome(fitArabicScale, t, capW, p.height, AR_EM * LINE_EM)
+        : fitArabicScale(t, capW, p.height);
+    const fitLat = (t: string) =>
+      c.shape
+        ? fitInDome(fitLatinScale, t, capW, p.height, LAT_EM * LAT_LINE_EM)
+        : fitLatinScale(t, capW, p.height);
     verseOverrides[p.verseIds[ci]] = {
       bg: tone.bg,
       border: tone.border,
@@ -460,13 +543,13 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // never a pill: SharedUI picks the verse font off this flag, so a mixed
       // page would be set in two sizes almost 2x apart.
       isPill: false,
-      textScaleOverride: round(fitArabicScale(c.ar, capW, p.height)),
+      textScaleOverride: round(fitAr(c.ar)),
       translationTextScaleOverride: round(
-        Math.min(
-          fitLatinScale(c.tr, capW, p.height),
-          fitLatinScale(c.en, capW, p.height),
-        ),
+        Math.min(fitLat(c.tr), fitLat(c.en)),
       ),
+      ...(c.shape
+        ? { verseShape: c.shape, domeSideRatio: DOME_SIDE_RATIO }
+        : {}),
       ...(c.noNumber ? {} : { showNumber: true, displayNumber: c.ayah }),
     };
    });
