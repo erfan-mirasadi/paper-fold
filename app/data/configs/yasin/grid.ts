@@ -67,7 +67,11 @@ export interface GridSpec {
   gapY: number;
   /** Paper margin on every side. */
   margin: number;
-  /** Scales every sheet on the paper at once. Default 1. */
+  /**
+   * Scales the WHOLE composition at once — every sheet, and the spacing
+   * between them. A true zoom: the arrangement is identical, only bigger, and
+   * nothing moves relative to anything else. Default 1.
+   */
   scale?: number;
 }
 
@@ -95,16 +99,24 @@ export function layOutGrid(spec: GridSpec): GridLayout {
     };
   });
 
+  // EVERY spacing scales with the sheets. This is what makes `scale` a zoom:
+  // if the column step, the row gap and the margin stayed at their authored
+  // size while the sheets grew, the arrangement would be reshuffled rather
+  // than enlarged.
+  const margin = spec.margin * paperScale;
+  const gapY = spec.gapY * paperScale;
+  const colStep = COL_UNIT * paperScale;
+
   // ── Rows: each is as tall as its tallest sheet, stacked downwards ───────
   const rowIndices = [...new Set(cells.map((c) => c.at[0]))].sort((a, b) => a - b);
   const rowTop = new Map<number, number>();
-  let y = -spec.margin;
+  let y = -margin;
   for (const r of rowIndices) {
     rowTop.set(r, y);
     const tallest = Math.max(...cells.filter((c) => c.at[0] === r).map((c) => c.h));
-    y -= tallest + spec.gapY;
+    y -= tallest + gapY;
   }
-  const contentBottom = y + spec.gapY; // the last row's bottom edge
+  const contentBottom = y + gapY; // the last row's bottom edge
 
   // ── Columns: a sheet's RIGHT edge sits on its column line ───────────────
   // The paper's own right margin is column 0, so the widest reach to the LEFT
@@ -113,19 +125,19 @@ export function layOutGrid(spec: GridSpec): GridLayout {
   const addressed = cells.filter((c) => !c.align);
   const reach = Math.max(
     ...(addressed.length ? addressed : cells).map(
-      (c) => c.at[1] * COL_UNIT + c.w,
+      (c) => c.at[1] * colStep + c.w,
     ),
   );
-  const paperWidth = spec.margin * 2 + reach;
-  const paperHeight = -contentBottom + spec.margin;
+  const paperWidth = margin * 2 + reach;
+  const paperHeight = -contentBottom + margin;
 
   /** The span a centred cell is centred ON. */
   const spanOf = (align: GridAlign): [number, number] =>
     align === "leftHalf"
-      ? [spec.margin, paperWidth / 2]
+      ? [margin, paperWidth / 2]
       : align === "rightHalf"
-        ? [paperWidth / 2, paperWidth - spec.margin]
-        : [spec.margin, paperWidth - spec.margin];
+        ? [paperWidth / 2, paperWidth - margin]
+        : [margin, paperWidth - margin];
 
   const placements: SheetPlacement[] = cells.map((c) => {
     let x: number;
@@ -133,7 +145,7 @@ export function layOutGrid(spec: GridSpec): GridLayout {
       const [from, to] = spanOf(c.align);
       x = (from + to) / 2 - c.w / 2;
     } else {
-      x = paperWidth - spec.margin - c.at[1] * COL_UNIT - c.w;
+      x = paperWidth - margin - c.at[1] * colStep - c.w;
     }
     return {
       key: c.key,

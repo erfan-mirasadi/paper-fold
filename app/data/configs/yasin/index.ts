@@ -82,20 +82,42 @@ const CELLS: GridCell[] = [
   { at: [4, 0], align: "center", key: "s83", sheet: S_83 },
 ];
 
+/**
+ * Zoom for the whole paper. Every sheet AND every gap between them scales by
+ * this, so the arrangement above is untouched — the same drawing, bigger.
+ * Turn this one number up or down; nothing else has to move.
+ */
+const SCALE = 1;
+
 const { placements, paperWidth, paperHeight } = layOutGrid({
   cells: CELLS,
   gapY: -0.08,
   margin: 0.02,
+  scale: SCALE,
 });
 
 /**
- * How far the camera has to sit back for the whole paper to be framed. The app
- * camera is fixed at the distance that suits a single 1.54 x 1.78 sheet (see
- * cameraConfig), so a paper this size has to say by how much it exceeds one —
- * height first, since the page is viewed at a tilt and its height is what runs
- * out of screen first.
+ * How much of the screen the paper fills, 0 → 1. This is the knob that makes
+ * the paper look bigger or smaller — NOT `SCALE`, which grows the paper and
+ * the camera together and so changes nothing you can see.
+ *
+ * 1 means the paper's height exactly fills the viewport; lower leaves air
+ * around it.
  */
-const CAMERA_DISTANCE_SCALE = Math.max(paperWidth / 2.4, paperHeight / 1.7);
+const FILL = 0.92;
+
+/**
+ * How far the camera sits back, as a multiple of the distance the app's fixed
+ * camera uses for one 1.54 x 1.78 sheet (see cameraConfig).
+ *
+ * The page lies flat and is viewed from about 44 degrees up, so its height
+ * foreshortens to ~0.71 of itself, and the camera shows ~1.93 world units of
+ * height per unit of distance-scale. Height therefore sets the number on a
+ * portrait paper — `h · 0.71 / 1.93` ≈ `h · 0.368` fills the screen exactly —
+ * and width only takes over if the paper is wider than it is tall.
+ */
+const CAMERA_DISTANCE_SCALE =
+  Math.max(paperWidth / 3.38, paperHeight * 0.45) / FILL;
 
 export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
   composePaper({
