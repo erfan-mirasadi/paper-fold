@@ -34,7 +34,7 @@ import { YASIN_36_CONFIG, YASIN_36_TEXT_DATA } from "./sheets/1-12";
 import { YASIN_13_19_CONFIG, YASIN_13_19_TEXT_DATA } from "./sheets/13-19";
 import { SHEET as S_20_27 } from "./sheets/20-27";
 import { SHEET as S_28_32 } from "./sheets/28-32";
-import { SHEET as S_33_36 } from "./sheets/33-36";
+import { SHEET as S_33_40 } from "./sheets/33-40";
 import { SHEET as S_41_47 } from "./sheets/41-47";
 import { SHEET as S_48_54 } from "./sheets/48-54";
 import { SHEET as S_55_68 } from "./sheets/55-68";
@@ -55,10 +55,9 @@ const S_13_19: ComposableSheet = {
 // The arrangement
 // ---------------------------------------------------------------------------
 
-// 37-40 is authored (./sheets/37-40) but NOT on the paper: the handwritten
-// page has five rows, and the sheet in this corner of it is 41-47, not 37-40
-// (see the photo the sheet was copied from). Re-adding it is one cell and its
-// import.
+// 37-40 has no sheet of its own: those four ayahs live inside the 33-40
+// rosette, under the four petals the handwritten page draws there. The sheet in
+// the far-left corner of that row is 41-47 (see the photo it was copied from).
 const CELLS: GridCell[] = [
   // Row 0 — the opening, alone and centred across the top of the sheet.
   { at: [0, 0], align: "center", key: "s0112", sheet: S_1_12 },
@@ -66,7 +65,7 @@ const CELLS: GridCell[] = [
   // Row 1 — the parable of the town and the signs that follow it, right to left.
   { at: [1, 0], key: "s1319", sheet: S_13_19 },
   { at: [1, 4], key: "s2027", sheet: S_20_27 },
-  { at: [1, 8], key: "s3336", sheet: S_33_36 },
+  { at: [1, 8], key: "s3340", sheet: S_33_40 },
   { at: [1, 13], key: "s4147", sheet: S_41_47 },
 
   // Row 2 — the one shout and "when is this promise?", side by side: 28-32
