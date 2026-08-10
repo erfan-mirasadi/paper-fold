@@ -8,40 +8,39 @@ const SPEC: SheetSpec = {
   title: "YÂSÎN: 20-27",
   heroSubtitle: "suresi 20-27",
   sayfa: 441,
+  contentStartY: -0.246,
 
   rows: [
     {
       ayah: 20,
       tone: "maroon",
-      ar: "وَجَاءَ مِنْ أَقْصَى الْمَدِينَةِ رَجُلٌ يَسْعَىٰ\nقَالَ يَا قَوْمِ اتَّبِعُوا الْمُرْسَلِينَ",
-      tr: "Şehrin öbür ucundan bir adam koşarak geldi:\n“Ey kavmim, gönderilen elçilere uyun.”",
-      en: "A man came running from the far end of the city:\n“O my people, follow the messengers.”",
+      ar: "وَجَاءَ مِنْ أَقْصَى الْمَدِينَةِ رَجُلٌ يَسْعَىٰ قَالَ يَا قَوْمِ اتَّبِعُوا الْمُرْسَلِينَ",
+      tr: "Şehrin öbür ucundan bir adam koşarak geldi: “Ey kavmim, gönderilen elçilere uyun.”",
+      en: "A man came running from the far end of the city: “O my people, follow the messengers.”",
     },
     {
       ayah: 21,
       tone: "white",
-      ar: "اتَّبِعُوا مَن لَّا يَسْأَلُكُمْ أَجْرًا\nوَهُم مُّهْتَدُونَ",
-      tr: "“Sizden bir ücret istemeyenlere uyun;\nonlar doğru yol üzeredir.”",
-      en: "“Follow those who ask no wage of you;\nthey are rightly guided.”",
+      ar: "اتَّبِعُوا مَن لَّا يَسْأَلُكُمْ أَجْرًا وَهُم مُّهْتَدُونَ",
+      tr: "“Sizden bir ücret istemeyenlere uyun; onlar doğru yol üzeredir.”",
+      en: "“Follow those who ask no wage of you; they are rightly guided.”",
     },
     {
-      // The right column reads first — it is the man's reason, and it carries
-      // the two long ayahs, so it takes the wider share of the band.
-      ratio: 0.62,
+      // The right column reads first — it is the man's reason
       right: [
         {
           ayah: 22,
           tone: "cream",
-          ar: "وَمَا لِيَ لَا أَعْبُدُ\nالَّذِي فَطَرَنِي\nوَإِلَيْهِ تُرْجَعُونَ",
-          tr: "“Beni yaratana niçin\nkulluk etmeyeyim?\nO'na döndürüleceksiniz.”",
-          en: "“Why should I not worship\nthe One who made me?\nTo Him you return.”",
+          ar: "وَمَا لِيَ لَا أَعْبُدُ الَّذِي فَطَرَنِي\nوَإِلَيْهِ تُرْجَعُونَ",
+          tr: "“Beni yaratana niçin kulluk etmeyeyim?\nO'na döndürüleceksiniz.”",
+          en: "“Why should I not worship the One who made me?\nTo Him you return.”",
         },
         {
           ayah: 23,
           tone: "cream",
-          ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً\nإِن يُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ\nلَّا تُغْنِ عَنِّي شَفَاعَتُهُمْ\nشَيْئًا وَلَا يُنقِذُونِ",
-          tr: "“O'ndan başka ilah mı edineyim?\nRahmân bana zarar dilese\nşefaatleri işe yaramaz,\nbeni kurtaramazlar.”",
-          en: "“Shall I take gods besides Him?\nIf the Merciful wills me harm\ntheir pleading avails nothing,\nnor can they save me.”",
+          ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً إِن يُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ\nلَّا تُغْنِ عَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنقِذُونِ",
+          tr: "“O'ndan başka ilah mı edineyim? Rahmân bana zarar dilese\nşefaatleri işe yaramaz, beni kurtaramazlar.”",
+          en: "“Shall I take gods besides Him? If the Merciful wills me harm\ntheir pleading avails nothing, nor can they save me.”",
         },
       ],
       left: [
@@ -64,24 +63,49 @@ const SPEC: SheetSpec = {
     {
       ayah: 26,
       tone: "green",
-      ar: "قِيلَ ادْخُلِ الْجَنَّةَ\nقَالَ يَا لَيْتَ قَوْمِي يَعْلَمُونَ",
-      tr: "“Cennete gir” denildi.\n“Keşke kavmim bilseydi” dedi:",
-      en: "It was said: “Enter the Garden.”\nHe said: “Would that my people knew”",
+      ar: "قِيلَ ادْخُلِ الْجَنَّةَ قَالَ يَا لَيْتَ قَوْمِي يَعْلَمُونَ",
+      tr: "“Cennete gir” denildi. “Keşke kavmim bilseydi” dedi:",
+      en: "It was said: “Enter the Garden.” He said: “Would that my people knew”",
     },
     {
       ayah: 27,
       tone: "green",
-      ar: "بِمَا غَفَرَ لِي رَبِّي\nوَجَعَلَنِي مِنَ الْمُكْرَمِينَ",
-      tr: "“Rabbimin beni bağışladığını\nve ikram edilenlerden kıldığını.”",
-      en: "“how my Lord forgave me\nand made me one of the honoured.”",
+      ar: "بِمَا غَفَرَ لِي رَبِّي وَجَعَلَنِي مِنَ الْمُكْرَمِينَ",
+      tr: "“Rabbimin beni bağışladığını ve ikram edilenlerden kıldığını.”",
+      en: "“how my Lord forgave me and made me one of the honoured.”",
     },
   ],
 
   frames: [
-    { from: 0, to: 4, tone: "outer" },
-    { from: 0, to: 1, tone: "rose", label: "Çağrı\n(20-21. ayet)", labelSide: "right" },
-    { from: 2, to: 2, tone: "band", label: "Delil\n(22-25. ayet)", labelSide: "left" },
-    { from: 3, to: 4, tone: "rose", label: "Karşılık\n(26-27. ayet)", labelSide: "right" },
+    {
+      from: 0,
+      to: 4,
+      tone: "outer",
+      src: "/yasin1319/all-section.svg",
+      w: 1.06,
+      h: 1.388,
+    },
+    {
+      from: 0,
+      to: 1,
+      tone: "rose",
+      label: "Çağrı\n(20-21. ayet)",
+      labelSide: "right",
+    },
+    {
+      from: 2,
+      to: 2,
+      tone: "band",
+      label: "Delil\n(22-25. ayet)",
+      labelSide: "left",
+    },
+    {
+      from: 3,
+      to: 4,
+      tone: "rose",
+      label: "Karşılık\n(26-27. ayet)",
+      labelSide: "right",
+    },
   ],
 };
 

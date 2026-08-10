@@ -187,6 +187,12 @@ export interface FrameSpec {
   /** Margin note pointing at this frame, e.g. "Cevap\n(26-27. ayet)". */
   label?: string;
   labelSide?: "left" | "right";
+  /** Override the width of the frame. */
+  w?: number;
+  /** Override the height of the frame. */
+  h?: number;
+  /** Override the offsetY of the frame. */
+  offsetY?: number;
 }
 
 export interface SheetSpec {
@@ -200,6 +206,8 @@ export interface SheetSpec {
   sayfa: number;
   /** Page width in world units. Height is derived from the stack. */
   paperWidth?: number;
+  /** Override the starting Y coordinate of the content stack. Defaults to -0.2 (SHEET_MARGIN_TOP). */
+  contentStartY?: number;
   rows: SheetRow[];
   frames: FrameSpec[];
 }
@@ -553,8 +561,9 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   });
 
   const stackH = -cursor;
+  const contentStartY = spec.contentStartY ?? -SHEET_MARGIN_TOP;
   const paperHeight =
-    Math.round((SHEET_MARGIN_TOP + stackH + SHEET_MARGIN_BOTTOM) * 1000) / 1000;
+    Math.round((-contentStartY + stackH + SHEET_MARGIN_BOTTOM) * 1000) / 1000;
 
   // ── Pass 2: blocks, with the gap chain that reproduces those places ─────
   // Same arithmetic the paper composer uses: state where a block should be,
@@ -677,12 +686,12 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // share of its width (`CapsuleSpec.width`) and a split row's columns sit
       // off-centre, so only the extent gets both the narrow petal and the
       // circle that has to reach around two of them right.
-      w: round(
+      w: f.w ?? round(
         Math.max(...owned.map((p) => p.xOffset + p.width / 2)) -
           Math.min(...owned.map((p) => p.xOffset - p.width / 2)) +
           framePadX(d) * 2,
       ),
-      h: round(top - bottom),
+      h: f.h ?? round(top - bottom),
       offsetX: round(
         (Math.max(...owned.map((p) => p.xOffset + p.width / 2)) +
           Math.min(...owned.map((p) => p.xOffset - p.width / 2))) /
@@ -690,7 +699,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       ),
       // Overlays anchor to their block's TOP edge, so this is the drop from
       // that edge to the frame's centre.
-      offsetY: round((top + bottom) / 2 - placements[anchor].top),
+      offsetY: f.offsetY ?? round((top + bottom) / 2 - placements[anchor].top),
       anchor,
     };
   });
@@ -757,7 +766,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     const r = frameRects[fi];
     notes.push({
       x: onLeft ? PADDING * 0.9 : paperWidth - PADDING * 0.9,
-      y: round(-SHEET_MARGIN_TOP + placements[r.anchor].top + r.offsetY + 0.05),
+      y: round(contentStartY + placements[r.anchor].top + r.offsetY + 0.05),
       fontSize: 0.03,
       color: "#000000",
       lineSpacing: 1.3,
@@ -889,7 +898,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // Pins the stack under the top margin, where the frame rectangles above
       // were solved. Auto-centring would drift the moment a sheet's margins
       // are not symmetric — and the title note lives in the top one.
-      contentStartYOverride: -SHEET_MARGIN_TOP,
+      contentStartYOverride: spec.contentStartY ?? -SHEET_MARGIN_TOP,
     },
 
     blocks,
