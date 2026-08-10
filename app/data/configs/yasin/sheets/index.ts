@@ -13,8 +13,8 @@ import { SHEET as S_20_27 } from "./20-27";
 import { SHEET as S_28_32 } from "./28-32";
 import { SHEET as S_33_40 } from "./33-40";
 import { SHEET as S_41_47 } from "./41-47";
-import { SHEET as S_48_54 } from "./48-54";
-import { SHEET as S_55_68 } from "./55-68";
+import { SHEET as S_48_52 } from "./48-52";
+import { SHEET as S_53_68 } from "./53-68";
 import { SHEET as S_69_82 } from "./69-82";
 import { SHEET as S_83 } from "./83";
 
@@ -24,8 +24,8 @@ export const YASIN_SHEET_LIST: BuiltSheet[] = [
   S_28_32,
   S_33_40,
   S_41_47,
-  S_48_54,
-  S_55_68,
+  S_48_52,
+  S_53_68,
   S_69_82,
   S_83,
 ];

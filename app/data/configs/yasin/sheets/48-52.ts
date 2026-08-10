@@ -1,8 +1,9 @@
 import { buildSheet, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
-// 48-54 — "when is this promise?", and the answer, copied off the handwritten
-// sheet.
+// 48-52 — "when is this promise?", and the answer, copied off the handwritten
+// sheet. (53 and 54 finish the passage, but the page draws them at the head of
+// the next sheet — see ./53-68.)
 //
 // ONE QUESTION OVER A GRID OF ANSWERS. The question runs the full width of the
 // page on its own, under its own arc; everything under it is the answer, laid
@@ -13,7 +14,6 @@ import { buildSheet, type SheetSpec } from "../kit";
 //     ╭─────────────────────────────────────╮
 //     │      50  ──  49                     │   the shout · no will, no return
 //     │      52  ──  51                      │   the trumpet · woe to us
-//     │      54  ──  53                      │   one shout · and no one wronged
 //     ╰─────────────────────────────────────╯
 //
 // Right reads first, as everywhere in this family, so a row reads 49 · 50 and
@@ -21,18 +21,18 @@ import { buildSheet, type SheetSpec } from "../kit";
 //
 // ONE AYAH IS ONE CAPSULE here, so every capsule prints its own number. They
 // are whole ayahs in half a row, so each is broken to THREE LINES by hand —
-// all six of them, even where two would fit, because a capsule is fitted to its
-// own text and a short ayah on two lines would set half again as large as the
-// long one bridged to it. `tr` and `en` are broken to the same count as `ar`,
+// all four of them, even where two would fit, because a capsule is fitted to
+// its own text and a short ayah on two lines would set half again as large as
+// the long one bridged to it. `tr` and `en` are broken to the same count as `ar`,
 // which is what sets the capsule's height.
 // ---------------------------------------------------------------------------
 
 const SPEC: SheetSpec = {
-  id: "yasin4854",
-  key: "yasin4854",
-  title: "YÂSÎN: 48-54",
-  heroSubtitle: "suresi 48-54",
-  noteTitle: "Yâsîn: 48-54",
+  id: "yasin4852",
+  key: "yasin4852",
+  title: "YÂSÎN: 48-52",
+  heroSubtitle: "suresi 48-52",
+  noteTitle: "Yâsîn: 48-52",
   sayfa: 443,
   // UNCHANGED from the sheet this replaces. The atlas centres this one in the
   // left half of its row (`align: "leftHalf"`), so its width is what puts it
@@ -89,37 +89,18 @@ const SPEC: SheetSpec = {
       ],
     },
 
-    // ── The whole of it in one shout, and the verdict that follows ────────
-    {
-      pair: [
-        {
-          ayah: 53,
-          tone: "white",
-          ar: "إِن كَانَتْ إِلَّا\nصَيْحَةً وَاحِدَةً فَإِذَا هُمْ\nجَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
-          tr: "Sadece tek bir ses olur;\nhepsi birden huzurumuzda\nhazır edilirler.",
-          en: "It is but one shout, and\nat once they are all\nbrought before Us.",
-        },
-        {
-          ayah: 54,
-          tone: "white",
-          ar: "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا\nوَلَا تُجْزَوْنَ إِلَّا\nمَا كُنتُمْ تَعْمَلُونَ",
-          tr: "O gün hiç kimseye zerre\nkadar haksızlık edilmez;\nancak yaptığınız verilir.",
-          en: "Today no soul is wronged\nin the least; you are repaid\nonly for what you did.",
-        },
-      ],
-    },
   ],
 
   frames: [
-    { from: 0, to: 3, tone: "outer" },
+    { from: 0, to: 2, tone: "outer" },
     // The arc over the question, and the frame around everything that answers
     // it — the two enclosures the sheet is drawn with.
     { from: 0, to: 0, tone: "rose", label: "Soru\n(48. ayet)", labelSide: "right" },
     {
       from: 1,
-      to: 3,
+      to: 2,
       tone: "band",
-      label: "Cevap\n(49-54. ayet)",
+      label: "Cevap\n(49-52. ayet)",
       labelSide: "left",
     },
   ],

@@ -167,6 +167,17 @@ export interface FrameSpec {
    */
   side?: "right" | "left";
   /**
+   * Draw this frame with ART THAT ALREADY EXISTS — a path under /public —
+   * instead of one emitted at its own aspect. Nothing is generated for it.
+   *
+   * Use it for the hand-made ornaments the other surahs are drawn with, and
+   * know what it costs: those files are tuned to the aspect their own config
+   * displays them at (each says so in its header), so one landing on a frame of
+   * a different shape arrives stretched — round ends turn oval, an even rim
+   * turns uneven. The generated frames exist precisely to avoid that.
+   */
+  src?: string;
+  /**
    * Vertical air this frame opens between itself and whatever is outside it, in
    * world units. Defaults to its nesting level's padding. Turn it DOWN to pull a
    * group towards its neighbours — a `none` frame in particular wants far less
@@ -355,9 +366,20 @@ const isSplit = (row: SheetRow): row is SplitRow =>
 const isPair = (row: SheetRow | ColumnItem): row is PairRow =>
   (row as PairRow).pair !== undefined;
 
-/** Every capsule an item carries — one, or the two halves of a pair. */
+/**
+ * Every capsule an item carries — one, or the two halves of a pair, IN THE
+ * ORDER THE ENGINE PLACES THEM, which is left to right: `SurahConfig`'s
+ * two-column path reads `colIndex = i % cols` and puts index 0 on the LEFT
+ * (see its "left = index 0, right = index 1"). A `pair` is declared the way the
+ * page reads — right first — so it is flipped here, once, and everything
+ * downstream (ids, blocks, colorGroups, overrides) stays in step.
+ */
 const capsulesOf = (item: SheetRow | ColumnItem): CapsuleSpec[] =>
-  isPair(item) ? item.pair : isSplit(item) ? [] : [item];
+  isPair(item)
+    ? [item.pair[1], item.pair[0]]
+    : isSplit(item)
+      ? []
+      : [item];
 
 /** Does this row/column item carry a domed capsule? */
 const isDomed = (item: SheetRow | ColumnItem) =>
@@ -393,6 +415,8 @@ interface Placement {
   /** Signed shift of this block's centre from the page centre. */
   xOffset: number;
   rowIndex: number;
+  /** Which column of a split row this capsule sits in. */
+  side?: "right" | "left";
 }
 
 export function buildSheet(spec: SheetSpec): BuiltSheet {
@@ -405,28 +429,35 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   const depth = rows.map(
     (_, i) => frames.filter((f) => i >= f.from && i <= f.to).length,
   );
+
+  /**
+   * Does g strictly enclose f? Its rows have to cover f's and it must not be
+   * confined to the other column — strictly, i.e. looser somewhere: more rows,
+   * or the whole row where f takes one column of it.
+   */
+  const encloses = (g: FrameSpec, f: FrameSpec) => {
+    if (g.from > f.from || g.to < f.to) return false;
+    if (g.side && g.side !== f.side) return false;
+    return g.to - g.from > f.to - f.from || (!g.side && !!f.side);
+  };
+
   /**
    * A frame's OWN nesting level: 1 for the sheet's outermost, +1 for each
-   * frame that strictly contains it. Not the depth of the row it starts at —
-   * an outer frame usually starts on a row that an inner frame also covers,
-   * and sizing it off that row would draw the two the same width.
+   * frame that encloses it. Not the depth of the row it starts at — an outer
+   * frame usually starts on a row that an inner frame also covers, and sizing
+   * it off that row would draw the two the same width.
    */
   const frameDepth = frames.map(
-    (f, i) =>
-      1 +
-      frames.filter(
-        (g, j) =>
-          j !== i &&
-          g.from <= f.from &&
-          g.to >= f.to &&
-          g.to - g.from > f.to - f.from,
-      ).length,
+    (f, i) => 1 + frames.filter((g, j) => j !== i && encloses(g, f)).length,
   );
 
   /** A row's full usable width at its nesting depth. */
   const rowWidth = (i: number) =>
     sectionInnerW -
     2 * (DEPTH_1_INSET + Math.max(0, depth[i] - 1) * DEPTH_STEP);
+
+  /** A frame's own vertical padding — its `pad`, or its nesting level's. */
+  const padOf = (fi: number) => frames[fi].pad ?? framePadY(frameDepth[fi]);
 
   /** Height of a stack of capsules, one under the other. */
   const stackHeight = (caps: ColumnItem[]) =>
@@ -444,9 +475,6 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     if (!isSplit(row)) return capsuleHeight(row) + BLOCK_PADDING * 2;
     return Math.max(stackHeight(row.right), stackHeight(row.left));
   };
-
-  /** A frame's own vertical padding — its `pad`, or its nesting level's. */
-  const padOf = (fi: number) => frames[fi].pad ?? framePadY(frameDepth[fi]);
 
   /** Air above row i: one rim's worth for every frame edge crossing here. */
   const gapAbove = (i: number) => {
@@ -493,7 +521,12 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       const rightShift = width / 2 - rightW / 2;
       const leftShift = -(width / 2 - leftW / 2);
 
-      const column = (caps: ColumnItem[], w: number, shift: number) => {
+      const column = (
+        caps: ColumnItem[],
+        w: number,
+        shift: number,
+        side: "right" | "left",
+      ) => {
         let y = top;
         caps.forEach((c, ci) => {
           if (ci) y -= airBetween(caps[ci - 1], c);
@@ -505,14 +538,15 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
             width: w,
             xOffset: shift,
             rowIndex: i,
+            side,
           });
           y -= capsuleHeight(c) + BLOCK_PADDING * 2;
         });
       };
       // Right first: it reads first, so it takes the lower verse ids and the
       // earlier colorGroups, which is the order the sidebar reads them in.
-      column(row.right, rightW, rightShift);
-      column(row.left, leftW, leftShift);
+      column(row.right, rightW, rightShift, "right");
+      column(row.left, leftW, leftShift, "left");
     }
 
     cursor = top - rowHeight(i);
@@ -604,31 +638,39 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   const widthAtDepth = (d: number) =>
     sectionInnerW - 2 * (DEPTH_1_INSET + Math.max(0, d - 1) * DEPTH_STEP);
 
+  /**
+   * The capsules a frame actually owns — every capsule in its rows, or just
+   * the one column of them that `side` names.
+   */
+  const ownedBy = (f: FrameSpec) =>
+    placements.filter(
+      (p) =>
+        p.rowIndex >= f.from &&
+        p.rowIndex <= f.to &&
+        (!f.side || p.side === f.side),
+    );
+
   const frameRects = frames.map((f, fi) => {
     const d = frameDepth[fi];
     const pad = padOf(fi);
 
     // A one-column frame is measured off the capsules in that column alone —
-    // its own top, its own bottom, its own width and its own centre line. That
-    // is what lets a rosette give each ayah its own petal when two of them sit
-    // side by side in one row.
-    const owned = placements.filter(
-      (p) =>
-        p.rowIndex >= f.from &&
-        p.rowIndex <= f.to &&
-        (!f.side || (f.side === "right" ? p.xOffset > 0 : p.xOffset < 0)),
-    );
-    const top = f.side
-      ? Math.max(...owned.map((p) => p.top)) + pad
-      : rowTop[f.from] + pad;
-    const bottom = f.side
-      ? Math.min(...owned.map((p) => p.top - p.height - BLOCK_PADDING * 2)) - pad
-      : rowBottom(f.to) - pad;
+    // its own width and its own centre line. That is what lets a rosette give
+    // each ayah its own petal when two of them sit side by side in one row.
+    const owned = ownedBy(f);
+    // EVERY frame takes the row band it covers, top and bottom — a one-column
+    // frame included. That is what makes the two columns of a split row come
+    // out the same height however unevenly they are filled, and two boxes of
+    // different heights do not read as two things weighed against each other.
+    const top = rowTop[f.from] + pad;
+    const bottom = rowBottom(f.to) - pad;
     const anchor = f.side
       ? placements.indexOf(owned[0])
       : firstBlockOfRow(f.from);
     return {
-      src: `/${spec.key}/frame-${fi}.svg`,
+      src: f.src ?? `/${spec.key}/frame-${fi}.svg`,
+      /** Only an emitted frame needs drawing; a borrowed one is already drawn. */
+      emit: f.src === undefined && f.tone !== "none",
       tone: f.tone,
       // Measured off the capsules the frame actually owns — their horizontal
       // EXTENT, not the nesting level's nominal width. A row may take only a
@@ -679,19 +721,18 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
 
   // Innermost FIRST — sectionResolver's reverse index is first-wins, so a
   // capsule lands in the tightest frame around it while the outer frames still
-  // carry it along through the ancestor index.
-  const rowIdsFrom = (from: number, to: number) =>
-    placements.filter((p) => p.rowIndex >= from && p.rowIndex <= to).flatMap((p) => p.verseIds);
-
+  // carry it along through the ancestor index. A zone owns exactly what its
+  // frame is DRAWN around, `side` and `items` included: click the bracket on
+  // one column of a split row and that column is what lifts, not the row.
   const customSections: CustomSectionDef[] = frames
-    .map((f, fi) => ({ f, fi, span: f.to - f.from }))
-    .sort((a, b) => a.span - b.span)
-    .map(({ f, fi, span }) => ({
+    .map((f, fi) => ({ f, fi, size: ownedBy(f).length }))
+    .sort((a, b) => a.size - b.size)
+    .map(({ f, fi, size }) => ({
       id: `${spec.key}_f${fi}`,
-      verseIds: rowIdsFrom(f.from, f.to),
+      verseIds: ownedBy(f).flatMap((p) => p.verseIds),
       cameraTarget: {
-        y: 1.0 + Math.min(span, 8) * 0.04,
-        fov: 25 + Math.min(span, 8) * 1.2,
+        y: 1.0 + Math.min(size, 9) * 0.035,
+        fov: 25 + Math.min(size, 9) * 1.1,
         tilt: -1.4,
       },
     }));
@@ -879,9 +920,10 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
   return {
     config,
     textData: { ar: textFor("ar"), en: textFor("en"), tr: textFor("tr") },
-    // `none` frames have no art to draw, so the emitter is never told about them.
-    frames: frameRects.flatMap(({ src, tone, w, h }) =>
-      tone === "none" ? [] : [{ src, tone, w, h }],
+    // The emitter is only told about frames whose art this kit owns: a `none`
+    // frame draws nothing, and a frame with its own `src` is already drawn.
+    frames: frameRects.flatMap(({ src, tone, w, h, emit }) =>
+      emit && tone !== "none" ? [{ src, tone, w, h }] : [],
     ),
     paperWidth,
     paperHeight,

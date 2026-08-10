@@ -36,8 +36,8 @@ import { SHEET as S_20_27 } from "./sheets/20-27";
 import { SHEET as S_28_32 } from "./sheets/28-32";
 import { SHEET as S_33_40 } from "./sheets/33-40";
 import { SHEET as S_41_47 } from "./sheets/41-47";
-import { SHEET as S_48_54 } from "./sheets/48-54";
-import { SHEET as S_55_68 } from "./sheets/55-68";
+import { SHEET as S_48_52 } from "./sheets/48-52";
+import { SHEET as S_53_68 } from "./sheets/53-68";
 import { SHEET as S_69_82 } from "./sheets/69-82";
 import { SHEET as S_83 } from "./sheets/83";
 
@@ -72,10 +72,10 @@ const CELLS: GridCell[] = [
   // takes the right half, 48-54 the left, which is the two-sheet band the
   // handwritten page has here.
   { at: [2, 0], align: "rightHalf", key: "s2832", sheet: S_28_32 },
-  { at: [2, 0], align: "leftHalf", key: "s4854", sheet: S_48_54 },
+  { at: [2, 0], align: "leftHalf", key: "s4852", sheet: S_48_52 },
 
   // Row 3 — the two big two-column sheets.
-  { at: [3, 0], key: "s5568", sheet: S_55_68 },
+  { at: [3, 0], key: "s5368", sheet: S_53_68 },
   { at: [3, 9], key: "s6982", sheet: S_69_82 },
 
   // Row 4 — the closing glorification, alone and centred at the foot.
