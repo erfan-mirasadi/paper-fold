@@ -206,6 +206,10 @@ export interface SheetSpec {
   sayfa: number;
   /** Page width in world units. Height is derived from the stack. */
   paperWidth?: number;
+  /** Per-sheet capsule width multiplier. Defaults to 1. */
+  capsuleWidthScale?: number;
+  /** Per-sheet capsule height multiplier. Defaults to 1. */
+  capsuleHeightScale?: number;
   /** Override the starting Y coordinate of the content stack. Defaults to -0.2 (SHEET_MARGIN_TOP). */
   contentStartY?: number;
   rows: SheetRow[];
@@ -429,6 +433,8 @@ interface Placement {
 
 export function buildSheet(spec: SheetSpec): BuiltSheet {
   const paperWidth = spec.paperWidth ?? 1.54;
+  const capsuleWidthScale = spec.capsuleWidthScale ?? 1;
+  const capsuleHeightScale = spec.capsuleHeightScale ?? 1;
   const sectionInnerW = paperWidth - PADDING * 2 - SECTION_PAD_X * 2;
 
   const { rows, frames } = spec;
@@ -472,7 +478,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     caps.reduce(
       (sum, c, i) =>
         sum +
-        capsuleHeight(c) +
+        capsuleHeight(c) * capsuleHeightScale +
         BLOCK_PADDING * 2 +
         (i ? airBetween(caps[i - 1], c) : 0),
       0,
@@ -480,7 +486,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
 
   const rowHeight = (i: number) => {
     const row = rows[i];
-    if (!isSplit(row)) return capsuleHeight(row) + BLOCK_PADDING * 2;
+    if (!isSplit(row)) return capsuleHeight(row) * capsuleHeightScale + BLOCK_PADDING * 2;
     return Math.max(stackHeight(row.right), stackHeight(row.left));
   };
 
@@ -514,20 +520,22 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
         capsules: capsulesOf(row),
         verseIds: capsulesOf(row).map(() => nextId++),
         top,
-        height: capsuleHeight(row),
-        width: width * (row.width ?? 1),
+        height: capsuleHeight(row) * capsuleHeightScale,
+        width: width * (row.width ?? 1) * capsuleWidthScale,
         xOffset: 0,
         rowIndex: i,
       });
     } else {
       const ratio = row.ratio ?? 0.5;
       const inner = width - COLUMN_GAP;
-      const rightW = inner * ratio;
-      const leftW = inner - rightW;
+      const rightSlotW = inner * ratio;
+      const leftSlotW = inner - rightSlotW;
+      const rightW = rightSlotW * capsuleWidthScale;
+      const leftW = leftSlotW * capsuleWidthScale;
       // Both columns keep their outer edge on the row's own edge, so the pair
       // reads as one band split in two rather than two centred stacks.
-      const rightShift = width / 2 - rightW / 2;
-      const leftShift = -(width / 2 - leftW / 2);
+      const rightShift = width / 2 - rightSlotW / 2;
+      const leftShift = -(width / 2 - leftSlotW / 2);
 
       const column = (
         caps: ColumnItem[],
@@ -542,13 +550,13 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
             capsules: capsulesOf(c),
             verseIds: capsulesOf(c).map(() => nextId++),
             top: y,
-            height: capsuleHeight(c),
+            height: capsuleHeight(c) * capsuleHeightScale,
             width: w,
             xOffset: shift,
             rowIndex: i,
             side,
           });
-          y -= capsuleHeight(c) + BLOCK_PADDING * 2;
+          y -= capsuleHeight(c) * capsuleHeightScale + BLOCK_PADDING * 2;
         });
       };
       // Right first: it reads first, so it takes the lower verse ids and the

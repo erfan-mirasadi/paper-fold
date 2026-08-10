@@ -54,6 +54,8 @@ const SPEC: SheetSpec = {
   heroSubtitle: "suresi 33-40",
   sayfa: 442,
   paperWidth: 2.3,
+  capsuleWidthScale: 0.7,
+  capsuleHeightScale: 0.7,
 
   rows: [
     // ── Lens 1 (top) — ayah 33 ───────────────────────────────────────────

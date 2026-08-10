@@ -128,8 +128,8 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     1: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
       circleTextCol: "#7C2C2A",
       // 2 lines in 0.140 — height-bound.
-      textScaleOverride: 0.88,
-      translationTextScaleOverride: 0.6,
+      textScaleOverride: 0.82,
+      translationTextScaleOverride: 0.58,
       showNumber: true,
       displayNumber: 13,
     }),
@@ -426,15 +426,15 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
   // renderOrder MUST stay 2 < 3 < 4: each frame paints over the one below it.
   svgOverlays: [
     // Outer frame — blocks 0 … 6 (ayahs 13 … 19).
-    //   wanted: 1.06 x 1.388, y −0.194 … −1.582  (centre −0.888)
+    //   wanted: 1.06 x 1.41, y −0.194 … −1.582  (centre −0.888)
     {
       src: "/yasin1319/all-section.svg",
       anchorGroupIndex: 0,
       anchorEdge: "top",
       scaleX: 1.06,
-      scaleY: 1.388,
+      scaleY: 1.41,
       offsetX: 0,
-      offsetY: -0.642,
+      offsetY: -0.672,
       renderOrder: 2,
       customSectionId: "sec_all",
     },

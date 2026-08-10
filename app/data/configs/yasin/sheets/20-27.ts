@@ -83,7 +83,8 @@ const SPEC: SheetSpec = {
       tone: "outer",
       src: "/yasin1319/all-section.svg",
       w: 1.06,
-      h: 1.388,
+      h: 1.41,
+      offsetY: -0.572,
     },
     {
       from: 0,
