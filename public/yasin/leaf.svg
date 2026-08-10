@@ -59,11 +59,7 @@
 <stop offset="0.503741" stop-color="#CDC577"/>
 <stop offset="1" stop-color="#968428"/>
 </linearGradient>
-<linearGradient id="yasinLeafCardGold" x1="770" y1="500" x2="2130" y2="500" gradientUnits="userSpaceOnUse">
-<stop stop-color="#968428"/>
-<stop offset="0.503741" stop-color="#CDC577"/>
-<stop offset="1" stop-color="#968428"/>
-</linearGradient>
+
 </defs>
 
 <!-- Outer lens — teal -->
@@ -76,9 +72,5 @@
       fill="#F6EDE8" fill-opacity="0.95"
       stroke="#B0504D" stroke-width="21" stroke-linejoin="round"/>
 
-<!-- Text ground — cream card -->
-<rect x="770" y="200" width="1360" height="600"
-      rx="120" ry="120"
-      fill="#F3EAD6" fill-opacity="0.97"
-      stroke="url(#yasinLeafCardGold)" stroke-width="12"/>
+
 </svg>

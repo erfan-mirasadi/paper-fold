@@ -7,7 +7,6 @@ const SPEC: SheetSpec = {
   key: "yasin2832",
   title: "YÂSÎN: 28-32",
   heroSubtitle: "suresi 28-32",
-  noteTitle: "Yâsîn: 28-32",
   sayfa: 442,
 
   rows: [

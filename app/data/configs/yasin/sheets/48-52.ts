@@ -32,7 +32,6 @@ const SPEC: SheetSpec = {
   key: "yasin4852",
   title: "YÂSÎN: 48-52",
   heroSubtitle: "suresi 48-52",
-  noteTitle: "Yâsîn: 48-52",
   sayfa: 443,
   // UNCHANGED from the sheet this replaces. The atlas centres this one in the
   // left half of its row (`align: "leftHalf"`), so its width is what puts it

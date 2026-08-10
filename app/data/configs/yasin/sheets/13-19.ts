@@ -241,17 +241,6 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
 
   handwrittenNotes: [
     {
-      x: 0.77,
-      y: -0.05,
-      fontSize: 0.046,
-      color: "#7C2C2A",
-      lineSpacing: 1.4,
-      maxWidth: 1.5,
-      textAlign: "center",
-      rotationZ: 0,
-      lines: [{ text: "Yâsîn: 13-19" }],
-    },
-    {
       x: 1.32,
       y: -0.28,
       fontSize: 0.03,

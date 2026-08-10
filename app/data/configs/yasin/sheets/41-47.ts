@@ -40,7 +40,6 @@ const SPEC: SheetSpec = {
   key: "yasin4147",
   title: "YÂSÎN: 41-47",
   heroSubtitle: "suresi 41-47",
-  noteTitle: "Yâsîn: 41-47",
   sayfa: 443,
   paperWidth: 1.7,
 

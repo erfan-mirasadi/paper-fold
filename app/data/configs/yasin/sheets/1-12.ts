@@ -140,7 +140,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
 
   dimensions: {
     paperWidth: 1.54,
-    paperHeight: 1.78,
+    paperHeight: 2.03,
     // +0.02 (others sit at −0.045): the mandorla's lower tip runs past its
     // capsule, so the stack is lifted to buy that tip a margin.
     sceneCenterYOffset: 0.02,
@@ -154,11 +154,21 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   specialVerses: {},
 
   verseOverrides: {
-    // ── SECTION 1 — ayahs 1 … 6 in four capsules ─────────────────────────
+    // ── SECTION 1 — ayahs 1 … 6, ONE CAPSULE EACH ────────────────────────
+    // The letters stand alone above the cloud (id 1), the oath opens it (12),
+    // ayahs 3 · 4 are its widest line, ayah 5 closes it (4), and the warning
+    // that follows (13) sits under it.
     1: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
       textScaleOverride: 0.95,
       translationTextScaleOverride: 0.7,
+      showNumber: true,
+      displayNumber: 1,
+    }),
+    12: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
+      circleTextCol: "#7A5A18",
+      textScaleOverride: 0.8,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 2,
     }),
@@ -179,9 +189,16 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       displayNumber: 4,
     }),
     4: capsule(LAV_BG, LAV_BORDER, INK_LAV, {
-      // Two lines in a 0.100 capsule — height-bound, not width-bound.
-      textScaleOverride: 0.82,
-      translationTextScaleOverride: 0.54,
+      // One line in a 0.500-wide capsule, the cloud's closing line.
+      textScaleOverride: 0.8,
+      translationTextScaleOverride: 0.5,
+      showNumber: true,
+      displayNumber: 5,
+    }),
+    13: capsule(WHITE_BG, LAV_BORDER, INK_LAV, {
+      // The long warning, on its own bar under the cloud.
+      textScaleOverride: 0.7,
+      translationTextScaleOverride: 0.46,
       showNumber: true,
       displayNumber: 6,
     }),
@@ -308,17 +325,6 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
 
   handwrittenNotes: [
     {
-      x: 0.77,
-      y: -0.045,
-      fontSize: 0.046,
-      color: "#7C2C2A",
-      lineSpacing: 1.4,
-      maxWidth: 1.5,
-      textAlign: "center",
-      rotationZ: 0,
-      lines: [{ text: "Yâsîn: 1-12" }],
-    },
-    {
       x: 1.33,
       y: -0.24,
       fontSize: 0.03,
@@ -408,19 +414,35 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   // three sections — 0.160 because the mandorla's upper tip reaches 0.135 above
   // its own capsule and must still clear the outer ring's bottom edge.
   blocks: [
+    // The two letters, alone in their own panel above the cloud.
     {
-      id: "s1_oath",
+      id: "s1_yasin",
       type: "group",
       verseIds: [1],
       columns: 1,
       capsuleHeight: 0.082,
-      horizontalInset: 0.087,
+      horizontalInset: 0.247,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
+      customSectionId: "sec_letters",
+    },
+    // The oath — the cloud's first line, and narrow, so the cloud tapers.
+    {
+      id: "s1_oath",
+      type: "group",
+      verseIds: [12],
+      columns: 1,
+      capsuleHeight: 0.082,
+      horizontalInset: 0.047,
+      isCenter: true,
+      dragBehavior: "individual",
+      hideRowConnectors: true,
+      gapBefore: 0.03,
       customSectionId: "sec_top",
     },
-    // Ayahs 4 · 3. RTL: ayah 3 reads first, so it takes the RIGHT column.
+    // Ayahs 4 · 3, the cloud's widest line. RTL: ayah 3 reads first, so it
+    // takes the RIGHT column — which is verseIds[1], not [0].
     {
       id: "s1_row",
       type: "group",
@@ -435,18 +457,32 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       gapBefore: 0.01,
       customSectionId: "sec_top",
     },
+    // Ayah 5 closes the cloud, as narrow as the line that opened it.
     {
       id: "s1_tenzil",
       type: "group",
       verseIds: [4],
       columns: 1,
-      capsuleHeight: 0.1,
-      horizontalInset: -0.353,
+      capsuleHeight: 0.082,
+      horizontalInset: 0.047,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
       gapBefore: 0.01,
       customSectionId: "sec_top",
+    },
+    // Ayah 6 — outside the cloud, on a bar of its own.
+    {
+      id: "s1_uyari",
+      type: "group",
+      verseIds: [13],
+      columns: 1,
+      capsuleHeight: 0.086,
+      horizontalInset: -0.313,
+      isCenter: true,
+      dragBehavior: "individual",
+      hideRowConnectors: true,
+      gapBefore: 0.03,
     },
     {
       id: "r_a7",
@@ -566,8 +602,13 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       cameraTarget: { y: 1.1, fov: 28, tilt: -1.4 },
     },
     {
+      id: "sec_letters",
+      verseIds: [1],
+      cameraTarget: { y: 0.95, fov: 24, tilt: -1.4 },
+    },
+    {
       id: "sec_top",
-      verseIds: [1, 2, 3, 4],
+      verseIds: [12, 2, 3, 4],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
     },
   ],
@@ -581,24 +622,38 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   // of the one below it, and that overpainting is what turns three filled
   // rectangles into three visible bands.
   svgOverlays: [
-    // Section 1's frame — blocks 0 … 2.
-    //   wanted: 1.04 x 0.394, y −0.1045 … −0.4985  (centre −0.3015)
-    {
-      src: "/yasin/all-section.svg",
-      anchorGroupIndex: 0,
-      anchorEdge: "top",
-      scaleX: 1.04,
-      scaleY: 0.394,
-      offsetX: 0,
-      offsetY: -0.165,
-      renderOrder: 2,
-      customSectionId: "sec_top",
-    },
+    // The letters' panel — block 0 alone. Centred on that block: 0.098 tall,
+    // 0.021 of air above and below it.
+    // {
+    //   src: "/yasin/letter-panel.svg",
+    //   anchorGroupIndex: 0,
+    //   anchorEdge: "top",
+    //   scaleX: 0.42,
+    //   scaleY: 0.14,
+    //   offsetX: 0,
+    //   offsetY: -0.049,
+    //   renderOrder: 2,
+    //   customSectionId: "sec_letters",
+    // },
+    // The cloud — blocks 1 … 3 (ayahs 2 … 5), 0.314 of stack inside a 0.52
+    // plane: the lobes stand on the body's edge and eat 0.083 top and bottom,
+    // so the band left for capsules is 0.354. Centre is the stack's centre.
+    // {
+    //   src: "/yasin/cloud.svg",
+    //   anchorGroupIndex: 1,
+    //   anchorEdge: "top",
+    //   scaleX: 1.06,
+    //   scaleY: 0.52,
+    //   offsetX: 0,
+    //   offsetY: -0.157,
+    //   renderOrder: 2,
+    //   customSectionId: "sec_top",
+    // },
     // Outer ring — blocks 3 … 8 (ayahs 7 … 11).
     //   wanted: 1.01 x 0.798, y −0.5095 … −1.3075  (centre −0.9085)
     {
       src: "/yasin/ring-outer.svg",
-      anchorGroupIndex: 3,
+      anchorGroupIndex: 5,
       anchorEdge: "top",
       scaleX: 1.01,
       scaleY: 0.798,
@@ -611,7 +666,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 0.86 x 0.534, y −0.6295 … −1.1635  (centre −0.8965)
     {
       src: "/yasin/ring-mid.svg",
-      anchorGroupIndex: 4,
+      anchorGroupIndex: 6,
       anchorEdge: "top",
       scaleX: 0.86,
       scaleY: 0.534,
@@ -626,7 +681,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 0.70 x 0.268, y −0.7635 … −1.0315  (centre −0.8975)
     {
       src: "/yasin/ring-inner.svg",
-      anchorGroupIndex: 5,
+      anchorGroupIndex: 7,
       anchorEdge: "top",
       scaleX: 0.7,
       scaleY: 0.268,
@@ -641,7 +696,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 1.16 x 0.400, y −1.3205 … −1.7205
     {
       src: "/yasin/leaf.svg",
-      anchorGroupIndex: 9,
+      anchorGroupIndex: 11,
       anchorEdge: "top",
       scaleX: 1.16,
       scaleY: 0.4,
@@ -730,15 +785,20 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
 
   animations: {
     computeFoldYPositions: (lm) => {
-      // fold0 — between section 1 (block 2) and the outer ring (block 3).
+      // fold0 — between section 1 (block 4) and the outer ring (block 5).
       const fold0 =
-        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) / 2;
+        (lm.groupYPositions[4] - lm.groupHeights[4] + lm.groupYPositions[5]) /
+        2;
       // fold1 — the onion's centre line, between ayah 9's two capsules.
       const fold1 =
-        (lm.groupYPositions[5] - lm.groupHeights[5] + lm.groupYPositions[6]) / 2;
-      // fold2 — between the outer ring (block 8) and the mandorla (block 9).
+        (lm.groupYPositions[7] - lm.groupHeights[7] + lm.groupYPositions[8]) /
+        2;
+      // fold2 — between the outer ring (block 10) and the mandorla (block 11).
       const fold2 =
-        (lm.groupYPositions[8] - lm.groupHeights[8] + lm.groupYPositions[9]) / 2;
+        (lm.groupYPositions[10] -
+          lm.groupHeights[10] +
+          lm.groupYPositions[11]) /
+        2;
       // fold3 — below the mandorla, so it can hinge as a unit.
       const fold3 = fold2 - 0.16;
       return [fold0, fold1, fold2, fold3];
@@ -798,7 +858,8 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      { verses: [{ number: 1, text: "يسٓ وَالْقُرْآنِ الْحَكِيمِ" }] },
+      { verses: [{ number: 1, text: "يسٓ" }] },
+      { verses: [{ number: 12, text: "وَالْقُرْآنِ الْحَكِيمِ" }] },
       {
         verses: [
           { number: 3, text: "عَلَىٰ صِرَاطٍ مُسْتَقِيمٍ" },
@@ -806,10 +867,13 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         ],
       },
       {
+        verses: [{ number: 4, text: "تَنْزِيلَ الْعَزِيزِ الرَّحِيمِ" }],
+      },
+      {
         verses: [
           {
-            number: 4,
-            text: "تَنْزِيلَ الْعَزِيزِ الرَّحِيمِ\nلِتُنْذِرَ قَوْمًا مَا أُنْذِرَ آبَاؤُهُمْ فَهُمْ غَافِلُونَ",
+            number: 13,
+            text: "لِتُنْذِرَ قَوْمًا مَا أُنْذِرَ آبَاؤُهُمْ فَهُمْ غَافِلُونَ",
           },
         ],
       },
@@ -837,7 +901,11 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
           },
         ],
       },
-      { verses: [{ number: 8, text: "فَأَغْشَيْنَاهُمْ فَهُمْ لَا يُبْصِرُونَ" }] },
+      {
+        verses: [
+          { number: 8, text: "فَأَغْشَيْنَاهُمْ فَهُمْ لَا يُبْصِرُونَ" },
+        ],
+      },
       {
         verses: [
           {
@@ -875,10 +943,9 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
+      { verses: [{ number: 1, text: "Yâsîn." }] },
       {
-        verses: [
-          { number: 1, text: "Yâsîn.\nHikmet dolu Kur'an'a andolsun ki," },
-        ],
+        verses: [{ number: 12, text: "Hikmet dolu Kur'an'a andolsun ki," }],
       },
       {
         verses: [
@@ -893,7 +960,15 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 4,
-            text: "Kur'an, Azîz ve Rahîm olan Allah tarafından indirilmiştir;\nataları uyarılmamış, bu yüzden gaflette olan bir kavmi uyarman için.",
+            text: "Azîz ve Rahîm olanın indirmesidir;",
+          },
+        ],
+      },
+      {
+        verses: [
+          {
+            number: 13,
+            text: "ataları uyarılmamış, bu yüzden gaflette olan bir kavmi uyarman için.",
           },
         ],
       },
@@ -963,7 +1038,8 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
     topLabel: "",
     introVerse: { number: 0, text: "" },
     colorGroups: [
-      { verses: [{ number: 1, text: "Ya Sin.\nBy the wise Qur'an," }] },
+      { verses: [{ number: 1, text: "Ya Sin." }] },
+      { verses: [{ number: 12, text: "By the wise Qur'an," }] },
       {
         verses: [
           { number: 3, text: "upon a\nstraight\npath." },
@@ -974,7 +1050,15 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 4,
-            text: "A revelation of the Almighty, the Most Merciful,\nto warn a people whose forefathers were not warned, and so are heedless.",
+            text: "A revelation of the Almighty, the Most Merciful,",
+          },
+        ],
+      },
+      {
+        verses: [
+          {
+            number: 13,
+            text: "to warn a people whose forefathers were not warned, and so are heedless.",
           },
         ],
       },

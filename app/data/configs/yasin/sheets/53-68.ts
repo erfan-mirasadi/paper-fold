@@ -54,7 +54,6 @@ const SPEC: SheetSpec = {
   key: "yasin5368",
   title: "YÂSÎN: 53-68",
   heroSubtitle: "suresi 53-68",
-  noteTitle: "Yâsîn: 53-68",
   sayfa: 444,
   // UNCHANGED from the 55-68 sheet this replaces — the atlas addresses this
   // sheet by its right edge, so its width is what puts it where it is.
