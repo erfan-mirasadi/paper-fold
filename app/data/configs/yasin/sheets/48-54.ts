@@ -1,6 +1,31 @@
 import { buildSheet, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
+// 48-54 — "when is this promise?", and the answer, copied off the handwritten
+// sheet.
+//
+// ONE QUESTION OVER A GRID OF ANSWERS. The question runs the full width of the
+// page on its own, under its own arc; everything under it is the answer, laid
+// out TWO ACROSS AND THREE DOWN inside one frame, each ayah bridged to the one
+// beside it:
+//
+//     ╭──────────────── 48 ─────────────────╮   when is this promise?
+//     ╭─────────────────────────────────────╮
+//     │      50  ──  49                     │   the shout · no will, no return
+//     │      52  ──  51                      │   the trumpet · woe to us
+//     │      54  ──  53                      │   one shout · and no one wronged
+//     ╰─────────────────────────────────────╯
+//
+// Right reads first, as everywhere in this family, so a row reads 49 · 50 and
+// the page reads straight down the pairs.
+//
+// ONE AYAH IS ONE CAPSULE here, so every capsule prints its own number. They
+// are whole ayahs in half a row, so each is broken to THREE LINES by hand —
+// all six of them, even where two would fit, because a capsule is fitted to its
+// own text and a short ayah on two lines would set half again as large as the
+// long one bridged to it. `tr` and `en` are broken to the same count as `ar`,
+// which is what sets the capsule's height.
+// ---------------------------------------------------------------------------
 
 const SPEC: SheetSpec = {
   id: "yasin4854",
@@ -9,71 +34,95 @@ const SPEC: SheetSpec = {
   heroSubtitle: "suresi 48-54",
   noteTitle: "Yâsîn: 48-54",
   sayfa: 443,
+  // UNCHANGED from the sheet this replaces. The atlas centres this one in the
+  // left half of its row (`align: "leftHalf"`), so its width is what puts it
+  // where it is on the big paper — change it and the sheet moves.
   paperWidth: 2.1,
 
   rows: [
+    // ── The question, alone across the top ────────────────────────────────
     {
       ayah: 48,
-      tone: "white",
+      tone: "maroon",
       ar: "وَيَقُولُونَ مَتَىٰ هَٰذَا الْوَعْدُ إِن كُنتُمْ صَادِقِينَ",
       tr: "“Doğru söylüyorsanız, bu vaat ne zaman?” diyorlar.",
       en: "They say, “When is this promise, if you are truthful?”",
     },
+
+    // ── The first blast: what it catches, and what it takes away ──────────
     {
-      ayah: 49,
-      tone: "maroon",
-      ar: "مَا يَنظُرُونَ إِلَّا صَيْحَةً وَاحِدَةً تَأْخُذُهُمْ وَهُمْ يَخِصِّمُونَ",
-      tr: "Onlar tek bir sesten başkasını beklemiyorlar; o ses onları çekişip dururken yakalayacak.",
-      en: "They await but one shout, which will seize them as they argue.",
+      pair: [
+        {
+          ayah: 49,
+          tone: "white",
+          ar: "مَا يَنظُرُونَ إِلَّا\nصَيْحَةً وَاحِدَةً تَأْخُذُهُمْ\nوَهُمْ يَخِصِّمُونَ",
+          tr: "Tek bir sesten başkasını\nbeklemiyorlar; o ses onları\nçekişirken yakalar.",
+          en: "They await but one shout,\nwhich will seize them\nas they are still arguing.",
+        },
+        {
+          ayah: 50,
+          tone: "white",
+          ar: "فَلَا يَسْتَطِيعُونَ\nتَوْصِيَةً وَلَا إِلَىٰ\nأَهْلِهِمْ يَرْجِعُونَ",
+          tr: "Ne bir vasiyette\nbulunabilirler, ne de\nailelerine dönebilirler.",
+          en: "They can leave no will,\nnor return to their\nown people.",
+        },
+      ],
     },
+
+    // ── The trumpet: what it raises, and what they say when it does ───────
     {
-      ayah: 50,
-      tone: "maroon",
-      ar: "فَلَا يَسْتَطِيعُونَ تَوْصِيَةً وَلَا إِلَىٰ أَهْلِهِمْ يَرْجِعُونَ",
-      tr: "Ne bir vasiyette bulunabilirler, ne de ailelerine dönebilirler.",
-      en: "They will not be able to leave a will, nor return to their people.",
+      pair: [
+        {
+          ayah: 51,
+          tone: "white",
+          ar: "وَنُفِخَ فِي الصُّورِ فَإِذَا\nهُم مِّنَ الْأَجْدَاثِ\nإِلَىٰ رَبِّهِمْ يَنسِلُونَ",
+          tr: "Sûr'a üflenir; bir de\nbakarsın kabirlerinden\nRablerine koşuyorlar.",
+          en: "The trumpet is blown, and\nat once they hasten from\nthe graves to their Lord.",
+        },
+        {
+          ayah: 52,
+          tone: "white",
+          ar: "قَالُوا يَا وَيْلَنَا مَن بَعَثَنَا\nمِن مَّرْقَدِنَا هَٰذَا مَا وَعَدَ\nالرَّحْمَٰنُ وَصَدَقَ الْمُرْسَلُونَ",
+          tr: "“Eyvah! Bizi yattığımız\nyerden kim kaldırdı?” —\nRahmân'ın vaadi, doğruymuş.",
+          en: "“Woe to us! Who raised us\nfrom our resting place?”\nThe Merciful's promise, true.",
+        },
+      ],
     },
+
+    // ── The whole of it in one shout, and the verdict that follows ────────
     {
-      ayah: 51,
-      tone: "lav",
-      ar: "وَنُفِخَ فِي الصُّورِ فَإِذَا هُم مِّنَ الْأَجْدَاثِ إِلَىٰ رَبِّهِمْ يَنسِلُونَ",
-      tr: "Sûr'a üflenir; bir de bakarsın kabirlerinden Rablerine koşuyorlar.",
-      en: "The trumpet is blown, and at once they hasten from the graves to their Lord.",
-    },
-    {
-      ayah: 52,
-      tone: "lav",
-      ar: "قَالُوا يَا وَيْلَنَا مَن بَعَثَنَا مِن مَّرْقَدِنَا هَٰذَا مَا وَعَدَ الرَّحْمَٰنُ وَصَدَقَ الْمُرْسَلُونَ",
-      tr: "“Eyvah! Bizi yattığımız yerden kim kaldırdı?” derler. “İşte Rahmân'ın vaadi; elçiler doğru söylemiş.”",
-      en: "They say, “Woe to us! Who raised us from our resting place?” “This is what the Merciful promised; the messengers told the truth.”",
-    },
-    {
-      ayah: 53,
-      tone: "white",
-      ar: "إِن كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً فَإِذَا هُمْ جَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
-      tr: "Sadece tek bir ses olur; hepsi birden huzurumuzda hazır edilirler.",
-      en: "It is but one shout, and at once they are all brought before Us.",
-    },
-    {
-      ayah: 54,
-      tone: "green",
-      ar: "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا وَلَا تُجْزَوْنَ إِلَّا مَا كُنتُمْ تَعْمَلُونَ",
-      tr: "O gün hiç kimseye zerre kadar haksızlık edilmez; size ancak yaptıklarınızın karşılığı verilir.",
-      en: "Today no soul is wronged in the least, and you are repaid only for what you did.",
+      pair: [
+        {
+          ayah: 53,
+          tone: "white",
+          ar: "إِن كَانَتْ إِلَّا\nصَيْحَةً وَاحِدَةً فَإِذَا هُمْ\nجَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
+          tr: "Sadece tek bir ses olur;\nhepsi birden huzurumuzda\nhazır edilirler.",
+          en: "It is but one shout, and\nat once they are all\nbrought before Us.",
+        },
+        {
+          ayah: 54,
+          tone: "white",
+          ar: "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا\nوَلَا تُجْزَوْنَ إِلَّا\nمَا كُنتُمْ تَعْمَلُونَ",
+          tr: "O gün hiç kimseye zerre\nkadar haksızlık edilmez;\nancak yaptığınız verilir.",
+          en: "Today no soul is wronged\nin the least; you are repaid\nonly for what you did.",
+        },
+      ],
     },
   ],
 
   frames: [
-    { from: 0, to: 6, tone: "outer" },
-    { from: 0, to: 2, tone: "rose", label: "Soru\n(48-50. ayet)", labelSide: "right" },
-    { from: 3, to: 5, tone: "band", label: "Sûr\n(51-53. ayet)", labelSide: "left" },
+    { from: 0, to: 3, tone: "outer" },
+    // The arc over the question, and the frame around everything that answers
+    // it — the two enclosures the sheet is drawn with.
+    { from: 0, to: 0, tone: "rose", label: "Soru\n(48. ayet)", labelSide: "right" },
+    {
+      from: 1,
+      to: 3,
+      tone: "band",
+      label: "Cevap\n(49-54. ayet)",
+      labelSide: "left",
+    },
   ],
 };
-
-// ---------------------------------------------------------------------------
-// 55-68 — the Garden, and the court of the guilty. The first of the two BIG
-// sheets, and the first laid out in two columns throughout: on a page this
-// long the ayahs pair off, and the handwritten sheet reads them across before
-// it reads them down.
 
 export const SHEET = buildSheet(SPEC);
