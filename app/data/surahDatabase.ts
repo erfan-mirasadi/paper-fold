@@ -103,18 +103,6 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     reference: "Mâûn 107",
   },
   {
-    id: "yasin36",
-    displayName: "Yâsîn 1-12",
-    arabicName: "يس ١-١٢",
-    reference: "Yâsîn 1-12",
-  },
-  {
-    id: "yasin1319",
-    displayName: "Yâsîn 13-19",
-    arabicName: "يس ١٣-١٩",
-    reference: "Yâsîn 13-19",
-  },
-  {
     id: "yasin",
     displayName: "Yâsîn — Tek Levha",
     arabicName: "يس",
@@ -256,20 +244,6 @@ const SURAH_PAPER_LOADERS: Readonly<
       import("./configs/maun107Config").then((m) => ({
         config: m.MAUN_107_CONFIG,
         textData: m.MAUN_107_TEXT_DATA,
-      })),
-  ],
-  yasin36: [
-    () =>
-      import("./configs/yasin/sheets/1-12").then((m) => ({
-        config: m.YASIN_36_CONFIG,
-        textData: m.YASIN_36_TEXT_DATA,
-      })),
-  ],
-  yasin1319: [
-    () =>
-      import("./configs/yasin/sheets/13-19").then((m) => ({
-        config: m.YASIN_13_19_CONFIG,
-        textData: m.YASIN_13_19_TEXT_DATA,
       })),
   ],
   // Not a page of its own: every Yâsîn sheet composed onto ONE landscape
