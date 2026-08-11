@@ -352,6 +352,7 @@ export function VerseController({ config }: { config: VerseConfig }) {
           translationTextHighlights={config.translationTextHighlights}
           textScaleOverride={finalVerseTextScale}
           translationTextAlign={config.translationTextAlign}
+          versePadding={config.versePadding}
           translationPadding={config.translationPadding}
           suppressShadow={!isIntroActive}
           shadowRenderOrder={isMiddleFoldCandidate ? 0 : 90}

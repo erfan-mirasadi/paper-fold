@@ -709,7 +709,10 @@ interface VerseBoxProps {
   /** When true, shows the number badge even if `features.hideVerseNumbers`
    * is globally true — see `VerseOverrideConfig.showNumber`. */
   forceShowNumber?: boolean;
-  /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
+  /** Inner padding, every language — see `VerseOverrideConfig.versePadding`. */
+  versePadding?: number;
+  /** The EN/TR padding, replacing `versePadding` there — see
+   * `VerseOverrideConfig.translationPadding`. */
   translationPadding?: number;
   /** Stacks the page's single ayah number under the chunk counter — see
    * `VerseOverrideConfig.showAyahNumber`. */
@@ -761,6 +764,7 @@ export const VerseBox = ({
   textAlignOverride,
   hideNumber = false,
   forceShowNumber = false,
+  versePadding,
   translationPadding,
   showAyahNumber = false,
   ayahBadgeBg,
@@ -888,19 +892,26 @@ export const VerseBox = ({
   const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
 
   const safeMargin = 0.0;
+  // THE PADDING THE CONFIG ASKED FOR, per side. Arabic reads `versePadding`;
+  // the translations read it too unless they were given their own — the same
+  // split as `textColor` / `translationTextColor` above.
+  const explicitPadding = isArabic
+    ? versePadding
+    : (translationPadding ?? versePadding);
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
   const defaultExtraPadding =
     !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
-  const EXTRA_BIG_VERSE_PADDING =
-    translationPadding !== undefined && !isArabic
-      ? translationPadding
-      : defaultExtraPadding;
+  const EXTRA_BIG_VERSE_PADDING = explicitPadding ?? defaultExtraPadding;
   const centeredSidePadding = centerTextInCapsule
     ? (showVerseNumber ? numberSidePadding : isTightPadding ? 0.005 : 0.012) +
       EXTRA_BIG_VERSE_PADDING
     : 0;
   const textMaxW = isTightPadding
-    ? finalW // remove wrapping limit so user can freely scale text to borders
+    ? // A tight page drops the wrapping limit so the text can be scaled right up
+      // to the border — but an EXPLICIT padding is the one thing it still obeys,
+      // otherwise a per-capsule padding would be silently ignored on every page
+      // that opted into tightness (which is every generated Yâsîn sheet).
+      finalW - (explicitPadding ?? 0) * 2
     : !showVerseNumber
       ? finalW - 0.04
       : (finalW -
@@ -1061,6 +1072,7 @@ interface SplitVerseCapsulesProps {
   verseId?: number;
   opacity?: any;
   baseRenderOrder?: number;
+  versePadding?: number;
   translationPadding?: number;
 }
 export const SplitVerseCapsules = ({
@@ -1085,6 +1097,7 @@ export const SplitVerseCapsules = ({
   verseId,
   opacity,
   baseRenderOrder,
+  versePadding,
   translationPadding,
 }: SplitVerseCapsulesProps) => {
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
@@ -1156,6 +1169,7 @@ export const SplitVerseCapsules = ({
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
+        versePadding={versePadding}
         translationPadding={translationPadding}
       />
       <VerseBox
@@ -1178,6 +1192,7 @@ export const SplitVerseCapsules = ({
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
+        versePadding={versePadding}
         translationPadding={translationPadding}
       />
     </group>

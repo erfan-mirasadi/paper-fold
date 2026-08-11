@@ -303,6 +303,7 @@ export function VerseGroup({
                 translationTextColor={override?.translationTextColor}
                 textHighlights={override?.textHighlights}
                 translationTextHighlights={override?.translationTextHighlights}
+                versePadding={override?.versePadding}
                 translationPadding={override?.translationPadding}
               />
             ) : (
@@ -330,6 +331,7 @@ export function VerseGroup({
                 translationTextColor={override?.translationTextColor}
                 textHighlights={override?.textHighlights}
                 translationTextHighlights={override?.translationTextHighlights}
+                versePadding={override?.versePadding}
                 translationPadding={override?.translationPadding}
                 textAlignOverride={override?.translationTextAlign}
                 forceShowNumber={override?.showNumber}

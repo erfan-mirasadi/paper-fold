@@ -44,6 +44,8 @@ export interface VerseConfig {
   textScaleOverride?: number;
   translationTextScaleOverride?: number | null;
   translationTextAlign?: "left" | "center" | "right";
+  /** See `VerseOverrideConfig.versePadding`. */
+  versePadding?: number;
   translationPadding?: number;
   isPill?: boolean;
   /** Half-oval/dome shape for the capsule — see `VerseOverrideConfig.verseShape`. */
@@ -177,6 +179,7 @@ export function buildVerseConfigs(
         const textScaleOverride = override?.textScaleOverride;
         const translationTextScaleOverride = override?.translationTextScaleOverride;
         const translationTextAlign = override?.translationTextAlign;
+        const versePadding = override?.versePadding;
         const translationPadding = override?.translationPadding;
 
         let direction: "left" | "right";
@@ -231,6 +234,7 @@ export function buildVerseConfigs(
           textScaleOverride,
           translationTextScaleOverride,
           translationTextAlign,
+          versePadding,
           translationPadding,
           isPill,
           isSectionIntroOutro: !isGridVerse,
@@ -280,6 +284,7 @@ export function buildVerseConfigs(
           textScaleOverride: override?.textScaleOverride,
           translationTextScaleOverride: override?.translationTextScaleOverride,
           translationTextAlign: override?.translationTextAlign,
+          versePadding: override?.versePadding,
           translationPadding: override?.translationPadding,
           isPill: override?.isPill ?? false,
           customFrameSvg: override?.customFrameSvg,
@@ -332,6 +337,7 @@ export function buildVerseConfigs(
       const textScaleOverride = override?.textScaleOverride;
       const translationTextScaleOverride = override?.translationTextScaleOverride;
       const translationTextAlign = override?.translationTextAlign;
+      const versePadding = override?.versePadding;
       const translationPadding = override?.translationPadding;
 
       const worldX = t.x - expandW - PAGE_WIDTH / 2;
@@ -394,6 +400,7 @@ export function buildVerseConfigs(
         textScaleOverride,
         translationTextScaleOverride,
         translationTextAlign,
+        versePadding,
         translationPadding,
         isPill: override?.isPill,
         forceShowNumber: override?.showNumber,

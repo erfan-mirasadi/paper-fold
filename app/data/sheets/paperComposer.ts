@@ -459,6 +459,10 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
             undefined,
           s,
         ),
+        // Both paddings are WORLD UNITS inside a capsule, so they shrink with
+        // the sheet exactly like the capsule they pad.
+        versePadding: scaleOr(ov?.versePadding, s),
+        translationPadding: scaleOr(ov?.translationPadding, s),
         // The composed page hides numbers page-wide, so a sheet that showed
         // them opts each of its verses back in.
         showNumber: sheetHidesNumbers ? ov?.showNumber : true,

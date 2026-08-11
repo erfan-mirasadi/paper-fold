@@ -666,7 +666,25 @@ export interface VerseOverrideConfig {
    * rounder dome; larger = a flatter dome. Defaults to 0.35.
    */
   domeSideRatio?: number;
-  /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
+  /**
+   * PADDING INSIDE THE CAPSULE — world units, taken off EACH side, so the text
+   * gets `capsuleWidth − 2 · versePadding` to set itself in. Applies to every
+   * language unless `translationPadding` narrows it, which makes this the
+   * ARABIC padding on a page that pads the two differently (the same split as
+   * `textColor` / `translationTextColor`).
+   *
+   * NEGATIVE opens the capsule up past its own border — the text is allowed to
+   * set wider than the box it sits in. That is the only way to reduce the air
+   * on a `tightVersePadding` page, where the default padding is already zero.
+   *
+   * It is a WRAP-AND-CLIP width, not a nudge: the text stays centred in the
+   * capsule either way, and what this changes is where a line breaks and where
+   * CanvasText stops drawing it. So it does nothing to a line that already fits
+   * — to actually close a gap between a short line and the border, move
+   * `textScaleOverride` instead, or narrow the capsule.
+   */
+  versePadding?: number;
+  /** The EN/TR padding, replacing `versePadding` there — see `versePadding`. */
   translationPadding?: number;
   /** Direct hex color for the verse box background (also used by paper masking) */
   bg?: string;

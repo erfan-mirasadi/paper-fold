@@ -144,6 +144,31 @@ export interface CapsuleSpec {
   arScale?: number;
   /** The same, for the EN/TR text. See `arScale`. */
   latScale?: number;
+  /**
+   * THE AIR THIS CAPSULE KEEPS INSIDE ITS OWN BORDER, per side, in world units
+   * — `VerseOverrideConfig.versePadding` for the Arabic of this one capsule.
+   * Defaults to the sheet's `capsuleArPad`, then to `AR_PAD` below, so one
+   * number moves one capsule, one sheet, or the whole surah.
+   *
+   * POSITIVE pulls the text in off the border; NEGATIVE lets it set wider than
+   * the capsule it sits in. Zero is where every sheet stands today: these pages
+   * declare `tightVersePadding`, whose whole point is that the text may run
+   * right up to the rule.
+   *
+   * WHAT IT ACTUALLY MOVES is where a line wraps and where it gets clipped —
+   * the text stays centred in the capsule either way. So it will not close the
+   * gap around a line that already fits: for that, raise `arScale` (bigger
+   * text) or narrow the capsule (`width`). Where it earns its keep is a capsule
+   * whose text is set right to the edge — a few thousandths of padding buys the
+   * ink its margin back without re-solving the scale.
+   *
+   * IT ALSO BOUNDS THE AUTO-FIT: a capsule with no `arScale` is fitted into the
+   * width this leaves, not the capsule's own, so padding and the fallback fit
+   * never fight each other.
+   */
+  arPad?: number;
+  /** The same, for the EN/TR text. See `arPad`. */
+  latPad?: number;
 }
 
 /**
@@ -228,6 +253,10 @@ export interface SheetSpec {
   capsuleWidthScale?: number;
   /** Per-sheet capsule height multiplier. Defaults to 1. */
   capsuleHeightScale?: number;
+  /** This sheet's default `CapsuleSpec.arPad` — every capsule on it. */
+  capsuleArPad?: number;
+  /** This sheet's default `CapsuleSpec.latPad` — every capsule on it. */
+  capsuleLatPad?: number;
   /** Override the starting Y coordinate of the content stack. Defaults to -0.2 (SHEET_MARGIN_TOP). */
   contentStartY?: number;
   rows: SheetRow[];
@@ -327,6 +356,24 @@ const framePadY = (depth: number) => 0.058 - (depth - 1) * 0.011;
  * the 0.012 the Arabic block loses to `BIG_VERSE_VERTICAL_SHIFT` (it is drawn
  * 0.006 low, so the bottom edge binds first) plus 0.01 of air.
  */
+/**
+ * THE WHOLE SURAH'S CAPSULE PADDING — the air every generated sheet keeps
+ * between a capsule's text and its own border, per side, in world units. A
+ * sheet overrides it with `capsuleArPad` / `capsuleLatPad` and a single capsule
+ * with `arPad` / `latPad`; see `CapsuleSpec.arPad` for what the number does and
+ * what it cannot do.
+ *
+ * Zero is the look these pages were solved at, `tightVersePadding` and all: turn
+ * it up to give every capsule of the surah a margin at once, and expect the
+ * capsules whose `arScale` was measured right to the rule to re-wrap.
+ *
+ * (The two HAND-MADE sheets, 1-12 and 13-19, do not come through this kit and
+ * are not touched by it — they carry their own `verseOverrides`, where the same
+ * knob is spelled `versePadding` / `translationPadding`.)
+ */
+const AR_PAD = 0;
+const LAT_PAD = 0;
+
 const AR_EM = 0.071;
 const AR_WORD_EM = 2.3;
 const LINE_EM = 1.2;
@@ -645,15 +692,23 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
      p.capsules.length === 2 ? (p.width - COLUMN_GAP) / 2 : p.width;
    p.capsules.forEach((c, ci) => {
     const tone = SHEET_COLORS[c.tone ?? "white"];
+    // Per capsule, then per sheet, then the whole surah — see `CapsuleSpec.arPad`.
+    const arPad = c.arPad ?? spec.capsuleArPad ?? AR_PAD;
+    const latPad = c.latPad ?? spec.capsuleLatPad ?? LAT_PAD;
+    // The FIT is given the padded width, not the capsule's: the air the padding
+    // opens is not room the fallback fit may spend on bigger text, or a capsule
+    // sized by it would wrap the moment its padding went up.
+    const arW = capW - arPad * 2;
+    const latW = capW - latPad * 2;
     // A dome's text is bounded by the arch, not by the capsule's own width.
     const fitAr = (t: string) =>
       c.shape
-        ? fitInDome(fitArabicScale, t, capW, p.height, AR_EM * LINE_EM)
-        : fitArabicScale(t, capW, p.height);
+        ? fitInDome(fitArabicScale, t, arW, p.height, AR_EM * LINE_EM)
+        : fitArabicScale(t, arW, p.height);
     const fitLat = (t: string) =>
       c.shape
-        ? fitInDome(fitLatinScale, t, capW, p.height, LAT_EM * LAT_LINE_EM)
-        : fitLatinScale(t, capW, p.height);
+        ? fitInDome(fitLatinScale, t, latW, p.height, LAT_EM * LAT_LINE_EM)
+        : fitLatinScale(t, latW, p.height);
     verseOverrides[p.verseIds[ci]] = {
       bg: tone.bg,
       border: tone.border,
@@ -668,6 +723,10 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       textScaleOverride: c.arScale ?? round(fitAr(c.ar)),
       translationTextScaleOverride:
         c.latScale ?? round(Math.min(fitLat(c.tr), fitLat(c.en))),
+      // Only emitted where it is asked for: a zero entry would be identical in
+      // effect but would put the number on every capsule of every sheet.
+      ...(arPad ? { versePadding: arPad } : {}),
+      ...(latPad ? { translationPadding: latPad } : {}),
       ...(c.shape
         ? { verseShape: c.shape, domeSideRatio: DOME_SIDE_RATIO }
         : {}),
