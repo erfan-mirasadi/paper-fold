@@ -44,6 +44,7 @@ import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScript
 import { SideInfoPanel } from "@/app/_components/dom/ui-overlay/SideInfoPanel";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
+import { YasinOpeningPopup } from "@/app/_components/dom/YasinOpeningPopup";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
@@ -229,6 +230,7 @@ function SurahViewerInner({
   const cameraDistanceScale = useStoryStore(
     (s) => s.activeConfig.dimensions.cameraDistanceScale ?? 1,
   );
+  const isYasin = useStoryStore((s) => s.activeConfig.id === "yasin");
   const cameraPosition = CAMERA_CONFIG.initialCamera.position.map(
     (v) => v * cameraDistanceScale,
   ) as [number, number, number];
@@ -433,6 +435,8 @@ function SurahViewerInner({
       </AnimatePresence>
 
       <PaperSwitchCursorSpinner />
+
+      {isSceneReady && isYasin && <YasinOpeningPopup />}
 
       {isSceneReady && showPostIntroUI && <SurahScriptSidebar />}
       {/* The panel's copy for a non-default language is its own chunk
