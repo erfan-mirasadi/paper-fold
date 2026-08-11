@@ -36,6 +36,8 @@ const REST_DIRECTION = REST_OFFSET.clone().normalize();
 const _focus = new Vector3();
 const _camPos = new Vector3();
 const _pageScale = new Vector3();
+/** Stands in for the orbit target on a scene mounted without controls. */
+const _aim = new Vector3();
 
 /**
  * Where the camera has to stand for `rect` — a rectangle on the page — to fill
@@ -60,6 +62,13 @@ function solveFraming(
   outFocus: Vector3,
   outPosition: Vector3,
 ) {
+  // This runs BEFORE the renderer's own matrix pass, so the anchor is still
+  // carrying last frame's transform — and, on the frame a paper mounts, no
+  // transform at all. Freshening this one chain (parents yes, children no) is a
+  // handful of matrix multiplies and it is what keeps the camera from aiming at
+  // where the page used to be while the spin or a page switch is moving it.
+  anchor.updateWorldMatrix(true, false);
+
   outFocus
     .set(rect.x + rect.w / 2, rect.y - rect.h / 2, 0)
     .applyMatrix4(anchor.matrixWorld);
@@ -223,13 +232,15 @@ export function SectionZoomCamera() {
         camera.updateProjectionMatrix();
       }
 
-      if (controls?.target) {
-        // Aiming the camera at this point stays CameraViewController's job —
-        // see the note in step 5.
-        controls.target.lerp(_focus, ease);
-      } else {
-        camera.lookAt(_focus);
-      }
+      // The orbit target IS the aim, and the camera is pointed at it HERE
+      // rather than left for CameraViewController to do a moment later. That
+      // controller is still right — it reads the very same vector, so it
+      // recomputes the identical rotation — but a flight that owns its own
+      // aiming cannot be caught mid-frame between a position that has arrived
+      // and a heading that has not.
+      const aim = controls?.target ?? _aim;
+      aim.lerp(_focus, ease);
+      camera.lookAt(aim);
       return;
     }
 

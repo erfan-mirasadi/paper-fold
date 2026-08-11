@@ -38,6 +38,7 @@ import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOv
 import { FoldSliderOverlay } from "@/app/_components/dom/ui-overlay/FoldSliderOverlay";
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
+import { SectionZoomArrowsOverlay } from "@/app/_components/dom/ui-overlay/SectionZoomArrowsOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
 import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { SideInfoPanel } from "@/app/_components/dom/ui-overlay/SideInfoPanel";
@@ -500,6 +501,7 @@ function SurahViewerInner({
                   <ScrollHintOverlay />
                   <FoldSliderOverlay />
                   <PaperArrowsOverlay />
+                  <SectionZoomArrowsOverlay />
                   <PaperPaginationOverlay />
                 </motion.div>
               )}

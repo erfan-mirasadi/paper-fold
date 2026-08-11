@@ -100,15 +100,6 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   }, [paperReady, gl, scene, camera, isMobile]);
 
   useEffect(() => {
-    // TEMP-DEBUG
-    (window as any).__stores = {
-      elevated: useElevatedStore,
-      fold: useFoldStore,
-      story: useStoryStore,
-    };
-  }, []);
-
-  useEffect(() => {
     const unsub = useFoldStore.subscribe((state, prevState) => {
       if (state.isIntroActive && !prevState.isIntroActive) {
         useElevatedStore.getState().forceShowAllSections();
