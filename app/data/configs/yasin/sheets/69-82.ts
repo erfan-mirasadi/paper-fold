@@ -56,6 +56,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 69,
       tone: "gold",
+      heightLines: 3,
       arScale: 0.9,
       latScale: 0.81,
       // The air the text keeps off this capsule's own rule, per side. Turn it
@@ -71,6 +72,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 70,
       tone: "gold",
+      heightLines: 3,
       arScale: 0.9,
       latScale: 0.82,
       ar: "لِّيُنذِرَ مَن كَانَ حَيًّا الْقَوْلُ الْكَافِرِينَ",
@@ -84,6 +86,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 71,
           tone: "lav",
+          heightLines: 5,
           arScale: 0.75,
           latScale: 0.72,
           ar: "أَوَلَمْ يَرَوْا أَنَّا خَلَقْنَا لَهُم مِّمَّا\nعَمِلَتْ أَيْدِينَا أَنْعَامًا فَهُمْ لَهَا مَالِكُونَ",
@@ -95,6 +98,7 @@ const SPEC: SheetSpec = {
             {
               ayah: 72,
               tone: "green",
+              heightLines: 4,
               arScale: 0.7,
               latScale: 0.62,
               ar: "وَذَلَّلْنَاهَا لَهُمْ\nفَمِنْهَا رَكُوبُهُمْ\nوَمِنْهَا يَأْكُلُونَ",
@@ -104,6 +108,7 @@ const SPEC: SheetSpec = {
             {
               ayah: 73,
               tone: "green",
+              heightLines: 4,
               arScale: 0.7,
               latScale: 0.7,
               ar: "وَلَهُمْ فِيهَا\nمَنَافِعُ وَمَشَارِبُ\nأَفَلَا يَشْكُرُونَ",
@@ -117,6 +122,7 @@ const SPEC: SheetSpec = {
             {
               ayah: 74,
               tone: "blue",
+              heightLines: 4,
               arScale: 0.7,
               latScale: 0.7,
               ar: "وَاتَّخَذُوا مِن\nدُونِ اللَّهِ آلِهَةً\nلَّعَلَّهُمْ يُنصَرُونَ",
@@ -126,6 +132,7 @@ const SPEC: SheetSpec = {
             {
               ayah: 75,
               tone: "blue",
+              heightLines: 4,
               arScale: 0.7,
               latScale: 0.75,
               ar: "لَا يَسْتَطِيعُونَ\nنَصْرَهُمْ وَهُمْ لَهُمْ\nجُندٌ مُّحْضَرُونَ",
@@ -137,6 +144,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 76,
           tone: "green",
+          heightLines: 5,
           arScale: 0.75,
           latScale: 0.72,
           ar: "فَلَا يَحْزُنكَ قَوْلُهُمْ إِنَّا\nنَعْلَمُ مَا يُسِرُّونَ وَمَا يُعْلِنُونَ",
@@ -148,6 +156,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 77,
           tone: "blue",
+          heightLines: 3,
           arScale: 0.75,
           latScale: 0.76,
           ar: "أَوَلَمْ يَرَ الْإِنسَانُ أَنَّا خَلَقْنَاهُ\nمِن نُّطْفَةٍ فَإِذَا هُوَ خَصِيمٌ مُّبِينٌ",
@@ -157,6 +166,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 78,
           tone: "green",
+          heightLines: 3,
           arScale: 0.72,
           latScale: 0.82,
           ar: "وَضَرَبَ لَنَا مَثَلًا وَنَسِيَ خَلْقَهُ\nقَالَ مَن يُحْيِي الْعِظَامَ وَهِيَ رَمِيمٌ",
@@ -168,6 +178,7 @@ const SPEC: SheetSpec = {
             {
               ayah: 79,
               tone: "blue",
+              heightLines: 4,
               arScale: 0.7,
               latScale: 0.68,
               ar: "قُلْ يُحْيِيهَا الَّذِي\nأَنشَأَهَا أَوَّلَ مَرَّةٍ\nوَهُوَ بِكُلِّ خَلْقٍ عَلِيمٌ",
@@ -177,6 +188,7 @@ const SPEC: SheetSpec = {
             {
               ayah: 80,
               tone: "blue",
+              heightLines: 4,
               arScale: 0.7,
               latScale: 0.64,
               ar: "الَّذِي جَعَلَ لَكُم مِّنَ\nالشَّجَرِ الْأَخْضَرِ نَارًا\nفَإِذَا أَنتُم مِّنْهُ تُوقِدُونَ",
@@ -188,6 +200,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 81,
           tone: "blue",
+          heightLines: 3,
           arScale: 0.75,
           latScale: 0.75,
           ar: "أَوَلَيْسَ الَّذِي خَلَقَ السَّمَاوَاتِ وَالْأَرْضَ بِقَادِرٍ\nعَلَىٰ أَن يَخْلُقَ مِثْلَهُم بَلَىٰ وَهُوَ الْخَلَّاقُ الْعَلِيمُ",
@@ -197,6 +210,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 82,
           tone: "gold",
+          heightLines: 3,
           arScale: 0.75,
           latScale: 0.75,
           ar: "إِنَّمَا أَمْرُهُ إِذَا أَرَادَ شَيْئًا\nأَن يَقُولَ لَهُ كُن فَيَكُونُ",

@@ -145,6 +145,14 @@ export interface CapsuleSpec {
   /** The same, for the EN/TR text. See `arScale`. */
   latScale?: number;
   /**
+   * Geometry-only line count for the capsule. Use this when text is reflowed
+   * into fewer visual lines but the original capsule/frame height must stay
+   * unchanged. It does not change the text or either text scale.
+   */
+  heightLines?: number;
+  /** Extra capsule width on each side; affects the rendered capsule only. */
+  expandW?: number;
+  /**
    * THE AIR THIS CAPSULE KEEPS INSIDE ITS OWN BORDER, per side, in world units
    * — `VerseOverrideConfig.versePadding` for the Arabic of this one capsule.
    * Defaults to the sheet's `capsuleArPad`, then to `AR_PAD` below, so one
@@ -485,7 +493,7 @@ const capsuleHeight = (item: CapsuleSpec | ColumnItem) =>
     ...capsulesOf(item).map(
       (c) =>
         CAPSULE_H_BASE +
-        CAPSULE_H_PER_LINE * c.ar.split("\n").length +
+        CAPSULE_H_PER_LINE * (c.heightLines ?? c.ar.split("\n").length) +
         (c.shape ? DOME_EXTRA_H : 0),
     ),
   );
@@ -730,6 +738,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       ...(c.shape
         ? { verseShape: c.shape, domeSideRatio: DOME_SIDE_RATIO }
         : {}),
+      ...(c.expandW ? { expandW: c.expandW } : {}),
       ...(c.noNumber ? {} : { showNumber: true, displayNumber: c.ayah }),
     };
    });
@@ -845,19 +854,9 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     }));
 
   // ── Handwritten notes ───────────────────────────────────────────────────
-  const notes: HandwrittenNoteConfig[] = [
-    {
-      x: paperWidth / 2,
-      y: -0.05,
-      fontSize: 0.046,
-      color: "#7C2C2A",
-      lineSpacing: 1.4,
-      maxWidth: paperWidth,
-      textAlign: "center",
-      rotationZ: 0,
-      lines: [{ text: spec.noteTitle ?? spec.title }],
-    },
-  ];
+  // Sheet-range titles (e.g. "YÂSÎN: 53-68") are metadata only; do not ink
+  // them across the top of the paper.
+  const notes: HandwrittenNoteConfig[] = [];
   frames.forEach((f, fi) => {
     if (!f.label) return;
     const onLeft = f.labelSide === "left";
