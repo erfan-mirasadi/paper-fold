@@ -97,6 +97,10 @@ const INK_LAV = "#26283F";
 const INK_PURPLE = "#634E73";
 const INK_RED = "#A30000";
 
+// Bring the opening sheet onto the shared Yâsîn text baseline. Its original
+// hand-tuned overrides were about 15% larger than the 13-19 reference sheet.
+const STANDARD_TEXT_SCALE = 0.85;
+
 // EVERY capsule is `isPill: false`, as in tevbe24Config. Not cosmetic: SharedUI
 // picks the verse font as `isPill ? VERSE_TEXT_SMALL (0.038) : VERSE_TEXT_BIG
 // (0.071)`, so mixing the flag on one page puts its capsules on two baselines
@@ -115,7 +119,16 @@ const capsule = (
   circleTextCol: textColor,
   textColor,
   isPill: false,
-  ...extra,
+  ...Object.fromEntries(
+    Object.entries(extra).map(([key, value]) => [
+      key,
+      key === "textScaleOverride" || key === "translationTextScaleOverride"
+        ? typeof value === "number"
+          ? value * STANDARD_TEXT_SCALE
+          : value
+        : value,
+    ]),
+  ),
 });
 
 export const YASIN_36_CONFIG: SurahLayoutConfig = {
@@ -317,9 +330,9 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //     Tevbe  0.071 x 1.05 x 0.80 = 0.060 in a 0.12  capsule  (50%)
     //     here   0.071 x 1.05 x 0.57 = 0.043 in a 0.086 capsule  (50%)
     // Every override multiplies this — move it and the whole page moves.
-    verseTextScale: 0.57,
+    verseTextScale: 0.57 * STANDARD_TEXT_SCALE,
     // 0.625 of the Arabic, the ratio Tevbe uses (0.50 / 0.80).
-    translationVerseTextScale: 0.36,
+    translationVerseTextScale: 0.36 * STANDARD_TEXT_SCALE,
     tightVersePadding: true,
   },
 

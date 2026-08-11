@@ -58,6 +58,7 @@ const SPEC: SheetSpec = {
   // UNCHANGED from the 55-68 sheet this replaces — the atlas addresses this
   // sheet by its right edge, so its width is what puts it where it is.
   paperWidth: 2.9,
+  capsuleWidthScale: 0.88,
 
   rows: [
     // ── The shout, and the verdict that follows it ────────────────────────
@@ -201,7 +202,15 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    { from: 0, to: 7, tone: "outer" },
+    {
+      from: 0,
+      to: 7,
+      tone: "outer",
+      src: "/yasin1319/all-section.svg",
+      pad: 0,
+      w: 2.16,
+      h: 2.06,
+    },
     {
       from: 0,
       to: 1,

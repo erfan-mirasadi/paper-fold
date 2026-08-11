@@ -91,7 +91,15 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    { from: 0, to: 2, tone: "outer" },
+    {
+      from: 0,
+      to: 2,
+      tone: "outer",
+      src: "/yasin1319/all-section.svg",
+      pad: 0,
+      w: 1.58,
+      h: 0.97,
+    },
     // The arc over the question, and the frame around everything that answers
     // it — the two enclosures the sheet is drawn with.
     { from: 0, to: 0, tone: "rose", label: "Soru\n(48. ayet)", labelSide: "right" },

@@ -63,23 +63,29 @@ const CELLS: GridCell[] = [
   { at: [0, 0], align: "center", key: "s0112", sheet: S_1_12 },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
-  { at: [1, 0], key: "s1319", sheet: S_13_19 },
+  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.1 },
   { at: [1, 4], key: "s2027", sheet: S_20_27 },
-  { at: [1, 8], key: "s3340", sheet: S_33_40 },
-  { at: [1, 13], key: "s4147", sheet: S_41_47 },
+  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: +0.12, shiftY: 0.15 },
+  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.1 },
 
   // Row 2 — the one shout and "when is this promise?", side by side: 28-32
   // takes the right half, 48-54 the left, which is the two-sheet band the
   // handwritten page has here.
-  { at: [2, 0], align: "rightHalf", key: "s2832", sheet: S_28_32 },
-  { at: [2, 0], align: "leftHalf", key: "s4852", sheet: S_48_52 },
+  {
+    at: [2, 0],
+    align: "rightHalf",
+    key: "s2832",
+    sheet: S_28_32,
+    shiftY: 0.18,
+  },
+  { at: [2, 0], align: "leftHalf", key: "s4852", sheet: S_48_52, shiftY: 0.15 },
 
   // Row 3 — the two big two-column sheets.
-  { at: [3, 0], key: "s5368", sheet: S_53_68 },
-  { at: [3, 9], key: "s6982", sheet: S_69_82 },
+  { at: [3, 0], key: "s5368", sheet: S_53_68, shiftY: 0.1 },
+  { at: [3, 9], key: "s6982", sheet: S_69_82, shiftY: 0.1 },
 
   // Row 4 — the closing glorification, alone and centred at the foot.
-  { at: [4, 0], align: "center", key: "s83", sheet: S_83 },
+  { at: [4, 0], align: "center", key: "s83", sheet: S_83, shiftY: 0.1 },
 ];
 
 /**

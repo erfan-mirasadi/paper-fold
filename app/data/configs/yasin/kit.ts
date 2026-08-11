@@ -202,7 +202,8 @@ export interface SheetSpec {
   title: string;
   heroSubtitle: string;
   /** The handwritten title inked across the top of the sheet. */
-  noteTitle: string;
+  /** Optional handwritten title; falls back to the sheet title. */
+  noteTitle?: string;
   sayfa: number;
   /** Page width in world units. Height is derived from the stack. */
   paperWidth?: number;
@@ -302,7 +303,10 @@ const framePadY = (depth: number) => 0.058 - (depth - 1) * 0.011;
 const AR_EM = 0.071;
 const AR_WORD_EM = 2.3;
 const LINE_EM = 1.2;
-const SAFETY = 0.82;
+// Shared Arabic baseline for generated sheets. The old 0.82 left nearly every
+// generated capsule visibly underset beside the hand-tuned 13-19 sheet.
+const AR_SCALE_CAP = 1;
+const SAFETY = 1.05;
 
 function fitArabicScale(text: string, w: number, h: number): number {
   const lines = text.split("\n");
@@ -311,7 +315,7 @@ function fitArabicScale(text: string, w: number, h: number): number {
   );
   const byWidth = (w - 0.04) / (AR_EM * AR_WORD_EM * widestWords);
   const byHeight = (h - 0.03) / (AR_EM * LINE_EM * lines.length);
-  return Math.min(byWidth, byHeight, 1.2) * SAFETY;
+  return Math.min(byWidth, byHeight, AR_SCALE_CAP) * SAFETY;
 }
 
 /** The same for a translation: Latin runs to the CHARACTER, not the word. */
@@ -323,7 +327,7 @@ function fitLatinScale(text: string, w: number, h: number): number {
   const widest = Math.max(...lines.map((l) => l.trim().length));
   const byWidth = (w - 0.05) / (LAT_EM * LAT_CHAR_EM * widest);
   const byHeight = (h - 0.03) / (LAT_EM * 1.06 * lines.length);
-  return Math.min(byWidth, byHeight, 0.9) * 0.92;
+  return Math.min(byWidth, byHeight, 0.9);
 }
 
 const LAT_LINE_EM = 1.06;
@@ -765,7 +769,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       maxWidth: paperWidth,
       textAlign: "center",
       rotationZ: 0,
-      lines: [{ text: spec.noteTitle }],
+      lines: [{ text: spec.noteTitle ?? spec.title }],
     },
   ];
   frames.forEach((f, fi) => {

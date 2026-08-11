@@ -31,6 +31,7 @@ import { SectionZoomCamera } from "../orchestrator/SectionZoomCamera";
 import { ViewSpinGroup } from "../orchestrator/ViewSpinGroup";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { usePaperStore } from "../../../stores/usePaperStore";
+import { PageSpaceAnchor } from "./PageSpaceAnchor";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -97,6 +98,15 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
       return () => clearTimeout(compileTimer);
     }
   }, [paperReady, gl, scene, camera, isMobile]);
+
+  useEffect(() => {
+    // TEMP-DEBUG
+    (window as any).__stores = {
+      elevated: useElevatedStore,
+      fold: useFoldStore,
+      story: useStoryStore,
+    };
+  }, []);
 
   useEffect(() => {
     const unsub = useFoldStore.subscribe((state, prevState) => {
@@ -229,6 +239,7 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
                * paper mesh, lights and any in-flight transition sheet keep
                * rendering normally.
                */}
+              <PageSpaceAnchor />
               <Suspense fallback={null}>
                 <group key={storyRevision}>
                   {config.features.hasElevatedSections && (

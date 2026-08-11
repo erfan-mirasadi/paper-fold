@@ -594,6 +594,30 @@ export interface CameraTargetConfig {
 }
 
 /**
+ * The patch of page a section's zoom should FRAME, rather than a hand-tuned
+ * camera height. `CameraTargetConfig` states where the camera goes; this states
+ * what has to be on screen when it gets there, and the camera solves its own
+ * distance from the page's size and the viewport's shape (SectionZoomCamera).
+ *
+ * One page holds ONE surah on every ordinary sheet, so the two describe the
+ * same thing there and `cameraTarget` is the shorter way to say it. On an atlas
+ * — a dozen sheets composed onto one paper (paperComposer) — they part company:
+ * a height and a tilt frame the middle of the paper no matter which sheet was
+ * clicked, while a rectangle frames the sheet itself.
+ *
+ * Stated in the composed page's own coordinates, the ones every placement uses:
+ * x runs 0 → paperWidth rightwards from the page's left edge, y runs 0 →
+ * −paperHeight downwards from its top, and `x, y` is the rectangle's TOP-LEFT
+ * corner.
+ */
+export interface CameraFocusRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
  * Defines a custom section for drag/click/elevation that can span verses
  * from multiple blocks. Used by Ahzab 35 (left/right column sections) and
  * also referenced by `LayoutBlock.customSectionId`.
@@ -605,6 +629,11 @@ export interface CustomSectionDef {
   verseIds: number[];
   /** Optional specific camera target for this custom section */
   cameraTarget?: CameraTargetConfig;
+  /**
+   * What this section's zoom must frame. Takes precedence over
+   * `cameraTarget` — see `CameraFocusRect`.
+   */
+  cameraFocus?: CameraFocusRect;
 }
 
 export interface SpecialVerses {

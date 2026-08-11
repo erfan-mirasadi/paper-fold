@@ -31,7 +31,11 @@
  * so a scaled sheet is the same drawing, smaller. See `SheetPlacement.scale`.
  */
 
-import type { ComposableSheet, SheetPlacement } from "../../sheets/paperComposer";
+import type {
+  ComposableSheet,
+  SheetPlacement,
+  SheetZoomTuning,
+} from "../../sheets/paperComposer";
 
 /**
  * The column step, in world units. Sheets snap to multiples of it, so `col`
@@ -59,6 +63,15 @@ export interface GridCell {
   sheet: ComposableSheet;
   /** Draw this sheet smaller (or larger) than it was authored. Default 1. */
   scale?: number;
+  /** Nudge the sheet horizontally inside the existing paper. Negative is left. */
+  shiftX?: number;
+  /** Nudge the sheet vertically inside the existing paper. Positive is up. */
+  shiftY?: number;
+  /**
+   * Trims or loosens what the camera frames when this sheet is clicked. The
+   * sheet's own rectangle is the default — see `SheetZoomTuning`.
+   */
+  zoom?: SheetZoomTuning;
 }
 
 export interface GridSpec {
@@ -145,14 +158,15 @@ export function layOutGrid(spec: GridSpec): GridLayout {
       const [from, to] = spanOf(c.align);
       x = (from + to) / 2 - c.w / 2;
     } else {
-      x = paperWidth - margin - c.at[1] * colStep - c.w;
+      x = paperWidth - margin - c.at[1] * colStep - c.w + (c.shiftX ?? 0);
     }
     return {
       key: c.key,
       sheet: c.sheet,
       x,
-      y: rowTop.get(c.at[0])!,
+      y: rowTop.get(c.at[0])! + (c.shiftY ?? 0),
       scale: c.s === 1 ? undefined : c.s,
+      zoom: c.zoom,
     };
   });
 

@@ -74,6 +74,7 @@ import type { SurahLanguage } from "../../hooks/useSurahLanguageStore";
 import { createBlockLayoutMath } from "../SurahConfig";
 import type { ColorGroup, SurahDataShape } from "../SurahConfig";
 import type {
+  CameraFocusRect,
   CustomSectionDef,
   FoldStoryStep,
   HandwrittenNoteConfig,
@@ -126,6 +127,37 @@ export interface SheetPlacement {
    * rules too thick.
    */
   scale?: number;
+  /**
+   * Trims or loosens what the camera frames when this sheet is clicked. The
+   * sheet's own page rectangle is the default — see `SheetZoomTuning`.
+   */
+  zoom?: SheetZoomTuning;
+}
+
+/**
+ * Per-sheet adjustments to the rectangle a section zoom frames.
+ *
+ * The default frame is the sheet's page rectangle exactly: everything the sheet
+ * draws, plus the blank margin it was authored with. That margin is not the
+ * same on every sheet — some were drawn tight, some with room to spare — and
+ * the camera cannot tell blank paper from a page that simply ends there. So
+ * where the default reads too loose or too tight, these four numbers move the
+ * frame's edges, in the paper's own world units.
+ *
+ * NEGATIVE PADDING CROPS. `padX: -0.1` pulls the left and right edges 0.1
+ * INWARDS, so less paper fills more screen; positive pushes them out and leaves
+ * more air. `dx` / `dy` slide the whole frame without resizing it, for a sheet
+ * whose drawing does not sit in the middle of its page.
+ */
+export interface SheetZoomTuning {
+  /** Air added to the left AND right edges. Negative crops. */
+  padX?: number;
+  /** Air added to the top AND bottom edges. Negative crops. */
+  padY?: number;
+  /** Slides the frame right (positive) or left. */
+  dx?: number;
+  /** Slides the frame up (positive) or down. */
+  dy?: number;
 }
 
 export interface PaperCompositionSpec {
@@ -297,6 +329,21 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
     // moves by the difference between the two pages' centres instead.
     const overlayShiftX = srcPageCenterX + dx - pageCenterX;
 
+    // ── The zoom frame ────────────────────────────────────────────────────
+    // What the camera must show when anything on this sheet is clicked: the
+    // sheet, and none of its neighbours. EVERY zone the sheet contributes
+    // carries the same rectangle, so clicking one ring inside a page frames
+    // the page rather than the ring — on an atlas the sheet is the unit the
+    // reader picked, whatever they happened to click inside it.
+    const zoomPadX = placement.zoom?.padX ?? 0;
+    const zoomPadY = placement.zoom?.padY ?? 0;
+    const cameraFocus: CameraFocusRect = {
+      x: dx - zoomPadX + (placement.zoom?.dx ?? 0),
+      y: dy + zoomPadY + (placement.zoom?.dy ?? 0),
+      w: srcPageW * s + zoomPadX * 2,
+      h: src.dimensions.paperHeight * s + zoomPadY * 2,
+    };
+
     // ── Verse ids ─────────────────────────────────────────────────────────
     const idMap = new Map<number, number>();
     const claim = (id: number): number => {
@@ -433,6 +480,7 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
             cameraTarget: cs.cameraTarget
               ? scaleCameraTarget(cs.cameraTarget, spec.cameraDistanceScale ?? 1)
               : undefined,
+            cameraFocus,
           }),
         );
       }
@@ -448,7 +496,9 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
         }
         zones.set(zoneId, ids);
       }
-      for (const [id, verseIds] of zones) customSections.push({ id, verseIds });
+      for (const [id, verseIds] of zones) {
+        customSections.push({ id, verseIds, cameraFocus });
+      }
     }
 
     // ── Frame SVGs ────────────────────────────────────────────────────────
