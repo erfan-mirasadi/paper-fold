@@ -65,6 +65,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 53,
       tone: "white",
+      arScale: 0.82,
+      latScale: 0.9,
       ar: "إِن كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً فَإِذَا هُمْ جَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
       tr: "Sadece tek bir ses olur; hepsi birden huzurumuzda hazır edilirler.",
       en: "It is but one shout, and at once they are all brought before Us.",
@@ -72,6 +74,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 54,
       tone: "green",
+      arScale: 0.82,
+      latScale: 0.9,
       ar: "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا وَلَا تُجْزَوْنَ إِلَّا مَا كُنتُمْ تَعْمَلُونَ",
       tr: "O gün hiç kimseye zerre kadar haksızlık edilmez; ancak yaptığınız verilir.",
       en: "Today no soul is wronged in the least, and you are repaid only for what you did.",
@@ -88,6 +92,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 55,
               tone: "green",
+              arScale: 0.62,
+              latScale: 0.76,
               ar: "إِنَّ أَصْحَابَ\nالْجَنَّةِ الْيَوْمَ\nفِي شُغُلٍ\nفَاكِهُونَ",
               tr: "O gün\ncennetlikler bir\nmeşguliyet içinde\nsevinirler.",
               en: "Today the\npeople of the\nGarden are busy\nin delight.",
@@ -95,6 +101,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 56,
               tone: "green",
+              arScale: 0.62,
+              latScale: 0.75,
               ar: "هُمْ وَأَزْوَاجُهُمْ\nفِي ظِلَالٍ\nعَلَى الْأَرَائِكِ\nمُتَّكِئُونَ",
               tr: "Onlar ve eşleri\ngölgeler altında,\ntahtlara\nkurulmuş.",
               en: "They and their\nspouses are in\nshade, reclining\non couches.",
@@ -106,6 +114,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 57,
               tone: "green",
+              arScale: 0.67,
+              latScale: 0.75,
               ar: "لَهُمْ فِيهَا\nفَاكِهَةٌ وَلَهُم\nمَّا\nيَدَّعُونَ",
               tr: "Orada meyveler\nonlarındır;\nistedikleri her\nşey onlarındır.",
               en: "They have fruit\nthere, and\nwhatever they\ncall for.",
@@ -113,6 +123,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 58,
               tone: "cream",
+              arScale: 0.63,
+              latScale: 0.75,
               ar: "سَلَامٌ\nقَوْلًا\nمِّن رَّبٍّ\nرَّحِيمٍ",
               tr: "Selâm —\nRahîm olan\nRabden\nbir söz.",
               en: "“Peace” —\na word from\na Merciful\nLord.",
@@ -124,6 +136,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 59,
           tone: "maroon",
+          arScale: 0.84,
+          latScale: 0.89,
           ar: "وَامْتَازُوا الْيَوْمَ أَيُّهَا الْمُجْرِمُونَ",
           tr: "“Ey suçlular, bugün şöyle ayrılın!”",
           en: "“Stand apart today, you guilty ones!”",
@@ -131,6 +145,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 60,
           tone: "white",
+          arScale: 0.59,
+          latScale: 0.58,
           ar: "أَلَمْ أَعْهَدْ إِلَيْكُمْ يَا بَنِي آدَمَ أَن لَّا تَعْبُدُوا الشَّيْطَانَ إِنَّهُ لَكُمْ عَدُوٌّ مُّبِينٌ",
           tr: "“Ey Âdemoğulları, şeytana kulluk etmeyin diye size ahit vermedim mi?”",
           en: "“Children of Adam, did I not charge you not to serve Satan?”",
@@ -138,6 +154,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 61,
           tone: "cream",
+          arScale: 0.84,
+          latScale: 0.68,
           ar: "وَأَنِ اعْبُدُونِي هَٰذَا صِرَاطٌ مُّسْتَقِيمٌ",
           tr: "“Bana kulluk edin; dosdoğru yol budur.”",
           en: "and that you serve Me? This is a straight path.”",
@@ -145,6 +163,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 62,
           tone: "white",
+          arScale: 0.77,
+          latScale: 0.65,
           ar: "وَلَقَدْ أَضَلَّ مِنكُمْ جِبِلًّا كَثِيرًا أَفَلَمْ تَكُونُوا تَعْقِلُونَ",
           tr: "“O sizden birçok nesli saptırdı. Aklınızı kullanmadınız mı?”",
           en: "“He led astray many of you. Did you not use your minds?”",
@@ -158,6 +178,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 63,
           tone: "maroon",
+          arScale: 0.86,
+          latScale: 0.8,
           ar: "هَٰذِهِ جَهَنَّمُ الَّتِي كُنتُمْ تُوعَدُونَ",
           tr: "“İşte size vaat edilen cehennem budur.”",
           en: "“This is the Hell you were promised.”",
@@ -165,6 +187,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 64,
           tone: "maroon",
+          arScale: 0.95,
+          latScale: 0.63,
           ar: "اصْلَوْهَا الْيَوْمَ بِمَا كُنتُمْ تَكْفُرُونَ",
           tr: "“İnkâr edip durmanıza karşılık bugün girin oraya.”",
           en: "“Burn in it today, for you were disbelieving.”",
@@ -174,6 +198,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 65,
       tone: "lav",
+      arScale: 0.84,
+      latScale: 0.67,
       ar: "الْيَوْمَ نَخْتِمُ عَلَىٰ أَفْوَاهِهِمْ وَتُكَلِّمُنَا أَيْدِيهِمْ وَتَشْهَدُ أَرْجُلُهُم بِمَا كَانُوا يَكْسِبُونَ",
       tr: "Bugün ağızlarını mühürleriz; elleri bizimle konuşur, ayakları kazandıklarına şahitlik eder.",
       en: "Today We seal their mouths; their hands speak to Us, their feet testify to what they earned.",
@@ -181,6 +207,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 66,
       tone: "lav",
+      arScale: 0.84,
+      latScale: 0.65,
       ar: "وَلَوْ نَشَاءُ لَطَمَسْنَا عَلَىٰ أَعْيُنِهِمْ فَاسْتَبَقُوا الصِّرَاطَ فَأَنَّىٰ يُبْصِرُونَ",
       tr: "Dilesek gözlerini silerdik; yola koşuşurlardı, ama nasıl göreceklerdi?",
       en: "Had We willed, We would have blotted their eyes; they would race for the path — how then would they see?",
@@ -188,6 +216,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 67,
       tone: "white",
+      arScale: 0.92,
+      latScale: 0.74,
       ar: "وَلَوْ نَشَاءُ لَمَسَخْنَاهُمْ عَلَىٰ مَكَانَتِهِمْ فَمَا اسْتَطَاعُوا مُضِيًّا وَلَا يَرْجِعُونَ",
       tr: "Dilesek onları oldukları yerde dondururduk; ne ileri gidebilir ne dönebilirlerdi.",
       en: "Had We willed, We would have fixed them where they stand: unable to go on, unable to return.",
@@ -195,6 +225,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 68,
       tone: "white",
+      arScale: 0.84,
+      latScale: 0.77,
       ar: "وَمَن نُّعَمِّرْهُ نُنَكِّسْهُ فِي الْخَلْقِ أَفَلَا يَعْقِلُونَ",
       tr: "Kime uzun ömür verirsek yaratılışını tersine çeviririz. Hâlâ akletmezler mi?",
       en: "Whom We grant long life, We reverse in creation. Will they not use their minds?",

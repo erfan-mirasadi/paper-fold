@@ -127,6 +127,23 @@ export interface CapsuleSpec {
    * beneath it — which is how a rosette gets four petals of equal size.
    */
   width?: number;
+  /**
+   * THE SIZE, SET BY HAND. Replaces the fit below for this capsule — the
+   * multiplier VerseBox turns into `0.071 × arScale` world units of Arabic.
+   *
+   * The fit is an estimate off word and character counts; these numbers were
+   * read off the capsule itself, at the size where the ink — vowel marks and
+   * descenders included — just clears the rule. That is always the larger
+   * number, often by half again, and it is the only way a capsule ends up
+   * genuinely full rather than safely underset.
+   *
+   * IT GOES STALE IF THE TEXT CHANGES. Change the words or the line breaks in
+   * this capsule and the number no longer describes it: delete it and the fit
+   * takes over again (smaller, but never clipped).
+   */
+  arScale?: number;
+  /** The same, for the EN/TR text. See `arScale`. */
+  latScale?: number;
 }
 
 /**
@@ -297,8 +314,18 @@ const framePadY = (depth: number) => 0.058 - (depth - 1) * 0.011;
  * draw bigger, it draws cropped. The per-word and per-character ems are
  * measured off yasin1319Config's hand-tuned capsules (its ayah 14 sits at 0.65
  * for 5.5 Arabic words on a 0.82-wide capsule, and 0.44 for a 70-character
- * Turkish line on the same one); SAFETY is the margin that keeps a generated
- * capsule on the conservative side of those.
+ * Turkish line on the same one).
+ *
+ * THIS IS ONLY THE FALLBACK. A word count cannot tell a short word from a long
+ * one, so the answer has to be pessimistic to be safe, and a capsule sized by
+ * it reads underset. Every capsule of the surah therefore carries its own
+ * measured `arScale` / `latScale`; this runs for the ones that do not.
+ *
+ * THE MARGINS below (0.016 across, 0.022 down) are what the capsule keeps clear
+ * of its own rule. They used to be 0.04 and 0.03, which on a 0.24-wide petal
+ * threw away a sixth of the width before a single word was set. 0.022 down is
+ * the 0.012 the Arabic block loses to `BIG_VERSE_VERTICAL_SHIFT` (it is drawn
+ * 0.006 low, so the bottom edge binds first) plus 0.01 of air.
  */
 const AR_EM = 0.071;
 const AR_WORD_EM = 2.3;
@@ -306,16 +333,17 @@ const LINE_EM = 1.2;
 // Shared Arabic baseline for generated sheets. The old 0.82 left nearly every
 // generated capsule visibly underset beside the hand-tuned 13-19 sheet.
 const AR_SCALE_CAP = 1;
-const SAFETY = 1.05;
+const PAD_X = 0.016;
+const PAD_Y = 0.022;
 
 function fitArabicScale(text: string, w: number, h: number): number {
   const lines = text.split("\n");
   const widestWords = Math.max(
     ...lines.map((l) => l.trim().split(/\s+/).length),
   );
-  const byWidth = (w - 0.04) / (AR_EM * AR_WORD_EM * widestWords);
-  const byHeight = (h - 0.03) / (AR_EM * LINE_EM * lines.length);
-  return Math.min(byWidth, byHeight, AR_SCALE_CAP) * SAFETY;
+  const byWidth = (w - PAD_X) / (AR_EM * AR_WORD_EM * widestWords);
+  const byHeight = (h - PAD_Y) / (AR_EM * LINE_EM * lines.length);
+  return Math.min(byWidth, byHeight, AR_SCALE_CAP);
 }
 
 /** The same for a translation: Latin runs to the CHARACTER, not the word. */
@@ -325,8 +353,8 @@ const LAT_CHAR_EM = 0.36;
 function fitLatinScale(text: string, w: number, h: number): number {
   const lines = text.split("\n");
   const widest = Math.max(...lines.map((l) => l.trim().length));
-  const byWidth = (w - 0.05) / (LAT_EM * LAT_CHAR_EM * widest);
-  const byHeight = (h - 0.03) / (LAT_EM * 1.06 * lines.length);
+  const byWidth = (w - PAD_X) / (LAT_EM * LAT_CHAR_EM * widest);
+  const byHeight = (h - 0.012) / (LAT_EM * 1.06 * lines.length);
   return Math.min(byWidth, byHeight, 0.9);
 }
 
@@ -637,10 +665,9 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // never a pill: SharedUI picks the verse font off this flag, so a mixed
       // page would be set in two sizes almost 2x apart.
       isPill: false,
-      textScaleOverride: round(fitAr(c.ar)),
-      translationTextScaleOverride: round(
-        Math.min(fitLat(c.tr), fitLat(c.en)),
-      ),
+      textScaleOverride: c.arScale ?? round(fitAr(c.ar)),
+      translationTextScaleOverride:
+        c.latScale ?? round(Math.min(fitLat(c.tr), fitLat(c.en))),
       ...(c.shape
         ? { verseShape: c.shape, domeSideRatio: DOME_SIDE_RATIO }
         : {}),

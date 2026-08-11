@@ -12,6 +12,8 @@ const SPEC: SheetSpec = {
   rows: [
     {
       ayah: 28,
+      arScale: 0.71,
+      latScale: 0.61,
       tone: "cream",
       ar: "وَمَا أَنزَلْنَا عَلَىٰ قَوْمِهِ مِن بَعْدِهِ\nمِن جُندٍ مِّنَ السَّمَاءِ وَمَا كُنَّا مُنزِلِينَ",
       tr: "Ondan sonra kavminin üzerine\ngökten bir ordu indirmedik; indirecek de değildik.",
@@ -19,6 +21,8 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 29,
+      arScale: 0.7,
+      latScale: 0.78,
       tone: "white",
       ar: "إِن كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً\nفَإِذَا هُمْ خَامِدُونَ",
       tr: "Sadece korkunç bir ses oldu;\nbir de baktılar, sönüp gitmişler.",
@@ -26,6 +30,8 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 30,
+      arScale: 0.73,
+      latScale: 0.63,
       tone: "maroon",
       ar: "يَا حَسْرَةً عَلَى الْعِبَادِ\nمَا يَأْتِيهِم مِّن رَّسُولٍ إِلَّا كَانُوا بِهِ يَسْتَهْزِئُونَ",
       tr: "Yazık şu kullara!\nKendilerine gelen her elçiyle mutlaka alay ettiler.",
@@ -33,6 +39,8 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 31,
+      arScale: 0.71,
+      latScale: 0.41,
       tone: "maroon",
       ar: "أَلَمْ يَرَوْا كَمْ أَهْلَكْنَا قَبْلَهُم مِّنَ الْقُرُونِ\nأَنَّهُمْ إِلَيْهِمْ لَا يَرْجِعُونَ",
       tr: "Görmediler mi, onlardan önce nice nesilleri helâk ettik;\nartık onlara dönmüyorlar.",
@@ -40,6 +48,8 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 32,
+      arScale: 0.79,
+      latScale: 0.65,
       tone: "cream",
       ar: "وَإِن كُلٌّ لَّمَّا جَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
       tr: "Hepsi de toplanıp huzurumuza getirileceklerdir.",

@@ -14,6 +14,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 20,
       tone: "maroon",
+      arScale: 0.59,
+      latScale: 0.59,
       ar: "وَجَاءَ مِنْ أَقْصَى الْمَدِينَةِ رَجُلٌ يَسْعَىٰ قَالَ يَا قَوْمِ اتَّبِعُوا الْمُرْسَلِينَ",
       tr: "Şehrin öbür ucundan bir adam koşarak geldi: “Ey kavmim, gönderilen elçilere uyun.”",
       en: "A man came running from the far end of the city: “O my people, follow the messengers.”",
@@ -21,6 +23,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 21,
       tone: "white",
+      arScale: 0.82,
+      latScale: 0.45,
       ar: "اتَّبِعُوا مَن لَّا يَسْأَلُكُمْ أَجْرًا وَهُم مُّهْتَدُونَ",
       tr: "“Sizden bir ücret istemeyenlere uyun; onlar doğru yol üzeredir.”",
       en: "“Follow those who ask no wage of you; they are rightly guided.”",
@@ -31,6 +35,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 22,
           tone: "cream",
+          arScale: 0.64,
+          latScale: 0.28,
           ar: "وَمَا لِيَ لَا أَعْبُدُ الَّذِي فَطَرَنِي\nوَإِلَيْهِ تُرْجَعُونَ",
           tr: "“Beni yaratana niçin kulluk etmeyeyim?\nO'na döndürüleceksiniz.”",
           en: "“Why should I not worship the One who made me?\nTo Him you return.”",
@@ -38,6 +44,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 23,
           tone: "cream",
+          arScale: 0.43,
+          latScale: 0.21,
           ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً إِن يُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ\nلَّا تُغْنِ عَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنقِذُونِ",
           tr: "“O'ndan başka ilah mı edineyim? Rahmân bana zarar dilese\nşefaatleri işe yaramaz, beni kurtaramazlar.”",
           en: "“Shall I take gods besides Him? If the Merciful wills me harm\ntheir pleading avails nothing, nor can they save me.”",
@@ -47,6 +55,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 24,
           tone: "lav",
+          arScale: 0.71,
+          latScale: 0.42,
           ar: "إِنِّي إِذًا\nلَّفِي ضَلَالٍ مُّبِينٍ",
           tr: "“İşte o zaman\napaçık bir sapkınlıkta olurum.”",
           en: "“Then I would be\nin clear error.”",
@@ -54,6 +64,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 25,
           tone: "lav",
+          arScale: 0.72,
+          latScale: 0.63,
           ar: "إِنِّي آمَنتُ\nبِرَبِّكُمْ فَاسْمَعُونِ",
           tr: "“Ben Rabbinize inandım;\nbeni dinleyin.”",
           en: "“I have believed in your\nLord, so hear me.”",
@@ -63,6 +75,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 26,
       tone: "green",
+      arScale: 0.87,
+      latScale: 0.65,
       ar: "قِيلَ ادْخُلِ الْجَنَّةَ قَالَ يَا لَيْتَ قَوْمِي يَعْلَمُونَ",
       tr: "“Cennete gir” denildi. “Keşke kavmim bilseydi” dedi:",
       en: "It was said: “Enter the Garden.” He said: “Would that my people knew”",
@@ -70,6 +84,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 27,
       tone: "green",
+      arScale: 0.89,
+      latScale: 0.65,
       ar: "بِمَا غَفَرَ لِي رَبِّي وَجَعَلَنِي مِنَ الْمُكْرَمِينَ",
       tr: "“Rabbimin beni bağışladığını ve ikram edilenlerden kıldığını.”",
       en: "“how my Lord forgave me and made me one of the honoured.”",

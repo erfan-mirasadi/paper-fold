@@ -33,13 +33,19 @@
  * `blocks`. Horizontally, `sectionInnerW` is 1.13, so a capsule's width is
  * `0.547 − horizontalInset`.
  *
- * TEXT SCALES. Base font is `0.071 × 1.05 × 0.75` = 0.0559 world — higher than
- * yasin36Config's 0.57 baseline because this sheet's capsules are much taller
- * (0.100 … 0.160 against 0.062 … 0.150).
- *     width  ≈ 0.201 × (words per line) × override  ≤  capsule width
- *     height ≈ 0.076  × (lines)         × override  ≤  capsule height
- * Overshooting either does not look big — CanvasText gets a canvas the size of
- * the capsule, so text that does not fit is re-wrapped and then CLIPPED.
+ * TEXT SCALES. `textScaleOverride` REPLACES the page's baseline rather than
+ * scaling it (SharedUI: `textScale = textScaleOverride ?? langScale.verseBig`),
+ * so the number on a capsule IS its font size, in units of the 0.071 big-verse
+ * em. Each one here is the size at which that capsule's ink — vowel marks and
+ * descenders included — just clears its own rule:
+ *
+ *     ink height ≈ 0.071 × override × ((lines − 1) × 1.2 + 1.05)
+ *                ≤ capsule height − 0.012   ← the Arabic block is drawn 0.006
+ *                                             low, so the bottom edge binds
+ *
+ * Overshooting does not look big — CanvasText gets a canvas the size of the
+ * capsule, so text that does not fit is re-wrapped and then CLIPPED, which is
+ * what used to shave the marks off the top line of ayahs 13 and 19.
  */
 
 import type { SurahLayoutConfig } from "../../../schema";
@@ -127,8 +133,9 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     // Ayah 13 — the narrator's line, alone above the band.
     1: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
       circleTextCol: "#7C2C2A",
-      // 2 lines in 0.140 — height-bound.
-      textScaleOverride: 0.82,
+      // ONE line in a 0.90-wide capsule. Broken in two it could only be set
+      // at 0.67, and the top line's marks were cropped by the capsule edge.
+      textScaleOverride: 0.8,
       translationTextScaleOverride: 0.58,
       showNumber: true,
       displayNumber: 13,
@@ -137,44 +144,45 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     // Ayahs 14 · 15 — the sending, and the town's first objection.
     2: capsule(WHITE_BG, WHITE_BORDER, INK, {
       // 11 words over 2 lines in 0.82 — width-bound, tightest on the sheet.
-      textScaleOverride: 0.65,
+      textScaleOverride: 0.76,
       translationTextScaleOverride: 0.44,
       showNumber: true,
       displayNumber: 14,
     }),
     3: capsule(WHITE_BG, WHITE_BORDER, INK_LAV, {
-      // 15 words: three lines, not two. At two lines the first would need a
-      // 0.49 trim and this capsule would read a size below its neighbours.
-      textScaleOverride: 0.66,
-      translationTextScaleOverride: 0.44,
+      // 15 words over TWO lines, not three: the third line was pure loss —
+      // 0.54 against the 0.75 the same words hold when the last two clauses
+      // share a line, and the capsule is 0.160 tall either way.
+      textScaleOverride: 0.75,
+      translationTextScaleOverride: 0.54,
       showNumber: true,
       displayNumber: 15,
     }),
 
     // Ayahs 16 · 17 — the messengers' reply, the framed pair.
     4: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
-      textScaleOverride: 0.54,
-      translationTextScaleOverride: 0.4,
+      textScaleOverride: 0.91,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 16,
     }),
     5: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
-      textScaleOverride: 0.64,
-      translationTextScaleOverride: 0.46,
+      textScaleOverride: 0.78,
+      translationTextScaleOverride: 0.61,
       showNumber: true,
       displayNumber: 17,
     }),
 
     // Ayahs 18 · 19 — the threat, and the answer to it.
     6: capsule(WHITE_BG, WHITE_BORDER, INK_LAV, {
-      textScaleOverride: 0.65,
-      translationTextScaleOverride: 0.44,
+      textScaleOverride: 0.81,
+      translationTextScaleOverride: 0.55,
       showNumber: true,
       displayNumber: 18,
     }),
     7: capsule(WHITE_BG, WHITE_BORDER, INK, {
-      textScaleOverride: 0.78,
-      translationTextScaleOverride: 0.52,
+      textScaleOverride: 0.67,
+      translationTextScaleOverride: 0.58,
       showNumber: true,
       displayNumber: 19,
     }),
@@ -612,7 +620,7 @@ export const YASIN_13_19_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 1,
-            text: "وَاضْرِبْ لَهُمْ مَثَلًا أَصْحَابَ الْقَرْيَةِ\nإِذْ جَاءَهَا الْمُرْسَلُونَ",
+            text: "وَاضْرِبْ لَهُمْ مَثَلًا أَصْحَابَ الْقَرْيَةِ إِذْ جَاءَهَا الْمُرْسَلُونَ",
           },
         ],
       },
@@ -628,7 +636,7 @@ export const YASIN_13_19_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 3,
-            text: "قَالُوا مَا أَنْتُمْ إِلَّا بَشَرٌ مِثْلُنَا\nوَمَا أَنْزَلَ الرَّحْمَٰنُ مِنْ شَيْءٍ\nإِنْ أَنْتُمْ إِلَّا تَكْذِبُونَ",
+            text: "قَالُوا مَا أَنْتُمْ إِلَّا بَشَرٌ مِثْلُنَا\nوَمَا أَنْزَلَ الرَّحْمَٰنُ مِنْ شَيْءٍ إِنْ أَنْتُمْ إِلَّا تَكْذِبُونَ",
           },
         ],
       },

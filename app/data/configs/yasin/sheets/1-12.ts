@@ -58,11 +58,20 @@
  * `0.547 − horizontalInset`, and each frame's corner radius caps how wide its
  * capsules may be — see the fit arithmetic in /public/yasin/ring-outer.svg.
  *
- * TEXT SCALES. Base font is `0.071 × 1.05 × verseTextScale` = 0.0425 world.
- *     width  ≈ 0.153 × (words per line) × override  ≤  capsule width
- *     height ≈ 0.0578 × (lines)         × override  ≤  capsule height
- * Overshooting either does not look big — CanvasText gets a canvas the size of
- * the capsule, so text that does not fit is re-wrapped and then CLIPPED.
+ * TEXT SCALES. `textScaleOverride` REPLACES the page's `verseTextScale` rather
+ * than scaling it (SharedUI: `textScale = textScaleOverride ?? verseBig`), so
+ * the number on a capsule IS its font size, in units of the 0.071 big-verse em.
+ * Each one is the size at which that capsule's ink — vowel marks and descenders
+ * included — just clears its own rule:
+ *
+ *     ink height ≈ 0.071 × override × ((lines − 1) × 1.2 + 1.05)
+ *                ≤ capsule height − 0.012   ← the Arabic block is drawn 0.006
+ *                                             low, so the bottom edge binds
+ *
+ * Overshooting does not look big — CanvasText gets a canvas the size of the
+ * capsule, so text that does not fit is re-wrapped and then CLIPPED. That is
+ * what used to shave the marks off the top line of every two-line capsule in
+ * the ring, and why four of them now set on one line instead.
  */
 
 import type { SurahLayoutConfig } from "../../../schema";
@@ -97,10 +106,6 @@ const INK_LAV = "#26283F";
 const INK_PURPLE = "#634E73";
 const INK_RED = "#A30000";
 
-// Bring the opening sheet onto the shared Yâsîn text baseline. Its original
-// hand-tuned overrides were about 15% larger than the 13-19 reference sheet.
-const STANDARD_TEXT_SCALE = 0.85;
-
 // EVERY capsule is `isPill: false`, as in tevbe24Config. Not cosmetic: SharedUI
 // picks the verse font as `isPill ? VERSE_TEXT_SMALL (0.038) : VERSE_TEXT_BIG
 // (0.071)`, so mixing the flag on one page puts its capsules on two baselines
@@ -119,16 +124,9 @@ const capsule = (
   circleTextCol: textColor,
   textColor,
   isPill: false,
-  ...Object.fromEntries(
-    Object.entries(extra).map(([key, value]) => [
-      key,
-      key === "textScaleOverride" || key === "translationTextScaleOverride"
-        ? typeof value === "number"
-          ? value * STANDARD_TEXT_SCALE
-          : value
-        : value,
-    ]),
-  ),
+  // Sizes pass through untouched: each one below is already the size itself,
+  // not a share of some page-wide baseline. See TEXT SCALES in the header.
+  ...extra,
 });
 
 export const YASIN_36_CONFIG: SurahLayoutConfig = {
@@ -173,22 +171,22 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // that follows (13) sits under it.
     1: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
-      textScaleOverride: 0.95,
-      translationTextScaleOverride: 0.7,
+      textScaleOverride: 0.94,
+      translationTextScaleOverride: 0.9,
       showNumber: true,
       displayNumber: 1,
     }),
     12: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
-      textScaleOverride: 0.8,
-      translationTextScaleOverride: 0.56,
+      textScaleOverride: 0.68,
+      translationTextScaleOverride: 0.49,
       showNumber: true,
       displayNumber: 2,
     }),
     2: capsule(WHITE_BG, WHITE_BORDER, INK, {
       circleTextCol: "#4A4636",
-      textScaleOverride: 0.86,
-      translationTextScaleOverride: 0.6,
+      textScaleOverride: 0.74,
+      translationTextScaleOverride: 0.46,
       showNumber: true,
       displayNumber: 3,
     }),
@@ -196,22 +194,22 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // section, and it lands on "a straight path".
     3: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
       circleTextCol: "#7C2C2A",
-      textScaleOverride: 0.86,
-      translationTextScaleOverride: 0.6,
+      textScaleOverride: 0.75,
+      translationTextScaleOverride: 0.48,
       showNumber: true,
       displayNumber: 4,
     }),
     4: capsule(LAV_BG, LAV_BORDER, INK_LAV, {
       // One line in a 0.500-wide capsule, the cloud's closing line.
-      textScaleOverride: 0.8,
-      translationTextScaleOverride: 0.5,
+      textScaleOverride: 0.69,
+      translationTextScaleOverride: 0.49,
       showNumber: true,
       displayNumber: 5,
     }),
     13: capsule(WHITE_BG, LAV_BORDER, INK_LAV, {
       // The long warning, on its own bar under the cloud.
-      textScaleOverride: 0.7,
-      translationTextScaleOverride: 0.46,
+      textScaleOverride: 0.63,
+      translationTextScaleOverride: 0.52,
       showNumber: true,
       displayNumber: 6,
     }),
@@ -219,31 +217,33 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // ── OUTER RING (cream frame) — ayahs 7 and 11 ────────────────────────
     5: capsule(WHITE_BG, GOLD_BORDER, INK_GOLD, {
       // Eight words on ONE line in 0.84 — the widest single line on the page.
-      textScaleOverride: 0.66,
-      translationTextScaleOverride: 0.46,
+      textScaleOverride: 0.69,
+      translationTextScaleOverride: 0.41,
       showNumber: true,
       displayNumber: 7,
     }),
     10: capsule(WHITE_BG, GOLD_BORDER, GREEN_THEME, {
-      // The longest text on the page: eleven words over two lines. It gets the
-      // tallest ring capsule (0.110) to pay for that.
-      textScaleOverride: 0.86,
-      translationTextScaleOverride: 0.56,
+      // The longest text on the page — eleven words. On ONE line now: the
+      // capsule is 0.84 wide and two lines in 0.110 could only be set at 0.48,
+      // where the top line's marks were cropped off by the capsule's own edge.
+      textScaleOverride: 0.53,
+      translationTextScaleOverride: 0.41,
       showNumber: true,
       displayNumber: 11,
     }),
 
     // ── MIDDLE RING (lavender frame) — ayahs 8 and 10 ────────────────────
-    // Both two-liners in a 0.100 capsule, so both height-bound, same trim.
+    // Both were broken over two lines and both were clipped for it; on one line
+    // each is width-bound instead, and ayah 10 in particular gains half again.
     6: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
-      textScaleOverride: 0.8,
-      translationTextScaleOverride: 0.54,
+      textScaleOverride: 0.57,
+      translationTextScaleOverride: 0.48,
       showNumber: true,
       displayNumber: 8,
     }),
     9: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
-      textScaleOverride: 0.8,
-      translationTextScaleOverride: 0.54,
+      textScaleOverride: 0.7,
+      translationTextScaleOverride: 0.53,
       showNumber: true,
       displayNumber: 10,
     }),
@@ -252,12 +252,12 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // Ayah 9 is the crux, so its closing clause takes Tevbe's red the way
     // Tevbe's own ana bölüm does, and the barriers take its purple.
     7: capsule(WHITE_BG, WHITE_BORDER, INK_PURPLE, {
-      textScaleOverride: 0.76,
-      translationTextScaleOverride: 0.52,
+      textScaleOverride: 0.59,
+      translationTextScaleOverride: 0.5,
     }),
     8: capsule(WHITE_BG, WHITE_BORDER, INK_RED, {
-      textScaleOverride: 0.9,
-      translationTextScaleOverride: 0.6,
+      textScaleOverride: 0.65,
+      translationTextScaleOverride: 0.48,
       showNumber: true,
       displayNumber: 9,
     }),
@@ -266,8 +266,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // One capsule for the whole ayah, three lines, on the tallest capsule
     // (0.150). Three lines is what makes this height-bound.
     11: capsule(WHITE_BG, MAROON_BORDER, INK_RED, {
-      textScaleOverride: 0.64,
-      translationTextScaleOverride: 0.44,
+      textScaleOverride: 0.49,
+      translationTextScaleOverride: 0.37,
       showNumber: true,
       displayNumber: 12,
     }),
@@ -325,14 +325,13 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     sectionPadX: 0.005,
     blockPadding: 0.008,
     sectionBorderWidth: 0.006,
-    // Every capsule is non-pill, so the base is VERSE_TEXT_BIG (0.071) x the
-    // Arabic 1.05, and 0.57 is that scaled to THIS page's capsule heights:
-    //     Tevbe  0.071 x 1.05 x 0.80 = 0.060 in a 0.12  capsule  (50%)
-    //     here   0.071 x 1.05 x 0.57 = 0.043 in a 0.086 capsule  (50%)
-    // Every override multiplies this — move it and the whole page moves.
-    verseTextScale: 0.57 * STANDARD_TEXT_SCALE,
+    // The page-wide fallback, reached only by a capsule that names no size of
+    // its own — which, on this sheet, is none of them. Every capsule carries a
+    // measured `textScaleOverride`, and an override REPLACES this rather than
+    // multiplying it.
+    verseTextScale: 0.57,
     // 0.625 of the Arabic, the ratio Tevbe uses (0.50 / 0.80).
-    translationVerseTextScale: 0.36 * STANDARD_TEXT_SCALE,
+    translationVerseTextScale: 0.36,
     tightVersePadding: true,
   },
 
@@ -902,7 +901,7 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 6,
-            text: "إِنَّا جَعَلْنَا فِي أَعْنَاقِهِمْ أَغْلَالًا\nفَهِيَ إِلَى الْأَذْقَانِ فَهُمْ مُقْمَحُونَ",
+            text: "إِنَّا جَعَلْنَا فِي أَعْنَاقِهِمْ أَغْلَالًا فَهِيَ إِلَى الْأَذْقَانِ فَهُمْ مُقْمَحُونَ",
           },
         ],
       },
@@ -910,7 +909,7 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "وَجَعَلْنَا مِنْ بَيْنِ أَيْدِيهِمْ سَدًّا\nوَمِنْ خَلْفِهِمْ سَدًّا",
+            text: "وَجَعَلْنَا مِنْ بَيْنِ أَيْدِيهِمْ سَدًّا وَمِنْ خَلْفِهِمْ سَدًّا",
           },
         ],
       },
@@ -923,7 +922,7 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 9,
-            text: "وَسَوَاءٌ عَلَيْهِمْ أَأَنْذَرْتَهُمْ\nأَمْ لَمْ تُنْذِرْهُمْ لَا يُؤْمِنُونَ",
+            text: "وَسَوَاءٌ عَلَيْهِمْ أَأَنْذَرْتَهُمْ أَمْ لَمْ تُنْذِرْهُمْ لَا يُؤْمِنُونَ",
           },
         ],
       },
@@ -931,7 +930,7 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 10,
-            text: "إِنَّمَا تُنْذِرُ مَنِ اتَّبَعَ الذِّكْرَ وَخَشِيَ الرَّحْمَٰنَ\nبِالْغَيْبِ فَبَشِّرْهُ بِمَغْفِرَةٍ وَأَجْرٍ كَرِيمٍ",
+            text: "إِنَّمَا تُنْذِرُ مَنِ اتَّبَعَ الذِّكْرَ وَخَشِيَ الرَّحْمَٰنَ بِالْغَيْبِ فَبَشِّرْهُ بِمَغْفِرَةٍ وَأَجْرٍ كَرِيمٍ",
           },
         ],
       },
@@ -962,10 +961,10 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
       },
       {
         verses: [
-          { number: 3, text: "Dosdoğru\nbir yol\nüzeresin." },
+          { number: 3, text: "Dosdoğru bir yol üzeresin." },
           {
             number: 2,
-            text: "Sen elbette\ngönderilmiş\npeygamberlerdensin,",
+            text: "Sen elbette gönderilmiş peygamberlerdensin,",
           },
         ],
       },
@@ -1055,8 +1054,8 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
       { verses: [{ number: 12, text: "By the wise Qur'an," }] },
       {
         verses: [
-          { number: 3, text: "upon a\nstraight\npath." },
-          { number: 2, text: "you are indeed\none of the\nmessengers," },
+          { number: 3, text: "upon a straight path." },
+          { number: 2, text: "you are indeed one of the messengers," },
         ],
       },
       {

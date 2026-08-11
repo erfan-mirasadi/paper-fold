@@ -43,6 +43,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 48,
       tone: "maroon",
+      arScale: 0.89,
+      latScale: 0.9,
       ar: "وَيَقُولُونَ مَتَىٰ هَٰذَا الْوَعْدُ إِن كُنتُمْ صَادِقِينَ",
       tr: "“Doğru söylüyorsanız, bu vaat ne zaman?” diyorlar.",
       en: "They say, “When is this promise, if you are truthful?”",
@@ -54,6 +56,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 49,
           tone: "white",
+          arScale: 0.64,
+          latScale: 0.81,
           ar: "مَا يَنظُرُونَ إِلَّا\nصَيْحَةً وَاحِدَةً تَأْخُذُهُمْ\nوَهُمْ يَخِصِّمُونَ",
           tr: "Tek bir sesten başkasını\nbeklemiyorlar; o ses onları\nçekişirken yakalar.",
           en: "They await but one shout,\nwhich will seize them\nas they are still arguing.",
@@ -61,6 +65,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 50,
           tone: "white",
+          arScale: 0.68,
+          latScale: 0.82,
           ar: "فَلَا يَسْتَطِيعُونَ\nتَوْصِيَةً وَلَا إِلَىٰ\nأَهْلِهِمْ يَرْجِعُونَ",
           tr: "Ne bir vasiyette\nbulunabilirler, ne de\nailelerine dönebilirler.",
           en: "They can leave no will,\nnor return to their\nown people.",
@@ -74,6 +80,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 51,
           tone: "white",
+          arScale: 0.68,
+          latScale: 0.81,
           ar: "وَنُفِخَ فِي الصُّورِ فَإِذَا\nهُم مِّنَ الْأَجْدَاثِ\nإِلَىٰ رَبِّهِمْ يَنسِلُونَ",
           tr: "Sûr'a üflenir; bir de\nbakarsın kabirlerinden\nRablerine koşuyorlar.",
           en: "The trumpet is blown, and\nat once they hasten from\nthe graves to their Lord.",
@@ -81,6 +89,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 52,
           tone: "white",
+          arScale: 0.69,
+          latScale: 0.75,
           ar: "قَالُوا يَا وَيْلَنَا مَن بَعَثَنَا\nمِن مَّرْقَدِنَا هَٰذَا مَا وَعَدَ\nالرَّحْمَٰنُ وَصَدَقَ الْمُرْسَلُونَ",
           tr: "“Eyvah! Bizi yattığımız\nyerden kim kaldırdı?” —\nRahmân'ın vaadi, doğruymuş.",
           en: "“Woe to us! Who raised us\nfrom our resting place?”\nThe Merciful's promise, true.",

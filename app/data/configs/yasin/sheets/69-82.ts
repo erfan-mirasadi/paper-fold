@@ -56,6 +56,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 69,
       tone: "gold",
+      arScale: 0.65,
+      latScale: 0.81,
       ar: "وَمَا عَلَّمْنَاهُ الشِّعْرَ\nوَمَا يَنبَغِي لَهُ إِنْ هُوَ\nإِلَّا ذِكْرٌ وَقُرْآنٌ مُّبِينٌ",
       tr: "Ona şiir öğretmedik,\nona yaraşmaz da. O ancak\nbir öğüt, apaçık bir Kur'an.",
       en: "We did not teach him poetry,\nnor would it suit him. It is only\na reminder, and a clear Qur'an —",
@@ -63,6 +65,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 70,
       tone: "gold",
+      arScale: 0.66,
+      latScale: 0.82,
       ar: "لِّيُنذِرَ مَن كَانَ حَيًّا\nوَيَحِقَّ الْقَوْلُ\nعَلَى الْكَافِرِينَ",
       tr: "Diri olanı uyarsın\nve inkâr edenler üzerine\no söz hak olsun diye.",
       en: "to warn whoever is alive,\nand so that the word\ncomes due against the disbelievers.",
@@ -74,6 +78,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 71,
           tone: "lav",
+          arScale: 0.6,
+          latScale: 0.72,
           ar: "أَوَلَمْ يَرَوْا أَنَّا\nخَلَقْنَا لَهُم مِّمَّا\nعَمِلَتْ أَيْدِينَا أَنْعَامًا\nفَهُمْ لَهَا\nمَالِكُونَ",
           tr: "Görmediler mi ki\nellerimizin yaptıklarından\nonlara davarlar yarattık;\nşimdi onlara\nsahip oluyorlar.",
           en: "Do they not see that We\nmade for them, of what\nOur hands have made,\ncattle — and so\nthey own them?",
@@ -83,6 +89,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 72,
               tone: "green",
+              arScale: 0.62,
+              latScale: 0.62,
               ar: "وَذَلَّلْنَاهَا لَهُمْ\nفَمِنْهَا رَكُوبُهُمْ\nوَمِنْهَا\nيَأْكُلُونَ",
               tr: "Onları kendilerine\nboyun eğdirdik; kimine\nbinerler, kiminden\nde yerler.",
               en: "We tamed them for\nthem: some they ride,\nand of some\nthey eat.",
@@ -90,6 +98,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 73,
               tone: "green",
+              arScale: 0.67,
+              latScale: 0.7,
               ar: "وَلَهُمْ فِيهَا\nمَنَافِعُ وَمَشَارِبُ\nأَفَلَا\nيَشْكُرُونَ",
               tr: "Onlarda başka\nyararlar ve içecekler\nde var. Hâlâ\nşükretmezler mi?",
               en: "In them are other\nuses, and drink.\nWill they not\ngive thanks?",
@@ -101,6 +111,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 74,
               tone: "blue",
+              arScale: 0.6,
+              latScale: 0.7,
               ar: "وَاتَّخَذُوا مِن دُونِ\nاللَّهِ آلِهَةً\nلَّعَلَّهُمْ\nيُنصَرُونَ",
               tr: "Allah'tan başka\ntanrılar edindiler —\nbelki yardım\ngörürler diye.",
               en: "They took gods\nbesides God, hoping\nthat they might\nbe helped.",
@@ -108,6 +120,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 75,
               tone: "blue",
+              arScale: 0.66,
+              latScale: 0.75,
               ar: "لَا يَسْتَطِيعُونَ\nنَصْرَهُمْ وَهُمْ\nلَهُمْ جُندٌ\nمُّحْضَرُونَ",
               tr: "Onlara yardım\nedemezler; oysa\nkendileri onlar için\nhazır bir ordudur.",
               en: "They cannot help\nthem; yet they are\nan army brought\nup for them.",
@@ -117,6 +131,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 76,
           tone: "green",
+          arScale: 0.63,
+          latScale: 0.72,
           ar: "فَلَا يَحْزُنكَ\nقَوْلُهُمْ إِنَّا نَعْلَمُ\nمَا يُسِرُّونَ\nوَمَا\nيُعْلِنُونَ",
           tr: "Onların sözü seni\nüzmesin. Gizlediklerini\nde açığa\nvurduklarını da\nbiliyoruz.",
           en: "So let their words\nnot grieve you. We know\nwhat they hide\nand what\nthey declare.",
@@ -126,6 +142,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 77,
           tone: "blue",
+          arScale: 0.65,
+          latScale: 0.76,
           ar: "أَوَلَمْ يَرَ الْإِنسَانُ أَنَّا\nخَلَقْنَاهُ مِن نُّطْفَةٍ\nفَإِذَا هُوَ خَصِيمٌ مُّبِينٌ",
           tr: "İnsan görmedi mi ki\nonu bir damla sudan yarattık —\nşimdi apaçık bir hasım kesildi.",
           en: "Does man not see that We\nmade him from a drop —\nand now he openly disputes?",
@@ -133,6 +151,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 78,
           tone: "green",
+          arScale: 0.62,
+          latScale: 0.82,
           ar: "وَضَرَبَ لَنَا مَثَلًا\nوَنَسِيَ خَلْقَهُ قَالَ مَن\nيُحْيِي الْعِظَامَ وَهِيَ رَمِيمٌ",
           tr: "Kendi yaratılışını unutup\nbize bir örnek getirdi: “Çürümüş\nkemikleri kim diriltecek?” dedi.",
           en: "He makes a comparison for Us\nand forgets his own making:\n“Who revives bones once rotted?”",
@@ -142,6 +162,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 79,
               tone: "blue",
+              arScale: 0.6,
+              latScale: 0.68,
               ar: "قُلْ يُحْيِيهَا الَّذِي\nأَنشَأَهَا أَوَّلَ مَرَّةٍ\nوَهُوَ بِكُلِّ\nخَلْقٍ عَلِيمٌ",
               tr: "De ki: “Onları ilk\ndefa yaratan diriltir;\nO her yaratmayı\nbilendir.”",
               en: "Say: “He who made\nthem the first time\nrevives them; He knows\nevery making.”",
@@ -149,6 +171,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 80,
               tone: "blue",
+              arScale: 0.62,
+              latScale: 0.64,
               ar: "الَّذِي جَعَلَ لَكُم\nمِّنَ الشَّجَرِ الْأَخْضَرِ\nنَارًا فَإِذَا أَنتُم\nمِّنْهُ تُوقِدُونَ",
               tr: "O ki size yeşil\nağaçtan ateş çıkardı —\nişte siz ondan\nyakıp duruyorsunuz.",
               en: "He who made for you\nfire out of the green\ntree — and from it\nyou kindle.",
@@ -158,6 +182,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 81,
           tone: "blue",
+          arScale: 0.65,
+          latScale: 0.75,
           ar: "أَوَلَيْسَ الَّذِي خَلَقَ السَّمَاوَاتِ\nوَالْأَرْضَ بِقَادِرٍ عَلَىٰ أَن يَخْلُقَ\nمِثْلَهُم بَلَىٰ وَهُوَ الْخَلَّاقُ الْعَلِيمُ",
           tr: "Gökleri ve yeri yaratan,\nonların benzerini yaratmaya gücü\nyetmez mi? Elbette — O Hallâk, Alîm.",
           en: "Is He who made the heavens\nand the earth not able to make\ntheir like? He is the Maker, the Knowing.",
@@ -165,6 +191,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 82,
           tone: "gold",
+          arScale: 0.65,
+          latScale: 0.75,
           ar: "إِنَّمَا أَمْرُهُ إِذَا أَرَادَ شَيْئًا\nأَن يَقُولَ لَهُ\nكُن فَيَكُونُ",
           tr: "Bir şeyi dilediğinde\nO'nun buyruğu, ona\n“Ol” demektir — o da olur.",
           en: "His command, when He wills\na thing, is only to say\nto it “Be” — and it is.",

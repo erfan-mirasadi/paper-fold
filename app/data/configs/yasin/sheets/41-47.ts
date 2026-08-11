@@ -50,6 +50,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 41,
           tone: "cream",
+          arScale: 0.65,
+          latScale: 0.81,
           ar: "وَآيَةٌ لَّهُمْ أَنَّا\nحَمَلْنَا ذُرِّيَّتَهُمْ\nفِي الْفُلْكِ الْمَشْحُونِ",
           tr: "Bir delil de şudur:\nzürriyetlerini dolu\ngemide taşıdık.",
           en: "A sign for them:\nWe carried their kin\nin the laden ship.",
@@ -57,6 +59,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 42,
           tone: "cream",
+          arScale: 0.72,
+          latScale: 0.75,
           ar: "وَخَلَقْنَا لَهُم\nمِّن مِّثْلِهِ\nمَا يَرْكَبُونَ",
           tr: "Onlar için bindikleri\nbenzerlerini de\nyarattık.",
           en: "And We made for them\nthe like of it,\nto ride upon.",
@@ -70,6 +74,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 43,
           tone: "gold",
+          arScale: 0.63,
+          latScale: 0.72,
           ar: "وَإِن نَّشَأْ نُغْرِقْهُمْ\nفَلَا صَرِيخَ لَهُمْ\nوَلَا هُمْ يُنقَذُونَ",
           tr: "Dilesek onları boğardık;\nne bir imdatları olurdu\nne de kurtarılırlardı.",
           en: "If We willed, We could\ndrown them: no cry\nfor help, and no rescue.",
@@ -77,6 +83,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 44,
           tone: "gold",
+          arScale: 0.64,
+          latScale: 0.72,
           ar: "إِلَّا رَحْمَةً\nمِّنَّا وَمَتَاعًا\nإِلَىٰ حِينٍ",
           tr: "Ancak bizden bir\nrahmet, bir vakte\nkadar geçim.",
           en: "Only as a mercy\nfrom Us, and enjoyment\nfor a time.",
@@ -90,6 +98,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 45,
           tone: "blue",
+          arScale: 0.68,
+          latScale: 0.58,
           ar: "وَإِذَا قِيلَ لَهُمُ اتَّقُوا\nمَا بَيْنَ أَيْدِيكُمْ وَمَا\nخَلْفَكُمْ لَعَلَّكُمْ تُرْحَمُونَ",
           tr: "“Önünüzdekinden,\narkanızdakinden sakının,\nmerhamet göresiniz” denince",
           en: "When told, “Beware what\nlies before and behind,\nthat you may find mercy”…",
@@ -97,6 +107,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 46,
           tone: "blue",
+          arScale: 0.63,
+          latScale: 0.71,
           ar: "وَمَا تَأْتِيهِم مِّنْ آيَةٍ\nمِّنْ آيَاتِ رَبِّهِمْ\nإِلَّا كَانُوا عَنْهَا مُعْرِضِينَ",
           tr: "Rablerinin ayetlerinden\nkendilerine gelen hiçbiri\nyok ki yüz çevirmesinler.",
           en: "No sign of their Lord's\nsigns comes to them\nbut they turn away.",
@@ -108,6 +120,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 47,
       tone: "maroon",
+      arScale: 0.61,
+      latScale: 0.75,
       ar: "وَإِذَا قِيلَ لَهُمْ أَنفِقُوا مِمَّا رَزَقَكُمُ اللَّهُ\nقَالَ الَّذِينَ كَفَرُوا لِلَّذِينَ آمَنُوا\nأَنُطْعِمُ مَن لَّوْ يَشَاءُ اللَّهُ أَطْعَمَهُ\nإِنْ أَنتُمْ إِلَّا فِي ضَلَالٍ مُّبِينٍ",
       tr: "“Allah'ın size verdiğinden infak edin”\ndenildiğinde, inkâr edenler\ninananlara: “Allah dileseydi doyururdu;\nbiz mi doyuralım? Apaçık sapkınlıktasınız.”",
       en: "When told, “Spend of what God gave you,”\nthe disbelievers say to the believers:\n“Shall we feed one whom God could feed?\nYou are in nothing but clear error.”",

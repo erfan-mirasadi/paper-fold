@@ -14,6 +14,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 83,
       tone: "gold",
+      arScale: 0.7,
+      latScale: 0.62,
       ar: "فَسُبْحَانَ الَّذِي بِيَدِهِ مَلَكُوتُ كُلِّ شَيْءٍ\nوَإِلَيْهِ تُرْجَعُونَ",
       tr: "Her şeyin hükümranlığı elinde olanı tesbih ederim;\nO'na döndürüleceksiniz.",
       en: "Glory to Him in whose hand is the dominion of all things;\nto Him you are returned.",
