@@ -61,7 +61,18 @@ export interface GridCell {
   /** Namespaces every id this sheet contributes to the composed paper. */
   key: string;
   sheet: ComposableSheet;
-  /** Draw this sheet smaller (or larger) than it was authored. Default 1. */
+  /**
+   * Draw this sheet smaller (or larger) than it was authored. Default 1.
+   *
+   * ONE CELL ONLY, so it is the one scale that does skew the grid, and there is
+   * no way for it not to: its row grows to hold it (rows are derived), but the
+   * sheet in the next column does not step aside (columns are addresses). A
+   * cell given a `scale` therefore needs its neighbour's `col` moved by hand —
+   * and, because the paper is as big as its contents, growing one cell makes
+   * the whole paper taller, which the camera answers by pulling back. Scale one
+   * sheet up and the page it sits on gets SMALLER on screen. That is arithmetic,
+   * not a bug, but it is the reason to reach for `col` before reaching for this.
+   */
   scale?: number;
   /** Nudge the sheet horizontally inside the existing paper. Negative is left. */
   shiftX?: number;
@@ -81,11 +92,55 @@ export interface GridSpec {
   /** Paper margin on every side. */
   margin: number;
   /**
-   * Scales the WHOLE composition at once — every sheet, and the spacing
+   * Scales the WHOLE composition at once — every sheet, and every distance
    * between them. A true zoom: the arrangement is identical, only bigger, and
    * nothing moves relative to anything else. Default 1.
+   *
+   * IT HAS TO TOUCH THE COLUMN STEP, and that is not a detail. This grid
+   * measures its two axes in different units: a row's height is DERIVED from
+   * the sheets in it, while a column is an ABSOLUTE 0.3 of the world. Scale the
+   * sheets without scaling the column step and only one of those two answers
+   * changes — the paper takes the full growth in height and almost none in
+   * width, and comes out a thinner page than it started as, with every sheet
+   * overlapping the neighbour that did not move aside for it. So there is one
+   * scale here and it drives both axes. Do not add a second that drives only
+   * the sheets; that is precisely the bug this note exists to prevent.
    */
   scale?: number;
+  /**
+   * The paper's OWN size, in world units, held fixed no matter what the sheets
+   * on it do. Absolute — unlike every other number here it is NOT touched by
+   * `scale`, because the paper is not part of the composition, it is the thing
+   * the composition is drawn on.
+   *
+   * WITHOUT THESE THE PAPER HAS NO SIZE OF ITS OWN: it is exactly as big as its
+   * contents, so every sheet that grows drags the paper along with it, the
+   * camera (which frames the paper) backs off by the same amount, and the
+   * drawing you were enlarging arrives the same size or smaller. Scaling is
+   * self-cancelling and no amount of tuning escapes it. Give the paper a size
+   * and that loop is cut: the sections then grow ON something that is holding
+   * still, which is the only kind of growth a fitted camera can show.
+   *
+   * The cost is the honest one — content can now run off the page, and pulling
+   * it back inside is a `col` / `shiftX` / `shiftY` job.
+   */
+  paperWidth?: number;
+  paperHeight?: number;
+  /**
+   * Blank paper added beyond what the sheets need, in the same authored world
+   * units as everything else here (so it scales with `scale`). Ignored when
+   * `paperWidth` states the width outright.
+   *
+   * The paper is otherwise exactly as wide as its contents, which makes it
+   * impossible to widen the page WITHOUT first moving a sheet out into the
+   * space that is not there yet. This is that space. Columns are counted from
+   * the paper's RIGHT edge, so the extra width opens on the LEFT — the
+   * direction the surah runs — and not one addressed sheet moves when it does.
+   *
+   * A `center` / `leftHalf` / `rightHalf` cell IS affected: it is centred on
+   * the paper, and the paper just got wider.
+   */
+  extraWidth?: number;
 }
 
 export interface GridLayout {
@@ -119,6 +174,7 @@ export function layOutGrid(spec: GridSpec): GridLayout {
   const margin = spec.margin * paperScale;
   const gapY = spec.gapY * paperScale;
   const colStep = COL_UNIT * paperScale;
+  const extraWidth = (spec.extraWidth ?? 0) * paperScale;
 
   // ── Rows: each is as tall as its tallest sheet, stacked downwards ───────
   const rowIndices = [...new Set(cells.map((c) => c.at[0]))].sort((a, b) => a - b);
@@ -133,16 +189,19 @@ export function layOutGrid(spec: GridSpec): GridLayout {
 
   // ── Columns: a sheet's RIGHT edge sits on its column line ───────────────
   // The paper's own right margin is column 0, so the widest reach to the LEFT
-  // over all cells is what sets the paper's width. Centred cells are placed
-  // inside a span the paper already has, so they are left out of that.
+  // over all cells — plus whatever blank `extraWidth` asks for beyond it — is
+  // what sets the paper's width. Centred cells are placed inside a span the
+  // paper already has, so they are left out of that.
   const addressed = cells.filter((c) => !c.align);
   const reach = Math.max(
     ...(addressed.length ? addressed : cells).map(
       (c) => c.at[1] * colStep + c.w,
     ),
   );
-  const paperWidth = margin * 2 + reach;
-  const paperHeight = -contentBottom + margin;
+  // The paper takes the size it was given, and only falls back to "as big as
+  // its contents" when it was not given one. See `GridSpec.paperWidth`.
+  const paperWidth = spec.paperWidth ?? margin * 2 + reach + extraWidth;
+  const paperHeight = spec.paperHeight ?? -contentBottom + margin;
 
   /** The span a centred cell is centred ON. */
   const spanOf = (align: GridAlign): [number, number] =>
@@ -156,7 +215,7 @@ export function layOutGrid(spec: GridSpec): GridLayout {
     let x: number;
     if (c.align) {
       const [from, to] = spanOf(c.align);
-      x = (from + to) / 2 - c.w / 2;
+      x = (from + to) / 2 - c.w / 2 + (c.shiftX ?? 0);
     } else {
       x = paperWidth - margin - c.at[1] * colStep - c.w + (c.shiftX ?? 0);
     }

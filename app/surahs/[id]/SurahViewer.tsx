@@ -65,6 +65,17 @@ if (typeof window !== "undefined") {
   });
 }
 
+/**
+ * Surah routes that read WITHOUT the two side panels — the left script
+ * sidebar and the right tafsir panel. On these pages the panels are never
+ * mounted at all (not hidden with CSS), so none of their content, fonts or
+ * scroll listeners ever reach the DOM. Both panels carry their own toggle
+ * rail, so leaving them out removes the buttons with them.
+ *
+ * To bring the panels back to a page, delete its id from this list.
+ */
+const SURAHS_WITHOUT_SIDE_PANELS: ReadonlySet<string> = new Set(["yasin"]);
+
 const Experience = dynamic(
   () =>
     import("@/app/_components/canvas/3d-scene/Experience").then(
@@ -232,6 +243,12 @@ function SurahViewerInner({
   const cameraPosition = CAMERA_CONFIG.initialCamera.position.map(
     (v) => v * cameraDistanceScale,
   ) as [number, number, number];
+
+  // See SURAHS_WITHOUT_SIDE_PANELS — pages listed there never mount either
+  // side panel, so nothing of theirs is rendered or measured.
+  const showSidePanels = usePaperStore(
+    (s) => !s.surahId || !SURAHS_WITHOUT_SIDE_PANELS.has(s.surahId),
+  );
 
   useAutoCollapsePanelsOnElevate();
 
@@ -434,11 +451,11 @@ function SurahViewerInner({
 
       <PaperSwitchCursorSpinner />
 
-      {isSceneReady && showPostIntroUI && <SurahScriptSidebar />}
+      {isSceneReady && showPostIntroUI && showSidePanels && <SurahScriptSidebar />}
       {/* The panel's copy for a non-default language is its own chunk
           (useSideInfoContent). The language switcher warms it before it
           flips, so this boundary is only the safety net for a cold read. */}
-      {isSceneReady && showPostIntroUI && (
+      {isSceneReady && showPostIntroUI && showSidePanels && (
         <Suspense fallback={null}>
           <SideInfoPanel />
         </Suspense>
