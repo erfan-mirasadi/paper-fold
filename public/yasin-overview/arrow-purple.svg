@@ -1,0 +1,16 @@
+<svg width="1727" height="1000" viewBox="0 0 1727 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: the long arrow across the gutter — one whole
+     explanation section answering the next (1. -> 2., 3. -> 4.). It is the
+     heavier of the two arrows on the page because it carries the heavier
+     claim, and it crosses both panels' rims, so it paints after them.
+
+       world 0.190 x 0.110  ->  1.727
+       viewBox 1727 x 1000  ->  1.727
+     one SVG unit = 1.100e-4 world units on both axes.
+
+     SHEET_COLORS.lav, border over ink: the same pair the surah's lavender
+     capsules are painted with. -->
+<path d="M 12 290 L 950 290 L 950 12 L 1715 500 L 950 988 L 950 710 L 12 710 Z"
+      fill="#8E93C8"
+      stroke="#26283F" stroke-width="23" stroke-linejoin="round"/>
+</svg>

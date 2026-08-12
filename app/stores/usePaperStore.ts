@@ -42,12 +42,25 @@ import { useCameraViewStore } from "./useCameraViewStore";
 import { useCameraStore } from "./useCameraStore";
 import { useElevatedStore } from "./useElevatedStore";
 import { seedStoresForPaper } from "./storySeeder";
+import { useStoryStore } from "./useStoryStore";
+import { preloadPaperAssets } from "../utils/paperAssets";
 import {
   requestPaperTransitionCapture,
   type PaperTransitionCapture,
 } from "../_components/canvas/3d-scene/paperSnapshot";
 
-/** If any phase hangs (e.g. WebGL context loss), force the switch to finish. */
+/**
+ * If a single PHASE hangs (e.g. WebGL context loss), force the switch to
+ * finish. Re-armed every time the phase advances, and that is the whole point:
+ * as one whole-switch budget this was a bug rather than a safety net. The
+ * "loading" phase's length is set by how long the incoming page takes to
+ * commit, which on a heavy page (the Yâsîn atlas) measured 21.8 s cold —
+ * so a 20 s whole-switch timer fired FIRST, every time, and tore the switch
+ * down a moment before it was ready to play. The choreography that followed
+ * then found `isSwitching` already false and silently did nothing, which is
+ * exactly the "switch never completes" this fixes. Per-phase, a slow load can
+ * no longer eat the animation's budget, and neither can strand the other.
+ */
 const SWITCH_FAILSAFE_MS = 20000;
 /** Fold rotations below this are considered "already flat" → no unfold step. */
 const FLAT_ANGLE_EPSILON = 0.06;
@@ -82,6 +95,13 @@ interface PaperState {
   hasTransitionSheet: boolean;
   /** Which sheet mesh is mounted right now. */
   sheetStage: SheetStage;
+  /**
+   * True when this switch crosses a paper too expensive to animate at all.
+   * There is no sheet, no curl and no glide — the site's own full-window
+   * loading screen covers the swap, exactly as it does on a first visit, and
+   * lifts when the new paper is genuinely ready.
+   */
+  usesSiteLoader: boolean;
   /**
    * True from the moment the incoming page is, visually, fully on screen —
    * even though the outgoing sheet may still be finishing its cosmetic
@@ -138,6 +158,28 @@ function clearFailsafe(): void {
   }
 }
 
+/**
+ * (Re)start the watchdog for the phase that is beginning now. Whatever gate
+ * fails to open, the reader still lands on the new paper.
+ */
+function armFailsafe(token: number): void {
+  clearFailsafe();
+  failsafeTimeoutId = window.setTimeout(() => {
+    failsafeTimeoutId = null;
+    if (token !== switchToken) return;
+    disposeActiveCapture();
+    curlDone = true;
+    enterDone = true;
+    usePaperStore.setState({
+      isSwitching: false,
+      transitionPhase: "idle",
+      hasTransitionSheet: false,
+      usesSiteLoader: false,
+      newPaperRevealed: true,
+    });
+  }, SWITCH_FAILSAFE_MS);
+}
+
 const delay = (ms: number) =>
   new Promise<void>((r) => window.setTimeout(r, ms));
 
@@ -184,14 +226,19 @@ function tryFinishSwitch(): void {
     transitionPhase: "idle",
     isSwitching: false,
     hasTransitionSheet: false,
+    usesSiteLoader: false,
     newPaperRevealed: true,
   });
 }
 
 /**
- * Warm the config cache for the papers next to `index` during idle time.
- * Only JS chunks are fetched — no textures, no GPU work — so this is safe
- * even on low-memory devices.
+ * Warm the neighbours of `index` during idle time: the config chunk, and then
+ * that config's artwork.
+ *
+ * The artwork matters more than it looks. It is a few dozen KB — nothing — but
+ * fetching it HERE is what stops the paper's content from suspending once per
+ * texture when it mounts, which on the Yâsîn atlas was the difference between a
+ * switch settling in 1.6 s and one taking 21.8 s. See `preloadPaperAssets`.
  */
 function prefetchNeighborPapers(surahId: string, index: number): void {
   const schedule =
@@ -199,9 +246,15 @@ function prefetchNeighborPapers(surahId: string, index: number): void {
       ? window.requestIdleCallback.bind(window)
       : (cb: () => void) => window.setTimeout(cb, 300);
 
+  const warm = (i: number) => {
+    void loadSurahPaper(surahId, i).then((paper) => {
+      if (paper) preloadPaperAssets(paper.config);
+    });
+  };
+
   schedule(() => {
-    void loadSurahPaper(surahId, index + 1);
-    if (index > 0) void loadSurahPaper(surahId, index - 1);
+    warm(index + 1);
+    if (index > 0) warm(index - 1);
   });
 }
 
@@ -214,6 +267,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
   transitionDirection: 1,
   hasTransitionSheet: false,
   sheetStage: "curl",
+  usesSiteLoader: false,
   newPaperRevealed: true,
 
   initForSurah: (surahId) => {
@@ -229,6 +283,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
       transitionPhase: "idle",
       hasTransitionSheet: false,
       sheetStage: "curl",
+      usesSiteLoader: false,
       newPaperRevealed: true,
     });
     prefetchNeighborPapers(surahId, 0);
@@ -249,19 +304,8 @@ export const usePaperStore = create<PaperState>((set, get) => ({
       newPaperRevealed: false,
     });
 
-    // Whole-switch failsafe: whatever gate never opens, land on the new
-    // paper so the UI can never get permanently stuck.
-    failsafeTimeoutId = window.setTimeout(() => {
-      failsafeTimeoutId = null;
-      if (token !== switchToken) return;
-      disposeActiveCapture();
-      set({
-        isSwitching: false,
-        transitionPhase: "idle",
-        hasTransitionSheet: false,
-        newPaperRevealed: true,
-      });
-    }, SWITCH_FAILSAFE_MS);
+    // Watchdog for the phase now beginning (config load → capture → swap).
+    armFailsafe(token);
 
     void (async () => {
       try {
@@ -291,20 +335,48 @@ export const usePaperStore = create<PaperState>((set, get) => ({
           return;
         }
 
-        // GPU-copy the outgoing page (map + normal, two blits) so a flatten/
-        // curl sheet can stand in for it independently of the live material,
-        // which is about to rebuild with the NEW paper's content. Awaiting
-        // this request means the actual GPU blit runs inside SinglePaper's
-        // own useFrame on the next frame — never on this click handler's own
-        // stack — so it can never race or interleave with R3F's own render.
-        disposeActiveCapture();
-        activeCapture = await requestPaperTransitionCapture();
+        // Get this paper's artwork moving BEFORE the swap. The idle prefetch
+        // has usually done it already; this covers the case where the reader
+        // clicked faster than idle time arrived. It is not awaited on purpose —
+        // what removes the per-texture suspense waterfall is the requests being
+        // in flight together, not their being finished (see preloadPaperAssets).
+        preloadPaperAssets(paper.config);
 
-        // A newer switch or a route change won the race while we waited for
-        // that frame — abandon this one; the newer switch owns the capture.
-        if (token !== switchToken || get().surahId !== surahId) {
+        // Is either side of this crossing a page heavy enough that animating
+        // it is the wrong idea? `progressivePageTexture` already marks exactly
+        // those pages — one paper carrying a dozen sheets, drawn in stages
+        // because a single capture of it is the slowest thing on the page —
+        // so the decision is made from what the paper COSTS rather than from a
+        // second flag that could disagree with the first.
+        const useSiteLoader =
+          useStoryStore.getState().activeConfig.features
+            .progressivePageTexture === true ||
+          paper.config.features.progressivePageTexture === true;
+
+        if (useSiteLoader) {
+          // No capture, no sheet, no choreography. A page-turn played over a
+          // page this heavy competes with the page itself for the very frames
+          // that were supposed to make it smooth, so the turn stutters and the
+          // paper arrives late — worse on both counts than not animating. The
+          // site's own loading screen covers the whole window instead, which
+          // cannot flicker, cannot go black and costs nothing to draw.
           disposeActiveCapture();
-          return;
+        } else {
+          // GPU-copy the outgoing page (map + normal, two blits) so a flatten/
+          // curl sheet can stand in for it independently of the live material,
+          // which is about to rebuild with the NEW paper's content. Awaiting
+          // this request means the actual GPU blit runs inside SinglePaper's
+          // own useFrame on the next frame — never on this click handler's own
+          // stack — so it can never race or interleave with R3F's own render.
+          disposeActiveCapture();
+          activeCapture = await requestPaperTransitionCapture();
+
+          // A newer switch or a route change won the race while we waited for
+          // that frame — abandon this one; the newer switch owns the capture.
+          if (token !== switchToken || get().surahId !== surahId) {
+            disposeActiveCapture();
+            return;
+          }
         }
 
         const needsFlatten = activeCapture
@@ -321,11 +393,15 @@ export const usePaperStore = create<PaperState>((set, get) => ({
         seedStoresForPaper(paper, { preserveCameraView: true });
         resetScrollToStoryStart();
 
+        // "loading" starts here, and it owns its own budget: everything up to
+        // this point (chunk, capture, swap) has already been paid for.
+        armFailsafe(token);
         set({
           activePaperIndex: index,
           transitionPhase: "loading",
           hasTransitionSheet: activeCapture !== null,
           sheetStage: needsFlatten ? "flatten" : "curl",
+          usesSiteLoader: useSiteLoader,
         });
 
         prefetchNeighborPapers(surahId, index);
@@ -337,6 +413,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
             isSwitching: false,
             transitionPhase: "idle",
             hasTransitionSheet: false,
+            usesSiteLoader: false,
             newPaperRevealed: true,
           });
         }
@@ -372,6 +449,7 @@ export const usePaperStore = create<PaperState>((set, get) => ({
       set({
         transitionPhase: "idle",
         isSwitching: false,
+        usesSiteLoader: false,
         newPaperRevealed: true,
       });
       return;
@@ -379,7 +457,10 @@ export const usePaperStore = create<PaperState>((set, get) => ({
 
     // "loading" → "animating": the ENTIRE choreography (unfold → curl-exit →
     // enter-glide) now plays once, back to back, with nothing left to wait
-    // for — this is the only place that transition fires from.
+    // for — this is the only place that transition fires from. The animation
+    // gets a fresh budget: however long the page took to commit, the flight
+    // that follows is a fixed few seconds and must be judged on its own.
+    armFailsafe(switchToken);
     set({ transitionPhase: "animating" });
   },
 
@@ -400,3 +481,4 @@ export const usePaperStore = create<PaperState>((set, get) => ({
     tryFinishSwitch();
   },
 }));
+

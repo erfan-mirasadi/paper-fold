@@ -46,6 +46,7 @@ import type {
   CustomSectionDef,
   HandwrittenNoteConfig,
   LayoutBlock,
+  LayoutStyling,
   SurahLayoutConfig,
   SvgOverlayItem,
   VerseOverrideConfig,
@@ -68,6 +69,56 @@ export const SHEET_COLORS = {
 } as const;
 
 export type Tone = keyof typeof SHEET_COLORS;
+
+/**
+ * The surah's one styling block. Every Yâsîn page — the generated sheets, and
+ * the overview plan that is not a sheet at all — is drawn with this, so a
+ * capsule rule, a badge and an elevated corner are the same thickness and the
+ * same radius wherever in the surah you meet them.
+ *
+ * Note what is NOT here: a capsule's own colours. Those travel per verse, in
+ * `verseOverrides`, picked off `SHEET_COLORS` — see `buildSheet`.
+ */
+export const SHEET_STYLING: LayoutStyling = {
+  colors: {
+    paperBase: "#FAF7F2",
+    shadow: "#000000",
+    backface: "#EDE8D6",
+    textDark: "#333333",
+    textLabel: "#555555",
+    circleBorder: "#bbbbbb",
+    verseNumberText: "#222222",
+    s1AnaLabelBg: "#ffffff",
+    s1AnaLabelText: "#000000",
+    s1AnaLabelBorder: "#dddddd",
+    s2FrameBg: "#f4f4f4",
+    boarderFrame: "#ffffff",
+    boarderHalo: "#ADADAD",
+    innerCard: "#eeeeee",
+    sectionBgTexture: "#fcfcfc",
+    hollowConnectorInnerBg: "#e3e3e3",
+    maroonTheme: SHEET_COLORS.maroon.border,
+    greenTheme: SHEET_COLORS.cream.border,
+    s1InnerBorder: "#cccccc",
+    s2IntroOutroBg: SHEET_COLORS.cream.bg,
+    s2Group1Bg: SHEET_COLORS.cream.bg,
+    s2Group2Bg: SHEET_COLORS.white.bg,
+    s2Group3Bg: SHEET_COLORS.maroon.bg,
+    // The frames do the bracketing; one transparent entry stops SideCurves
+    // falling back to its default olive bracket on every centred block.
+    curveColors: [{ color: "transparent", fillColor: "transparent" }],
+  },
+  capsuleBorderWidth: 0.0038,
+  circleBorderWidth: 0.003,
+  verseRadius: 0.05,
+  oppositeVerseConnectorRadius: 0.04,
+  elevatedSectionRadii: {
+    base: 0.04,
+    outer: 0.026,
+    innerA: 0.024,
+    innerB: 0.022,
+  },
+};
 
 /**
  * The frame paints. `outer` is the sheet's solid rim; everything else is one
@@ -942,46 +993,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     specialVerses: {},
     verseOverrides,
 
-    styling: {
-      colors: {
-        paperBase: "#FAF7F2",
-        shadow: "#000000",
-        backface: "#EDE8D6",
-        textDark: "#333333",
-        textLabel: "#555555",
-        circleBorder: "#bbbbbb",
-        verseNumberText: "#222222",
-        s1AnaLabelBg: "#ffffff",
-        s1AnaLabelText: "#000000",
-        s1AnaLabelBorder: "#dddddd",
-        s2FrameBg: "#f4f4f4",
-        boarderFrame: "#ffffff",
-        boarderHalo: "#ADADAD",
-        innerCard: "#eeeeee",
-        sectionBgTexture: "#fcfcfc",
-        hollowConnectorInnerBg: "#e3e3e3",
-        maroonTheme: SHEET_COLORS.maroon.border,
-        greenTheme: SHEET_COLORS.cream.border,
-        s1InnerBorder: "#cccccc",
-        s2IntroOutroBg: SHEET_COLORS.cream.bg,
-        s2Group1Bg: SHEET_COLORS.cream.bg,
-        s2Group2Bg: SHEET_COLORS.white.bg,
-        s2Group3Bg: SHEET_COLORS.maroon.bg,
-        // The frames do the bracketing; one transparent entry stops SideCurves
-        // falling back to its default olive bracket on every centred block.
-        curveColors: [{ color: "transparent", fillColor: "transparent" }],
-      },
-      capsuleBorderWidth: 0.0038,
-      circleBorderWidth: 0.003,
-      verseRadius: 0.05,
-      oppositeVerseConnectorRadius: 0.04,
-      elevatedSectionRadii: {
-        base: 0.04,
-        outer: 0.026,
-        innerA: 0.024,
-        innerB: 0.022,
-      },
-    },
+    styling: SHEET_STYLING,
 
     globalSettings: {
       capsuleHeight: 0.12,

@@ -74,6 +74,7 @@ import {
 
 import type { CameraFocusRect, SurahLayoutConfig } from "../../../data/schema";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
+import { usePaperStore } from "../../../stores/usePaperStore";
 import { detectGpuTier } from "../../../utils/gpuTier";
 import { buildSectionZoomIndex } from "../../../utils/sectionZoom";
 import { useFoldStore } from "../orchestrator/ScrollManager";
@@ -91,8 +92,18 @@ import {
 // The driver's own dials — sizes live in `pageTextureLodMath`
 // ---------------------------------------------------------------------------
 
-/** How long after the page settles the background refine may start — long
- *  enough for the loading handoff and the first reveal to be over with. */
+/**
+ * How long after the page settles the background refine may start — long
+ * enough for the loading handoff and the first reveal to be over with.
+ *
+ * Counted from the end of a PAPER SWITCH, not from the settle, whenever one is
+ * in flight. A switch settles the incoming page BEFORE it animates it (that is
+ * the whole point of the "loading" phase), so a delay measured from the settle
+ * would drop the most expensive pass this module owns — the whole page,
+ * re-rendered a tile a frame — directly into the middle of the choreography,
+ * which is exactly where the frame budget is already spoken for. On a heavy
+ * page that is the stutter the reader sees during the turn.
+ */
 const REFINE_IDLE_DELAY_MS = 900;
 
 /** Seconds⁻¹ for the detail's fade. ~0.4 s door to door. */
@@ -397,6 +408,25 @@ export function PageTextureLod({
     settledAtRef.current = settled ? performance.now() : 0;
   }, [settled]);
 
+  // A switch holds the clock down and restarts it on the way out, so the
+  // refine's delay is always measured from the last thing that finished —
+  // never from a settle the choreography then ran on top of.
+  useEffect(() => {
+    let wasSwitching = usePaperStore.getState().isSwitching;
+    return usePaperStore.subscribe((state) => {
+      if (state.isSwitching === wasSwitching) return;
+      wasSwitching = state.isSwitching;
+      if (state.isSwitching) {
+        // Give up a half-drawn picture rather than carry it across the turn:
+        // the page it was of is the page being replaced.
+        pausedRefineRef.current = null;
+        if (passRef.current?.kind === "refine") passRef.current = null;
+      } else if (settledAtRef.current > 0) {
+        settledAtRef.current = performance.now();
+      }
+    });
+  }, []);
+
   // ── Teardown ────────────────────────────────────────────────────────────
   // Hand the material back the texture drei attached BEFORE the buffers go, so
   // nothing can ever hold a disposed one — not the paper, not the page-turn
@@ -513,6 +543,7 @@ export function PageTextureLod({
     if (
       !refineDoneRef.current &&
       !detailPending &&
+      !usePaperStore.getState().isSwitching &&
       settledAtRef.current > 0 &&
       performance.now() - settledAtRef.current > REFINE_IDLE_DELAY_MS
     ) {

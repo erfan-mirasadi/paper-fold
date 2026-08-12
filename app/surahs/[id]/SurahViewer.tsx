@@ -181,6 +181,22 @@ export default function SurahViewer() {
     };
   }, [isSceneReady]);
 
+  // A paper too heavy to animate is swapped behind the SITE's own loading
+  // screen instead of behind a page-turn — the same screen, the same fade, the
+  // same lift, as arriving at the page for the first time. Dropping
+  // `isSceneReady` is all it takes: the overlay is already bound to it, and so
+  // are the scroll lock and the UI's own fade, so the whole "the page is not
+  // ready yet" state comes back in one piece rather than being re-created.
+  // `handleSceneReady` below raises it again when the new paper has genuinely
+  // settled, which is the same signal the first visit waits for.
+  useEffect(() => {
+    return usePaperStore.subscribe((state, prevState) => {
+      if (state.usesSiteLoader && !prevState.usesSiteLoader) {
+        setIsSceneReady(false);
+      }
+    });
+  }, []);
+
   const handleSceneReady = useCallback(() => {
     setIsSceneReady(true);
     // If this ready signal comes from a freshly swapped paper, it dismisses

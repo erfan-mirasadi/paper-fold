@@ -1,0 +1,22 @@
+<svg width="2250" height="1000" viewBox="0 0 2250 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: the lid over the opening's 4 + 6, inside
+     open-outer.svg. See that file's header for the aspect rule.
+
+       world 0.630 x 0.280  ->  2.250
+       viewBox 2250 x 1000  ->  2.250
+     one SVG unit = 2.800e-4 world units on both axes.
+
+     Fill is /yasin1319/band.svg's rose sibling — the `rose` paint the
+     generated sheet frames use for a group inside a group. -->
+<defs>
+<linearGradient id="ovOpenInnerGold" x1="0" y1="500" x2="2250" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="15.5" y="15.5" width="2219" height="969"
+      rx="90.0" ry="90.0"
+      fill="#F3DEDE" fill-opacity="0.55"
+      stroke="url(#ovOpenInnerGold)" stroke-width="31"/>
+</svg>

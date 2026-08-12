@@ -1,0 +1,15 @@
+<svg width="2600" height="1000" viewBox="0 0 2600 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: the short arrow inside a panel — one run of ayahs
+     answering the run beside it (7 -> 8, 8 -> 7, 4 -> 4, 6 -> 6). It sits in
+     the gutter its two capsules leave, and paints over the panel rim.
+
+       world 0.130 x 0.050  ->  2.600
+       viewBox 2600 x 1000  ->  2.600
+     one SVG unit = 5.000e-5 world units on both axes.
+
+     SHEET_COLORS.green, border over ink: the same pair the surah's green
+     capsules are painted with. -->
+<path d="M 20 300 L 1500 300 L 1500 20 L 2580 500 L 1500 980 L 1500 700 L 20 700 Z"
+      fill="#6E9464"
+      stroke="#2F5D3A" stroke-width="40" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg width="2701" height="1000" viewBox="0 0 2701 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: one of the two twenty-ayah explanation panels
+     (1. and 2. AÇIKLAMA BÖL.). Both are the same rectangle, so both are drawn
+     from this one file. See open-outer.svg for the aspect rule.
+
+       world 1.310 x 0.485  ->  2.701
+       viewBox 2701 x 1000  ->  2.701
+     one SVG unit = 4.850e-4 world units on both axes.
+
+     THE RIM IS MAROON, NOT GOLD, and that is deliberate. Everywhere else in
+     this surah the rim is the gold gradient, because everywhere else the
+     nesting does the talking. Here the whole point of the page is that TWO
+     PAIRS of panels answer each other — twenty ayahs against twenty, fifteen
+     against fifteen — and a reader has to see which pair a panel belongs to
+     before reading a word of it. So the pair is told apart by ink:
+     SHEET_COLORS.maroon.border here, SHEET_COLORS.green.border on panel-15.
+     Both inks are the surah's own; only the rule they are painted on is new.
+
+     The fill is SHEET_COLORS.white.bg, kept near-paper so the lavender, green
+     and rose capsules inside keep their own colour against it. -->
+<rect x="9" y="9" width="2683" height="982"
+      rx="90.0" ry="90.0"
+      fill="#FBFAF4" fill-opacity="0.6"
+      stroke="#B0504D" stroke-width="18"/>
+</svg>

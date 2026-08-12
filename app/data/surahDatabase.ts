@@ -246,9 +246,17 @@ const SURAH_PAPER_LOADERS: Readonly<
         textData: m.MAUN_107_TEXT_DATA,
       })),
   ],
-  // Not a page of its own: every Yâsîn sheet composed onto ONE landscape
-  // paper (see yasinPaperConfig). Its chunk pulls both sheet configs in.
+  // Two papers, in the order the study reads them: the PLAN of the surah — how
+  // many ayahs each passage holds and which verse the whole thing turns on —
+  // and then the surah itself, every sheet of it composed onto one landscape
+  // paper. Separate chunks: the plan is a page of its own and must not drag
+  // ten sheet configs in behind it.
   yasin: [
+    () =>
+      import("./configs/yasin/overview").then((m) => ({
+        config: m.YASIN_OVERVIEW_CONFIG,
+        textData: m.YASIN_OVERVIEW_TEXT_DATA,
+      })),
     () =>
       import("./configs/yasin").then((m) => ({
         config: m.YASIN_PAPER_CONFIG,
