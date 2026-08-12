@@ -5,24 +5,12 @@ import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "./ScrollManager";
 import { CAMERA_CONFIG } from "../../../data/cameraConfig";
 import { useStoryStore } from "../../../stores/useStoryStore";
-import { CameraFocusRect, CameraTargetConfig } from "../../../data/schema";
+import { CameraFocusRect } from "../../../data/schema";
 import { PAGE_SPACE_ANCHOR } from "../3d-scene/PageSpaceAnchor";
+import { buildSectionZoomIndex, FRAME_FILL } from "../../../utils/sectionZoom";
 import { MathUtils, Object3D, PerspectiveCamera, Vector3 } from "three";
 
 import { useMemo, useRef } from "react";
-
-/**
- * How much of the screen the framed rectangle fills, along whichever of its two
- * sides runs out of room first. At 1 its edges touch the edges of the window;
- * below that there is air around it.
- *
- * Not 1, for two reasons. A sheet's rectangle is the page it was drawn on and
- * the ink usually stops short of that — but not always, and a frame SVG drawn
- * out to the very edge would be cropped by the window if the fit were exact.
- * And a sheet read completely alone, with no hint of the ones it sits between,
- * loses the thing an atlas is for.
- */
-const FRAME_FILL = 0.9;
 
 /** Seconds⁻¹. The flight is ~2/3 of the way home after 1 s at this rate. */
 const FRAME_RESPONSE = 3.2;
@@ -92,57 +80,12 @@ function solveFraming(
 export function SectionZoomCamera() {
   const config = useStoryStore(state => state.activeConfig);
 
-  const { zoomTargets, zoomFocus, getSectionIdForVerse } = useMemo(() => {
-    const zoomTargets: Record<string, CameraTargetConfig> = {};
-    // The sections that say WHAT the camera must show instead of where it
-    // should stand. An atlas of many sheets fills this and leaves `zoomTargets`
-    // empty; an ordinary one-surah page does the reverse. See `CameraFocusRect`.
-    const zoomFocus: Record<string, CameraFocusRect> = {};
-
-    if (config.customSections && config.customSections.length > 0) {
-      // Register the custom section camera target (falls back to the first block with one)
-      const fallback = config.blocks?.find((b: any) => b.cameraTarget)?.cameraTarget;
-      config.customSections.forEach((cs: any) => {
-        const target = cs.cameraTarget ?? fallback;
-        if (target) zoomTargets[cs.id] = target;
-        if (cs.cameraFocus) zoomFocus[cs.id] = cs.cameraFocus;
-      });
-    } else {
-      // "perBlock" elevation (Fatiha, Kafirun, Alak): blocks sharing a
-      // `customSectionId` (e.g. Alak's intro/outro merging into their
-      // neighboring group's zone) register under that zone instead of
-      // their own id. Blocks without their own `cameraTarget` reuse the
-      // first target found anywhere (matching "Fallback: per-group entries
-      // with same target" behavior for Kafirun/Fatiha, where only one block
-      // declares a target), instead of never zooming.
-      const fallback = config.blocks?.find((b: any) => b.cameraTarget)?.cameraTarget;
-      config.blocks?.forEach((block: any) => {
-        if (block.type === 'spacer' || !block.verseIds?.length) return;
-        const zoneId = block.customSectionId ?? block.id;
-        const target = block.cameraTarget ?? zoomTargets[zoneId] ?? fallback;
-        if (target) zoomTargets[zoneId] = target;
-      });
-    }
-
-    const getSectionIdForVerse = (vid: number): string | null => {
-      if (config.customSections && config.customSections.length > 0) {
-        for (const cs of config.customSections) {
-          if (cs.verseIds.includes(vid)) return cs.id;
-        }
-      }
-      for (const block of (config.blocks ?? [])) {
-        if (block.verseIds?.includes(vid)) return block.customSectionId ?? block.id;
-        // Grid blocks (Alak) carry their anaAyet as a separate field, not
-        // part of `verseIds`.
-        if (block.type === "grid" && block.anaAyetId === vid) {
-          return block.customSectionId ?? block.id;
-        }
-      }
-      return null;
-    };
-
-    return { zoomTargets, zoomFocus, getSectionIdForVerse };
-  }, [config.blocks, config.customSections]);
+  // The zone lookups, shared verbatim with the texture ladder that has to have
+  // a sharp picture of the same rectangle ready — see `utils/sectionZoom`.
+  const { zoomTargets, zoomFocus, getSectionIdForVerse } = useMemo(
+    () => buildSectionZoomIndex(config),
+    [config],
+  );
 
   /** True for a page whose sections frame themselves — see step 3. */
   const framesSections = Object.keys(zoomFocus).length > 0;

@@ -16,6 +16,23 @@ export type GpuTier = "high" | "medium" | "low";
 let cachedTier: GpuTier | null = null;
 
 /**
+ * `?gpu=low` (or medium / high) forces the tier for the whole session.
+ *
+ * There is no other way to SEE what a weak device gets: the tier decides how
+ * much of the page-texture ladder runs (`PageTextureLod`), and the only honest
+ * way to check that a phone still gets a sharp sheet when it zooms is to make a
+ * desktop behave like one. Read once, at the same moment detection would have
+ * run, so everything downstream is consistent for the life of the page.
+ */
+function readForcedTier(): GpuTier | null {
+  if (typeof window === "undefined") return null;
+  const asked = new URLSearchParams(window.location.search).get("gpu");
+  return asked === "low" || asked === "medium" || asked === "high"
+    ? asked
+    : null;
+}
+
+/**
  * Detect GPU tier once and cache the result.
  * Uses WebGL renderer/vendor strings + maxTextureSize as heuristics.
  * Falls back to "medium" when detection is unavailable (SSR, etc.).
@@ -23,6 +40,12 @@ let cachedTier: GpuTier | null = null;
 export function detectGpuTier(): GpuTier {
   if (cachedTier) return cachedTier;
   if (typeof window === "undefined") return "medium";
+
+  const forced = readForcedTier();
+  if (forced) {
+    cachedTier = forced;
+    return cachedTier;
+  }
 
   try {
     const canvas = document.createElement("canvas");

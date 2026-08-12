@@ -26,6 +26,19 @@ export interface SurahFeatures {
    * duplicate it.
    */
   hideBismillah3D?: boolean;
+  /**
+   * Draw the page's texture in stages instead of all at once — see
+   * `PageTextureLod`. For a paper that carries MANY SHEETS: one buffer big
+   * enough for all of them at reading resolution is the slowest thing on the
+   * page and the thing a weak GPU refuses, so such a page arrives at a low
+   * resolution on every device, sharpens to its resting one a frame at a time
+   * once it is on screen, and draws a screen-sized picture of whatever a
+   * section zoom is about to frame.
+   *
+   * Off (and untouched) for a single-sheet surah, which fits in one buffer at
+   * full quality and has nothing to gain from the machinery.
+   */
+  progressivePageTexture?: boolean;
 }
 
 export interface LayoutDimensions {

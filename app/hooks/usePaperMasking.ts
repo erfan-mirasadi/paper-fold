@@ -1,5 +1,6 @@
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect, useCallback, useRef } from "react";
 import { Color, type Texture } from "three";
+import { createPageDetailUniforms } from "../_components/canvas/3d-scene/pageTextureLodMath";
 import { usePopUpStore } from "../stores/usePopUpStore";
 import { useElevatedStore } from "../stores/useElevatedStore";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
@@ -222,8 +223,21 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
     }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS, activeConfig]);
 
+  /**
+   * The sharp patch a section zoom draws for itself — see `PageTextureLod`.
+   * Created for every page, whether or not it has a ladder: the paper material
+   * survives paper switches without recompiling, so a shader that only some
+   * surahs carry would be the WRONG shader the moment the reader turns the
+   * page. With `uDetailStrength` at 0 — which is where it stays for every
+   * ordinary surah, forever — this is one uniform comparison per fragment.
+   */
+  const detailUniforms = useMemo(() => createPageDetailUniforms(), []);
+  /** Handed to the ladder as a ref: it writes to these every frame. */
+  const detailRef = useRef(detailUniforms);
+
   const uniforms = useMemo(
     () => ({
+      ...detailUniforms,
       uVerseVisibility: { value: new Float32Array(VERSE_ARR_SIZE).fill(1.0) },
       uSectionVisibility: { value: new Float32Array(TOTAL_SECTIONS).fill(1.0) },
       uVerseRects: { value: new Float32Array(VERSE_ARR_SIZE * 4) },
@@ -235,7 +249,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uBaseTexture: { value: paperTextureDiffuse },
       uVerseExpand: { value: 0.005 },
     }),
-    [paperTextureDiffuse],
+    [paperTextureDiffuse, detailUniforms],
   );
 
   useEffect(() => {
@@ -455,11 +469,36 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform float uPageWidth;
       uniform float uPageHeight;
       uniform sampler2D uBaseTexture;
+      uniform sampler2D uDetailMap;
+      uniform vec4 uDetailRect;
+      uniform float uDetailStrength;
+      uniform float uDetailFeather;
       ${shader.fragmentShader}
     `.replace(
         "#include <map_fragment>",
         `
       #include <map_fragment>
+
+      // The zoomed sheet's own sharp picture, laid over the page's rectangle
+      // of it (PageTextureLod). Same content, more texels — so it is a plain
+      // swap of where the colour is read from, not a second look. Everything
+      // below this point (a hidden verse, a hidden section) still overrides
+      // it, exactly as it overrides the page texture.
+      if (uDetailStrength > 0.0) {
+        vec2 dUv = (vMapUv - uDetailRect.xy) / uDetailRect.zw;
+        if (dUv.x > 0.0 && dUv.x < 1.0 && dUv.y > 0.0 && dUv.y < 1.0) {
+          vec2 edge = smoothstep(vec2(0.0), vec2(uDetailFeather), dUv) *
+                      (1.0 - smoothstep(vec2(1.0 - uDetailFeather), vec2(1.0), dUv));
+          // map_fragment leaves diffuseColor as (material colour x map), so the
+          // detail has to be tinted the same way or the patch reads brighter.
+          diffuseColor = mix(
+            diffuseColor,
+            vec4(diffuse, opacity) * texture2D(uDetailMap, dUv),
+            uDetailStrength * min(edge.x, edge.y)
+          );
+        }
+      }
+
       float lx = vMapUv.x * uPageWidth;
       float ly = (vMapUv.y - 1.0) * uPageHeight;
 
@@ -515,5 +554,5 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     [uniforms],
   );
 
-  return { onBeforeCompile };
+  return { onBeforeCompile, detailRef };
 }

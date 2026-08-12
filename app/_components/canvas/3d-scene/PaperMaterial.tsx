@@ -23,9 +23,12 @@ import {
   MeshStandardMaterial,
   NoColorSpace,
   RepeatWrapping,
+  Scene,
   SRGBColorSpace,
   Vector2,
 } from "three";
+import { PageLodSceneProbe, PageTextureLod } from "./PageTextureLod";
+import { firstPassTextureSize } from "./pageTextureLodMath";
 import { usePaperMasking } from "../../../hooks/usePaperMasking";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useStoryStore } from "../../../stores/useStoryStore";
@@ -153,6 +156,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   PaperMaterialProps
 > = ({ toggles, isFolded = false, onReady }, ref) => {
   const { gl } = useThree();
+  const dpr = useThree((s) => s.viewport.dpr);
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
@@ -171,14 +175,38 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     1,
     (maxTextureSize - 16) / Math.max(targetW, targetH),
   );
-  const renderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
-  const renderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
+  const baseRenderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
+  const baseRenderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
 
   const colorSamples = tier === "low" ? 0 : tier === "medium" ? 2 : 4;
   const normalSamples = 0;
 
-  const normalTexW = Math.min(renderTexWidth, 1024);
-  const normalTexHeight = Math.min(renderTexHeight, 1024);
+  const normalTexW = Math.min(baseRenderTexWidth, 1024);
+  const normalTexHeight = Math.min(baseRenderTexHeight, 1024);
+
+  /**
+   * A page of many sheets is drawn in stages instead of once — see
+   * `PageTextureLod`. The first paint is deliberately small and identical on
+   * every device; the resolution the page ends up at is reached afterwards,
+   * off the critical path, and the zoom brings its own. Every ordinary surah
+   * leaves this off and keeps the single full-size capture above, untouched.
+   */
+  const useLod = runtime.config.features.progressivePageTexture === true;
+  const virtualSceneRef = useRef<Scene | null>(null);
+
+  // RenderTexture multiplies whatever it is given by the device pixel ratio,
+  // so the ask is divided by it first — these numbers ARE the buffer.
+  const firstPass = firstPassTextureSize(
+    runtime.PAGE_WIDTH,
+    runtime.PAGE_HEIGHT,
+    maxTextureSize,
+  );
+  const renderTexWidth = useLod
+    ? Math.max(64, Math.round(firstPass.width / dpr))
+    : baseRenderTexWidth;
+  const renderTexHeight = useLod
+    ? Math.max(64, Math.round(firstPass.height / dpr))
+    : baseRenderTexHeight;
 
   // The scene (and this material) persist across paper switches — bumping
   // storyRevision remounts ONLY the RenderTextures so the new paper's content
@@ -341,7 +369,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     },
   );
 
-  const { onBeforeCompile } = usePaperMasking(paperTextureDiffuse);
+  const { onBeforeCompile, detailRef } = usePaperMasking(paperTextureDiffuse);
 
   return (
     <meshStandardMaterial
@@ -398,6 +426,13 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
          * The reporter below re-arms the settle gate once the real content
          * has committed.
          */}
+        {/*
+         * Outside the Suspense boundary on purpose: it only reports WHICH
+         * scene the page is being drawn into, and the ladder must be able to
+         * find that scene the moment the content lands in it.
+         */}
+        {useLod && <PageLodSceneProbe sceneRef={virtualSceneRef} />}
+
         <Suspense fallback={null}>
           {fontsReady && (
             <>
@@ -474,6 +509,30 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
             </mesh>
           ))}
         </RenderTexture>
+      )}
+
+      {/*
+       * Renders nothing — it only draws into buffers of its own and hands the
+       * material a sharper `map` when one is ready. Keyed with the capture, so
+       * a new language, a new paper or a re-awoken context starts the ladder
+       * from the bottom again rather than serving the previous page's picture.
+       *
+       * `isWakingUp` is part of that key and has to be: a restored GL context
+       * has emptied every buffer this owns, and the material is pointed back at
+       * the live RenderTexture (which is redrawing itself right then) the
+       * moment the ladder unmounts.
+       */}
+      {useLod && (
+        <PageTextureLod
+          key={`${renderTextureKey}-${isWakingUp ? "waking" : "awake"}`}
+          config={runtime.config}
+          materialRef={matRef}
+          sceneRef={virtualSceneRef}
+          pageWidth={runtime.PAGE_WIDTH}
+          pageHeight={runtime.PAGE_HEIGHT}
+          settled={settled}
+          detailRef={detailRef}
+        />
       )}
     </meshStandardMaterial>
   );

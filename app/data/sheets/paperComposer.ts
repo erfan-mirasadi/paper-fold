@@ -654,6 +654,10 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       // see the verse-override bake above.
       hideVerseNumbers: true,
       hideBismillah3D: true,
+      // A composed paper is the only kind that carries a dozen sheets at once,
+      // and the only kind a single full-resolution capture cannot serve. See
+      // `SurahFeatures.progressivePageTexture` / `PageTextureLod`.
+      progressivePageTexture: true,
     },
 
     dimensions: {
