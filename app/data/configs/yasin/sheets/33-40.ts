@@ -64,7 +64,7 @@ const SPEC: SheetSpec = {
       noNumber: true,
       tone: "green",
       width: PETAL,
-      arScale: 0.61,
+      arScale: 0.69,
       latScale: 0.55,
       ar: "وَآيَةٌ لَّهُمُ الْأَرْضُ الْمَيْتَةُ",
       tr: "Ölü toprak onlar için bir delildir:",
@@ -99,7 +99,7 @@ const SPEC: SheetSpec = {
       ayah: 33,
       tone: "green",
       width: PETAL,
-      arScale: 0.56,
+      arScale: 0.69,
       latScale: 0.89,
       ar: "فَمِنْهُ يَأْكُلُونَ",
       tr: "ondan yiyorlar.",
@@ -109,11 +109,13 @@ const SPEC: SheetSpec = {
     // ── Lenses 2 and 3 (right · left) — ayahs 34 and 35 ──────────────────
     {
       ratio: 0.5,
+      inwardShift: 0.035,
       right: [
         {
           ayah: 34,
           noNumber: true,
           tone: "green",
+          width: 0.9,
           arScale: 0.69,
           latScale: 0.66,
           ar: "وَجَعَلْنَا فِيهَا جَنَّاتٍ",
@@ -121,12 +123,13 @@ const SPEC: SheetSpec = {
           en: "In it We made gardens,",
         },
         {
+          width: 0.9,
           pair: [
             {
               ayah: 34,
               noNumber: true,
               tone: "cream",
-              arScale: 0.51,
+              arScale: 0.6,
               latScale: 0.73,
               ar: "مِّن نَّخِيلٍ",
               tr: "hurmadan",
@@ -136,7 +139,7 @@ const SPEC: SheetSpec = {
               ayah: 34,
               noNumber: true,
               tone: "cream",
-              arScale: 0.57,
+              arScale: 0.6,
               latScale: 0.63,
               ar: "وَأَعْنَابٍ",
               tr: "ve üzümden",
@@ -147,6 +150,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 34,
           tone: "green",
+          // Bring the two opposite bottom capsules almost together.
+          width: 0.9,
           arScale: 0.69,
           latScale: 0.58,
           ar: "وَفَجَّرْنَا فِيهَا مِنَ الْعُيُونِ",
@@ -159,19 +164,21 @@ const SPEC: SheetSpec = {
           ayah: 35,
           noNumber: true,
           tone: "green",
-          arScale: 0.56,
+          width: 0.9,
+          arScale: 0.69,
           latScale: 0.58,
           ar: "لِيَأْكُلُوا مِن ثَمَرِهِ",
           tr: "Ürününden yesinler diye —",
           en: "That they may eat its fruit —",
         },
         {
+          width: 0.9,
           pair: [
             {
               ayah: 35,
               noNumber: true,
               tone: "cream",
-              arScale: 0.76,
+              arScale: 0.6,
               latScale: 0.44,
               ar: "وَمَا عَمِلَتْهُ",
               tr: "oysa onu yapan",
@@ -192,8 +199,10 @@ const SPEC: SheetSpec = {
         {
           ayah: 35,
           tone: "green",
-          arScale: 0.6,
-          latScale: 0.64,
+          // Match ayah 34 so the pair remains visually centred.
+          width: 0.9,
+          arScale: 0.69,
+          latScale: 0.58,
           ar: "أَفَلَا يَشْكُرُونَ",
           tr: "Hâlâ şükretmezler mi?",
           en: "Will they not give thanks?",
@@ -207,7 +216,7 @@ const SPEC: SheetSpec = {
       noNumber: true,
       tone: "green",
       width: PETAL,
-      arScale: 0.59,
+      arScale: 0.69,
       latScale: 0.49,
       ar: "سُبْحَانَ الَّذِي خَلَقَ الْأَزْوَاجَ كُلَّهَا",
       tr: "Bütün çiftleri yaratanı tesbih ederim:",
@@ -220,7 +229,7 @@ const SPEC: SheetSpec = {
           ayah: 36,
           noNumber: true,
           tone: "cream",
-          arScale: 0.61,
+          arScale: 0.6,
           latScale: 0.44,
           ar: "مِمَّا تُنبِتُ الْأَرْضُ",
           tr: "toprağın bitirdiklerinden,",
@@ -242,7 +251,7 @@ const SPEC: SheetSpec = {
       ayah: 36,
       tone: "green",
       width: PETAL,
-      arScale: 0.72,
+      arScale: 0.69,
       latScale: 0.59,
       ar: "وَمِمَّا لَا يَعْلَمُونَ",
       tr: "ve bilmediklerinden.",
@@ -254,37 +263,40 @@ const SPEC: SheetSpec = {
     // BRIDGED PAIR through the middle, one across the bottom. The only
     // difference is what a capsule holds — a whole ayah here, a fragment in the
     // petals around it — so every one of these four prints its own number, and
-    // its two middle capsules carry four lines where the others carry one.
+    // its two middle capsules carry one line here as an intentional layout
+    // experiment — the generator will fit the long ayahs down to the slot.
     {
       ayah: 37,
       tone: "lav",
       width: PETAL,
-      arScale: 0.5,
+      arScale: 0.55,
       latScale: 0.5,
       ar: "وَآيَةٌ لَّهُمُ اللَّيْلُ نَسْلَخُ مِنْهُ\nالنَّهَارَ فَإِذَا هُم مُّظْلِمُونَ",
       tr: "Gece de bir delildir: ondan gündüzü\nsıyırırız, karanlıkta kalıverirler.",
       en: "The night is a sign: We strip the day\nfrom it, and they are in darkness.",
     },
     {
-      width: PETAL,
+      // Give the 38–39 pair a little extra width so the number badge clears
+      // the long one-line text instead of sitting inside it.
+      width: 1.2,
       pair: [
         {
           ayah: 38,
           tone: "blue",
-          arScale: 0.42,
-          latScale: 0.41,
-          ar: "وَالشَّمْسُ تَجْرِي\nلِمُسْتَقَرٍّ لَّهَا\nذَٰلِكَ تَقْدِيرُ\nالْعَزِيزِ الْعَلِيمِ",
-          tr: "Güneş kendi\nyörüngesinde akar;\nbu, Azîz ve\nAlîm'in takdiridir.",
-          en: "The sun runs to\nits resting place:\nthe decree of the\nMighty, the Knowing.",
+          arScale: 0.48,
+          latScale: 0.45,
+          ar: "وَالشَّمْسُ تَجْرِي لِمُسْتَقَرٍّ لَّهَا ذَٰلِكَ تَقْدِيرُ الْعَزِيزِ الْعَلِيمِ",
+          tr: "Güneş kendi yörüngesinde akar; bu, Azîz ve Alîm'in takdiridir.",
+          en: "The sun runs to its resting place: the decree of the Mighty, the Knowing.",
         },
         {
           ayah: 39,
           tone: "blue",
-          arScale: 0.43,
-          latScale: 0.4,
-          ar: "وَالْقَمَرَ قَدَّرْنَاهُ\nمَنَازِلَ حَتَّىٰ\nعَادَ كَالْعُرْجُونِ\nالْقَدِيمِ",
-          tr: "Aya da konaklar\ntakdir ettik; sonunda\nkuru bir hurma\ndalına döner.",
-          en: "For the moon We\nordained phases,\ntill it returns like\nan old palm stalk.",
+          arScale: 0.48,
+          latScale: 0.45,
+          ar: "وَالْقَمَرَ قَدَّرْنَاهُ مَنَازِلَ حَتَّىٰ عَادَ كَالْعُرْجُونِ الْقَدِيمِ",
+          tr: "Aya da konaklar takdir ettik; sonunda kuru bir hurma dalına döner.",
+          en: "For the moon We ordained phases, till it returns like an old palm stalk.",
         },
       ],
     },
@@ -293,7 +305,7 @@ const SPEC: SheetSpec = {
       tone: "lav",
       width: PETAL,
       heightLines: 3,
-      arScale: 0.44,
+      arScale: 0.55,
       latScale: 0.49,
       ar: "لَا الشَّمْسُ يَنبَغِي لَهَا أَن تُدْرِكَ الْقَمَرَ\nوَلَا اللَّيْلُ سَابِقُ النَّهَارِ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ",
       tr: "Ne güneş aya yetişebilir, ne gece gündüzü geçebilir;\nher biri bir yörüngede yüzer.",

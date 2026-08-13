@@ -252,6 +252,8 @@ export interface SplitRow {
   left: ColumnItem[];
   /** Share of the row's width the RIGHT column takes. Defaults to 0.5. */
   ratio?: number;
+  /** Pull both columns towards the centre by this amount. */
+  inwardShift?: number;
 }
 
 export type SheetRow = CapsuleSpec | PairRow | SplitRow;
@@ -674,6 +676,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // reads as one band split in two rather than two centred stacks.
       const rightShift = width / 2 - rightSlotW / 2;
       const leftShift = -(width / 2 - leftSlotW / 2);
+      const inwardShift = row.inwardShift ?? 0;
 
       const column = (
         caps: ColumnItem[],
@@ -689,7 +692,11 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
             verseIds: capsulesOf(c).map(() => nextId++),
             top: y,
             height: capsuleHeight(c) * capsuleHeightScale,
-            width: w,
+            // `w` already includes the sheet-wide capsule width scale. Undo
+            // that scale before applying a split-column item's own share of
+            // the natural slot width, so `width: 0.95` really means 95% of
+            // the slot rather than 95% of the current 70% capsule width.
+            width: w * (c.width ?? 1) / capsuleWidthScale,
             xOffset: shift,
             rowIndex: i,
             side,
@@ -699,8 +706,8 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       };
       // Right first: it reads first, so it takes the lower verse ids and the
       // earlier colorGroups, which is the order the sidebar reads them in.
-      column(row.right, rightW, rightShift, "right");
-      column(row.left, leftW, leftShift, "left");
+      column(row.right, rightW, rightShift - inwardShift, "right");
+      column(row.left, leftW, leftShift + inwardShift, "left");
     }
 
     cursor = top - rowHeight(i);
