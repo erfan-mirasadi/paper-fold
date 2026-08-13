@@ -431,11 +431,30 @@ export function PageTextureLod({
   // Hand the material back the texture drei attached BEFORE the buffers go, so
   // nothing can ever hold a disposed one — not the paper, not the page-turn
   // snapshot that blits `material.map` mid-switch.
+  //
+  // ONLY IF THE MAP IS STILL OURS. This cleanup is a passive effect, so it runs
+  // AFTER the commit that swapped the page — and leaving a heavy paper for a
+  // light one unmounts this ladder in the very same commit that mounts the new
+  // page's `RenderTexture`, which has already attached ITS texture to the
+  // material by the time we get here. Restoring unconditionally therefore wrote
+  // the OLD paper's first-pass texture over the new paper's live one, and then
+  // disposed the buffers underneath it: the page went black, and stayed black,
+  // for exactly the right → left trip and no other.
   useEffect(() => {
-    const material = materialRef.current;
     const detail = detailRef.current;
     return () => {
-      if (material && firstPassMapRef.current) {
+      // Read LATE, on purpose. The lint rule here advises copying the ref into
+      // the effect body — which is precisely the pattern that produced the
+      // black page: the whole question this cleanup has to answer is what the
+      // material looks like NOW, after the swap, not what it looked like when
+      // the effect first ran.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const material = materialRef.current;
+      const restorable =
+        material !== null &&
+        firstPassMapRef.current !== null &&
+        material.map === refineTargetRef.current?.texture;
+      if (material && restorable) {
         material.map = firstPassMapRef.current;
       }
       detail.uDetailStrength.value = 0;
