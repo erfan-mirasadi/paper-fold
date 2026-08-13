@@ -5,6 +5,7 @@ import {
   Suspense,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -28,7 +29,17 @@ import {
   Vector2,
 } from "three";
 import { PageLodSceneProbe, PageTextureLod } from "./PageTextureLod";
-import { firstPassTextureSize } from "./pageTextureLodMath";
+import {
+  firstPassTextureSize,
+  maxPageTexelsPerUnit,
+  QUALITY,
+  TEXT_DENSITY_HEADROOM,
+} from "./pageTextureLodMath";
+import {
+  PageTextDensityContext,
+  PageZoomDensityContext,
+} from "../shared/CanvasText";
+import { buildSectionZoomIndex } from "../../../utils/sectionZoom";
 import { usePaperMasking } from "../../../hooks/usePaperMasking";
 import { useSurahLayoutRuntime } from "../../../hooks/useSurahLayoutRuntime";
 import { useStoryStore } from "../../../stores/useStoryStore";
@@ -157,6 +168,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 > = ({ toggles, isFolded = false, onReady }, ref) => {
   const { gl } = useThree();
   const dpr = useThree((s) => s.viewport.dpr);
+  const size = useThree((s) => s.size);
   const runtime = useSurahLayoutRuntime();
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
   const fontsReady = usePageTextFontsReady();
@@ -193,6 +205,58 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
    */
   const useLod = runtime.config.features.progressivePageTexture === true;
   const virtualSceneRef = useRef<Scene | null>(null);
+
+  /**
+   * How finely the text on THIS page is worth drawing — see
+   * `PageTextDensityContext`. Only a composed paper answers; every other surah
+   * passes null and keeps the rasterisation it has always had, to the pixel.
+   *
+   * On a page of a dozen sheets it is the difference between a hundred and
+   * ninety canvases sized for a screen that does not exist and canvases sized
+   * for the one in front of the reader — which is most of what makes this page
+   * slow to open and heavy to hold.
+   */
+  const textDensity = useMemo(() => {
+    if (!useLod) return null;
+
+    const rects = Object.values(buildSectionZoomIndex(runtime.config).zoomFocus);
+    if (rects.length === 0) return null;
+
+    const perSheet = rects.map((rect) => ({
+      rect,
+      density:
+        maxPageTexelsPerUnit(
+          [rect],
+          size.width,
+          size.height,
+          dpr,
+          QUALITY[tier],
+          maxTextureSize,
+        ) * TEXT_DENSITY_HEADROOM,
+    }));
+
+    // The tightest zoom on the page — what anything outside every sheet gets,
+    // since it is the one answer that can never be too soft.
+    const pageWide = Math.max(...perSheet.map((s) => s.density));
+
+    /** The sheet under a point, or the page-wide answer if there is none. */
+    const at = (x: number, y: number) => {
+      let finest = 0;
+      for (const { rect, density } of perSheet) {
+        const inside =
+          x >= rect.x &&
+          x <= rect.x + rect.w &&
+          y <= rect.y &&
+          y >= rect.y - rect.h;
+        // Overlapping zones take the tighter of the two: either could be the
+        // one the reader clicks.
+        if (inside) finest = Math.max(finest, density);
+      }
+      return finest > 0 ? finest : pageWide;
+    };
+
+    return { pageWide, at };
+  }, [useLod, runtime.config, size.width, size.height, dpr, tier, maxTextureSize]);
 
   // RenderTexture multiplies whatever it is given by the device pixel ratio,
   // so the ask is divided by it first — these numbers ARE the buffer.
@@ -435,13 +499,17 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 
         <Suspense fallback={null}>
           {fontsReady && (
-            <>
-              <PaperContent isFolded={isFolded} />
-              <RenderTextureContentMounted
-                mountedKey={renderTextureKey}
-                onMounted={setContentMountedKey}
-              />
-            </>
+            <PageTextDensityContext.Provider
+              value={textDensity?.pageWide ?? null}
+            >
+              <PageZoomDensityContext.Provider value={textDensity?.at ?? null}>
+                <PaperContent isFolded={isFolded} />
+                <RenderTextureContentMounted
+                  mountedKey={renderTextureKey}
+                  onMounted={setContentMountedKey}
+                />
+              </PageZoomDensityContext.Provider>
+            </PageTextDensityContext.Provider>
           )}
         </Suspense>
 

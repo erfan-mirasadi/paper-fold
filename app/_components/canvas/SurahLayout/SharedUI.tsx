@@ -2,7 +2,7 @@
 import { a } from "@react-spring/three";
 
 import { useTexture } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useContext, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
   WHITE_BASE,
@@ -38,7 +38,11 @@ import {
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
-import { CanvasText } from "../shared/CanvasText";
+import {
+  CanvasText,
+  PageTextDensityContext,
+  PageZoomDensityContext,
+} from "../shared/CanvasText";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import type { AyahBadgeLayout, VerseTextHighlight } from "../../../data/schema";
 
@@ -944,7 +948,16 @@ export const VerseBox = ({
 
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
 
-  return (
+  // How finely this capsule's text is worth rasterising: set by the zoom of the
+  // SHEET it is printed on, not by the tightest zoom anywhere on the paper.
+  // Null on every ordinary surah, which has no sheets to tell apart — see
+  // `PageZoomDensityContext`.
+  const resolveTextDensity = useContext(PageZoomDensityContext);
+  const textDensity = resolveTextDensity
+    ? resolveTextDensity(x + w / 2, y - h / 2)
+    : null;
+
+  const capsule = (
     <group position={[finalX, y, z]}>
       {/* 1. حاشیه (عمیقترین لایه z=0) */}
       <UiRect
@@ -1043,6 +1056,13 @@ export const VerseBox = ({
         />
       </group>
     </group>
+  );
+
+  if (textDensity === null) return capsule;
+  return (
+    <PageTextDensityContext.Provider value={textDensity}>
+      {capsule}
+    </PageTextDensityContext.Provider>
   );
 };
 

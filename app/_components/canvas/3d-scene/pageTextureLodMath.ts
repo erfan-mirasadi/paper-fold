@@ -19,12 +19,18 @@ import { FRAME_FILL } from "../../../utils/sectionZoom";
 // ---------------------------------------------------------------------------
 
 /**
- * The first paint, in texels per world unit — low on purpose, and the same
- * number on every device. A page of 12.5 x 11.4 units lands at ~1200 x 1090,
- * about a megapixel: an allocation nothing refuses and a draw nothing waits
- * for. It is soft, and it is replaced within a second of the page appearing.
+ * The first paint, as a PIXEL BUDGET rather than a density — low on purpose,
+ * and the same on every device, because the point of it is to arrive fast
+ * rather than to be looked at for long. It is replaced within a second.
+ *
+ * A budget, not a texels-per-unit number, because a composed paper's size is
+ * whatever its grid came to: the first version of this fixed the density and
+ * silently gave a 5.6-unit-wide paper a 541 x 727 first paint — a quarter of
+ * the resolution its own screen could show, for the whole first second. Two
+ * megapixels is about a sixteenth of what the old single full-size capture
+ * cost, and lands within a hair of what a laptop resolves at rest.
  */
-export const FIRST_PASS_PX_PER_UNIT = 96;
+export const FIRST_PASS_PIXELS = 2e6;
 
 /**
  * How much of the screen the paper fills when resting. Only used to work out
@@ -134,18 +140,19 @@ export function fitTextureSize(
   };
 }
 
-/** The cheap first paint — see `FIRST_PASS_PX_PER_UNIT`. */
+/** The cheap first paint — see `FIRST_PASS_PIXELS`. */
 export function firstPassTextureSize(
   pageWidth: number,
   pageHeight: number,
   maxTextureSize: number,
 ): TextureSize {
+  // Infinite density, so the budget itself is what decides the size.
   return fitTextureSize(
     pageWidth,
     pageHeight,
-    FIRST_PASS_PX_PER_UNIT,
+    Infinity,
     maxTextureSize,
-    4e6,
+    FIRST_PASS_PIXELS,
   );
 }
 
@@ -175,8 +182,10 @@ export function refineTextureSize(
     maxTextureSize,
     quality.refineMaxPixels,
   );
-  const gain = size.width / pageWidth / FIRST_PASS_PX_PER_UNIT;
-  return gain >= REFINE_WORTH_IT ? size : null;
+  // Measured against the first paint the page will already be showing, so the
+  // question is always "is this enough BETTER than what is on screen".
+  const first = firstPassTextureSize(pageWidth, pageHeight, maxTextureSize);
+  return size.width / first.width >= REFINE_WORTH_IT ? size : null;
 }
 
 /**
@@ -228,6 +237,57 @@ export function detailRect(rect: CameraFocusRect, aspect: number): CameraFocusRe
   return { x: cx - w / 2, y: cy + h / 2, w, h };
 }
 
+
+/**
+ * Margin on top of the ceiling below — small, and small ON PURPOSE.
+ *
+ * The instinct is to be generous here, but generosity costs sharpness as well
+ * as memory. A texture denser than the pixels sampling it is not read at level
+ * zero; the GPU blends down the mip chain, so ink drawn at 1.5x the screen's
+ * rate arrives BLURRIER than ink drawn at exactly its rate. Matching it is both
+ * the lightest and the sharpest thing to do.
+ *
+ * That only holds if the ceiling is a real ceiling, and here it is: the camera
+ * cannot be zoomed by hand on these pages (`DynamicControls` enables zoom only
+ * during an intro, which a composed paper does not have), the section framing
+ * is exact rather than eased-past, and the page is seen head-on rather than
+ * foreshortened (`solveFraming`). The 15% is for rounding, not for surprises.
+ */
+export const TEXT_DENSITY_HEADROOM = 1.15;
+
+/**
+ * The finest the page is EVER drawn, in texels per world unit.
+ *
+ * This is the ceiling on how sharply anything inside the page — above all the
+ * text — can be worth rasterising. The page is only ever seen THROUGH its own
+ * texture, so ink drawn finer than this is rasterised, uploaded, mipmapped and
+ * then sampled away: paid for in full, never seen.
+ *
+ * The answer is the zoom detail (stage 3), since that is the sharpest stage,
+ * and specifically the SMALLEST rectangle any zoom frames — a small sheet is
+ * magnified more, so it sets the ceiling for the whole page. Returns 0 when the
+ * page has no zoom rectangles at all, which is the caller's signal that it has
+ * nothing better than its own default to go on.
+ */
+export function maxPageTexelsPerUnit(
+  focusRects: CameraFocusRect[],
+  screenW: number,
+  screenH: number,
+  dpr: number,
+  quality: TierQuality,
+  maxTextureSize: number,
+): number {
+  if (focusRects.length === 0) return 0;
+
+  const detail = detailTextureSize(screenW, screenH, dpr, quality, maxTextureSize);
+  const aspect = detail.width / detail.height;
+
+  let finest = 0;
+  for (const rect of focusRects) {
+    finest = Math.max(finest, detail.width / detailRect(rect, aspect).w);
+  }
+  return finest;
+}
 
 /** Tiles for a buffer, kept squarish so no tile is a sliver. */
 export function planTiles(
