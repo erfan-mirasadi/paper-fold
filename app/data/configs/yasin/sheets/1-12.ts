@@ -171,6 +171,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // that follows (13) sits under it.
     1: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
+      textColor: "#000000",
       textScaleOverride: 0.94,
       translationTextScaleOverride: 0.9,
       showNumber: true,
@@ -178,6 +179,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
     12: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
+      textColor: "#000000",
       textScaleOverride: 0.68,
       translationTextScaleOverride: 0.49,
       showNumber: true,
@@ -185,6 +187,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
     2: capsule(WHITE_BG, WHITE_BORDER, INK, {
       circleTextCol: "#4A4636",
+      textColor: "#000000",
       textScaleOverride: 0.74,
       translationTextScaleOverride: 0.46,
       showNumber: true,
@@ -194,6 +197,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // section, and it lands on "a straight path".
     3: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
       circleTextCol: "#7C2C2A",
+      textColor: "#000000",
       textScaleOverride: 0.75,
       translationTextScaleOverride: 0.48,
       showNumber: true,
@@ -201,6 +205,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
     4: capsule(LAV_BG, LAV_BORDER, INK_LAV, {
       // One line in a 0.500-wide capsule, the cloud's closing line.
+      textColor: "#000000",
       textScaleOverride: 0.69,
       translationTextScaleOverride: 0.49,
       showNumber: true,
@@ -208,8 +213,9 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
     13: capsule(WHITE_BG, LAV_BORDER, INK_LAV, {
       // The long warning, on its own bar under the cloud.
-      textScaleOverride: 0.63,
-      translationTextScaleOverride: 0.52,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 6,
     }),
@@ -217,8 +223,9 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // ── OUTER RING (cream frame) — ayahs 7 and 11 ────────────────────────
     5: capsule(WHITE_BG, GOLD_BORDER, INK_GOLD, {
       // Eight words on ONE line in 0.84 — the widest single line on the page.
-      textScaleOverride: 0.69,
-      translationTextScaleOverride: 0.41,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 7,
     }),
@@ -226,8 +233,9 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       // The longest text on the page — eleven words. On ONE line now: the
       // capsule is 0.84 wide and two lines in 0.110 could only be set at 0.48,
       // where the top line's marks were cropped off by the capsule's own edge.
-      textScaleOverride: 0.53,
-      translationTextScaleOverride: 0.41,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 11,
     }),
@@ -236,14 +244,16 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // Both were broken over two lines and both were clipped for it; on one line
     // each is width-bound instead, and ayah 10 in particular gains half again.
     6: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
-      textScaleOverride: 0.57,
-      translationTextScaleOverride: 0.48,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 8,
     }),
     9: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
-      textScaleOverride: 0.7,
-      translationTextScaleOverride: 0.53,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 10,
     }),
@@ -252,12 +262,14 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // Ayah 9 is the crux, so its closing clause takes Tevbe's red the way
     // Tevbe's own ana bölüm does, and the barriers take its purple.
     7: capsule(WHITE_BG, WHITE_BORDER, INK_PURPLE, {
-      textScaleOverride: 0.59,
-      translationTextScaleOverride: 0.5,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
     }),
     8: capsule(WHITE_BG, WHITE_BORDER, INK_RED, {
-      textScaleOverride: 0.65,
-      translationTextScaleOverride: 0.48,
+      textColor: "#000000",
+      textScaleOverride: 0.73,
+      translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 9,
     }),
@@ -489,8 +501,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [13],
       columns: 1,
-      capsuleHeight: 0.086,
-      horizontalInset: -0.313,
+      capsuleHeight: 0.11,
+      horizontalInset: -0.605,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -501,8 +513,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       type: "group",
       verseIds: [5],
       columns: 1,
-      capsuleHeight: 0.086,
-      horizontalInset: -0.293,
+      capsuleHeight: 0.11,
+      horizontalInset: -0.605,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -514,7 +526,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [6],
       columns: 1,
       capsuleHeight: 0.1,
-      horizontalInset: -0.173,
+      horizontalInset: -0.462,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -526,7 +538,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [7],
       columns: 1,
       capsuleHeight: 0.094,
-      horizontalInset: -0.033,
+      horizontalInset: -0.297,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -538,7 +550,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [8],
       columns: 1,
       capsuleHeight: 0.08,
-      horizontalInset: -0.033,
+      horizontalInset: -0.297,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -550,7 +562,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [9],
       columns: 1,
       capsuleHeight: 0.1,
-      horizontalInset: -0.173,
+      horizontalInset: -0.462,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -562,7 +574,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [10],
       columns: 1,
       capsuleHeight: 0.11,
-      horizontalInset: -0.293,
+      horizontalInset: -0.605,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -577,7 +589,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [11],
       columns: 1,
       capsuleHeight: 0.15,
-      horizontalInset: 0.027,
+      horizontalInset: -0.043,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -710,8 +722,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       src: "/yasin/leaf.svg",
       anchorGroupIndex: 11,
       anchorEdge: "top",
-      scaleX: 1.16,
-      scaleY: 0.4,
+      scaleX: 1.15,
+      scaleY: 0.38,
       offsetX: 0,
       offsetY: -0.083,
       renderOrder: 3,
