@@ -26,7 +26,7 @@ import type {
  * And a sheet read completely alone, with no hint of the ones it sits between,
  * loses the thing an atlas is for.
  */
-export const FRAME_FILL = 0.9;
+export const FRAME_FILL = 1.1;
 
 export interface SectionZoomIndex {
   /** Sections that say where the camera should STAND (ordinary one-sheet pages). */
@@ -75,7 +75,8 @@ export function buildSectionZoomIndex(
       }
     }
     for (const block of config.blocks ?? []) {
-      if (block.verseIds?.includes(vid)) return block.customSectionId ?? block.id;
+      if (block.verseIds?.includes(vid))
+        return block.customSectionId ?? block.id;
       // Grid blocks (Alak) carry their anaAyet as a separate field, not
       // part of `verseIds`.
       if (block.type === "grid" && block.anaAyetId === vid) {

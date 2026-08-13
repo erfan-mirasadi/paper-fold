@@ -135,7 +135,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       circleTextCol: "#7C2C2A",
       // ONE line in a 0.90-wide capsule. Broken in two it could only be set
       // at 0.67, and the top line's marks were cropped by the capsule edge.
-      textScaleOverride: 0.8,
+      textScaleOverride: 0.75,
       translationTextScaleOverride: 0.58,
       showNumber: true,
       displayNumber: 13,
@@ -144,7 +144,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     // Ayahs 14 · 15 — the sending, and the town's first objection.
     2: capsule(WHITE_BG, WHITE_BORDER, INK, {
       // 11 words over 2 lines in 0.82 — width-bound, tightest on the sheet.
-      textScaleOverride: 0.76,
+      textScaleOverride: 0.81,
       translationTextScaleOverride: 0.44,
       showNumber: true,
       displayNumber: 14,
@@ -153,7 +153,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       // 15 words over TWO lines, not three: the third line was pure loss —
       // 0.54 against the 0.75 the same words hold when the last two clauses
       // share a line, and the capsule is 0.160 tall either way.
-      textScaleOverride: 0.75,
+      textScaleOverride: 0.81,
       translationTextScaleOverride: 0.54,
       showNumber: true,
       displayNumber: 15,
@@ -161,7 +161,8 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
 
     // Ayahs 16 · 17 — the messengers' reply, the framed pair.
     4: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
-      textScaleOverride: 0.91,
+      // Match ayah 17's text size.
+      textScaleOverride: 0.78,
       translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 16,
@@ -181,7 +182,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       displayNumber: 18,
     }),
     7: capsule(WHITE_BG, WHITE_BORDER, INK, {
-      textScaleOverride: 0.67,
+      textScaleOverride: 0.81,
       translationTextScaleOverride: 0.58,
       showNumber: true,
       displayNumber: 19,
@@ -319,7 +320,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       verseIds: [1],
       columns: 1,
       capsuleHeight: 0.14,
-      horizontalInset: -0.353,
+      horizontalInset: -0.39,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -636,7 +637,7 @@ export const YASIN_13_19_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 3,
-            text: "قَالُوا مَا أَنْتُمْ إِلَّا بَشَرٌ مِثْلُنَا\nوَمَا أَنْزَلَ الرَّحْمَٰنُ مِنْ شَيْءٍ إِنْ أَنْتُمْ إِلَّا تَكْذِبُونَ",
+            text: "قَالُوا مَا أَنْتُمْ إِلَّا بَشَرٌ مِثْلُنَا وَمَا أَنْزَلَ الرَّحْمَٰنُ\nمِنْ شَيْءٍ إِنْ أَنْتُمْ إِلَّا تَكْذِبُونَ",
           },
         ],
       },
@@ -658,7 +659,7 @@ export const YASIN_13_19_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "قَالُوا طَائِرُكُمْ مَعَكُمْ أَئِنْ ذُكِّرْتُمْ\nبَلْ أَنْتُمْ قَوْمٌ مُسْرِفُونَ",
+            text: "قَالُوا طَائِرُكُمْ مَعَكُمْ أَئِنْ\nذُكِّرْتُمْ بَلْ أَنْتُمْ قَوْمٌ مُسْرِفُونَ",
           },
         ],
       },

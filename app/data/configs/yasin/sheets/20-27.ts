@@ -14,6 +14,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 20,
       tone: "maroon",
+      width: 1.1,
       arScale: 0.59,
       latScale: 0.59,
       ar: "وَجَاءَ مِنْ أَقْصَى الْمَدِينَةِ رَجُلٌ يَسْعَىٰ قَالَ يَا قَوْمِ اتَّبِعُوا الْمُرْسَلِينَ",
@@ -23,6 +24,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 21,
       tone: "white",
+      width: 1.1,
       arScale: 0.82,
       latScale: 0.45,
       ar: "اتَّبِعُوا مَن لَّا يَسْأَلُكُمْ أَجْرًا وَهُم مُّهْتَدُونَ",
@@ -37,16 +39,17 @@ const SPEC: SheetSpec = {
           tone: "cream",
           arScale: 0.64,
           latScale: 0.28,
-          ar: "وَمَا لِيَ لَا أَعْبُدُ الَّذِي فَطَرَنِي\nوَإِلَيْهِ تُرْجَعُونَ",
+          ar: "وَمَا لِيَ لَا أَعْبُدُ الَّذِي\nفَطَرَنِي وَإِلَيْهِ تُرْجَعُونَ",
           tr: "“Beni yaratana niçin kulluk etmeyeyim?\nO'na döndürüleceksiniz.”",
           en: "“Why should I not worship the One who made me?\nTo Him you return.”",
         },
         {
           ayah: 23,
           tone: "cream",
-          arScale: 0.43,
+          arScale: 0.5,
           latScale: 0.21,
-          ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً إِن يُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ\nلَّا تُغْنِ عَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنقِذُونِ",
+          heightLines: 2,
+          ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً إِن\nيُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ لَّا تُغْنِ\nعَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنقِذُونِ",
           tr: "“O'ndan başka ilah mı edineyim? Rahmân bana zarar dilese\nşefaatleri işe yaramaz, beni kurtaramazlar.”",
           en: "“Shall I take gods besides Him? If the Merciful wills me harm\ntheir pleading avails nothing, nor can they save me.”",
         },
@@ -75,6 +78,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 26,
       tone: "green",
+      width: 1.1,
       arScale: 0.87,
       latScale: 0.65,
       ar: "قِيلَ ادْخُلِ الْجَنَّةَ قَالَ يَا لَيْتَ قَوْمِي يَعْلَمُونَ",
@@ -84,6 +88,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 27,
       tone: "green",
+      width: 1.1,
       arScale: 0.89,
       latScale: 0.65,
       ar: "بِمَا غَفَرَ لِي رَبِّي وَجَعَلَنِي مِنَ الْمُكْرَمِينَ",
