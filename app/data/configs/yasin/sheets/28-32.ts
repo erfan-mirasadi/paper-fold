@@ -59,8 +59,8 @@ const SPEC: SheetSpec = {
 
   frames: [
     { from: 0, to: 4, tone: "ring" },
-    { from: 1, to: 3, tone: "ringMid", label: "Helâk\n(29-31. ayet)", labelSide: "right" },
-    { from: 2, to: 3, tone: "ringInner", label: "Hasret\n(30-31. ayet)", labelSide: "left" },
+    { from: 1, to: 3, tone: "ringMid" },
+    { from: 2, to: 3, tone: "ringInner" },
   ],
 };
 

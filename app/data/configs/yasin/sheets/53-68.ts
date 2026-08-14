@@ -256,8 +256,6 @@ const SPEC: SheetSpec = {
       to: 1,
       tone: "rose",
       pad: BLOCK_PAD,
-      label: "Sûr\n(53-54. ayet)",
-      labelSide: "right",
     },
     // The two halves of the middle band, each bracketed on its own side. They
     // come out as TWINS — same width because the columns split the row evenly,
@@ -268,8 +266,6 @@ const SPEC: SheetSpec = {
       side: "right",
       tone: "band",
       pad: BLOCK_PAD,
-      label: "Cennet\n(55-58. ayet)",
-      labelSide: "right",
     },
     {
       from: 2,
@@ -277,8 +273,6 @@ const SPEC: SheetSpec = {
       side: "left",
       tone: "rose",
       pad: BLOCK_PAD,
-      label: "Ayrılık\n(59-62. ayet)",
-      labelSide: "left",
     },
     // The fire, and the sealing of the mouths inside it.
     {
@@ -286,8 +280,6 @@ const SPEC: SheetSpec = {
       to: 7,
       tone: "band",
       pad: BLOCK_PAD,
-      label: "Cehennem\n(63-68. ayet)",
-      labelSide: "left",
     },
     { from: 4, to: 7, tone: "inner" },
   ],

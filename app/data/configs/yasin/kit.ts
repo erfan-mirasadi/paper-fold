@@ -44,7 +44,6 @@
 
 import type {
   CustomSectionDef,
-  HandwrittenNoteConfig,
   LayoutBlock,
   LayoutStyling,
   SurahLayoutConfig,
@@ -287,9 +286,6 @@ export interface FrameSpec {
    * than a drawn one, having no rim for the air to clear.
    */
   pad?: number;
-  /** Margin note pointing at this frame, e.g. "Cevap\n(26-27. ayet)". */
-  label?: string;
-  labelSide?: "left" | "right";
   /** Override the width of the frame. */
   w?: number;
   /** Override the height of the frame. */
@@ -304,9 +300,6 @@ export interface SheetSpec {
   key: string;
   title: string;
   heroSubtitle: string;
-  /** The handwritten title inked across the top of the sheet. */
-  /** Optional handwritten title; falls back to the sheet title. */
-  noteTitle?: string;
   sayfa: number;
   /** Page width in world units. Height is derived from the stack. */
   paperWidth?: number;
@@ -914,40 +907,6 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       },
     }));
 
-  // ── Handwritten notes ───────────────────────────────────────────────────
-  // Sheet-range titles (e.g. "YÂSÎN: 53-68") are metadata only; do not ink
-  // them across the top of the paper.
-  const notes: HandwrittenNoteConfig[] = [];
-  frames.forEach((f, fi) => {
-    if (!f.label) return;
-    const onLeft = f.labelSide === "left";
-    const r = frameRects[fi];
-    notes.push({
-      x: onLeft ? PADDING * 0.9 : paperWidth - PADDING * 0.9,
-      y: round(contentStartY + placements[r.anchor].top + r.offsetY + 0.05),
-      fontSize: 0.03,
-      color: "#000000",
-      lineSpacing: 1.3,
-      maxWidth: 0.34,
-      textAlign: "center",
-      rotationZ: onLeft ? -0.04 : 0.04,
-      lines: f.label
-        .split("\n")
-        .map((t, li) => ({ text: t, scale: li ? 0.82 : 1 })),
-      svgs: [
-        {
-          src: "/ahzab/arrows.svg",
-          anchor: "end",
-          offsetX: onLeft ? 0.02 : -0.02,
-          offsetY: -0.07,
-          scaleX: onLeft ? -0.07 : 0.07,
-          scaleY: 0.07,
-          rotationZ: onLeft ? -Math.PI * 0.22 : Math.PI * 0.22,
-        },
-      ],
-    });
-  });
-
   // ── Text tables ─────────────────────────────────────────────────────────
   // One colorGroup per block, in block order — the alignment BlockRenderer
   // relies on (`colorGroups[i]` addresses the i-th group it draws).
@@ -1023,7 +982,6 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     blocks,
     customSections,
     svgOverlays,
-    handwrittenNotes: notes,
 
     animations: {
       foldSteps: [

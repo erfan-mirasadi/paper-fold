@@ -292,7 +292,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 39,
           tone: "blue",
-          arScale: 0.48,
+          arScale: 0.53,
           latScale: 0.45,
           ar: "وَالْقَمَرَ قَدَّرْنَاهُ مَنَازِلَ حَتَّىٰ عَادَ كَالْعُرْجُونِ الْقَدِيمِ",
           tr: "Aya da konaklar takdir ettik; sonunda kuru bir hurma dalına döner.",
@@ -319,8 +319,6 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 9,
       tone: "circle",
-      label: "Toprak ve gök\n(33-40. ayet)",
-      labelSide: "left",
     },
     // One petal per ayah, `none` rather than `lens`: the mandorla outline is
     // gone, but the grouping it stood for is not. Each petal still gets its own

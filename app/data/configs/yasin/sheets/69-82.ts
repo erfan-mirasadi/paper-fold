@@ -236,8 +236,6 @@ const SPEC: SheetSpec = {
       to: 1,
       tone: "rose",
       pad: BLOCK_PAD,
-      label: "Şiir değil\n(69-70. ayet)",
-      labelSide: "right",
     },
     // The two columns of six. Both are drawn the same, as on the sheet, and a
     // one-column frame takes the row's own band, so they come out one size.
@@ -247,8 +245,6 @@ const SPEC: SheetSpec = {
       side: "right",
       tone: "band",
       pad: BLOCK_PAD,
-      label: "Nimetler\n(71-76. ayet)",
-      labelSide: "right",
     },
     {
       from: 2,
@@ -256,8 +252,6 @@ const SPEC: SheetSpec = {
       side: "left",
       tone: "band",
       pad: BLOCK_PAD,
-      label: "Diriliş\n(77-82. ayet)",
-      labelSide: "left",
     },
   ],
 };

@@ -60,7 +60,15 @@ const S_13_19: ComposableSheet = {
 // the far-left corner of that row is 41-47 (see the photo it was copied from).
 const CELLS: GridCell[] = [
   // Row 0 — the opening, alone and centred across the top of the sheet.
-  { at: [0, 0], align: "center", key: "s0112", sheet: S_1_12 },
+  {
+    at: [0, 0],
+    align: "center",
+    key: "s0112",
+    sheet: S_1_12,
+    // The first capsule sits close to the sheet's top edge. Give this sheet
+    // a little extra vertical air so ayah 1 is never cropped during zoom.
+    zoom: { padY: 0.14 },
+  },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
   { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.1 },
@@ -93,7 +101,7 @@ const CELLS: GridCell[] = [
  * this, so the arrangement above is untouched — the same drawing, bigger.
  * Turn this one number up or down; nothing else has to move.
  */
-const SCALE = 1;
+const SCALE = 1.1;
 
 const { placements, paperWidth, paperHeight } = layOutGrid({
   cells: CELLS,
@@ -101,6 +109,22 @@ const { placements, paperWidth, paperHeight } = layOutGrid({
   margin: 0.02,
   scale: SCALE,
 });
+
+/**
+ * The atlas camera frames the clicked sheet by its page rectangle. A small
+ * upward shift of that rectangle leaves the sheet a little lower in the
+ * viewport, which matches the visual balance of the elevated sections.
+ * Keep this here so every Yâsîn sheet gets the same correction.
+ */
+const SECTION_ZOOM_DY = -0.06;
+
+const zoomedPlacements = placements.map((placement) => ({
+  ...placement,
+  zoom: {
+    ...placement.zoom,
+    dy: (placement.zoom?.dy ?? 0) + SECTION_ZOOM_DY,
+  },
+}));
 
 /**
  * How much of the screen the paper fills, 0 → 1. This is the knob that makes
@@ -138,5 +162,5 @@ export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
 
     scriptInfo: { title: "36 Yâ-Sîn", sayfa: 440, juz: 22, hizb: 44 },
 
-    sheets: placements,
+    sheets: zoomedPlacements,
   });

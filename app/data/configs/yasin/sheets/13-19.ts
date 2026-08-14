@@ -248,53 +248,6 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     tightVersePadding: true,
   },
 
-  handwrittenNotes: [
-    {
-      x: 1.32,
-      y: -0.28,
-      fontSize: 0.03,
-      color: "#000000",
-      lineSpacing: 1.3,
-      maxWidth: 0.38,
-      textAlign: "center",
-      rotationZ: 0.04,
-      lines: [{ text: "Kıssa" }, { text: "(13. ayet)", scale: 0.82 }],
-      svgs: [
-        {
-          src: "/ahzab/arrows.svg",
-          anchor: "end",
-          offsetX: -0.02,
-          offsetY: -0.07,
-          scaleX: 0.07,
-          scaleY: 0.07,
-          rotationZ: Math.PI * 0.24,
-        },
-      ],
-    },
-    {
-      x: 0.19,
-      y: -0.99,
-      fontSize: 0.03,
-      color: "#000000",
-      lineSpacing: 1.3,
-      maxWidth: 0.34,
-      textAlign: "center",
-      rotationZ: -0.04,
-      lines: [{ text: "Cevap" }, { text: "(16-17. ayet)", scale: 0.78 }],
-      svgs: [
-        {
-          src: "/ahzab/arrows.svg",
-          anchor: "end",
-          offsetX: 0.02,
-          offsetY: -0.07,
-          scaleX: -0.07,
-          scaleY: 0.07,
-          rotationZ: -Math.PI * 0.2,
-        },
-      ],
-    },
-  ],
-
   // ── BLOCKS ───────────────────────────────────────────────────────────────
   // The solved stack (paperHeight 1.78, sceneCenterYOffset 0):
   //   totalContentH 1.288, contentStartY −0.246, content bottom −1.534

@@ -116,13 +116,11 @@ const SPEC: SheetSpec = {
     },
     // The arc over the question, and the frame around everything that answers
     // it — the two enclosures the sheet is drawn with.
-    { from: 0, to: 0, tone: "rose", label: "Soru\n(48. ayet)", labelSide: "right" },
+    { from: 0, to: 0, tone: "rose" },
     {
       from: 1,
       to: 2,
       tone: "band",
-      label: "Cevap\n(49-52. ayet)",
-      labelSide: "left",
     },
   ],
 };

@@ -111,22 +111,16 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 1,
       tone: "rose",
-      label: "Çağrı\n(20-21. ayet)",
-      labelSide: "right",
     },
     {
       from: 2,
       to: 2,
       tone: "band",
-      label: "Delil\n(22-25. ayet)",
-      labelSide: "left",
     },
     {
       from: 3,
       to: 4,
       tone: "rose",
-      label: "Karşılık\n(26-27. ayet)",
-      labelSide: "right",
     },
   ],
 };

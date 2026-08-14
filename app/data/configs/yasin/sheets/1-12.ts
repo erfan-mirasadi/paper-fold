@@ -45,7 +45,7 @@
  *    8        9b        ٩     "so We covered them; they cannot see"
  *    9        10        ١٠
  *   10        11        ١١
- *   11        12        ١٢    all three of its clauses, over three lines
+ *   11        12        ١٢    all three of its clauses, over two lines
  *
  * A capsule's badge is the number of the LAST ayah it carries, the way a mushaf
  * marks the end of the text in front of you. `hideVerseNumbers` is on and each
@@ -275,11 +275,11 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
 
     // ── MANDORLA (cream card on a maroon lens) — ayah 12 ─────────────────
-    // One capsule for the whole ayah, three lines, on the tallest capsule
-    // (0.150). Three lines is what makes this height-bound.
+    // One capsule for the whole ayah, two lines, on the tallest capsule
+    // (0.150). The extra width keeps the two-line text readable.
     11: capsule(WHITE_BG, MAROON_BORDER, INK_RED, {
-      textScaleOverride: 0.49,
-      translationTextScaleOverride: 0.37,
+      textScaleOverride: 0.62,
+      translationTextScaleOverride: 0.39,
       showNumber: true,
       displayNumber: 12,
     }),
@@ -347,75 +347,6 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     tightVersePadding: true,
   },
 
-  // handwrittenNotes: [
-  //   {
-  //     x: 1.53,
-  //     y: -0.24,
-  //     fontSize: 0.03,
-  //     color: "#000000",
-  //     lineSpacing: 1.3,
-  //     maxWidth: 0.38,
-  //     textAlign: "center",
-  //     rotationZ: 0.04,
-  //     lines: [{ text: "Giriş" }, { text: "(1-6. ayet)", scale: 0.82 }],
-  //     svgs: [
-  //       {
-  //         src: "/ahzab/arrows.svg",
-  //         anchor: "end",
-  //         offsetX: -0.02,
-  //         offsetY: -0.07,
-  //         scaleX: 0.07,
-  //         scaleY: 0.07,
-  //         rotationZ: Math.PI * 0.22,
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     x: 0.2,
-  //     y: -0.68,
-  //     fontSize: 0.03,
-  //     color: "#000000",
-  //     lineSpacing: 1.3,
-  //     maxWidth: 0.36,
-  //     textAlign: "center",
-  //     rotationZ: -0.04,
-  //     lines: [{ text: "Ana Bölüm" }, { text: "(7-11. ayet)", scale: 0.82 }],
-  //     svgs: [
-  //       {
-  //         src: "/ahzab/arrows.svg",
-  //         anchor: "end",
-  //         offsetX: 0.02,
-  //         offsetY: -0.07,
-  //         scaleX: -0.07,
-  //         scaleY: 0.07,
-  //         rotationZ: -Math.PI * 0.22,
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     x: 1.53,
-  //     y: -1.46,
-  //     fontSize: 0.03,
-  //     color: "#000000",
-  //     lineSpacing: 1.3,
-  //     maxWidth: 0.38,
-  //     textAlign: "center",
-  //     rotationZ: 0.04,
-  //     lines: [{ text: "Cevap" }, { text: "(12. ayet)", scale: 0.82 }],
-  //     svgs: [
-  //       {
-  //         src: "/ahzab/arrows.svg",
-  //         anchor: "end",
-  //         offsetX: -0.02,
-  //         offsetY: -0.07,
-  //         scaleX: 0.07,
-  //         scaleY: 0.07,
-  //         rotationZ: Math.PI * 0.28,
-  //       },
-  //     ],
-  //   },
-  // ],
-
   // ── BLOCKS ───────────────────────────────────────────────────────────────
   // The solved stack (paperHeight 1.78, sceneCenterYOffset 0.02):
   //   totalContentH 1.467, contentStartY −0.1365, content bottom −1.6035
@@ -430,7 +361,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   //    6   r_a9b       0.096   −0.9115      0.580      1
   //    7   r_a10       0.116   −1.0215      0.720      2
   //    8   r_a11       0.126   −1.1515      0.840      2
-  //    9   leaf_a12    0.166   −1.4375      0.520      3
+  //    9   leaf_a12    0.166   −1.4375      0.800      2
   //
   // Block height is `2·blockPadding + capsuleHeight` (one row each); each frameY
   // is the previous block's bottom minus this block's gapBefore. The two big
@@ -580,9 +511,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
       gapBefore: 0.012,
     },
-    // Ayah 12 whole, three lines on the lens's cream card. The card is 0.544
-    // wide and 0.240 tall, so this capsule (0.520 × 0.150) clears its cream by
-    // 0.012 a side and 0.045 top and bottom.
+    // Ayah 12 whole, two lines on the lens's cream card. The expanded capsule
+    // stays inside the inner lens while giving the larger text room to breathe.
     {
       id: "leaf_a12",
       type: "group",
@@ -950,7 +880,7 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 11,
-            text: "إِنَّا نَحْنُ نُحْيِي الْمَوْتَىٰ\nوَنَكْتُبُ مَا قَدَّمُوا وَآثَارَهُمْ\nوَكُلَّ شَيْءٍ أَحْصَيْنَاهُ فِي إِمَامٍ مُبِينٍ",
+            text: "إِنَّا نَحْنُ نُحْيِي الْمَوْتَىٰ وَنَكْتُبُ مَا قَدَّمُوا\nوَآثَارَهُمْ وَكُلَّ شَيْءٍ أَحْصَيْنَاهُ فِي إِمَامٍ مُبِينٍ",
           },
         ],
       },
@@ -1045,7 +975,7 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 11,
-            text: "Şüphesiz ölüleri biz diriltiriz,\nyaptıklarını ve bıraktıkları eserleri yazarız;\nher şeyi apaçık bir kitapta saymışızdır.",
+            text: "Şüphesiz ölüleri biz diriltiriz, yaptıklarını ve bıraktıkları\neserleri yazarız; her şeyi apaçık bir kitapta saymışızdır.",
           },
         ],
       },
@@ -1135,7 +1065,7 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 11,
-            text: "It is We who bring the dead to life,\nand We record what they send ahead and leave behind;\nWe have accounted for everything in a clear Record.",
+            text: "It is We who bring the dead to life, and We record what they send ahead\nand leave behind; We have accounted for everything in a clear Record.",
           },
         ],
       },
