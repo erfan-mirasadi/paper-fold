@@ -1,27 +1,27 @@
 /**
- * YÂSÎN: 1-12 — the opening twelve ayahs in eleven capsules, three sections.
+ * YÂSÎN: 1-12 — the opening page in twelve capsules, three sections.
  *
  *      ╭───────── all-section frame ─────────╮
  *      │            ┌─── (1) ───┐             │   ayahs 1 · 2
  *      │       ┌─ (3) ─┬─ (2) ─┐              │   ayahs 4 · 3
- *      │        ┌────── (4) ──────┐           │   ayahs 5 · 6
+ *      │        ┌────── (5) ──────┐           │   ayah 5
  *      ╰─────────────────────────────────────╯
  *
  *   ╔═════════════ outer ring ═════════════╗
- *   ║  ┌──────────── (5) ───────────┐       ║   ayah 7
+ *   ║  ┌──────────── (6) ───────────┐       ║   ayah 7
  *   ║ ╔══════════ middle ring ════╗         ║
- *   ║ ║  ┌───────── (6) ───────┐   ║        ║   ayah 8
+ *   ║ ║  ┌───────── (7) ───────┐   ║        ║   ayah 8
  *   ║ ║ ╔═══════ inner ring ══╗    ║        ║
- *   ║ ║ ║  ┌───── (7) ─────┐   ║   ║        ║   ayah 9, the two barriers
- *   ║ ║ ║  └──── (8) ─────┘    ║   ║        ║   ayah 9, the veil
+ *   ║ ║ ║  ┌───── (8) ─────┐   ║   ║        ║   ayah 9, the two barriers
+ *   ║ ║ ║  └──── (9) ─────┘    ║   ║        ║   ayah 9, the veil
  *   ║ ║ ╚════════════════════╝     ║        ║
- *   ║ ║  └───────── (9) ──────┘    ║        ║   ayah 10
+ *   ║ ║  └───────── (10) ──────┘    ║        ║   ayah 10
  *   ║ ╚═════════════════════════╝            ║
- *   ║  └──────────── (10) ──────────┘        ║   ayah 11
+ *   ║  └──────────── (11) ──────────┘        ║   ayah 11
  *   ╚═══════════════════════════════════════╝
  *
  *        ╭──── mandorla: teal ▷ maroon ▷ card ────╮
- *        │             (11)          ۱۲            │   ayah 12
+ *        │             (12)          ۱۲            │   ayah 12
  *        ╰───────────────────────────────────────╯
  *
  * THE RING IS THE POINT. Ayahs 7 … 11 are a chiasm and the page draws it as an
@@ -30,18 +30,17 @@
  * at the centre. Ayah 12 is not another layer of the onion, which is why it gets
  * a shape of its own: it answers the whole thing.
  *
- * HOW TWELVE AYAHS LAND IN ELEVEN CAPSULES. One capsule per ayah through the
- * middle and bottom; the opening merges two pairs and the centre splits one
- * ayah, and both seams are grammatical, not convenience:
+ * HOW THE PAGE LANDS IN TWELVE CAPSULES. The opening merges two pairs and the
+ * centre splits one ayah, and both seams are grammatical, not convenience:
  *
  *   capsule  ayah(s)  badge   why it is one capsule
  *    1        1 · 2     ٢     the oath: "Yâ Sîn — by the wise Qur'an"
  *    2        3         ٣
  *    3        4         ٤
- *    4        5 · 6     ٦     one sentence: "a revelation … so that you warn"
- *    5        7         ٧
- *    6        8         ٨
- *    7        9a       (—)    the two barriers, front and behind
+ *    4        5         ٥     the cloud's closing line
+ *    5        7         ٦
+ *    6        8         ٧
+ *    7        9a        ٨     the two barriers, front and behind
  *    8        9b        ٩     "so We covered them; they cannot see"
  *    9        10        ١٠
  *   10        11        ١١
@@ -49,8 +48,8 @@
  *
  * A capsule's badge is the number of the LAST ayah it carries, the way a mushaf
  * marks the end of the text in front of you. `hideVerseNumbers` is on and each
- * badge opts back in via `showNumber` + `displayNumber`; capsule 7 is mid-ayah
- * and bare. The capsule ids are NOT the numbers drawn on the page.
+ * badge opts back in via `showNumber` + `displayNumber`; every capsule now has
+ * a number. The capsule ids are NOT the numbers drawn on the page.
  *
  * GEOMETRY IS SOLVED, NOT EYEBALLED. Every `svgOverlays` offsetY is
  * `(wanted frame centre) − (anchor block's frameY)`, from the stack table above
@@ -165,28 +164,27 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   specialVerses: {},
 
   verseOverrides: {
-    // ── SECTION 1 — ayahs 1 … 6, ONE CAPSULE EACH ────────────────────────
+    // ── SECTION 1 — the opening five capsules ─────────────────────────────
     // The letters stand alone above the cloud (id 1), the oath opens it (12),
-    // ayahs 3 · 4 are its widest line, ayah 5 closes it (4), and the warning
-    // that follows (13) sits under it.
-    1: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
-      circleTextCol: "#7A5A18",
+    // ayahs 3 · 4 are its widest line, and ayah 5 closes it.
+    1: capsule(WHITE_BG, WHITE_BORDER, INK, {
+      circleTextCol: "#4A4636",
       textColor: "#000000",
       textScaleOverride: 0.94,
       translationTextScaleOverride: 0.9,
       showNumber: true,
       displayNumber: 1,
     }),
-    12: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
-      circleTextCol: "#7A5A18",
+    12: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
+      circleTextCol: "#7C2C2A",
       textColor: "#000000",
       textScaleOverride: 0.68,
       translationTextScaleOverride: 0.49,
       showNumber: true,
       displayNumber: 2,
     }),
-    2: capsule(WHITE_BG, WHITE_BORDER, INK, {
-      circleTextCol: "#4A4636",
+    2: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
+      circleTextCol: "#7A5A18",
       textColor: "#000000",
       textScaleOverride: 0.74,
       translationTextScaleOverride: 0.46,
@@ -195,15 +193,16 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
     // The photo rules this one in dark red — the only red rule in the opening
     // section, and it lands on "a straight path".
-    3: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
-      circleTextCol: "#7C2C2A",
+    3: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
+      circleTextCol: "#7A5A18",
       textColor: "#000000",
       textScaleOverride: 0.75,
       translationTextScaleOverride: 0.48,
       showNumber: true,
       displayNumber: 4,
     }),
-    4: capsule(LAV_BG, LAV_BORDER, INK_LAV, {
+    4: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
+      circleTextCol: "#7C2C2A",
       // One line in a 0.500-wide capsule, the cloud's closing line.
       textColor: "#000000",
       textScaleOverride: 0.69,
@@ -211,15 +210,6 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 5,
     }),
-    13: capsule(WHITE_BG, LAV_BORDER, INK_LAV, {
-      // The long warning, on its own bar under the cloud.
-      textColor: "#000000",
-      textScaleOverride: 0.73,
-      translationTextScaleOverride: 0.56,
-      showNumber: true,
-      displayNumber: 6,
-    }),
-
     // ── OUTER RING (cream frame) — ayahs 7 and 11 ────────────────────────
     5: capsule(WHITE_BG, GOLD_BORDER, INK_GOLD, {
       // Eight words on ONE line in 0.84 — the widest single line on the page.
@@ -227,7 +217,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       textScaleOverride: 0.73,
       translationTextScaleOverride: 0.56,
       showNumber: true,
-      displayNumber: 7,
+      displayNumber: 6,
     }),
     10: capsule(WHITE_BG, GOLD_BORDER, GREEN_THEME, {
       // The longest text on the page — eleven words. On ONE line now: the
@@ -248,7 +238,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       textScaleOverride: 0.73,
       translationTextScaleOverride: 0.56,
       showNumber: true,
-      displayNumber: 8,
+      displayNumber: 7,
     }),
     9: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
       textColor: "#000000",
@@ -265,6 +255,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       textColor: "#000000",
       textScaleOverride: 0.73,
       translationTextScaleOverride: 0.56,
+      showNumber: true,
+      displayNumber: 8,
     }),
     8: capsule(WHITE_BG, WHITE_BORDER, INK_RED, {
       textColor: "#000000",
@@ -425,19 +417,6 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
       gapBefore: 0.01,
       customSectionId: "sec_top",
-    },
-    // Ayah 6 — outside the cloud, on a bar of its own.
-    {
-      id: "s1_uyari",
-      type: "group",
-      verseIds: [13],
-      columns: 1,
-      capsuleHeight: 0.11,
-      horizontalInset: -0.71,
-      isCenter: true,
-      dragBehavior: "individual",
-      hideRowConnectors: true,
-      gapBefore: 0.03,
     },
     {
       id: "r_a7",
@@ -607,7 +586,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 1.01 x 0.798, y −0.5095 … −1.3075  (centre −0.9085)
     {
       src: "/yasin/ring-outer.svg",
-      anchorGroupIndex: 5,
+      anchorGroupIndex: 4,
       anchorEdge: "top",
       scaleX: 1.5,
       scaleY: 0.8,
@@ -620,7 +599,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 0.86 x 0.534, y −0.6295 … −1.1635  (centre −0.8965)
     {
       src: "/yasin/ring-mid.svg",
-      anchorGroupIndex: 6,
+      anchorGroupIndex: 5,
       anchorEdge: "top",
       scaleX: 1.3,
       scaleY: 0.5,
@@ -635,7 +614,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 0.70 x 0.268, y −0.7635 … −1.0315  (centre −0.8975)
     {
       src: "/yasin/ring-inner.svg",
-      anchorGroupIndex: 7,
+      anchorGroupIndex: 6,
       anchorEdge: "top",
       scaleX: 1.1,
       scaleY: 0.268,
@@ -650,7 +629,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   wanted: 1.16 x 0.400, y −1.3205 … −1.7205
     {
       src: "/yasin/leaf.svg",
-      anchorGroupIndex: 11,
+      anchorGroupIndex: 10,
       anchorEdge: "top",
       scaleX: 1.3,
       scaleY: 0.3,
@@ -668,7 +647,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
         kicker: "YÂSÎN: 1-12",
         paragraphs: [
           "Yâsîn suresi, Kur'an-ı Kerim'in kalbi diye anılır. Bu sayfada onun ilk on iki ayetini görüyorsunuz. Ayetler alt alta sıralanmış değil; bir sistem içinde, iç içe halkalar hâlinde dizilmiştir. Bu diziliş sonradan uydurulmuş bir şema değil, ayetlerin kendi anlamlarının çizdiği şekildir.",
-          "Sayfa üç bölümden oluşuyor. En üstte bir giriş çerçevesi var: 1-6. ayetler. Ortada birbirinin içine geçmiş üç halka var: 7-11. ayetler. En altta ise bir badem şekli var: 12. ayet.",
+          "Sayfa üç bölümden oluşuyor. En üstte ilk beş kapsülün giriş çerçevesi var. Ortada birbirinin içine geçmiş üç halka var. En altta ise bir badem şekli var: 12. ayet.",
           "Üstteki giriş, Peygamber Efendimize hitaptır: Kur'an'a yemin edilir, onun gönderilmiş bir peygamber olduğu, dosdoğru bir yol üzerinde bulunduğu, bu Kitabın Azîz ve Rahîm olan Allah tarafından indirildiği ve niçin indirildiği söylenir. Yani muhatap ve görev burada belirlenir.",
         ],
       },
@@ -745,13 +724,13 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
         2;
       // fold1 — the onion's centre line, between ayah 9's two capsules.
       const fold1 =
-        (lm.groupYPositions[7] - lm.groupHeights[7] + lm.groupYPositions[8]) /
+        (lm.groupYPositions[6] - lm.groupHeights[6] + lm.groupYPositions[7]) /
         2;
       // fold2 — between the outer ring (block 10) and the mandorla (block 11).
       const fold2 =
-        (lm.groupYPositions[10] -
-          lm.groupHeights[10] +
-          lm.groupYPositions[11]) /
+        (lm.groupYPositions[9] -
+          lm.groupHeights[9] +
+          lm.groupYPositions[10]) /
         2;
       // fold3 — below the mandorla, so it can hinge as a unit.
       const fold3 = fold2 - 0.16;
@@ -822,14 +801,6 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
       },
       {
         verses: [{ number: 4, text: "تَنْزِيلَ الْعَزِيزِ الرَّحِيمِ" }],
-      },
-      {
-        verses: [
-          {
-            number: 13,
-            text: "لِتُنْذِرَ قَوْمًا مَا أُنْذِرَ آبَاؤُهُمْ فَهُمْ غَافِلُونَ",
-          },
-        ],
       },
       {
         verses: [
@@ -921,14 +892,6 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
       {
         verses: [
           {
-            number: 13,
-            text: "ataları uyarılmamış, bu yüzden gaflette olan bir kavmi uyarman için.",
-          },
-        ],
-      },
-      {
-        verses: [
-          {
             number: 5,
             text: "Andolsun, onların çoğu üzerine o söz hak olmuştur; artık inanmazlar.",
           },
@@ -1005,14 +968,6 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
           {
             number: 4,
             text: "A revelation of the Almighty, the Most Merciful,",
-          },
-        ],
-      },
-      {
-        verses: [
-          {
-            number: 13,
-            text: "to warn a people whose forefathers were not warned, and so are heedless.",
           },
         ],
       },

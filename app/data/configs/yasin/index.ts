@@ -65,6 +65,9 @@ const CELLS: GridCell[] = [
     align: "center",
     key: "s0112",
     sheet: S_1_12,
+    // Keep the opening twelve ayahs proportional, but give the whole sheet
+    // a little more presence than the surrounding Yâsîn sheets.
+    scale: 1.15,
     // The first capsule sits close to the sheet's top edge. Give this sheet
     // a little extra vertical air so ayah 1 is never cropped during zoom.
     zoom: { padY: 0.14 },
