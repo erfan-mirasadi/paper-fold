@@ -137,8 +137,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   scriptInfo: { title: "36 Yâ-Sîn", sayfa: 440, juz: 22, hizb: 44 },
 
   scriptHighlights: {
-    "pre-start": [1, 2, 3, 4, 5, 10, 11],
-    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "pre-start": [1, 2, 3, 4, 5, 6, 11, 12],
+    end: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   },
 
   features: {
@@ -175,7 +175,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 1,
     }),
-    12: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
+    2: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
       circleTextCol: "#7C2C2A",
       textColor: "#000000",
       textScaleOverride: 0.68,
@@ -183,7 +183,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 2,
     }),
-    2: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
+    3: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
       textColor: "#000000",
       textScaleOverride: 0.74,
@@ -193,7 +193,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     }),
     // The photo rules this one in dark red — the only red rule in the opening
     // section, and it lands on "a straight path".
-    3: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
+    4: capsule(CREAM_BG, GOLD_BORDER, INK_GOLD, {
       circleTextCol: "#7A5A18",
       textColor: "#000000",
       textScaleOverride: 0.75,
@@ -201,7 +201,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 4,
     }),
-    4: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
+    5: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
       circleTextCol: "#7C2C2A",
       // One line in a 0.500-wide capsule, the cloud's closing line.
       textColor: "#000000",
@@ -211,21 +211,21 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       displayNumber: 5,
     }),
     // ── OUTER RING (cream frame) — ayahs 7 and 11 ────────────────────────
-    5: capsule(WHITE_BG, GOLD_BORDER, INK_GOLD, {
+    6: capsule(WHITE_BG, GOLD_BORDER, INK_GOLD, {
       // Eight words on ONE line in 0.84 — the widest single line on the page.
       textColor: "#000000",
-      textScaleOverride: 0.73,
-      translationTextScaleOverride: 0.56,
+      textScaleOverride: 0.8,
+      translationTextScaleOverride: 0.61,
       showNumber: true,
       displayNumber: 6,
     }),
-    10: capsule(WHITE_BG, GOLD_BORDER, GREEN_THEME, {
+    11: capsule(WHITE_BG, GOLD_BORDER, GREEN_THEME, {
       // The longest text on the page — eleven words. On ONE line now: the
       // capsule is 0.84 wide and two lines in 0.110 could only be set at 0.48,
       // where the top line's marks were cropped off by the capsule's own edge.
       textColor: "#000000",
-      textScaleOverride: 0.73,
-      translationTextScaleOverride: 0.56,
+      textScaleOverride: 0.8,
+      translationTextScaleOverride: 0.61,
       showNumber: true,
       displayNumber: 11,
     }),
@@ -233,14 +233,14 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // ── MIDDLE RING (lavender frame) — ayahs 8 and 10 ────────────────────
     // Both were broken over two lines and both were clipped for it; on one line
     // each is width-bound instead, and ayah 10 in particular gains half again.
-    6: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
+    7: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
       textColor: "#000000",
       textScaleOverride: 0.73,
       translationTextScaleOverride: 0.56,
       showNumber: true,
       displayNumber: 7,
     }),
-    9: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
+    10: capsule(CREAM_BG, LAV_BORDER, INK_LAV, {
       textColor: "#000000",
       textScaleOverride: 0.73,
       translationTextScaleOverride: 0.56,
@@ -251,17 +251,17 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // ── INNER RING (blue frame) — the centre, ayah 9 ─────────────────────
     // Ayah 9 is the crux, so its closing clause takes Tevbe's red the way
     // Tevbe's own ana bölüm does, and the barriers take its purple.
-    7: capsule(WHITE_BG, WHITE_BORDER, INK_PURPLE, {
+    8: capsule(WHITE_BG, WHITE_BORDER, INK_PURPLE, {
       textColor: "#000000",
-      textScaleOverride: 0.73,
-      translationTextScaleOverride: 0.56,
+      textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.5,
       showNumber: true,
       displayNumber: 8,
     }),
-    8: capsule(WHITE_BG, WHITE_BORDER, INK_RED, {
+    9: capsule(WHITE_BG, WHITE_BORDER, INK_RED, {
       textColor: "#000000",
-      textScaleOverride: 0.73,
-      translationTextScaleOverride: 0.56,
+      textScaleOverride: 0.6,
+      translationTextScaleOverride: 0.5,
       showNumber: true,
       displayNumber: 9,
     }),
@@ -269,9 +269,9 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // ── MANDORLA (cream card on a maroon lens) — ayah 12 ─────────────────
     // One capsule for the whole ayah, two lines, on the tallest capsule
     // (0.150). The extra width keeps the two-line text readable.
-    11: capsule(WHITE_BG, MAROON_BORDER, INK_RED, {
-      textScaleOverride: 0.62,
-      translationTextScaleOverride: 0.39,
+    12: capsule(WHITE_BG, MAROON_BORDER, INK_RED, {
+      textScaleOverride: 0.69,
+      translationTextScaleOverride: 0.45,
       showNumber: true,
       displayNumber: 12,
     }),
@@ -378,7 +378,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "s1_oath",
       type: "group",
-      verseIds: [12],
+      verseIds: [2],
       columns: 1,
       capsuleHeight: 0.082,
       horizontalInset: 0.047,
@@ -393,7 +393,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "s1_row",
       type: "group",
-      verseIds: [3, 2],
+      verseIds: [4, 3],
       columns: 2,
       capsuleHeight: 0.082,
       horizontalInset: 0.127,
@@ -408,7 +408,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "s1_tenzil",
       type: "group",
-      verseIds: [4],
+      verseIds: [5],
       columns: 1,
       capsuleHeight: 0.082,
       horizontalInset: 0.047,
@@ -421,10 +421,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "r_a7",
       type: "group",
-      verseIds: [5],
+      verseIds: [6],
       columns: 1,
       capsuleHeight: 0.11,
-      horizontalInset: -0.71,
+      horizontalInset: -0.812,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -433,10 +433,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "r_a8",
       type: "group",
-      verseIds: [6],
+      verseIds: [7],
       columns: 1,
       capsuleHeight: 0.1,
-      horizontalInset: -0.554,
+      horizontalInset: -0.644,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -445,10 +445,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "r_a9a",
       type: "group",
-      verseIds: [7],
+      verseIds: [8],
       columns: 1,
       capsuleHeight: 0.094,
-      horizontalInset: -0.374,
+      horizontalInset: -0.449,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -457,10 +457,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "r_a9b",
       type: "group",
-      verseIds: [8],
+      verseIds: [9],
       columns: 1,
-      capsuleHeight: 0.08,
-      horizontalInset: -0.374,
+      capsuleHeight: 0.094,
+      horizontalInset: -0.449,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -469,10 +469,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "r_a10",
       type: "group",
-      verseIds: [9],
+      verseIds: [10],
       columns: 1,
       capsuleHeight: 0.1,
-      horizontalInset: -0.554,
+      horizontalInset: -0.644,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -481,10 +481,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "r_a11",
       type: "group",
-      verseIds: [10],
+      verseIds: [11],
       columns: 1,
       capsuleHeight: 0.11,
-      horizontalInset: -0.71,
+      horizontalInset: -0.812,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -495,10 +495,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     {
       id: "leaf_a12",
       type: "group",
-      verseIds: [11],
+      verseIds: [12],
       columns: 1,
-      capsuleHeight: 0.15,
-      horizontalInset: -0.043,
+      capsuleHeight: 0.19,
+      horizontalInset: -0.092,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -516,22 +516,22 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   customSections: [
     {
       id: "sec_ring3",
-      verseIds: [7, 8],
+      verseIds: [8, 9],
       cameraTarget: { y: 1.05, fov: 26, tilt: -1.4 },
     },
     {
       id: "sec_ring2",
-      verseIds: [6, 7, 8, 9],
+      verseIds: [7, 8, 9, 10],
       cameraTarget: { y: 1.15, fov: 29, tilt: -1.4 },
     },
     {
       id: "sec_ring1",
-      verseIds: [5, 6, 7, 8, 9, 10],
+      verseIds: [6, 7, 8, 9, 10, 11],
       cameraTarget: { y: 1.25, fov: 32, tilt: -1.4 },
     },
     {
       id: "sec_leaf",
-      verseIds: [11],
+      verseIds: [12],
       cameraTarget: { y: 1.1, fov: 28, tilt: -1.4 },
     },
     {
@@ -541,7 +541,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     },
     {
       id: "sec_top",
-      verseIds: [12, 2, 3, 4],
+      verseIds: [2, 3, 4, 5],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
     },
   ],
@@ -591,7 +591,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       scaleX: 1.5,
       scaleY: 0.8,
       offsetX: 0,
-      offsetY: -0.38,
+      offsetY: -0.384,
       renderOrder: 3,
       customSectionId: "sec_ring1",
     },
@@ -604,7 +604,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       scaleX: 1.3,
       scaleY: 0.5,
       offsetX: 0,
-      offsetY: -0.237,
+      offsetY: -0.247,
       renderOrder: 4,
       customSectionId: "sec_ring2",
     },
@@ -619,7 +619,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       scaleX: 1.1,
       scaleY: 0.268,
       offsetX: 0,
-      offsetY: -0.108,
+      offsetY: -0.118,
       renderOrder: 5,
       customSectionId: "sec_ring3",
     },
@@ -631,10 +631,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       src: "/yasin/leaf.svg",
       anchorGroupIndex: 10,
       anchorEdge: "top",
-      scaleX: 1.3,
+      scaleX: 1.1,
       scaleY: 0.3,
       offsetX: 0,
-      offsetY: -0.083,
+      offsetY: -0.105,
       renderOrder: 3,
       customSectionId: "sec_leaf",
     },
@@ -728,9 +728,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
         2;
       // fold2 — between the outer ring (block 10) and the mandorla (block 11).
       const fold2 =
-        (lm.groupYPositions[9] -
-          lm.groupHeights[9] +
-          lm.groupYPositions[10]) /
+        (lm.groupYPositions[9] - lm.groupHeights[9] + lm.groupYPositions[10]) /
         2;
       // fold3 — below the mandorla, so it can hinge as a unit.
       const fold3 = fold2 - 0.16;
@@ -792,29 +790,21 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       { verses: [{ number: 1, text: "يسٓ" }] },
-      { verses: [{ number: 12, text: "وَالْقُرْآنِ الْحَكِيمِ" }] },
+      { verses: [{ number: 2, text: "وَالْقُرْآنِ الْحَكِيمِ" }] },
       {
         verses: [
-          { number: 3, text: "عَلَىٰ صِرَاطٍ مُسْتَقِيمٍ" },
-          { number: 2, text: "إِنَّكَ لَمِنَ الْمُرْسَلِينَ" },
+          { number: 4, text: "عَلَىٰ صِرَاطٍ مُسْتَقِيمٍ" },
+          { number: 3, text: "إِنَّكَ لَمِنَ الْمُرْسَلِينَ" },
         ],
       },
       {
-        verses: [{ number: 4, text: "تَنْزِيلَ الْعَزِيزِ الرَّحِيمِ" }],
-      },
-      {
-        verses: [
-          {
-            number: 5,
-            text: "لَقَدْ حَقَّ الْقَوْلُ عَلَىٰ أَكْثَرِهِمْ فَهُمْ لَا يُؤْمِنُونَ",
-          },
-        ],
+        verses: [{ number: 5, text: "تَنْزِيلَ الْعَزِيزِ الرَّحِيمِ" }],
       },
       {
         verses: [
           {
             number: 6,
-            text: "إِنَّا جَعَلْنَا فِي أَعْنَاقِهِمْ أَغْلَالًا فَهِيَ إِلَى الْأَذْقَانِ فَهُمْ مُقْمَحُونَ",
+            text: "لِتُنذِرَ قَوْمًا مَّا أُنذِرَ آبَاؤُهُمْ فَهُمْ غَافِلُونَ",
           },
         ],
       },
@@ -822,20 +812,23 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "وَجَعَلْنَا مِنْ بَيْنِ أَيْدِيهِمْ سَدًّا وَمِنْ خَلْفِهِمْ سَدًّا",
+            text: "لَقَدْ حَقَّ الْقَوْلُ عَلَىٰ أَكْثَرِهِمْ فَهُمْ لَا يُؤْمِنُونَ",
           },
         ],
       },
       {
         verses: [
-          { number: 8, text: "فَأَغْشَيْنَاهُمْ فَهُمْ لَا يُبْصِرُونَ" },
+          {
+            number: 8,
+            text: "إِنَّا جَعَلْنَا فِي أَعْنَاقِهِمْ أَغْلَالًا فَهِيَ إِلَى الْأَذْقَانِ فَهُمْ مُقْمَحُونَ",
+          },
         ],
       },
       {
         verses: [
           {
             number: 9,
-            text: "وَسَوَاءٌ عَلَيْهِمْ أَأَنْذَرْتَهُمْ أَمْ لَمْ تُنْذِرْهُمْ لَا يُؤْمِنُونَ",
+            text: "وَجَعَلْنَا مِنْ بَيْنِ أَيْدِيهِمْ سَدًّا وَمِنْ خَلْفِهِمْ سَدًّا فَأَغْشَيْنَاهُمْ فَهُمْ لَا يُبْصِرُونَ",
           },
         ],
       },
@@ -843,7 +836,7 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 10,
-            text: "إِنَّمَا تُنْذِرُ مَنِ اتَّبَعَ الذِّكْرَ وَخَشِيَ الرَّحْمَٰنَ بِالْغَيْبِ فَبَشِّرْهُ بِمَغْفِرَةٍ وَأَجْرٍ كَرِيمٍ",
+            text: "وَسَوَاءٌ عَلَيْهِمْ أَأَنْذَرْتَهُمْ أَمْ لَمْ تُنْذِرْهُمْ لَا يُؤْمِنُونَ",
           },
         ],
       },
@@ -851,6 +844,14 @@ export const YASIN_36_TEXT_AR: SurahDataShape = {
         verses: [
           {
             number: 11,
+            text: "إِنَّمَا تُنْذِرُ مَنِ اتَّبَعَ الذِّكْرَ وَخَشِيَ الرَّحْمَٰنَ بِالْغَيْبِ فَبَشِّرْهُ بِمَغْفِرَةٍ وَأَجْرٍ كَرِيمٍ",
+          },
+        ],
+      },
+      {
+        verses: [
+          {
+            number: 12,
             text: "إِنَّا نَحْنُ نُحْيِي الْمَوْتَىٰ وَنَكْتُبُ مَا قَدَّمُوا\nوَآثَارَهُمْ وَكُلَّ شَيْءٍ أَحْصَيْنَاهُ فِي إِمَامٍ مُبِينٍ",
           },
         ],
@@ -870,13 +871,13 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
     colorGroups: [
       { verses: [{ number: 1, text: "Yâsîn." }] },
       {
-        verses: [{ number: 12, text: "Hikmet dolu Kur'an'a andolsun ki," }],
+        verses: [{ number: 2, text: "Hikmet dolu Kur'an'a andolsun ki," }],
       },
       {
         verses: [
-          { number: 3, text: "Dosdoğru bir yol üzeresin." },
+          { number: 4, text: "Dosdoğru bir yol üzeresin." },
           {
-            number: 2,
+            number: 3,
             text: "Sen elbette gönderilmiş peygamberlerdensin,",
           },
         ],
@@ -884,7 +885,7 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
       {
         verses: [
           {
-            number: 4,
+            number: 5,
             text: "Azîz ve Rahîm olanın indirmesidir;",
           },
         ],
@@ -892,16 +893,8 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
       {
         verses: [
           {
-            number: 5,
-            text: "Andolsun, onların çoğu üzerine o söz hak olmuştur; artık inanmazlar.",
-          },
-        ],
-      },
-      {
-        verses: [
-          {
             number: 6,
-            text: "Biz onların boyunlarına halkalar geçirdik;\no halkalar çenelerine dayandı, başları kalkık kaldı.",
+            text: "Ataları uyarılmamış, bu yüzden kendileri gaflette kalmış bir toplumu uyarman için indirilmiştir.",
           },
         ],
       },
@@ -909,20 +902,23 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "Önlerine bir set, arkalarına\nda bir set çektik,",
+            text: "Andolsun, onların çoğu üzerine o söz hak olmuştur; artık inanmazlar.",
           },
         ],
       },
       {
         verses: [
-          { number: 8, text: "Ve gözlerini perdeledik; artık görmezler." },
+          {
+            number: 8,
+            text: "Biz onların boyunlarına halkalar geçirdik;\no halkalar çenelerine dayandı, başları kalkık kaldı.",
+          },
         ],
       },
       {
         verses: [
           {
             number: 9,
-            text: "Onları uyarsan da uyarmasan da\nkendileri için birdir; inanmazlar.",
+            text: "Önlerine bir set, arkalarına da bir set çektik ve gözlerini perdeledik.",
           },
         ],
       },
@@ -930,7 +926,7 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 10,
-            text: "Sen ancak Zikr'e uyanı ve görmediği hâlde Rahmân'dan korkanı uyarırsın.\nİşte öylesini bağışlanma ve güzel bir mükâfatla müjdele.",
+            text: "Onları uyarsan da uyarmasan da\nkendileri için birdir; inanmazlar.",
           },
         ],
       },
@@ -938,6 +934,14 @@ export const YASIN_36_TEXT_TR: SurahDataShape = {
         verses: [
           {
             number: 11,
+            text: "Sen ancak Zikr'e uyanı ve görmediği hâlde Rahmân'dan korkanı uyarırsın.\nİşte öylesini bağışlanma ve güzel bir mükâfatla müjdele.",
+          },
+        ],
+      },
+      {
+        verses: [
+          {
+            number: 12,
             text: "Şüphesiz ölüleri biz diriltiriz, yaptıklarını ve bıraktıkları\neserleri yazarız; her şeyi apaçık bir kitapta saymışızdır.",
           },
         ],
@@ -956,17 +960,17 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
     introVerse: { number: 0, text: "" },
     colorGroups: [
       { verses: [{ number: 1, text: "Ya Sin." }] },
-      { verses: [{ number: 12, text: "By the wise Qur'an," }] },
+      { verses: [{ number: 2, text: "By the wise Qur'an," }] },
       {
         verses: [
-          { number: 3, text: "upon a straight path." },
-          { number: 2, text: "you are indeed one of the messengers," },
+          { number: 4, text: "upon a straight path." },
+          { number: 3, text: "you are indeed one of the messengers," },
         ],
       },
       {
         verses: [
           {
-            number: 4,
+            number: 5,
             text: "A revelation of the Almighty, the Most Merciful,",
           },
         ],
@@ -974,16 +978,8 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
       {
         verses: [
           {
-            number: 5,
-            text: "The word has already come true against most of them, so they will not believe.",
-          },
-        ],
-      },
-      {
-        verses: [
-          {
             number: 6,
-            text: "We have placed shackles around their necks,\nreaching their chins, so their heads are forced up.",
+            text: "so that you may warn a people whose forefathers were not warned, so they are heedless.",
           },
         ],
       },
@@ -991,20 +987,23 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 7,
-            text: "And We have set a barrier before them\nand a barrier behind them,",
+            text: "The word has already come true against most of them, so they will not believe.",
           },
         ],
       },
       {
         verses: [
-          { number: 8, text: "and covered them over, so they cannot see." },
+          {
+            number: 8,
+            text: "We have placed shackles around their necks,\nreaching their chins, so their heads are forced up.",
+          },
         ],
       },
       {
         verses: [
           {
             number: 9,
-            text: "It is all the same to them whether\nyou warn them or not — they will not believe.",
+            text: "And We have set a barrier before them and a barrier behind them, then covered them over, so they cannot see.",
           },
         ],
       },
@@ -1012,7 +1011,7 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 10,
-            text: "You can only warn one who follows the Reminder and fears the Most Merciful unseen.\nGive him good news of forgiveness and a generous reward.",
+            text: "It is all the same to them whether\nyou warn them or not — they will not believe.",
           },
         ],
       },
@@ -1020,6 +1019,14 @@ export const YASIN_36_TEXT_EN: SurahDataShape = {
         verses: [
           {
             number: 11,
+            text: "You can only warn one who follows the Reminder and fears the Most Merciful unseen.\nGive him good news of forgiveness and a generous reward.",
+          },
+        ],
+      },
+      {
+        verses: [
+          {
+            number: 12,
             text: "It is We who bring the dead to life, and We record what they send ahead\nand leave behind; We have accounted for everything in a clear Record.",
           },
         ],
