@@ -8,7 +8,7 @@
  * what a given device is asked to pay for, is decided here.
  */
 
-import { Vector4, type Texture } from "three";
+import { Vector2, Vector4, type Texture } from "three";
 
 import type { CameraFocusRect } from "../../../data/schema";
 import type { GpuTier } from "../../../utils/gpuTier";
@@ -58,31 +58,49 @@ const DETAIL_FEATHER = 0.045;
  */
 export const REFINE_WORTH_IT = 1.15;
 
+// ---------------------------------------------------------------------------
+// The zoom, which is not a tier decision
+// ---------------------------------------------------------------------------
+
+/**
+ * Texels per screen pixel for the ZOOM — ONE, and the same number on every
+ * device there is.
+ *
+ * ONE because it is the rate the mip chain rewards. The GPU picks its own level
+ * from the sampling rate, so 1.25 texels per pixel is level 0.32, which
+ * trilinear filtering serves as two thirds of the sharp mip blended with one
+ * third of the HALF-SIZE one; only an exact match is handed level zero and
+ * nothing else. Against that, 1.25 does carry more raw texels, so the two are
+ * closer than the mip arithmetic alone suggests — call it a wash on sharpness,
+ * decided by the 36% of the buffer it gives back. That is what pays for the
+ * second slot (`DETAIL_SLOTS`), and the edge contrast is bought back properly
+ * by `DETAIL_SHARPEN` rather than by throwing texels at it.
+ *
+ * The same on every device because the alternative was to guess. The tier table
+ * used to set this — 1.25 / 1.1 / 1.0 — off a regex against the GPU's name, and
+ * a name the regex does not recognise is not a weak GPU, it is an unknown one.
+ * Windows is where that lands hardest: the vendor string arrives wrapped by
+ * ANGLE, integrated parts far outnumber discrete ones, and a reader whose chip
+ * merely failed to be recognised was handed a permanently softer page for it.
+ * One screen's worth of texels is not a luxury a GPU has to qualify for — it is
+ * less work than the device already does every frame to fill that same screen.
+ */
+export const DETAIL_SUPERSAMPLE = 1;
+
+/**
+ * Ceiling on ONE zoom buffer, in texels. Half-float, so a texel is 8 bytes.
+ *
+ * Reached only above roughly 1440p of PHYSICAL pixels; below that the screen
+ * itself is the smaller number and this never binds. It is here so a 5K panel
+ * cannot ask for a third of a gigabyte, not to grade devices.
+ */
+export const DETAIL_MAX_PIXELS = 12e6;
+
 export interface TierQuality {
   /** Texels per screen pixel for the whole-page refine. */
   refineSuperSample: number;
   /** Ceiling on the refine buffer. Half-float, so a texel is 8 bytes. */
   refineMaxPixels: number;
-  /**
-   * Texels per screen pixel for the ZOOM. Never below 1 on any tier: a sharp
-   * sheet under the reader's eye is the entire point of the ladder, and one
-   * screen's worth of texels is no more than a weak GPU already draws every
-   * frame — it is the twenty-times-the-screen full-page buffer it cannot do,
-   * which is exactly what the two rows above are for.
-   */
-  detailSuperSample: number;
-  detailMaxPixels: number;
-  /**
-   * How many zoom pictures may be held at once, out of `DETAIL_SLOTS`.
-   *
-   * Two is what keeps a step between sheets from dipping: the incoming sheet
-   * is drawn into the buffer nobody is reading while the outgoing one stays
-   * lit. It is also, exactly, twice the memory — `detailMaxPixels` texels at
-   * eight bytes each, plus a third again for mipmaps — and on the tier that
-   * already gives up the whole-page refine for want of room, that is the wrong
-   * thing to spend it on. A weak device keeps one buffer and the dip with it.
-   */
-  detailSlots: number;
   /** Texels one tile may cost — the bill a single frame has to pay. */
   tilePixels: number;
   /** Anisotropy ceiling. A zoomed sheet is seen nearly head-on, so a weak GPU
@@ -90,22 +108,21 @@ export interface TierQuality {
   maxAnisotropy: number;
 }
 
+/**
+ * What is still worth grading by device, and only that: how much WORK a frame
+ * is given (`tilePixels`), and the whole-page refine, which is a luxury a small
+ * screen gains nothing from anyway. The zoom is above this table now.
+ */
 export const QUALITY: Record<GpuTier, TierQuality> = {
   high: {
     refineSuperSample: 1.25,
     refineMaxPixels: 9e6,
-    detailSuperSample: 1.25,
-    detailMaxPixels: 11e6,
-    detailSlots: 2,
     tilePixels: 2e6,
     maxAnisotropy: 16,
   },
   medium: {
     refineSuperSample: 1,
     refineMaxPixels: 5e6,
-    detailSuperSample: 1.1,
-    detailMaxPixels: 7e6,
-    detailSlots: 2,
     tilePixels: 1.2e6,
     maxAnisotropy: 8,
   },
@@ -114,10 +131,6 @@ export const QUALITY: Record<GpuTier, TierQuality> = {
     // REFINE_WORTH_IT — and spends what it has on the zoom instead.
     refineSuperSample: 0.85,
     refineMaxPixels: 2.5e6,
-    detailSuperSample: 1,
-    detailMaxPixels: 5e6,
-    // One buffer, and the dip between sheets with it — see `detailSlots`.
-    detailSlots: 1,
     // Small tiles: more frames, but no frame that a slow GPU would drop.
     tilePixels: 0.55e6,
     maxAnisotropy: 4,
@@ -218,15 +231,14 @@ export function detailTextureSize(
   screenW: number,
   screenH: number,
   dpr: number,
-  quality: TierQuality,
   maxTextureSize: number,
 ): TextureSize {
   return fitTextureSize(
     screenW,
     screenH,
-    dpr * quality.detailSuperSample * DETAIL_OVERSCAN,
+    dpr * DETAIL_SUPERSAMPLE * DETAIL_OVERSCAN,
     maxTextureSize,
-    quality.detailMaxPixels,
+    DETAIL_MAX_PIXELS,
   );
 }
 
@@ -289,12 +301,11 @@ export function maxPageTexelsPerUnit(
   screenW: number,
   screenH: number,
   dpr: number,
-  quality: TierQuality,
   maxTextureSize: number,
 ): number {
   if (focusRects.length === 0) return 0;
 
-  const detail = detailTextureSize(screenW, screenH, dpr, quality, maxTextureSize);
+  const detail = detailTextureSize(screenW, screenH, dpr, maxTextureSize);
   const aspect = detail.width / detail.height;
 
   let finest = 0;
@@ -330,12 +341,37 @@ export function planTiles(
  */
 export const DETAIL_SLOTS = 2;
 
+/**
+ * How hard the zoom patch is unsharp-masked, 0 for not at all.
+ *
+ * WHY THIS IS A TEXT CONTROL AND NOT A PAGE ONE, despite being applied to the
+ * whole patch. An unsharp mask amplifies whatever differs from its own
+ * neighbourhood, and on a sheet the only thing that does is the ink: the paper
+ * around it is a slow wash with almost no high frequency for the filter to find
+ * and almost nothing, therefore, that it can do to it. Point it at the patch
+ * and it lands on the script, which is the part worth looking at.
+ *
+ * It cannot invent a letter that was never resolved — nothing can, and anything
+ * claiming to would be the fake kind of sharpening. What it does is give back
+ * the edge contrast that two resamplings cost: the glyph is drawn into a canvas
+ * (`CanvasText`), the canvas is drawn into the zoom buffer, and the buffer is
+ * drawn onto the screen, each step a filtered read that trades a little acutance
+ * for a little smoothness. This puts that back, and no more.
+ *
+ * 0.4 is deliberately short of where haloes start; past about 0.8 a white seam
+ * appears around the heavier strokes.
+ */
+export const DETAIL_SHARPEN = 0.4;
+
 export interface PageDetailUniforms {
   uDetailMap: { value: (Texture | null)[] };
   /** Each detail's rectangle in the page's UV space: x, y, w, h. */
   uDetailRect: { value: Vector4[] };
   uDetailStrength: { value: number[] };
   uDetailFeather: { value: number };
+  /** One texel of the zoom buffer, in its own UV space — the sharpen's reach. */
+  uDetailTexel: { value: Vector2 };
+  uDetailSharpen: { value: number };
 }
 
 export function createPageDetailUniforms(): PageDetailUniforms {
@@ -346,6 +382,8 @@ export function createPageDetailUniforms(): PageDetailUniforms {
     },
     uDetailStrength: { value: Array.from({ length: DETAIL_SLOTS }, () => 0) },
     uDetailFeather: { value: DETAIL_FEATHER },
+    uDetailTexel: { value: new Vector2(1 / 2048, 1 / 2048) },
+    uDetailSharpen: { value: DETAIL_SHARPEN },
   };
 }
 

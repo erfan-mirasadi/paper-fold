@@ -32,7 +32,6 @@ import { PageLodSceneProbe, PageTextureLod } from "./PageTextureLod";
 import {
   firstPassTextureSize,
   maxPageTexelsPerUnit,
-  QUALITY,
   TEXT_DENSITY_HEADROOM,
 } from "./pageTextureLodMath";
 import {
@@ -230,7 +229,6 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
           size.width,
           size.height,
           dpr,
-          QUALITY[tier],
           maxTextureSize,
         ) * TEXT_DENSITY_HEADROOM,
     }));
@@ -256,7 +254,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     };
 
     return { pageWide, at };
-  }, [useLod, runtime.config, size.width, size.height, dpr, tier, maxTextureSize]);
+  }, [useLod, runtime.config, size.width, size.height, dpr, maxTextureSize]);
 
   // RenderTexture multiplies whatever it is given by the device pixel ratio,
   // so the ask is divided by it first — these numbers ARE the buffer.

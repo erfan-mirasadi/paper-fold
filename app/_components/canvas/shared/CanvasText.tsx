@@ -202,6 +202,9 @@ export function CanvasText({
   const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
   const pageDensity = useContext(PageTextDensityContext);
   const canvasElement = useThree((s) => s.gl.domElement);
+  const maxTextureSize = useThree(
+    (s) => s.gl.capabilities.maxTextureSize || 4096,
+  );
 
   // A restored GL context has lost every uploaded texture, and the canvases
   // they were uploaded from are gone too (see `onUpdate` below) — so the text
@@ -306,8 +309,30 @@ export function CanvasText({
     let targetH = height * texelsPerUnit;
     let activeScaleFactor = texelsPerUnit;
 
-    // سقف امنیتی VRAM بر اساس توان GPU (نه اندازه صفحه)
-    const MAX_TEX_SIZE = tier === "high" ? 8192 : tier === "medium" ? 4096 : 2048;
+    // The ceiling on one piece of text.
+    //
+    // A page that states its own density (`pageDensity` — a composed paper, and
+    // only ever that) has already been told exactly how many texels its zoom can
+    // show, and asked for those and no more. Clamping THAT to a number picked
+    // off the GPU's name does not save memory it was going to waste; it just
+    // rasterises the script smaller and magnifies it back, and the reader is
+    // handed permanently softer text because a regex did not recognise their
+    // chip. Windows is where that happens most (ANGLE-wrapped vendor strings,
+    // integrated parts everywhere), which is exactly where the zoom was said to
+    // stop paying off. So for those pages the only ceiling is the real one the
+    // driver reports.
+    //
+    // Every other surah keeps the tier ceiling untouched: its density is the
+    // fixed 3072 above, which is NOT tuned to any particular screen and so does
+    // still need a guard.
+    const MAX_TEX_SIZE =
+      pageDensity && pageDensity > 0
+        ? maxTextureSize
+        : tier === "high"
+          ? 8192
+          : tier === "medium"
+            ? 4096
+            : 2048;
     const maxDim = Math.max(targetW, targetH);
 
     if (maxDim > MAX_TEX_SIZE) {
@@ -457,6 +482,7 @@ export function CanvasText({
     fontWeight,
     fontStyle,
     pageDensity,
+    maxTextureSize,
   ]);
 
   useEffect(() => {

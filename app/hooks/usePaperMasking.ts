@@ -65,11 +65,27 @@ const detailSlotSource = Array.from(
         if (dUv${i}.x > 0.0 && dUv${i}.x < 1.0 && dUv${i}.y > 0.0 && dUv${i}.y < 1.0) {
           vec2 edge${i} = smoothstep(vec2(0.0), vec2(uDetailFeather), dUv${i}) *
                       (1.0 - smoothstep(vec2(1.0 - uDetailFeather), vec2(1.0), dUv${i}));
+
+          // The patch, with the edge contrast two resamplings cost put back —
+          // see DETAIL_SHARPEN. Four neighbours make the blur this subtracts
+          // from centre; on the paper they all agree and nothing happens, on a
+          // stroke of script they do not and the stroke gets its edge back.
+          vec4 mid${i} = texture2D(uDetailMap[${i}], dUv${i});
+          vec4 ring${i} =
+            texture2D(uDetailMap[${i}], dUv${i} + vec2(uDetailTexel.x, 0.0)) +
+            texture2D(uDetailMap[${i}], dUv${i} - vec2(uDetailTexel.x, 0.0)) +
+            texture2D(uDetailMap[${i}], dUv${i} + vec2(0.0, uDetailTexel.y)) +
+            texture2D(uDetailMap[${i}], dUv${i} - vec2(0.0, uDetailTexel.y));
+          vec4 sharp${i} = mid${i} + (mid${i} - ring${i} * 0.25) * uDetailSharpen;
+          // Never below black: an overshoot on the dark side of a stroke would
+          // otherwise come back as a negative that the lighting then amplifies.
+          sharp${i} = max(sharp${i}, vec4(0.0));
+
           // map_fragment leaves diffuseColor as (material colour x map), so the
           // detail has to be tinted the same way or the patch reads brighter.
           diffuseColor = mix(
             diffuseColor,
-            vec4(diffuse, opacity) * texture2D(uDetailMap[${i}], dUv${i}),
+            vec4(diffuse, opacity) * sharp${i},
             uDetailStrength[${i}] * min(edge${i}.x, edge${i}.y)
           );
         }
@@ -505,6 +521,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform vec4 uDetailRect[${DETAIL_SLOTS}];
       uniform float uDetailStrength[${DETAIL_SLOTS}];
       uniform float uDetailFeather;
+      uniform vec2 uDetailTexel;
+      uniform float uDetailSharpen;
       ${shader.fragmentShader}
     `.replace(
         "#include <map_fragment>",

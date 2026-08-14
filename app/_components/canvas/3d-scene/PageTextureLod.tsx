@@ -307,8 +307,6 @@ export function PageTextureLod({
 
   const quality = QUALITY[detectGpuTier()];
   const maxTextureSize = gl.capabilities.maxTextureSize || 4096;
-  /** How many zoom pictures this device may hold at once — see `detailSlots`. */
-  const slots = Math.min(DETAIL_SLOTS, quality.detailSlots);
 
   const { zoomFocus, getSectionIdForVerse } = useMemo(
     () => buildSectionZoomIndex(config),
@@ -319,10 +317,18 @@ export function PageTextureLod({
   // frames the same window, so ONE SHAPE serves them all — which is what lets
   // the two slots ping-pong without either ever paying for an allocation.
   const detailSize = useMemo(
-    () =>
-      detailTextureSize(size.width, size.height, dpr, quality, maxTextureSize),
-    [size.width, size.height, dpr, quality, maxTextureSize],
+    () => detailTextureSize(size.width, size.height, dpr, maxTextureSize),
+    [size.width, size.height, dpr, maxTextureSize],
   );
+
+  // The sharpen's reach, in the buffer's own UV space. Written here rather than
+  // per frame: it changes only when the buffer's shape does.
+  useEffect(() => {
+    detailRef.current.uDetailTexel.value.set(
+      1 / detailSize.width,
+      1 / detailSize.height,
+    );
+  }, [detailSize, detailRef]);
 
   const refineSize = useMemo(
     () =>
@@ -536,18 +542,12 @@ export function PageTextureLod({
     const detailPending = want !== null && hit < 0;
 
     /**
-     * The buffer the incoming sheet will be drawn into, or -1 for none.
-     *
-     * With two, it is the one the reader is NOT looking at, which is the whole
-     * point: the sheet in front of them keeps its picture while the next one is
-     * drawn behind their back. With one (see `detailSlots`) there is no such
-     * choice — the only buffer is the one in use, so it has to be given up.
+     * The buffer the incoming sheet will be drawn into, or -1 for none: always
+     * the one the reader is NOT looking at, which is the whole point — the
+     * sheet in front of them keeps its picture while the next one is drawn
+     * behind their back.
      */
-    const drawInto = !detailPending
-      ? -1
-      : slots > 1
-        ? 1 - shownSlotRef.current
-        : shownSlotRef.current;
+    const drawInto = detailPending ? 1 - shownSlotRef.current : -1;
 
     // 2. The fades.
     //
@@ -689,9 +689,7 @@ export function PageTextureLod({
     //    two of these back to back is the largest pair of allocations this
     //    module ever makes, and the second one can wait for the next frame.
     if (refineDoneRef.current) {
-      const empty = detailTargetsRef.current.findIndex(
-        (t, slot) => slot < slots && t === null,
-      );
+      const empty = detailTargetsRef.current.findIndex((t) => t === null);
       if (empty >= 0) {
         const target = createPageTarget(
           renderer,
