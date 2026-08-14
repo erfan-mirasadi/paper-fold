@@ -72,6 +72,17 @@ export interface TierQuality {
    */
   detailSuperSample: number;
   detailMaxPixels: number;
+  /**
+   * How many zoom pictures may be held at once, out of `DETAIL_SLOTS`.
+   *
+   * Two is what keeps a step between sheets from dipping: the incoming sheet
+   * is drawn into the buffer nobody is reading while the outgoing one stays
+   * lit. It is also, exactly, twice the memory — `detailMaxPixels` texels at
+   * eight bytes each, plus a third again for mipmaps — and on the tier that
+   * already gives up the whole-page refine for want of room, that is the wrong
+   * thing to spend it on. A weak device keeps one buffer and the dip with it.
+   */
+  detailSlots: number;
   /** Texels one tile may cost — the bill a single frame has to pay. */
   tilePixels: number;
   /** Anisotropy ceiling. A zoomed sheet is seen nearly head-on, so a weak GPU
@@ -85,6 +96,7 @@ export const QUALITY: Record<GpuTier, TierQuality> = {
     refineMaxPixels: 9e6,
     detailSuperSample: 1.25,
     detailMaxPixels: 11e6,
+    detailSlots: 2,
     tilePixels: 2e6,
     maxAnisotropy: 16,
   },
@@ -93,6 +105,7 @@ export const QUALITY: Record<GpuTier, TierQuality> = {
     refineMaxPixels: 5e6,
     detailSuperSample: 1.1,
     detailMaxPixels: 7e6,
+    detailSlots: 2,
     tilePixels: 1.2e6,
     maxAnisotropy: 8,
   },
@@ -103,6 +116,8 @@ export const QUALITY: Record<GpuTier, TierQuality> = {
     refineMaxPixels: 2.5e6,
     detailSuperSample: 1,
     detailMaxPixels: 5e6,
+    // One buffer, and the dip between sheets with it — see `detailSlots`.
+    detailSlots: 1,
     // Small tiles: more frames, but no frame that a slow GPU would drop.
     tilePixels: 0.55e6,
     maxAnisotropy: 4,
@@ -308,19 +323,28 @@ export function planTiles(
 // The uniforms the paper shader composites the detail through
 // ---------------------------------------------------------------------------
 
+/**
+ * How many sharp patches the paper can carry at once — see `DETAIL_SLOTS`.
+ * Two, and the shader unrolls a loop of exactly this length, so changing it
+ * changes the shader.
+ */
+export const DETAIL_SLOTS = 2;
+
 export interface PageDetailUniforms {
-  uDetailMap: { value: Texture | null };
-  /** The detail's rectangle in the page's UV space: x, y, w, h. */
-  uDetailRect: { value: Vector4 };
-  uDetailStrength: { value: number };
+  uDetailMap: { value: (Texture | null)[] };
+  /** Each detail's rectangle in the page's UV space: x, y, w, h. */
+  uDetailRect: { value: Vector4[] };
+  uDetailStrength: { value: number[] };
   uDetailFeather: { value: number };
 }
 
 export function createPageDetailUniforms(): PageDetailUniforms {
   return {
-    uDetailMap: { value: null },
-    uDetailRect: { value: new Vector4(0, 0, 1, 1) },
-    uDetailStrength: { value: 0 },
+    uDetailMap: { value: Array.from({ length: DETAIL_SLOTS }, () => null) },
+    uDetailRect: {
+      value: Array.from({ length: DETAIL_SLOTS }, () => new Vector4(0, 0, 1, 1)),
+    },
+    uDetailStrength: { value: Array.from({ length: DETAIL_SLOTS }, () => 0) },
     uDetailFeather: { value: DETAIL_FEATHER },
   };
 }

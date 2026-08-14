@@ -86,7 +86,7 @@ const CELLS: GridCell[] = [
     sheet: S_28_32,
     shiftY: 0.18,
   },
-  { at: [2, 0], align: "leftHalf", key: "s4852", sheet: S_48_52, shiftY: 0.15 },
+  { at: [2, 0], align: "leftHalf", key: "s4852", sheet: S_48_52, shiftY: 0 },
 
   // Row 3 — the two big two-column sheets.
   { at: [3, 0], key: "s5368", sheet: S_53_68, shiftY: 0.1 },

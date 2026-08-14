@@ -35,6 +35,19 @@
  *      registers and finished long before the flight ends — the reader sees the
  *      sheet sharpen as they arrive, never a wait for it.
  *
+ * WHY THE DETAIL IS DOUBLE-BUFFERED. Two of stage 3, alternating, because one
+ * of it cannot survive being stepped off. Drawing the sheet the reader is
+ * moving TO means overwriting the sheet they are moving FROM, and a buffer
+ * cannot be overwritten while the page is still reading it — so the single
+ * buffer had to be faded out first, and the sheet in front of the reader
+ * visibly softened back to the low first paint in the middle of every step
+ * between sheets. The dip was not a limit of anything; the sharp picture was
+ * there the whole time and was being thrown away to make room. With two, the
+ * incoming sheet is drawn into the one nobody is looking at, and the outgoing
+ * one is left lit until its buffer is claimed — a step later, with the camera
+ * long gone from it. The bill is one more buffer of the same size; what it buys
+ * is that nothing on screen ever gets worse than it already was.
+ *
  * WHY TILES. A tile is a normal render of the same offscreen scene with the
  * camera's box narrowed to a slice of the page and the viewport and scissor
  * narrowed to the matching slice of the buffer. The clear respects the scissor,
@@ -79,6 +92,7 @@ import { detectGpuTier } from "../../../utils/gpuTier";
 import { buildSectionZoomIndex } from "../../../utils/sectionZoom";
 import { useFoldStore } from "../orchestrator/ScrollManager";
 import {
+  DETAIL_SLOTS,
   detailRect,
   detailTextureSize,
   planTiles,
@@ -119,6 +133,8 @@ interface TilePass {
   kind: PassKind;
   /** Which detail request this pass is for — stale ones are abandoned. */
   key: string;
+  /** Which detail slot is being filled. Absent on the refine. */
+  slot?: number;
   target: WebGLRenderTarget;
   rect: CameraFocusRect;
   cols: number;
@@ -291,6 +307,8 @@ export function PageTextureLod({
 
   const quality = QUALITY[detectGpuTier()];
   const maxTextureSize = gl.capabilities.maxTextureSize || 4096;
+  /** How many zoom pictures this device may hold at once — see `detailSlots`. */
+  const slots = Math.min(DETAIL_SLOTS, quality.detailSlots);
 
   const { zoomFocus, getSectionIdForVerse } = useMemo(
     () => buildSectionZoomIndex(config),
@@ -298,8 +316,8 @@ export function PageTextureLod({
   );
 
   // The buffer the screen is worth, at this window size. Every sheet's zoom
-  // frames the same window, so one buffer shape serves them all and no zoom
-  // ever pays for an allocation.
+  // frames the same window, so ONE SHAPE serves them all — which is what lets
+  // the two slots ping-pong without either ever paying for an allocation.
   const detailSize = useMemo(
     () =>
       detailTextureSize(size.width, size.height, dpr, quality, maxTextureSize),
@@ -327,16 +345,28 @@ export function PageTextureLod({
   }, []);
 
   const refineTargetRef = useRef<WebGLRenderTarget | null>(null);
-  const detailTargetRef = useRef<WebGLRenderTarget | null>(null);
+  /** One buffer per slot — see `DETAIL_SLOTS` and the ping-pong below. */
+  const detailTargetsRef = useRef<(WebGLRenderTarget | null)[]>(
+    Array.from({ length: DETAIL_SLOTS }, () => null),
+  );
   const passRef = useRef<TilePass | null>(null);
   const pausedRefineRef = useRef<TilePass | null>(null);
   const refineDoneRef = useRef(false);
   const settledAtRef = useRef(0);
   /** The map drei attached, restored on the way out. */
   const firstPassMapRef = useRef<Texture | null>(null);
-  /** Which detail the buffer currently holds, and how visible it is. */
-  const heldDetailRef = useRef<string | null>(null);
-  const fadeRef = useRef(0);
+  /** Which detail each buffer holds, and how visible each one is. */
+  const heldDetailRef = useRef<(string | null)[]>(
+    Array.from({ length: DETAIL_SLOTS }, () => null),
+  );
+  const fadeRef = useRef<number[]>(
+    Array.from({ length: DETAIL_SLOTS }, () => 0),
+  );
+  /**
+   * The slot carrying the sheet the reader is on — so the OTHER one is the
+   * spare, and the spare is always where the next sheet gets drawn.
+   */
+  const shownSlotRef = useRef(0);
   /** What the reader is looking at right now — written by the subscription. */
   const wantRef = useRef<{ key: string; rect: CameraFocusRect } | null>(null);
 
@@ -396,13 +426,22 @@ export function PageTextureLod({
       }
     }
 
-    const det = detailTargetRef.current;
-    if (det && (det.width !== detailSize.width || det.height !== detailSize.height)) {
+    detailTargetsRef.current.forEach((det, slot) => {
+      if (!det) return;
+      if (det.width === detailSize.width && det.height === detailSize.height) {
+        return;
+      }
       det.setSize(detailSize.width, detailSize.height);
-      heldDetailRef.current = null;
-      if (passRef.current?.kind === "detail") passRef.current = null;
-    }
-  }, [refineSize, detailSize]);
+      // The picture in it did not survive the resize, so nothing may be shown
+      // from it until it has been drawn again.
+      heldDetailRef.current[slot] = null;
+      fadeRef.current[slot] = 0;
+      detailRef.current.uDetailStrength.value[slot] = 0;
+      if (passRef.current?.kind === "detail" && passRef.current.slot === slot) {
+        passRef.current = null;
+      }
+    });
+  }, [refineSize, detailSize, detailRef]);
 
   useEffect(() => {
     settledAtRef.current = settled ? performance.now() : 0;
@@ -457,12 +496,19 @@ export function PageTextureLod({
       if (material && restorable) {
         material.map = firstPassMapRef.current;
       }
-      detail.uDetailStrength.value = 0;
-      detail.uDetailMap.value = null;
+      // Read late for the same reason as the material above: what has to be
+      // disposed is whatever these slots are holding NOW, not what they held
+      // when the effect first ran.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const detailTargets = detailTargetsRef.current;
+      for (let slot = 0; slot < DETAIL_SLOTS; slot++) {
+        detail.uDetailStrength.value[slot] = 0;
+        detail.uDetailMap.value[slot] = null;
+        detailTargets[slot]?.dispose();
+        detailTargets[slot] = null;
+      }
       refineTargetRef.current?.dispose();
-      detailTargetRef.current?.dispose();
       refineTargetRef.current = null;
-      detailTargetRef.current = null;
     };
   }, [materialRef, detailRef]);
 
@@ -479,21 +525,60 @@ export function PageTextureLod({
     const detail = detailRef.current;
     const want = wantRef.current;
 
-    // 1. The fade. It only ever runs towards 1 for a detail the buffer really
-    //    holds, so a stale picture can never be shown for even one frame.
-    const showing = want !== null && heldDetailRef.current === want.key;
-    /** A zoom is on its way and the buffer does not have its picture yet. */
-    const detailPending = want !== null && !showing;
-    const fadeTarget = showing ? 1 : 0;
-    const fade = fadeRef.current;
-    if (fade !== fadeTarget) {
+    // 1. Which slot, if any, already has the picture the reader is asking for.
+    //    Found by rectangle, so stepping between two zones of one sheet is a
+    //    hit rather than a redraw — and so is stepping BACK to the sheet just
+    //    left, whose picture the spare is still holding.
+    const held = heldDetailRef.current;
+    const hit = want ? held.indexOf(want.key) : -1;
+    if (hit >= 0) shownSlotRef.current = hit;
+    /** A zoom is on its way and no buffer has its picture yet. */
+    const detailPending = want !== null && hit < 0;
+
+    /**
+     * The buffer the incoming sheet will be drawn into, or -1 for none.
+     *
+     * With two, it is the one the reader is NOT looking at, which is the whole
+     * point: the sheet in front of them keeps its picture while the next one is
+     * drawn behind their back. With one (see `detailSlots`) there is no such
+     * choice — the only buffer is the one in use, so it has to be given up.
+     */
+    const drawInto = !detailPending
+      ? -1
+      : slots > 1
+        ? 1 - shownSlotRef.current
+        : shownSlotRef.current;
+
+    // 2. The fades.
+    //
+    //    A slot is lit whenever it holds a real picture and the reader is
+    //    zoomed in — INCLUDING the sheet they have just stepped off, whose
+    //    rectangle is somewhere else on the page and costs nothing to leave
+    //    sharp. The one thing that is ever put out is the buffer about to be
+    //    drawn into, because a buffer cannot be overwritten while the page is
+    //    still reading it.
+    //
+    //    That is the whole of the difference. The old ladder had one buffer, so
+    //    the one being drawn into was always the one in front of the reader,
+    //    and they watched the sheet they were looking at soften back to the
+    //    page's own low first paint in the middle of every step. Nothing about
+    //    that dip was earned: the sharp picture existed the whole way through
+    //    and was being thrown away to make room.
+    for (let slot = 0; slot < DETAIL_SLOTS; slot++) {
+      const target =
+        held[slot] === null || want === null || slot === drawInto ? 0 : 1;
+      const fade = fadeRef.current[slot];
+      if (fade === target) continue;
       const eased =
-        fade + (fadeTarget - fade) * (1 - Math.exp(-DETAIL_FADE_RATE * Math.min(delta, 0.1)));
-      fadeRef.current = Math.abs(fadeTarget - eased) < 0.002 ? fadeTarget : eased;
-      detail.uDetailStrength.value = fadeRef.current;
+        fade +
+        (target - fade) *
+          (1 - Math.exp(-DETAIL_FADE_RATE * Math.min(delta, 0.1)));
+      fadeRef.current[slot] =
+        Math.abs(target - eased) < 0.002 ? target : eased;
+      detail.uDetailStrength.value[slot] = fadeRef.current[slot];
     }
 
-    // 2. A zoom outranks the background refine — pause it mid-picture and pick
+    // 3. A zoom outranks the background refine — pause it mid-picture and pick
     //    it up again when the reader has their sharp sheet.
     let pass = passRef.current;
     if (pass?.kind === "refine" && detailPending) {
@@ -502,7 +587,7 @@ export function PageTextureLod({
       pass = null;
     }
 
-    // 3. Abandon a detail pass the reader has already moved on from.
+    // 4. Abandon a detail pass the reader has already moved on from.
     if (pass?.kind === "detail" && pass.key !== (want?.key ?? "")) {
       passRef.current = null;
       pass = null;
@@ -512,35 +597,43 @@ export function PageTextureLod({
       if (!drawTiles(renderer, scene, camera, pass, 1)) return;
       passRef.current = null;
 
-      if (pass.kind === "detail") {
-        detail.uDetailMap.value = pass.target.texture;
-        detail.uDetailRect.value.set(
+      if (pass.kind === "detail" && pass.slot !== undefined) {
+        detail.uDetailMap.value[pass.slot] = pass.target.texture;
+        detail.uDetailRect.value[pass.slot].set(
           pass.rect.x / pageWidth,
           1 + (pass.rect.y - pass.rect.h) / pageHeight,
           pass.rect.w / pageWidth,
           pass.rect.h / pageHeight,
         );
-        heldDetailRef.current = pass.key;
-      } else {
+        held[pass.slot] = pass.key;
+        // The picture is complete, so this is the slot the reader is on — and
+        // the one they were on keeps its own light until its buffer is claimed.
+        shownSlotRef.current = pass.slot;
+      } else if (pass.kind === "refine") {
         material.map = pass.target.texture;
         refineDoneRef.current = true;
       }
       return;
     }
 
-    // 4. Nothing running: the zoom first, the page's own sharpening second.
-    //    A detail may only start once nothing on screen is reading the buffer —
-    //    which is what the fade-out of the sheet being left behind is waiting
-    //    for. One buffer, and never a frame of the wrong page in it.
-    if (detailPending && want && fadeRef.current <= 0.001) {
-      if (!detailTargetRef.current) {
-        detailTargetRef.current = createPageTarget(renderer, detailSize, quality.maxAnisotropy);
+    // 5. Nothing running: the zoom first, the page's own sharpening second.
+    //    The buffer has to be dark before it can be drawn into — which, with
+    //    two of them, it already is on the very first frame of a step, since
+    //    nothing on screen was reading it in the first place.
+    if (detailPending && want && fadeRef.current[drawInto] <= 0.001) {
+      if (!detailTargetsRef.current[drawInto]) {
+        detailTargetsRef.current[drawInto] = createPageTarget(
+          renderer,
+          detailSize,
+          quality.maxAnisotropy,
+        );
       }
-      const target = detailTargetRef.current;
+      const target = detailTargetsRef.current[drawInto]!;
       const rect = detailRect(want.rect, target.width / target.height);
       passRef.current = {
         kind: "detail",
         key: want.key,
+        slot: drawInto,
         target,
         rect,
         ...planTiles(
@@ -591,14 +684,26 @@ export function PageTextureLod({
       return;
     }
 
-    // 5. Idle, and the page is as sharp as it gets: pay for the detail buffer's
-    //    allocation NOW, so the first zoom is pure drawing.
-    if (refineDoneRef.current && !detailTargetRef.current) {
-      detailTargetRef.current = createPageTarget(renderer, detailSize, quality.maxAnisotropy);
-      const previous = renderer.getRenderTarget();
-      renderer.setRenderTarget(detailTargetRef.current);
-      renderer.clear();
-      renderer.setRenderTarget(previous);
+    // 6. Idle, and the page is as sharp as it gets: pay for a detail buffer's
+    //    allocation NOW, so the first zoom is pure drawing. ONE PER IDLE FRAME —
+    //    two of these back to back is the largest pair of allocations this
+    //    module ever makes, and the second one can wait for the next frame.
+    if (refineDoneRef.current) {
+      const empty = detailTargetsRef.current.findIndex(
+        (t, slot) => slot < slots && t === null,
+      );
+      if (empty >= 0) {
+        const target = createPageTarget(
+          renderer,
+          detailSize,
+          quality.maxAnisotropy,
+        );
+        detailTargetsRef.current[empty] = target;
+        const previous = renderer.getRenderTarget();
+        renderer.setRenderTarget(target);
+        renderer.clear();
+        renderer.setRenderTarget(previous);
+      }
     }
   });
 
