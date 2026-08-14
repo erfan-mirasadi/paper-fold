@@ -692,11 +692,14 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
             verseIds: capsulesOf(c).map(() => nextId++),
             top: y,
             height: capsuleHeight(c) * capsuleHeightScale,
-            // `w` already includes the sheet-wide capsule width scale. Undo
-            // that scale before applying a split-column item's own share of
-            // the natural slot width, so `width: 0.95` really means 95% of
-            // the slot rather than 95% of the current 70% capsule width.
-            width: w * (c.width ?? 1) / capsuleWidthScale,
+            // A split-column item's OWN `width` is a share of the natural slot,
+            // so undo the sheet-wide capsule scale baked into `w` before
+            // applying it: `width: 0.95` means 95% of the slot, not 95% of the
+            // already-scaled capsule. An item that declares no width keeps `w`
+            // untouched — the scaled slot, same as every unsplit row gets.
+            // Dividing that default through the scale too widens every column
+            // capsule by 1/scale and runs the columns into each other.
+            width: c.width === undefined ? w : (w / capsuleWidthScale) * c.width,
             xOffset: shift,
             rowIndex: i,
             side,
