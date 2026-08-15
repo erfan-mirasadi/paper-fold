@@ -1,4 +1,4 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 // 69-82 — not poetry, the cattle, and the bones brought back. Copied off the
@@ -226,7 +226,7 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 2,
       tone: "outer",
-      src: "/yasin1319/all-section.svg",
+      src: SHEET_FRAME_SVGS.overall,
       pad: 0,
       w: 2.16,
       h: 2.06,

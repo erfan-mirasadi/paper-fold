@@ -1,4 +1,4 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ const SPEC: SheetSpec = {
       ayah: 29,
       arScale: 0.7,
       latScale: 0.78,
-      tone: "white",
+      tone: "green",
       ar: "إِن كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً\nفَإِذَا هُمْ خَامِدُونَ",
       tr: "Sadece korkunç bir ses oldu;\nbir de baktılar, sönüp gitmişler.",
       en: "It was but one shout —\nand at once they were extinguished.",
@@ -32,7 +32,7 @@ const SPEC: SheetSpec = {
       ayah: 30,
       arScale: 0.73,
       latScale: 0.63,
-      tone: "maroon",
+      tone: "white",
       ar: "يَا حَسْرَةً عَلَى الْعِبَادِ\nمَا يَأْتِيهِم مِّن رَّسُولٍ إِلَّا كَانُوا بِهِ يَسْتَهْزِئُونَ",
       tr: "Yazık şu kullara!\nKendilerine gelen her elçiyle mutlaka alay ettiler.",
       en: "Alas for the servants!\nNo messenger came to them but they mocked him.",
@@ -41,7 +41,7 @@ const SPEC: SheetSpec = {
       ayah: 31,
       arScale: 0.71,
       latScale: 0.41,
-      tone: "maroon",
+      tone: "white",
       ar: "أَلَمْ يَرَوْا كَمْ أَهْلَكْنَا قَبْلَهُم مِّنَ الْقُرُونِ\nأَنَّهُمْ إِلَيْهِمْ لَا يَرْجِعُونَ",
       tr: "Görmediler mi, onlardan önce nice nesilleri helâk ettik;\nartık onlara dönmüyorlar.",
       en: "Have they not seen how many generations We destroyed before them,\nnone of whom return to them?",
@@ -50,7 +50,7 @@ const SPEC: SheetSpec = {
       ayah: 32,
       arScale: 0.79,
       latScale: 0.65,
-      tone: "cream",
+      tone: "green",
       ar: "وَإِن كُلٌّ لَّمَّا جَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
       tr: "Hepsi de toplanıp huzurumuza getirileceklerdir.",
       en: "And all of them will be brought before Us together.",
@@ -58,9 +58,23 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    { from: 0, to: 4, tone: "ring" },
-    { from: 1, to: 3, tone: "ringMid" },
-    { from: 2, to: 3, tone: "ringInner" },
+    // The page-wide enclosure uses the pale overall frame; the 29-32 group
+    // uses the project's stronger pink inner frame.
+    {
+      from: 0,
+      to: 4,
+      tone: "outer",
+      src: SHEET_FRAME_SVGS.overall,
+    },
+    {
+      from: 1,
+      to: 4,
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
+      w: 0.9, // scaleX
+      h: 0.82, // scaleY
+      offsetY: -0.298,
+    },
   ],
 };
 

@@ -1,4 +1,4 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 // 53-68 — the shout, the Garden, the guilty, and the fire. Fifteen ayahs on one
@@ -246,7 +246,7 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 7,
       tone: "outer",
-      src: "/yasin1319/all-section.svg",
+      src: SHEET_FRAME_SVGS.overall,
       pad: 0,
       w: 2.16,
       h: 2.06,

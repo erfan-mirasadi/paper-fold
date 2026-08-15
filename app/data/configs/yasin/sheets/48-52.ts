@@ -1,4 +1,4 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 // 48-52 — "when is this promise?", and the answer, copied off the handwritten
@@ -109,7 +109,7 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 2,
       tone: "outer",
-      src: "/yasin1319/all-section.svg",
+      src: SHEET_FRAME_SVGS.overall,
       pad: 0,
       w: 1.58,
       h: 0.97,

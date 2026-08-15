@@ -1,4 +1,4 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 4,
       tone: "outer",
-      src: "/yasin1319/all-section.svg",
+      src: SHEET_FRAME_SVGS.overall,
       w: 1.06,
       h: 1.41,
       offsetY: -0.572,
@@ -110,7 +110,8 @@ const SPEC: SheetSpec = {
     {
       from: 0,
       to: 1,
-      tone: "rose",
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
     },
     {
       from: 2,
@@ -120,7 +121,8 @@ const SPEC: SheetSpec = {
     {
       from: 3,
       to: 4,
-      tone: "rose",
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
     },
   ],
 };

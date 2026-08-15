@@ -51,6 +51,7 @@
 import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
+import { SHEET_FRAME_SVGS } from "../kit";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, as in yasin36Config. The reference photo paints
@@ -390,7 +391,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     // Outer frame — blocks 0 … 6 (ayahs 13 … 19).
     //   wanted: 1.06 x 1.41, y −0.194 … −1.582  (centre −0.888)
     {
-      src: "/yasin1319/all-section.svg",
+      src: SHEET_FRAME_SVGS.overall,
       anchorGroupIndex: 0,
       anchorEdge: "top",
       scaleX: 1.06,

@@ -67,6 +67,16 @@ export const SHEET_COLORS = {
   blue: { bg: "#EAF1F5", border: "#6E96A8", ink: "#1F3D4A" },
 } as const;
 
+/**
+ * The two shared frame textures used by the Yasin sheets. Keeping one URL per
+ * visual role lets Three's texture cache reuse the same rasterised SVG across
+ * every sheet that needs it.
+ */
+export const SHEET_FRAME_SVGS = {
+  overall: "/yasin1319/all-section.svg",
+  inner: "/nisa/all-section.svg",
+} as const;
+
 export type Tone = keyof typeof SHEET_COLORS;
 
 /**
