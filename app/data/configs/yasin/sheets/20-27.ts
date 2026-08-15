@@ -29,6 +29,7 @@ const SPEC: SheetSpec = {
       tone: "white",
       width: 1.15,
       heightLines: 1.5,
+      gapAfter: 0.01,
       arScale: 0.82,
       latScale: 0.45,
       ar: "اتَّبِعُوا مَن لَّا يَسْأَلُكُمْ أَجْرًا وَهُم مُّهْتَدُونَ",
@@ -38,6 +39,8 @@ const SPEC: SheetSpec = {
     {
       // The right column reads first — it is the man's reason
       inwardShift: -0.03,
+      gapAfter: -0.01,
+      offsetY: 0.02,
       right: [
         {
           ayah: 22,

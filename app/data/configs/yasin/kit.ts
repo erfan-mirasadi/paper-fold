@@ -265,6 +265,10 @@ export interface SplitRow {
   ratio?: number;
   /** Pull both columns towards the centre by this amount. */
   inwardShift?: number;
+  /** Custom air after this split section before the next stacked row. */
+  gapAfter?: number;
+  /** Move this split section without moving the rows that follow it. */
+  offsetY?: number;
 }
 
 export type SheetRow = CapsuleSpec | PairRow | SplitRow;
@@ -544,7 +548,9 @@ const isDomed = (item: SheetRow | ColumnItem) =>
 
 /** Air between two items stacked one under the other. */
 const airBetween = (above: SheetRow | ColumnItem, below: SheetRow | ColumnItem) =>
-  capsulesOf(above)[0]?.gapAfter ??
+  ("gapAfter" in above && typeof above.gapAfter === "number"
+    ? above.gapAfter
+    : capsulesOf(above)[0]?.gapAfter) ??
   (isDomed(above) || isDomed(below) ? DOME_ROW_AIR : ROW_AIR);
 
 const capsuleHeight = (item: CapsuleSpec | ColumnItem) =>
@@ -657,7 +663,10 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
 
   rows.forEach((row, i) => {
     cursor -= gapAbove(i);
-    const top = cursor;
+    const stackTop = cursor;
+    const top =
+      stackTop +
+      ("offsetY" in row && typeof row.offsetY === "number" ? row.offsetY : 0);
     rowTop.push(top);
     const width = rowWidth(i);
 
@@ -719,7 +728,8 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       column(row.left, leftW, leftShift + inwardShift, "left");
     }
 
-    cursor = top - rowHeight(i);
+    // A row offset is visual only: later rows keep their original positions.
+    cursor = stackTop - rowHeight(i);
   });
 
   const stackH = -cursor;
