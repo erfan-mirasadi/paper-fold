@@ -1,0 +1,14 @@
+<svg width="2360" height="1000" viewBox="0 0 2360 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: one of the two fifteen-ayah explanation panels
+     (3. and 4. AÇIKLAMA BÖL.). Both are the same rectangle, so both are drawn
+     from this one file. See open-outer.svg for the aspect rule, and
+     panel-20.svg for why this pair's rim is a different ink from that one's.
+
+       world 1.310 x 0.555  ->  2.360
+       viewBox 2360 x 1000  ->  2.360
+     one SVG unit = 5.550e-4 world units on both axes. -->
+<rect x="8" y="8" width="2344" height="984"
+      rx="90.0" ry="90.0"
+      fill="#FBFAF4" fill-opacity="0.6"
+      stroke="#6E9464" stroke-width="16"/>
+</svg>

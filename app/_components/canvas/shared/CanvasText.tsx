@@ -1,10 +1,58 @@
 "use client";
 import { a } from "@react-spring/three";
-import { cloneElement, useEffect, useMemo, useState } from "react";
+import { useThree } from "@react-three/fiber";
+import {
+  cloneElement,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import * as THREE from "three";
 
 import { FONT_FAMILY_NAMES } from "../../../data/theme";
 import { detectGpuTier } from "../../../utils/gpuTier";
+
+/**
+ * Texels per world unit this text is worth rasterising at, or null for the
+ * default below.
+ *
+ * A page made of MANY SHEETS supplies this; every ordinary surah leaves it
+ * null and is rasterised exactly as it always was. The reason is that the
+ * default is a fixed number tuned for one 1.54 x 1.78 sheet, whose page
+ * texture is drawn at around 2700 texels per unit — well matched. Put ten
+ * sheets on one paper and the page texture falls to a few hundred texels per
+ * unit, while the default keeps drawing at 3072: on a phone that is fifty
+ * times the pixels the screen can ever resolve, per line of script, times a
+ * hundred and ninety pieces of text. See `maxPageTexelsPerUnit`.
+ */
+export const PageTextDensityContext = createContext<number | null>(null);
+
+/**
+ * Narrows the page-wide answer to the SHEET a given piece of text sits on,
+ * given a point in page space.
+ *
+ * Worth the extra step because a page of sheets does not zoom uniformly: the
+ * smallest sheet on the Yâsîn paper is magnified two and a half times more than
+ * the largest, and if every text on the page is drawn for that one sheet's
+ * zoom, the other nine pay its bill — about five times over. A text is only
+ * ever magnified by the zoom of the sheet it is printed on, so that is the
+ * zoom it should be drawn for.
+ *
+ * A point inside no sheet at all (a label in the margin) falls back to the
+ * page-wide answer, which is the sharpest of them and therefore always safe.
+ */
+export const PageZoomDensityContext = createContext<
+  ((x: number, y: number) => number) | null
+>(null);
+
+/**
+ * The default, in texels per world unit: `scaleFactor` 1024 x `resolution` 3.
+ * Left exactly where it has always been — for a single sheet it is the right
+ * answer, and every surah that does not opt in keeps it untouched.
+ */
+const DEFAULT_TEXELS_PER_UNIT = 3072;
 
 interface CanvasTextSegment {
   /** This segment's text, concatenated directly after the previous segment (no auto-spacing). */
@@ -152,6 +200,22 @@ export function CanvasText({
   highlights,
 }: CanvasTextProps) {
   const [fontsLoadedKey, setFontsLoadedKey] = useState(0);
+  const pageDensity = useContext(PageTextDensityContext);
+  const canvasElement = useThree((s) => s.gl.domElement);
+  const maxTextureSize = useThree(
+    (s) => s.gl.capabilities.maxTextureSize || 4096,
+  );
+
+  // A restored GL context has lost every uploaded texture, and the canvases
+  // they were uploaded from are gone too (see `onUpdate` below) — so the text
+  // is drawn again from scratch. Same key the font loader uses; there is only
+  // one way to redraw.
+  useEffect(() => {
+    const redraw = () => setFontsLoadedKey((k) => k + 1);
+    canvasElement.addEventListener("webglcontextrestored", redraw);
+    return () =>
+      canvasElement.removeEventListener("webglcontextrestored", redraw);
+  }, [canvasElement]);
 
   useEffect(() => {
     let active = true;
@@ -233,12 +297,42 @@ export function CanvasText({
     // resolution (DPR) هم بالا بریم تا متن كیف بمونه; GPU tier سقف رو تعیین میکنه
     const dpr = resolution;
 
-    let targetW = width * scaleFactor * dpr;
-    let targetH = height * scaleFactor * dpr;
-    let activeScaleFactor = scaleFactor * dpr;
+    // Texels per world unit. Never ABOVE the default — a page that asks for
+    // less is a page whose texture cannot show more (see the context), so the
+    // difference is pixels nobody could ever see.
+    const texelsPerUnit =
+      pageDensity && pageDensity > 0
+        ? Math.min(DEFAULT_TEXELS_PER_UNIT, pageDensity)
+        : scaleFactor * dpr;
 
-    // سقف امنیتی VRAM بر اساس توان GPU (نه اندازه صفحه)
-    const MAX_TEX_SIZE = tier === "high" ? 8192 : tier === "medium" ? 4096 : 2048;
+    let targetW = width * texelsPerUnit;
+    let targetH = height * texelsPerUnit;
+    let activeScaleFactor = texelsPerUnit;
+
+    // The ceiling on one piece of text.
+    //
+    // A page that states its own density (`pageDensity` — a composed paper, and
+    // only ever that) has already been told exactly how many texels its zoom can
+    // show, and asked for those and no more. Clamping THAT to a number picked
+    // off the GPU's name does not save memory it was going to waste; it just
+    // rasterises the script smaller and magnifies it back, and the reader is
+    // handed permanently softer text because a regex did not recognise their
+    // chip. Windows is where that happens most (ANGLE-wrapped vendor strings,
+    // integrated parts everywhere), which is exactly where the zoom was said to
+    // stop paying off. So for those pages the only ceiling is the real one the
+    // driver reports.
+    //
+    // Every other surah keeps the tier ceiling untouched: its density is the
+    // fixed 3072 above, which is NOT tuned to any particular screen and so does
+    // still need a guard.
+    const MAX_TEX_SIZE =
+      pageDensity && pageDensity > 0
+        ? maxTextureSize
+        : tier === "high"
+          ? 8192
+          : tier === "medium"
+            ? 4096
+            : 2048;
     const maxDim = Math.max(targetW, targetH);
 
     if (maxDim > MAX_TEX_SIZE) {
@@ -354,6 +448,17 @@ export function CanvasText({
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
+    // Hand the 2D backing store back to the system the moment the GPU has a
+    // copy. `onUpdate` fires at the end of three's upload, and a canvas is not
+    // a small thing to keep: the picture lives on twice otherwise, once in VRAM
+    // and once in RAM, for as long as the page is open. The re-rasterisation on
+    // context loss below is what makes this safe to do.
+    tex.onUpdate = (uploaded: THREE.Texture) => {
+      canvas.width = 0;
+      canvas.height = 0;
+      uploaded.onUpdate = null;
+    };
+
     // نهایت کیفیت وکتور بدون فلیکر زدن لبه‌ها
     tex.generateMipmaps = true;
     tex.minFilter = THREE.LinearMipmapLinearFilter;
@@ -376,6 +481,8 @@ export function CanvasText({
     fontsLoadedKey,
     fontWeight,
     fontStyle,
+    pageDensity,
+    maxTextureSize,
   ]);
 
   useEffect(() => {

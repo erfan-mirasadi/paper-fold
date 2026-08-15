@@ -69,6 +69,8 @@ export interface VerseMeshProps {
   translationTextHighlights?: VerseTextHighlight[];
   textScaleOverride?: number;
   translationTextAlign?: "left" | "center" | "right";
+  /** See `VerseOverrideConfig.versePadding`. */
+  versePadding?: number;
   translationPadding?: number;
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
@@ -181,6 +183,7 @@ export function VerseMesh({
   translationTextHighlights,
   textScaleOverride,
   translationTextAlign,
+  versePadding,
   translationPadding,
   suppressShadow = false,
   shadowRenderOrder,
@@ -442,6 +445,7 @@ export function VerseMesh({
                         textHighlights={textHighlights}
                         translationTextHighlights={translationTextHighlights}
                         textScaleOverride={textScaleOverride}
+                        versePadding={versePadding}
                         translationPadding={translationPadding}
                         opacity={combinedOpacity}
                         baseRenderOrder={baseRenderOrder}
@@ -467,6 +471,7 @@ export function VerseMesh({
                         translationTextHighlights={translationTextHighlights}
                         textScaleOverride={textScaleOverride}
                         textAlignOverride={translationTextAlign}
+                        versePadding={versePadding}
                         translationPadding={translationPadding}
                         isPill={isPill}
                         domeDir={domeDir}

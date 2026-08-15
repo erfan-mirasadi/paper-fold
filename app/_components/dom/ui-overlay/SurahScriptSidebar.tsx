@@ -757,6 +757,15 @@ export function SurahScriptSidebar() {
                 >
                   {ayahs.map((v) => {
                     const { isPill, color } = chunkAppearance(v.number);
+                    // The rosette prints the ayah's MUSHAF number, which is
+                    // only the same as its id on a page that starts at ayah 1.
+                    // A page of a longer surah — and every sheet of a composed
+                    // atlas — numbers its capsules from 1 and states the real
+                    // number in `displayNumber`, exactly as the paper badge does.
+                    const shown = Number(
+                      activeConfig.verseOverrides?.[v.number]?.displayNumber ??
+                        v.number,
+                    );
                     return (
                       <span key={v.number}>
                         <HighlightChunk
@@ -766,7 +775,7 @@ export function SurahScriptSidebar() {
                         >
                           {v.text}
                         </HighlightChunk>
-                        <AyahNumber n={v.number} />
+                        <AyahNumber n={shown} />
                       </span>
                     );
                   })}

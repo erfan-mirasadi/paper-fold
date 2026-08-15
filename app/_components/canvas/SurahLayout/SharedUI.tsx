@@ -2,7 +2,7 @@
 import { a } from "@react-spring/three";
 
 import { useTexture } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useContext, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
   WHITE_BASE,
@@ -38,7 +38,11 @@ import {
   useSurahLanguageStore,
 } from "../../../hooks/useSurahLanguageStore";
 import { cloneTextureAsAspectCover } from "../../../utils/textureFit";
-import { CanvasText } from "../shared/CanvasText";
+import {
+  CanvasText,
+  PageTextDensityContext,
+  PageZoomDensityContext,
+} from "../shared/CanvasText";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import type { AyahBadgeLayout, VerseTextHighlight } from "../../../data/schema";
 
@@ -709,7 +713,10 @@ interface VerseBoxProps {
   /** When true, shows the number badge even if `features.hideVerseNumbers`
    * is globally true — see `VerseOverrideConfig.showNumber`. */
   forceShowNumber?: boolean;
-  /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
+  /** Inner padding, every language — see `VerseOverrideConfig.versePadding`. */
+  versePadding?: number;
+  /** The EN/TR padding, replacing `versePadding` there — see
+   * `VerseOverrideConfig.translationPadding`. */
   translationPadding?: number;
   /** Stacks the page's single ayah number under the chunk counter — see
    * `VerseOverrideConfig.showAyahNumber`. */
@@ -761,6 +768,7 @@ export const VerseBox = ({
   textAlignOverride,
   hideNumber = false,
   forceShowNumber = false,
+  versePadding,
   translationPadding,
   showAyahNumber = false,
   ayahBadgeBg,
@@ -888,19 +896,26 @@ export const VerseBox = ({
   const textAlign = isArabic || centerTextInCapsule ? "center" : "left";
 
   const safeMargin = 0.0;
+  // THE PADDING THE CONFIG ASKED FOR, per side. Arabic reads `versePadding`;
+  // the translations read it too unless they were given their own — the same
+  // split as `textColor` / `translationTextColor` above.
+  const explicitPadding = isArabic
+    ? versePadding
+    : (translationPadding ?? versePadding);
   // Increase padding for big verses so text stays clear of decorative border SVG swirls
   const defaultExtraPadding =
     !isPill && !isArabic && !isTightPadding ? 0.07 : 0;
-  const EXTRA_BIG_VERSE_PADDING =
-    translationPadding !== undefined && !isArabic
-      ? translationPadding
-      : defaultExtraPadding;
+  const EXTRA_BIG_VERSE_PADDING = explicitPadding ?? defaultExtraPadding;
   const centeredSidePadding = centerTextInCapsule
     ? (showVerseNumber ? numberSidePadding : isTightPadding ? 0.005 : 0.012) +
       EXTRA_BIG_VERSE_PADDING
     : 0;
   const textMaxW = isTightPadding
-    ? finalW // remove wrapping limit so user can freely scale text to borders
+    ? // A tight page drops the wrapping limit so the text can be scaled right up
+      // to the border — but an EXPLICIT padding is the one thing it still obeys,
+      // otherwise a per-capsule padding would be silently ignored on every page
+      // that opted into tightness (which is every generated Yâsîn sheet).
+      finalW - (explicitPadding ?? 0) * 2
     : !showVerseNumber
       ? finalW - 0.04
       : (finalW -
@@ -933,7 +948,16 @@ export const VerseBox = ({
 
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
 
-  return (
+  // How finely this capsule's text is worth rasterising: set by the zoom of the
+  // SHEET it is printed on, not by the tightest zoom anywhere on the paper.
+  // Null on every ordinary surah, which has no sheets to tell apart — see
+  // `PageZoomDensityContext`.
+  const resolveTextDensity = useContext(PageZoomDensityContext);
+  const textDensity = resolveTextDensity
+    ? resolveTextDensity(x + w / 2, y - h / 2)
+    : null;
+
+  const capsule = (
     <group position={[finalX, y, z]}>
       {/* 1. حاشیه (عمیقترین لایه z=0) */}
       <UiRect
@@ -1033,6 +1057,13 @@ export const VerseBox = ({
       </group>
     </group>
   );
+
+  if (textDensity === null) return capsule;
+  return (
+    <PageTextDensityContext.Provider value={textDensity}>
+      {capsule}
+    </PageTextDensityContext.Provider>
+  );
 };
 
 // SPLIT VERSE CAPSULES — one verse rendered as TWO capsules (no per-capsule
@@ -1061,6 +1092,7 @@ interface SplitVerseCapsulesProps {
   verseId?: number;
   opacity?: any;
   baseRenderOrder?: number;
+  versePadding?: number;
   translationPadding?: number;
 }
 export const SplitVerseCapsules = ({
@@ -1085,6 +1117,7 @@ export const SplitVerseCapsules = ({
   verseId,
   opacity,
   baseRenderOrder,
+  versePadding,
   translationPadding,
 }: SplitVerseCapsulesProps) => {
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
@@ -1156,6 +1189,7 @@ export const SplitVerseCapsules = ({
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
+        versePadding={versePadding}
         translationPadding={translationPadding}
       />
       <VerseBox
@@ -1178,6 +1212,7 @@ export const SplitVerseCapsules = ({
         opacity={opacity}
         baseRenderOrder={baseRenderOrder}
         hideNumber
+        versePadding={versePadding}
         translationPadding={translationPadding}
       />
     </group>

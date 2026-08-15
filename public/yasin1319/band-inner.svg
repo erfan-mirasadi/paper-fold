@@ -1,0 +1,39 @@
+<svg width="2476" height="1000" viewBox="0 0 2476 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 13-19 — the sheet's INNERMOST FRAME: ayahs 16 and 17, the
+     messengers' answer ("our Lord knows we are sent to you" / "and ours is only
+     to deliver the message plainly"). It is the only pair on this sheet that
+     gets a frame of its own, and that is the sheet's argument: four ayahs of the
+     town's objections surround two ayahs of reply, so the reply is drawn as the
+     thing being surrounded.
+
+     COLOUR. Lavender #E1E3F3 — Tevbe 24's shield fill — at 0.85, higher than
+     the blue band outside it because it is painted over two fills rather than
+     one. Same gold gradient outline as everything else in the family.
+
+     ASPECT — drawn AT the aspect it is displayed at:
+
+         viewBox 2476 x 1000                   ->  2.476
+         config  scaleX 0.78 / scaleY 0.315     ->  2.476
+
+     one SVG unit = 3.15e-4 world on BOTH axes.
+
+     GEOMETRY (world units at 0.78 x 0.315)
+       outer edge   flush with the plane   ->  0.78 w x 0.315 h
+       stroke       13.5 units             ->  0.00425
+       corner r     355.75 units           ->  0.112   (36% of the height)
+
+     Fit check at r 0.112 and d 0.036 (ayah 16's top edge under the config's
+     0.028 top pad): 0.029 lost a side, leaving 0.706 usable for the 0.68
+     capsules. -->
+<defs>
+<linearGradient id="yasin1319InnerGold" x1="0" y1="500" x2="2476" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="6.75" y="6.75" width="2462.5" height="986.5"
+      rx="355.75" ry="355.75"
+      fill="#E1E3F3" fill-opacity="0.85"
+      stroke="url(#yasin1319InnerGold)" stroke-width="13.5"/>
+</svg>

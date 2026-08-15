@@ -1,0 +1,44 @@
+<svg width="2640" height="1000" viewBox="0 0 2640 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 1-12 — SECTION 1's OUTER FRAME (the opening four capsules, ayahs
+     1 … 6). The project's own "all-section" frame — a solid gold rim with a
+     cream panel inside it — same gradient, same world-unit rim thickness, same
+     corner radius as /nisa/all-section-1.svg, /maun/all-section.svg and
+     /imran/all-section-outer.svg.
+
+     WHY A PAGE-LOCAL COPY, the same reason /maun/all-section.svg is one.
+     /nisa/all-section-1.svg pre-distorts its corner ellipse (rx != ry) to
+     cancel a NON-UNIFORM plane stretch, and that pre-distortion is tuned to
+     Imran-14's scaleX/scaleY = 1.1 / 1.28 = 0.859. This frame is far more
+     landscape than that (1.04 x 0.394 -> 2.640), so re-using the shared file
+     would land its corners ~3x wider than tall and its top/bottom rim that much
+     thinner than the sides. So this file dodges the problem the way the newer
+     frames do: it is DRAWN AT THE ASPECT IT IS DISPLAYED AT, so rx = ry here
+     arrives as a true circle on screen and a uniform rim arrives uniform.
+
+         viewBox 2640 x 1000                  ->  2.640
+         config  scaleX 1.04 / scaleY 0.394   ->  2.640
+
+     one SVG unit = 3.94e-4 world units on BOTH axes.
+
+     GEOMETRY (world units at 1.04 x 0.394)
+       outer edge  flush with the plane  ->  1.04 w x 0.394 h
+       gold rim    11.0 units            ->  0.00433  (Maûn's is 0.0045)
+       corner r    102 units             ->  0.0402   (Maûn's is 0.04)
+
+     Drawn as gold rect + panel rect on top, concentric by construction
+     (outer r 102 / inner r 91 = 102 - rim): the panel's antialiased edge
+     composites straight onto the gold, so there is no mask seam.
+
+     The panel is opaque, exactly as the shared frames are — unlike the three
+     ring-*.svg frames below it on this page, which are translucent so they can
+     be stacked over one another. Nothing is stacked over this one. -->
+<defs>
+<linearGradient id="yasinAllSectionGold" x1="0" y1="500" x2="2640" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="0" y="0" width="2640" height="1000" rx="102" ry="102" fill="url(#yasinAllSectionGold)"/>
+<rect x="11" y="11" width="2618" height="978" rx="91" ry="91" fill="#F0E4E5"/>
+</svg>

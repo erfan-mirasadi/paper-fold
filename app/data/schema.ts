@@ -26,6 +26,19 @@ export interface SurahFeatures {
    * duplicate it.
    */
   hideBismillah3D?: boolean;
+  /**
+   * Draw the page's texture in stages instead of all at once — see
+   * `PageTextureLod`. For a paper that carries MANY SHEETS: one buffer big
+   * enough for all of them at reading resolution is the slowest thing on the
+   * page and the thing a weak GPU refuses, so such a page arrives at a low
+   * resolution on every device, sharpens to its resting one a frame at a time
+   * once it is on screen, and draws a screen-sized picture of whatever a
+   * section zoom is about to frame.
+   *
+   * Off (and untouched) for a single-sheet surah, which fits in one buffer at
+   * full quality and has nothing to gain from the machinery.
+   */
+  progressivePageTexture?: boolean;
 }
 
 export interface LayoutDimensions {
@@ -41,6 +54,15 @@ export interface LayoutDimensions {
    * separately. Defaults to false (paper widens as usual).
    */
   fixedWidthAcrossLanguages?: boolean;
+  /**
+   * Pulls the camera back by this factor, for a page too big to be framed by
+   * the app's fixed camera (see `cameraConfig`, which is otherwise page-size
+   * agnostic — every surah sheet is the same 1.54-wide page). Roughly
+   * `paperWidth / 1.54` frames a big paper the way a single sheet is framed;
+   * a smaller number lets it fill more of the screen. Defaults to 1, i.e. the
+   * camera every existing surah uses, untouched.
+   */
+  cameraDistanceScale?: number;
 }
 
 export interface CurveColorConfig {
@@ -585,6 +607,30 @@ export interface CameraTargetConfig {
 }
 
 /**
+ * The patch of page a section's zoom should FRAME, rather than a hand-tuned
+ * camera height. `CameraTargetConfig` states where the camera goes; this states
+ * what has to be on screen when it gets there, and the camera solves its own
+ * distance from the page's size and the viewport's shape (SectionZoomCamera).
+ *
+ * One page holds ONE surah on every ordinary sheet, so the two describe the
+ * same thing there and `cameraTarget` is the shorter way to say it. On an atlas
+ * — a dozen sheets composed onto one paper (paperComposer) — they part company:
+ * a height and a tilt frame the middle of the paper no matter which sheet was
+ * clicked, while a rectangle frames the sheet itself.
+ *
+ * Stated in the composed page's own coordinates, the ones every placement uses:
+ * x runs 0 → paperWidth rightwards from the page's left edge, y runs 0 →
+ * −paperHeight downwards from its top, and `x, y` is the rectangle's TOP-LEFT
+ * corner.
+ */
+export interface CameraFocusRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
  * Defines a custom section for drag/click/elevation that can span verses
  * from multiple blocks. Used by Ahzab 35 (left/right column sections) and
  * also referenced by `LayoutBlock.customSectionId`.
@@ -596,6 +642,11 @@ export interface CustomSectionDef {
   verseIds: number[];
   /** Optional specific camera target for this custom section */
   cameraTarget?: CameraTargetConfig;
+  /**
+   * What this section's zoom must frame. Takes precedence over
+   * `cameraTarget` — see `CameraFocusRect`.
+   */
+  cameraFocus?: CameraFocusRect;
 }
 
 export interface SpecialVerses {
@@ -628,7 +679,25 @@ export interface VerseOverrideConfig {
    * rounder dome; larger = a flatter dome. Defaults to 0.35.
    */
   domeSideRatio?: number;
-  /** Explicit amount of extra padding to apply inside the capsule when rendering translations (EN, TR). Overrides default extra padding. */
+  /**
+   * PADDING INSIDE THE CAPSULE — world units, taken off EACH side, so the text
+   * gets `capsuleWidth − 2 · versePadding` to set itself in. Applies to every
+   * language unless `translationPadding` narrows it, which makes this the
+   * ARABIC padding on a page that pads the two differently (the same split as
+   * `textColor` / `translationTextColor`).
+   *
+   * NEGATIVE opens the capsule up past its own border — the text is allowed to
+   * set wider than the box it sits in. That is the only way to reduce the air
+   * on a `tightVersePadding` page, where the default padding is already zero.
+   *
+   * It is a WRAP-AND-CLIP width, not a nudge: the text stays centred in the
+   * capsule either way, and what this changes is where a line breaks and where
+   * CanvasText stops drawing it. So it does nothing to a line that already fits
+   * — to actually close a gap between a short line and the border, move
+   * `textScaleOverride` instead, or narrow the capsule.
+   */
+  versePadding?: number;
+  /** The EN/TR padding, replacing `versePadding` there — see `versePadding`. */
   translationPadding?: number;
   /** Direct hex color for the verse box background (also used by paper masking) */
   bg?: string;

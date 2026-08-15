@@ -276,6 +276,7 @@ function GridBlock({
               translationTextColor={override?.translationTextColor}
               textHighlights={override?.textHighlights}
               translationTextHighlights={override?.translationTextHighlights}
+              versePadding={override?.versePadding}
               translationPadding={override?.translationPadding}
               textAlignOverride={override?.translationTextAlign}
               domeDir={override?.verseShape === "dome-up" ? "up" : override?.verseShape === "dome-down" ? "down" : undefined}
@@ -443,6 +444,7 @@ export function BlockRenderer({
           translationTextHighlights={introOverride?.translationTextHighlights}
           textScaleOverride={activeLanguage !== "ar" ? (introOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (introOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
           verseId={introVerseNum}
+          versePadding={introOverride?.versePadding}
           translationPadding={introOverride?.translationPadding} />
       )}
 
@@ -471,6 +473,7 @@ export function BlockRenderer({
           translationTextHighlights={outroOverride?.translationTextHighlights}
           textScaleOverride={activeLanguage !== "ar" ? (outroOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (outroOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
           verseId={outroVerseNum}
+          versePadding={outroOverride?.versePadding}
           translationPadding={outroOverride?.translationPadding} />
       )}
 

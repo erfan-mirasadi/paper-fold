@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePaperStore } from "../../../stores/usePaperStore";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
+import { useSectionZoomNav } from "../../../hooks/useSectionZoomNav";
 import { OverlayButton } from "./OverlayButton";
 
 const arrowStroke = "var(--foreground)";
@@ -59,10 +60,15 @@ export function PaperArrowsOverlay() {
   const goToPreviousPaper = usePaperStore((s) => s.goToPreviousPaper);
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  // While the reader is inside one section of an atlas, these two slots belong
+  // to stepping between SECTIONS — SectionZoomArrowsOverlay takes them, keys
+  // included, and switching papers waits until they come back out.
+  const isSteppingSections = useSectionZoomNav().isActive;
 
   const hasPrevious = activePaperIndex > 0;
   const hasNext = activePaperIndex < paperCount - 1;
-  const isVisible = paperCount > 1 && !isIntroActive && !isAllSectionsMode;
+  const isVisible =
+    paperCount > 1 && !isIntroActive && !isAllSectionsMode && !isSteppingSections;
 
   // Standard keyboard navigation. Scroll keys (up/down/space/…) are already
   // owned by the scroll system; left/right are free.

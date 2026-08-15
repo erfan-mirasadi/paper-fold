@@ -1,5 +1,9 @@
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect, useCallback, useRef } from "react";
 import { Color, type Texture } from "three";
+import {
+  createPageDetailUniforms,
+  DETAIL_SLOTS,
+} from "../_components/canvas/3d-scene/pageTextureLodMath";
 import { usePopUpStore } from "../stores/usePopUpStore";
 import { useElevatedStore } from "../stores/useElevatedStore";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
@@ -42,6 +46,51 @@ const isMiddleHorizontalFoldedForVerse = (
 const MAX_VERSE_ID = 100;
 const VERSE_ARR_SIZE = MAX_VERSE_ID + 1;
 const TOTAL_SECTIONS = 10;
+
+/**
+ * One detail slot's compositing, with the slot number written in as a LITERAL.
+ *
+ * Unrolled here rather than left as a `for` loop in GLSL because a sampler
+ * array may only be indexed by a constant integral expression: a loop counter
+ * does not qualify, however obviously constant its bounds are, and the shader
+ * fails to compile — silently on some drivers, with a black page on the rest.
+ * Written out per slot, every index is a literal and there is nothing for a
+ * driver to disagree about.
+ */
+const detailSlotSource = Array.from(
+  { length: DETAIL_SLOTS },
+  (_, i) => `
+      if (uDetailStrength[${i}] > 0.0) {
+        vec2 dUv${i} = (vMapUv - uDetailRect[${i}].xy) / uDetailRect[${i}].zw;
+        if (dUv${i}.x > 0.0 && dUv${i}.x < 1.0 && dUv${i}.y > 0.0 && dUv${i}.y < 1.0) {
+          vec2 edge${i} = smoothstep(vec2(0.0), vec2(uDetailFeather), dUv${i}) *
+                      (1.0 - smoothstep(vec2(1.0 - uDetailFeather), vec2(1.0), dUv${i}));
+
+          // The patch, with the edge contrast two resamplings cost put back —
+          // see DETAIL_SHARPEN. Four neighbours make the blur this subtracts
+          // from centre; on the paper they all agree and nothing happens, on a
+          // stroke of script they do not and the stroke gets its edge back.
+          vec4 mid${i} = texture2D(uDetailMap[${i}], dUv${i});
+          vec4 ring${i} =
+            texture2D(uDetailMap[${i}], dUv${i} + vec2(uDetailTexel.x, 0.0)) +
+            texture2D(uDetailMap[${i}], dUv${i} - vec2(uDetailTexel.x, 0.0)) +
+            texture2D(uDetailMap[${i}], dUv${i} + vec2(0.0, uDetailTexel.y)) +
+            texture2D(uDetailMap[${i}], dUv${i} - vec2(0.0, uDetailTexel.y));
+          vec4 sharp${i} = mid${i} + (mid${i} - ring${i} * 0.25) * uDetailSharpen;
+          // Never below black: an overshoot on the dark side of a stroke would
+          // otherwise come back as a negative that the lighting then amplifies.
+          sharp${i} = max(sharp${i}, vec4(0.0));
+
+          // map_fragment leaves diffuseColor as (material colour x map), so the
+          // detail has to be tinted the same way or the patch reads brighter.
+          diffuseColor = mix(
+            diffuseColor,
+            vec4(diffuse, opacity) * sharp${i},
+            uDetailStrength[${i}] * min(edge${i}.x, edge${i}.y)
+          );
+        }
+      }`,
+).join("\n");
 
 export function usePaperMasking(paperTextureDiffuse: Texture) {
   const { PAGE_WIDTH, PAGE_HEIGHT, SURAH_TRANSFORMS, FOLD_Y_POSITIONS } =
@@ -222,8 +271,21 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
 
     }, [SURAH_TRANSFORMS, FOLD_Y_POSITIONS, activeConfig]);
 
+  /**
+   * The sharp patch a section zoom draws for itself — see `PageTextureLod`.
+   * Created for every page, whether or not it has a ladder: the paper material
+   * survives paper switches without recompiling, so a shader that only some
+   * surahs carry would be the WRONG shader the moment the reader turns the
+   * page. With `uDetailStrength` at 0 — which is where it stays for every
+   * ordinary surah, forever — this is one uniform comparison per fragment.
+   */
+  const detailUniforms = useMemo(() => createPageDetailUniforms(), []);
+  /** Handed to the ladder as a ref: it writes to these every frame. */
+  const detailRef = useRef(detailUniforms);
+
   const uniforms = useMemo(
     () => ({
+      ...detailUniforms,
       uVerseVisibility: { value: new Float32Array(VERSE_ARR_SIZE).fill(1.0) },
       uSectionVisibility: { value: new Float32Array(TOTAL_SECTIONS).fill(1.0) },
       uVerseRects: { value: new Float32Array(VERSE_ARR_SIZE * 4) },
@@ -235,7 +297,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uBaseTexture: { value: paperTextureDiffuse },
       uVerseExpand: { value: 0.005 },
     }),
-    [paperTextureDiffuse],
+    [paperTextureDiffuse, detailUniforms],
   );
 
   useEffect(() => {
@@ -455,11 +517,31 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform float uPageWidth;
       uniform float uPageHeight;
       uniform sampler2D uBaseTexture;
+      uniform sampler2D uDetailMap[${DETAIL_SLOTS}];
+      uniform vec4 uDetailRect[${DETAIL_SLOTS}];
+      uniform float uDetailStrength[${DETAIL_SLOTS}];
+      uniform float uDetailFeather;
+      uniform vec2 uDetailTexel;
+      uniform float uDetailSharpen;
       ${shader.fragmentShader}
     `.replace(
         "#include <map_fragment>",
         `
       #include <map_fragment>
+
+      // The zoomed sheets' own sharp pictures, laid over the page's rectangles
+      // of them (PageTextureLod). Same content, more texels — so it is a plain
+      // swap of where the colour is read from, not a second look. Everything
+      // below this point (a hidden verse, a hidden section) still overrides
+      // it, exactly as it overrides the page texture.
+      //
+      // TWO of them, because a reader stepping from one sheet to the next must
+      // never watch the one they are still looking at go soft. The patches are
+      // different rectangles of the same page, so both are simply drawn; where
+      // two zones of one sheet overlap they carry the same picture anyway, and
+      // the later one winning costs nothing.
+      ${detailSlotSource}
+
       float lx = vMapUv.x * uPageWidth;
       float ly = (vMapUv.y - 1.0) * uPageHeight;
 
@@ -515,5 +597,5 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     [uniforms],
   );
 
-  return { onBeforeCompile };
+  return { onBeforeCompile, detailRef };
 }

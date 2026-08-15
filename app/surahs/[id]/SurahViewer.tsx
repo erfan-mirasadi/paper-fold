@@ -11,7 +11,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
 import { Preload, PerspectiveCamera } from "@react-three/drei";
 import dynamic from "next/dynamic";
-import { Suspense, useCallback, useEffect, useState, useRef } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import * as THREE from "three";
 
 import { PopUpHoverScrollController } from "@/app/_components/canvas/pop-up-verses/PopUpHoverScrollController";
@@ -38,6 +45,7 @@ import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOv
 import { FoldSliderOverlay } from "@/app/_components/dom/ui-overlay/FoldSliderOverlay";
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
+import { SectionZoomArrowsOverlay } from "@/app/_components/dom/ui-overlay/SectionZoomArrowsOverlay";
 import { PaperSwitchCursorSpinner } from "@/app/_components/dom/ui-overlay/PaperSwitchCursorSpinner";
 import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScriptSidebar";
 import { SideInfoPanel } from "@/app/_components/dom/ui-overlay/SideInfoPanel";
@@ -64,6 +72,17 @@ if (typeof window !== "undefined") {
   });
 }
 
+/**
+ * Surah routes that read WITHOUT the two side panels — the left script
+ * sidebar and the right tafsir panel. On these pages the panels are never
+ * mounted at all (not hidden with CSS), so none of their content, fonts or
+ * scroll listeners ever reach the DOM. Both panels carry their own toggle
+ * rail, so leaving them out removes the buttons with them.
+ *
+ * To bring the panels back to a page, delete its id from this list.
+ */
+const SURAHS_WITHOUT_SIDE_PANELS: ReadonlySet<string> = new Set(["yasin"]);
+
 const Experience = dynamic(
   () =>
     import("@/app/_components/canvas/3d-scene/Experience").then(
@@ -72,12 +91,37 @@ const Experience = dynamic(
   { ssr: false },
 );
 
+/**
+ * The phone profile: half the buffers, no multisampling, no bulk preload.
+ *
+ * Device identity comes first and is the only part of this that is certain —
+ * `Experience` makes the same call, and for the same reason. The width is a
+ * second opinion for a desktop browser squeezed to phone size, and it is only
+ * ever asked of a window that HAS a width: `innerWidth` reads 0 while the
+ * window is still coming up, and a 0 that counts as "narrow" is how a desktop
+ * ends up rendering at half resolution for the rest of the session.
+ */
+function readIsMobile(): boolean {
+  if (typeof window === "undefined") return false;
+  if (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    )
+  ) {
+    return true;
+  }
+  const width = window.innerWidth || document.documentElement.clientWidth;
+  return width > 0 && width < 768;
+}
+
 export default function SurahViewer() {
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
   const [mountMainOverlays, setMountMainOverlays] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [webglSupported, setWebglSupported] = useState(true);
+  /** Bumped when the display's pixel ratio changes — see the effect below. */
+  const [dprEpoch, setDprEpoch] = useState(0);
 
   // Decoupled from immediate Zustand hooks to prevent render cascade at handoff
   const [showPostIntroUI, setShowPostIntroUI] = useState(
@@ -99,15 +143,10 @@ export default function SurahViewer() {
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Detect mobile safely on mount — prevents SSR hydration mismatch
-    const mobileCheck =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      ) || window.innerWidth < 768;
     // Mount Canvas on the first animation frame so WebGL setup happens
     // right at the start of the load, while the loading overlay is visible
     const rafId = requestAnimationFrame(() => {
-      setIsMobile(mobileCheck);
+      setIsMobile(readIsMobile());
       setWebglSupported(isWebGLSupported());
       setCanvasReady(true);
     });
@@ -115,6 +154,81 @@ export default function SurahViewer() {
       cancelAnimationFrame(rafId);
     };
   }, []);
+
+  /**
+   * ...and asked again afterwards, because the first answer is the one that
+   * cannot be trusted.
+   *
+   * `readIsMobile` is a width test as much as a device test, and a width is
+   * only worth reading once the window has one. A window still being created —
+   * restored from minimised, opened in a background tab, sized by a display
+   * whose scaling has not settled — reports `innerWidth` 0, and 0 is under 768.
+   * The check above used to be the only one there was, so a single early read
+   * stood for the whole session: a desktop got the phone profile, and with it
+   * `dpr` pinned to 1. That pins EVERY buffer in the page-texture ladder — the
+   * zoom's own detail pass included — to half the linear resolution of the
+   * screen it is being looked at on, which is exactly the ceiling a reader
+   * hits when zooming in stops paying off.
+   */
+  useEffect(() => {
+    const recheck = () => setIsMobile(readIsMobile());
+    recheck();
+    window.addEventListener("resize", recheck);
+    return () => window.removeEventListener("resize", recheck);
+  }, []);
+
+  /**
+   * `devicePixelRatio` is a constant on a Mac and a variable on Windows: it
+   * moves with browser zoom, with the OS display scaling, and with dragging
+   * the window onto a monitor scaled differently. R3F reads it when the Canvas
+   * renders and never on its own, so a ratio that changes after mount leaves
+   * the whole scene — and the texture ladder sized from it — built for a
+   * display that is no longer there.
+   *
+   * A media query naming the CURRENT ratio is the only event the platform
+   * offers for this, and it has to be re-armed after every change, since the
+   * query itself names the value that just stopped being true. The state it
+   * bumps exists only to re-render the Canvas, which is what makes R3F look
+   * again.
+   */
+  useEffect(() => {
+    let media: MediaQueryList | null = null;
+    let cancelled = false;
+
+    const onChange = () => {
+      if (cancelled) return;
+      setDprEpoch((n) => n + 1);
+      arm();
+    };
+
+    const arm = () => {
+      if (cancelled) return;
+      media?.removeEventListener("change", onChange);
+      media = window.matchMedia(
+        `(resolution: ${window.devicePixelRatio}dppx)`,
+      );
+      media.addEventListener("change", onChange);
+    };
+
+    arm();
+    return () => {
+      cancelled = true;
+      media?.removeEventListener("change", onChange);
+    };
+  }, []);
+
+  /**
+   * Rebuilt whenever the ratio changes so the Canvas re-renders with it —
+   * R3F compares the RESOLVED number, so an identical pair costs nothing.
+   */
+  const dpr: [number, number] = useMemo(
+    () => (isMobile ? [1, 1] : [1, 2]),
+    // `dprEpoch` is deliberately a dep the body does not read: producing a new
+    // array is the whole point, since that is what re-renders the Canvas and
+    // makes R3F sample `devicePixelRatio` again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMobile, dprEpoch],
+  );
 
   useEffect(() => {
     let timeoutId: number | null = null;
@@ -169,6 +283,22 @@ export default function SurahViewer() {
     };
   }, [isSceneReady]);
 
+  // A paper too heavy to animate is swapped behind the SITE's own loading
+  // screen instead of behind a page-turn — the same screen, the same fade, the
+  // same lift, as arriving at the page for the first time. Dropping
+  // `isSceneReady` is all it takes: the overlay is already bound to it, and so
+  // are the scroll lock and the UI's own fade, so the whole "the page is not
+  // ready yet" state comes back in one piece rather than being re-created.
+  // `handleSceneReady` below raises it again when the new paper has genuinely
+  // settled, which is the same signal the first visit waits for.
+  useEffect(() => {
+    return usePaperStore.subscribe((state, prevState) => {
+      if (state.usesSiteLoader && !prevState.usesSiteLoader) {
+        setIsSceneReady(false);
+      }
+    });
+  }, []);
+
   const handleSceneReady = useCallback(() => {
     setIsSceneReady(true);
     // If this ready signal comes from a freshly swapped paper, it dismisses
@@ -182,6 +312,7 @@ export default function SurahViewer() {
         isSceneReady={isSceneReady}
         canvasReady={canvasReady}
         isMobile={isMobile}
+        dpr={dpr}
         webglSupported={webglSupported}
         showPostIntroUI={showPostIntroUI}
         isIntroRenderPhase={isIntroRenderPhase}
@@ -198,6 +329,8 @@ interface InnerProps {
   isSceneReady: boolean;
   canvasReady: boolean;
   isMobile: boolean;
+  /** Resolved by the parent so a pixel-ratio change re-renders the Canvas. */
+  dpr: [number, number];
   webglSupported: boolean;
   showPostIntroUI: boolean;
   isIntroRenderPhase: boolean;
@@ -211,6 +344,7 @@ function SurahViewerInner({
   isSceneReady,
   canvasReady,
   isMobile,
+  dpr,
   webglSupported,
   showPostIntroUI,
   isIntroRenderPhase,
@@ -220,6 +354,23 @@ function SurahViewerInner({
   handleSceneReady,
 }: InnerProps) {
   const lenis = useLenis();
+
+  // A composed atlas page (several sheets on one paper) is several times wider
+  // than a surah sheet and would run straight off the sides of the app's fixed
+  // camera. Every ordinary surah leaves this at 1 and is untouched — see
+  // `LayoutDimensions.cameraDistanceScale`.
+  const cameraDistanceScale = useStoryStore(
+    (s) => s.activeConfig.dimensions.cameraDistanceScale ?? 1,
+  );
+  const cameraPosition = CAMERA_CONFIG.initialCamera.position.map(
+    (v) => v * cameraDistanceScale,
+  ) as [number, number, number];
+
+  // See SURAHS_WITHOUT_SIDE_PANELS — pages listed there never mount either
+  // side panel, so nothing of theirs is rendered or measured.
+  const showSidePanels = usePaperStore(
+    (s) => !s.surahId || !SURAHS_WITHOUT_SIDE_PANELS.has(s.surahId),
+  );
 
   useAutoCollapsePanelsOnElevate();
 
@@ -364,10 +515,10 @@ function SurahViewerInner({
                   canvasWrapperRef as React.MutableRefObject<HTMLDivElement>
                 }
                 camera={{
-                  position: CAMERA_CONFIG.initialCamera.position,
+                  position: cameraPosition,
                   fov: CAMERA_CONFIG.initialCamera.fov,
                 }}
-                dpr={isMobile ? [1, 1] : [1, 2]}
+                dpr={dpr}
                 gl={{
                   antialias: !isMobile,
                   powerPreference: "high-performance",
@@ -385,7 +536,7 @@ function SurahViewerInner({
                  */}
                 <PerspectiveCamera
                   makeDefault
-                  position={CAMERA_CONFIG.initialCamera.position}
+                  position={cameraPosition}
                   fov={CAMERA_CONFIG.initialCamera.fov}
                 />
                 <DynamicControls />
@@ -422,11 +573,11 @@ function SurahViewerInner({
 
       <PaperSwitchCursorSpinner />
 
-      {isSceneReady && showPostIntroUI && <SurahScriptSidebar />}
+      {isSceneReady && showPostIntroUI && showSidePanels && <SurahScriptSidebar />}
       {/* The panel's copy for a non-default language is its own chunk
           (useSideInfoContent). The language switcher warms it before it
           flips, so this boundary is only the safety net for a cold read. */}
-      {isSceneReady && showPostIntroUI && (
+      {isSceneReady && showPostIntroUI && showSidePanels && (
         <Suspense fallback={null}>
           <SideInfoPanel />
         </Suspense>
@@ -489,6 +640,7 @@ function SurahViewerInner({
                   <ScrollHintOverlay />
                   <FoldSliderOverlay />
                   <PaperArrowsOverlay />
+                  <SectionZoomArrowsOverlay />
                   <PaperPaginationOverlay />
                 </motion.div>
               )}

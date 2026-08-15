@@ -1,0 +1,27 @@
+<svg width="3515" height="1000" viewBox="0 0 3515 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: the ground the opening's two runs sit on.
+
+     DRAWN AT THE ASPECT IT IS DISPLAYED AT, the rule every frame in this
+     project keeps: the plane is stretched to (scaleX, scaleY) world units, so
+     a file drawn square and shown at 3.5:1 arrives with oval corners and a rim
+     three times thicker down the sides than across the top.
+
+       world 1.160 x 0.330  ->  3.515
+       viewBox 3515 x 1000  ->  3.515
+     one SVG unit = 3.300e-4 world units on both axes.
+
+     Rim 0.0088 world (the generated sheet frames'), radius 9% of the short
+     side (band.svg's proportion). Fill and gradient are the surah's own:
+     SHEET_COLORS.gold.bg over the gold rim of /yasin1319/all-section.svg. -->
+<defs>
+<linearGradient id="ovOpenOuterGold" x1="0" y1="500" x2="3515" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="13.5" y="13.5" width="3488" height="973"
+      rx="90.0" ry="90.0"
+      fill="#F5EEDC" fill-opacity="0.6"
+      stroke="url(#ovOpenOuterGold)" stroke-width="27"/>
+</svg>

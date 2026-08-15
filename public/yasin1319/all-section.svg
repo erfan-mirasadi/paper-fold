@@ -1,0 +1,43 @@
+<svg width="764" height="1000" viewBox="0 0 764 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 13-19 — the sheet's OUTER FRAME (all seven ayahs). The project's own
+     "all-section" frame: a solid gold rim with a cream panel inside it, same
+     gradient, same world-unit rim thickness, same corner radius as
+     /nisa/all-section-1.svg, /maun/all-section.svg and /yasin/all-section.svg.
+
+     WHY A SHEET-LOCAL COPY, the same reason /maun/all-section.svg is one.
+     /nisa/all-section-1.svg pre-distorts its corner ellipse (rx != ry) to
+     cancel a NON-UNIFORM plane stretch, tuned to Imran-14's scaleX/scaleY =
+     0.859. This frame is PORTRAIT (1.06 x 1.388 -> 0.551), the opposite
+     stretch, so re-using the shared file would land its corners about 1.6x
+     taller than wide. This file is DRAWN AT THE ASPECT IT IS DISPLAYED AT, so
+     rx = ry here arrives as a true circle on screen and a uniform rim arrives
+     uniform.
+
+         viewBox 764 x 1000                    ->  0.764
+         config  scaleX 1.06 / scaleY 1.388     ->  0.764
+
+     one SVG unit = 1.388e-3 world units on BOTH axes — the coarsest mapping of
+     any frame in this family, because this is the tallest plane. That is why
+     the rim is only 3 units here against /yasin/all-section.svg's 11: both
+     arrive at the same ~0.0045 world.
+
+     GEOMETRY (world units at 1.06 x 1.388)
+       outer edge  flush with the plane  ->  1.06 w x 1.388 h
+       gold rim    3.0 units             ->  0.00416
+       corner r    29 units              ->  0.0403   (Maûn's is 0.04)
+
+     Drawn as gold rect + panel rect on top, concentric by construction
+     (outer r 29 / inner r 26 = 29 - rim): the panel's antialiased edge
+     composites straight onto the gold, so there is no mask seam. The panel is
+     opaque, as the shared frames are — the two band-*.svg frames stacked inside
+     it are the translucent ones. -->
+<defs>
+<linearGradient id="yasin1319OuterGold" x1="0" y1="500" x2="764" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="0" y="0" width="764" height="1000" rx="29" ry="29" fill="url(#yasin1319OuterGold)"/>
+<rect x="3" y="3" width="758" height="994" rx="26" ry="26" fill="#F0E4E5"/>
+</svg>

@@ -1,0 +1,21 @@
+<svg width="595" height="1000" viewBox="0 0 595 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — SÛRENİN PLANI: one wing of the ANA AYET ribbon.
+
+     The main verse is not a box on this page, it is a ribbon pointing both
+     ways — back at the ten ayahs that lead to it, forward at the sixty that
+     unfold from it. The ribbon's BODY is the verse capsule itself; these are
+     its two heads, drawn once and mirrored (`scaleX: -w`) for the other end.
+     Each one is TALLER than the capsule, the way a block arrow's head stands
+     proud of its shaft, and its base tucks under the capsule so no seam shows.
+
+       world 0.110 x 0.185  ->  0.595
+       viewBox 595 x 1000   ->  0.595
+     one SVG unit = 1.850e-4 world units on both axes.
+
+     Fill and rule are SHEET_COLORS.gold — the same bg and border the capsule
+     it joins is painted with, so the two read as one piece of ribbon. Stroke
+     0.0038 world = the project's CAPSULE_BORDER_WIDTH. -->
+<path d="M 585 10.5 L 10.5 500 L 585 989.5 Z"
+      fill="#F5EEDC"
+      stroke="#D0A24E" stroke-width="21" stroke-linejoin="round"/>
+</svg>

@@ -102,6 +102,18 @@ const SURAH_META_REGISTRY: ReadonlyArray<SurahMeta> = [
     arabicName: "المَاعُون ١٠٧",
     reference: "Mâûn 107",
   },
+  {
+    id: "yasin",
+    displayName: "Yâsîn — Tek Levha",
+    arabicName: "يس",
+    reference: "Yâsîn 1-19",
+  },
+  {
+    id: "yasinsheets",
+    displayName: "Yâsîn — Sayfalar",
+    arabicName: "يس",
+    reference: "Yâsîn 20-83",
+  },
 ] as const;
 
 /**
@@ -131,6 +143,19 @@ const META_REGISTRY_MAP = new Map<string, SurahMeta>(
 
 type PaperLoader = () => Promise<SurahPaper>;
 
+/**
+ * One paper per generated Yâsîn sheet, in surah order. Indices rather than
+ * imports, so naming them here costs nothing — the module is still only
+ * fetched when one of its papers is actually opened. Keep in step with
+ * `YASIN_SHEET_LIST` in ./configs/yasin/sheets.
+ */
+const YASIN_SHEET_INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 8] as const;
+
+/**
+ * The generated Yâsîn sheets, in surah order. Listed by key rather than
+ * imported, so naming them here costs nothing — the module itself is still
+ * only fetched when one of its papers is actually opened.
+ */
 const SURAH_PAPER_LOADERS: Readonly<
   Record<string, ReadonlyArray<PaperLoader>>
 > = {
@@ -221,6 +246,32 @@ const SURAH_PAPER_LOADERS: Readonly<
         textData: m.MAUN_107_TEXT_DATA,
       })),
   ],
+  // Two papers, in the order the study reads them: the PLAN of the surah — how
+  // many ayahs each passage holds and which verse the whole thing turns on —
+  // and then the surah itself, every sheet of it composed onto one landscape
+  // paper. Separate chunks: the plan is a page of its own and must not drag
+  // ten sheet configs in behind it.
+  yasin: [
+    () =>
+      import("./configs/yasin/overview").then((m) => ({
+        config: m.YASIN_OVERVIEW_CONFIG,
+        textData: m.YASIN_OVERVIEW_TEXT_DATA,
+      })),
+    () =>
+      import("./configs/yasin").then((m) => ({
+        config: m.YASIN_PAPER_CONFIG,
+        textData: m.YASIN_PAPER_TEXT_DATA,
+      })),
+  ],
+  // The generated sheets on their own, one per paper, so each can be read
+  // (and corrected) at full size instead of only as a tile of the atlas.
+  yasinsheets: YASIN_SHEET_INDICES.map(
+    (i) => () =>
+      import("./configs/yasin/sheets").then((m) => ({
+        config: m.YASIN_SHEET_LIST[i].config,
+        textData: m.YASIN_SHEET_LIST[i].textData,
+      })),
+  ),
 };
 
 // Memoized in-flight/settled promises. Keeping resolved configs cached makes

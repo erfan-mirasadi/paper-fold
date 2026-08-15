@@ -92,6 +92,20 @@ interface ElevatedStoreState {
   syncScrollOffset: (offset: number) => void;
   elevateVerse: (verseId: number) => void;
   elevateVerses: (verseIds: number[], sectionId?: ElevatedSectionId) => void;
+  /**
+   * Elevate exactly these verses, whatever was elevated before.
+   *
+   * `elevateVerses` MERGES — it is the click handler's action, where a second
+   * click on a second section means "and that one too". Moving from one section
+   * straight to the next needs the opposite, and doing it as dismiss-then-
+   * elevate would pass through `idle` on the way: one frame of "nothing is
+   * selected" that the camera reads as an instruction to fly home, and that
+   * every panel watching this store reads as an exit.
+   */
+  focusSection: (
+    verseIds: number[],
+    sectionId?: ElevatedSectionId,
+  ) => void;
   showAllSections: () => void;
   /** Like showAllSections but bypasses the scroll-unlock check.
    *  Used by the intro sequence where scroll is at 0. */
@@ -243,6 +257,27 @@ export const useElevatedStore = create<ElevatedStoreState>((set, get) => ({
       ),
       phase: nextIds.length > 0 ? "elevated" : "idle",
       hasEverElevated: hasEverElevated || nextIds.length > 0,
+    });
+  },
+
+  focusSection: (verseIds, sectionId) => {
+    const { unlockedVerseIds } = get();
+
+    const normalized = normalizeVerseIds(
+      verseIds.filter((id) => unlockedVerseIds.includes(id)),
+    );
+    if (normalized.length === 0) return;
+
+    const nextSectionIds = resolveSectionIds(normalized);
+
+    set({
+      activeVerseId: normalized[0],
+      activeVerseIds: normalized,
+      activeSectionIds: nextSectionIds,
+      activeSectionId: pickActiveSectionId(nextSectionIds, sectionId),
+      isAllSectionsMode: false,
+      phase: "elevated",
+      hasEverElevated: true,
     });
   },
 
