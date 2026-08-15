@@ -1,7 +1,7 @@
 import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
-// 53-68 — the shout, the Garden, the guilty, and the fire. Fifteen ayahs on one
+// 53-67 — the shout, the Garden, the guilty, and the fire. Fifteen ayahs on one
 // sheet, copied off the handwritten page.
 //
 // THE PAGE IS THREE BLOCKS, and the middle one is where its whole argument is:
@@ -18,11 +18,11 @@ import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 //   │  61                        │ │       58  ──  57                │
 //   │  62                        │ │                                 │
 //   ╰───────────────────────────╯ ╰─────────────────────────────────╯
-//   ╭──────────────────────── the fire (63-68) ────────────────────────╮
+//   ╭──────────────────────── the fire (63-67) ────────────────────────╮
 //   │       64  ──  63                                                 │
 //   │  ╭──────────────────── 65 ─────────────────────────────────────╮ │
 //   │  │  66                                                         │ │
-//   │  │  67 · 68                                                    │ │
+//   │  │  67                                                         │ │
 //   ╰──╰─────────────────────────────────────────────────────────────╯─╯
 //
 // TWO SHAPES OF GROUP, and they mean different things. Capsules SIDE BY SIDE
@@ -52,8 +52,8 @@ const BLOCK_PAD = 0.025;
 const SPEC: SheetSpec = {
   id: "yasin5368",
   key: "yasin5368",
-  title: "YÂSÎN: 53-68",
-  heroSubtitle: "suresi 53-68",
+  title: "YÂSÎN: 53-67",
+  heroSubtitle: "suresi 53-67",
   sayfa: 444,
   // UNCHANGED from the 55-68 sheet this replaces — the atlas addresses this
   // sheet by its right edge, so its width is what puts it where it is.
@@ -205,6 +205,7 @@ const SPEC: SheetSpec = {
 
     // ── The fire: named, then entered, then sealed ────────────────────────
     {
+      gapAfter: 0.032,
       pair: [
         {
           ayah: 63,
@@ -218,6 +219,7 @@ const SPEC: SheetSpec = {
         {
           ayah: 64,
           tone: "blue",
+          heightLines: 1.5,
           arScale: 0.95,
           latScale: 0.63,
           ar: "اصْلَوْهَا الْيَوْمَ بِمَا كُنتُمْ تَكْفُرُونَ",
@@ -229,6 +231,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 65,
       tone: "white",
+      heightLines: 1.5,
+      gapAfter: 0.032,
       arScale: 0.84,
       latScale: 0.67,
       ar: "الْيَوْمَ نَخْتِمُ عَلَىٰ أَفْوَاهِهِمْ وَتُكَلِّمُنَا أَيْدِيهِمْ وَتَشْهَدُ أَرْجُلُهُم بِمَا كَانُوا يَكْسِبُونَ",
@@ -238,6 +242,8 @@ const SPEC: SheetSpec = {
     {
       ayah: 66,
       tone: "white",
+      heightLines: 1.5,
+      gapAfter: 0.032,
       arScale: 0.84,
       latScale: 0.65,
       ar: "وَلَوْ نَشَاءُ لَطَمَسْنَا عَلَىٰ أَعْيُنِهِمْ فَاسْتَبَقُوا الصِّرَاطَ فَأَنَّىٰ يُبْصِرُونَ",
@@ -247,27 +253,19 @@ const SPEC: SheetSpec = {
     {
       ayah: 67,
       tone: "white",
+      heightLines: 1.5,
       arScale: 0.92,
       latScale: 0.74,
       ar: "وَلَوْ نَشَاءُ لَمَسَخْنَاهُمْ عَلَىٰ مَكَانَتِهِمْ فَمَا اسْتَطَاعُوا مُضِيًّا وَلَا يَرْجِعُونَ",
       tr: "Dilesek onları oldukları yerde dondururduk; ne ileri gidebilir ne dönebilirlerdi.",
       en: "Had We willed, We would have fixed them where they stand: unable to go on, unable to return.",
     },
-    {
-      ayah: 68,
-      tone: "white",
-      arScale: 0.84,
-      latScale: 0.77,
-      ar: "وَمَن نُّعَمِّرْهُ نُنَكِّسْهُ فِي الْخَلْقِ أَفَلَا يَعْقِلُونَ",
-      tr: "Kime uzun ömür verirsek yaratılışını tersine çeviririz. Hâlâ akletmezler mi?",
-      en: "Whom We grant long life, We reverse in creation. Will they not use their minds?",
-    },
   ],
 
   frames: [
     {
       from: 0,
-      to: 7,
+      to: 6,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       pad: 0,
@@ -307,11 +305,11 @@ const SPEC: SheetSpec = {
     // The fire, and the sealing of the mouths inside it.
     {
       from: 3,
-      to: 7,
+      to: 6,
       tone: "band",
       pad: BLOCK_PAD,
     },
-    // { from: 4, to: 7, tone: "inner" },
+    // { from: 4, to: 6, tone: "inner" },
   ],
 };
 

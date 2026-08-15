@@ -44,8 +44,8 @@ const BLOCK_PAD = 0.0483;
 const SPEC: SheetSpec = {
   id: "yasin6982",
   key: "yasin6982",
-  title: "YÂSÎN: 69-82",
-  heroSubtitle: "suresi 69-82",
+  title: "YÂSÎN: 68-82",
+  heroSubtitle: "suresi 68-82",
   sayfa: 445,
   // UNCHANGED — the atlas addresses this sheet by its right edge, so its width
   // is what puts it where it is.
@@ -53,8 +53,7 @@ const SPEC: SheetSpec = {
   capsuleWidthScale: 0.88,
 
   rows: [
-    // Ayah 68 is intentionally repeated here as the lead-in to 69-70. Its
-    // original capsule remains on the preceding sheet.
+    // Ayah 68 leads into 69-70 and now lives only on this sheet.
     {
       ayah: 68,
       tone: "gold",

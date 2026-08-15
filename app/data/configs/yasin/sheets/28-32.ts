@@ -12,6 +12,7 @@ const SPEC: SheetSpec = {
   rows: [
     {
       ayah: 28,
+      gapAfter: 0.05,
       arScale: 0.71,
       latScale: 0.61,
       tone: "cream",
@@ -65,7 +66,7 @@ const SPEC: SheetSpec = {
       to: 4,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
-      offsetY: -0.46,
+      offsetY: -0.47,
       h: 1.05,
     },
     {
