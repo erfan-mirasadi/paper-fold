@@ -86,6 +86,9 @@ const SPEC: SheetSpec = {
     // moment said twice. LEFT is the guilty, and it is a stack, because what
     // happens to them happens in order.
     {
+      // Pull the two middle sections apart far enough that their enlarged,
+      // equal-size frames keep a clean gap between them.
+      inwardShift: -0.15,
       right: [
         {
           pair: [
@@ -140,7 +143,9 @@ const SPEC: SheetSpec = {
         {
           ayah: 59,
           tone: "maroon",
-          expandW: 0.04,
+          heightLines: 1.5,
+          gapAfter: 0.004,
+          expandW: 0.13,
           arScale: 0.84,
           latScale: 0.89,
           ar: "وَامْتَازُوا الْيَوْمَ أَيُّهَا الْمُجْرِمُونَ",
@@ -150,8 +155,10 @@ const SPEC: SheetSpec = {
         {
           ayah: 60,
           tone: "white",
-          expandW: 0.04,
-          arScale: 0.59,
+          heightLines: 1.5,
+          gapAfter: 0.004,
+          expandW: 0.13,
+          arScale: 0.7,
           latScale: 0.58,
           ar: "أَلَمْ أَعْهَدْ إِلَيْكُمْ يَا بَنِي آدَمَ أَن لَّا تَعْبُدُوا الشَّيْطَانَ إِنَّهُ لَكُمْ عَدُوٌّ مُّبِينٌ",
           tr: "“Ey Âdemoğulları, şeytana kulluk etmeyin diye size ahit vermedim mi?”",
@@ -160,7 +167,9 @@ const SPEC: SheetSpec = {
         {
           ayah: 61,
           tone: "white",
-          expandW: 0.04,
+          heightLines: 1.5,
+          gapAfter: 0.004,
+          expandW: 0.13,
           arScale: 0.84,
           latScale: 0.68,
           ar: "وَأَنِ اعْبُدُونِي هَٰذَا صِرَاطٌ مُّسْتَقِيمٌ",
@@ -170,7 +179,8 @@ const SPEC: SheetSpec = {
         {
           ayah: 62,
           tone: "maroon",
-          expandW: 0.04,
+          heightLines: 1.5,
+          expandW: 0.13,
           arScale: 0.77,
           latScale: 0.65,
           ar: "وَلَقَدْ أَضَلَّ مِنكُمْ جِبِلًّا كَثِيرًا أَفَلَمْ تَكُونُوا تَعْقِلُونَ",
@@ -248,24 +258,26 @@ const SPEC: SheetSpec = {
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       pad: 0,
-      w: 2.16,
+      w: 2.3,
       h: 2.06,
     },
     {
       from: 0,
       to: 1,
-      tone: "rose",
+      tone: "inner",
       pad: BLOCK_PAD,
     },
     // The two halves of the middle band, each bracketed on its own side. They
-    // come out as TWINS — same width because the columns split the row evenly,
-    // same height because both hold two rows of three-line capsules.
+    // come out as TWINS. Their explicit size also accounts for the extra width
+    // added to 59–62, so neither that stack nor the Garden escapes its frame.
     {
       from: 2,
       to: 2,
       side: "right",
       tone: "band",
       pad: BLOCK_PAD,
+      w: 1.28,
+      h: 0.7,
     },
     {
       from: 2,
@@ -273,6 +285,8 @@ const SPEC: SheetSpec = {
       side: "left",
       tone: "rose",
       pad: BLOCK_PAD,
+      w: 1.28,
+      h: 0.7,
     },
     // The fire, and the sealing of the mouths inside it.
     {

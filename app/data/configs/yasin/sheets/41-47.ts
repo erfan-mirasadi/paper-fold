@@ -123,7 +123,7 @@ const SPEC: SheetSpec = {
     // ── Band 4 — the retort (47), alone across the whole band ─────────────
     {
       ayah: 47,
-      tone: "maroon",
+      tone: "white",
       heightLines: 4,
       arScale: 0.75,
       latScale: 0.82,
