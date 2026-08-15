@@ -19,10 +19,10 @@
 
      GEOMETRY (world units at 0.78 x 0.315)
        outer edge   flush with the plane   ->  0.78 w x 0.315 h
-       stroke       27 units               ->  0.0085  (== band.svg's 0.0090)
-       corner r     349 units              ->  0.110   (35% of the height)
+       stroke       13.5 units             ->  0.00425
+       corner r     355.75 units           ->  0.112   (36% of the height)
 
-     Fit check at r 0.110 and d 0.036 (ayah 16's top edge under the config's
+     Fit check at r 0.112 and d 0.036 (ayah 16's top edge under the config's
      0.028 top pad): 0.029 lost a side, leaving 0.706 usable for the 0.68
      capsules. -->
 <defs>
@@ -32,8 +32,8 @@
 <stop offset="1" stop-color="#968428"/>
 </linearGradient>
 </defs>
-<rect x="13.5" y="13.5" width="2449" height="973"
-      rx="349" ry="349"
+<rect x="6.75" y="6.75" width="2462.5" height="986.5"
+      rx="355.75" ry="355.75"
       fill="#E1E3F3" fill-opacity="0.85"
-      stroke="url(#yasin1319InnerGold)" stroke-width="27"/>
+      stroke="url(#yasin1319InnerGold)" stroke-width="13.5"/>
 </svg>

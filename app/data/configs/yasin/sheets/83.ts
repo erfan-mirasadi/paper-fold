@@ -9,6 +9,7 @@ const SPEC: SheetSpec = {
   heroSubtitle: "suresi 83",
   sayfa: 445,
   paperWidth: 1.3,
+  capsuleWidthScale: 2,
 
   rows: [
     {

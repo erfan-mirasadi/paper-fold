@@ -22,8 +22,8 @@
 
      GEOMETRY (world units at 0.95 x 1.123)
        outer edge   flush with the plane   ->  0.95 w x 1.123 h
-       stroke       8 units                ->  0.0090
-       corner r     80 units               ->  0.0898  (8% of the height)
+       stroke       4 units                ->  0.0045
+       corner r     82 units               ->  0.0921  (8% of the height)
 
      Corner radius is small relative to the height here — this is a tall band,
      not a stadium — so the corner costs a capsule almost nothing: at d 0.044
@@ -36,8 +36,8 @@
 <stop offset="1" stop-color="#968428"/>
 </linearGradient>
 </defs>
-<rect x="4" y="4" width="838" height="992"
-      rx="80" ry="80"
+<rect x="2" y="2" width="842" height="996"
+      rx="82" ry="82"
       fill="#CEE0E9" fill-opacity="0.6"
-      stroke="url(#yasin1319BandGold)" stroke-width="8"/>
+      stroke="url(#yasin1319BandGold)" stroke-width="4"/>
 </svg>

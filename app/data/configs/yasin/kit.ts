@@ -208,8 +208,10 @@ export interface CapsuleSpec {
    * Geometry-only line count for the capsule. Use this when text is reflowed
    * into fewer visual lines but the original capsule/frame height must stay
    * unchanged. It does not change the text or either text scale.
-   */
+  */
   heightLines?: number;
+  /** Custom air after this capsule before the next stacked row. */
+  gapAfter?: number;
   /** Extra capsule width on each side; affects the rendered capsule only. */
   expandW?: number;
   /**
@@ -542,7 +544,8 @@ const isDomed = (item: SheetRow | ColumnItem) =>
 
 /** Air between two items stacked one under the other. */
 const airBetween = (above: SheetRow | ColumnItem, below: SheetRow | ColumnItem) =>
-  isDomed(above) || isDomed(below) ? DOME_ROW_AIR : ROW_AIR;
+  capsulesOf(above)[0]?.gapAfter ??
+  (isDomed(above) || isDomed(below) ? DOME_ROW_AIR : ROW_AIR);
 
 const capsuleHeight = (item: CapsuleSpec | ColumnItem) =>
   Math.max(

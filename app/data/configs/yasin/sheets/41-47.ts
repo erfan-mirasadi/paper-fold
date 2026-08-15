@@ -1,4 +1,4 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 // 41-47 — the laden ship, copied off the handwritten sheet.
@@ -134,13 +134,21 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    // The two outlines on the sheet, and nothing else — no rim around the page.
-    // `outer` is the project's own all-section art: gold rim, panel inside,
-    // drawn at the aspect each of these two is displayed at. They are siblings,
-    // not nested, so both are drawn at the same width and every band keeps the
-    // same measure.
+    // One outer frame around the complete 41-47 section.
+    {
+      from: 0,
+      to: 3,
+      tone: "outer",
+      src: SHEET_FRAME_SVGS.overall,
+      w: 1.1,
+      h: 1.41,
+    },
+    // Keep the two original outer frames around the two bands.
     { from: 0, to: 1, tone: "outer" },
     { from: 2, to: 3, tone: "outer" },
+    // Each band also gets its own inner SVG frame.
+    { from: 0, to: 1, tone: "inner" },
+    { from: 2, to: 3, tone: "inner" },
   ],
 };
 
