@@ -73,7 +73,7 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 54,
-      tone: "green",
+      tone: "blue",
       arScale: 0.9,
       latScale: 0.9,
       ar: "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا وَلَا تُجْزَوْنَ إِلَّا مَا كُنتُمْ تَعْمَلُونَ",
@@ -125,7 +125,7 @@ const SPEC: SheetSpec = {
             },
             {
               ayah: 58,
-              tone: "cream",
+              tone: "green",
               heightLines: 4,
               arScale: 0.82,
               latScale: 0.75,
@@ -159,7 +159,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 61,
-          tone: "cream",
+          tone: "white",
           expandW: 0.04,
           arScale: 0.84,
           latScale: 0.68,
@@ -169,7 +169,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 62,
-          tone: "white",
+          tone: "maroon",
           expandW: 0.04,
           arScale: 0.77,
           latScale: 0.65,
@@ -185,7 +185,7 @@ const SPEC: SheetSpec = {
       pair: [
         {
           ayah: 63,
-          tone: "maroon",
+          tone: "blue",
           arScale: 0.86,
           latScale: 0.8,
           ar: "هَٰذِهِ جَهَنَّمُ الَّتِي كُنتُمْ تُوعَدُونَ",
@@ -194,7 +194,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 64,
-          tone: "maroon",
+          tone: "blue",
           arScale: 0.95,
           latScale: 0.63,
           ar: "اصْلَوْهَا الْيَوْمَ بِمَا كُنتُمْ تَكْفُرُونَ",
@@ -205,7 +205,7 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 65,
-      tone: "lav",
+      tone: "white",
       arScale: 0.84,
       latScale: 0.67,
       ar: "الْيَوْمَ نَخْتِمُ عَلَىٰ أَفْوَاهِهِمْ وَتُكَلِّمُنَا أَيْدِيهِمْ وَتَشْهَدُ أَرْجُلُهُم بِمَا كَانُوا يَكْسِبُونَ",
@@ -214,7 +214,7 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 66,
-      tone: "lav",
+      tone: "white",
       arScale: 0.84,
       latScale: 0.65,
       ar: "وَلَوْ نَشَاءُ لَطَمَسْنَا عَلَىٰ أَعْيُنِهِمْ فَاسْتَبَقُوا الصِّرَاطَ فَأَنَّىٰ يُبْصِرُونَ",
@@ -281,7 +281,7 @@ const SPEC: SheetSpec = {
       tone: "band",
       pad: BLOCK_PAD,
     },
-    { from: 4, to: 7, tone: "inner" },
+    // { from: 4, to: 7, tone: "inner" },
   ],
 };
 
