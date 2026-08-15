@@ -278,6 +278,10 @@ export const SHEET = buildSheet(SPEC);
 // block 0) down by 0.04. The engine isolates the first block's nudge, so block
 // 1 starts the same shift for the rest of this cluster; block 3 cancels it
 // before the two lower columns begin, leaving 71–82 exactly where they were.
-SHEET.config.blocks[0].verticalNudge = 0.04;
-SHEET.config.blocks[1].verticalNudge = 0.04;
-SHEET.config.blocks[3].verticalNudge = -0.04;
+const sheetBlocks = SHEET.config.blocks;
+if (!sheetBlocks) {
+  throw new Error("yasin6982: buildSheet did not emit layout blocks");
+}
+sheetBlocks[0].verticalNudge = 0.04;
+sheetBlocks[1].verticalNudge = 0.04;
+sheetBlocks[3].verticalNudge = -0.04;
