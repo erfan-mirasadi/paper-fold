@@ -1,49 +1,24 @@
-import { buildSheet, type SheetSpec } from "../kit";
+import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
-// 33-40 — the earth and the sky, drawn as a ROSETTE inside one circle.
+// 33-40 — the earth and the sky, grouped inside the project's standard frames.
+// One pale outer frame holds the whole sheet. Four strong-pink inner frames
+// hold ayah 33, ayahs 34-35 together, ayah 36, and ayahs 37-40 together.
 //
-// 33-36 IS THE ROSETTE PROPER, copied off the handwritten sheet: each of those
-// four ayahs gets its own petal. 37-40 — the night, the sun, the moon, and
-// everything in orbit — are a FIFTH PETAL, built the same way, holding four
-// whole ayahs instead of one ayah's four fragments:
-//
-//              ╭─────────── circle ───────────╮
-//              │      ╭──────  33  ──────╮     │   the earth revived
-//              │  ╭──  35  ──╮ ╭──  34  ──╮    │   the fruit · the gardens
-//              │      ╰──────  36  ──────╯     │   all the pairs
-//              │      ╭──────  37  ──────╮     │   the night
-//              │      │   39  ──  38     │     │   the moon · the sun
-//              │      ╰──────  40  ──────╯     │   all of it in orbit
-//              ╰──────────────────────────────╯
-//
-// A 33-36 PETAL IS BUILT THE SAME WAY EVERY TIME: a line across the top, TWO
-// CAPSULES BRIDGED BY A CONNECTOR through the middle, and a line across the
-// bottom. The pair is the widest part, which is what makes the group read as a
-// lens rather than a stack — the phrase that splits in two sits where the
-// mandorla would be widest. There, ONE AYAH IS THREE CAPSULES and only the LAST
-// fragment carries the number, as on the sheet.
-//
-// IN THE SKY PETAL ONE AYAH IS ONE CAPSULE, so every one of them carries its
-// own number. They are long, so their text is broken across lines by hand, and
-// `tr` and `en` are broken to the same count as `ar` — `ar` is what sets the
-// capsule's height, and a translation left on one line would be fitted to that
-// one line and set tiny.
+// Ayahs 33-36 are still split into phrase capsules: a full-width phrase, a
+// bridged pair, and another full-width phrase. Only the final fragment prints
+// the ayah number. Ayahs 37-40 each remain whole and print their own numbers.
 // ---------------------------------------------------------------------------
 
 /**
- * All four petals come out the SAME size. The middle row splits its width in
- * two, so the top and bottom rows take half of theirs — then every lens is one
- * column wide and the rosette is regular, four equal petals around a centre.
+ * Single-ayah phrase groups use half the natural row width. The 34-35 row uses
+ * both columns together, while each ayah keeps the same local phrase width.
  */
 const PETAL = 0.5;
 
 /**
- * Air each petal keeps around itself — the gap that separates 33 from the
- * 34 · 35 band, and that band from 36. THIS is the number that moves the top
- * and bottom petals towards the centre of the rosette: turn it down and they
- * close in, up and they spread. Three petal frames meet at each of the two
- * boundaries, so the gap there is three times this.
+ * Vertical air each inner frame keeps around its group. Lower values pull the
+ * four framed groups together; higher values separate them.
  */
 const PETAL_PAD = 0.01;
 
@@ -314,24 +289,54 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    // The circle that holds the whole rosette — the only frame that is DRAWN.
+    // One pale standard frame around the complete 33-40 sheet.
     {
       from: 0,
       to: 9,
-      tone: "circle",
+      tone: "outer",
+      src: SHEET_FRAME_SVGS.overall,
     },
-    // One petal per ayah, `none` rather than `lens`: the mandorla outline is
-    // gone, but the grouping it stood for is not. Each petal still gets its own
-    // width, its own air from the petals around it, and its own drag zone and
-    // camera target.
-    // `pad` well under the nesting level's own: three of these frames meet at
-    // each band boundary (one ending, two starting side by side), and without a
-    // rim between them there is nothing there for the default air to clear.
-    { from: 0, to: 2, tone: "none", pad: PETAL_PAD },
-    { from: 3, to: 3, tone: "none", side: "right", pad: PETAL_PAD },
-    { from: 3, to: 3, tone: "none", side: "left", pad: PETAL_PAD },
-    { from: 4, to: 6, tone: "none", pad: PETAL_PAD },
-    { from: 7, to: 9, tone: "none", pad: PETAL_PAD },
+    // Four strong-pink standard inner frames: 33, 34-35, 36 and 37-40.
+    {
+      from: 0,
+      to: 2,
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
+      pad: PETAL_PAD,
+      w: 0.6864,
+      h: 0.38,
+      offsetY: -0.1352,
+    },
+    {
+      from: 3,
+      to: 3,
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
+      pad: PETAL_PAD,
+      w: 1.53,
+      h: 0.39,
+      offsetY: -0.1353,
+    },
+    {
+      from: 4,
+      to: 6,
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
+      pad: PETAL_PAD,
+      w: 0.6864,
+      h: 0.38,
+      offsetY: -0.1353,
+    },
+    {
+      from: 7,
+      to: 9,
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
+      pad: PETAL_PAD,
+      w: 1.4617,
+      h: 0.48,
+      offsetY: -0.1757,
+    },
   ],
 };
 

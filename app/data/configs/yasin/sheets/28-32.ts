@@ -65,14 +65,17 @@ const SPEC: SheetSpec = {
       to: 4,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
+      offsetY: -0.46,
+      h: 1.05,
     },
     {
       from: 1,
       to: 4,
       tone: "inner",
       src: SHEET_FRAME_SVGS.inner,
-      w: 0.9, // scaleX
-      h: 0.82, // scaleY
+      pad: 0.015,
+      w: 0.9,
+      h: 0.82,
       offsetY: -0.298,
     },
   ],

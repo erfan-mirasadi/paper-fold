@@ -74,9 +74,9 @@ const CELLS: GridCell[] = [
   },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
-  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.1 },
-  { at: [1, 4], key: "s2027", sheet: S_20_27 },
-  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: +0.12, shiftY: 0.15 },
+  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.105 },
+  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0.03 },
+  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: +0.2, shiftY: 0.15 },
   { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.1 },
 
   // Row 2 — the one shout and "when is this promise?", side by side: 28-32
@@ -87,9 +87,15 @@ const CELLS: GridCell[] = [
     align: "rightHalf",
     key: "s2832",
     sheet: S_28_32,
-    shiftY: 0.18,
+    shiftY: 0.23,
   },
-  { at: [2, 0], align: "leftHalf", key: "s4852", sheet: S_48_52, shiftY: 0 },
+  {
+    at: [2, 0],
+    align: "leftHalf",
+    key: "s4852",
+    sheet: S_48_52,
+    shiftY: 0.1,
+  },
 
   // Row 3 — the two big two-column sheets.
   { at: [3, 0], key: "s5368", sheet: S_53_68, shiftY: 0.1 },
