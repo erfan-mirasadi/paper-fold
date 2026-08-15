@@ -39,5 +39,5 @@
 <rect x="16.0" y="16.0" width="2580" height="968"
       rx="392" ry="392"
       fill="#CEE0E9" fill-opacity="0.85"
-      stroke="url(#yasinRingInnerGold)" stroke-width="32"/>
+      stroke="url(#yasinRingInnerGold)" stroke-width="16"/>
 </svg>

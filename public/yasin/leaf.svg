@@ -65,12 +65,12 @@
 <!-- Outer lens — teal -->
 <path d="M 11,500 Q 1450,-478 2889,500 Q 1450,1478 11,500 Z"
       fill="#CFE2E6" fill-opacity="0.7"
-      stroke="url(#yasinLeafGold)" stroke-width="21" stroke-linejoin="round"/>
+      stroke="url(#yasinLeafGold)" stroke-width="10.5" stroke-linejoin="round"/>
 
 <!-- Inner lens — pale maroon, the page's one red rule -->
 <path d="M 290,500 Q 1450,-348 2610,500 Q 1450,1348 290,500 Z"
       fill="#F6EDE8" fill-opacity="0.95"
-      stroke="#B0504D" stroke-width="21" stroke-linejoin="round"/>
+      stroke="#B0504D" stroke-width="10.5" stroke-linejoin="round"/>
 
 
 </svg>

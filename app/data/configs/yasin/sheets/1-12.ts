@@ -502,7 +502,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.16,
+      gapBefore: 0.12,
       customSectionId: "sec_leaf",
     },
   ],

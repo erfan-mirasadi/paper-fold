@@ -65,5 +65,5 @@
 <rect x="5.5" y="5.5" width="1255" height="989"
       rx="188" ry="188"
       fill="#F5EEDC" fill-opacity="0.6"
-      stroke="url(#yasinRingOuterGold)" stroke-width="11"/>
+      stroke="url(#yasinRingOuterGold)" stroke-width="5.5"/>
 </svg>
