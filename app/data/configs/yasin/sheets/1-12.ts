@@ -77,6 +77,7 @@ import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
 import { GREEN_THEME } from "../../../theme";
+import { SHEET_FRAME_SVGS } from "../kit";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, not the reference photo's. The photo paints in
@@ -368,7 +369,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [1],
       columns: 1,
       capsuleHeight: 0.082,
-      horizontalInset: 0.247,
+      horizontalInset: 0.047,
+      verticalNudge: -0.02,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -582,6 +584,18 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     //   renderOrder: 2,
     //   customSectionId: "sec_top",
     // },
+    // Shared inner frame — blocks 1 … 3, containing ayahs 2 … 5.
+    {
+      src: SHEET_FRAME_SVGS.inner,
+      anchorGroupIndex: 1,
+      anchorEdge: "top",
+      scaleX: 1,
+      scaleY: 0.42,
+      offsetX: 0,
+      offsetY: -0.14,
+      renderOrder: 2,
+      customSectionId: "sec_top",
+    },
     // Outer ring — blocks 3 … 8 (ayahs 7 … 11).
     //   wanted: 1.01 x 0.798, y −0.5095 … −1.3075  (centre −0.9085)
     {

@@ -101,7 +101,6 @@ const SPEC: SheetSpec = {
         },
       ],
     },
-
   ],
 
   frames: [
@@ -111,8 +110,8 @@ const SPEC: SheetSpec = {
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       pad: 0,
-      w: 1.58,
-      h: 0.97,
+      w: 1.62,
+      h: 0.93,
     },
     // The arc over the question, and the frame around everything that answers
     // it — the two enclosures the sheet is drawn with.

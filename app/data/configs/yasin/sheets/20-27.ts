@@ -122,7 +122,7 @@ const SPEC: SheetSpec = {
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       w: 1.1,
-      h: 1.41,
+      h: 1.47,
       offsetY: -0.63,
     },
     {

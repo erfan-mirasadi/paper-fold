@@ -395,7 +395,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 0,
       anchorEdge: "top",
       scaleX: 1.06,
-      scaleY: 1.41,
+      scaleY: 1.47,
       offsetX: 0,
       offsetY: -0.672,
       renderOrder: 2,
@@ -503,16 +503,20 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       // fold0 — between ayah 13 and the band's first capsule (blocks 0 → 1),
       // i.e. exactly where the band's top edge runs.
       const fold0 =
-        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) / 2;
+        (lm.groupYPositions[0] - lm.groupHeights[0] + lm.groupYPositions[1]) /
+        2;
       // fold1 — the band-inner frame's top edge (blocks 2 → 3).
       const fold1 =
-        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) / 2;
+        (lm.groupYPositions[2] - lm.groupHeights[2] + lm.groupYPositions[3]) /
+        2;
       // fold2 — the band-inner frame's bottom edge (blocks 4 → 5).
       const fold2 =
-        (lm.groupYPositions[4] - lm.groupHeights[4] + lm.groupYPositions[5]) / 2;
+        (lm.groupYPositions[4] - lm.groupHeights[4] + lm.groupYPositions[5]) /
+        2;
       // fold3 — between the last two capsules (blocks 5 → 6).
       const fold3 =
-        (lm.groupYPositions[5] - lm.groupHeights[5] + lm.groupYPositions[6]) / 2;
+        (lm.groupYPositions[5] - lm.groupHeights[5] + lm.groupYPositions[6]) /
+        2;
       return [fold0, fold1, fold2, fold3];
     },
 
@@ -597,10 +601,17 @@ export const YASIN_13_19_TEXT_AR: SurahDataShape = {
       },
       {
         verses: [
-          { number: 4, text: "قَالُوا رَبُّنَا يَعْلَمُ إِنَّا إِلَيْكُمْ لَمُرْسَلُونَ" },
+          {
+            number: 4,
+            text: "قَالُوا رَبُّنَا يَعْلَمُ إِنَّا إِلَيْكُمْ لَمُرْسَلُونَ",
+          },
         ],
       },
-      { verses: [{ number: 5, text: "وَمَا عَلَيْنَا إِلَّا الْبَلَاغُ الْمُبِينُ" }] },
+      {
+        verses: [
+          { number: 5, text: "وَمَا عَلَيْنَا إِلَّا الْبَلَاغُ الْمُبِينُ" },
+        ],
+      },
       {
         verses: [
           {
