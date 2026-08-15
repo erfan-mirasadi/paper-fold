@@ -65,6 +65,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 53,
       tone: "white",
+      heightLines: 1.75,
       arScale: 0.9,
       latScale: 0.9,
       ar: "إِن كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً فَإِذَا هُمْ جَمِيعٌ لَّدَيْنَا مُحْضَرُونَ",
@@ -74,6 +75,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 54,
       tone: "blue",
+      heightLines: 1.75,
       arScale: 0.9,
       latScale: 0.9,
       ar: "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا وَلَا تُجْزَوْنَ إِلَّا مَا كُنتُمْ تَعْمَلُونَ",
@@ -276,7 +278,10 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 1,
       tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
       pad: BLOCK_PAD,
+      h: 0.45,
+      offsetY: -0.14,
     },
     // The two halves of the middle band, each bracketed on its own side. They
     // come out as TWINS. Their explicit size also accounts for the extra width
