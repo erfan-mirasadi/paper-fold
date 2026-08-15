@@ -74,6 +74,7 @@ export const SHEET_COLORS = {
  */
 export const SHEET_FRAME_SVGS = {
   overall: "/yasin1319/all-section.svg",
+  band: "/yasin1319/band.svg",
   inner: "/nisa/all-section.svg",
 } as const;
 
@@ -212,6 +213,8 @@ export interface CapsuleSpec {
   heightLines?: number;
   /** Custom air after this capsule before the next stacked row. */
   gapAfter?: number;
+  /** Move this row without moving rows that follow it. */
+  offsetY?: number;
   /** Extra capsule width on each side; affects the rendered capsule only. */
   expandW?: number;
   /**
@@ -252,6 +255,8 @@ export interface PairRow {
   pair: [CapsuleSpec, CapsuleSpec];
   /** Share of the row's natural width, centred. See `CapsuleSpec.width`. */
   width?: number;
+  /** Move this row without moving rows that follow it. */
+  offsetY?: number;
 }
 
 /** What a column of a split row may hold: a capsule, or a bridged pair. */

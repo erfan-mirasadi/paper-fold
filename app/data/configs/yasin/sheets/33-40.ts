@@ -244,6 +244,7 @@ const SPEC: SheetSpec = {
       ayah: 37,
       tone: "lav",
       width: PETAL,
+      offsetY: -0.02,
       arScale: 0.55,
       latScale: 0.5,
       ar: "وَآيَةٌ لَّهُمُ اللَّيْلُ نَسْلَخُ مِنْهُ\nالنَّهَارَ فَإِذَا هُم مُّظْلِمُونَ",
@@ -254,6 +255,7 @@ const SPEC: SheetSpec = {
       // Give the 38–39 pair a little extra width so the number badge clears
       // the long one-line text instead of sitting inside it.
       width: 1.2,
+      offsetY: -0.02,
       pair: [
         {
           ayah: 38,
@@ -280,6 +282,7 @@ const SPEC: SheetSpec = {
       tone: "lav",
       width: PETAL,
       heightLines: 3,
+      offsetY: -0.02,
       arScale: 0.55,
       latScale: 0.49,
       ar: "لَا الشَّمْسُ يَنبَغِي لَهَا أَن تُدْرِكَ الْقَمَرَ\nوَلَا اللَّيْلُ سَابِقُ النَّهَارِ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ",
@@ -295,6 +298,18 @@ const SPEC: SheetSpec = {
       to: 9,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
+      w: 1.6,
+      h: 1.7,
+    },
+    // The blue section used for ayahs 14-19, reused here for ayahs 33-36.
+    {
+      from: 0,
+      to: 6,
+      tone: "band",
+      src: SHEET_FRAME_SVGS.band,
+      pad: PETAL_PAD,
+      h: 1.13,
+      w: 1.4,
     },
     // Four strong-pink standard inner frames: 33, 34-35, 36 and 37-40.
     {
