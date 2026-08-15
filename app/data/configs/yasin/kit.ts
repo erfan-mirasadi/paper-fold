@@ -215,6 +215,8 @@ export interface CapsuleSpec {
   gapAfter?: number;
   /** Move this row without moving rows that follow it. */
   offsetY?: number;
+  /** Uniformly scale this capsule around its centre without moving its layout slot. */
+  scale?: number;
   /** Extra capsule width on each side; affects the rendered capsule only. */
   expandW?: number;
   /**
@@ -255,6 +257,10 @@ export interface PairRow {
   pair: [CapsuleSpec, CapsuleSpec];
   /** Share of the row's natural width, centred. See `CapsuleSpec.width`. */
   width?: number;
+  /** Horizontal air between this pair's two capsules. */
+  columnGap?: number;
+  /** Custom air after this pair before the next item in its column. */
+  gapAfter?: number;
   /** Move this row without moving rows that follow it. */
   offsetY?: number;
 }
@@ -581,6 +587,8 @@ interface Placement {
   top: number;
   height: number;
   width: number;
+  /** Optional horizontal gap for a bridged pair. */
+  columnGap?: number;
   /** Signed shift of this block's centre from the page centre. */
   xOffset: number;
   rowIndex: number;
@@ -707,10 +715,12 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
         let y = top;
         caps.forEach((c, ci) => {
           if (ci) y -= airBetween(caps[ci - 1], c);
+          const itemOffsetY =
+            "offsetY" in c && typeof c.offsetY === "number" ? c.offsetY : 0;
           placements.push({
             capsules: capsulesOf(c),
             verseIds: capsulesOf(c).map(() => nextId++),
-            top: y,
+            top: y + itemOffsetY,
             height: capsuleHeight(c) * capsuleHeightScale,
             // A split-column item's OWN `width` is a share of the natural slot,
             // so undo the sheet-wide capsule scale baked into `w` before
@@ -720,6 +730,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
             // Dividing that default through the scale too widens every column
             // capsule by 1/scale and runs the columns into each other.
             width: c.width === undefined ? w : (w / capsuleWidthScale) * c.width,
+            columnGap: isPair(c) ? c.columnGap : undefined,
             xOffset: shift,
             rowIndex: i,
             side,
@@ -765,6 +776,7 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       verseIds: p.verseIds,
       columns: pair ? 2 : 1,
       capsuleHeight: p.height,
+      ...(p.columnGap !== undefined ? { columnGap: p.columnGap } : {}),
       horizontalInset: round((sectionInnerW - blockInnerW) / 2),
       xOffset: round(p.xOffset),
       isCenter: true,
@@ -781,6 +793,10 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
    const capW =
      p.capsules.length === 2 ? (p.width - COLUMN_GAP) / 2 : p.width;
    p.capsules.forEach((c, ci) => {
+    const capsuleScale = c.scale ?? 1;
+    const expandW =
+      (c.expandW ?? 0) + (capW * (capsuleScale - 1)) / 2;
+    const expandH = (p.height * (capsuleScale - 1)) / 2;
     const tone = SHEET_COLORS[c.tone ?? "white"];
     // Per capsule, then per sheet, then the whole surah — see `CapsuleSpec.arPad`.
     const arPad = c.arPad ?? spec.capsuleArPad ?? AR_PAD;
@@ -810,9 +826,12 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // never a pill: SharedUI picks the verse font off this flag, so a mixed
       // page would be set in two sizes almost 2x apart.
       isPill: false,
-      textScaleOverride: c.arScale ?? round(fitAr(c.ar)),
-      translationTextScaleOverride:
-        c.latScale ?? round(Math.min(fitLat(c.tr), fitLat(c.en))),
+      textScaleOverride: round(
+        (c.arScale ?? fitAr(c.ar)) * capsuleScale,
+      ),
+      translationTextScaleOverride: round(
+        (c.latScale ?? Math.min(fitLat(c.tr), fitLat(c.en))) * capsuleScale,
+      ),
       // Only emitted where it is asked for: a zero entry would be identical in
       // effect but would put the number on every capsule of every sheet.
       ...(arPad ? { versePadding: arPad } : {}),
@@ -820,7 +839,8 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       ...(c.shape
         ? { verseShape: c.shape, domeSideRatio: DOME_SIDE_RATIO }
         : {}),
-      ...(c.expandW ? { expandW: c.expandW } : {}),
+      ...(expandW ? { expandW: round(expandW) } : {}),
+      ...(expandH ? { expandH: round(expandH) } : {}),
       ...(c.noNumber ? {} : { showNumber: true, displayNumber: c.ayah }),
     };
    });

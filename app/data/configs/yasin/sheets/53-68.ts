@@ -91,11 +91,16 @@ const SPEC: SheetSpec = {
       inwardShift: -0.15,
       right: [
         {
+          width: 0.93,
+          columnGap: 0.085,
+          gapAfter: 0.06,
+          offsetY: 0,
           pair: [
             {
               ayah: 55,
               tone: "green",
-              heightLines: 4,
+              heightLines: 4.25,
+              scale: 1.12,
               arScale: 0.82,
               latScale: 0.76,
               ar: "إِنَّ أَصْحَابَ الْجَنَّة\n الْيَوْمَ شُغُلٍ فَاكِهُونَ",
@@ -105,7 +110,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 56,
               tone: "green",
-              heightLines: 4,
+              heightLines: 4.25,
+              scale: 1.12,
               arScale: 0.82,
               latScale: 0.75,
               ar: "هُمْ وَأَزْوَاجُهُمْ فِي\n ظِلَالٍ الْأَرَائِكِ مُتَّكِئُونَ",
@@ -115,11 +121,15 @@ const SPEC: SheetSpec = {
           ],
         },
         {
+          width: 0.93,
+          columnGap: 0.085,
+          offsetY: 0.01,
           pair: [
             {
               ayah: 57,
               tone: "green",
-              heightLines: 4,
+              heightLines: 4.25,
+              scale: 1.12,
               arScale: 0.82,
               latScale: 0.75,
               ar: "لَهُمْ فِيهَا فَاكِهَةٌ\nوَلَهُم مَّا يَدَّعُونَ",
@@ -129,7 +139,8 @@ const SPEC: SheetSpec = {
             {
               ayah: 58,
               tone: "green",
-              heightLines: 4,
+              heightLines: 4.25,
+              scale: 1.12,
               arScale: 0.82,
               latScale: 0.75,
               ar: "سَلَامٌ قَوْلًا مِّن رَّبٍّ\nرَّحِيمٍ",
