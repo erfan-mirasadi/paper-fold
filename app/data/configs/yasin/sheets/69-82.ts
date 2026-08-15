@@ -4,7 +4,8 @@ import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 // 69-82 — not poetry, the cattle, and the bones brought back. Copied off the
 // handwritten page, which lays it out as one band over two columns of six:
 //
-//   ╭─────────────── not poetry (69-70) ───────────────╮
+//   ╭────────────── long life + not poetry (68-70) ─────────────╮
+//   │  68                                              │
 //   │  69                                              │
 //   │  70                                              │
 //   ╰──────────────────────────────────────────────────╯
@@ -52,11 +53,23 @@ const SPEC: SheetSpec = {
   capsuleWidthScale: 0.88,
 
   rows: [
+    // Ayah 68 is intentionally repeated here as the lead-in to 69-70. Its
+    // original capsule remains on the preceding sheet.
+    {
+      ayah: 68,
+      tone: "gold",
+      heightLines: 2.5,
+      arScale: 0.9,
+      latScale: 0.77,
+      ar: "وَمَن نُّعَمِّرْهُ نُنَكِّسْهُ فِي الْخَلْقِ أَفَلَا يَعْقِلُونَ",
+      tr: "Kime uzun ömür verirsek yaratılışını tersine çeviririz. Hâlâ akletmezler mi?",
+      en: "Whom We grant long life, We reverse in creation. Will they not use their minds?",
+    },
     // ── Not poetry: a reminder, and a warning ─────────────────────────────
     {
       ayah: 69,
       tone: "gold",
-      heightLines: 3,
+      heightLines: 2.5,
       arScale: 0.9,
       latScale: 0.81,
       // The air the text keeps off this capsule's own rule, per side. Turn it
@@ -72,7 +85,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 70,
       tone: "gold",
-      heightLines: 3,
+      heightLines: 2.5,
       arScale: 0.9,
       latScale: 0.82,
       ar: "لِّيُنذِرَ مَن كَانَ حَيًّا الْقَوْلُ الْكَافِرِينَ",
@@ -97,7 +110,7 @@ const SPEC: SheetSpec = {
           pair: [
             {
               ayah: 72,
-              tone: "green",
+              tone: "lav",
               heightLines: 4,
               arScale: 0.7,
               latScale: 0.62,
@@ -107,7 +120,7 @@ const SPEC: SheetSpec = {
             },
             {
               ayah: 73,
-              tone: "green",
+              tone: "lav",
               heightLines: 4,
               arScale: 0.7,
               latScale: 0.7,
@@ -224,31 +237,35 @@ const SPEC: SheetSpec = {
   frames: [
     {
       from: 0,
-      to: 2,
+      to: 3,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       pad: 0,
       w: 2.16,
-      h: 2.06,
+      h: 2.135,
+      offsetY: -0.94,
     },
     {
       from: 0,
-      to: 1,
-      tone: "rose",
+      to: 2,
+      tone: "inner",
+      src: SHEET_FRAME_SVGS.inner,
       pad: BLOCK_PAD,
+      h: 0.8,
+      offsetY: -0.26,
     },
     // The two columns of six. Both are drawn the same, as on the sheet, and a
     // one-column frame takes the row's own band, so they come out one size.
     {
-      from: 2,
-      to: 2,
+      from: 3,
+      to: 3,
       side: "right",
       tone: "band",
       pad: BLOCK_PAD,
     },
     {
-      from: 2,
-      to: 2,
+      from: 3,
+      to: 3,
       side: "left",
       tone: "band",
       pad: BLOCK_PAD,
@@ -257,3 +274,11 @@ const SPEC: SheetSpec = {
 };
 
 export const SHEET = buildSheet(SPEC);
+
+// Move only the complete 68–70 cluster (including its frame, which anchors to
+// block 0) down by 0.04. The engine isolates the first block's nudge, so block
+// 1 starts the same shift for the rest of this cluster; block 3 cancels it
+// before the two lower columns begin, leaving 71–82 exactly where they were.
+SHEET.config.blocks[0].verticalNudge = 0.04;
+SHEET.config.blocks[1].verticalNudge = 0.04;
+SHEET.config.blocks[3].verticalNudge = -0.04;

@@ -15,6 +15,7 @@ const SPEC: SheetSpec = {
     {
       ayah: 83,
       tone: "maroon",
+      heightLines: 3,
       arScale: 0.92,
       latScale: 0.82,
       ar: "فَسُبْحَانَ الَّذِي بِيَدِهِ مَلَكُوتُ كُلِّ شَيْءٍ تُرْجَعُونَ",

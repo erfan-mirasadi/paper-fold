@@ -299,7 +299,8 @@ const SPEC: SheetSpec = {
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       w: 1.6,
-      h: 1.7,
+      h: 1.78,
+      offsetY: -0.76,
     },
     // The blue section used for ayahs 14-19, reused here for ayahs 33-36.
     {
