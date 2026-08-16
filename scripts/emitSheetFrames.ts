@@ -59,7 +59,7 @@ const PAINTS: Record<
   ringMid: { fill: "#E1E3F3", opacity: 0.7, stadium: true },
   ringInner: { fill: "#CEE0E9", opacity: 0.75, stadium: true },
   // The 33-36 sheet is drawn as a rosette: four LENS petals (two arcs meeting
-  // at a point, like /yasin/leaf.svg) inside one big CIRCLE.
+  // at a point) inside one big CIRCLE.
   lens: { fill: "#EDF3EA", opacity: 0.55, lens: true },
   circle: { fill: "#DCE9F2", opacity: 0.45, ellipse: true },
 };

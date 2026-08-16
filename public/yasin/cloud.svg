@@ -1,0 +1,70 @@
+<svg width="1492" height="683" viewBox="0 0 1492 683" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 1-12 — THE OPENING SECTION FRAME (ayahs 2 … 5).
+
+     SHAPE. A scalloped band: a rounded-rectangle body with three lobes on each
+     flank, supplied as artwork and used here unaltered. The body is what holds
+     the capsules; the lobes are ornament and they bulge widest at the band's
+     own mid-height, which is exactly where the widest line of the section (the
+     3 · 4 row) sits. That coincidence is the reason this shape fits the section
+     at all — see THE FIT below.
+
+     COLOUR is Tevbe 24's, like every other frame on this sheet: the translucent
+     cream #F5EEDC at 0.6, byte-for-byte /tevbe/dome-section.svg's fill, under
+     the shared gold rim gradient (#968428 → #CDC577 → #968428). The artwork
+     arrived with a flat green outline; the green is the only thing dropped.
+
+     ASPECT — drawn AT the aspect it is displayed at:
+
+         viewBox 1492 x 683                   ->  2.1845
+         config  scaleX 1.070 / scaleY 0.4897  ->  2.1845
+
+     one SVG unit = 7.17e-4 world on BOTH axes, so the lobes stay the shape they
+     were drawn as. The 6-unit margin the group is translated into is the half
+     of the rim the outline would otherwise lose off the plane's edge; the drawn
+     ornament is therefore 1.0614 x 0.4811 world, centred in the plane.
+
+     THE FIT. The shape is only body-wide near its top and bottom edges, so a
+     capsule's clearance has to be checked at ITS OWN height, not at the widest
+     point. As a fraction of the plane's width the outline spans (v measured
+     from the top edge):
+
+         v 0.19  ->  0.76      v 0.42 … 0.58  ->  0.96      v 0.81  ->  0.76
+
+     Against a frame 1.0614 wide that is 0.81 of usable width where ayahs 2 and
+     5 sit (0.500 capsules) and 1.02 across the 3 · 4 row (0.860 including its
+     gap) — 0.08 of air a side on the tightest line. Move the section's capsules
+     wider, or the frame's height down, and the row's corners break out through
+     the lobes before anything else does. -->
+<defs>
+<linearGradient id="yasinCloudGold" x1="0" y1="341.5" x2="1492" y2="341.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<g transform="translate(-22 -165)">
+<path d="M 505 171
+         H 1025
+         C 1088 171, 1138 206, 1164 262
+         C 1180 254, 1196 251, 1215 251
+         C 1284 251, 1338 291, 1354 351
+         C 1423 351, 1471 395, 1508 507
+         C 1474 612, 1425 660, 1353 660
+         C 1339 721, 1286 761, 1215 761
+         C 1196 761, 1180 758, 1164 751
+         C 1139 808, 1089 842, 1025 842
+         H 505
+         C 442 842, 392 808, 367 751
+         C 351 758, 335 761, 316 761
+         C 246 761, 192 721, 178 660
+         C 106 660, 57 612, 28 507
+         C 61 398, 108 351, 178 351
+         C 194 291, 247 251, 316 251
+         C 335 251, 351 254, 367 262
+         C 393 206, 443 171, 505 171
+         Z"
+      fill="#F5EEDC" fill-opacity="0.6"
+      stroke="url(#yasinCloudGold)" stroke-width="9"
+      stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+</svg>

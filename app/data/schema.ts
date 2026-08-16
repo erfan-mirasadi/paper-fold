@@ -71,7 +71,21 @@ export interface CurveColorConfig {
   bowGap?: number;
   innerBowGap?: number;
   inwardOffset?: number;
+  /**
+   * Outline thickness in PIXELS (drei's `Line` is screen-space by default), so
+   * a bracket's rule gets thinner relative to the page the further you zoom in.
+   * That is the historical behaviour and every page that does not say otherwise
+   * still gets it.
+   */
   lineWidth?: number;
+  /**
+   * Outline thickness in WORLD units — takes precedence over `lineWidth` and
+   * switches the line material to `worldUnits`. Set it to the page's
+   * `styling.capsuleBorderWidth` and a bracket's rule is drawn exactly as thick
+   * as a capsule's rule, at every zoom, which is the only way the two actually
+   * match: a capsule's border is world-space geometry, not a screen-space line.
+   */
+  lineWidthWorld?: number;
   /**
    * Overall opacity of the curve fill (and its outline lines), from 0 (fully
    * transparent) to 1 (fully opaque). Defaults to 1 when omitted.
@@ -80,6 +94,19 @@ export interface CurveColorConfig {
   opacity?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
+  /**
+   * The two BLOCKS this bracket joins, as indices into `blocks`. Omit it and
+   * the default pairing stands: the i-th entry of `curveColors` brackets the
+   * i-th block from the TOP of the page to the i-th from the BOTTOM, which is
+   * right for a page that is one chiasm end to end.
+   *
+   * Name it when the chiasm is only PART of the page — Yâsîn 1-12's rings hold
+   * ayahs 6 … 11 inside an opening and a closing that sit outside them, so its
+   * pairs are (6,11), (7,10), (8,9) and none of the three is the i-th from each
+   * end. An entry that names a pair is drawn even past the
+   * `floor(blocks / 2)` limit that caps the default pairing.
+   */
+  pair?: [number, number];
   /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
   drawInnerCurves?: boolean;
   innerCurvesBowGap?: number;

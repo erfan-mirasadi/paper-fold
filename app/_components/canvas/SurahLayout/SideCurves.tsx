@@ -38,12 +38,25 @@ export interface CurveConfig {
   inwardOffset?: number;
   lineWidth?: number;
   /**
+   * Outline thickness in WORLD units instead of pixels. See
+   * `CurveColorConfig.lineWidthWorld` in schema.ts — set it to the page's
+   * `capsuleBorderWidth` and a bracket's rule is drawn exactly as thick as a
+   * capsule's, at every zoom.
+   */
+  lineWidthWorld?: number;
+  /**
    * Overall opacity of the curve fill and outline lines, 0 (invisible) → 1 (solid).
    * Defaults to 1 when omitted. Use e.g. 0.5 to see content behind the bracket.
    */
   opacity?: number;
   /** Whether the curves should be symmetrical (default) or both bow to the 'left' or 'right'. */
   curveSide?: "symmetrical" | "left" | "right";
+  /**
+   * The two groups this bracket joins, as indices into `groups`. Omitted, the
+   * default pairing stands — i-th from the top with i-th from the bottom. See
+   * `CurveColorConfig.pair` in schema.ts for when a page needs to say instead.
+   */
+  pair?: [number, number];
   /** If true, draws additional curves on the inner edges of the columns (in the center gap). */
   drawInnerCurves?: boolean;
   innerCurvesBowGap?: number;
@@ -218,9 +231,17 @@ function computeBrackets(
       Math.floor(groups.length / 2),
     );
 
-    for (let i = 0; i < outerPairs; i++) {
-      const gTop = groups[i];
-      const gBot = groups[lastIdx - i];
+    // The i-th colour brackets the i-th group from the TOP to the i-th from
+    // the BOTTOM — unless it names its own `pair`, which a page whose chiasm
+    // is not the whole page has to (see CurveColorConfig.pair). A named pair
+    // is also exempt from `outerPairs`: that cap exists so the default walk
+    // cannot run past the middle of the page and bracket a group to itself,
+    // and it says nothing about two groups the config picked out by hand.
+    for (let i = 0; i < outerColors.length; i++) {
+      const named = outerColors[i]?.pair;
+      if (!named && i >= outerPairs) continue;
+      const gTop = groups[named ? named[0] : i];
+      const gBot = groups[named ? named[1] : lastIdx - i];
       if (!gTop || !gBot) continue;
 
       const pad = layout.curvePad ?? groupPad;
@@ -419,6 +440,7 @@ const CurveComponent = ({
   fillColor,
   shouldHide,
   lineWidth,
+  worldUnits = false,
   arrowTip,
   opacity = 1,
 }: any) => {
@@ -504,6 +526,7 @@ const CurveComponent = ({
           points={outerPoints}
           color={color}
           lineWidth={lineWidth ?? CURVE_OUTER_LINE_WIDTH}
+          worldUnits={worldUnits}
           transparent
           renderOrder={5}
         />
@@ -512,6 +535,7 @@ const CurveComponent = ({
           points={innerPoints}
           color={color}
           lineWidth={lineWidth ?? CURVE_INNER_LINE_WIDTH}
+          worldUnits={worldUnits}
           transparent
           renderOrder={5}
         />
@@ -521,6 +545,7 @@ const CurveComponent = ({
             points={arrowHeadOutline}
             color={color}
             lineWidth={lineWidth ?? CURVE_OUTER_LINE_WIDTH}
+            worldUnits={worldUnits}
             transparent
             renderOrder={5}
           />
@@ -626,6 +651,14 @@ export const SideCurves = ({
 
         const bowMultiplier = totalLevels - b.nestLevel;
         const nestMultiplier = b.nestLevel + 1;
+
+        // A bracket's rule is a screen-space pixel line unless the page asked
+        // for world units — which is the only way it can be exactly as thick as
+        // a capsule's rule, that being world-space geometry. See
+        // CurveColorConfig.lineWidthWorld.
+        const ruleWorld = b.lineWidthWorld !== undefined;
+        const ruleWidth =
+          b.lineWidthWorld ?? b.lineWidth ?? configColors.curveLineWidth;
 
         const outerBow = b.bowGap ?? CURVE_GAP * bowMultiplier;
         const innerBow = b.innerBowGap ?? INNER_CURVE_GAP * bowMultiplier;
@@ -846,7 +879,8 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={twistTopFill}
                   shouldHide={shouldHide}
-                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                  lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                   opacity={b.opacity}
                 />
                 <CurveComponent
@@ -855,7 +889,8 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={b.fillColor}
                   shouldHide={shouldHide}
-                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                  lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                   arrowTip={arrowTip1}
                   opacity={b.opacity}
                 />
@@ -867,7 +902,8 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                 arrowTip={arrowTip1}
                 opacity={b.opacity}
               />
@@ -880,7 +916,8 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={twistTopFill}
                   shouldHide={shouldHide}
-                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                  lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                   opacity={b.opacity}
                 />
                 <CurveComponent
@@ -889,7 +926,8 @@ export const SideCurves = ({
                   color={b.color}
                   fillColor={b.fillColor}
                   shouldHide={shouldHide}
-                  lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                  lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                   arrowTip={arrowTip2}
                   opacity={b.opacity}
                 />
@@ -901,7 +939,8 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                 arrowTip={arrowTip2}
                 opacity={b.opacity}
               />
@@ -913,7 +952,8 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                 opacity={b.opacity}
               />
             )}
@@ -924,7 +964,8 @@ export const SideCurves = ({
                 color={b.color}
                 fillColor={b.fillColor}
                 shouldHide={shouldHide}
-                lineWidth={b.lineWidth ?? configColors.curveLineWidth}
+                lineWidth={ruleWidth}
+                worldUnits={ruleWorld}
                 opacity={b.opacity}
               />
             )}

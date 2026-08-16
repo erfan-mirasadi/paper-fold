@@ -1,34 +1,38 @@
 /**
  * YÂSÎN: 1-12 — the opening page in twelve capsules, three sections.
  *
- *      ╭───────── all-section frame ─────────╮
- *      │            ┌─── (1) ───┐             │   ayahs 1 · 2
- *      │       ┌─ (3) ─┬─ (2) ─┐              │   ayahs 4 · 3
- *      │        ┌────── (5) ──────┐           │   ayah 5
- *      ╰─────────────────────────────────────╯
+ *                  ┌─── (1) ───┐                  ayah 1
+ *
+ *      ╭╴╴╴╴╴╴ scalloped frame ╶╴╴╴╴╴╴╴╴╴╴╮
+ *      ⊂           ┌─── (2) ───┐          ⊃      ayah 2
+ *      ⊂      ┌─ (3) ─┬─ (4) ─┐           ⊃      ayahs 3 · 4
+ *      ⊂           ┌─── (5) ───┐          ⊃      ayah 5
+ *      ╰╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╯
  *
  *   ╔═════════════ outer ring ═════════════╗
- *   ║  ┌──────────── (6) ───────────┐       ║   ayah 7
- *   ║ ╔══════════ middle ring ════╗         ║
- *   ║ ║  ┌───────── (7) ───────┐   ║        ║   ayah 8
- *   ║ ║ ╔═══════ inner ring ══╗    ║        ║
- *   ║ ║ ║  ┌───── (8) ─────┐   ║   ║        ║   ayah 9, the two barriers
- *   ║ ║ ║  └──── (9) ─────┘    ║   ║        ║   ayah 9, the veil
- *   ║ ║ ╚════════════════════╝     ║        ║
- *   ║ ║  └───────── (10) ──────┘    ║        ║   ayah 10
- *   ║ ╚═════════════════════════╝            ║
- *   ║  └──────────── (11) ──────────┘        ║   ayah 11
+ *   ║ ╭┌──────────── (6) ───────────┐      ║   ayah 6
+ *   ║ │╔══════════ middle ring ════╗       ║
+ *   ║ │╭┌──────── (7) ────────┐   ║        ║   ayah 7
+ *   ║ ││╔═══════ inner ring ══╗    ║       ║
+ *   ║ ││╭┌──── (8) ─────┐    ║   ║         ║   ayah 9, the two barriers
+ *   ║ ││╰└──── (9) ─────┘    ║   ║         ║   ayah 9, the veil
+ *   ║ ││╚════════════════════╝     ║       ║
+ *   ║ │╰ └───────── (10) ──────┘    ║      ║   ayah 10
+ *   ║ │╚═════════════════════════╝         ║
+ *   ║ ╰ └──────────── (11) ──────────┘     ║   ayah 11
  *   ╚═══════════════════════════════════════╝
  *
- *        ╭──── mandorla: teal ▷ maroon ▷ card ────╮
- *        │             (12)          ۱۲            │   ayah 12
- *        ╰───────────────────────────────────────╯
+ *              ┌───── (12) ─────┐   ۱۲         ayah 12, on no frame at all
  *
- * THE RING IS THE POINT. Ayahs 7 … 11 are a chiasm and the page draws it as an
- * onion: 7 pairs with 11 (who will not believe / whom you can warn), 8 pairs
+ * THE RING IS THE POINT. Ayahs 6 … 11 are a chiasm and the page draws it as an
+ * onion: 6 pairs with 11 (who will not believe / whom you can warn), 7 pairs
  * with 10 (shackled necks / warning makes no difference), and ayah 9 sits alone
- * at the centre. Ayah 12 is not another layer of the onion, which is why it gets
- * a shape of its own: it answers the whole thing.
+ * at the centre, split over two capsules. The three ⟨ brackets down the LEFT
+ * margin say the pairing outright — the project's own plain side curves, one
+ * bow each (`curveSide: "left"`, never mirrored). They are declared in
+ * `styling.colors.curveColors`, not in `svgOverlays`. Ayah 12 is not another
+ * layer of the onion, which is why nothing is drawn around it at all: it
+ * answers the whole thing from outside.
  *
  * HOW THE PAGE LANDS IN TWELVE CAPSULES. The opening merges two pairs and the
  * centre splits one ayah, and both seams are grammatical, not convenience:
@@ -37,7 +41,7 @@
  *    1        1 · 2     ٢     the oath: "Yâ Sîn — by the wise Qur'an"
  *    2        3         ٣
  *    3        4         ٤
- *    4        5         ٥     the cloud's closing line
+ *    4        5         ٥     the opening section's closing line
  *    5        7         ٦
  *    6        8         ٧
  *    7        9a        ٨     the two barriers, front and behind
@@ -51,11 +55,21 @@
  * badge opts back in via `showNumber` + `displayNumber`; every capsule now has
  * a number. The capsule ids are NOT the numbers drawn on the page.
  *
+ * IT IS DRAWN AFTER TEVBE 24, and that is a rule, not a resemblance. Every fill
+ * on this page is a colour lifted from tevbe24Config or from the frames that
+ * page is drawn with, at the SAME opacity: the frames are #F5EEDC / #E1E3F3 /
+ * #CEE0E9 at 0.6, which is what /tevbe/dome-section.svg and dome-section-1.svg
+ * carry. Every frame corner is 0.040 world, which is what /nisa/all-section-1
+ * comes out at on Tevbe's own 1.15 x 1.24 plane — no stadiums, here or there.
+ * A capsule's own colours are Tevbe's palette too (see the constants below).
+ *
  * GEOMETRY IS SOLVED, NOT EYEBALLED. Every `svgOverlays` offsetY is
  * `(wanted frame centre) − (anchor block's frameY)`, from the stack table above
  * `blocks`. Horizontally, `sectionInnerW` is 1.13, so a capsule's width is
  * `0.547 − horizontalInset`, and each frame's corner radius caps how wide its
- * capsules may be — see the fit arithmetic in /public/yasin/ring-outer.svg.
+ * capsules may be — see the fit arithmetic in /public/yasin/ring-outer.svg. The
+ * scalloped opening frame is the tightest of them, because it is only body-wide
+ * near its top and bottom edges; /public/yasin/cloud.svg carries that profile.
  *
  * TEXT SCALES. `textScaleOverride` REPLACES the page's `verseTextScale` rather
  * than scaling it (SharedUI: `textScale = textScaleOverride ?? verseBig`), so
@@ -77,16 +91,21 @@ import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
 import { GREEN_THEME } from "../../../theme";
-import { SHEET_FRAME_SVGS, yasinHandwrittenTitle } from "../kit";
+import { yasinHandwrittenTitle } from "../kit";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, not the reference photo's. The photo paints in
 // watercolour; this app's idiom is the shared gold gradient on frames and
 // Tevbe's pale grounds with colored rules on capsules. Pairing rule: a capsule
 // never shares its ground with the frame it sits on.
-//   outer ring   cream frame     ->  WHITE_BG capsules  (ayahs 7 · 11)
-//   middle ring  lavender frame  ->  CREAM_BG capsules  (ayahs 8 · 10)
+//   scalloped    cream frame     ->  MAROON/CREAM capsules (ayahs 2 … 5)
+//   outer ring   cream frame     ->  WHITE_BG capsules  (ayahs 6 · 11)
+//   middle ring  lavender frame  ->  CREAM_BG capsules  (ayahs 7 · 10)
 //   inner ring   blue frame      ->  WHITE_BG capsules  (ayah 9)
+//
+// Every constant below is a literal from tevbe24Config.ts, and the frames use
+// the same three fills at the same 0.6 opacity Tevbe's own frames carry. Change
+// one here and it stops being that page's ink.
 // ---------------------------------------------------------------------------
 
 const CREAM_BG = "#F3EAD6";
@@ -99,6 +118,15 @@ const WHITE_BG = "#FBFAF4";
 const WHITE_BORDER = "#C7C1AC";
 const MAROON_BG = "#F6EDE8";
 const MAROON_BORDER = "#B0504D";
+
+/**
+ * The page's one rule thickness, in world units. It is `capsuleBorderWidth`
+ * below AND the three side brackets' `lineWidthWorld`, so a bracket's outline
+ * is drawn exactly as thick as the capsule rules it runs between — which only
+ * works in world units, a capsule's border being geometry rather than a
+ * screen-space line.
+ */
+const RULE_W = 0.0038;
 
 const INK = "#2C2A22";
 const INK_GOLD = "#5A3D12";
@@ -151,9 +179,11 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
 
   dimensions: {
     paperWidth: 1.54,
-    paperHeight: 2.03,
-    // +0.02 (others sit at −0.045): the mandorla's lower tip runs past its
-    // capsule, so the stack is lifted to buy that tip a margin.
+    // Solved, not chosen: the stack is 1.617 tall and `contentStartY` has to
+    // land on −0.184 (the top margin the handwritten title was placed in), so
+    //   PH = 2 · (0.184 + 1.617/2 + sceneCenterYOffset) = 2.025.
+    // Change a gap in `blocks` and this number changes with it.
+    paperHeight: 2.025,
     sceneCenterYOffset: 0.02,
     // 0.20, not 0.29 → sectionW 1.14, sectionInnerW 1.13. The outer ring is
     // 1.01 wide and the mandorla 1.16; at 0.29 neither would fit.
@@ -269,10 +299,17 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       displayNumber: 9,
     }),
 
-    // ── MANDORLA (cream card on a maroon lens) — ayah 12 ─────────────────
-    // One capsule for the whole ayah, two lines, on the tallest capsule
-    // (0.150). The extra width keeps the two-line text readable.
-    12: capsule(WHITE_BG, MAROON_BORDER, INK_RED, {
+    // ── THE CLOSING AYAH — 12, on no frame at all ────────────────────────
+    // One capsule for the whole ayah, two lines, and the page's widest capsule
+    // after the ring. It used to sit on a mandorla; the shape is gone and the
+    // capsule now carries the closing entirely on its own, in ayah 5's colours
+    // exactly — the maroon ground, the maroon rule, the maroon badge ink. Those
+    // two are the only maroon capsules on the sheet, and reading one against
+    // the other is what the pairing is for: 5 closes the opening section, 12
+    // closes the page.
+    12: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
+      circleTextCol: "#7C2C2A",
+      textColor: "#000000",
       textScaleOverride: 0.69,
       translationTextScaleOverride: 0.45,
       showNumber: true,
@@ -305,12 +342,134 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       s2Group1Bg: DOME_BG,
       s2Group2Bg: LAV_BG,
       s2Group3Bg: WHITE_BG,
-      // No side brackets — the rings do that job. One fully transparent entry
-      // makes SideCurves emit nothing (an empty [] would fall back to the
-      // default olive bracket on every isCenter block, and all are centered).
-      curveColors: [{ color: "transparent", fillColor: "transparent" }],
+      // ── THE THREE PAIR BRACKETS ────────────────────────────────────────
+      // The chiasm the rings draw as nesting, said outright: 6 answered by 11,
+      // 7 by 10, 9a by 9b. Each is one of the project's plain side curves —
+      // the same bowed bracket alak96Config draws around its own pairs, no
+      // arrowhead and no twist.
+      //
+      // ONE SIDE ONLY. `curveSide: "left"` bows both of a bracket's curves the
+      // same way instead of mirroring them, and since every block here holds a
+      // single capsule its two anchors coincide — so what is drawn is exactly
+      // one ribbon, down the LEFT of the page. Nothing is mirrored on the right.
+      //
+      // `pair` is what makes them the RIGHT three. The default pairing is i-th
+      // block from the top with i-th from the bottom, which on this page would
+      // bracket ayah 1 to ayah 12 and ayah 2 to ayah 11 — the ring is a chiasm
+      // inside a page that is not one, so each bracket names its own two blocks.
+      //
+      // HOW DEEP A BOW FITS, which is the whole difficulty here. A bracket's
+      // depth is the horizontal travel from its tip to the arc's extremity, and
+      // for a cubic with both controls on the far side that extremity sits at
+      //
+      //     x = 0.25 · tip + 0.75 · (anchor − bowGap)     [ = anchor − 0.75·bowGap ]
+      //
+      // Every ring on this page is nearly as wide as the paper (1.50 of 1.54),
+      // so the margin outside its capsules is only 0.066 / 0.054 / 0.052 — bow
+      // out of the capsule's own edge and there is nothing to bow INTO. Two
+      // things buy the depth back. The TIP is pulled inwards, off the capsule's
+      // edge and onto the capsule, with `topAnchorXOffset` /
+      // `bottomAnchorXOffset` (negative moves right, `anchor = edge − offset`).
+      // And the two outer bows are then allowed to swing past the sheet's own
+      // left edge entirely:
+      //
+      //           tip     extremity   depth
+      //   6 ▸ 11  0.1405   −0.195     0.335    ← past x = 0, onto bare levha
+      //   7 ▸ 10  0.2245   −0.094     0.319    ← same
+      //   8 ▸  9  0.3020    0.112     0.190    ← stays inside the inner ring
+      //
+      // That is deliberate, and it is why these three are tuned against the live
+      // page rather than solved: the sheet sits at the top of the composed
+      // levha with blank paper beside it, so an arc leaving the sheet has
+      // somewhere to go. Move this sheet on the grid and check them again.
+      // `inwardOffset: 0` because the tip is already placed by hand; the
+      // default 0.015 would move it again.
+      //
+      // THE TIP IS AS TALL AS THE CAPSULE IT TOUCHES. `tipThickness` defaults to
+      // the page-wide `capsuleHeight` (0.09), which is not any of these three
+      // capsules, so each bracket names its pair's own height instead — 0.110,
+      // 0.100, 0.094. With the Y offsets below (which recentre the anchors off
+      // that same 0.09 default), the ribbon's two edges then land exactly on the
+      // capsule's top and bottom rules at both ends.
+      //
+      // THE FILL IS THE CAPSULE'S FILL — WHITE_BG for the two pairs of white
+      // capsules, CREAM_BG for the cream pair — so a bracket reads as the two
+      // capsules it joins reaching for each other, not as a fourth frame. It is
+      // laid on slightly translucent, so the ring it crosses still shows.
+      //
+      // 0.55 IS NOT THE OPACITY YOU SEE. `curveSide: "left"` draws both of a
+      // bracket's curves and every block here holds ONE capsule, so the two
+      // coincide and the ribbon is painted TWICE: what lands is
+      // `1 − (1 − 0.55)² ≈ 0.80`. Read the number as "about four fifths", and
+      // if you want a different one, solve `o = 1 − √(1 − wanted)`.
+      //
+      // THE RULE IS AS THICK AS A CAPSULE'S. `lineWidthWorld` (not `lineWidth`)
+      // — the default is a screen-space pixel line, which cannot match a
+      // capsule border, that being world-space geometry. Both are `RULE_W`.
+      //
+      // The rule colour is each pair's own, except at the centre: ayah 9's
+      // capsules are ruled WHITE_BORDER, which at this size would disappear, so
+      // the innermost bracket takes the red that ayah already carries.
+      //
+      // The last entry stays transparent: it is the CENTER colour, and every
+      // block of the opening section is `isCenter && isPushedIn`, so a visible
+      // one would put a bracket around each of them too.
+      curveColors: [
+        {
+          pair: [4, 9], // ayah 6 ▸ ayah 11, the outermost layer
+          color: GOLD_BORDER,
+          fillColor: WHITE_BG, // ayahs 6 · 11's own ground
+          curveSide: "left",
+          // tip 0.1405 (capsule edge 0.0905 + 0.05), extremity −0.195
+          topAnchorXOffset: 0,
+          bottomAnchorXOffset: 0,
+          bowGap: 0.447,
+          innerBowGap: 0.429,
+          inwardOffset: 0,
+          lineWidthWorld: RULE_W,
+          opacity: 0.55,
+          tipThickness: 0.145,
+          topAnchorYOffset: -0.032,
+          bottomAnchorYOffset: 0.032,
+        },
+        {
+          pair: [5, 8], // ayah 7 ▸ ayah 10
+          color: LAV_BORDER,
+          fillColor: CREAM_BG, // ayahs 7 · 10's own ground
+          curveSide: "left",
+          // tip 0.2245 (capsule edge 0.1745 + 0.05), extremity −0.094
+          topAnchorXOffset: -0.05,
+          bottomAnchorXOffset: -0.05,
+          bowGap: 0.425,
+          innerBowGap: 0.411,
+          inwardOffset: 0,
+          lineWidthWorld: RULE_W,
+          opacity: 0.55,
+          tipThickness: 0.145,
+          topAnchorYOffset: -0.03,
+          bottomAnchorYOffset: 0.03,
+        },
+        {
+          pair: [6, 7], // ayah 9's two halves — the centre of the chiasm
+          color: MAROON_BORDER,
+          fillColor: WHITE_BG, // ayah 9's own ground
+          curveSide: "left",
+          // tip 0.302 (capsule edge 0.272 + 0.03), extremity 0.112
+          topAnchorXOffset: -0.03,
+          bottomAnchorXOffset: -0.03,
+          bowGap: 0.253,
+          innerBowGap: 0.22,
+          inwardOffset: 0,
+          lineWidthWorld: RULE_W,
+          opacity: 0.55,
+          tipThickness: 0.12,
+          topAnchorYOffset: -0.03,
+          bottomAnchorYOffset: 0.03,
+        },
+        { color: "transparent", fillColor: "transparent" },
+      ],
     },
-    capsuleBorderWidth: 0.0038,
+    capsuleBorderWidth: RULE_W,
     circleBorderWidth: 0.003,
     // Near a stadium on the short capsules. This, not `isPill`, is where the
     // photo's rounded capsules come from.
@@ -343,28 +502,34 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   },
 
   // ── BLOCKS ───────────────────────────────────────────────────────────────
-  // The solved stack (paperHeight 1.78, sceneCenterYOffset 0.02):
-  //   totalContentH 1.467, contentStartY −0.1365, content bottom −1.6035
+  // The solved stack (paperHeight 2.025, sceneCenterYOffset 0.02):
+  //   totalContentH 1.617, contentStartY −0.184, content bottom −1.801
   //
-  //   idx  block        H       frameY    capsule w   lines
-  //    0   s1_oath     0.098   −0.1365      0.460      1
-  //    1   s1_row      0.098   −0.2445      0.420 ×2   1     (row 0.862)
-  //    2   s1_tenzil   0.116   −0.3525      0.900      2
-  //    3   r_a7        0.102   −0.5435      0.840      1
-  //    4   r_a8        0.116   −0.6595      0.720      2
-  //    5   r_a9a       0.110   −0.7895      0.580      2
-  //    6   r_a9b       0.096   −0.9115      0.580      1
-  //    7   r_a10       0.116   −1.0215      0.720      2
-  //    8   r_a11       0.126   −1.1515      0.840      2
-  //    9   leaf_a12    0.166   −1.4375      0.800      2
+  //   idx  block        H      frameY   capsule top … bottom   w       lines
+  //    0   s1_yasin    0.098   −0.164   −0.172 … −0.254      0.500      1
+  //    1   s1_oath     0.098   −0.357   −0.365 … −0.447      0.500      1
+  //    2   s1_row      0.098   −0.465   −0.473 … −0.555      0.420 ×2   1
+  //    3   s1_tenzil   0.098   −0.573   −0.581 … −0.663      0.500      1
+  //    4   r_a7        0.126   −0.801   −0.809 … −0.919      1.359      1
+  //    5   r_a8        0.116   −0.939   −0.947 … −1.047      1.191      1
+  //    6   r_a9a       0.110   −1.067   −1.075 … −1.169      0.996      1
+  //    7   r_a9b       0.110   −1.189   −1.197 … −1.291      0.996      1
+  //    8   r_a10       0.116   −1.311   −1.319 … −1.419      1.191      1
+  //    9   r_a11       0.126   −1.439   −1.447 … −1.557      1.359      1
+  //   10   closing_a12    0.166   −1.635   −1.643 … −1.793      0.639      2
   //
   // Block height is `2·blockPadding + capsuleHeight` (one row each); each frameY
-  // is the previous block's bottom minus this block's gapBefore. The two big
-  // gapBefores (0.075 on block 3, 0.160 on block 9) are the air between the
-  // three sections — 0.160 because the mandorla's upper tip reaches 0.135 above
-  // its own capsule and must still clear the outer ring's bottom edge.
+  // is the previous block's bottom minus this block's gapBefore. The three big
+  // gapBefores (0.075 on block 1, 0.130 on block 4, 0.070 on block 10) are the
+  // air BETWEEN the sections, and each is measured off a drawn frame rather than
+  // off a capsule — see each one's own note.
+  //
+  // The capsule top/bottom column is what the overlays are solved against: every
+  // frame and every arrow below quotes numbers out of it.
   blocks: [
-    // The two letters, alone in their own panel above the cloud.
+    // The two letters, alone above the scalloped frame — outside it, so the
+    // frame's top edge has to clear this capsule's bottom (−0.254). It does, by
+    // 0.019; see `s1_oath`'s gapBefore.
     {
       id: "s1_yasin",
       type: "group",
@@ -389,7 +554,10 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.03,
+      // 0.075, not 0.03: the scalloped frame's top edge sits 0.240 above the
+      // section's centre, and that edge has to clear ayah 1's capsule, which is
+      // outside the frame. This gap is the clearance.
+      gapBefore: 0.075,
       customSectionId: "sec_top",
     },
     // Ayahs 4 · 3, the cloud's widest line. RTL: ayah 3 reads first, so it
@@ -432,7 +600,11 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.09,
+      // 0.13 — the air between the opening section and the ring. It is measured
+      // off the SCALLOPED frame's lowest point (−0.759), not off ayah 5's
+      // capsule: the lobes hang 0.096 below it, and the outer ring's top edge
+      // has to clear them.
+      gapBefore: 0.13,
     },
     {
       id: "r_a8",
@@ -444,7 +616,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.012,
+      gapBefore: 0.03,
     },
     {
       id: "r_a9a",
@@ -456,7 +628,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.012,
+      gapBefore: 0.03,
     },
     {
       id: "r_a9b",
@@ -480,7 +652,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.012,
+      gapBefore: 0.03,
     },
     {
       id: "r_a11",
@@ -492,22 +664,25 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.012,
+      gapBefore: 0.03,
     },
-    // Ayah 12 whole, two lines on the lens's cream card. The expanded capsule
-    // stays inside the inner lens while giving the larger text room to breathe.
+    // Ayah 12 whole, two lines, on bare paper. Both numbers here were the
+    // mandorla's: 0.19 was the height of the lens's cream card and 0.12 was
+    // clearance for the lens's upper tip. With the shape gone the capsule is
+    // sized to its own two lines (0.150) and sits 0.07 under the ring — the
+    // page's largest gap, which is now the only thing setting this ayah apart.
     {
-      id: "leaf_a12",
+      id: "closing_a12",
       type: "group",
       verseIds: [12],
       columns: 1,
-      capsuleHeight: 0.19,
+      capsuleHeight: 0.15,
       horizontalInset: -0.092,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.12,
-      customSectionId: "sec_leaf",
+      gapBefore: 0.07,
+      customSectionId: "sec_closing",
     },
   ],
 
@@ -515,7 +690,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   // One per shape drawn, INNERMOST FIRST: sectionResolver's reverse index is
   // first-wins, so each capsule lands in the tightest shape around it and an
   // outer zone owns only what no inner zone claimed — while still dragging the
-  // inner ones with it, via the ancestor index. `sec_top` and `sec_leaf` are
+  // inner ones with it, via the ancestor index. `sec_top` and `sec_closing` are
   // declared on their blocks since each is one contiguous run.
   customSections: [
     {
@@ -534,7 +709,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       cameraTarget: { y: 1.25, fov: 32, tilt: -1.4 },
     },
     {
-      id: "sec_leaf",
+      id: "sec_closing",
       verseIds: [12],
       cameraTarget: { y: 1.1, fov: 28, tilt: -1.4 },
     },
@@ -559,101 +734,64 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   // of the one below it, and that overpainting is what turns three filled
   // rectangles into three visible bands.
   svgOverlays: [
-    // The letters' panel — block 0 alone. Centred on that block: 0.098 tall,
-    // 0.021 of air above and below it.
-    // {
-    //   src: "/yasin/letter-panel.svg",
-    //   anchorGroupIndex: 0,
-    //   anchorEdge: "top",
-    //   scaleX: 0.42,
-    //   scaleY: 0.14,
-    //   offsetX: 0,
-    //   offsetY: -0.049,
-    //   renderOrder: 2,
-    //   customSectionId: "sec_letters",
-    // },
-    // The cloud — blocks 1 … 3 (ayahs 2 … 5), 0.314 of stack inside a 0.52
-    // plane: the lobes stand on the body's edge and eat 0.083 top and bottom,
-    // so the band left for capsules is 0.354. Centre is the stack's centre.
-    // {
-    //   src: "/yasin/cloud.svg",
-    //   anchorGroupIndex: 1,
-    //   anchorEdge: "top",
-    //   scaleX: 1.06,
-    //   scaleY: 0.52,
-    //   offsetX: 0,
-    //   offsetY: -0.157,
-    //   renderOrder: 2,
-    //   customSectionId: "sec_top",
-    // },
-    // Shared inner frame — blocks 1 … 3, containing ayahs 2 … 5.
+    // The scalloped opening frame — blocks 1 … 3 (ayahs 2 … 5). 0.298 of stack
+    // inside a 0.4811 shape: the lobes stand on the body's edge and eat 0.09
+    // top and bottom, so the band left for capsules is 0.30 and it is full.
+    //   wanted: 1.0614 x 0.4811 of drawn ornament, centred on −0.514, which is
+    //   the centre of the three capsule rows; the plane is 6 SVG units larger
+    //   all round so the outline's rim is not clipped off its own edge.
     {
-      src: SHEET_FRAME_SVGS.inner,
+      src: "/yasin/cloud.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
-      scaleX: 1,
-      scaleY: 0.42,
+      scaleX: 1.07,
+      scaleY: 0.37,
       offsetX: 0,
-      offsetY: -0.14,
+      offsetY: -0.157,
       renderOrder: 2,
       customSectionId: "sec_top",
     },
-    // Outer ring — blocks 3 … 8 (ayahs 7 … 11).
-    //   wanted: 1.01 x 0.798, y −0.5095 … −1.3075  (centre −0.9085)
+    // Outer ring — blocks 4 … 9 (ayahs 6 … 11).
     {
       src: "/yasin/ring-outer.svg",
       anchorGroupIndex: 4,
       anchorEdge: "top",
       scaleX: 1.5,
-      scaleY: 0.8,
+      scaleY: 0.922,
       offsetX: 0,
-      offsetY: -0.384,
+      offsetY: -0.42,
       renderOrder: 3,
       customSectionId: "sec_ring1",
     },
-    // Middle ring — blocks 4 … 7 (ayahs 8 … 10).
-    //   wanted: 0.86 x 0.534, y −0.6295 … −1.1635  (centre −0.8965)
     {
       src: "/yasin/ring-mid.svg",
       anchorGroupIndex: 5,
       anchorEdge: "top",
       scaleX: 1.3,
-      scaleY: 0.5,
+      scaleY: 0.56,
       offsetX: 0,
-      offsetY: -0.247,
+      offsetY: -0.265,
       renderOrder: 4,
       customSectionId: "sec_ring2",
     },
-    // Inner ring — blocks 5 … 6 (ayah 9). The three centres land within 0.012
-    // of each other (−0.9085 / −0.8965 / −0.8975), which is what makes the set
-    // read as concentric.
-    //   wanted: 0.70 x 0.268, y −0.7635 … −1.0315  (centre −0.8975)
     {
       src: "/yasin/ring-inner.svg",
       anchorGroupIndex: 6,
       anchorEdge: "top",
       scaleX: 1.1,
-      scaleY: 0.268,
+      scaleY: 0.27,
       offsetX: 0,
       offsetY: -0.118,
       renderOrder: 5,
       customSectionId: "sec_ring3",
     },
-    // Mandorla — block 9 (ayah 12). Centred on the CAPSULE (−1.4455 … −1.5955,
-    // centre −1.5205), not on the block frame: the lens's cream card is sized to
-    // the text, so a pad measured off block padding would drift.
-    //   wanted: 1.16 x 0.400, y −1.3205 … −1.7205
-    {
-      src: "/yasin/leaf.svg",
-      anchorGroupIndex: 10,
-      anchorEdge: "top",
-      scaleX: 1.1,
-      scaleY: 0.3,
-      offsetX: 0,
-      offsetY: -0.105,
-      renderOrder: 3,
-      customSectionId: "sec_leaf",
-    },
+    // The chiasm's three pairings are NOT drawn here — they are side curves,
+    // and side curves come out of `styling.colors.curveColors`. See it.
+    //
+    // Ayah 12 has NO frame. It used to sit on a mandorla; the shape is gone on
+    // purpose — `sec_closing` survives it, so the ayah still lifts and zooms as a
+    // section of its own, it is simply not drawn around. (Same idea as the
+    // kit's `tone: "none"` frame: group without painting.)
   ],
 
   sideInfo: {
@@ -663,7 +801,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
         kicker: "YÂSÎN: 1-12",
         paragraphs: [
           "Yâsîn suresi, Kur'an-ı Kerim'in kalbi diye anılır. Bu sayfada onun ilk on iki ayetini görüyorsunuz. Ayetler alt alta sıralanmış değil; bir sistem içinde, iç içe halkalar hâlinde dizilmiştir. Bu diziliş sonradan uydurulmuş bir şema değil, ayetlerin kendi anlamlarının çizdiği şekildir.",
-          "Sayfa üç bölümden oluşuyor. En üstte ilk beş kapsülün giriş çerçevesi var. Ortada birbirinin içine geçmiş üç halka var. En altta ise bir badem şekli var: 12. ayet.",
+          "Sayfa üç bölümden oluşuyor. En üstte ilk beş kapsülü içine alan, kenarları işlemeli giriş çerçevesi var. Ortada birbirinin içine geçmiş üç halka var. En altta ise hiçbir çerçevenin içine konulmamış tek bir ayet var: 12. ayet.",
           "Üstteki giriş, Peygamber Efendimize hitaptır: Kur'an'a yemin edilir, onun gönderilmiş bir peygamber olduğu, dosdoğru bir yol üzerinde bulunduğu, bu Kitabın Azîz ve Rahîm olan Allah tarafından indirildiği ve niçin indirildiği söylenir. Yani muhatap ve görev burada belirlenir.",
         ],
       },
@@ -713,13 +851,13 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           "Dikkat ediniz: en dıştaki iki ayet, yani 7 ve 11, birbirinin karşılığıdır. Biri inanmayanlardan, diğeri uyarının kime fayda vereceğinden söz eder. Onların bir içindeki 8 ve 10 da birbirinin karşılığıdır: biri kalkık kalmış başları, diğeri uyarmanın fark etmeyişini anlatır. Ortada ise tek başına 9. ayet durur.",
           "Bu yüzden 9. ayet halkanın tam merkezine, en küçük ve en yuvarlak çerçevenin içine konulmuştur. O da kendi içinde ikiye ayrılmıştır: önden ve arkadan çekilen setler, sonra da gözlerin perdelenmesi. Önü arkası kapanmış, üstelik görüşü de alınmış bir insan tasviri.",
           "Şunu da fark etmek gerekir: burada anlatılan kapanma bir zorlama değildir. İnsan önce yüz çevirir; ardından bu yüz çevirme onun için bir alışkanlık, bir perde hâline gelir.",
-          "En alttaki badem şekli ise bütün bu halkanın cevabıdır. Onun için ne girişin içine ne de halkaların birine konulmamıştır; kendine ait bir şekli vardır:",
+          "En alttaki ayet ise bütün bu halkanın cevabıdır. Bu yüzden ne girişin içine ne de halkalardan birine konulmuştur; hiçbir çerçevenin içinde değildir, sayfanın en altında tek başına durur:",
           {
             capsules: [
               {
                 n: 12,
                 text: "12. ayet — Şüphesiz ölüleri biz diriltiriz; yaptıklarını ve bıraktıkları eserleri yazarız; her şeyi apaçık bir kitapta saymışızdır.",
-                bg: WHITE_BG,
+                bg: MAROON_BG,
                 color: MAROON_BORDER,
                 textColor: INK_RED,
               },

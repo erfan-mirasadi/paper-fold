@@ -1,21 +1,17 @@
-<svg width="1266" height="1000" viewBox="0 0 1266 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
-<!-- YÂSÎN 1-12 — RING 1 of 3, the OUTERMOST band. Encloses ayahs 7 … 11; the
-     two capsules that sit against its top and bottom edges are ayah 7 and
+<svg width="1875" height="1000" viewBox="0 0 1875 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 1-12 — RING 1 of 3, the OUTERMOST band. Encloses ayahs 6 … 11; the
+     two capsules that sit against its top and bottom edges are ayah 6 and
      ayah 11, the outermost pair of the chiasm.
 
-     COLOUR follows the project's frame idiom, not the reference photo's paint.
-     The photo washes these three rings in green / copper / blue watercolour;
-     every frame in this app instead uses the shared gold gradient outline
-     (#968428 → #CDC577 → #968428) over a translucent pale fill — see
-     /tevbe/dome-section.svg, /nisa23/frame-oval-top.svg, /maun/all-section.svg.
-     So the three rings keep the photo's SHAPE and nesting and take Tevbe 24's
-     tints for their fills: cream here, lavender in ring-mid, blue in
-     ring-inner. Three different tints because the onion has to read as three
-     layers at a glance; going warm→cool inward also puts the coolest, tightest
-     frame on the ayah at the centre.
+     COLOUR follows Tevbe 24, which this whole sheet is drawn after: the
+     translucent cream #F5EEDC at 0.6 — byte-for-byte /tevbe/dome-section.svg's
+     fill — under the shared gold rim gradient (#968428 → #CDC577 → #968428).
+     All three rings are painted at the SAME 0.6 that Tevbe's own frames use;
+     they differ only in tint (cream here, lavender in ring-mid, blue in
+     ring-inner) so the onion reads as three layers at a glance.
 
-     THE SET. Three files — ring-outer (ayahs 7 … 11), ring-mid (ayahs 8 … 10)
-     and ring-inner (ayah 9) — drawn as three FILLED rounded rectangles and
+     THE SET. Three files — ring-outer (ayahs 6 … 11), ring-mid (ayahs 7 … 10)
+     and ring-inner (ayahs 8 · 9) — drawn as three FILLED rounded rectangles and
      stacked by renderOrder 3 / 4 / 5 in the config. Each one paints over the
      middle of the one below it, so the visible cream is the margin between
      this rectangle and the lavender one: the "band" is a leftover, not a shape
@@ -25,45 +21,42 @@
      They are separate files rather than three rects in one SVG because each
      ring is also a drag/elevation zone of its own (customSectionId sec_ring1 /
      2 / 3), and an overlay carries exactly one zone. Peeling the outer ring
-     lifts all five ayahs; peeling the middle one lifts three; the inner, one.
+     lifts all six ayahs; peeling the middle one lifts four; the inner, two.
 
-     CORNER RADIUS IS THE BINDING CONSTRAINT, not the width. A capsule sits
-     near the top or bottom edge, which is exactly where a rounded corner has
-     eaten the most width, so the fit has to be checked THERE:
+     CORNER RADIUS IS TEVBE'S, NOT A STADIUM'S. /nisa/all-section-1.svg — the
+     frame around the whole of Tevbe 24 — carries rx 800 / ry 337.57 on a
+     22087 x 10845 viewBox displayed at 1.15 x 1.24, i.e. 0.0417 x 0.0386 world.
+     All three rings here are drawn at a flat 0.040 world on BOTH axes, which is
+     also the sheet's own `styling.verseRadius` (0.042): frame corners and
+     capsule corners are then the same curve, and the rings read as boxes
+     nested in boxes rather than as three stadiums.
 
-         width lost per side  =  r - sqrt(r^2 - (r - d)^2)
-
-     with d the capsule edge's distance below the frame's own edge. At r 0.150
-     world and d 0.042 (ayah 7's top edge under the config's 0.034 top pad),
-     that is 0.046 a side, leaving 0.902 of usable width for a 0.84 capsule —
-     0.031 clearance. Rounder corners, a thinner pad, or a wider capsule all
-     spend the same 0.031. All three rings are tuned to about that margin.
+     Because the file is drawn AT its display aspect, one radius in SVG units is
+     a true circle on screen — a shared file stretched to another aspect is
+     exactly how the old rings ended up with corners half again wider than they
+     were tall.
 
      ASPECT — drawn AT the aspect it is displayed at:
 
-         viewBox 1266 x 1000                  ->  1.266
-         config  scaleX 1.01 / scaleY 0.798   ->  1.266
+         viewBox 1875 x 1000                  ->  1.875
+         config  scaleX 1.50 / scaleY 0.80     ->  1.875
 
-     one SVG unit = 7.98e-4 world on BOTH axes, so rx == ry arrives as a true
-     circular corner and the 11-unit stroke arrives uniform at 0.0088 world.
-     All three rings are stroked to that same ~0.0086 — which is why their
-     stroke-widths differ file to file (11 / 16 / 32): each viewBox maps to a
-     different world height. Keep them in step, or the innermost ring starts
-     looking like it was drawn with a different pen.
+     one SVG unit = 8.00e-4 world on BOTH axes.
 
-     GEOMETRY (world units at 1.01 x 0.798)
-       outer edge   flush with the plane   ->  1.01 w x 0.798 h
-       stroke       11 units               ->  0.0088
-       corner r     188 units              ->  0.150  (19% of the height) -->
+     GEOMETRY (world units at 1.50 x 0.80)
+       outer edge   flush with the plane   ->  1.50 w x 0.80 h
+       rim          5.6 units              ->  0.0045  (== the other two rings,
+                                                        == Tevbe's own gold band)
+       corner r     50 units               ->  0.040 -->
 <defs>
-<linearGradient id="yasinRingOuterGold" x1="0" y1="500" x2="1266" y2="500" gradientUnits="userSpaceOnUse">
+<linearGradient id="yasinRingOuterGold" x1="0" y1="500" x2="1875" y2="500" gradientUnits="userSpaceOnUse">
 <stop stop-color="#968428"/>
 <stop offset="0.503741" stop-color="#CDC577"/>
 <stop offset="1" stop-color="#968428"/>
 </linearGradient>
 </defs>
-<rect x="5.5" y="5.5" width="1255" height="989"
-      rx="188" ry="188"
+<rect x="2.8" y="2.8" width="1869.4" height="994.4"
+      rx="50" ry="50"
       fill="#F5EEDC" fill-opacity="0.6"
-      stroke="url(#yasinRingOuterGold)" stroke-width="5.5"/>
+      stroke="url(#yasinRingOuterGold)" stroke-width="5.6"/>
 </svg>

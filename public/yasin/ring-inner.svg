@@ -1,43 +1,40 @@
-<svg width="2612" height="1000" viewBox="0 0 2612 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<svg width="4104" height="1000" viewBox="0 0 4104 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
 <!-- YÂSÎN 1-12 — RING 3 of 3, the INNERMOST band, and the centre of the
      chiasm: it holds ayah 9 alone, in two capsules — the two barriers, and the
-     veil that follows them. Painted last,
-     over ring-mid.svg — see ring-outer.svg for how the three stack, why the
-     colours are Tevbe 24's tints rather than the photo's watercolour, and how
-     the corner radius (not the width) sets how wide a capsule may be.
+     veil that follows them. Painted last, over ring-mid.svg — see
+     ring-outer.svg for how the three stack, why the colours and the corner
+     radius are Tevbe 24's, and why each file has to be drawn at its own
+     display aspect.
 
-     Blue #CEE0E9 — byte-for-byte /tevbe/dome-section-1.svg's fill, at a higher
-     opacity because this one is painted over two other fills rather than over
-     bare paper. It is the coolest and tightest of the three frames, which is
+     Blue #CEE0E9 at 0.6 — byte-for-byte /tevbe/dome-section-1.svg's fill AND
+     its opacity. It is the coolest and tightest of the three frames, which is
      the point: the innermost ring is where the ayah about being closed in sits.
 
-     Its corner radius is 39% of the height, so it reads as very nearly a
-     stadium rather than a rounded rectangle. That is deliberate and matches
-     the reference page: the innermost ring is the roundest of the three, which
-     is what makes the set read as an onion rather than as three boxes. It is
-     also the tightest fit on the page — the two capsules it holds are 0.58
-     wide against 0.628 of usable width.
+     It used to be drawn at a 39%-of-height radius, nearly a stadium, on the
+     argument that the innermost ring should be the roundest of the three. It is
+     now 0.040 world like the other two — the sheet is drawn after Tevbe 24, and
+     nothing in Tevbe is a stadium.
 
      ASPECT — drawn AT the aspect it is displayed at:
 
-         viewBox 2612 x 1000                  ->  2.612
-         config  scaleX 0.70 / scaleY 0.268    ->  2.612
+         viewBox 4104 x 1000                  ->  4.104
+         config  scaleX 1.10 / scaleY 0.268    ->  4.104
 
      one SVG unit = 2.68e-4 world on BOTH axes.
 
-     GEOMETRY (world units at 0.70 x 0.268)
-       outer edge   flush with the plane   ->  0.70 w x 0.268 h
-       stroke       32 units               ->  0.0086  (== the other two rings)
-       corner r     392 units              ->  0.105   (39% of the height) -->
+     GEOMETRY (world units at 1.10 x 0.268)
+       outer edge   flush with the plane   ->  1.10 w x 0.268 h
+       rim          17 units               ->  0.0046  (== the other two rings)
+       corner r     149 units              ->  0.040   (== the other two rings) -->
 <defs>
-<linearGradient id="yasinRingInnerGold" x1="0" y1="500" x2="2612" y2="500" gradientUnits="userSpaceOnUse">
+<linearGradient id="yasinRingInnerGold" x1="0" y1="500" x2="4104" y2="500" gradientUnits="userSpaceOnUse">
 <stop stop-color="#968428"/>
 <stop offset="0.503741" stop-color="#CDC577"/>
 <stop offset="1" stop-color="#968428"/>
 </linearGradient>
 </defs>
-<rect x="16.0" y="16.0" width="2580" height="968"
-      rx="392" ry="392"
-      fill="#CEE0E9" fill-opacity="0.85"
-      stroke="url(#yasinRingInnerGold)" stroke-width="16"/>
+<rect x="8.5" y="8.5" width="4087" height="983"
+      rx="149" ry="149"
+      fill="#CEE0E9" fill-opacity="0.6"
+      stroke="url(#yasinRingInnerGold)" stroke-width="17"/>
 </svg>
