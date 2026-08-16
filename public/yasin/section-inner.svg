@@ -1,0 +1,67 @@
+<svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — THE INNER SECTION FRAME, the surah's pink inner frame. Sheets point
+     at it through `SHEET_FRAME_SVGS.inner`. Pair file: section-gold.svg, same
+     construction and same geometry, cream instead of pink — see below.
+
+     WHY IT EXISTS. It used to be /nisa/all-section.svg, borrowed. That file is
+     filled #D9C7CA — a strong mauve that is in NO other frame of this surah and
+     in none of Tevbe 24 either, and it was the one colour on a Yâsîn sheet that
+     broke the rule the rest of the surah keeps. It could not simply be
+     retinted: nisa36Config, fatiha1Config and fatiha4Config draw with the same
+     file and are not Yâsîn's to repaint. So the geometry was copied here, byte
+     for byte, and only the paint changed.
+
+     COLOUR. Tevbe 24's #F0E4E5 at 0.6 — the pale pink that page fills its own
+     outer frame with, at the opacity its frames are painted at. It is also the
+     one Tevbe colour no capsule ground uses, so a capsule can never vanish
+     into it.
+
+     THE SURAH'S SHARED FRAMES, outermost first:
+
+         overall  /yasin1319/all-section.svg   #F0E4E5  opaque   (pink)
+         band     /yasin1319/band.svg          #CEE0E9  0.6      (blue)
+         inner    this file                    #F0E4E5  0.6      (pink)
+         gold     /yasin/section-gold.svg      #F5EEDC  0.6      (cream)
+
+     THE OUTER AND THE INNER ARE THE SAME PINK, and that is copied straight from
+     Tevbe 24, where the page's outer frame and the inner box around its ana
+     bölüm carry one fill and are told apart by their gold rims alone. Only the
+     small shields on that page take another colour.
+
+     WATCH THE STACK WHEN YOU CHANGE THE OPACITY. On most sheets this frame sits
+     over the blue band, so whatever is left translucent here picks the band up.
+     Pink over blue stays warm; a lavender #E1E3F3 at 0.6 was tried here and the
+     whole sheet came out reading blue-grey, because these frames cover nearly
+     all of it. If it ever goes cool again, that is the reason.
+
+     THE ELLIPSE IS PRE-DISTORTED, and deliberately so. This file is rasterised
+     once and stretched onto a 1x1 plane by each sheet's scaleX/scaleY, so the
+     two axes get DIFFERENT scale factors and a circle drawn here does not
+     arrive as a circle. Hence ry ≠ rx (1066.2 against 800) and a vertical rim
+     thicker than the horizontal one (119.95 against 90): both are cancelled by
+     the stretch. Tuned to Imran-14's 0.95 x 0.35 bands, which is the aspect the
+     original was solved at and the reason these numbers are what they are.
+     DO NOT "fix" them into a square radius.
+
+     CONSTRUCTION: THE RIM IS MASKED, not underlaid. The Nisa original is a gold
+     rect with an OPAQUE panel laid over it, so the gold survives only as the
+     margin the panel does not cover. That trick needs the panel to be opaque —
+     at 0.6 the gold would show through the whole middle. So the rim is punched
+     out with a mask here and the panel drawn on bare page: same two rectangles,
+     same edges, gold only where gold belongs. -->
+<defs>
+<linearGradient id="yasinInnerGold" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+<mask id="yasinInnerRim">
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2" fill="#ffffff"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25" fill="#000000"/>
+</mask>
+</defs>
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2"
+      fill="url(#yasinInnerGold)" mask="url(#yasinInnerRim)"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25"
+      fill="#F0E4E5" fill-opacity="0.6"/>
+</svg>

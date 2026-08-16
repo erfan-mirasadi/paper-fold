@@ -2,8 +2,10 @@ import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 // 33-40 — the earth and the sky, grouped inside the project's standard frames.
-// One pale outer frame holds the whole sheet. Four strong-pink inner frames
-// hold ayah 33, ayahs 34-35 together, ayah 36, and ayahs 37-40 together.
+// One pale outer frame holds the whole sheet. Inside it, three PINK inner
+// frames hold ayah 33, ayahs 34-35 together and ayah 36; the closing group,
+// ayahs 37-40, takes a CREAM one instead — it answers the three above it
+// rather than continuing them.
 //
 // Ayahs 33-36 are still split into phrase capsules: a full-width phrase, a
 // bridged pair, and another full-width phrase. Only the final fragment prints
@@ -312,7 +314,7 @@ const SPEC: SheetSpec = {
       h: 1.13,
       w: 1.4,
     },
-    // Four strong-pink standard inner frames: 33, 34-35, 36 and 37-40.
+    // Four standard inner frames: pink on 33, 34-35 and 36; cream on 37-40.
     {
       from: 0,
       to: 2,
@@ -343,11 +345,15 @@ const SPEC: SheetSpec = {
       h: 0.38,
       offsetY: -0.1353,
     },
+    // The closing section (37-40 — the night, the sun, the moon, the orbits)
+    // takes the CREAM frame instead of the pink one. Those four ayahs answer the
+    // three sections above them rather than continuing them, and this is the one
+    // frame on the sheet that is not pink, so the break reads without a word.
     {
       from: 7,
       to: 9,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
+      src: SHEET_FRAME_SVGS.gold,
       pad: PETAL_PAD,
       w: 1.4617,
       h: 0.48,

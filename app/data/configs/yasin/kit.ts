@@ -69,14 +69,36 @@ export const SHEET_COLORS = {
 } as const;
 
 /**
- * The two shared frame textures used by the Yasin sheets. Keeping one URL per
+ * The three shared frame textures used by the Yasin sheets. Keeping one URL per
  * visual role lets Three's texture cache reuse the same rasterised SVG across
  * every sheet that needs it.
+ *
+ * TEVBE 24's FILLS, AT TEVBE'S OWN OPACITIES:
+ *
+ *   overall  #F0E4E5  opaque   Tevbe's outer frame
+ *   band     #CEE0E9  0.6      Tevbe's shields
+ *   inner    #F0E4E5  0.6      Tevbe's inner box — the SAME pink as the outer
+ *   gold     #F5EEDC  0.6      Tevbe's centre dome — for a section that closes
+ *
+ * The outer and the inner sharing one fill is not an oversight: Tevbe's own
+ * page frame and the box around its ana bölüm are one colour, told apart by
+ * their gold rims. `gold` is the odd one out on purpose — give it to a passage
+ * that answers the ones above it rather than continuing them.
+ *
+ * `inner` and `gold` are the SAME FILE with one different fill, because an
+ * overlay is a texture at a URL and there is nowhere to pass it a colour.
+ *
+ * `inner` was /nisa/all-section.svg until it was found to be the one colour on
+ * a Yâsîn sheet that came from outside that box (an opaque #D9C7CA mauve). It
+ * could not be retinted where it stood — Nisa and Fâtiha draw with the same
+ * file — so its geometry was copied to /yasin/section-inner.svg and repainted
+ * there. That file's header carries the rest.
  */
 export const SHEET_FRAME_SVGS = {
   overall: "/yasin1319/all-section.svg",
   band: "/yasin1319/band.svg",
-  inner: "/nisa/all-section.svg",
+  inner: "/yasin/section-inner.svg",
+  gold: "/yasin/section-gold.svg",
 } as const;
 
 /** Shared handwritten heading used at the top of every Yâsîn sheet. */

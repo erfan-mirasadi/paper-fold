@@ -1,0 +1,48 @@
+<svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — THE CREAM SECTION FRAME. Pair file: section-inner.svg — identical
+     geometry, identical construction, one different fill. Sheets point at it
+     through `SHEET_FRAME_SVGS.gold`.
+
+     WHY A SECOND FILE RATHER THAN A PARAMETER. An overlay is a rasterised
+     texture at a URL; there is nowhere to pass it a colour. A section that
+     wants a different fill therefore wants a different file, and the two are
+     kept byte-identical apart from the fill so they can never drift into
+     different shapes.
+
+     COLOUR. Tevbe 24's #F5EEDC at 0.6 — byte-for-byte /tevbe/dome-section.svg's
+     fill AND its opacity, the cream that page paints its centre dome with. It
+     is the warmest of the surah's frame fills, which is what it is for: a
+     closing section that should read as its own thing rather than as one more
+     pink box in the stack.
+
+     WHERE IT IS USED. The 33-40 sheet's last section (ayahs 37 … 40 — the
+     night, the sun, the moon, the orbits). That passage answers the three
+     sections above it rather than continuing them, and the cream says so.
+
+     MIND THE CAPSULES. Cream is close to SHEET_COLORS.gold's own ground
+     (#F5EEDC, identical), so a gold-toned capsule on this frame would be told
+     apart by its rule alone. The section it is used on carries lavender and
+     blue capsules, which is why it works there. Check before reusing it.
+
+     THE ELLIPSE IS PRE-DISTORTED, and deliberately so — see section-inner.svg
+     for the arithmetic and for why ry ≠ rx here. DO NOT "fix" them into a
+     square radius.
+
+     CONSTRUCTION: THE RIM IS MASKED, not underlaid, because the panel is
+     translucent — again, see section-inner.svg. -->
+<defs>
+<linearGradient id="yasinGoldRim" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+<mask id="yasinGoldRimMask">
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2" fill="#ffffff"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25" fill="#000000"/>
+</mask>
+</defs>
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2"
+      fill="url(#yasinGoldRim)" mask="url(#yasinGoldRimMask)"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25"
+      fill="#F5EEDC" fill-opacity="0.6"/>
+</svg>

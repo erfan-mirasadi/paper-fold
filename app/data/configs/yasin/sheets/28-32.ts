@@ -60,7 +60,7 @@ const SPEC: SheetSpec = {
 
   frames: [
     // The page-wide enclosure uses the pale overall frame; the 29-32 group
-    // uses the project's stronger pink inner frame.
+    // uses the surah's shared pink inner frame.
     {
       from: 0,
       to: 4,
