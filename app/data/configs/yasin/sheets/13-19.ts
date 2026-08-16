@@ -51,7 +51,7 @@
 import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
-import { SHEET_FRAME_SVGS } from "../kit";
+import { SHEET_FRAME_SVGS, yasinHandwrittenTitle } from "../kit";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, as in yasin36Config. The reference photo paints
@@ -129,6 +129,8 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
   },
 
   specialVerses: {},
+
+  handwrittenNotes: yasinHandwrittenTitle(1.54, "13–19"),
 
   verseOverrides: {
     // Ayah 13 — the narrator's line, alone above the band.

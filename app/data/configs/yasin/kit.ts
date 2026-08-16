@@ -44,6 +44,7 @@
 
 import type {
   CustomSectionDef,
+  HandwrittenNoteConfig,
   LayoutBlock,
   LayoutStyling,
   SurahLayoutConfig,
@@ -77,6 +78,24 @@ export const SHEET_FRAME_SVGS = {
   band: "/yasin1319/band.svg",
   inner: "/nisa/all-section.svg",
 } as const;
+
+/** Shared handwritten heading used at the top of every Yâsîn sheet. */
+export const yasinHandwrittenTitle = (
+  paperWidth: number,
+  range: string,
+): HandwrittenNoteConfig[] => [
+  {
+    x: paperWidth / 2,
+    y: -0.08,
+    fontSize: 0.048,
+    color: "#2f4858",
+    lineSpacing: 1.6,
+    maxWidth: paperWidth,
+    textAlign: "center",
+    rotationZ: 0,
+    lines: [{ text: `Yâsîn Suresi ${range.replaceAll("-", "–")}` }],
+  },
+];
 
 export type Tone = keyof typeof SHEET_COLORS;
 
@@ -1009,6 +1028,11 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
 
     specialVerses: {},
     verseOverrides,
+
+    handwrittenNotes: yasinHandwrittenTitle(
+      paperWidth,
+      spec.title.replace(/^YÂSÎN:\s*/, ""),
+    ),
 
     styling: SHEET_STYLING,
 
