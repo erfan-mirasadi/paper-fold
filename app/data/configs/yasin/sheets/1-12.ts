@@ -90,7 +90,7 @@
 import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
-import { GREEN_THEME } from "../../../theme";
+import { GREEN_THEME, GREEN_VERSE_BG } from "../../../theme";
 import { yasinHandwrittenTitle } from "../kit";
 
 // ---------------------------------------------------------------------------
@@ -243,8 +243,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 5,
     }),
-    // ── OUTER RING (cream frame) — ayahs 7 and 11 ────────────────────────
-    6: capsule(WHITE_BG, GOLD_BORDER, INK_GOLD, {
+    // ── OUTER RING — ayahs 6 and 11, paired in the green theme ───────────
+    6: capsule(GREEN_VERSE_BG, GREEN_THEME, GREEN_THEME, {
       // Eight words on ONE line in 0.84 — the widest single line on the page.
       textColor: "#000000",
       textScaleOverride: 0.8,
@@ -252,7 +252,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       showNumber: true,
       displayNumber: 6,
     }),
-    11: capsule(WHITE_BG, GOLD_BORDER, GREEN_THEME, {
+    11: capsule(GREEN_VERSE_BG, GREEN_THEME, GREEN_THEME, {
       // The longest text on the page — eleven words. On ONE line now: the
       // capsule is 0.84 wide and two lines in 0.110 could only be set at 0.48,
       // where the top line's marks were cropped off by the capsule's own edge.
@@ -286,14 +286,14 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // Tevbe's own ana bölüm does, and the barriers take its purple.
     8: capsule(WHITE_BG, WHITE_BORDER, INK_PURPLE, {
       textColor: "#000000",
-      textScaleOverride: 0.6,
+      textScaleOverride: 0.63,
       translationTextScaleOverride: 0.5,
       showNumber: true,
       displayNumber: 8,
     }),
     9: capsule(WHITE_BG, WHITE_BORDER, INK_RED, {
       textColor: "#000000",
-      textScaleOverride: 0.6,
+      textScaleOverride: 0.63,
       translationTextScaleOverride: 0.5,
       showNumber: true,
       displayNumber: 9,
@@ -307,9 +307,45 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // two are the only maroon capsules on the sheet, and reading one against
     // the other is what the pairing is for: 5 closes the opening section, 12
     // closes the page.
-    12: capsule(MAROON_BG, MAROON_BORDER, INK_RED, {
+    // THE CREAM CARD INSIDE THE MANDORLA, and the page's only red text. Every
+    // other capsule here sets in black; this one does not, because it is the
+    // one ayah that answers the ring rather than belonging to it, and the
+    // handwritten sheet reds it for the same reason. Cream ground, not maroon:
+    // the lens under it is already pale maroon, and a maroon capsule on it
+    // would have nothing but its rule to stand on.
+    // The cream card at the heart of the mandorla — the reference sheet's own
+    // reading of this ayah, and the one capsule on the page whose TEXT is
+    // coloured rather than black. It carries no `textColor` of its own on
+    // purpose: `capsule()`'s third argument is the ink, so the red travels to
+    // the text, the badge and nothing else. Ayah 12 is the answer the whole
+    // ring was waiting for, so it is the one that speaks in colour.
+    12: capsule(CREAM_BG, MAROON_BORDER, INK_RED, {
+      // THE DECORATION IS ALAK 96's — /alak/Group 11.svg, the gold cartouche it
+      // draws around its ana ayet (its own ayah 5), reused here unaltered. It
+      // is drawn ENTIRELY in the shared #968428 → #CDC577 gold gradient and
+      // carries no fill of its own, so it lands on this page's palette without
+      // a single colour to reconcile — which is why it is borrowed rather than
+      // redrawn.
+      //
+      // A CAPSULE FRAME, not a section frame: `customFrameSvg` is rendered by
+      // VerseMesh's `BorderSvg` around this one capsule, at 0.8 x 0.93 of its
+      // OUTER size (capsule + expandW/expandH). No `svgOverlays` entry, no
+      // anchor, no offsetY — it travels with the capsule.
+      //
+      // IT ARRIVES SQUASHED, and there is no way around it. The art is drawn at
+      // 8717 x 1167 (aspect 7.47) for Alak's one-line ana ayet; ayah 12 is two
+      // lines, so its outer box is 0.87 x 0.195 → 3.84 after BorderSvg's own
+      // scaling. The ornamental ends therefore come out about twice as stout as
+      // Alak's. Matching the aspect would need either a one-line capsule
+      // (~0.080 tall, and the ink alone needs 0.110) or a 1.62-wide one, on a
+      // 1.54 page. Stout ends it is.
+      customFrameSvg: "/alak/Group 11.svg",
+      // The air the cartouche needs outside the rule it wraps — Alak's own
+      // numbers, and they scale with the art rather than with the capsule.
+      expandW: 0.035,
+      expandH: 0.01,
+      frameScaleLTR: 1.1,
       circleTextCol: "#7C2C2A",
-      textColor: "#000000",
       textScaleOverride: 0.69,
       translationTextScaleOverride: 0.45,
       showNumber: true,
@@ -428,8 +464,8 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       curveColors: [
         {
           pair: [4, 9], // ayah 6 ▸ ayah 11, the outermost layer
-          color: GOLD_BORDER,
-          fillColor: WHITE_BG, // ayahs 6 · 11's own ground
+          color: GREEN_THEME,
+          fillColor: GREEN_VERSE_BG,
           curveSide: "left",
           // tip 0.1405 (capsule edge 0.0905 + 0.05), extremity −0.195
           topAnchorXOffset: 0,
@@ -650,7 +686,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [8],
       columns: 1,
       capsuleHeight: 0.094,
-      horizontalInset: -0.449,
+      horizontalInset: -0.48,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -662,7 +698,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       verseIds: [9],
       columns: 1,
       capsuleHeight: 0.094,
-      horizontalInset: -0.449,
+      horizontalInset: -0.48,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
@@ -692,22 +728,25 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
       gapBefore: 0.03,
     },
-    // Ayah 12 whole, two lines, on bare paper. Both numbers here were the
-    // mandorla's: 0.19 was the height of the lens's cream card and 0.12 was
-    // clearance for the lens's upper tip. With the shape gone the capsule is
-    // sized to its own two lines (0.150) and sits 0.07 under the ring — the
-    // page's largest gap, which is now the only thing setting this ayah apart.
+    // Ayah 12 whole, two lines. It is the page's LARGEST capsule after the ring
+    // — 0.800 against the 0.639 it used to be, and 0.175 against 0.150 — because
+    // it is the one ayah that stands on its own, and because the cartouche
+    // around it (verseOverrides[12].customFrameSvg) wants a card worth framing.
+    //   inset = (1.13 − (2·0.800 + 2·0.008 + 0.02)) / 2 = −0.253
+    // 0.09 of air above it: the cartouche is drawn on the capsule's OUTER box
+    // (capsule + expandW/expandH), so it reaches 0.010 past the capsule top and
+    // still has to clear the outer ring's bottom edge (−1.549).
     {
       id: "closing_a12",
       type: "group",
       verseIds: [12],
       columns: 1,
-      capsuleHeight: 0.15,
-      horizontalInset: -0.092,
+      capsuleHeight: 0.175,
+      horizontalInset: -0.253,
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
-      gapBefore: 0.07,
+      gapBefore: 0.09,
       customSectionId: "sec_closing",
     },
   ],
@@ -809,10 +848,9 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // The chiasm's three pairings are NOT drawn here — they are side curves,
     // and side curves come out of `styling.colors.curveColors`. See it.
     //
-    // Ayah 12 has NO frame. It used to sit on a mandorla; the shape is gone on
-    // purpose — `sec_closing` survives it, so the ayah still lifts and zooms as a
-    // section of its own, it is simply not drawn around. (Same idea as the
-    // kit's `tone: "none"` frame: group without painting.)
+    // Ayah 12 has NO overlay of its own. Its decoration is a CAPSULE FRAME, not
+    // a section frame — `verseOverrides[12].customFrameSvg`, the cartouche Alak
+    // 96 draws around its ana ayet. See it there.
   ],
 
   sideInfo: {
