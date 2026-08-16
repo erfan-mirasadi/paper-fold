@@ -8,10 +8,9 @@
      3 · 4 row) sits. That coincidence is the reason this shape fits the section
      at all — see THE FIT below.
 
-     COLOUR is Tevbe 24's, like every other frame on this sheet: the translucent
-     cream #F5EEDC at 0.6, byte-for-byte /tevbe/dome-section.svg's fill, under
-     the shared gold rim gradient (#968428 → #CDC577 → #968428). The artwork
-     arrived with a flat green outline; the green is the only thing dropped.
+     COLOUR uses the shared translucent blue band treatment: #CEE0E9 at 0.6,
+     under the shared gold rim gradient (#968428 → #CDC577 → #968428). The
+     scalloped cloud geometry itself remains unchanged.
 
      ASPECT — drawn AT the aspect it is displayed at:
 
@@ -63,7 +62,7 @@
          C 335 251, 351 254, 367 262
          C 393 206, 443 171, 505 171
          Z"
-      fill="#F5EEDC" fill-opacity="0.6"
+      fill="#CEE0E9" fill-opacity="0.6"
       stroke="url(#yasinCloudGold)" stroke-width="9"
       stroke-linejoin="round" stroke-linecap="round"/>
 </g>

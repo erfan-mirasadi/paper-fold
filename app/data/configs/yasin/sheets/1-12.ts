@@ -344,9 +344,14 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       s2Group3Bg: WHITE_BG,
       // ── THE THREE PAIR BRACKETS ────────────────────────────────────────
       // The chiasm the rings draw as nesting, said outright: 6 answered by 11,
-      // 7 by 10, 9a by 9b. Each is one of the project's plain side curves —
-      // the same bowed bracket alak96Config draws around its own pairs, no
-      // arrowhead and no twist.
+      // 7 by 10, 9a by 9b. Each is one of the project's side curves, in
+      // nisa36Config's TWISTED ARROW style: `shape: "arrow"` caps the tail in a
+      // flared head that points into the lower ayah of the pair, and
+      // `twist: true` sweeps the body as a folded ribbon — full width at both
+      // capsules, pinching to a point at `twistT` where the two edges cross,
+      // with the segment before the fold auto-darkened so it reads as the
+      // ribbon turning its back face over. The head says WHICH ayah answers
+      // which; the fold is what makes the answer look like it travelled.
       //
       // ONE SIDE ONLY. `curveSide: "left"` bows both of a bracket's curves the
       // same way instead of mirroring them, and since every block here holds a
@@ -407,6 +412,12 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       // — the default is a screen-space pixel line, which cannot match a
       // capsule border, that being world-space geometry. Both are `RULE_W`.
       //
+      // THE ARROWHEAD FLARES FROM THE TAIL'S CENTRE, ±`arrowHeadWidth`, so it
+      // only reads as a flare while `arrowHeadWidth > tipThickness / 2` —
+      // below that it tapers instead. At tipThickness 0.145 that floor is
+      // 0.0725, which is why these are 0.09. `arrowHeadLength` is how far the
+      // tip pokes past the ribbon's own end, INTO the capsule it points at.
+      //
       // The rule colour is each pair's own, except at the centre: ayah 9's
       // capsules are ruled WHITE_BORDER, which at this size would disappear, so
       // the innermost bracket takes the red that ayah already carries.
@@ -422,7 +433,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           curveSide: "left",
           // tip 0.1405 (capsule edge 0.0905 + 0.05), extremity −0.195
           topAnchorXOffset: 0,
-          bottomAnchorXOffset: 0,
+          bottomAnchorXOffset: 0.17,
           bowGap: 0.447,
           innerBowGap: 0.429,
           inwardOffset: 0,
@@ -431,6 +442,11 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           tipThickness: 0.145,
           topAnchorYOffset: -0.032,
           bottomAnchorYOffset: 0.032,
+          shape: "arrow",
+          arrowHeadLength: 0.15,
+          arrowHeadWidth: 0.12,
+          twist: true,
+          twistT: 0.6,
         },
         {
           pair: [5, 8], // ayah 7 ▸ ayah 10
@@ -439,7 +455,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           curveSide: "left",
           // tip 0.2245 (capsule edge 0.1745 + 0.05), extremity −0.094
           topAnchorXOffset: -0.05,
-          bottomAnchorXOffset: -0.05,
+          bottomAnchorXOffset: 0.13,
           bowGap: 0.425,
           innerBowGap: 0.411,
           inwardOffset: 0,
@@ -448,15 +464,20 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           tipThickness: 0.145,
           topAnchorYOffset: -0.03,
           bottomAnchorYOffset: 0.03,
+          shape: "arrow",
+          arrowHeadLength: 0.11,
+          arrowHeadWidth: 0.11,
+          twist: true,
+          twistT: 0.6,
         },
         {
           pair: [6, 7], // ayah 9's two halves — the centre of the chiasm
-          color: MAROON_BORDER,
-          fillColor: WHITE_BG, // ayah 9's own ground
+          color: GOLD_BORDER,
+          fillColor: WHITE_BG, // ayaground
           curveSide: "left",
           // tip 0.302 (capsule edge 0.272 + 0.03), extremity 0.112
-          topAnchorXOffset: -0.03,
-          bottomAnchorXOffset: -0.03,
+          topAnchorXOffset: 0.01,
+          bottomAnchorXOffset: 0.12,
           bowGap: 0.253,
           innerBowGap: 0.22,
           inwardOffset: 0,
@@ -465,6 +486,11 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           tipThickness: 0.12,
           topAnchorYOffset: -0.03,
           bottomAnchorYOffset: 0.03,
+          shape: "arrow",
+          arrowHeadLength: 0.09,
+          arrowHeadWidth: 0.09,
+          twist: true,
+          twistT: 0.6,
         },
         { color: "transparent", fillColor: "transparent" },
       ],
@@ -734,12 +760,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
   // of the one below it, and that overpainting is what turns three filled
   // rectangles into three visible bands.
   svgOverlays: [
-    // The scalloped opening frame — blocks 1 … 3 (ayahs 2 … 5). 0.298 of stack
-    // inside a 0.4811 shape: the lobes stand on the body's edge and eat 0.09
-    // top and bottom, so the band left for capsules is 0.30 and it is full.
-    //   wanted: 1.0614 x 0.4811 of drawn ornament, centred on −0.514, which is
-    //   the centre of the three capsule rows; the plane is 6 SVG units larger
-    //   all round so the outline's rim is not clipped off its own edge.
+    // Blue translucent scalloped cloud — blocks 1 … 3 (ayahs 2 … 5).
     {
       src: "/yasin/cloud.svg",
       anchorGroupIndex: 1,
