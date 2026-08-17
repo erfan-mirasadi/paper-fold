@@ -220,7 +220,53 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       // No side brackets — the three frames do that job. One fully transparent
       // entry makes SideCurves emit nothing (an empty [] would fall back to the
       // default olive bracket on every isCenter block, and all are centered).
-      curveColors: [{ color: "transparent", fillColor: "transparent" }],
+      // ── THE LINK ACROSS THE EXCHANGE ───────────────────────────────────
+      // The same move the 20-27 sheet makes: one bracket from the first outer
+      // group to the second, straight past what sits between them. Here that is
+      // ayah 15 ▸ ayah 18 — the townspeople's denial answered by their threat,
+      // with the messengers' reply (16 · 17) passed on the way. It is anchored
+      // on the INNER edge of each cream frame, so the bow's body lies in the
+      // gap and the head lands on the group the frame below marks.
+      //
+      // nisa36Config's twisted arrow, one side only, tip as tall as the
+      // capsules it touches, rule in world units so it matches theirs exactly.
+      //
+      // `pair` is BLOCK indices: 13→0, 14→1, 15→2, 16→3, 17→4, 18→5, 19→6.
+      //
+      // The Y offsets correct for `smallBoxH2` — a bracket anchors with the
+      // page-wide `capsuleHeight` (0.14 here) and these capsules are 0.160, so
+      // each end misses its own capsule's centre by 0.010 until corrected.
+      //
+      // The last entry is the CENTER colour and stays transparent: every block
+      // on this sheet is `isCenter`, and any that is also `isPushedIn` would
+      // otherwise take a bracket of its own.
+      curveColors: [
+        {
+          pair: [2, 5], // ayah 15 ▸ ayah 18
+          color: MAROON_BORDER,
+          fillColor: MAROON_BG,
+          curveSide: "left",
+          // Anchored on the capsules' left edge (0.360) and bowed out to
+          // x ≈ 0.13, which is inside the outer frame's left margin (its inner
+          // edge is at 0.245) and clear of the blue band (0.295).
+          bowGap: 0.31,
+          innerBowGap: 0.29,
+          inwardOffset: 0,
+          tipThickness: 0.12, // == both capsules' own height
+          topAnchorYOffset: 0.04,
+          bottomAnchorYOffset: 0.1,
+          topAnchorXOffset: 0.06,
+          bottomAnchorXOffset: 0.2,
+          lineWidthWorld: 0.0038, // == capsuleBorderWidth below
+          opacity: 0.55,
+          shape: "arrow",
+          arrowHeadLength: 0.13,
+          arrowHeadWidth: 0.11,
+          twist: true,
+          twistT: 0.6,
+        },
+        { color: "transparent", fillColor: "transparent" },
+      ],
     },
     capsuleBorderWidth: 0.0038,
     circleBorderWidth: 0.003,
@@ -371,6 +417,19 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       verseIds: [4, 5],
       cameraTarget: { y: 1.05, fov: 26, tilt: -1.4 },
     },
+    // The two outer groups of the exchange. Same size as each other, so the
+    // same camera — clicking either frames it the same way, which is part of
+    // reading them as a pair. Capsule ids, not ayah numbers: id = ayah − 12.
+    {
+      id: "sec_claim",
+      verseIds: [2, 3], // ayahs 14 · 15
+      cameraTarget: { y: 1.1, fov: 28, tilt: -1.4 },
+    },
+    {
+      id: "sec_threat",
+      verseIds: [6, 7], // ayahs 18 · 19
+      cameraTarget: { y: 1.1, fov: 28, tilt: -1.4 },
+    },
     {
       id: "sec_band",
       verseIds: [2, 3, 4, 5, 6, 7],
@@ -396,7 +455,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       src: SHEET_FRAME_SVGS.overall,
       anchorGroupIndex: 0,
       anchorEdge: "top",
-      scaleX: 1.06,
+      scaleX: 1.07,
       scaleY: 1.47,
       offsetX: 0,
       offsetY: -0.672,
@@ -410,11 +469,25 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: 0.95,
-      scaleY: 1.123,
+      scaleY: 1.17,
       offsetX: 0,
-      offsetY: -0.5255,
+      offsetY: -0.532,
       renderOrder: 3,
       customSectionId: "sec_band",
+    },
+    // The claim and the denial — blocks 1 … 2 (ayahs 14 · 15).
+    //   capsules −0.485 … −0.839; frame keeps 0.022 all round
+    //   wanted: 0.865 x 0.40, y −0.462 … −0.862  (centre −0.662)
+    {
+      src: "/yasin1319/band-claim.svg",
+      anchorGroupIndex: 1,
+      anchorEdge: "top",
+      scaleX: 0.9,
+      scaleY: 0.42,
+      offsetX: 0,
+      offsetY: -0.185,
+      renderOrder: 4,
+      customSectionId: "sec_claim",
     },
     // Innermost frame — blocks 3 … 4 (ayahs 16 · 17).
     //   wanted: 0.78 x 0.315, y −0.857 … −1.172  (centre −1.0145)
@@ -423,11 +496,26 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       anchorGroupIndex: 3,
       anchorEdge: "top",
       scaleX: 0.78,
-      scaleY: 0.315,
+      scaleY: 0.3,
       offsetX: 0,
       offsetY: -0.1295,
       renderOrder: 4,
       customSectionId: "sec_reply",
+    },
+    // The threat and the answer — blocks 5 … 6 (ayahs 18 · 19). Mirror of the
+    // claim frame, 0.022 shorter because ayah 19's capsule is 0.140 not 0.160.
+    //   capsules −1.192 … −1.526
+    //   wanted: 0.865 x 0.378, y −1.170 … −1.548  (centre −1.359)
+    {
+      src: "/yasin1319/band-threat.svg",
+      anchorGroupIndex: 5,
+      anchorEdge: "top",
+      scaleX: 0.9,
+      scaleY: 0.42,
+      offsetX: 0,
+      offsetY: -0.175,
+      renderOrder: 4,
+      customSectionId: "sec_threat",
     },
   ],
 

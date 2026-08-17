@@ -1,0 +1,55 @@
+<svg width="2163" height="1000" viewBox="0 0 2163 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 13-19 — THE CLAIM AND THE DENIAL, ayahs 14 · 15.
+
+     WHAT IT GROUPS. The messengers say they are sent; the townspeople answer
+     that they are only men and that the Merciful sent nothing down. Claim and
+     denial are one exchange, so they get one frame — which the page could not
+     say before, because the middle band holds all six of ayahs 14 … 19 and the
+     inner frame holds only the messengers' reply. The two ends of the argument
+     had nothing around them.
+
+     ITS PAIR IS /yasin1319/band-threat.svg (ayahs 18 · 19), drawn in the same
+     cream at the same opacity and differing only in aspect. That is deliberate:
+     one colour for the two outer groups of the exchange, so the eye reads them
+     as the same kind of thing on either side of the reply, and the side curve
+     between them (see `styling.colors.curveColors`) has two matching ends to
+     join.
+
+     COLOUR. Tevbe 24's #F5EEDC at 0.6 — byte-for-byte /tevbe/dome-section.svg's
+     fill AND its opacity, the translucent cream that page paints its centre
+     dome with. Warm, against the blue band it sits on and the lavender of the
+     reply below it.
+
+     CORNER RADIUS IS THE SHEET'S ONE RADIUS. /yasin1319/all-section.svg carries
+     rx 29 on a 764 x 1000 viewBox displayed at 1.06 x 1.47, i.e. 0.040 world.
+     Every frame on this page is drawn at that same 0.040 on BOTH axes.
+
+     ASPECT — drawn AT the aspect it is displayed at:
+
+         viewBox 2163 x 1000                  ->  2.163
+         config  scaleX 0.865 / scaleY 0.40    ->  2.1625
+
+     one SVG unit = 4.00e-4 world on BOTH axes.
+
+     GEOMETRY (world units at 0.865 x 0.40)
+       outer edge   flush with the plane   ->  0.865 w x 0.400 h
+       rim          11 units               ->  0.0044  (== every rim on the page)
+       corner r     100 units              ->  0.040
+
+     THE FIT. Ayahs 14 and 15 are 0.820-wide capsules spanning y −0.485 … −0.839,
+     so this frame keeps 0.022 of air on all four sides. It sits inside the blue
+     band (x 0.295 … 1.245, y −0.441 … −1.564) with 0.043 to spare at the sides
+     and 0.021 at the top. Widen either capsule and this frame has to grow with
+     it, and the band is what caps that. -->
+<defs>
+<linearGradient id="yasin1319ClaimGold" x1="0" y1="500" x2="2163" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="5.5" y="5.5" width="2152" height="989"
+      rx="100" ry="100"
+      fill="#F5EEDC" fill-opacity="0.6"
+      stroke="url(#yasin1319ClaimGold)" stroke-width="11"/>
+</svg>

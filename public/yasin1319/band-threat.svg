@@ -1,0 +1,46 @@
+<svg width="2288" height="1000" viewBox="0 0 2288 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 13-19 — THE THREAT AND THE ANSWER, ayahs 18 · 19.
+
+     WHAT IT GROUPS. The townspeople call the messengers an ill omen and promise
+     stoning and torment; the messengers answer that the omen is their own. One
+     exchange, one frame — the mirror of /yasin1319/band-claim.svg at the other
+     end of the page.
+
+     THE TWO ARE ONE PAIR, drawn in the same cream at the same opacity and
+     differing only in aspect (this one is shorter, because ayah 19's capsule is
+     0.140 against ayah 14's 0.160). Matching them is the point: the reply of
+     the messengers sits between them in lavender, and the side curve declared
+     in `styling.colors.curveColors` runs from ayah 15 down to ayah 18 — from
+     the first of these frames to the second, straight past the reply.
+
+     COLOUR. Tevbe 24's #F5EEDC at 0.6 — see band-claim.svg for the rest of it,
+     and for the corner-radius rule this page holds every frame to.
+
+     ASPECT — drawn AT the aspect it is displayed at:
+
+         viewBox 2288 x 1000                  ->  2.288
+         config  scaleX 0.865 / scaleY 0.378   ->  2.2884
+
+     one SVG unit = 3.78e-4 world on BOTH axes.
+
+     GEOMETRY (world units at 0.865 x 0.378)
+       outer edge   flush with the plane   ->  0.865 w x 0.378 h
+       rim          12 units               ->  0.0045  (== every rim on the page)
+       corner r     106 units              ->  0.040
+
+     THE FIT. Ayahs 18 and 19 span y −1.192 … −1.526, so this keeps 0.022 of air
+     all round, like its pair. Its bottom edge lands at −1.548 and the blue band
+     ends at −1.564 — 0.016 of clearance, the tightest relation on the sheet.
+     Anything that grows ayah 19's capsule pushes this through the band. -->
+<defs>
+<linearGradient id="yasin1319ThreatGold" x1="0" y1="500" x2="2288" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="6" y="6" width="2276" height="988"
+      rx="106" ry="106"
+      fill="#F5EEDC" fill-opacity="0.6"
+      stroke="url(#yasin1319ThreatGold)" stroke-width="12"/>
+</svg>

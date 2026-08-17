@@ -28,7 +28,15 @@
      Corner radius is small relative to the height here — this is a tall band,
      not a stadium — so the corner costs a capsule almost nothing: at d 0.044
      (ayah 14's top edge under the config's 0.036 top pad) it eats 0.013 a side,
-     leaving 0.908 of usable width for the 0.82 capsules. -->
+     leaving 0.908 of usable width for the 0.82 capsules. 
+     CORNER RADIUS IS THE SHEET'S ONE RADIUS. /yasin1319/all-section.svg — the
+     outer frame of this same sheet — carries rx 29 on a 764 x 1000 viewBox
+     displayed at 1.06 x 1.47, i.e. 0.040 world. Every frame on this page is
+     drawn at that same 0.040 on BOTH axes, so the nested set reads as boxes
+     inside boxes rather than as stadiums inside stadiums. Because each file is
+     drawn AT its display aspect, one radius in SVG units is a true circle on
+     screen.
+-->
 <defs>
 <linearGradient id="yasin1319BandGold" x1="0" y1="500" x2="846" y2="500" gradientUnits="userSpaceOnUse">
 <stop stop-color="#968428"/>
@@ -37,7 +45,7 @@
 </linearGradient>
 </defs>
 <rect x="2" y="2" width="842" height="996"
-      rx="82" ry="82"
+      rx="36" ry="36"
       fill="#CEE0E9" fill-opacity="0.6"
       stroke="url(#yasin1319BandGold)" stroke-width="4"/>
 </svg>
