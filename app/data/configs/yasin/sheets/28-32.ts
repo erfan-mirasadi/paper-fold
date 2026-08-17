@@ -51,8 +51,11 @@ const SPEC: SheetSpec = {
     },
     {
       pair: [2, 3], // ayah 30 ▸ ayah 31 — the inner layer
-      color: "#B0504D", // the pair is WHITE_BG/white-ruled; that rule would
-      fillColor: "#F6EDE8", // vanish at this size, so it takes the page's red
+      // The surah's LINK colour, as on 1-12's 9a ▸ 9b: gold rule, white ground.
+      // The 29 ▸ 32 bracket above keeps green — an outer layer reads as its own
+      // pair, an inner one as the same kind of mark on every sheet.
+      color: "#D0A24E",
+      fillColor: "#FBFAF4",
       curveSide: "left",
       bowGap: 0.19,
       innerBowGap: 0.175,

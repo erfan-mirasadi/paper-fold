@@ -28,8 +28,10 @@ const SPEC: SheetSpec = {
   curveColors: [
     {
       pair: [1, 6], // ayah 21 ▸ ayah 26, section to section
-      color: "#B0504D",
-      fillColor: "#F6EDE8",
+      // The surah's LINK colour — the gold rule on a white ground,
+      // matching the 1-12 sheet's 9a ▸ 9b bracket and 13-19's 15 ▸ 18.
+      color: "#D0A24E",
+      fillColor: "#FBFAF4",
       curveSide: "left",
       // It bows out to x ≈ 0.06 from a capsule edge at 0.293 — far wider than
       // any bracket on the ring sheets, because this one has the whole left

@@ -76,6 +76,11 @@ const INK_GOLD = "#5A3D12";
 const INK_LAV = "#26283F";
 const INK_RED = "#A30000";
 
+// Requested vertical composition: lift ayah 13, then open the two lower
+// group gaps by the same small amount while keeping 14–15 anchored.
+const VERSE_LAYOUT_NUDGE = 0.03;
+const FIRST_GAP_REDUCTION = 0.01;
+
 // Every capsule is `isPill: false`, as in tevbe24Config and yasin36Config —
 // SharedUI picks the verse font as `isPill ? 0.038 : 0.071`, so mixing the flag
 // on one page puts its capsules on two baselines almost 2x apart. The rounded
@@ -243,8 +248,12 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       curveColors: [
         {
           pair: [2, 5], // ayah 15 ▸ ayah 18
-          color: MAROON_BORDER,
-          fillColor: MAROON_BG,
+          // The surah's LINK colour — gold rule on a white ground, the same
+          // pair the 1-12 sheet gives its 9a ▸ 9b bracket. Every arrow that
+          // joins two groups now carries it; only 28-32's outer 29 ▸ 32 keeps a
+          // colour of its own, being a frame's own chiasm rather than a link.
+          color: GOLD_BORDER,
+          fillColor: WHITE_BG,
           curveSide: "left",
           // Anchored on the capsules' left edge (0.360) and bowed out to
           // x ≈ 0.13, which is inside the outer frame's left margin (its inner
@@ -254,7 +263,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
           inwardOffset: 0,
           tipThickness: 0.12, // == both capsules' own height
           topAnchorYOffset: 0.04,
-          bottomAnchorYOffset: 0.1,
+          bottomAnchorYOffset: -0.05,
           topAnchorXOffset: 0.06,
           bottomAnchorXOffset: 0.2,
           lineWidthWorld: 0.0038, // == capsuleBorderWidth below
@@ -309,6 +318,9 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
   //    4   b_a17       17   0.116   −1.030       0.680      1
   //    5   b_a18       18   0.176   −1.184       0.820      2
   //    6   b_a19       19   0.156   −1.378       0.820      2
+  //   visual nudges: 13 moves up 0.030; 14–15 move up 0.020 to tighten the
+  //   first gap; 16–17 remain 0.030 down from the base stack; 18–19 remain
+  //   0.080 down from the base stack.
   //
   // Block height is `2·blockPadding + capsuleHeight` (one row each); each frameY
   // is the previous block's bottom minus this block's gapBefore. The three big
@@ -326,6 +338,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       isCenter: true,
       dragBehavior: "individual",
       hideRowConnectors: true,
+      verticalNudge: -VERSE_LAYOUT_NUDGE + 0.022,
     },
     {
       id: "b_a14",
@@ -338,6 +351,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       dragBehavior: "individual",
       hideRowConnectors: true,
       gapBefore: 0.075,
+      verticalNudge: -FIRST_GAP_REDUCTION,
       customSectionId: "sec_band",
     },
     {
@@ -364,6 +378,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       dragBehavior: "individual",
       hideRowConnectors: true,
       gapBefore: 0.038,
+      verticalNudge: VERSE_LAYOUT_NUDGE + FIRST_GAP_REDUCTION,
     },
     {
       id: "b_a17",
@@ -389,6 +404,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       hideRowConnectors: true,
       gapBefore: 0.038,
       customSectionId: "sec_band",
+      verticalNudge: VERSE_LAYOUT_NUDGE + FIRST_GAP_REDUCTION,
     },
     {
       id: "b_a19",
@@ -450,7 +466,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
   // renderOrder MUST stay 2 < 3 < 4: each frame paints over the one below it.
   svgOverlays: [
     // Outer frame — blocks 0 … 6 (ayahs 13 … 19).
-    //   wanted: 1.06 x 1.41, y −0.194 … −1.582  (centre −0.888)
+    //   expanded to clear the nudged 13–19 stack while staying inside the page
     {
       src: SHEET_FRAME_SVGS.overall,
       anchorGroupIndex: 0,
@@ -458,20 +474,20 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       scaleX: 1.07,
       scaleY: 1.47,
       offsetX: 0,
-      offsetY: -0.672,
+      offsetY: -0.71,
       renderOrder: 2,
       customSectionId: "sec_all",
     },
     // Middle band — blocks 1 … 6 (ayahs 14 … 19), i.e. everything but ayah 13.
-    //   wanted: 0.95 x 1.123, y −0.441 … −1.564  (centre −1.0025)
+    //   expanded at the bottom to clear the nudged 16–19 groups
     {
       src: "/yasin1319/band.svg",
       anchorGroupIndex: 1,
       anchorEdge: "top",
       scaleX: 0.95,
-      scaleY: 1.17,
+      scaleY: 1.234,
       offsetX: 0,
-      offsetY: -0.532,
+      offsetY: -0.573,
       renderOrder: 3,
       customSectionId: "sec_band",
     },
@@ -490,7 +506,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       customSectionId: "sec_claim",
     },
     // Innermost frame — blocks 3 … 4 (ayahs 16 · 17).
-    //   wanted: 0.78 x 0.315, y −0.857 … −1.172  (centre −1.0145)
+    //   same frame-to-capsule relation; its whole group is nudged down 0.040
     {
       src: "/yasin1319/band-inner.svg",
       anchorGroupIndex: 3,
@@ -505,7 +521,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
     // The threat and the answer — blocks 5 … 6 (ayahs 18 · 19). Mirror of the
     // claim frame, 0.022 shorter because ayah 19's capsule is 0.140 not 0.160.
     //   capsules −1.192 … −1.526
-    //   wanted: 0.865 x 0.378, y −1.170 … −1.548  (centre −1.359)
+    //   same frame-to-capsule relation; its whole group is nudged down 0.080
     {
       src: "/yasin1319/band-threat.svg",
       anchorGroupIndex: 5,
