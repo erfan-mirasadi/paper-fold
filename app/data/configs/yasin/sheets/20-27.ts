@@ -11,6 +11,53 @@ const SPEC: SheetSpec = {
   contentStartY: -0.246,
   capsuleWidthScale: 1.05,
 
+  // ── THE LINK ACROSS THE PAGE ───────────────────────────────────────────
+  // Every other bracket in this surah joins two ayahs inside ONE frame. This
+  // one does the opposite: it runs from the man's arrival (20 · 21, the top
+  // section) to what is said to him at the end (26 · 27, the bottom section),
+  // straight past the four capsules of his speech in between. It is anchored on
+  // ayah 21 and ayah 26 — the inner edge of each section — so the bow's whole
+  // body lies in the gap between them and passes the split row on the way.
+  //
+  // Same treatment as the 1-12 sheet's ring: nisa36Config's twisted arrow, one
+  // side only, tip as tall as the capsules, rule in world units.
+  //
+  // `pair` is BLOCK indices, and a SPLIT ROW emits its RIGHT column first:
+  //   20→0  21→1  22→2  23→3  24→4  25→5  26→6  27→7
+  // Add a row and these all move; print them, do not count them.
+  curveColors: [
+    {
+      pair: [1, 6], // ayah 21 ▸ ayah 26, section to section
+      color: "#B0504D",
+      fillColor: "#F6EDE8",
+      curveSide: "left",
+      // It bows out to x ≈ 0.06 from a capsule edge at 0.293 — far wider than
+      // any bracket on the ring sheets, because this one has the whole left
+      // margin of the page to itself and has to read as spanning the sheet
+      // rather than hugging a group.
+      bowGap: 0.31,
+      innerBowGap: 0.29,
+      inwardOffset: 0,
+      tipThickness: 0.127, // == both capsules' own height
+      topAnchorYOffset: 0.07,
+      bottomAnchorYOffset: -0.065,
+      topAnchorXOffset: 0.052,
+      bottomAnchorXOffset: 0.14,
+      lineWidthWorld: 0.0038,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.09,
+      arrowHeadWidth: 0.085,
+      twist: true,
+      twistT: 0.6,
+    },
+    // The CENTER colour — see SheetSpec.curveColors. It MU2ST stay transparent
+    // here: the four capsules of the split row are narrow enough that their
+    // `horizontalInset` comes out positive, so each one is `isPushedIn` and
+    // would take a bracket of its own.
+    { color: "transparent", fillColor: "transparent" },
+  ],
+
   rows: [
     {
       ayah: 20,

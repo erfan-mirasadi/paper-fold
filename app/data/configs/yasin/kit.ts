@@ -381,6 +381,26 @@ export interface SheetSpec {
   capsuleLatPad?: number;
   /** Override the starting Y coordinate of the content stack. Defaults to -0.2 (SHEET_MARGIN_TOP). */
   contentStartY?: number;
+  /**
+   * SIDE CURVES for this sheet — the bowed brackets that say "this ayah answers
+   * that one". Omitted, the sheet gets `SHEET_STYLING`'s single transparent
+   * entry and draws none, which is right for a page whose frames already do all
+   * the grouping.
+   *
+   * Declare it when a sheet carries a PAIRING its frames cannot show: a chiasm
+   * inside one frame (Yâsîn 29 ▸ 32 around 30 ▸ 31), or a link that jumps from
+   * one section to another (Yâsîn 21 ▸ 26). Each entry names the two BLOCKS it
+   * joins with `pair` — block indices, one per capsule in row order, and a
+   * split row emits its RIGHT column first. Print them with a probe rather than
+   * counting by hand; the mapping shifts the moment a row is added.
+   *
+   * KEEP THE LAST ENTRY TRANSPARENT. SideCurves reads the final entry as the
+   * CENTER colour and hands it to every block that is `isCenter && isPushedIn`
+   * — which, on a generated sheet, is every capsule narrow enough for its
+   * `horizontalInset` to come out positive (the columns of a split row, mostly).
+   * A visible one puts a bracket around each of them.
+   */
+  curveColors?: LayoutStyling["colors"]["curveColors"];
   rows: SheetRow[];
   frames: FrameSpec[];
 }
@@ -1056,7 +1076,14 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       spec.title.replace(/^YÂSÎN:\s*/, ""),
     ),
 
-    styling: SHEET_STYLING,
+    // SHEET_STYLING is SHARED — one object across every sheet of the surah — so
+    // a sheet that wants its own curves gets a copy rather than a mutation.
+    styling: spec.curveColors
+      ? {
+          ...SHEET_STYLING,
+          colors: { ...SHEET_STYLING.colors, curveColors: spec.curveColors },
+        }
+      : SHEET_STYLING,
 
     globalSettings: {
       capsuleHeight: 0.12,

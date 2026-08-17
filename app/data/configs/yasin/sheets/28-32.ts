@@ -9,6 +9,72 @@ const SPEC: SheetSpec = {
   heroSubtitle: "suresi 28-32",
   sayfa: 442,
 
+  // ── THE CHIASM, said with side curves ──────────────────────────────────
+  // Ayahs 29 … 32 are a nest, and the pink frame around them can only say they
+  // belong together — not which answers which. So: 29 ▸ 32 on the outside (one
+  // shout / all brought before Us — the end, twice), and 30 ▸ 31 within it
+  // (they mocked every messenger / and they do not return). Ayah 28 is outside
+  // both, which is why the frame starts at row 1.
+  //
+  // Same treatment as the 1-12 sheet's ring: nisa36Config's twisted arrow, one
+  // side only, tips as tall as the capsules they touch, rules in world units so
+  // they match the capsule rules exactly.
+  //
+  // `pair` is BLOCK indices, not ayah numbers — here one capsule per row, so
+  // 28→0, 29→1, 30→2, 31→3, 32→4.
+  //
+  // THE Y OFFSETS ARE NOT DECORATION. A bracket places its anchors with the
+  // page-wide `capsuleHeight` (0.12 on every generated sheet); these capsules
+  // are 0.148 and 0.105, so each end misses its own capsule's centre until it
+  // is corrected. Recompute them if a row's height changes.
+  curveColors: [
+    {
+      pair: [1, 4], // ayah 29 ▸ ayah 32 — the outer layer
+      color: "#6E9464", // SHEET_COLORS.green's rule, which both capsules carry
+      fillColor: "#EDF3EA",
+      curveSide: "left",
+      bowGap: 0.31,
+      innerBowGap: 0.29,
+      inwardOffset: 0,
+      tipThickness: 0.135, // between ayah 29's 0.148 and ayah 32's 0.105
+      topAnchorXOffset: 0.01,
+      topAnchorYOffset: -0.03,
+      bottomAnchorYOffset: -0.0075,
+      bottomAnchorXOffset: 0.13,
+      lineWidthWorld: 0.0038,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.1,
+      arrowHeadWidth: 0.08,
+      twist: true,
+      twistT: 0.6,
+    },
+    {
+      pair: [2, 3], // ayah 30 ▸ ayah 31 — the inner layer
+      color: "#B0504D", // the pair is WHITE_BG/white-ruled; that rule would
+      fillColor: "#F6EDE8", // vanish at this size, so it takes the page's red
+      curveSide: "left",
+      bowGap: 0.19,
+      innerBowGap: 0.175,
+      inwardOffset: 0,
+      tipThickness: 0.118, // == both capsules' own height
+      topAnchorYOffset: -0.04,
+      topAnchorXOffset: 0.02,
+      bottomAnchorYOffset: 0.03,
+      bottomAnchorXOffset: 0.14,
+      lineWidthWorld: 0.0038,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.095,
+      arrowHeadWidth: 0.08,
+      twist: true,
+      twistT: 0.6,
+    },
+    // The CENTER colour — see SheetSpec.curveColors. Transparent, or every
+    // narrow capsule on the sheet gets a bracket of its own.
+    { color: "transparent", fillColor: "transparent" },
+  ],
+
   rows: [
     {
       ayah: 28,

@@ -128,6 +128,23 @@ const MAROON_BORDER = "#B0504D";
  */
 const RULE_W = 0.0038;
 
+/**
+ * WHAT THE COMPOSED PAGE MULTIPLIES THIS SHEET BY — 1.25 of its own (see the
+ * `s0112` placement in ../index.ts) times the grid's 1.1.
+ *
+ * This sheet is never drawn on its own; it only ever appears on the Yâsîn
+ * levha, and `paperComposer` scales every world-unit field a sheet owns —
+ * capsule heights, insets, overlay sizes, and the side curves below.
+ *
+ * The curve numbers were tuned BY EYE, on the composed page, so they are the
+ * composed sizes. `tuned()` divides them back into this sheet's own units,
+ * which is what the composer expects to be handed. Keep tuning in composed
+ * numbers — read one off the screen, put it in, and let this do the division.
+ */
+const LEVHA_S = 1.25 * 1.1;
+const tuned = (composed: number) =>
+  Math.round((composed / LEVHA_S) * 1e5) / 1e5;
+
 const INK = "#2C2A22";
 const INK_GOLD = "#5A3D12";
 const INK_LAV = "#26283F";
@@ -469,18 +486,18 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           curveSide: "left",
           // tip 0.1405 (capsule edge 0.0905 + 0.05), extremity −0.195
           topAnchorXOffset: 0,
-          bottomAnchorXOffset: 0.17,
-          bowGap: 0.447,
-          innerBowGap: 0.429,
+          bottomAnchorXOffset: tuned(0.17),
+          bowGap: tuned(0.447),
+          innerBowGap: tuned(0.429),
           inwardOffset: 0,
           lineWidthWorld: RULE_W,
           opacity: 0.55,
-          tipThickness: 0.145,
-          topAnchorYOffset: -0.032,
-          bottomAnchorYOffset: 0.032,
+          tipThickness: tuned(0.145),
+          topAnchorYOffset: tuned(-0.032),
+          bottomAnchorYOffset: tuned(0.032),
           shape: "arrow",
-          arrowHeadLength: 0.15,
-          arrowHeadWidth: 0.12,
+          arrowHeadLength: tuned(0.15),
+          arrowHeadWidth: tuned(0.12),
           twist: true,
           twistT: 0.6,
         },
@@ -490,19 +507,19 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           fillColor: CREAM_BG, // ayahs 7 · 10's own ground
           curveSide: "left",
           // tip 0.2245 (capsule edge 0.1745 + 0.05), extremity −0.094
-          topAnchorXOffset: -0.05,
-          bottomAnchorXOffset: 0.13,
-          bowGap: 0.425,
-          innerBowGap: 0.411,
+          topAnchorXOffset: tuned(-0.05),
+          bottomAnchorXOffset: tuned(0.13),
+          bowGap: tuned(0.425),
+          innerBowGap: tuned(0.411),
           inwardOffset: 0,
           lineWidthWorld: RULE_W,
           opacity: 0.55,
-          tipThickness: 0.145,
-          topAnchorYOffset: -0.03,
-          bottomAnchorYOffset: 0.03,
+          tipThickness: tuned(0.145),
+          topAnchorYOffset: tuned(-0.03),
+          bottomAnchorYOffset: tuned(0.03),
           shape: "arrow",
-          arrowHeadLength: 0.11,
-          arrowHeadWidth: 0.11,
+          arrowHeadLength: tuned(0.11),
+          arrowHeadWidth: tuned(0.11),
           twist: true,
           twistT: 0.6,
         },
@@ -512,19 +529,19 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
           fillColor: WHITE_BG, // ayaground
           curveSide: "left",
           // tip 0.302 (capsule edge 0.272 + 0.03), extremity 0.112
-          topAnchorXOffset: 0.01,
-          bottomAnchorXOffset: 0.12,
-          bowGap: 0.253,
-          innerBowGap: 0.22,
+          topAnchorXOffset: tuned(0.01),
+          bottomAnchorXOffset: tuned(0.12),
+          bowGap: tuned(0.253),
+          innerBowGap: tuned(0.22),
           inwardOffset: 0,
           lineWidthWorld: RULE_W,
           opacity: 0.55,
-          tipThickness: 0.12,
-          topAnchorYOffset: -0.03,
-          bottomAnchorYOffset: 0.03,
+          tipThickness: tuned(0.12),
+          topAnchorYOffset: tuned(-0.03),
+          bottomAnchorYOffset: tuned(0.03),
           shape: "arrow",
-          arrowHeadLength: 0.09,
-          arrowHeadWidth: 0.09,
+          arrowHeadLength: tuned(0.09),
+          arrowHeadWidth: tuned(0.09),
           twist: true,
           twistT: 0.6,
         },

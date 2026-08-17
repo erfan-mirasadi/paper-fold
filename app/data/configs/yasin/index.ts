@@ -74,10 +74,10 @@ const CELLS: GridCell[] = [
   },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
-  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.105 },
-  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0.03, shiftY: 0.058 },
-  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: +0.2, shiftY: 0.15 },
-  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.1, shiftY: -0.045 },
+  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.105, shiftX: 0.65 },
+  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0.33, shiftY: 0.058 },
+  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: 0.1, shiftY: 0.15 },
+  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.55, shiftY: -0.045 },
 
   // Row 2 — the one shout and "when is this promise?", side by side: 28-32
   // takes the right half, 48-54 the left, which is the two-sheet band the
@@ -87,6 +87,7 @@ const CELLS: GridCell[] = [
     align: "rightHalf",
     key: "s2832",
     sheet: S_28_32,
+    shiftX: 0.15,
     shiftY: 0.23,
   },
   {
@@ -94,6 +95,7 @@ const CELLS: GridCell[] = [
     align: "leftHalf",
     key: "s4852",
     sheet: S_48_52,
+    shiftX: -0.15,
     shiftY: 0.01,
   },
 
@@ -120,6 +122,19 @@ const { placements, paperWidth, paperHeight } = layOutGrid({
 });
 
 /**
+ * Give the atlas a little more horizontal breathing room without stretching
+ * any of the authored sheets. The placements move with the new page centre,
+ * so the extra paper is shared evenly by both sides.
+ */
+const PAPER_WIDTH_SCALE = 1.2;
+const widerPaperWidth = paperWidth * PAPER_WIDTH_SCALE;
+const horizontalExpansion = (widerPaperWidth - paperWidth) / 2;
+const centeredPlacements = placements.map((placement) => ({
+  ...placement,
+  x: placement.x + horizontalExpansion,
+}));
+
+/**
  * The atlas camera frames the clicked sheet by its page rectangle. A small
  * upward shift of that rectangle leaves the sheet a little lower in the
  * viewport, which matches the visual balance of the elevated sections.
@@ -127,7 +142,7 @@ const { placements, paperWidth, paperHeight } = layOutGrid({
  */
 const SECTION_ZOOM_DY = -0.06;
 
-const zoomedPlacements = placements.map((placement) => ({
+const zoomedPlacements = centeredPlacements.map((placement) => ({
   ...placement,
   zoom: {
     ...placement.zoom,
@@ -156,7 +171,7 @@ const FILL = 0.92;
  * and width only takes over if the paper is wider than it is tall.
  */
 const CAMERA_DISTANCE_SCALE =
-  Math.max(paperWidth / 3.38, paperHeight * 0.45) / FILL;
+  Math.max(widerPaperWidth / 3.38, paperHeight * 0.45) / FILL;
 
 export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
   composePaper({
@@ -165,7 +180,7 @@ export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
     heroTitle: "Yâsîn",
     heroSubtitle: "tek levha",
 
-    paperWidth,
+    paperWidth: widerPaperWidth,
     paperHeight,
     cameraDistanceScale: CAMERA_DISTANCE_SCALE,
 

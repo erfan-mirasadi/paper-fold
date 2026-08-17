@@ -79,6 +79,7 @@ import type {
   FoldStoryStep,
   HandwrittenNoteConfig,
   LayoutBlock,
+  LayoutStyling,
   SideInfoEntry,
   SurahGlobalSettings,
   SurahLayoutConfig,
@@ -281,6 +282,15 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
   const customSections: CustomSectionDef[] = [];
   const svgOverlays: SvgOverlayItem[] = [];
   const handwrittenNotes: HandwrittenNoteConfig[] = [];
+  /**
+   * Every sheet's side curves, re-pointed at composed block indices. Only
+   * entries that NAME their two blocks with `pair` can survive composition:
+   * the default pairing is positional — i-th block from the top of the page
+   * with i-th from the bottom — and on a composed paper "the page" is all the
+   * sheets at once, so an unpaired entry would bracket two sheets to each
+   * other. See `CurveColorConfig.pair`.
+   */
+  const curveColors: NonNullable<LayoutStyling["colors"]["curveColors"]> = [];
   const verseIdMaps: Record<string, Map<number, number>> = {};
 
   const colorGroups: Record<SurahLanguage, ColorGroup[]> = {
@@ -544,6 +554,48 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       );
     }
 
+    // ── Side curves ───────────────────────────────────────────────────────
+    // A sheet's brackets follow its blocks onto the big page: `pair` is
+    // re-pointed through `groupIndexMap`, and every WORLD-unit field is scaled
+    // by the sheet's own `s` the way its overlays and paddings are — a bracket
+    // on a half-size sheet has to bow half as far.
+    //
+    // Entries with no `pair` are dropped, and the composed page gets exactly
+    // ONE transparent center entry appended at the end (see below). Keeping a
+    // sheet's own center entry would be worse than useless: the last entry is
+    // read as the center colour for the WHOLE page, so the last sheet in the
+    // list would silently decide it for all the others.
+    for (const c of src.styling?.colors?.curveColors ?? []) {
+      if (!c.pair) continue;
+      const a = groupIndexMap.get(c.pair[0]);
+      const b = groupIndexMap.get(c.pair[1]);
+      if (a === undefined || b === undefined) continue;
+      curveColors.push(
+        defined({
+          ...c,
+          pair: [a, b] as [number, number],
+          bowGap: scaleOr(c.bowGap, s),
+          innerBowGap: scaleOr(c.innerBowGap, s),
+          inwardOffset: scaleOr(c.inwardOffset, s),
+          tipThickness: scaleOr(c.tipThickness, s),
+          topAnchorXOffset: scaleOr(c.topAnchorXOffset, s),
+          bottomAnchorXOffset: scaleOr(c.bottomAnchorXOffset, s),
+          topAnchorYOffset: scaleOr(c.topAnchorYOffset, s),
+          bottomAnchorYOffset: scaleOr(c.bottomAnchorYOffset, s),
+          arrowHeadLength: scaleOr(c.arrowHeadLength, s),
+          arrowHeadWidth: scaleOr(c.arrowHeadWidth, s),
+          // NOT scaled. `lineWidthWorld` exists to match a bracket's rule to a
+          // capsule's, and `capsuleBorderWidth` comes off `base.styling`
+          // untouched — one rule width for the whole composed page, whatever
+          // scale a sheet sits at. Scale this and the brackets on the larger
+          // sheets draw a heavier rule than the capsules beside them.
+          lineWidthWorld: c.lineWidthWorld,
+          innerCurvesBowGap: scaleOr(c.innerCurvesBowGap, s),
+          innerCurvesInnerBowGap: scaleOr(c.innerCurvesInnerBowGap, s),
+        }),
+      );
+    }
+
     // ── Handwritten notes ─────────────────────────────────────────────────
     // These are the only things on a page positioned in raw page coordinates,
     // so they are the only things that simply translate.
@@ -674,7 +726,24 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
 
     // One config, one styling block. Only border widths and the theme-colour
     // fallbacks live here — a capsule's own colours travel with its override.
-    styling: base!.styling,
+    //
+    // The exception is `curveColors`: brackets are the one thing in `styling`
+    // that belongs to a SHEET rather than to the page, so they are gathered
+    // from every sheet above and spliced in here, with one transparent CENTER
+    // entry closing the list. Without that entry SideCurves falls back to its
+    // default olive bracket and puts one around every centred, pushed-in block
+    // on the paper. `base!.styling` is never mutated — it is a sheet's own
+    // object, shared with that sheet's standalone route.
+    styling: {
+      ...base!.styling,
+      colors: {
+        ...base!.styling.colors,
+        curveColors: [
+          ...curveColors,
+          { color: "transparent", fillColor: "transparent" },
+        ],
+      },
+    },
     specialVerses: {},
 
     globalSettings: {
