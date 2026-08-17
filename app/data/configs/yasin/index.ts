@@ -74,10 +74,10 @@ const CELLS: GridCell[] = [
   },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
-  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.105, shiftX: 0.65 },
-  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0.33, shiftY: 0.058 },
-  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: 0.1, shiftY: 0.15 },
-  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.55, shiftY: -0.045 },
+  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.16, shiftX: 0.35 },
+  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0, shiftY: 0.058 },
+  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: -0.45, shiftY: 0.08 },
+  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.35, shiftY: -0.045 },
 
   // Row 2 — the one shout and "when is this promise?", side by side: 28-32
   // takes the right half, 48-54 the left, which is the two-sheet band the
@@ -126,7 +126,7 @@ const { placements, paperWidth, paperHeight } = layOutGrid({
  * any of the authored sheets. The placements move with the new page centre,
  * so the extra paper is shared evenly by both sides.
  */
-const PAPER_WIDTH_SCALE = 1.2;
+const PAPER_WIDTH_SCALE = 1.1;
 const widerPaperWidth = paperWidth * PAPER_WIDTH_SCALE;
 const horizontalExpansion = (widerPaperWidth - paperWidth) / 2;
 const centeredPlacements = placements.map((placement) => ({

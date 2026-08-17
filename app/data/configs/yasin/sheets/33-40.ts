@@ -1,28 +1,33 @@
-import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
+import {
+  buildSheet,
+  SHEET_COLORS,
+  SHEET_FRAME_SVGS,
+  type SheetSpec,
+} from "../kit";
 
 // ---------------------------------------------------------------------------
-// 33-40 — the earth and the sky, grouped inside the project's standard frames.
-// One pale outer frame holds the whole sheet. Inside it, three PINK inner
-// frames hold ayah 33, ayahs 34-35 together and ayah 36; the closing group,
-// ayahs 37-40, takes a CREAM one instead — it answers the three above it
-// rather than continuing them.
+// 33-40 — the earth and the sky, ONE sheet in two mirrored halves.
 //
-// Ayahs 33-36 are still split into phrase capsules: a full-width phrase, a
-// bridged pair, and another full-width phrase. Only the final fragment prints
-// the ayah number. Ayahs 37-40 each remain whole and print their own numbers.
+// Eight ayahs, and they fall into two fours that say the same thing twice: a
+// sign underfoot, then a sign overhead. So both halves are declared with the
+// SAME THREE ROWS — a whole ayah, a bridged pair, a whole ayah — and each half
+// gets one frame and one arrow from its first ayah to its last:
+//
+//        ╭──────── the earth (pink) ────────╮
+//        │   33   ────────────────────► 36  │   whole · pair(34·35) · whole
+//        ╰──────────────────────────────────╯
+//        ╭──────── the sky  (cream) ────────╮
+//        │   37   ────────────────────► 40  │   whole · pair(38·39) · whole
+//        ╰──────────────────────────────────╯
+//
+// EVERY AYAH IS WHOLE. This sheet used to break 33 … 36 into phrase capsules —
+// three per ayah, with only the last one numbered — while 37 … 40 stayed whole.
+// That made one page out of two grammars and it is gone. One capsule, one ayah,
+// one number, on both halves.
+//
+// The two halves keep their own inks (green/cream above, lavender/blue below)
+// so the mirror reads as a rhyme rather than a repetition.
 // ---------------------------------------------------------------------------
-
-/**
- * Single-ayah phrase groups use half the natural row width. The 34-35 row uses
- * both columns together, while each ayah keeps the same local phrase width.
- */
-const PETAL = 0.5;
-
-/**
- * Vertical air each inner frame keeps around its group. Lower values pull the
- * four framed groups together; higher values separate them.
- */
-const PETAL_PAD = 0.01;
 
 const SPEC: SheetSpec = {
   id: "yasin3340",
@@ -30,334 +35,219 @@ const SPEC: SheetSpec = {
   title: "YÂSÎN: 33-40",
   heroSubtitle: "suresi 33-40",
   sayfa: 442,
-  paperWidth: 2.3,
-  capsuleWidthScale: 0.7,
-  capsuleHeightScale: 0.7,
+  // EVERY SIZING KNOB HERE IS 20-27's, so the two stand side by side on the
+  // levha as one pair: the default 1.54 page, `capsuleWidthScale` 1.05, rows at
+  // `width: 1.15`, and the outer frame below at exactly its 1.1 x 1.47. The
+  // sheet used to be 2.3 wide with capsules at 0.7 and sprawled across two of
+  // its neighbours' columns.
+  capsuleWidthScale: 1.05,
+  contentStartY: -0.246,
+
+  // ── THE LINK BETWEEN THE HALVES ────────────────────────────────────────
+  // Earth answered by sky. Anchored on the INNER edge of each half — ayah 36's
+  // last phrase (block 11) and ayah 37 (block 12) — so the bow's body lies in
+  // the gap between the two frames and the head lands on the sky.
+  //
+  // The surah's LINK colour, gold on white: the same mark the 1-12 sheet gives
+  // 9a ▸ 9b and the 13-19 and 20-27 sheets give their own section-to-section
+  // arrows. nisa36Config's twisted arrow, one side only.
+  //
+  // `pair` is BLOCK indices, and a split row emits its RIGHT column first:
+  //   33 → 0 · 1 · 2      34 → 3 · 4 · 5      35 → 6 · 7 · 8
+  //   36 → 9 · 10 · 11    37 → 12   38·39 → 13   40 → 14
+  //
+  // Y offsets correct for `smallBoxH2`: a bracket anchors with the page-wide
+  // `capsuleHeight` (0.12) and these capsules are 0.073 and 0.104, so each end
+  // misses its own capsule's centre until it is corrected.
+  curveColors: [
+    {
+      pair: [0, 2], // ayah 33 ▸ ayah 36 — across the earth
+      color: SHEET_COLORS.green.border,
+      fillColor: SHEET_COLORS.green.bg,
+      curveSide: "left",
+      // Anchored on the capsules' left edge (0.375) and bowed out to x ≈ 0.14,
+      // past the outer frame — the same depth the 13-19 and 20-27 sheets give
+      // their own section-to-section arrows, so all three read as one gesture.
+      bowGap: 0.31,
+      innerBowGap: 0.29,
+      inwardOffset: 0,
+      tipThickness: 0.148, // == every capsule on the sheet
+      // Anchors are placed with the page-wide `capsuleHeight` (0.12) and these
+      // capsules are 0.148, so both ends are 0.014 off their own centre.
+      topAnchorYOffset: -0.033,
+      bottomAnchorYOffset: 0.014,
+      bottomAnchorXOffset: 0.13,
+      // topAnchorXOffset: 0.05,
+      lineWidthWorld: 0.0038,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.095,
+      arrowHeadWidth: 0.1,
+      twist: true,
+      twistT: 0.6,
+    },
+    {
+      pair: [3, 5], // ayah 37 ▸ ayah 40 — across the sky
+      color: SHEET_COLORS.lav.border,
+      fillColor: SHEET_COLORS.lav.bg,
+      curveSide: "left",
+      // Same depth as the earth's arrow above — the two halves are mirrors and
+      // their arrows have to look it.
+      bowGap: 0.31,
+      innerBowGap: 0.29,
+      inwardOffset: 0,
+      tipThickness: 0.148, // == every capsule on the sheet
+      topAnchorYOffset: -0.034,
+      bottomAnchorYOffset: 0.014,
+      bottomAnchorXOffset: 0.13,
+      lineWidthWorld: 0.0038,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.095,
+      arrowHeadWidth: 0.1,
+      twist: true,
+      twistT: 0.6,
+    },
+    // The CENTER colour — EVERY block here is `isCenter && isPushedIn`, so a
+    // visible one would bracket all six capsule rows individually.
+    { color: "transparent", fillColor: "transparent" },
+  ],
 
   rows: [
-    // ── Lens 1 (top) — ayah 33 ───────────────────────────────────────────
-    {
-      ayah: 33,
-      noNumber: true,
-      tone: "green",
-      width: PETAL,
-      arScale: 0.69,
-      latScale: 0.55,
-      ar: "وَآيَةٌ لَّهُمُ الْأَرْضُ الْمَيْتَةُ",
-      tr: "Ölü toprak onlar için bir delildir:",
-      en: "The dead earth is a sign for them:",
-    },
-    {
-      width: PETAL,
-      pair: [
-        {
-          ayah: 33,
-          noNumber: true,
-          tone: "cream",
-          arScale: 0.6,
-          latScale: 0.62,
-          ar: "أَحْيَيْنَاهَا",
-          tr: "onu dirilttik,",
-          en: "We revived it,",
-        },
-        {
-          ayah: 33,
-          noNumber: true,
-          tone: "cream",
-          arScale: 0.6,
-          latScale: 0.44,
-          ar: "وَأَخْرَجْنَا مِنْهَا حَبًّا",
-          tr: "ondan taneler çıkardık,",
-          en: "and brought grain from it,",
-        },
-      ],
-    },
+    // ── THE EARTH — ayahs 33 … 36 ────────────────────────────────────────
+    // Three rows: a whole ayah, the 34 · 35 pair FACING EACH OTHER, a whole
+    // ayah. The sky below repeats it exactly. No `arScale` anywhere — the rows
+    // are all one width, so the kit's fit gives the singles one size and the
+    // pair capsules another, and each set stays level with itself.
     {
       ayah: 33,
       tone: "green",
-      width: PETAL,
-      arScale: 0.69,
-      latScale: 0.89,
-      ar: "فَمِنْهُ يَأْكُلُونَ",
-      tr: "ondan yiyorlar.",
-      en: "and of it they eat.",
-    },
-
-    // ── Lenses 2 and 3 (right · left) — ayahs 34 and 35 ──────────────────
-    {
-      ratio: 0.5,
-      inwardShift: 0.035,
-      right: [
-        {
-          ayah: 34,
-          noNumber: true,
-          tone: "green",
-          width: 0.9,
-          arScale: 0.69,
-          latScale: 0.66,
-          ar: "وَجَعَلْنَا فِيهَا جَنَّاتٍ",
-          tr: "Orada bahçeler var ettik,",
-          en: "In it We made gardens,",
-        },
-        {
-          width: 0.9,
-          pair: [
-            {
-              ayah: 34,
-              noNumber: true,
-              tone: "cream",
-              arScale: 0.6,
-              latScale: 0.73,
-              ar: "مِّن نَّخِيلٍ",
-              tr: "hurmadan",
-              en: "of palm",
-            },
-            {
-              ayah: 34,
-              noNumber: true,
-              tone: "cream",
-              arScale: 0.6,
-              latScale: 0.63,
-              ar: "وَأَعْنَابٍ",
-              tr: "ve üzümden",
-              en: "and vine",
-            },
-          ],
-        },
-        {
-          ayah: 34,
-          tone: "green",
-          // Bring the two opposite bottom capsules almost together.
-          width: 0.9,
-          arScale: 0.69,
-          latScale: 0.58,
-          ar: "وَفَجَّرْنَا فِيهَا مِنَ الْعُيُونِ",
-          tr: "içinden pınarlar fışkırttık.",
-          en: "and made springs gush forth.",
-        },
-      ],
-      left: [
-        {
-          ayah: 35,
-          noNumber: true,
-          tone: "green",
-          width: 0.9,
-          arScale: 0.69,
-          latScale: 0.58,
-          ar: "لِيَأْكُلُوا مِن ثَمَرِهِ",
-          tr: "Ürününden yesinler diye —",
-          en: "That they may eat its fruit —",
-        },
-        {
-          width: 0.9,
-          pair: [
-            {
-              ayah: 35,
-              noNumber: true,
-              tone: "cream",
-              arScale: 0.6,
-              latScale: 0.44,
-              ar: "وَمَا عَمِلَتْهُ",
-              tr: "oysa onu yapan",
-              en: "yet it was not made",
-            },
-            {
-              ayah: 35,
-              noNumber: true,
-              tone: "cream",
-              arScale: 0.6,
-              latScale: 0.5,
-              ar: "أَيْدِيهِمْ",
-              tr: "elleri değil.",
-              en: "by their hands.",
-            },
-          ],
-        },
-        {
-          ayah: 35,
-          tone: "green",
-          // Match ayah 34 so the pair remains visually centred.
-          width: 0.9,
-          arScale: 0.69,
-          latScale: 0.58,
-          ar: "أَفَلَا يَشْكُرُونَ",
-          tr: "Hâlâ şükretmezler mi?",
-          en: "Will they not give thanks?",
-        },
-      ],
-    },
-
-    // ── Lens 4 — ayah 36 ────────────────────────────────────────────────
-    {
-      ayah: 36,
-      noNumber: true,
-      tone: "green",
-      width: PETAL,
-      arScale: 0.69,
-      latScale: 0.49,
-      ar: "سُبْحَانَ الَّذِي خَلَقَ الْأَزْوَاجَ كُلَّهَا",
-      tr: "Bütün çiftleri yaratanı tesbih ederim:",
-      en: "Glory to Him who created all the pairs:",
+      width: 1.15,
+      ar: "وَآيَةٌ لَّهُمُ الْأَرْضُ الْمَيْتَةُ أَحْيَيْنَاهَا\nوَأَخْرَجْنَا مِنْهَا حَبًّا فَمِنْهُ يَأْكُلُونَ",
+      tr: "Ölü toprak onlar için bir delildir: onu dirilttik,\nondan taneler çıkardık; ondan yiyorlar.",
+      en: "The dead earth is a sign for them: We revived it,\nbrought grain from it, and of it they eat.",
     },
     {
-      width: PETAL,
+      // The pair keeps its bridge. Its capsules are half a row wide, so their
+      // text takes THREE lines where a single takes two — that is where the
+      // height went when the page lost its width.
+      width: 1.15,
       pair: [
         {
-          ayah: 36,
-          noNumber: true,
+          ayah: 34,
           tone: "cream",
-          arScale: 0.6,
-          latScale: 0.44,
-          ar: "مِمَّا تُنبِتُ الْأَرْضُ",
-          tr: "toprağın bitirdiklerinden,",
-          en: "of what the earth grows,",
+          ar: "وَجَعَلْنَا فِيهَا جَنَّاتٍ\nمِّن نَّخِيلٍ وَأَعْنَابٍ\nوَفَجَّرْنَا فِيهَا مِنَ الْعُيُونِ",
+          tr: "Orada hurmadan ve üzümden\nbahçeler var ettik;\niçinden pınarlar fışkırttık.",
+          en: "In it We made gardens\nof palm and vine,\nand made springs gush forth.",
         },
         {
-          ayah: 36,
-          noNumber: true,
+          ayah: 35,
           tone: "cream",
-          arScale: 0.6,
-          latScale: 0.46,
-          ar: "وَمِنْ أَنفُسِهِمْ",
-          tr: "kendi canlarından,",
-          en: "of themselves,",
+          ar: "لِيَأْكُلُوا مِن ثَمَرِهِ\nوَمَا عَمِلَتْهُ أَيْدِيهِمْ\nأَفَلَا يَشْكُرُونَ",
+          tr: "Ürününden yesinler diye —\noysa onu yapan elleri değil.\nHâlâ şükretmezler mi?",
+          en: "That they may eat its fruit —\nyet not made by their hands.\nWill they not give thanks?",
         },
       ],
     },
     {
       ayah: 36,
       tone: "green",
-      width: PETAL,
-      arScale: 0.69,
-      latScale: 0.59,
-      ar: "وَمِمَّا لَا يَعْلَمُونَ",
-      tr: "ve bilmediklerinden.",
-      en: "and of what they do not know.",
+      width: 1.15,
+      ar: "سُبْحَانَ الَّذِي خَلَقَ الْأَزْوَاجَ كُلَّهَا مِمَّا تُنبِتُ\nالْأَرْضُ وَمِنْ أَنفُسِهِمْ وَمِمَّا لَا يَعْلَمُونَ",
+      tr: "Bütün çiftleri yaratanı tesbih ederim: toprağın bitirdiklerinden,\nkendi canlarından ve bilmediklerinden.",
+      en: "Glory to Him who created all the pairs: of what the earth grows,\nof themselves, and of what they do not know.",
     },
-    // ── Lens 5 (bottom) — the sky, 37-40 ────────────────────────────────
-    //
-    // Same three lines as every petal on this page: one across the top, a
-    // BRIDGED PAIR through the middle, one across the bottom. The only
-    // difference is what a capsule holds — a whole ayah here, a fragment in the
-    // petals around it — so every one of these four prints its own number, and
-    // its two middle capsules carry one line here as an intentional layout
-    // experiment — the generator will fit the long ayahs down to the slot.
+
+    // ── THE SKY — ayahs 37 … 40. The same three rows again. ──────────────
     {
       ayah: 37,
       tone: "lav",
-      width: PETAL,
-      offsetY: -0.02,
-      arScale: 0.55,
-      latScale: 0.5,
+      width: 1.15,
       ar: "وَآيَةٌ لَّهُمُ اللَّيْلُ نَسْلَخُ مِنْهُ\nالنَّهَارَ فَإِذَا هُم مُّظْلِمُونَ",
       tr: "Gece de bir delildir: ondan gündüzü\nsıyırırız, karanlıkta kalıverirler.",
       en: "The night is a sign: We strip the day\nfrom it, and they are in darkness.",
     },
     {
-      // Give the 38–39 pair a little extra width so the number badge clears
-      // the long one-line text instead of sitting inside it.
-      width: 1.2,
-      offsetY: -0.02,
+      width: 1.15,
       pair: [
         {
           ayah: 38,
           tone: "blue",
-          arScale: 0.48,
-          latScale: 0.45,
-          ar: "وَالشَّمْسُ تَجْرِي لِمُسْتَقَرٍّ لَّهَا ذَٰلِكَ تَقْدِيرُ الْعَزِيزِ الْعَلِيمِ",
-          tr: "Güneş kendi yörüngesinde akar; bu, Azîz ve Alîm'in takdiridir.",
-          en: "The sun runs to its resting place: the decree of the Mighty, the Knowing.",
+          ar: "وَالشَّمْسُ تَجْرِي\nلِمُسْتَقَرٍّ لَّهَا ذَٰلِكَ\nتَقْدِيرُ الْعَزِيزِ الْعَلِيمِ",
+          tr: "Güneş kendi\nyörüngesinde akar; bu,\nAzîz ve Alîm'in takdiridir.",
+          en: "The sun runs to its\nresting place: the decree\nof the Mighty, the Knowing.",
         },
         {
           ayah: 39,
           tone: "blue",
-          arScale: 0.53,
-          latScale: 0.45,
-          ar: "وَالْقَمَرَ قَدَّرْنَاهُ مَنَازِلَ حَتَّىٰ عَادَ كَالْعُرْجُونِ الْقَدِيمِ",
-          tr: "Aya da konaklar takdir ettik; sonunda kuru bir hurma dalına döner.",
-          en: "For the moon We ordained phases, till it returns like an old palm stalk.",
+          ar: "وَالْقَمَرَ قَدَّرْنَاهُ\nمَنَازِلَ حَتَّىٰ عَادَ\nكَالْعُرْجُونِ الْقَدِيمِ",
+          tr: "Aya da konaklar\ntakdir ettik; sonunda kuru\nbir hurma dalına döner.",
+          en: "For the moon We ordained\nphases, till it returns\nlike an old palm stalk.",
         },
       ],
     },
     {
       ayah: 40,
       tone: "lav",
-      width: PETAL,
-      heightLines: 3,
-      offsetY: -0.02,
-      arScale: 0.55,
-      latScale: 0.49,
-      ar: "لَا الشَّمْسُ يَنبَغِي لَهَا أَن تُدْرِكَ الْقَمَرَ\nوَلَا اللَّيْلُ سَابِقُ النَّهَارِ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ",
+      width: 1.15,
+      ar: "لَا الشَّمْسُ يَنبَغِي لَهَا أَن تُدْرِكَ الْقَمَرَ وَلَا اللَّيْلُ\nسَابِقُ النَّهَارِ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ",
       tr: "Ne güneş aya yetişebilir, ne gece gündüzü geçebilir;\nher biri bir yörüngede yüzer.",
       en: "The sun may not overtake the moon,\nnor the night outrun the day: each swims in an orbit.",
     },
   ],
 
   frames: [
-    // One pale standard frame around the complete 33-40 sheet.
+    // TWO SECTION FRAMES, and nothing else. The page used to nest four pink
+    // frames and a blue band inside the outer one — one around ayah 33, one
+    // around 34-35, one around 36, one around 37-40 — which drew every group
+    // twice over and left the sheet reading as five boxes rather than two
+    // halves. It is now what it always meant: the earth (33 … 36), then the sky
+    // (37 … 40), one frame each, both drawn the way 37-40 already was.
+    //
+    // NONE OF THE THREE CARRIES w / h / offsetY. Those overrides are exactly
+    // what made the outer frame the wrong size for its own rows; drop them and
+    // `buildSheet` measures each frame off the capsules it actually owns — their
+    // horizontal extent plus `framePadX(depth)`, and the row band top to bottom
+    // plus its own `pad`. Add or resize a row and the frames follow it.
+    //
+    // `pad` is the only size knob left: the vertical air a frame opens around
+    // its rows, AND — through `gapAbove` — the air opened wherever a frame edge
+    // passes between two rows. Turning it up is how this sheet got taller. The
+    // outer frame takes much more than the two inside it (0.09 against 0.06) so
+    // that it reads as a margin around them rather than a fourth rule hugging
+    // the pink one: at the depth defaults the two would have sat 0.008 apart.
     {
       from: 0,
-      to: 9,
+      to: 5,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
-      w: 1.6,
-      h: 1.75,
-      offsetY: -0.76,
+      pad: 0.07,
+      w: 1.1,
+      h: 1.47,
+      offsetY: -0.63,
     },
-    // The blue section used for ayahs 14-19, reused here for ayahs 33-36.
-    {
-      from: 0,
-      to: 6,
-      tone: "band",
-      src: SHEET_FRAME_SVGS.band,
-      pad: PETAL_PAD,
-      h: 1.13,
-      w: 1.4,
-    },
-    // Four standard inner frames: pink on 33, 34-35 and 36; cream on 37-40.
+    // The earth — ayahs 33 … 36, in the surah's shared pink.
     {
       from: 0,
       to: 2,
       tone: "inner",
       src: SHEET_FRAME_SVGS.inner,
-      pad: PETAL_PAD,
-      w: 0.6864,
-      h: 0.38,
-      offsetY: -0.1352,
+      pad: 0.045,
+      w: 1.05,
+      h: 0.73,
+      offsetY: -0.255,
     },
+    // The sky — ayahs 37 … 40, in cream. The one frame on the sheet that is not
+    // pink: these four answer the four above them rather than continuing them.
     {
       from: 3,
-      to: 3,
-      tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
-      pad: PETAL_PAD,
-      w: 1.53,
-      h: 0.39,
-      offsetY: -0.1353,
-    },
-    {
-      from: 4,
-      to: 6,
-      tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
-      pad: PETAL_PAD,
-      w: 0.6864,
-      h: 0.38,
-      offsetY: -0.1353,
-    },
-    // The closing section (37-40 — the night, the sun, the moon, the orbits)
-    // takes the CREAM frame instead of the pink one. Those four ayahs answer the
-    // three sections above them rather than continuing them, and this is the one
-    // frame on the sheet that is not pink, so the break reads without a word.
-    {
-      from: 7,
-      to: 9,
+      to: 5,
       tone: "inner",
       src: SHEET_FRAME_SVGS.gold,
-      pad: PETAL_PAD,
-      w: 1.4617,
-      h: 0.48,
-      offsetY: -0.1757,
+      pad: 0.045,
+      w: 1.05,
+      h: 0.73,
+      offsetY: -0.255,
     },
   ],
 };

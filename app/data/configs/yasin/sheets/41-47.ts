@@ -144,8 +144,8 @@ const SPEC: SheetSpec = {
       h: 1.41,
     },
     // Keep the two original outer frames around the two bands.
-    { from: 0, to: 1, tone: "outer" },
-    { from: 2, to: 3, tone: "outer" },
+    { from: 0, to: 1, tone: "outer", pad: 0.018 },
+    { from: 2, to: 3, tone: "outer", pad: 0.018 },
     // Each band also gets its own inner SVG frame.
     { from: 0, to: 1, tone: "inner" },
     { from: 2, to: 3, tone: "inner" },
