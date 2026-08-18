@@ -18,7 +18,7 @@ const SPEC: SheetSpec = {
       heightLines: 3,
       arScale: 0.92,
       latScale: 0.82,
-      ar: "فَسُبْحَانَ الَّذِي بِيَدِهِ مَلَكُوتُ كُلِّ شَيْءٍ تُرْجَعُونَ",
+      ar: "فَسُبْحَانَ الَّذِي بِيَدِهِ مَلَكُوتُ كُلِّ شَيْءٍ وَإِلَيْهِ تُرْجَعُونَ",
       tr: "Her şeyin hükümranlığı elinde olanı tesbih ederim;\nO'na döndürüleceksiniz.",
       en: "Glory to Him in whose hand is the dominion of all things;\nto Him you are returned.",
     },

@@ -77,7 +77,7 @@ const SPEC: SheetSpec = {
       // and surah-wide versions of the same number.
       arPad: 0.001,
       latPad: 0.01,
-      ar: "وَمَا عَلَّمْنَاهُ الشِّعْرَ  يَنبَغِي لَهُ إِنْ ذِكْرٌ وَقُرْآنٌ مُّبِينٌ",
+      ar: "وَمَا عَلَّمْنَاهُ الشِّعْرَ وَمَا يَنبَغِي لَهُ إِنْ هُوَ إِلَّا ذِكْرٌ وَقُرْآنٌ مُّبِينٌ",
       tr: "Ona şiir öğretmedik,\nona yaraşmaz da. O ancak\nbir öğüt, apaçık bir Kur'an.",
       en: "We did not teach him poetry,\nnor would it suit him. It is only\na reminder, and a clear Qur'an —",
     },
@@ -87,7 +87,7 @@ const SPEC: SheetSpec = {
       heightLines: 2.5,
       arScale: 0.9,
       latScale: 0.82,
-      ar: "لِّيُنذِرَ مَن كَانَ حَيًّا الْقَوْلُ الْكَافِرِينَ",
+      ar: "لِّيُنذِرَ مَن كَانَ حَيًّا وَيَحِقَّ الْقَوْلُ عَلَى الْكَافِرِينَ",
       tr: "Diri olanı uyarsın\nve inkâr edenler üzerine\no söz hak olsun diye.",
       en: "to warn whoever is alive,\nand so that the word\ncomes due against the disbelievers.",
     },
