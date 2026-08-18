@@ -35,11 +35,12 @@ export const ScrollHintOverlay: React.FC = () => {
     };
   }, []);
 
-  // Visible only when intro is finished and we haven't reached the very end of the story
-  // We use 0.92 instead of 0.99 because Lenis max scroll sometimes doesn't reach exactly 1.0
+  // Visible only until the page reaches 98% of its scroll progress.
+  // Keep the hint available through the final part of the story, then hide it
+  // during the last 2% so it does not overlap the ending UI.
   const isFoldStory =
     !isIntroActive &&
-    currentOffset < 0.92 &&
+    currentOffset < 0.85 &&
     currentOffset >= 0 &&
     !isElevated &&
     !isPopUpActive &&
