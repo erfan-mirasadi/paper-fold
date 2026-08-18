@@ -37,10 +37,15 @@
  *      └──────────────────────────────────────────────────┘
  *
  * CHUNK 15 is the tail the reference page prints separately under a red
- * "Not:" marker — the continuation of chunk 11 (وَرَبَائِبُكُمُ …). It is numbered
- * 15 and drawn as a normal capsule outside the outer frame; the "Not:" marker
- * itself is not reproduced. The mushaf ayah number (23) rides on chunk 14
- * instead, stacked under 14's own counter (`showAyahNumber`).
+ * "Not:" marker — the continuation of chunk 11 (وَرَبَائِبُكُمُ …). It is NOT a
+ * capsule block: there are only eight blocks (0–7, chunks 1–14), and the
+ * space under the frame is filled by `handwrittenNotes` instead, because the
+ * reference prints something different there per language — the ayah's own
+ * tail in Arabic, a prose gloss of it in Turkish. See the note block below;
+ * the reference's box and (15) badge around it are not reproduced.
+ *
+ * The mushaf ayah number (23) rides on chunk 14 instead, stacked under 14's
+ * own counter (`showAyahNumber`).
  *
  * MIRRORING. Arabic reads right→left, so chunks 4–7 sit in the RIGHT half and
  * 8–11 in the LEFT. Turkish/English read left→right and want the opposite.
@@ -78,6 +83,7 @@ import {
   CAPSULE_BG_6_19,
   ORANGE_THEME,
   WHITE_VERSE_BG,
+  QURAN_FONT,
 } from "../theme";
 
 // ---------------------------------------------------------------------------
@@ -401,6 +407,73 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       rotationZ: 0,
       lines: [{ text: "Nisâ: 23" }],
     },
+    // ── THE "NOT:" TAIL, TWO WAYS ────────────────────────────────────────────
+    // The reference page prints chunk 15 — the continuation of chunk 11
+    // (وَرَبَائِبُكُمُ …) — below the outer frame under a red "Not:" marker. What it
+    // prints there is NOT the same content in two languages:
+    //
+    //   Arabic page  → the ayah's own tail, in mushaf script, two lines
+    //   Turkish page → a prose gloss explaining that tail, four lines
+    //
+    // Different wording, line count, script, font and ink — so they are two
+    // separate notes, each hidden in the other's languages, rather than one
+    // note with a text override. That is the pattern for every other surah's
+    // per-language notes too: author one note per script, set `hidden` in the
+    // languages that don't read it. Both resolve on the language switch (see
+    // `HandwrittenNoteLanguageOverride`).
+
+    // ARABIC — the ayah tail itself. `font` is spelled out even though the
+    // renderer would infer QURAN_FONT from the script, because a margin note in
+    // the Latin cursive is this system's default and the exception should be
+    // visible here. Every line pins `rotation: 0`: the auto-wobble sells
+    // handwriting, and this is printed mushaf text, not a hand-written gloss.
+    {
+      x: 0.77,
+      y: -1.552,
+      fontSize: 0.042,
+      font: QURAN_FONT,
+      color: "#111111",
+      lineSpacing: 1.55,
+      maxWidth: 1.35,
+      textAlign: "center",
+      rotationZ: 0,
+      lines: [
+        {
+          text: "مِّن نِّسَائِكُمُ اللَّاتِي دَخَلْتُم بِهِنَّ فَإِن لَّمْ تَكُونُوا دَخَلْتُم بِهِنَّ فَلَا",
+          rotation: 0,
+        },
+        { text: "جُنَاحَ عَلَيْكُمْ", rotation: 0 },
+      ],
+      languageOverrides: {
+        tr: { hidden: true },
+        en: { hidden: true },
+      },
+    },
+
+    // ARABIC — the red "Not:" marker that labels the tail above. Its own note
+    // because it is Latin script sitting next to Arabic: one note carries one
+    // font, and the marker wants the handwritten face the rest of the page's
+    // margins use. Anchored near the frame's left edge (frame runs x 0.17…1.37),
+    // level with the tail's second line, as on the reference page.
+    {
+      x: 0.235,
+      y: -1.617,
+      fontSize: 0.032,
+      color: RED_TEXT,
+      lineSpacing: 1.4,
+      maxWidth: 0.3,
+      textAlign: "left",
+      rotationZ: 0,
+      lines: [{ text: "Not:", rotation: 0 }],
+      languageOverrides: {
+        tr: { hidden: true },
+        en: { hidden: true },
+      },
+    },
+
+    // TURKISH / ENGLISH — the prose gloss. English currently reads the Turkish
+    // wording (as everywhere else on this page that has no English copy yet);
+    // give it its own `lines` under an `en` override when that copy exists.
     {
       x: 0.77,
       y: -1.546,
@@ -410,6 +483,7 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       maxWidth: 1.5,
       textAlign: "center",
       rotationZ: 0,
+      hidden: true,
       lines: [
         {
           segments: [
@@ -427,6 +501,10 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
           text: "girmediğiniz eşlerinizin kızlanını nikahlayabılirsiniz.",
         },
       ],
+      languageOverrides: {
+        tr: { hidden: false },
+        en: { hidden: false },
+      },
     },
   ],
 
@@ -458,7 +536,9 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
   //     5     −0.878      0.169    left half ↓
   //     6     −1.089      0.154    chunks 12,13
   //     7     −1.257      0.149    chunk 14
-  //     8     −1.506      0.159    chunk 15   (clears the bottom dome's apex)
+  //
+  // Below block 7 there is no block: the chunk-15 band (from about −1.506) is
+  // drawn by `handwrittenNotes`, which is why it is per-language.
   //
   // allGroups index (used by svgOverlays anchorGroupIndex) == block index.
   blocks: [
@@ -1090,9 +1170,9 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
         id: "green",
         folds: [
           { direction: -1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
-          { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 1 },
+          { direction: 1, angleFactor: 0.5 },
+          { direction: -1, angleFactor: 1.05 },
+          { direction: 1, angleFactor: 0.55 },
           { direction: -1, angleFactor: 0 },
         ],
       },
@@ -1178,7 +1258,10 @@ export const NISA_23_TEXT_AR: SurahDataShape = {
       // 5 — LEFT half, lower row [left = 11, right = 10]
       {
         verses: [
-          { number: 11, text: "وَرَبَائِبُكُمُ\n*اللَّاتِي فِي حُجُورِكُمْ" },
+          {
+            number: 11,
+            text: "وَرَبَائِبُكُمُ\n*اللَّاتِي فِي حُجُورِكُمْ\u200F...\u200F",
+          },
           { number: 10, text: "وَأُمَّهَاتُ\nنِسَائِكُمْ" },
         ],
       },

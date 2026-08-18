@@ -2,7 +2,7 @@
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { CanvasText } from "../shared/CanvasText";
-import { HANDWRITTEN_FONT } from "../../../data/theme";
+import { HANDWRITTEN_FONT, QURAN_FONT } from "../../../data/theme";
 import type { HandwrittenNoteConfig } from "../../../data/schema";
 import {
   resolveNoteForLanguage,
@@ -20,6 +20,26 @@ function autoWobbleRotation(index: number): number {
 }
 function autoWobbleY(index: number): number {
   return Math.cos(index * 7.233) * 0.0015;
+}
+
+/** Arabic block + its supplements/presentation forms — same range CanvasText uses. */
+const ARABIC_CHARS = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+/**
+ * The font a note falls back to when it doesn't name one.
+ *
+ * `HANDWRITTEN_FONT` (Latin cursive) has no Arabic coverage, so a note whose
+ * text is Arabic — the reference book quotes the ayah's own tail in the margin
+ * where the translations print a gloss — would rasterise as tofu. Detecting the
+ * script keeps every existing Latin note byte-identical while letting a config
+ * author an Arabic note without having to remember `font:` every time. An
+ * explicit `font` always wins.
+ */
+function autoFont(lines: HandwrittenNoteConfig["lines"]): string {
+  const text = lines
+    .map((l) => l.segments?.map((s) => s.text).join("") ?? l.text ?? "")
+    .join("");
+  return ARABIC_CHARS.test(text) ? QURAN_FONT : HANDWRITTEN_FONT;
 }
 
 function NoteSvg({
@@ -40,10 +60,15 @@ function NoteSvg({
 /**
  * Renders a per-surah handwritten margin note as a stack of canvas-texture
  * text lines (same text-to-texture technique used for Arabic/Latin verse
- * text — see `CanvasText`), using the cursive `HANDWRITTEN_FONT` instead of
- * the Quran/Latin fonts. Each line gets its own small group so it can carry
- * an independent size/rotation/offset, which is what sells the "actually
- * handwritten" look rather than one perfectly uniform text block.
+ * text — see `CanvasText`), using the cursive `HANDWRITTEN_FONT` by default
+ * instead of the Quran/Latin fonts. Each line gets its own small group so it
+ * can carry an independent size/rotation/offset, which is what sells the
+ * "actually handwritten" look rather than one perfectly uniform text block.
+ *
+ * Everything here reads through `resolveNoteForLanguage`, so the note re-renders
+ * on the language switch: a language can move the note, restyle it, replace its
+ * `lines` outright, swap the `font` (Arabic margin notes need `QURAN_FONT`) or
+ * hide it — see `HandwrittenNoteLanguageOverride`.
  */
 export function HandwrittenNote({ note: rawNote }: { note: HandwrittenNoteConfig }) {
   const activeLanguage = useSurahLanguageStore((s) => s.activeLanguage);
@@ -61,8 +86,16 @@ export function HandwrittenNote({ note: rawNote }: { note: HandwrittenNoteConfig
     opacity = 0.94,
     renderOrder = 20,
     svgs,
+    font,
+    hidden = false,
   } = note;
 
+  // A language may drop this note entirely — the Arabic and Latin forms of one
+  // margin note are usually two separate notes, each hidden in the other's
+  // languages (see `HandwrittenNoteLanguageOverride`).
+  if (hidden || lines.length === 0) return null;
+
+  const resolvedFont = font ?? autoFont(lines);
   const baseMaxWidth = maxWidth ?? fontSize * 12;
   const lineGap = fontSize * lineSpacing;
   const alignSign = textAlign === "right" ? -1 : textAlign === "center" ? 0 : 1;
@@ -89,7 +122,7 @@ export function HandwrittenNote({ note: rawNote }: { note: HandwrittenNoteConfig
             <CanvasText
               text={line.segments ? undefined : line.text}
               segments={line.segments}
-              font={HANDWRITTEN_FONT}
+              font={resolvedFont}
               fontSize={lineFontSize}
               color={line.color ?? color}
               width={lineW}

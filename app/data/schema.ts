@@ -1073,6 +1073,22 @@ export type HandwrittenNoteSvgLanguageOverride = Partial<
 export interface HandwrittenNoteConfig {
   /** Lines of handwritten text, top to bottom. */
   lines: HandwrittenNoteLine[];
+  /**
+   * Font URL these lines are drawn with. Defaults to `HANDWRITTEN_FONT`, the
+   * Latin cursive — which carries NO Arabic glyphs, so an Arabic-script note
+   * must point this at `QURAN_FONT` or it rasterises as blank/tofu. Any URL
+   * used here has to be registered in both `FONT_FAMILY_NAMES` (theme.ts) and
+   * `PAGE_TEXT_FONTS` (PaperMaterial.tsx) so the FontFace is actually loaded —
+   * `QURAN_FONT` and `HANDWRITTEN_FONT` already are.
+   */
+  font?: string;
+  /**
+   * Skip this note entirely. Its real use is per-language: the Arabic and the
+   * Latin form of the same margin note want different fonts, line counts and
+   * anchor points, so author them as two notes and let each language hide the
+   * one it doesn't read (see nisa23Config).
+   */
+  hidden?: boolean;
   /** World-space X of the note's anchor (left edge of the text block). */
   x: number;
   /** World-space Y of the note's anchor (top edge of the text block). */
@@ -1097,18 +1113,43 @@ export interface HandwrittenNoteConfig {
   svgs?: HandwrittenNoteSvg[];
 
   /**
-   * Per-language placement for the note itself (the icons carry their own
+   * Per-language form of the note itself (the icons carry their own
    * `languageOverrides`). Use when a translation moves the chunk this note
-   * labels.
+   * labels — or prints something else there entirely.
    */
   languageOverrides?: Partial<Record<SurahLanguage, HandwrittenNoteLanguageOverride>>;
 }
 
-/** The placement fields of `HandwrittenNoteConfig` a single language may override. */
+/**
+ * The fields of `HandwrittenNoteConfig` a single language may override.
+ *
+ * Covers CONTENT, not just placement, because a margin note is prose: where
+ * the reference book prints the Arabic tail of an ayah, the translations print
+ * an explanatory gloss of it, and the two differ in wording, line count,
+ * script, font, ink colour and alignment all at once. So a language may
+ * replace `lines` outright — see the "NOT:" note in nisa23Config.
+ *
+ * `svgs` is REPLACE, not merge: a language that sets it supplies the whole
+ * icon list. Omit it to inherit the base note's icons, which then follow their
+ * own per-icon `languageOverrides` for placement.
+ */
 export type HandwrittenNoteLanguageOverride = Partial<
   Pick<
     HandwrittenNoteConfig,
-    "x" | "y" | "fontSize" | "lineSpacing" | "maxWidth" | "rotationZ"
+    | "lines"
+    | "font"
+    | "hidden"
+    | "x"
+    | "y"
+    | "fontSize"
+    | "color"
+    | "lineSpacing"
+    | "maxWidth"
+    | "textAlign"
+    | "rotationZ"
+    | "opacity"
+    | "renderOrder"
+    | "svgs"
   >
 >;
 
