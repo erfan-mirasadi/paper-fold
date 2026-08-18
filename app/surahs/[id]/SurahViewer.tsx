@@ -31,7 +31,7 @@ import { SurahMenuOverlay } from "@/app/_components/dom/ui-overlay/SurahMenuOver
 import { LanguageSwitchOverlay } from "@/app/_components/dom/ui-overlay/LanguageSwitchOverlay";
 import { AllSectionsOverlay } from "@/app/_components/dom/ui-overlay/AllSectionsOverlay";
 import { SiteLoadingOverlay } from "@/app/_components/dom/ui-overlay/SiteLoadingOverlay";
-import { CameraViewPresetOverlay } from "@/app/_components/dom/ui-overlay/CameraViewPresetOverlay";
+// import { CameraViewPresetOverlay } from "@/app/_components/dom/ui-overlay/CameraViewPresetOverlay";
 import { CameraViewController } from "@/app/_components/canvas/orchestrator/CameraViewController";
 import { DynamicControls } from "@/app/_components/canvas/orchestrator/DynamicControls";
 import { SceneLighting } from "@/app/_components/canvas/orchestrator/SceneLighting";
@@ -636,7 +636,8 @@ function SurahViewerInner({
                   transition={{ duration: 0.45, ease: "easeOut" }}
                   style={{ pointerEvents: "auto", willChange: "opacity" }}
                 >
-                  <CameraViewPresetOverlay />
+                  {/* Temporarily hidden camera rotation control. */}
+                  {/* <CameraViewPresetOverlay /> */}
                   <ScrollHintOverlay />
                   <FoldSliderOverlay />
                   <PaperArrowsOverlay />
