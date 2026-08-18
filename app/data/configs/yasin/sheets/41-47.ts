@@ -49,7 +49,7 @@ const SPEC: SheetSpec = {
       pair: [
         {
           ayah: 41,
-          tone: "cream",
+          tone: "creamAlt",
           heightLines: 3,
           arScale: 0.72,
           latScale: 0.81,
@@ -59,7 +59,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 42,
-          tone: "cream",
+          tone: "creamAlt",
           heightLines: 3,
           arScale: 0.72,
           latScale: 0.75,

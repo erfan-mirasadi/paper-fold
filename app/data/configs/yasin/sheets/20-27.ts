@@ -93,7 +93,7 @@ const SPEC: SheetSpec = {
       right: [
         {
           ayah: 22,
-          tone: "cream",
+          tone: "lav",
           width: 1.15,
           heightLines: 3.25,
           arScale: 0.7,
@@ -102,19 +102,6 @@ const SPEC: SheetSpec = {
           tr: "“Beni yaratana niçin kulluk etmeyeyim?\nO'na döndürüleceksiniz.”",
           en: "“Why should I not worship the One who made me?\nTo Him you return.”",
         },
-        {
-          ayah: 23,
-          tone: "lav",
-          width: 1.15,
-          heightLines: 3.25,
-          arScale: 0.6,
-          latScale: 0.21,
-          ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً إِن\nيُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ لَّا تُغْنِ\nعَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنقِذُونِ",
-          tr: "“O'ndan başka ilah mı edineyim? Rahmân bana zarar dilese\nşefaatleri işe yaramaz, beni kurtaramazlar.”",
-          en: "“Shall I take gods besides Him? If the Merciful wills me harm\ntheir pleading avails nothing, nor can they save me.”",
-        },
-      ],
-      left: [
         {
           ayah: 24,
           tone: "cream",
@@ -126,9 +113,22 @@ const SPEC: SheetSpec = {
           tr: "“İşte o zaman\napaçık bir sapkınlıkta olurum.”",
           en: "“Then I would be\nin clear error.”",
         },
+      ],
+      left: [
+        {
+          ayah: 23,
+          tone: "lav",
+          width: 1.15,
+          heightLines: 3.25,
+          arScale: 0.6,
+          latScale: 0.21,
+          ar: "أَأَتَّخِذُ مِن دُونِهِ آلِهَةً إِن\nيُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ لَّا تُغْنِ\nعَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنقِذُونِ",
+          tr: "“O'ndan başka ilah mı edineyim? Rahmân bana zarar dilese\nşefaatleri işe yaramaz, beni kurtaramazlar.”",
+          en: "“Shall I take gods besides Him? If the Merciful wills me harm\ntheir pleading avails nothing, nor can they save me.”",
+        },
         {
           ayah: 25,
-          tone: "lav",
+          tone: "cream",
           width: 1.15,
           heightLines: 3.25,
           arScale: 0.72,

@@ -60,6 +60,7 @@ import type { SurahLanguage } from "../../../hooks/useSurahLanguageStore";
 
 export const SHEET_COLORS = {
   cream: { bg: "#F3EAD6", border: "#D0A24E", ink: "#5A3D12" },
+  creamAlt: { bg: "#F8E5BE", border: "#D39A42", ink: "#654713" },
   white: { bg: "#FBFAF4", border: "#C7C1AC", ink: "#2C2A22" },
   lav: { bg: "#E1E3F3", border: "#8E93C8", ink: "#26283F" },
   maroon: { bg: "#F6EDE8", border: "#B0504D", ink: "#A30000" },
