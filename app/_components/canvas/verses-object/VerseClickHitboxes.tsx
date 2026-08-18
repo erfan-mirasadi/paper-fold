@@ -199,21 +199,28 @@ export function VerseClickHitboxes() {
     [runtime, config],
   );
 
-  const handleClick = (e: ThreeEvent<MouseEvent>) => {
-    const { kind, verseId, verseIds, sectionId } = e.object.userData;
-    if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
-
+  /**
+   * Would a press on this hitbox actually zoom?
+   *
+   * ONE answer, asked by both the click and the hover, because a magnifier is a
+   * promise and a promise the click does not keep is worse than no cursor at
+   * all. These used to be two separate conditions, and they disagreed in the
+   * state the reader spends the most time in: scrolled to the end, where the
+   * click still elevates but the cursor was gated behind `isPaperFolded` and so
+   * never appeared. Clicking worked and nothing on screen said so.
+   */
+  const wouldElevate = (e: ThreeEvent<PointerEvent | MouseEvent>) => {
     const offset = useFoldStore.getState().currentOffset;
     const phase = useElevatedStore.getState().phase;
     const isPaperFolded = offset < 0.98;
 
-    // Delegate to background mesh if we are already zoomed in
-    if (isPaperFolded && phase === "elevated") {
-      return;
-    }
+    // Already zoomed in on a folded paper: the background mesh owns the press,
+    // and the global cursor style owns the zoom-out it shows for it.
+    if (isPaperFolded && phase === "elevated") return false;
 
-    // When the paper is folded, hitboxes below the folded part remain active in the empty space.
-    // We reject clicks that hit these "invisible" hitboxes below the current visual paper edge.
+    // When the paper is folded, hitboxes below the folded part remain active in
+    // the empty space. Reject presses that land on these "invisible" hitboxes
+    // below the current visual paper edge.
     const angles = getFoldAnglesForScroll(offset, runtime.foldSteps);
 
     let lowestVisibleY = -Infinity;
@@ -224,11 +231,15 @@ export function VerseClickHitboxes() {
       }
     }
 
-    // Hitbox's local Y position is exactly its cy coordinate, matching the fold positions.
-    // A larger buffer (0.5) allows clicking on slightly folded sections
-    if (e.object.position.y < lowestVisibleY - 0.5) {
-      return;
-    }
+    // Hitbox's local Y position is exactly its cy coordinate, matching the fold
+    // positions. A larger buffer (0.5) allows slightly folded sections through.
+    return e.object.position.y >= lowestVisibleY - 0.5;
+  };
+
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    const { kind, verseId, verseIds, sectionId } = e.object.userData;
+    if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
+    if (!wouldElevate(e)) return;
 
     if (e.delta > 10) return;
     e.stopPropagation();
@@ -267,21 +278,10 @@ export function VerseClickHitboxes() {
   const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
     const { kind, verseId, verseIds } = e.object.userData;
     if (!canUseElevatedInteraction(kind, verseId, verseIds)) return;
+    if (!wouldElevate(e)) return;
 
-    const { currentOffset } = useFoldStore.getState();
-    const { phase } = useElevatedStore.getState();
-    const isPaperFolded = currentOffset < 0.98;
-
-    // Let the global cursor style handle "zoom-out" anywhere on the screen
-    if (isPaperFolded && phase === "elevated") {
-      return;
-    }
-
-    if (isPaperFolded) {
-      e.stopPropagation();
-      // Paper has folds → magnifier cursor
-      document.body.style.cursor = "zoom-in";
-    }
+    e.stopPropagation();
+    document.body.style.cursor = "zoom-in";
   };
 
   const handlePointerOut = () => {

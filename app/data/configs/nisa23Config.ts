@@ -605,6 +605,29 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
   ],
 
   // ── Drag / elevation zones ───────────────────────────────────────────────
+  //
+  // `cameraFocus` puts this page on the SAME zoom as the Yâsîn atlas: a zone
+  // states the RECTANGLE the camera must show, and `SectionZoomCamera` solves
+  // the distance itself, flying in all three axes and returning home on
+  // dismiss. Stating a focus is what switches the page onto that path, so the
+  // `cameraTarget` heights below are superseded — they are kept as the
+  // fallback the moment a focus is removed again.
+  //
+  // Each rectangle is the union of the zone's verse capsules AND the
+  // decorative frame drawn around it (see `svgOverlays` below — a frame's
+  // on-screen size IS its scaleX/scaleY, centred on its anchor plus offset),
+  // grown by 1.12 about its own centre. That last factor is not decoration:
+  // `FRAME_FILL` is 1.1, which fits the rectangle to 110% of the viewport and
+  // so crops a tenth of whichever side runs out of room first — without the
+  // margin, the frame art is exactly what gets cut off. Move a block or a
+  // frame and these have to move with it.
+  //
+  // Deliberately NOT on the progressive-page-texture ladder (`PageTextureLod`).
+  // That ladder exists for a paper carrying a dozen sheets, where one capture
+  // cannot serve them all. This page is a single 1.54 x 1.78 sheet whose one
+  // capture already lands ~3100 texels per world unit — better than the
+  // screen-sized detail patch the ladder would swap in, so turning it on here
+  // would cost memory and LOSE sharpness.
   // One zone per decorative frame below, innermost first: the reverse index is
   // first-wins, so each chunk lands in the tightest frame drawn around it and
   // `sec_all` keeps only its own outer frame — which encloses the other zones
@@ -614,26 +637,31 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       id: "sec_top",
       verseIds: [1, 2, 3],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+      cameraFocus: { x: 0.126, y: -0.281, w: 1.288, h: 0.422 },
     },
     {
       id: "sec_grp_a",
       verseIds: [4, 5, 6, 7],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+      cameraFocus: { x: 0.736, y: -0.669, w: 0.762, h: 0.414 },
     },
     {
       id: "sec_grp_b",
       verseIds: [8, 9, 10, 11],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+      cameraFocus: { x: 0.042, y: -0.669, w: 0.762, h: 0.414 },
     },
     {
       id: "sec_bottom",
       verseIds: [12, 13, 14],
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
+      cameraFocus: { x: 0.126, y: -1.057, w: 1.288, h: 0.422 },
     },
     {
       id: "sec_all",
       verseIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
       cameraTarget: { y: 1.2, fov: 28, tilt: -1.35 },
+      cameraFocus: { x: 0.022, y: -0.064, w: 1.495, h: 1.512 },
     },
   ],
 
@@ -1050,38 +1078,26 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
         // edge between them.
         id: "pre-start",
         folds: [
-          { direction: 1, angleFactor: 1 }, // fold0
-          { direction: -1, angleFactor: 1.03 }, // fold1
-          { direction: 1, angleFactor: 1.03 }, // fold2
-          { direction: -1, angleFactor: 1 }, // fold3
-          { direction: 1, angleFactor: 0 }, // fold4
+          { direction: 1, angleFactor: 0.5 }, // fold0
+          { direction: -1, angleFactor: 1 }, // fold1
+          { direction: -1, angleFactor: 1 }, // fold2
+          { direction: 1, angleFactor: 1 }, // fold3
+          { direction: 1, angleFactor: 0.5 }, // fold4
         ],
       },
       {
         // GREEN row joins it — the whole middle band is now readable.
         id: "green",
         folds: [
+          { direction: -1, angleFactor: 0 },
           { direction: 1, angleFactor: 0 },
-          { direction: 1, angleFactor: 1 },
           { direction: -1, angleFactor: 1 },
-          { direction: 1, angleFactor: 0 },
-          { direction: 1, angleFactor: 0 },
+          { direction: 1, angleFactor: 1 },
+          { direction: -1, angleFactor: 0 },
         ],
       },
-      // {
-      //   // BLUE row comes back into plane (pink + green still tucked above it,
-      //   // white still tucked below).
-      //   id: "blue",
-      //   folds: [
-      //     { direction: 1, angleFactor: 0.5 },
-      //     { direction: -1, angleFactor: 1.05 },
-      //     { direction: 1, angleFactor: 0.55 },
-      //     { direction: 1, angleFactor: 0.5 },
-      //     { direction: -1, angleFactor: 0.5 },
-      //   ],
-      // },
+
       {
-        // Flat — pink (2,3) and white (12,13) complete the page.
         id: "end",
         folds: [
           { direction: 1, angleFactor: 0 },
