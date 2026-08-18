@@ -450,21 +450,21 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       },
     },
 
-    // ARABIC — the red "Not:" marker that labels the tail above. Its own note
+    // ARABIC — the red "Not (11) ..." marker that labels the tail above. Its own note
     // because it is Latin script sitting next to Arabic: one note carries one
     // font, and the marker wants the handwritten face the rest of the page's
     // margins use. Anchored near the frame's left edge (frame runs x 0.17…1.37),
-    // level with the tail's second line, as on the reference page.
+    // level with the tail's first line.
     {
-      x: 0.235,
-      y: -1.617,
+      x: 0.2,
+      y: -1.552,
       fontSize: 0.032,
       color: RED_TEXT,
       lineSpacing: 1.4,
       maxWidth: 0.3,
       textAlign: "left",
       rotationZ: 0,
-      lines: [{ text: "Not:", rotation: 0 }],
+      lines: [{ text: "Not (11) ...", rotation: 0 }],
       languageOverrides: {
         tr: { hidden: true },
         en: { hidden: true },
