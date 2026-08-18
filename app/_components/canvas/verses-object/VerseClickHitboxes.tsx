@@ -170,6 +170,26 @@ function buildHitboxes(
     }
   });
 
+  // Zones that state their own way in — see `CustomSectionDef.hitRect`. Nothing
+  // above this loop can reach them: every hitbox so far came from a verse
+  // capsule or a block frame, and a zone printed outside the blocks (the "Not:"
+  // tail under Nisâ 23's frame) has neither.
+  (config.customSections ?? []).forEach((cs) => {
+    const r = cs.hitRect;
+    if (!r) return;
+    hitboxes.push({
+      key: `section-${cs.id}-hitrect`,
+      cx: r.x + r.w / 2 - PAGE_WIDTH / 2,
+      cy: r.y - r.h / 2,
+      cz: zSection,
+      w: r.w,
+      h: r.h,
+      kind: "section",
+      sectionId: cs.id,
+      verseIds: cs.verseIds,
+    });
+  });
+
   return hitboxes;
 }
 

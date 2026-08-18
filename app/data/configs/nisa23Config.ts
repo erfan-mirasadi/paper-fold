@@ -737,6 +737,24 @@ export const NISA_23_CONFIG: SurahLayoutConfig = {
       cameraTarget: { y: 1.2, fov: 30, tilt: -1.4 },
       cameraFocus: { x: 0.126, y: -1.057, w: 1.288, h: 0.422 },
     },
+    // CHUNK 15 — the "Not:" tail, printed BELOW the outer frame as
+    // `handwrittenNotes` rather than as a capsule (see the note block above).
+    // It is the one zone on this page with nothing to derive a hitbox from, so
+    // it states its own `hitRect`; everything else about it — elevating,
+    // zooming — runs off `verseIds: [15]` like every other zone. Deliberately
+    // NOT inside `sec_all`, whose frame it sits outside of.
+    //
+    // Both rectangles come from the note's own layout: `y` is the FIRST line's
+    // centre and line i sits at -i x fontSize x lineSpacing, so the Turkish
+    // gloss (4 lines, the tallest of the three) runs -1.527 down to -1.725. The
+    // width is the outer frame's own measure, x 0.17 … 1.37, which is what the
+    // text is set to.
+    {
+      id: "sec_note",
+      verseIds: [15],
+      hitRect: { x: 0.17, y: -1.5, w: 1.2, h: 0.25 },
+      cameraFocus: { x: 0.098, y: -1.515, w: 1.344, h: 0.222 },
+    },
     {
       id: "sec_all",
       verseIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],

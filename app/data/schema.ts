@@ -674,6 +674,21 @@ export interface CustomSectionDef {
    * `cameraTarget` — see `CameraFocusRect`.
    */
   cameraFocus?: CameraFocusRect;
+  /**
+   * Where this section can be CLICKED, when nothing on the page draws it.
+   *
+   * Every other zone gets its hitbox for free: `VerseClickHitboxes` derives
+   * one from each verse capsule and each block frame, so a zone made of
+   * capsules is clickable wherever its capsules are. A zone whose content is
+   * not a capsule at all — a `handwrittenNotes` passage printed outside the
+   * frame, say — has no transform to derive anything from, and so cannot be
+   * reached however plainly it is sitting there. Stating the rectangle is how
+   * such a zone gets a way in; the zoom, the elevation and the masking all
+   * still run off `verseIds` exactly as they do everywhere else.
+   *
+   * Page space, same convention as `CameraFocusRect`.
+   */
+  hitRect?: CameraFocusRect;
 }
 
 export interface SpecialVerses {
