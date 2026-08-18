@@ -288,7 +288,7 @@ export function SectionZoomCamera() {
           viewWidth(framingDistance(rect, pageScale, halfV, aspect), halfV, aspect),
         );
 
-        if (flight.duration === 0) flight.duration = flightDuration(path.length);
+        if (flight.duration === 0) flight.duration = flightDuration(path);
         flight.elapsed += Math.min(delta, 0.1);
 
         // Nowhere to go (two zones of one sheet, say), or the time is up: the
@@ -312,6 +312,7 @@ export function SectionZoomCamera() {
             .multiplyScalar(viewDistance(at.width, halfV, aspect))
             .add(_focus);
 
+          (window as any).__flight = { t: flight.elapsed / flight.duration, w: at.width, dur: flight.duration };
           aim.copy(_focus);
           camera.lookAt(aim);
           return;
