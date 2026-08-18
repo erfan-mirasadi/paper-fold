@@ -17,8 +17,7 @@ const SPEC: SheetSpec = {
   // both, which is why the frame starts at row 1.
   //
   // Same treatment as the 1-12 sheet's ring: nisa36Config's twisted arrow, one
-  // side only, tips as tall as the capsules they touch, rules in world units so
-  // they match the capsule rules exactly.
+  // side only, with slim tips and fine world-unit rules.
   //
   // `pair` is BLOCK indices, not ayah numbers — here one capsule per row, so
   // 28→0, 29→1, 30→2, 31→3, 32→4.
@@ -33,21 +32,21 @@ const SPEC: SheetSpec = {
       color: "#6E9464", // SHEET_COLORS.green's rule, which both capsules carry
       fillColor: "#EDF3EA",
       curveSide: "left",
-      bowGap: 0.31,
-      innerBowGap: 0.29,
+      bowGap: 0.18,
+      innerBowGap: 0.15,
       inwardOffset: 0,
-      tipThickness: 0.135, // between ayah 29's 0.148 and ayah 32's 0.105
+      tipThickness: 0.09,
       topAnchorXOffset: 0.01,
       topAnchorYOffset: -0.03,
       bottomAnchorYOffset: -0.0075,
       bottomAnchorXOffset: 0.13,
-      lineWidthWorld: 0.0038,
+      lineWidthWorld: 0.003,
       opacity: 0.55,
       shape: "arrow",
       arrowHeadLength: 0.1,
-      arrowHeadWidth: 0.08,
+      arrowHeadWidth: 0.07,
       twist: true,
-      twistT: 0.6,
+      twistT: 0.5,
     },
     {
       pair: [2, 3], // ayah 30 ▸ ayah 31 — the inner layer
@@ -57,24 +56,22 @@ const SPEC: SheetSpec = {
       color: "#D0A24E",
       fillColor: "#FBFAF4",
       curveSide: "left",
-      bowGap: 0.19,
-      innerBowGap: 0.175,
+      bowGap: 0.1,
+      innerBowGap: 0.07,
       inwardOffset: 0,
-      tipThickness: 0.118, // == both capsules' own height
+      tipThickness: 0.08,
       topAnchorYOffset: -0.04,
       topAnchorXOffset: 0.02,
       bottomAnchorYOffset: 0.03,
       bottomAnchorXOffset: 0.14,
-      lineWidthWorld: 0.0038,
+      lineWidthWorld: 0.003,
       opacity: 0.55,
       shape: "arrow",
       arrowHeadLength: 0.095,
-      arrowHeadWidth: 0.08,
+      arrowHeadWidth: 0.06,
       twist: true,
-      twistT: 0.6,
+      twistT: 0.5,
     },
-    // The CENTER colour — see SheetSpec.curveColors. Transparent, or every
-    // narrow capsule on the sheet gets a bracket of its own.
     { color: "transparent", fillColor: "transparent" },
   ],
 

@@ -55,7 +55,7 @@ const SPEC: SheetSpec = {
       pair: [
         {
           ayah: 49,
-          tone: "white",
+          tone: "whiteMuted",
           heightLines: 3,
           arScale: 0.64,
           latScale: 0.81,
@@ -65,7 +65,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 50,
-          tone: "white",
+          tone: "whiteMuted",
           heightLines: 3,
           arScale: 0.68,
           latScale: 0.82,

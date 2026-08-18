@@ -65,26 +65,25 @@ const SPEC: SheetSpec = {
       color: SHEET_COLORS.green.border,
       fillColor: SHEET_COLORS.green.bg,
       curveSide: "left",
-      // Anchored on the capsules' left edge (0.375) and bowed out to x ≈ 0.14,
-      // past the outer frame — the same depth the 13-19 and 20-27 sheets give
-      // their own section-to-section arrows, so all three read as one gesture.
-      bowGap: 0.31,
-      innerBowGap: 0.29,
+      // Anchored on the capsules' left edge (0.375), using the same shallow bow
+      // as the 13-19 and 20-27 section-to-section arrows.
+      bowGap: 0.11,
+      innerBowGap: 0.09,
       inwardOffset: 0,
-      tipThickness: 0.148, // == every capsule on the sheet
+      tipThickness: 0.09,
       // Anchors are placed with the page-wide `capsuleHeight` (0.12) and these
       // capsules are 0.148, so both ends are 0.014 off their own centre.
       topAnchorYOffset: -0.033,
       bottomAnchorYOffset: 0.014,
       bottomAnchorXOffset: 0.13,
-      // topAnchorXOffset: 0.05,
-      lineWidthWorld: 0.0038,
+      topAnchorXOffset: 0.021,
+      lineWidthWorld: 0.003,
       opacity: 0.55,
       shape: "arrow",
       arrowHeadLength: 0.095,
-      arrowHeadWidth: 0.1,
+      arrowHeadWidth: 0.075,
       twist: true,
-      twistT: 0.6,
+      twistT: 0.5,
     },
     {
       pair: [3, 5], // ayah 37 ▸ ayah 40 — across the sky
@@ -93,20 +92,21 @@ const SPEC: SheetSpec = {
       curveSide: "left",
       // Same depth as the earth's arrow above — the two halves are mirrors and
       // their arrows have to look it.
-      bowGap: 0.31,
-      innerBowGap: 0.29,
+      bowGap: 0.11,
+      innerBowGap: 0.09,
       inwardOffset: 0,
-      tipThickness: 0.148, // == every capsule on the sheet
+      tipThickness: 0.09,
+      topAnchorXOffset: 0.021,
       topAnchorYOffset: -0.034,
       bottomAnchorYOffset: 0.014,
       bottomAnchorXOffset: 0.13,
-      lineWidthWorld: 0.0038,
+      lineWidthWorld: 0.003,
       opacity: 0.55,
       shape: "arrow",
       arrowHeadLength: 0.095,
-      arrowHeadWidth: 0.1,
+      arrowHeadWidth: 0.075,
       twist: true,
-      twistT: 0.6,
+      twistT: 0.5,
     },
     // The CENTER colour — EVERY block here is `isCenter && isPushedIn`, so a
     // visible one would bracket all six capsule rows individually.

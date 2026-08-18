@@ -62,6 +62,7 @@ export const SHEET_COLORS = {
   cream: { bg: "#F3EAD6", border: "#D0A24E", ink: "#5A3D12" },
   creamAlt: { bg: "#F8E5BE", border: "#D39A42", ink: "#654713" },
   white: { bg: "#FBFAF4", border: "#C7C1AC", ink: "#2C2A22" },
+  whiteMuted: { bg: "#F0EEE6", border: "#B8B19E", ink: "#2C2A22" },
   lav: { bg: "#E1E3F3", border: "#8E93C8", ink: "#26283F" },
   maroon: { bg: "#F6EDE8", border: "#B0504D", ink: "#A30000" },
   gold: { bg: "#F5EEDC", border: "#D0A24E", ink: "#5A3D12" },
@@ -1072,10 +1073,10 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     specialVerses: {},
     verseOverrides,
 
-    handwrittenNotes: yasinHandwrittenTitle(
-      paperWidth,
-      spec.title.replace(/^YÂSÎN:\s*/, ""),
-    ),
+    // handwrittenNotes: yasinHandwrittenTitle(
+    //   paperWidth,
+    //   spec.title.replace(/^YÂSÎN:\s*/, ""),
+    // ),
 
     // SHEET_STYLING is SHARED — one object across every sheet of the surah — so
     // a sheet that wants its own curves gets a copy rather than a mutation.

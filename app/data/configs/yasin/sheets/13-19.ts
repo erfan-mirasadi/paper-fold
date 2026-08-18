@@ -51,7 +51,8 @@
 import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
-import { SHEET_FRAME_SVGS, yasinHandwrittenTitle } from "../kit";
+import { SHEET_FRAME_SVGS } from "../kit";
+// import { yasinHandwrittenTitle } from "../kit";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, as in yasin36Config. The reference photo paints
@@ -135,7 +136,7 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
 
   specialVerses: {},
 
-  handwrittenNotes: yasinHandwrittenTitle(1.54, "13–19"),
+  // handwrittenNotes: yasinHandwrittenTitle(1.54, "13–19"),
 
   verseOverrides: {
     // Ayah 13 — the narrator's line, alone above the band.
@@ -233,8 +234,8 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       // on the INNER edge of each cream frame, so the bow's body lies in the
       // gap and the head lands on the group the frame below marks.
       //
-      // nisa36Config's twisted arrow, one side only, tip as tall as the
-      // capsules it touches, rule in world units so it matches theirs exactly.
+      // nisa36Config's twisted arrow, one side only, with a slim tip and rule
+      // in world units so its weight stays stable at every zoom level.
       //
       // `pair` is BLOCK indices: 13→0, 14→1, 15→2, 16→3, 17→4, 18→5, 19→6.
       //
@@ -255,24 +256,23 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
           color: GOLD_BORDER,
           fillColor: WHITE_BG,
           curveSide: "left",
-          // Anchored on the capsules' left edge (0.360) and bowed out to
-          // x ≈ 0.13, which is inside the outer frame's left margin (its inner
-          // edge is at 0.245) and clear of the blue band (0.295).
-          bowGap: 0.31,
-          innerBowGap: 0.29,
+          // Anchored on the capsules' left edge (0.360), with a shallow bow
+          // that stays clear of the blue band.
+          bowGap: 0.18,
+          innerBowGap: 0.16,
           inwardOffset: 0,
-          tipThickness: 0.12, // == both capsules' own height
+          tipThickness: 0.09,
           topAnchorYOffset: 0.04,
           bottomAnchorYOffset: -0.05,
           topAnchorXOffset: 0.06,
           bottomAnchorXOffset: 0.2,
-          lineWidthWorld: 0.0038, // == capsuleBorderWidth below
+          lineWidthWorld: 0.003,
           opacity: 0.55,
           shape: "arrow",
           arrowHeadLength: 0.13,
-          arrowHeadWidth: 0.11,
+          arrowHeadWidth: 0.08,
           twist: true,
-          twistT: 0.6,
+          twistT: 0.5,
         },
         { color: "transparent", fillColor: "transparent" },
       ],

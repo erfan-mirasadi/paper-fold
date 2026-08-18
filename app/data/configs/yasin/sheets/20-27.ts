@@ -20,7 +20,7 @@ const SPEC: SheetSpec = {
   // body lies in the gap between them and passes the split row on the way.
   //
   // Same treatment as the 1-12 sheet's ring: nisa36Config's twisted arrow, one
-  // side only, tip as tall as the capsules, rule in world units.
+  // side only, with a slim tip and a stable world-unit rule.
   //
   // `pair` is BLOCK indices, and a SPLIT ROW emits its RIGHT column first:
   //   20→0  21→1  22→2  23→3  24→4  25→5  26→6  27→7
@@ -33,25 +33,22 @@ const SPEC: SheetSpec = {
       color: "#D0A24E",
       fillColor: "#FBFAF4",
       curveSide: "left",
-      // It bows out to x ≈ 0.06 from a capsule edge at 0.293 — far wider than
-      // any bracket on the ring sheets, because this one has the whole left
-      // margin of the page to itself and has to read as spanning the sheet
-      // rather than hugging a group.
-      bowGap: 0.31,
-      innerBowGap: 0.29,
+      // Geometry matches the 13-19 sheet's reference arrow exactly.
+      bowGap: 0.17,
+      innerBowGap: 0.15,
       inwardOffset: 0,
-      tipThickness: 0.127, // == both capsules' own height
-      topAnchorYOffset: 0.07,
-      bottomAnchorYOffset: -0.065,
-      topAnchorXOffset: 0.052,
-      bottomAnchorXOffset: 0.14,
-      lineWidthWorld: 0.0038,
+      tipThickness: 0.09,
+      topAnchorYOffset: 0.04,
+      bottomAnchorYOffset: -0.05,
+      topAnchorXOffset: 0.06,
+      bottomAnchorXOffset: 0.2,
+      lineWidthWorld: 0.003,
       opacity: 0.55,
       shape: "arrow",
-      arrowHeadLength: 0.09,
-      arrowHeadWidth: 0.085,
+      arrowHeadLength: 0.13,
+      arrowHeadWidth: 0.08,
       twist: true,
-      twistT: 0.6,
+      twistT: 0.5,
     },
     // The CENTER colour — see SheetSpec.curveColors. It MU2ST stay transparent
     // here: the four capsules of the split row are narrow enough that their

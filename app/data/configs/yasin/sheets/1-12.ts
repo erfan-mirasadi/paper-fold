@@ -91,7 +91,7 @@ import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
 import { GREEN_THEME, GREEN_VERSE_BG } from "../../../theme";
-import { yasinHandwrittenTitle } from "../kit";
+// import { yasinHandwrittenTitle } from "../kit";
 
 // ---------------------------------------------------------------------------
 // COLOR PALETTE — Tevbe 24's, not the reference photo's. The photo paints in
@@ -211,7 +211,7 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
 
   specialVerses: {},
 
-  handwrittenNotes: yasinHandwrittenTitle(1.54, "1–12"),
+  // handwrittenNotes: yasinHandwrittenTitle(1.54, "1–12"),
 
   verseOverrides: {
     // ── SECTION 1 — the opening five capsules ─────────────────────────────
