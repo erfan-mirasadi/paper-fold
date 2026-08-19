@@ -1,0 +1,33 @@
+<svg width="1098" height="1000" viewBox="0 0 1098 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 28-32 — THE 29-32 NEST'S FRAME, drawn at its own box (w 0.9 x h 0.82)
+     rather than borrowed from SHEET_FRAME_SVGS.blue, which is pre-distorted for
+     the shared Imran-14 aspect (0.95 x 0.35) and reads with the same barely-
+     visible rim as every other borrowed frame at a mismatched aspect. See
+     /yasin3340/section.svg for the fuller rationale — same fix, same numbers.
+
+       world 0.900 x 0.820  ->  1.098
+       viewBox 1098 x 1000  ->  1.098
+       one SVG unit = 8.200e-4 world units on both axes (aspect matches exactly,
+       so rx = ry arrives as a true circle — no pre-distortion needed).
+       corner r  48.8 units  ->  0.0400
+       gold rim   5.2 units  ->  0.0043
+
+     CONSTRUCTION: THE RIM IS MASKED, not underlaid — see /yasin/section-inner.svg
+     for why a translucent panel over an unmasked gold rect would bleed gold
+     through the whole middle instead of just the rim. -->
+<defs>
+<linearGradient id="yasin2832SectionGold" x1="0" y1="500" x2="1098" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+<mask id="yasin2832SectionRim">
+<rect x="0" y="0" width="1098" height="1000" rx="48.8" ry="48.8" fill="#ffffff"/>
+<rect x="5.2" y="5.2" width="1087.6" height="989.6" rx="43.6" ry="43.6" fill="#000000"/>
+</mask>
+</defs>
+<rect x="0" y="0" width="1098" height="1000" rx="48.8" ry="48.8"
+      fill="url(#yasin2832SectionGold)" mask="url(#yasin2832SectionRim)"/>
+<rect x="5.2" y="5.2" width="1087.6" height="989.6" rx="43.6" ry="43.6"
+      fill="#CEE0E9" fill-opacity="0.6"/>
+</svg>

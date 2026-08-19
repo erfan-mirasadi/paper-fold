@@ -1,4 +1,9 @@
-import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
+import {
+  buildSheet,
+  SHEET_COLORS,
+  SHEET_FRAME_SVGS,
+  type SheetSpec,
+} from "../kit";
 
 // ---------------------------------------------------------------------------
 // 53-67 — the shout, the Garden, the guilty, and the fire. Fifteen ayahs on one
@@ -79,15 +84,16 @@ const SPEC: SheetSpec = {
   //
   // `curveSide: "right"` — NOT this surah's usual "left" — because 59-62 are
   // already the LEFT column of the split row: bowing "left" would push the
-  // ribbon into the sliver of margin between the rose frame and the outer
-  // one (0.025 world units, barely a rule's width). "right" bows it into the
-  // gutter the guilty stack and the Garden already keep between them.
+  // ribbon into the sliver of margin between this column's own frame and the
+  // outer one (0.025 world units, barely a rule's width). "right" bows it
+  // into the gutter the guilty stack and the Garden already keep between them.
   curveColors: [
     {
       pair: [4, 6],
-      // SHEET_COLORS.maroon — the ink 59 and 62 are already painted in.
-      color: "#B0504D",
-      fillColor: "#F6EDE8",
+      // SHEET_COLORS.blue — matches the 59-62 frame now that its ground is
+      // blue rather than the maroon the 59/62 capsules alone still carry.
+      color: SHEET_COLORS.blue.border,
+      fillColor: SHEET_COLORS.blue.bg,
       curveSide: "left",
       bowGap: 0.18,
       innerBowGap: 0.15,
@@ -108,14 +114,14 @@ const SPEC: SheetSpec = {
     // 53 ▸ 65 — the shout named at the top of the page answered by the mouths
     // sealed at the bottom of it. Both blocks are centred (xOffset 0, not a
     // split-row column), so this is the surah's usual LINK idiom — 1-12's
-    // 9a▸9b, 20-27's 21▸26 — gold rule on a white ground, `curveSide: "left"`
-    // down the page's own left margin, geometry modelled on 20-27's (the
-    // closest thing to this on the surah: also a jump PAST several
-    // intervening rows rather than a chiasm inside one frame).
+    // 9a▸9b, 20-27's 21▸26 — `curveSide: "left"` down the page's own left
+    // margin, geometry modelled on 20-27's (the closest thing to this on the
+    // surah: also a jump PAST several intervening rows rather than a chiasm
+    // inside one frame). Blue, matching the 53-54 frame it starts from.
     {
       pair: [0, 8],
-      color: "#D0A24E",
-      fillColor: "#FBFAF4",
+      color: SHEET_COLORS.blue.border,
+      fillColor: SHEET_COLORS.blue.bg,
       curveSide: "right",
       bowGap: 0.4,
       innerBowGap: 0.37,
@@ -394,7 +400,9 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 1,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
+      // Blue, not the surah's default pink — matches the 53▸65 curve below
+      // and the shout capsules' own `blue` tone.
+      src: SHEET_FRAME_SVGS.blue,
       pad: BLOCK_PAD,
       h: 0.45,
       offsetY: -0.14,
@@ -418,6 +426,11 @@ const SPEC: SheetSpec = {
       to: 2,
       side: "left",
       tone: "rose",
+      // Frozen to blue: without `src` this frame auto-emits `tone`'s rose
+      // fill on every `npm run emit:frames` run. Pointing at its own already-
+      // generated path opts it out, so the hand-recoloured file (rose #F3DEDE
+      // -> blue #CEE0E9, see its own header) survives a re-run.
+      src: "/yasin5368/frame-3.svg",
       pad: BLOCK_PAD,
       w: 1.28,
       h: 0.74,

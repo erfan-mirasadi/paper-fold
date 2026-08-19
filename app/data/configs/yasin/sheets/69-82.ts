@@ -1,4 +1,9 @@
-import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
+import {
+  buildSheet,
+  SHEET_COLORS,
+  SHEET_FRAME_SVGS,
+  type SheetSpec,
+} from "../kit";
 
 // ---------------------------------------------------------------------------
 // 68-82 — long life, not poetry, the cattle, and the bones brought back.
@@ -52,6 +57,76 @@ const SPEC: SheetSpec = {
   // is what puts it where it is.
   paperWidth: 2.9,
   capsuleWidthScale: 0.88,
+
+  // Three reading links inside the two lower columns. `pair` uses emitted
+  // block indices: the right column is 3-6, then the left column is 7-11.
+  curveColors: [
+    {
+      pair: [3, 6], // ayah 71 ▸ ayah 76
+      color: SHEET_COLORS.green.border,
+      fillColor: SHEET_COLORS.green.bg,
+      curveSide: "right",
+      bowGap: 0.18,
+      innerBowGap: 0.15,
+      inwardOffset: 0,
+      tipThickness: 0.09,
+      topAnchorXOffset: 0.05,
+      bottomAnchorXOffset: 0.16,
+      topAnchorYOffset: -0.079,
+      bottomAnchorYOffset: 0.079,
+      lineWidthWorld: 0.003,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.1,
+      arrowHeadWidth: 0.07,
+      twist: true,
+      twistT: 0.5,
+    },
+    {
+      pair: [7, 11], // ayah 77 ▸ ayah 82 — outer link
+      color: SHEET_COLORS.gold.border,
+      fillColor: SHEET_COLORS.gold.bg,
+      curveSide: "left",
+      bowGap: 0.18,
+      innerBowGap: 0.15,
+      inwardOffset: 0,
+      tipThickness: 0.09,
+      topAnchorXOffset: 0.05,
+      bottomAnchorXOffset: 0.16,
+      topAnchorYOffset: -0.036,
+      bottomAnchorYOffset: 0.036,
+      lineWidthWorld: 0.003,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.1,
+      arrowHeadWidth: 0.07,
+      twist: true,
+      twistT: 0.5,
+    },
+    {
+      pair: [8, 10], // ayah 78 ▸ ayah 81 — inner link
+      color: SHEET_COLORS.green.border,
+      fillColor: SHEET_COLORS.green.bg,
+      curveSide: "left",
+      bowGap: 0.1,
+      innerBowGap: 0.07,
+      inwardOffset: 0,
+      tipThickness: 0.08,
+      topAnchorXOffset: 0.06,
+      bottomAnchorXOffset: 0.16,
+      topAnchorYOffset: -0.036,
+      bottomAnchorYOffset: 0.036,
+      lineWidthWorld: 0.003,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.095,
+      arrowHeadWidth: 0.06,
+      twist: true,
+      twistT: 0.5,
+    },
+    // Prevent the split-column blocks from receiving automatic centre curves.
+    { color: "transparent", fillColor: "transparent" },
+  ],
 
   rows: [
     // Ayah 68 leads into 69-70 but stands outside their inner frame.

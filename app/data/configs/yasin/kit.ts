@@ -63,6 +63,7 @@ export const SHEET_COLORS = {
   creamAlt: { bg: "#F8E5BE", border: "#D39A42", ink: "#654713" },
   white: { bg: "#FBFAF4", border: "#C7C1AC", ink: "#2C2A22" },
   whiteMuted: { bg: "#F0EEE6", border: "#B8B19E", ink: "#2C2A22" },
+  whiteDark: { bg: "#DDD8CC", border: "#9F9783", ink: "#2C2A22" },
   lav: { bg: "#E1E3F3", border: "#8E93C8", ink: "#26283F" },
   maroon: { bg: "#F6EDE8", border: "#B0504D", ink: "#A30000" },
   gold: { bg: "#F5EEDC", border: "#D0A24E", ink: "#5A3D12" },
@@ -72,7 +73,7 @@ export const SHEET_COLORS = {
 } as const;
 
 /**
- * The three shared frame textures used by the Yasin sheets. Keeping one URL per
+ * The shared frame textures used by the Yasin sheets. Keeping one URL per
  * visual role lets Three's texture cache reuse the same rasterised SVG across
  * every sheet that needs it.
  *
@@ -82,26 +83,30 @@ export const SHEET_COLORS = {
  *   band     #CEE0E9  0.6      Tevbe's shields
  *   inner    #F0E4E5  0.6      Tevbe's inner box — the SAME pink as the outer
  *   gold     #F5EEDC  0.6      Tevbe's centre dome — for a section that closes
+ *   blue     #CEE0E9  0.6      the band's own blue, for a section that wants
+ *                              to read cool instead of warm
  *
  * The outer and the inner sharing one fill is not an oversight: Tevbe's own
  * page frame and the box around its ana bölüm are one colour, told apart by
  * their gold rims. `gold` is the odd one out on purpose — give it to a passage
  * that answers the ones above it rather than continuing them.
  *
- * `inner` and `gold` are the SAME FILE with one different fill, because an
- * overlay is a texture at a URL and there is nowhere to pass it a colour.
+ * `inner`, `gold` and `blue` are the SAME FILE with one different fill, because
+ * an overlay is a texture at a URL and there is nowhere to pass it a colour.
  *
  * `inner` was /nisa/all-section.svg until it was found to be the one colour on
  * a Yâsîn sheet that came from outside that box (an opaque #D9C7CA mauve). It
  * could not be retinted where it stood — Nisa and Fâtiha draw with the same
  * file — so its geometry was copied to /yasin/section-inner.svg and repainted
- * there. That file's header carries the rest.
+ * there. That file's header carries the rest, and section-blue.svg's carries
+ * what changed again for the third ground.
  */
 export const SHEET_FRAME_SVGS = {
   overall: "/yasin1319/all-section.svg",
   band: "/yasin1319/band.svg",
   inner: "/yasin/section-inner.svg",
   gold: "/yasin/section-gold.svg",
+  blue: "/yasin/section-blue.svg",
 } as const;
 
 /** Shared handwritten heading used at the top of every Yâsîn sheet. */

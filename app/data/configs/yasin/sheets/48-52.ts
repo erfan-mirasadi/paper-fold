@@ -55,7 +55,7 @@ const SPEC: SheetSpec = {
       pair: [
         {
           ayah: 49,
-          tone: "whiteMuted",
+          tone: "whiteDark",
           heightLines: 3,
           arScale: 0.64,
           latScale: 0.81,
@@ -65,7 +65,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 50,
-          tone: "whiteMuted",
+          tone: "whiteDark",
           heightLines: 3,
           arScale: 0.68,
           latScale: 0.82,
@@ -137,9 +137,9 @@ SHEET.config.svgOverlays?.push(
     anchorEdge: "top",
     scaleX: 0.1,
     scaleY: 0.1,
-    offsetY: 0.02,
+    offsetY: -0.04,
     rotationZ: -Math.PI / 2.8,
-    renderOrder: 8,
+    renderOrder: 15,
     customSectionId: "yasin4852_f2",
   },
   {
@@ -148,10 +148,10 @@ SHEET.config.svgOverlays?.push(
     anchorEdge: "top",
     scaleX: 0.1,
     scaleY: 0.1,
-    offsetX: -0.7,
+    offsetX: -0.65,
     offsetY: -0.22,
     rotationZ: Math.PI * 0.1,
-    renderOrder: 8,
+    renderOrder: 15,
     customSectionId: "yasin4852_f2",
   },
   {
@@ -160,10 +160,10 @@ SHEET.config.svgOverlays?.push(
     anchorEdge: "top",
     scaleX: -0.1,
     scaleY: 0.1,
-    offsetX: 0.7,
+    offsetX: 0.65,
     offsetY: -0.22,
     rotationZ: -Math.PI * 0.1,
-    renderOrder: 8,
+    renderOrder: 15,
     customSectionId: "yasin4852_f2",
   },
   {
@@ -172,9 +172,9 @@ SHEET.config.svgOverlays?.push(
     anchorEdge: "top",
     scaleX: -0.1,
     scaleY: 0.1,
-    offsetY: -0.46,
+    offsetY: -0.39,
     rotationZ: -Math.PI / 1.5,
-    renderOrder: 8,
+    renderOrder: 15,
     customSectionId: "yasin4852_f2",
   },
 );

@@ -1,0 +1,32 @@
+<svg width="2209" height="1085" viewBox="0 0 22087 10845" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — THE BLUE SECTION FRAME. Pair file: section-inner.svg — identical
+     geometry and construction, one different fill. Sheets point at it through
+     `SHEET_FRAME_SVGS.blue`.
+
+     COLOUR. #CEE0E9 at 0.6 — the surah's own blue, byte-for-byte
+     /yasin1319/band.svg's fill and opacity (also the "band" recipe in
+     scripts/emitSheetFrames.ts). A third ground beside `inner`'s pink and
+     `gold`'s cream, for a section that wants to read cool rather than warm.
+
+     THE ELLIPSE IS PRE-DISTORTED, and deliberately so — see section-inner.svg
+     for the arithmetic and for why ry ≠ rx here. DO NOT "fix" them into a
+     square radius.
+
+     CONSTRUCTION: THE RIM IS MASKED, not underlaid, because the panel is
+     translucent — again, see section-inner.svg. -->
+<defs>
+<linearGradient id="yasinBlueRimGold" x1="224.41" y1="5930.27" x2="21862.6" y2="5930.27" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+<mask id="yasinBlueRimMask">
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2" fill="#ffffff"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25" fill="#000000"/>
+</mask>
+</defs>
+<rect x="224.41" y="1083.2" width="21638.19" height="9693.5" rx="800" ry="1066.2"
+      fill="url(#yasinBlueRimGold)" mask="url(#yasinBlueRimMask)"/>
+<rect x="314.41" y="1203.15" width="21458.19" height="9453.61" rx="710" ry="946.25"
+      fill="#CEE0E9" fill-opacity="0.6"/>
+</svg>

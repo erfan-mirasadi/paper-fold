@@ -1,4 +1,9 @@
-import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
+import {
+  buildSheet,
+  SHEET_COLORS,
+  SHEET_FRAME_SVGS,
+  type SheetSpec,
+} from "../kit";
 
 // ---------------------------------------------------------------------------
 
@@ -28,10 +33,10 @@ const SPEC: SheetSpec = {
   curveColors: [
     {
       pair: [1, 6], // ayah 21 ▸ ayah 26, section to section
-      // The surah's LINK colour — the gold rule on a white ground,
-      // matching the 1-12 sheet's 9a ▸ 9b bracket and 13-19's 15 ▸ 18.
-      color: "#D0A24E",
-      fillColor: "#FBFAF4",
+      // Gold rule on a gold-tinted ground, matching the 20-21 and 26-27
+      // sections it joins now that both are painted with SHEET_FRAME_SVGS.gold.
+      color: SHEET_COLORS.gold.border,
+      fillColor: SHEET_COLORS.gold.bg,
       curveSide: "left",
       // Geometry matches the 13-19 sheet's reference arrow exactly.
       bowGap: 0.17,
@@ -175,7 +180,9 @@ const SPEC: SheetSpec = {
       from: 0,
       to: 1,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
+      // Yellow, not the surah's default pink — matched to the 21 ▸ 26 curve
+      // below, which now carries the same gold.
+      src: SHEET_FRAME_SVGS.gold,
       w: 1.05,
       offsetY: -0.12,
     },
@@ -189,7 +196,9 @@ const SPEC: SheetSpec = {
       from: 3,
       to: 4,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
+      // Same yellow as the 20-21 frame above — the two ends of the link
+      // this sheet's curve draws.
+      src: SHEET_FRAME_SVGS.gold,
       w: 1.05,
       offsetY: -0.12,
     },

@@ -36,10 +36,10 @@ const SPEC: SheetSpec = {
       innerBowGap: 0.15,
       inwardOffset: 0,
       tipThickness: 0.09,
-      topAnchorXOffset: 0.01,
+      topAnchorXOffset: 0.032,
       topAnchorYOffset: -0.03,
-      bottomAnchorYOffset: -0.0075,
-      bottomAnchorXOffset: 0.13,
+      bottomAnchorYOffset: 0.01,
+      bottomAnchorXOffset: 0.14,
       lineWidthWorld: 0.003,
       opacity: 0.55,
       shape: "arrow",
@@ -61,7 +61,7 @@ const SPEC: SheetSpec = {
       inwardOffset: 0,
       tipThickness: 0.08,
       topAnchorYOffset: -0.04,
-      topAnchorXOffset: 0.02,
+      topAnchorXOffset: 0.035,
       bottomAnchorYOffset: 0.03,
       bottomAnchorXOffset: 0.14,
       lineWidthWorld: 0.003,
@@ -126,7 +126,7 @@ const SPEC: SheetSpec = {
 
   frames: [
     // The page-wide enclosure uses the pale overall frame; the 29-32 group
-    // uses the surah's shared pink inner frame.
+    // uses the surah's shared blue inner frame.
     {
       from: 0,
       to: 4,
@@ -139,11 +139,15 @@ const SPEC: SheetSpec = {
       from: 1,
       to: 4,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
+      // Blue, not the surah's default pink — the nest of 29-32 reads as its
+      // own cool-toned unit against the page's outer frame. A sheet-local
+      // frame, not SHEET_FRAME_SVGS.blue: see its own header for why (a
+      // properly circular, standardised border at this box's own aspect).
+      src: "/yasin2832/section.svg",
       pad: 0.015,
       w: 0.9,
-      h: 0.82,
-      offsetY: -0.298,
+      h: 0.75,
+      offsetY: -0.334,
     },
   ],
 };

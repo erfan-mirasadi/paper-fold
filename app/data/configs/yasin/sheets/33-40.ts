@@ -226,24 +226,28 @@ const SPEC: SheetSpec = {
       h: 1.47,
       offsetY: -0.63,
     },
-    // The earth — ayahs 33 … 36, in the surah's shared pink.
+    // The earth — ayahs 33 … 36. Same cream ground as the sky below it now,
+    // rather than the surah's default pink — the two halves read as one
+    // mirrored pair sharing a ground, told apart by their capsule inks alone.
+    // A sheet-local frame, not SHEET_FRAME_SVGS.gold: see its own header for
+    // why (a properly circular, standardised border at this box's own aspect,
+    // rather than the shared file's barely-visible one at a borrowed aspect).
     {
       from: 0,
       to: 2,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.inner,
+      src: "/yasin3340/section.svg",
       pad: 0.045,
       w: 1.05,
       h: 0.73,
       offsetY: -0.255,
     },
-    // The sky — ayahs 37 … 40, in cream. The one frame on the sheet that is not
-    // pink: these four answer the four above them rather than continuing them.
+    // The sky — ayahs 37 … 40, in the same cream and the same frame file.
     {
       from: 3,
       to: 5,
       tone: "inner",
-      src: SHEET_FRAME_SVGS.gold,
+      src: "/yasin3340/section.svg",
       pad: 0.045,
       w: 1.05,
       h: 0.73,

@@ -1,0 +1,44 @@
+<svg width="1438" height="1000" viewBox="0 0 1438 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 33-40 — THE EARTH AND SKY FRAME, shared by both halves (33-36 and
+     37-40 sit in the same size box, w 1.05 x h 0.73, and now the same cream).
+
+     WHY A SHEET-LOCAL FILE rather than SHEET_FRAME_SVGS.gold: that shared file
+     is also 20-27's, at a much shorter box, and is pre-distorted (rx != ry) for
+     a THIRD aspect again (Imran-14's 0.95 x 0.35). Reusing it here would carry
+     that mismatch as oval corners and an uneven rim. This file is drawn AT
+     33-40's own aspect instead, the way /yasin1319/all-section.svg and
+     /yasin/all-section.svg are drawn at theirs — see either for the rationale.
+
+     STANDARDISED TO ALL-SECTION'S OWN NUMBERS: a fixed ~0.04 world-unit corner
+     radius and ~0.0043 world-unit rim, the constants every all-section*.svg in
+     the surah converges on regardless of its own box size. Previously this pair
+     carried the thin, box-proportional rim SHEET_FRAME_SVGS.gold/.inner use —
+     barely visible at this box size, which is why it reads as borderless.
+
+       world 1.050 x 0.730  ->  1.438
+       viewBox 1438 x 1000  ->  1.438
+       one SVG unit = 7.300e-4 world units on both axes (aspect matches exactly,
+       so rx = ry arrives as a true circle — no pre-distortion needed).
+       corner r  54.8 units  ->  0.0400
+       gold rim   6.0 units  ->  0.0044
+
+     CONSTRUCTION: THE RIM IS MASKED, not underlaid — the panel is translucent
+     (0.6), and an unmasked opaque gold rect behind a translucent panel would
+     bleed gold through the whole middle rather than just the rim. See
+     /yasin/section-inner.svg for the fuller explanation. -->
+<defs>
+<linearGradient id="yasin3340SectionGold" x1="0" y1="500" x2="1438" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+<mask id="yasin3340SectionRim">
+<rect x="0" y="0" width="1438" height="1000" rx="54.8" ry="54.8" fill="#ffffff"/>
+<rect x="6" y="6" width="1426" height="988" rx="48.8" ry="48.8" fill="#000000"/>
+</mask>
+</defs>
+<rect x="0" y="0" width="1438" height="1000" rx="54.8" ry="54.8"
+      fill="url(#yasin3340SectionGold)" mask="url(#yasin3340SectionRim)"/>
+<rect x="6" y="6" width="1426" height="988" rx="48.8" ry="48.8"
+      fill="#F5EEDC" fill-opacity="0.6"/>
+</svg>

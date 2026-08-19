@@ -51,7 +51,7 @@
 import type { SurahLayoutConfig } from "../../../schema";
 import type { SurahDataShape } from "../../../SurahConfig";
 import type { SurahLanguage } from "../../../../hooks/useSurahLanguageStore";
-import { SHEET_FRAME_SVGS } from "../kit";
+import { SHEET_COLORS, SHEET_FRAME_SVGS } from "../kit";
 // import { yasinHandwrittenTitle } from "../kit";
 
 // ---------------------------------------------------------------------------
@@ -249,12 +249,11 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       curveColors: [
         {
           pair: [2, 5], // ayah 15 ▸ ayah 18
-          // The surah's LINK colour — gold rule on a white ground, the same
-          // pair the 1-12 sheet gives its 9a ▸ 9b bracket. Every arrow that
-          // joins two groups now carries it; only 28-32's outer 29 ▸ 32 keeps a
-          // colour of its own, being a frame's own chiasm rather than a link.
-          color: GOLD_BORDER,
-          fillColor: WHITE_BG,
+          // Blue, matching the band frame (/yasin1319/band.svg, #CEE0E9) this
+          // curve is drawn over — the same "curve carries its section's own
+          // colour" choice made for the 53-65 shout-to-seal link.
+          color: SHEET_COLORS.blue.border,
+          fillColor: SHEET_COLORS.blue.bg,
           curveSide: "left",
           // Anchored on the capsules' left edge (0.360), with a shallow bow
           // that stays clear of the blue band.

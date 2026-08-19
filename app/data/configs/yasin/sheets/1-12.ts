@@ -337,26 +337,21 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
     // the text, the badge and nothing else. Ayah 12 is the answer the whole
     // ring was waiting for, so it is the one that speaks in colour.
     12: capsule(CREAM_BG, MAROON_BORDER, INK_RED, {
-      // THE DECORATION IS ALAK 96's — /alak/Group 11.svg, the gold cartouche it
-      // draws around its ana ayet (its own ayah 5), reused here unaltered. It
-      // is drawn ENTIRELY in the shared #968428 → #CDC577 gold gradient and
-      // carries no fill of its own, so it lands on this page's palette without
-      // a single colour to reconcile — which is why it is borrowed rather than
-      // redrawn.
+      // THE DECORATION IS A SUPPLIED ORNAMENT — /yasin/ornament-12.svg, placed
+      // exactly as given: its own navy ink (#0e358d), not this surah's gold.
+      // Unlike every other frame in the surah, this one carries its own colour
+      // on purpose and is not reconciled to the page's palette.
       //
       // A CAPSULE FRAME, not a section frame: `customFrameSvg` is rendered by
       // VerseMesh's `BorderSvg` around this one capsule, at 0.8 x 0.93 of its
       // OUTER size (capsule + expandW/expandH). No `svgOverlays` entry, no
       // anchor, no offsetY — it travels with the capsule.
       //
-      // IT ARRIVES SQUASHED, and there is no way around it. The art is drawn at
-      // 8717 x 1167 (aspect 7.47) for Alak's one-line ana ayet; ayah 12 is two
-      // lines, so its outer box is 0.87 x 0.195 → 3.84 after BorderSvg's own
-      // scaling. The ornamental ends therefore come out about twice as stout as
-      // Alak's. Matching the aspect would need either a one-line capsule
-      // (~0.080 tall, and the ink alone needs 0.110) or a 1.62-wide one, on a
-      // 1.54 page. Stout ends it is.
-      customFrameSvg: "/alak/Group 11.svg",
+      // IT ARRIVES SQUASHED, same as the Alak cartouche it replaced. The art
+      // is drawn at 1774 x 887 (aspect 2.00); ayah 12's outer box is 0.87 x
+      // 0.195 → 3.84 after BorderSvg's own scaling, so it lands a little
+      // wider than drawn.
+      customFrameSvg: "/yasin/ornament-12.svg",
       // The air the cartouche needs outside the rule it wraps — Alak's own
       // numbers, and they scale with the art rather than with the capsule.
       expandW: 0.035,
