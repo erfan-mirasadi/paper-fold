@@ -162,7 +162,7 @@ SHEET.config.svgOverlays?.push(
     scaleY: 0.1,
     offsetX: 0.7,
     offsetY: -0.22,
-    rotationZ: Math.PI * 0.01,
+    rotationZ: -Math.PI * 0.1,
     renderOrder: 8,
     customSectionId: "yasin4852_f2",
   },

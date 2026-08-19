@@ -105,6 +105,34 @@ const SPEC: SheetSpec = {
       twist: true,
       twistT: 0.5,
     },
+    // 53 ▸ 65 — the shout named at the top of the page answered by the mouths
+    // sealed at the bottom of it. Both blocks are centred (xOffset 0, not a
+    // split-row column), so this is the surah's usual LINK idiom — 1-12's
+    // 9a▸9b, 20-27's 21▸26 — gold rule on a white ground, `curveSide: "left"`
+    // down the page's own left margin, geometry modelled on 20-27's (the
+    // closest thing to this on the surah: also a jump PAST several
+    // intervening rows rather than a chiasm inside one frame).
+    {
+      pair: [0, 8],
+      color: "#D0A24E",
+      fillColor: "#FBFAF4",
+      curveSide: "right",
+      bowGap: 0.4,
+      innerBowGap: 0.37,
+      inwardOffset: 0,
+      tipThickness: 0.09,
+      topAnchorYOffset: -0.1,
+      topAnchorXOffset: 0.09,
+      bottomAnchorYOffset: -0.01,
+      bottomAnchorXOffset: 0.23,
+      lineWidthWorld: 0.003,
+      opacity: 0.55,
+      shape: "arrow",
+      arrowHeadLength: 0.13,
+      arrowHeadWidth: 0.08,
+      twist: true,
+      twistT: 0.5,
+    },
     // The CENTER colour — see SheetSpec.curveColors. MUST stay transparent:
     // every split-row column on this sheet is narrow enough to be
     // `isPushedIn`, and a visible center colour would bracket all of them.
@@ -307,7 +335,10 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 65,
-      tone: "white",
+      // SHEET_COLORS.maroon — the same tone ayah 83 closes the surah in, on
+      // the sister sheet: cream ground, dark red ink. Asked for by eye, not
+      // by any pairing this sheet draws.
+      tone: "maroon",
       heightLines: 1.5,
       gapAfter: 0.032,
       arScale: 0.84,
@@ -316,33 +347,45 @@ const SPEC: SheetSpec = {
       tr: "Bugün ağızlarını mühürleriz; elleri bizimle konuşur, ayakları kazandıklarına şahitlik eder.",
       en: "Today We seal their mouths; their hands speak to Us, their feet testify to what they earned.",
     },
+    // 66 ▸ 67, BRIDGED — same shape as 60 ▸ 61: one row instead of two, so the
+    // connector bar says "held together" the way the stack could not. UNLIKE
+    // 60 ▸ 61, this one is asked to cost NOTHING: no frame on this sheet moves,
+    // because the pair's own height (`heightLines`) is set to exactly the
+    // 0.317 the two stacked rows used to take between them —
+    //   old: rowHeight(66) 0.1425 + gapAfter 0.032 + rowHeight(67) 0.1425
+    // — so the fire band ends exactly where it always did.
     {
-      ayah: 66,
-      tone: "white",
-      heightLines: 1.5,
-      gapAfter: 0.032,
-      arScale: 0.84,
-      latScale: 0.65,
-      ar: "وَلَوْ نَشَاءُ لَطَمَسْنَا عَلَىٰ أَعْيُنِهِمْ فَاسْتَبَقُوا الصِّرَاطَ فَأَنَّىٰ يُبْصِرُونَ",
-      tr: "Dilesek gözlerini silerdik; yola koşuşurlardı, ama nasıl göreceklerdi?",
-      en: "Had We willed, We would have blotted their eyes; they would race for the path — how then would they see?",
-    },
-    {
-      ayah: 67,
-      tone: "white",
-      heightLines: 1.5,
-      arScale: 0.92,
-      latScale: 0.74,
-      ar: "وَلَوْ نَشَاءُ لَمَسَخْنَاهُمْ عَلَىٰ مَكَانَتِهِمْ فَمَا اسْتَطَاعُوا مُضِيًّا وَلَا يَرْجِعُونَ",
-      tr: "Dilesek onları oldukları yerde dondururduk; ne ileri gidebilir ne dönebilirlerdi.",
-      en: "Had We willed, We would have fixed them where they stand: unable to go on, unable to return.",
+      pair: [
+        {
+          ayah: 66,
+          tone: "white",
+          heightLines: 5.56,
+          arScale: 0.86,
+          latScale: 0.52,
+          ar: "وَلَوْ نَشَاءُ لَطَمَسْنَا عَلَىٰ أَعْيُنِهِمْ\nفَاسْتَبَقُوا الصِّرَاطَ\nفَأَنَّىٰ يُبْصِرُونَ",
+          tr: "Dilesek gözlerini silerdik;\nyola koşuşurlardı,\nama nasıl göreceklerdi?",
+          en: "Had We willed, We would have\nblotted their eyes; they would\nrace for the path — how then\nwould they see?",
+        },
+        {
+          ayah: 67,
+          tone: "white",
+          heightLines: 5.56,
+          arScale: 0.86,
+          latScale: 0.52,
+          ar: "وَلَوْ نَشَاءُ لَمَسَخْنَاهُمْ عَلَىٰ مَكَانَتِهِمْ\nفَمَا اسْتَطَاعُوا مُضِيًّا\nوَلَا يَرْجِعُونَ",
+          tr: "Dilesek onları oldukları yerde\ndondururduk; ne ileri\ngidebilir ne dönebilirlerdi.",
+          en: "Had We willed, We would have\nfixed them where they stand:\nunable to go on, unable to return.",
+        },
+      ],
     },
   ],
 
   frames: [
     {
       from: 0,
-      to: 6,
+      // 6, not 5, until 66 ▸ 67 merged into one row — see the fire frame
+      // below.
+      to: 5,
       tone: "outer",
       src: SHEET_FRAME_SVGS.overall,
       pad: 0,
@@ -382,14 +425,16 @@ const SPEC: SheetSpec = {
       w: 1.28,
       h: 0.74,
     },
-    // The fire, and the sealing of the mouths inside it.
+    // The fire, and the sealing of the mouths inside it. `to: 5`, not 6 — 66
+    // and 67 are one row now (see the pair above), so the fire band is six
+    // rows deep, not seven.
     {
       from: 3,
-      to: 6,
+      to: 5,
       tone: "band",
       pad: BLOCK_PAD,
     },
-    // { from: 4, to: 6, tone: "inner" },
+    // { from: 4, to: 5, tone: "inner" },
   ],
 };
 
