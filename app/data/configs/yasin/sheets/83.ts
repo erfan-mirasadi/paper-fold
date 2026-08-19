@@ -24,7 +24,8 @@ const SPEC: SheetSpec = {
     },
   ],
 
-  frames: [{ from: 0, to: 0, tone: "outer" }],
+  // Temporarily hidden: the section SVG that sat behind ayah 83.
+  frames: [],
 };
 
 export const SHEET = buildSheet(SPEC);

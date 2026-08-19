@@ -67,6 +67,7 @@ export const SHEET_COLORS = {
   maroon: { bg: "#F6EDE8", border: "#B0504D", ink: "#A30000" },
   gold: { bg: "#F5EEDC", border: "#D0A24E", ink: "#5A3D12" },
   green: { bg: "#EDF3EA", border: "#6E9464", ink: "#2F5D3A" },
+  greenMuted: { bg: "#E2EBDD", border: "#62875A", ink: "#2F5D3A" },
   blue: { bg: "#EAF1F5", border: "#6E96A8", ink: "#1F3D4A" },
 } as const;
 
