@@ -161,6 +161,37 @@ export interface SheetZoomTuning {
   dy?: number;
 }
 
+/**
+ * ART LAID ON THE BIG PAPER ITSELF, at a rectangle stated in the paper's own
+ * coordinates — x rightwards from the left edge, y downwards from the top as a
+ * negative number, exactly like `SheetPlacement`.
+ *
+ * This is for the decoration that belongs to the ARRANGEMENT rather than to any
+ * one sheet: a frame drawn around a run of sheets to say they are one passage.
+ * A sheet's own art keeps travelling with the sheet (`svgOverlays` on its
+ * config); it is only here that a rectangle may span several of them.
+ *
+ * The art is stretched to (`w`, `h`), so — the rule every frame file in this
+ * project follows — the SVG must be DRAWN at that aspect, or its rim goes
+ * uneven and its corners turn oval.
+ */
+export interface PaperDecoration {
+  /** Path under /public. */
+  src: string;
+  /** Left edge, top edge, and the size the art is stretched to. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** Mirror horizontally — how one wing file can serve both ends of a ribbon. */
+  flip?: boolean;
+  /**
+   * Three.js renderOrder. A sheet's own frames paint at 3, so anything drawn
+   * AROUND a run of sheets wants a lower number or it covers them.
+   */
+  order?: number;
+}
+
 export interface PaperCompositionSpec {
   id: string;
   title: string;
@@ -193,6 +224,13 @@ export interface PaperCompositionSpec {
   foldLines?: number[];
 
   sheets: SheetPlacement[];
+
+  /**
+   * Frames and other art belonging to the arrangement rather than to a sheet.
+   * Painted after every sheet's own overlays are gathered, so `order` is the
+   * only thing that decides what covers what.
+   */
+  decorations?: PaperDecoration[];
 }
 
 export interface ComposedPaper {
@@ -316,6 +354,14 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
   // one ended, which is the normal case for sheets sitting side by side.
   let contentStartY: number | undefined;
   let prevBottom = 0;
+  /**
+   * The frame top of COMPOSED GROUP 0 — the anchor every paper-level decoration
+   * is stated from. `SvgOverlays` places an overlay at `groups[i].frameY +
+   * offsetY`, so a rectangle given in paper coordinates only becomes an offset
+   * once this is known, and it is not known until the first sheet's first group
+   * block has been laid down.
+   */
+  let anchorGroupY: number | undefined;
 
   for (const placement of spec.sheets) {
     const { key, sheet, x: dx, y: dy, scale: rawScale } = placement;
@@ -443,6 +489,7 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       prevBottom = wantedFrameY - frameH;
 
       if (isGroupBlock(block)) {
+        if (anchorGroupY === undefined) anchorGroupY = wantedFrameY;
         groupIndexMap.set(srcGroupIdx, composedGroupCount + srcGroupIdx);
         srcGroupIdx++;
       }
@@ -670,6 +717,24 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
     )) {
       sideInfoByVerse[mapId(Number(verseId))] = entry;
     }
+  }
+
+  // ── The arrangement's own art ───────────────────────────────────────────
+  // Stated as paper rectangles, restated as offsets from the page centre and
+  // from composed group 0's top edge — the same conversion the overview page
+  // does for its panels, and the only anchor a decoration that spans several
+  // sheets can be pinned to.
+  for (const d of spec.decorations ?? []) {
+    svgOverlays.push({
+      src: d.src,
+      anchorGroupIndex: 0,
+      anchorEdge: "top",
+      scaleX: d.flip ? -d.w : d.w,
+      scaleY: d.h,
+      offsetX: d.x + d.w / 2 - pageCenterX,
+      offsetY: d.y - d.h / 2 - (anchorGroupY ?? 0),
+      renderOrder: d.order ?? 3,
+    });
   }
 
   // ── Fold story ──────────────────────────────────────────────────────────

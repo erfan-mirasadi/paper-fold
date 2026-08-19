@@ -27,7 +27,7 @@
  */
 
 import { composePaper } from "../../sheets/paperComposer";
-import type { ComposableSheet } from "../../sheets/paperComposer";
+import type { ComposableSheet, PaperDecoration } from "../../sheets/paperComposer";
 import { layOutGrid, type GridCell } from "./grid";
 
 import { YASIN_36_CONFIG, YASIN_36_TEXT_DATA } from "./sheets/1-12";
@@ -104,7 +104,12 @@ const CELLS: GridCell[] = [
   { at: [3, 9], key: "s6982", sheet: S_69_82, shiftY: 0.1 },
 
   // Row 4 — the closing glorification, alone and centred at the foot.
-  { at: [4, 0], align: "center", key: "s83", sheet: S_83, shiftY: 0.1 },
+  // It sits 0.12 lower than the rest of the arrangement would put it, because
+  // the BODY frame's bottom edge has to pass between it and the 69-82 sheet
+  // (see DECOS): those two were 0.066 apart, and a frame rim plus the air on
+  // either side of it does not fit in that. `PAPER_BOTTOM_MARGIN` gives the
+  // paper the extra length this needs.
+  { at: [4, 0], align: "center", key: "s83", sheet: S_83, shiftY: -0.02 },
 ];
 
 /**
@@ -125,9 +130,22 @@ const { placements, paperWidth, paperHeight } = layOutGrid({
  * Give the atlas a little more horizontal breathing room without stretching
  * any of the authored sheets. The placements move with the new page centre,
  * so the extra paper is shared evenly by both sides.
+ *
+ * It went from 1.1 to 1.14 when the frames arrived: the body frame reaches
+ * further out than any sheet does, and at 1.1 its rim ran within a rounding
+ * error of the paper's right edge.
  */
-const PAPER_WIDTH_SCALE = 1.1;
+const PAPER_WIDTH_SCALE = 1.14;
 const widerPaperWidth = paperWidth * PAPER_WIDTH_SCALE;
+
+/**
+ * Extra paper below the last row. `layOutGrid` ends the page exactly where the
+ * bottom row's sheet ends, and ayah 83 was pushed 0.12 further down to make
+ * room for the body frame's bottom edge — this keeps the blank margin under it
+ * the same as it was before the frames arrived.
+ */
+const PAPER_BOTTOM_MARGIN = 0.15;
+const tallerPaperHeight = paperHeight + PAPER_BOTTOM_MARGIN;
 const horizontalExpansion = (widerPaperWidth - paperWidth) / 2;
 const centeredPlacements = placements.map((placement) => ({
   ...placement,
@@ -150,6 +168,148 @@ const zoomedPlacements = centeredPlacements.map((placement) => ({
   },
 }));
 
+// ---------------------------------------------------------------------------
+// THE FOUR FRAMES
+//
+// The surah, once ayah 12 has been read, is an argument in three moves, and the
+// paper says so with four rectangles: one around the whole body of it, and one
+// around each move inside that.
+//
+//   ┌─ BODY ────────────────────────────────────────────────────────────┐
+//   │  ┌── 2. AÇIKLAMA ───────────┐   ┌── 1. AÇIKLAMA ───────────────┐  │
+//   │  │  41-47 · 33-40           │   │  20-27 · 13-19               │  │
+//   │  │        48-52             │   │        28-32                 │  │
+//   │  └──────────────────────────┘   └──────────────────────────────┘  │
+//   │  ┌── 3. + 4. AÇIKLAMA ─────────────────────────────────────────┐  │
+//   │  │            69-82                    53-68                   │  │
+//   │  └─────────────────────────────────────────────────────────────┘  │
+//   └───────────────────────────────────────────────────────────────────┘
+//
+// Right to left, like the surah: 13 … 32 is twenty ayahs, 33 … 52 is the other
+// twenty, and 53 … 82 is the two fifteens the plan page keeps apart but the
+// atlas draws as one band. The MAIN VERSE (12) and its TWIN (83) are the only
+// two things on the paper left outside — that is the claim, and it is why the
+// body frame's edges are worth the trouble they cost.
+//
+// NO FRAME STATES ITS OWN RECTANGLE. Each one is solved from `DRAWN` below —
+// the extent each sheet's art actually covers, which is NOT its page rectangle:
+// a sheet carries a blank margin of its own, and a frame drawn on that margin
+// reads as slack. A group frame is the union of the sheets it wraps grown by
+// `AIR`; the body frame is the union of the three group frames grown by
+// `BODY_AIR`.
+//
+// MOVING A SHEET INVALIDATES `DRAWN`. Change a `shiftX` / `shiftY` above and
+// its row has to be re-measured, and any SVG under /public/yasin-atlas whose
+// rectangle changed shape has to be redrawn — every frame in this project is
+// drawn at the aspect it is displayed at, so a frame that changes aspect and
+// keeps its old file comes out with oval corners and an uneven rim.
+// ---------------------------------------------------------------------------
+
+/** The air a frame keeps between its rim and whatever it wraps. */
+const AIR = 0.055;
+/** The air the body frame keeps outside the three frames inside it. */
+const BODY_AIR = 0.05;
+
+/** A drawn extent, as `{ left, right, top, bottom }` in paper coordinates. */
+interface Extent {
+  l: number;
+  r: number;
+  t: number;
+  b: number;
+}
+
+const round = (v: number) => Math.round(v * 10000) / 10000;
+
+/** The smallest extent holding all of these. */
+const union = (...es: Extent[]): Extent => ({
+  l: Math.min(...es.map((e) => e.l)),
+  r: Math.max(...es.map((e) => e.r)),
+  t: Math.max(...es.map((e) => e.t)),
+  b: Math.min(...es.map((e) => e.b)),
+});
+
+/**
+ * That extent, opened by `air` on all four sides, as a decoration rectangle on
+ * the widened paper. Extents that already carry the expansion (a frame wrapping
+ * other frames) pass `centred: true` so it is not added twice.
+ */
+const frame = (
+  src: string,
+  e: Extent,
+  air: number,
+  order: number,
+  centred = false,
+): PaperDecoration => ({
+  src,
+  x: round(e.l - air + (centred ? 0 : horizontalExpansion)),
+  y: round(e.t + air),
+  w: round(e.r - e.l + air * 2),
+  h: round(e.t - e.b + air * 2),
+  order,
+});
+
+/**
+ * What each sheet actually paints — see the table above. `l` and `r` are in the
+ * GRID's own coordinates, the ones `layOutGrid` hands back, so that widening
+ * the paper moves the frames with the sheets instead of leaving them behind:
+ * `frame` adds `horizontalExpansion` the same way `centeredPlacements` does.
+ */
+const DRAWN: Record<string, Extent> = {
+  s1319: { l: 5.0965, r: 6.2735, t: -2.7927, b: -4.4097 },
+  s2027: { l: 3.41, r: 4.62, t: -2.8155, b: -4.4325 },
+  s2832: { l: 4.059, r: 5.225, t: -4.5179, b: -5.6729 },
+  s3340: { l: 1.64, r: 2.85, t: -2.788, b: -4.4105 },
+  s4147: { l: 0.002, r: 1.212, t: -2.8145, b: -4.3655 },
+  s4852: { l: 0.671, r: 2.453, t: -4.6658, b: -5.6888 },
+  s5368: { l: 3.1515, r: 6.0225, t: -5.845, b: -8.111 },
+  s6982: { l: 0.429, r: 2.805, t: -5.8749, b: -8.2234 },
+};
+
+/** 1. açıklama — ayahs 13 … 32, on the right, where the reading starts. */
+const ACIK_1 = frame(
+  "/yasin-atlas/acik-1.svg",
+  union(DRAWN.s1319, DRAWN.s2027, DRAWN.s2832),
+  AIR,
+  2,
+);
+/** 2. açıklama — ayahs 33 … 52, the answering twenty, on the left. */
+const ACIK_2 = frame(
+  "/yasin-atlas/acik-2.svg",
+  union(DRAWN.s3340, DRAWN.s4147, DRAWN.s4852),
+  AIR,
+  2,
+);
+/** 3. and 4. açıklama — ayahs 53 … 82, fifteen and fifteen, in one band. */
+const ACIK_34 = frame(
+  "/yasin-atlas/acik-34.svg",
+  union(DRAWN.s5368, DRAWN.s6982),
+  AIR,
+  2,
+);
+
+/** The extent a frame rectangle covers, so the body frame can wrap the three. */
+const extentOf = (d: PaperDecoration): Extent => ({
+  l: d.x,
+  r: d.x + d.w,
+  t: d.y,
+  b: d.y - d.h,
+});
+
+const DECOS: PaperDecoration[] = [
+  // The body of the surah, painted first and under everything: the three
+  // frames inside it and every sheet's own art sit on top of it.
+  frame(
+    "/yasin-atlas/body.svg",
+    union(extentOf(ACIK_1), extentOf(ACIK_2), extentOf(ACIK_34)),
+    BODY_AIR,
+    1,
+    true,
+  ),
+  ACIK_1,
+  ACIK_2,
+  ACIK_34,
+];
+
 /**
  * How much of the screen the paper fills, 0 → 1. This is the knob that makes
  * the paper look bigger or smaller — NOT `SCALE`, which grows the paper and
@@ -171,7 +331,7 @@ const FILL = 0.92;
  * and width only takes over if the paper is wider than it is tall.
  */
 const CAMERA_DISTANCE_SCALE =
-  Math.max(widerPaperWidth / 3.38, paperHeight * 0.45) / FILL;
+  Math.max(widerPaperWidth / 3.38, tallerPaperHeight * 0.45) / FILL;
 
 export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
   composePaper({
@@ -181,10 +341,11 @@ export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
     heroSubtitle: "tek levha",
 
     paperWidth: widerPaperWidth,
-    paperHeight,
+    paperHeight: tallerPaperHeight,
     cameraDistanceScale: CAMERA_DISTANCE_SCALE,
 
     scriptInfo: { title: "36 Yâ-Sîn", sayfa: 440, juz: 22, hizb: 44 },
 
     sheets: zoomedPlacements,
+    decorations: DECOS,
   });

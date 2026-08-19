@@ -1,0 +1,24 @@
+<svg width="982" height="1000" viewBox="0 0 982 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — TEK LEVHA: 2. AÇIKLAMA BÖL. — ayahs 33 … 52, the other
+     twenty, over the sheets 33-40, 41-47 and 48-52. Maroon, because it is the
+     twin of acik-1.svg — see that file's header for why the ink matters. Not
+     the same file as acik-1 because it is not the same rectangle, and a frame
+     in this project is drawn at its own aspect or not at all
+
+     DRAWN AT THE ASPECT IT IS DISPLAYED AT, the rule every frame file in this
+     project follows — an SVG plane here is stretched to (w, h) world units, so
+     a shared square file would arrive with oval corners and a rim thicker
+     across the top than down the sides.
+
+       world 2.9580 x 3.0108  ->  0.982
+       viewBox 982 x 1000  ->  0.982
+     one SVG unit = 3.011e-03 world units on both axes, so the 0.012
+     rim and the 0.09 corner convert with the same factor either way.
+
+     Change the rectangle in app/data/configs/yasin/index.ts and this file has
+     to be redrawn to match. -->
+<rect x="2.0" y="2.0" width="978.0" height="996.0"
+      rx="29.9" ry="29.9"
+      fill="#FBFAF4" fill-opacity="0.35"
+      stroke="#B0504D" stroke-width="4.0"/>
+</svg>

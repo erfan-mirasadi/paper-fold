@@ -1,0 +1,27 @@
+<svg width="994" height="1000" viewBox="0 0 994 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — TEK LEVHA: 1. AÇIKLAMA BÖL. — ayahs 13 … 32, twenty of
+     them, over the sheets 13-19, 20-27 and 28-32.
+
+     THE RIM IS MAROON, NOT GOLD, and it is the same ink the plan page paints
+     its two twenty-ayah panels with (/yasin-overview/panel-20.svg,
+     SHEET_COLORS.maroon.border). A reader who has seen the plan has to be able
+     to find the same two blocks here without reading a word: maroon for the
+     pair of twenties, green for the fifteens. See acik-34.svg
+
+     DRAWN AT THE ASPECT IT IS DISPLAYED AT, the rule every frame file in this
+     project follows — an SVG plane here is stretched to (w, h) world units, so
+     a shared square file would arrive with oval corners and a rim thicker
+     across the top than down the sides.
+
+       world 2.9735 x 2.9902  ->  0.994
+       viewBox 994 x 1000  ->  0.994
+     one SVG unit = 2.990e-03 world units on both axes, so the 0.012
+     rim and the 0.09 corner convert with the same factor either way.
+
+     Change the rectangle in app/data/configs/yasin/index.ts and this file has
+     to be redrawn to match. -->
+<rect x="2.0" y="2.0" width="990.0" height="996.0"
+      rx="30.1" ry="30.1"
+      fill="#FBFAF4" fill-opacity="0.35"
+      stroke="#B0504D" stroke-width="4.0"/>
+</svg>

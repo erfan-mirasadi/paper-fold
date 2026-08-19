@@ -6,7 +6,7 @@
        viewBox 1705 x 1000  ->  1.705
      one SVG unit = 5.690e-4 world units on both axes. -->
 <defs>
-<linearGradient id="yasin4147F4Gold" x1="0" y1="500" x2="1705" y2="500" gradientUnits="userSpaceOnUse">
+<linearGradient id="yasin4147F3Gold" x1="0" y1="500" x2="1705" y2="500" gradientUnits="userSpaceOnUse">
 <stop stop-color="#968428"/>
 <stop offset="0.503741" stop-color="#CDC577"/>
 <stop offset="1" stop-color="#968428"/>
@@ -15,5 +15,5 @@
 <rect x="7.5" y="7.5" width="1690" height="985"
       rx="90.0" ry="90.0"
       fill="#E1E3F3" fill-opacity="0.85"
-      stroke="url(#yasin4147F4Gold)" stroke-width="15"/>
+      stroke="url(#yasin4147F3Gold)" stroke-width="15"/>
 </svg>

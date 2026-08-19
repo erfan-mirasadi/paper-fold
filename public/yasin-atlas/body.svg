@@ -1,0 +1,30 @@
+<svg width="1148" height="1000" viewBox="0 0 1148 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN — TEK LEVHA: the body of the surah. Everything between the
+     main verse (12) and its twin (83) sits inside this one frame; those two
+     verses are deliberately outside it, which is the whole claim the page
+     makes. Gold rim, because on every Yâsîn page the OUTERMOST frame is gold
+
+     DRAWN AT THE ASPECT IT IS DISPLAYED AT, the rule every frame file in this
+     project follows — an SVG plane here is stretched to (w, h) world units, so
+     a shared square file would arrive with oval corners and a rim thicker
+     across the top than down the sides.
+
+       world 6.4815 x 5.6454  ->  1.148
+       viewBox 1148 x 1000  ->  1.148
+     one SVG unit = 5.645e-03 world units on both axes, so the 0.016
+     rim and the 0.11 corner convert with the same factor either way.
+
+     Change the rectangle in app/data/configs/yasin/index.ts and this file has
+     to be redrawn to match. -->
+<defs>
+<linearGradient id="atlasBodyGold" x1="0" y1="500.0" x2="1148" y2="500.0" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="1.4" y="1.4" width="1145.2" height="997.2"
+      rx="19.5" ry="19.5"
+      fill="#F5EEDC" fill-opacity="0.25"
+      stroke="url(#atlasBodyGold)" stroke-width="2.8"/>
+</svg>

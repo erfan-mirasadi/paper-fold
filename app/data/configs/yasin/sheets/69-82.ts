@@ -1,11 +1,12 @@
 import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
-// 69-82 — not poetry, the cattle, and the bones brought back. Copied off the
-// handwritten page, which lays it out as one band over two columns of six:
+// 68-82 — long life, not poetry, the cattle, and the bones brought back.
+// Ayah 68 stands above the first band; the rest is laid out over two columns:
 //
-//   ╭────────────── long life + not poetry (68-70) ─────────────╮
-//   │  68                                              │
+//                         68
+//
+//   ╭───────────────── not poetry (69-70) ─────────────────╮
 //   │  69                                              │
 //   │  70                                              │
 //   ╰──────────────────────────────────────────────────╯
@@ -53,7 +54,7 @@ const SPEC: SheetSpec = {
   capsuleWidthScale: 0.88,
 
   rows: [
-    // Ayah 68 leads into 69-70 and now lives only on this sheet.
+    // Ayah 68 leads into 69-70 but stands outside their inner frame.
     {
       ayah: 68,
       tone: "gold",
@@ -242,16 +243,29 @@ const SPEC: SheetSpec = {
       pad: 0,
       w: 2.16,
       h: 2.135,
-      offsetY: -0.94,
+      // Block 0 moves up by another 0.02 below; compensate here so the outer
+      // frame itself stays put.
+      offsetY: -1,
     },
+    // Preserve 68's original nesting depth (and therefore its exact capsule
+    // width) without drawing a frame around it.
     {
       from: 0,
+      to: 0,
+      tone: "none",
+      pad: 0,
+    },
+    {
+      from: 1,
       to: 2,
       tone: "inner",
       src: SHEET_FRAME_SVGS.inner,
-      pad: BLOCK_PAD,
-      h: 0.8,
-      offsetY: -0.26,
+      pad: 0.01,
+      // The shared SVG leaves roughly 10% transparent space above its painted
+      // rim, so give its plane extra height and lift its centre enough for the
+      // visible frame to fully enclose both capsules.
+      h: 0.55,
+      offsetY: -0.17,
     },
     // The two columns of six. Both are drawn the same, as on the sheet, and a
     // one-column frame takes the row's own band, so they come out one size.
@@ -274,14 +288,13 @@ const SPEC: SheetSpec = {
 
 export const SHEET = buildSheet(SPEC);
 
-// Move only the complete 68–70 cluster (including its frame, which anchors to
-// block 0) down by 0.04. The engine isolates the first block's nudge, so block
-// 1 starts the same shift for the rest of this cluster; block 3 cancels it
-// before the two lower columns begin, leaving 71–82 exactly where they were.
+// Keep 68 another 0.02 above the stack's natural top.
+// Block 3 cancels the 0.022 of extra structural clearance before the lower
+// columns so 71–82 stay exactly where they were.
 const sheetBlocks = SHEET.config.blocks;
 if (!sheetBlocks) {
   throw new Error("yasin6982: buildSheet did not emit layout blocks");
 }
-sheetBlocks[0].verticalNudge = 0.04;
-sheetBlocks[1].verticalNudge = 0.04;
-sheetBlocks[3].verticalNudge = -0.04;
+sheetBlocks[0].verticalNudge = -0.05;
+sheetBlocks[1].verticalNudge = 0;
+sheetBlocks[3].verticalNudge = -0.03;
