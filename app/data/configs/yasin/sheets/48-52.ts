@@ -125,3 +125,56 @@ const SPEC: SheetSpec = {
 };
 
 export const SHEET = buildSheet(SPEC);
+
+// Reuse the project's existing curved arrow four times around the 49-52
+// answer frame, following the supplied markup: top, left, mirrored right and
+// bottom. They share the answer frame's anchor so all four stay registered to
+// the group in every language.
+SHEET.config.svgOverlays?.push(
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 1,
+    anchorEdge: "top",
+    scaleX: 0.1,
+    scaleY: 0.1,
+    offsetY: 0.02,
+    rotationZ: -Math.PI / 2.8,
+    renderOrder: 8,
+    customSectionId: "yasin4852_f2",
+  },
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 1,
+    anchorEdge: "top",
+    scaleX: 0.1,
+    scaleY: 0.1,
+    offsetX: -0.7,
+    offsetY: -0.22,
+    rotationZ: Math.PI * 0.1,
+    renderOrder: 8,
+    customSectionId: "yasin4852_f2",
+  },
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 1,
+    anchorEdge: "top",
+    scaleX: -0.1,
+    scaleY: 0.1,
+    offsetX: 0.7,
+    offsetY: -0.22,
+    rotationZ: Math.PI * 0.01,
+    renderOrder: 8,
+    customSectionId: "yasin4852_f2",
+  },
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 1,
+    anchorEdge: "top",
+    scaleX: -0.1,
+    scaleY: 0.1,
+    offsetY: -0.46,
+    rotationZ: -Math.PI / 1.5,
+    renderOrder: 8,
+    customSectionId: "yasin4852_f2",
+  },
+);

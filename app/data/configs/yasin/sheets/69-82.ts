@@ -212,7 +212,7 @@ const SPEC: SheetSpec = {
         },
         {
           ayah: 81,
-          tone: "blue",
+          tone: "green",
           heightLines: 3,
           arScale: 0.75,
           latScale: 0.75,
@@ -298,3 +298,12 @@ if (!sheetBlocks) {
 sheetBlocks[0].verticalNudge = -0.05;
 sheetBlocks[1].verticalNudge = 0;
 sheetBlocks[3].verticalNudge = -0.03;
+
+// Keep 82's gold capsule, but recolor its text in every language.
+const verse82Override = Object.values(SHEET.config.verseOverrides ?? {}).find(
+  (override) => override.displayNumber === 82,
+);
+if (!verse82Override) {
+  throw new Error("yasin6982: verse override for ayah 82 was not emitted");
+}
+verse82Override.textColor = "#A30000";

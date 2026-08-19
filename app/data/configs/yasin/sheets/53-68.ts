@@ -14,9 +14,8 @@ import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 //   ╰──────────────────────────────────────────────────────────────────╯
 //   ╭──── the guilty (59-62) ────╮ ╭──── the Garden (55-58) ─────────╮
 //   │  59                        │ │       56  ──  55                │
-//   │  60                        │ │                                 │
-//   │  61                        │ │       58  ──  57                │
-//   │  62                        │ │                                 │
+//   │      61  ──  60            │ │                                 │
+//   │  62                        │ │       58  ──  57                │
 //   ╰───────────────────────────╯ ╰─────────────────────────────────╯
 //   ╭──────────────────────── the fire (63-67) ────────────────────────╮
 //   │       64  ──  63                                                 │
@@ -26,18 +25,24 @@ import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 //   ╰──╰─────────────────────────────────────────────────────────────╯─╯
 //
 // TWO SHAPES OF GROUP, and they mean different things. Capsules SIDE BY SIDE
-// are one moment said twice — 55 with 56, 57 with 58, 63 with 64 — and the
-// connector bar between them says so. Capsules STACKED are a sequence: the
-// guilty are told to stand apart (59), reminded of the covenant (60-61), and
-// then charged with it (62), one after the other.
+// are one moment said twice — 55 with 56, 57 with 58, 63 with 64, and 60 with
+// 61 — and the connector bar between them says so. Capsules STACKED are a
+// sequence: the guilty are told to stand apart (59), reminded of the covenant
+// (60-61, one sentence in two halves), and then charged with it (62).
+//
+// SO THE LEFT COLUMN IS A SEQUENCE OF THREE, NOT FOUR. 60 and 61 are the two
+// halves of ONE covenant — "do not serve Satan" answered by "serve Me" — and
+// stacking them read as two more steps of the sequence. Bridged, they read as
+// the single step they are, and the charge above and the verdict below stand
+// clear of them: that is what the wider `gapAfter` on either side is for.
 //
 // THE TWO HALVES OF THAT BAND ARE THE SAME BOX. A whole-column frame takes the
 // row's own band, so they cannot come out different heights — but a box the
 // same size as its twin and half as full is worse than no twin at all, so the
-// two are filled to match as well: FOUR single-line bars on the left against
-// TWO rows of four-line capsules on the right, which stack to the same height.
-// Every capsule in a column is the height of every other one in it. Change a
-// line count on either side and the empty half comes straight back.
+// two are filled to match as well. The left column now stacks to
+// 0.1425 + 0.022 + 0.293 + 0.022 + 0.1425 = 0.622; the Garden's own two rows
+// carry 0.1 of air between them so they come to the same number. CHANGE ONE
+// AND THE OTHER HAS TO FOLLOW, or the twins stop being twins.
 // ---------------------------------------------------------------------------
 
 /**
@@ -60,11 +65,57 @@ const SPEC: SheetSpec = {
   paperWidth: 2.9,
   capsuleWidthScale: 0.88,
 
+  // ── THE GUILTY STACK, SAID WITH AN ARROW ───────────────────────────────
+  // 59 ▸ 62: they are told to stand apart, and then charged with exactly that
+  // — the covenant (60-61, bridged between them) is what they are charged
+  // WITH, not another step of the sequence. Same idiom as every other jump in
+  // this surah (1-12's ring, 20-27's 21 ▸ 26): a bracket the frame itself
+  // cannot draw, because 59 and 62 are two ends of the SAME frame, not two of
+  // them.
+  //
+  // `pair` is BLOCK indices — this column emits 59, the 60▸61 pair, then 62:
+  //   ...  59→4   (60,61)→5   62→6  ...
+  // Print them, do not count them; a row added above shifts every index.
+  //
+  // `curveSide: "right"` — NOT this surah's usual "left" — because 59-62 are
+  // already the LEFT column of the split row: bowing "left" would push the
+  // ribbon into the sliver of margin between the rose frame and the outer
+  // one (0.025 world units, barely a rule's width). "right" bows it into the
+  // gutter the guilty stack and the Garden already keep between them.
+  curveColors: [
+    {
+      pair: [4, 6],
+      // SHEET_COLORS.maroon — the ink 59 and 62 are already painted in.
+      color: "#B0504D",
+      fillColor: "#F6EDE8",
+      curveSide: "left",
+      bowGap: 0.18,
+      innerBowGap: 0.15,
+      inwardOffset: 0,
+      tipThickness: 0.07,
+      topAnchorYOffset: -0.01,
+      bottomAnchorYOffset: 0.01,
+      topAnchorXOffset: 0.04,
+      bottomAnchorXOffset: 0.12,
+      lineWidthWorld: 0.003,
+      opacity: 0.6,
+      shape: "arrow",
+      arrowHeadLength: 0.08,
+      arrowHeadWidth: 0.055,
+      twist: true,
+      twistT: 0.5,
+    },
+    // The CENTER colour — see SheetSpec.curveColors. MUST stay transparent:
+    // every split-row column on this sheet is narrow enough to be
+    // `isPushedIn`, and a visible center colour would bracket all of them.
+    { color: "transparent", fillColor: "transparent" },
+  ],
+
   rows: [
     // ── The shout, and the verdict that follows it ────────────────────────
     {
       ayah: 53,
-      tone: "white",
+      tone: "blue",
       heightLines: 1.75,
       arScale: 0.9,
       latScale: 0.9,
@@ -95,7 +146,10 @@ const SPEC: SheetSpec = {
         {
           width: 0.93,
           columnGap: 0.085,
-          gapAfter: 0.06,
+          // 0.06 until 60 and 61 were bridged. The two halves of this band are
+          // twins and have to STAY twins — see the header — so the air the
+          // guilty stack gained around its new pair is given back here.
+          gapAfter: 0.1,
           offsetY: 0,
           pair: [
             {
@@ -157,7 +211,7 @@ const SPEC: SheetSpec = {
           ayah: 59,
           tone: "maroon",
           heightLines: 1.5,
-          gapAfter: 0.004,
+          gapAfter: 0.022,
           expandW: 0.13,
           arScale: 0.84,
           latScale: 0.89,
@@ -165,29 +219,52 @@ const SPEC: SheetSpec = {
           tr: "“Ey suçlular, bugün şöyle ayrılın!”",
           en: "“Stand apart today, you guilty ones!”",
         },
+        // THE COVENANT, BRIDGED. 60 and 61 are one sentence with two halves —
+        // "do not serve Satan" and "serve Me" — so they sit side by side with
+        // the connector bar between them, the same shape the Garden's pairs
+        // take, rather than stacked as two more steps of the sequence. The
+        // charge (59) and the verdict (62) stay stacked around them; that is
+        // what the wider `gapAfter` on either side of this pair is for.
+        //
+        // `width` is 1.137 of the column's natural slot, not 1: the two halves
+        // together have to span what a single capsule here spans once its
+        // `expandW: 0.13` is added, or the pair would sit narrower than the
+        // bars above and below it and the stack would step in and out.
         {
-          ayah: 60,
-          tone: "white",
-          heightLines: 1.5,
-          gapAfter: 0.004,
-          expandW: 0.13,
-          arScale: 0.7,
-          latScale: 0.58,
-          ar: "أَلَمْ أَعْهَدْ إِلَيْكُمْ يَا بَنِي آدَمَ أَن لَّا تَعْبُدُوا الشَّيْطَانَ إِنَّهُ لَكُمْ عَدُوٌّ مُّبِينٌ",
-          tr: "“Ey Âdemoğulları, şeytana kulluk etmeyin diye size ahit vermedim mi?”",
-          en: "“Children of Adam, did I not charge you not to serve Satan?”",
-        },
-        {
-          ayah: 61,
-          tone: "white",
-          heightLines: 1.5,
-          gapAfter: 0.004,
-          expandW: 0.13,
-          arScale: 0.84,
-          latScale: 0.68,
-          ar: "وَأَنِ اعْبُدُونِي هَٰذَا صِرَاطٌ مُّسْتَقِيمٌ",
-          tr: "“Bana kulluk edin; dosdoğru yol budur.”",
-          en: "and that you serve Me? This is a straight path.”",
+          width: 1.137,
+          // The pair's OUTER edges are fixed by `width` — they line up with the
+          // bars above and below — so this gap is the only thing that decides
+          // how wide the two halves come out. It is deliberately tighter than
+          // the Garden's 0.085: these two are one sentence, not two moments,
+          // and the air between them was reading as a wall.
+          columnGap: 0.028,
+          gapAfter: 0.022,
+          pair: [
+            {
+              ayah: 60,
+              tone: "white",
+              heightLines: 5,
+              arScale: 0.9,
+              latScale: 0.48,
+              // THREE LINES, BROKEN WHERE THE SENTENCE BREAKS: the vocative,
+              // the prohibition, the reason. Half a column is too narrow to
+              // let the wrapper choose, and a wrapped line here lands mid
+              // phrase.
+              ar: "أَلَمْ أَعْهَدْ إِلَيْكُمْ يَا بَنِي آدَمَ\nأَن لَّا تَعْبُدُوا الشَّيْطَانَ\nإِنَّهُ لَكُمْ عَدُوٌّ مُّبِينٌ",
+              tr: "“Ey Âdemoğulları, şeytana\nkulluk etmeyin diye size\nahit vermedim mi?”",
+              en: "“Children of Adam, did I not\ncharge you not to serve\nSatan — he is a clear enemy?”",
+            },
+            {
+              ayah: 61,
+              tone: "white",
+              heightLines: 5,
+              arScale: 1.05,
+              latScale: 0.6,
+              ar: "وَأَنِ اعْبُدُونِي\nهَٰذَا صِرَاطٌ مُّسْتَقِيمٌ",
+              tr: "“Bana kulluk edin;\ndosdoğru yol budur.”",
+              en: "“and that you serve Me?\nThis is a straight path.”",
+            },
+          ],
         },
         {
           ayah: 62,
@@ -270,7 +347,8 @@ const SPEC: SheetSpec = {
       src: SHEET_FRAME_SVGS.overall,
       pad: 0,
       w: 2.3,
-      h: 2.06,
+      // 2.06 until the covenant pair made the middle band 0.04 taller.
+      h: 2.1,
     },
     {
       from: 0,
@@ -291,7 +369,9 @@ const SPEC: SheetSpec = {
       tone: "band",
       pad: BLOCK_PAD,
       w: 1.28,
-      h: 0.7,
+      // 0.7 until the covenant pair made this band taller; the number is the
+      // band plus the same clearance the twins were drawn with before.
+      h: 0.74,
     },
     {
       from: 2,
@@ -300,7 +380,7 @@ const SPEC: SheetSpec = {
       tone: "rose",
       pad: BLOCK_PAD,
       w: 1.28,
-      h: 0.7,
+      h: 0.74,
     },
     // The fire, and the sealing of the mouths inside it.
     {
