@@ -6,12 +6,17 @@ import { useFoldStore } from "../../canvas/orchestrator/ScrollManager";
 import { useDragState, resetAllDrags } from "../../../utils/dragEngine";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { OverlayButton } from "./OverlayButton";
+import { useHasFoldStory } from "../../../hooks/useHasFoldStory";
 
 export function NavigationOverlay() {
   const triggerTransition = useFoldStore((s) => s.triggerTransition);
   const isTransitioning = useFoldStore((s) => s.isTransitioning);
   const hasDragged = useDragState((s) => s.hasDragged);
   const isAllSectionsMode = useElevatedStore((s) => s.isAllSectionsMode);
+  // Aç/Katla only means something on a paper that folds. A flat one (a
+  // composed atlas, or a sheet whose creased step is commented out) has one
+  // pose, so the button would toggle between it and itself.
+  const hasFoldStory = useHasFoldStory();
 
   const isEndStage = useFoldStore((s) => s.currentOffset < 0.5);
 
@@ -118,7 +123,7 @@ export function NavigationOverlay() {
       animate="visible"
       className="pointer-events-auto flex flex-row-reverse gap-2 items-center"
     >
-      {!isAllSectionsMode && (
+      {hasFoldStory && !isAllSectionsMode && (
         <NavButton
           onClick={handleSmartTransition}
           icon={activeIcon}

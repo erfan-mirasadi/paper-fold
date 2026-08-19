@@ -546,7 +546,10 @@ export const SinglePaper: FC<SinglePaperProps> = ({
         />
       ))}
       {!runtime.config.features.hideBismillah3D && (
-        <BismillahText3D surfaceZ={PAGE_DEPTH / 2} />
+        <BismillahText3D
+          surfaceZ={PAGE_DEPTH / 2}
+          scale={runtime.config.features.bismillah3DScale}
+        />
       )}
     </group>
   );

@@ -3,7 +3,7 @@
 import type Lenis from "lenis";
 import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
-import { getOffsetForId } from "../3d-scene/FoldStory";
+import { getOffsetForId, hasFoldMotion } from "../3d-scene/FoldStory";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 
 import { usePopUpStore } from "../../../stores/usePopUpStore";
@@ -23,6 +23,16 @@ const easeInOutCubic = (t: number): number => {
 };
 
 const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1);
+
+/**
+ * Where a story's fold offset starts — and, when the paper has no folds at
+ * all, where it stays for good. Such a page is already open, and every "is the
+ * paper still folded?" gate in the app reads `currentOffset < 0.98`, so it has
+ * to sit at the END of its (empty) timeline: at 0 the atlas would keep its
+ * elevated sections, pop-ups and verse drag switched off forever.
+ */
+const startOffsetFor = (config: any): number =>
+  hasFoldMotion(config.animations.foldSteps) ? 0 : 1;
 
 // Configuration is now read dynamically from ALAK_LAYOUT_CONFIG (or active Surah config) via runtime.
 
@@ -62,7 +72,7 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
   targetStageId: null,
   transitionToken: 0,
   isTransitioning: false,
-  currentOffset: 0,
+  currentOffset: startOffsetFor(getActiveStoryConfig()),
   rawOffset: 0,
   isIntroActive: getActiveStoryConfig().features.hasIntro,
   introProgress: getActiveStoryConfig().features.hasIntro ? 0 : 1,
@@ -94,7 +104,7 @@ export const useFoldStore = create<FoldStoreState>((set) => ({
       introHandoffProgress: config.features.hasIntro ? 0 : 1,
       ambientProgress: config.features.hasIntro ? 0 : 1,
       barrierProgress: 0,
-      currentOffset: 0,
+      currentOffset: startOffsetFor(config),
       rawOffset: 0,
       targetStageId: null,
       isTransitioning: false,
@@ -154,8 +164,12 @@ export function ScrollManager() {
     useFoldStore.getState().resetForStory(runtime.config);
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
-      // Force store to 0 immediately so we don't render 1 frame with the old scroll position.
-      useFoldStore.setState({ currentOffset: 0, rawOffset: 0 });
+      // Force the offset to the new story's start immediately so we don't
+      // render 1 frame with the old scroll position.
+      useFoldStore.setState({
+        currentOffset: startOffsetFor(runtime.config),
+        rawOffset: 0,
+      });
     }
   }, [runtime.config, lenis]);
 
@@ -231,8 +245,12 @@ export function ScrollManager() {
         ambientProgress = 1;
         handoffProgress = 1;
       }
-      // getStoryOffsetForRaw already handles hasIntro internally
-      const storyOffset = getStoryOffsetForRaw(rawOffset, runtime.config);
+      // getStoryOffsetForRaw already handles hasIntro internally. A page with
+      // no folds has no scroll length either (SurahViewer drops the spacer),
+      // but a transient layout limit must never drag it back off its open pose.
+      const storyOffset = hasFoldMotion(runtime.config.animations.foldSteps)
+        ? getStoryOffsetForRaw(rawOffset, runtime.config)
+        : 1;
 
       let scrollAmbientMediaId: string | null = null;
       if (ambientProgress >= 0 && handoffProgress === 0) {

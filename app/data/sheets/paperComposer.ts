@@ -200,10 +200,21 @@ export interface PaperCompositionSpec {
 
   paperWidth: number;
   paperHeight: number;
+  /** Vertical paper offset in scene space. Negative values move it down. */
+  sceneCenterYOffset?: number;
   /** Outer margin of the layout section. Defaults to 0.2, as on the sheets. */
   padding?: number;
   /** Scroll length of the fold story. Defaults to 3. */
   scrollPages?: number;
+  /**
+   * Whether the shared 3D bismillah is hidden at the top of the composed
+   * paper. Defaults to true because most compositions already include their
+   * own heading; set to false when the composition should match a regular
+   * surah paper.
+   */
+  hideBismillah3D?: boolean;
+  /** Visual scale of the 3D bismillah when it is shown. Defaults to 1. */
+  bismillah3DScale?: number;
   /**
    * How much further back the camera sits than on a normal 1.54-wide page.
    * A big paper needs it: the camera is otherwise fixed (see cameraConfig).
@@ -770,7 +781,8 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       // Page-wide, with every verse opting back in through `showNumber` —
       // see the verse-override bake above.
       hideVerseNumbers: true,
-      hideBismillah3D: true,
+      hideBismillah3D: spec.hideBismillah3D ?? true,
+      bismillah3DScale: spec.bismillah3DScale,
       // A composed paper is the only kind that carries a dozen sheets at once,
       // and the only kind a single full-resolution capture cannot serve. See
       // `SurahFeatures.progressivePageTexture` / `PageTextureLod`.
@@ -780,7 +792,7 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
     dimensions: {
       paperWidth: spec.paperWidth,
       paperHeight: spec.paperHeight,
-      sceneCenterYOffset: 0,
+      sceneCenterYOffset: spec.sceneCenterYOffset ?? 0,
       padding,
       scrollPages: spec.scrollPages ?? 3,
       // Load-bearing: every `xOffset` above was solved against this exact page

@@ -14,6 +14,7 @@ const FRONT_CLEARANCE = 0.016;
 
 interface BismillahText3DProps {
   surfaceZ: number;
+  scale?: number;
 }
 
 // ─── Font tracking — mirrors CanvasText's fontsLoadedKey pattern ─────────────
@@ -111,7 +112,10 @@ function createDepthCanvasTexture(
   return tex;
 }
 
-export function BismillahText3D({ surfaceZ }: BismillahText3DProps) {
+export function BismillahText3D({
+  surfaceZ,
+  scale = 1,
+}: BismillahText3DProps) {
   // The render-order shuffle only matters when sections physically lift off
   // the paper (all-sections mode / intro). A plain paper click just zooms the
   // camera and leaves the paper flat, so keep the default ordering there.
@@ -189,6 +193,7 @@ export function BismillahText3D({ surfaceZ }: BismillahText3DProps) {
 
   return (
     <group
+      scale={scale}
       position={[
         0,
         TOP_EDGE_OFFSET + MANUAL_DOWN_SHIFT,

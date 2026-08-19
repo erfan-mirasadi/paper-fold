@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useFoldStore } from "@/app/_components/canvas/orchestrator/ScrollManager";
 import { useElevatedStore } from "@/app/stores/useElevatedStore";
 import { usePopUpStore } from "@/app/stores/usePopUpStore";
+import { useHasFoldStory } from "@/app/hooks/useHasFoldStory";
 
 export const ScrollHintOverlay: React.FC = () => {
   const isIntroActive = useFoldStore((s) => s.isIntroActive);
@@ -15,6 +16,9 @@ export const ScrollHintOverlay: React.FC = () => {
   const isPopUpActive = usePopUpStore(
     (s) => s.popUpAllOpen || s.popUpGroups.some((g) => g.isOpen),
   );
+  // A paper with no folds has no scroll length at all, so "Aşağı kaydır"
+  // would be pointing at nothing.
+  const hasFoldStory = useHasFoldStory();
 
   // Track whether the page actually has scrollable content (i.e. content taller than viewport).
   // On short/small devices the paper already fits on screen and the hint is misleading.
@@ -39,6 +43,7 @@ export const ScrollHintOverlay: React.FC = () => {
   // Keep the hint available through the final part of the story, then hide it
   // during the last 2% so it does not overlap the ending UI.
   const isFoldStory =
+    hasFoldStory &&
     !isIntroActive &&
     currentOffset < 0.85 &&
     currentOffset >= 0 &&

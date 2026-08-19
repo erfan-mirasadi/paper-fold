@@ -27,6 +27,11 @@ export interface SurahFeatures {
    */
   hideBismillah3D?: boolean;
   /**
+   * Visual scale of the floating 3D bismillah. Large composed papers are
+   * viewed from farther away and can opt into a larger heading.
+   */
+  bismillah3DScale?: number;
+  /**
    * Draw the page's texture in stages instead of all at once — see
    * `PageTextureLod`. For a paper that carries MANY SHEETS: one buffer big
    * enough for all of them at reading resolution is the slowest thing on the

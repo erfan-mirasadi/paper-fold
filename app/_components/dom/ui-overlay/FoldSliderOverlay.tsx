@@ -11,6 +11,7 @@ import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useSurahLayoutRuntime } from "@/app/hooks/useSurahLayoutRuntime";
 import { useLenis } from "@/app/_components/dom/LenisProvider";
 import { foldSliderTrack } from "@/app/_components/canvas/3d-scene/foldSliderTrack";
+import { useHasFoldStory } from "@/app/hooks/useHasFoldStory";
 
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 
@@ -46,7 +47,9 @@ export const FoldSliderOverlay: React.FC = () => {
   const runtime = useSurahLayoutRuntime();
   const foldSteps = runtime.foldSteps;
   const stepCount = foldSteps.length;
-  const hasFolds = stepCount > 1;
+  // Not `stepCount > 1`: a composed atlas has two steps that are both flat, so
+  // the scrubber used to hug the edge of a paper that could not fold.
+  const hasFolds = useHasFoldStory();
 
   const lenis = useLenis();
 

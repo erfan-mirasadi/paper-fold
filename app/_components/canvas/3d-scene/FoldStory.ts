@@ -60,3 +60,40 @@ export const getOffsetForId = (
   if (index === -1) return 0;
   return index / (foldSteps.length - 1);
 };
+
+/**
+ * Does this fold story actually fold anything?
+ *
+ * Two kinds of page answer no. A composed atlas (paperComposer) is a map to
+ * read rather than a sheet to fold, so it is given two IDENTICAL flat steps
+ * purely so `FOLD_Y_POSITIONS` has a line to hold; and a few single-sheet
+ * configs keep only their `end` step, having commented the creased one out.
+ * Either way there is no motion between step 0 and any other step.
+ *
+ * Such a page has nothing for the fold UI to drive: no edge slider, no
+ * Aç/Katla button, no "scroll down" hint, and no scroll length at all — the
+ * story sits at its final (open) state from the first frame. Everything that
+ * asks "is the paper still folded?" (elevated sections, pop-ups, verse drag)
+ * therefore has to see it as open, which is why the offset is pinned to 1
+ * rather than left at 0.
+ */
+export const hasFoldMotion = (
+  foldSteps: readonly FoldStoryStep[],
+): boolean => {
+  if (foldSteps.length < 2) return false;
+
+  const angleAt = (step: FoldStoryStep, index: number) => {
+    const fold = step.folds[index];
+    return fold ? foldStateToAngle(fold) : 0;
+  };
+  const foldCount = Math.max(...foldSteps.map((step) => step.folds.length));
+
+  for (let stepIndex = 1; stepIndex < foldSteps.length; stepIndex++) {
+    for (let foldIndex = 0; foldIndex < foldCount; foldIndex++) {
+      const from = angleAt(foldSteps[0], foldIndex);
+      const to = angleAt(foldSteps[stepIndex], foldIndex);
+      if (Math.abs(from - to) > 1e-4) return true;
+    }
+  }
+  return false;
+};

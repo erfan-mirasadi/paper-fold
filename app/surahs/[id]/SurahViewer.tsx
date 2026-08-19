@@ -43,6 +43,7 @@ import { HeroTitleOverlay } from "@/app/_components/dom/ui-overlay/HeroTitleOver
 import { SkipIntroButton } from "@/app/_components/dom/ui-overlay/SkipIntroButton";
 import { ScrollHintOverlay } from "@/app/_components/dom/ui-overlay/ScrollHintOverlay";
 import { FoldSliderOverlay } from "@/app/_components/dom/ui-overlay/FoldSliderOverlay";
+import { useHasFoldStory } from "@/app/hooks/useHasFoldStory";
 import { PaperArrowsOverlay } from "@/app/_components/dom/ui-overlay/PaperArrowsOverlay";
 import { PaperPaginationOverlay } from "@/app/_components/dom/ui-overlay/PaperPaginationOverlay";
 import { SectionZoomArrowsOverlay } from "@/app/_components/dom/ui-overlay/SectionZoomArrowsOverlay";
@@ -355,6 +356,12 @@ function SurahViewerInner({
 }: InnerProps) {
   const lenis = useLenis();
 
+  // Whether this paper folds at all. A flat one (a composed atlas, or a sheet
+  // whose creased step is commented out) gets no scroll length, no edge
+  // slider, no Aç/Katla button and no scroll hint — there is nothing for any
+  // of them to drive.
+  const hasFoldStory = useHasFoldStory();
+
   // A composed atlas page (several sheets on one paper) is several times wider
   // than a surah sheet and would run straight off the sides of the app's fixed
   // camera. Every ordinary surah leaves this at 1 and is untouched — see
@@ -466,10 +473,13 @@ function SurahViewerInner({
       }}
     >
       <div className="surah-bg-image" />
+      {/* The scroll length of the fold story. A paper with nothing to fold
+          gets none of it, so the page is exactly one viewport tall and the
+          browser's scrollbar never appears beside it. */}
       <div
         aria-hidden="true"
         style={{
-          height: `${scrollPages * 100}vh`,
+          height: hasFoldStory ? `${scrollPages * 100}vh` : 0,
           pointerEvents: "none",
         }}
       />

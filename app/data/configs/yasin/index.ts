@@ -379,7 +379,10 @@ export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
 
     paperWidth: widerPaperWidth,
     paperHeight: tallerPaperHeight,
+    sceneCenterYOffset: -0.15,
     cameraDistanceScale: CAMERA_DISTANCE_SCALE,
+    hideBismillah3D: false,
+    bismillah3DScale: 2.8,
 
     scriptInfo: { title: "36 Yâ-Sîn", sayfa: 440, juz: 22, hizb: 44 },
 
