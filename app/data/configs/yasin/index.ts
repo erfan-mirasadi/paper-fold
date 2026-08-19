@@ -27,7 +27,10 @@
  */
 
 import { composePaper } from "../../sheets/paperComposer";
-import type { ComposableSheet, PaperDecoration } from "../../sheets/paperComposer";
+import type {
+  ComposableSheet,
+  PaperDecoration,
+} from "../../sheets/paperComposer";
 import { layOutGrid, type GridCell } from "./grid";
 
 import { YASIN_36_CONFIG, YASIN_36_TEXT_DATA } from "./sheets/1-12";
@@ -74,10 +77,10 @@ const CELLS: GridCell[] = [
   },
 
   // Row 1 — the parable of the town and the signs that follow it, right to left.
-  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.16, shiftX: 0.35 },
-  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0, shiftY: 0.058 },
-  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: -0.45, shiftY: 0.08 },
-  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.35, shiftY: -0.045 },
+  { at: [1, 0], key: "s1319", sheet: S_13_19, shiftY: 0.115, shiftX: 0.35 },
+  { at: [1, 4], key: "s2027", sheet: S_20_27, shiftX: 0.1, shiftY: 0.028 },
+  { at: [1, 8], key: "s3340", sheet: S_33_40, shiftX: -0.45, shiftY: 0.03 },
+  { at: [1, 13], key: "s4147", sheet: S_41_47, shiftX: -0.35, shiftY: -0.075 },
 
   // Row 2 — the one shout and "when is this promise?", side by side: 28-32
   // takes the right half, 48-54 the left, which is the two-sheet band the
@@ -87,21 +90,21 @@ const CELLS: GridCell[] = [
     align: "rightHalf",
     key: "s2832",
     sheet: S_28_32,
-    shiftX: 0.15,
-    shiftY: 0.23,
+    shiftX: 0.1,
+    shiftY: 0.2,
   },
   {
     at: [2, 0],
     align: "leftHalf",
     key: "s4852",
     sheet: S_48_52,
-    shiftX: -0.15,
-    shiftY: 0.01,
+    shiftX: -0.2,
+    shiftY: 0.05,
   },
 
   // Row 3 — the two big two-column sheets.
-  { at: [3, 0], key: "s5368", sheet: S_53_68, shiftY: 0.1 },
-  { at: [3, 9], key: "s6982", sheet: S_69_82, shiftY: 0.1 },
+  { at: [3, 0], key: "s5368", sheet: S_53_68, shiftY: 0.03, shiftX: 0.15 },
+  { at: [3, 9], key: "s6982", sheet: S_69_82, shiftY: 0.04, shiftX: -0.2 },
 
   // Row 4 — the closing glorification, alone and centred at the foot.
   // It sits 0.12 lower than the rest of the arrangement would put it, because
@@ -109,7 +112,7 @@ const CELLS: GridCell[] = [
   // (see DECOS): those two were 0.066 apart, and a frame rim plus the air on
   // either side of it does not fit in that. `PAPER_BOTTOM_MARGIN` gives the
   // paper the extra length this needs.
-  { at: [4, 0], align: "center", key: "s83", sheet: S_83, shiftY: -0.02 },
+  { at: [4, 0], align: "center", key: "s83", sheet: S_83, shiftY: -0.04 },
 ];
 
 /**
@@ -191,24 +194,81 @@ const zoomedPlacements = centeredPlacements.map((placement) => ({
 // two things on the paper left outside — that is the claim, and it is why the
 // body frame's edges are worth the trouble they cost.
 //
-// NO FRAME STATES ITS OWN RECTANGLE. Each one is solved from `DRAWN` below —
-// the extent each sheet's art actually covers, which is NOT its page rectangle:
-// a sheet carries a blank margin of its own, and a frame drawn on that margin
-// reads as slack. A group frame is the union of the sheets it wraps grown by
-// `AIR`; the body frame is the union of the three group frames grown by
-// `BODY_AIR`.
+// The natural centre of each frame is solved from `DRAWN` below — the extent
+// each sheet's art actually covers, which is NOT its page rectangle. Its final
+// size and position are then taken from the single edit-friendly settings block
+// below. Changing a width grows/shrinks a frame equally from both sides.
 //
 // MOVING A SHEET INVALIDATES `DRAWN`. Change a `shiftX` / `shiftY` above and
-// its row has to be re-measured, and any SVG under /public/yasin-atlas whose
-// rectangle changed shape has to be redrawn — every frame in this project is
-// drawn at the aspect it is displayed at, so a frame that changes aspect and
-// keeps its old file comes out with oval corners and an uneven rim.
+// its row has to be re-measured. Ordinary visual tuning of these four borders,
+// however, only needs the settings block below.
 // ---------------------------------------------------------------------------
 
-/** The air a frame keeps between its rim and whatever it wraps. */
-const AIR = 0.055;
-/** The air the body frame keeps outside the three frames inside it. */
-const BODY_AIR = 0.05;
+interface AtlasFrameSetting {
+  /** SVG file under /public. */
+  src: string;
+  /** Final frame size. Width/height grow from the frame's centre. */
+  width: number;
+  height: number;
+  /** Fine position adjustments. Positive X = right; positive Y = up. */
+  moveX: number;
+  moveY: number;
+  order: number;
+}
+
+/**
+ * ┌─────────────────────────────────────────────────────────────────────┐
+ * │ EDIT THE FOUR LARGE ATLAS BORDERS HERE                              │
+ * └─────────────────────────────────────────────────────────────────────┘
+ *
+ * `width`  makes a border wider/narrower from both sides.
+ * `height` makes it taller/shorter from top and bottom.
+ * `moveX`  moves the whole border left (-) or right (+).
+ * `moveY`  moves the whole border down (-) or up (+).
+ *
+ * All numbers are world units. Usually change them in steps of 0.05 or 0.10.
+ */
+const ATLAS_FRAME_SETTINGS = {
+  // Top-right red border — ayahs 13 … 32
+  acik1: {
+    src: "/yasin-atlas/acik-1.svg",
+    width: 3.25,
+    height: 3,
+    moveX: -0.04,
+    moveY: -0.03,
+    order: 2,
+  },
+
+  // Top-left red border — ayahs 33 … 52
+  acik2: {
+    src: "/yasin-atlas/acik-1.svg",
+    width: 3.25,
+    height: 3,
+    moveX: -0.02,
+    moveY: -0.03,
+    order: 2,
+  },
+
+  // Bottom green border — ayahs 53 … 82
+  acik34: {
+    src: "/yasin-atlas/acik-34.svg",
+    width: 6.65,
+    height: 2.4884,
+    moveX: -0.12,
+    moveY: -0.03,
+    order: 2,
+  },
+
+  // Gold border around all three borders above
+  body: {
+    src: "/yasin-atlas/body.svg",
+    width: 6.8815,
+    height: 5.73,
+    moveX: -0.03,
+    moveY: -0.03,
+    order: 1,
+  },
+} satisfies Record<"acik1" | "acik2" | "acik34" | "body", AtlasFrameSetting>;
 
 /** A drawn extent, as `{ left, right, top, bottom }` in paper coordinates. */
 interface Extent {
@@ -229,24 +289,23 @@ const union = (...es: Extent[]): Extent => ({
 });
 
 /**
- * That extent, opened by `air` on all four sides, as a decoration rectangle on
- * the widened paper. Extents that already carry the expansion (a frame wrapping
- * other frames) pass `centred: true` so it is not added twice.
+ * Centres one of the edit-friendly frame sizes above on its own fixed content
+ * extent. Every frame starts from a raw DRAWN extent, so changing one frame's
+ * size or movement can never move any of the other three.
  */
-const frame = (
-  src: string,
-  e: Extent,
-  air: number,
-  order: number,
-  centred = false,
-): PaperDecoration => ({
-  src,
-  x: round(e.l - air + (centred ? 0 : horizontalExpansion)),
-  y: round(e.t + air),
-  w: round(e.r - e.l + air * 2),
-  h: round(e.t - e.b + air * 2),
-  order,
-});
+const frame = (setting: AtlasFrameSetting, e: Extent): PaperDecoration => {
+  const centerX = (e.l + e.r) / 2 + horizontalExpansion;
+  const centerY = (e.t + e.b) / 2;
+
+  return {
+    src: setting.src,
+    x: round(centerX - setting.width / 2 + setting.moveX),
+    y: round(centerY + setting.height / 2 + setting.moveY),
+    w: setting.width,
+    h: setting.height,
+    order: setting.order,
+  };
+};
 
 /**
  * What each sheet actually paints — see the table above. `l` and `r` are in the
@@ -265,46 +324,24 @@ const DRAWN: Record<string, Extent> = {
   s6982: { l: 0.429, r: 2.805, t: -5.8749, b: -8.2234 },
 };
 
-/** 1. açıklama — ayahs 13 … 32, on the right, where the reading starts. */
-const ACIK_1 = frame(
-  "/yasin-atlas/acik-1.svg",
-  union(DRAWN.s1319, DRAWN.s2027, DRAWN.s2832),
-  AIR,
-  2,
-);
-/** 2. açıklama — ayahs 33 … 52, the answering twenty, on the left. */
-const ACIK_2 = frame(
-  "/yasin-atlas/acik-2.svg",
-  union(DRAWN.s3340, DRAWN.s4147, DRAWN.s4852),
-  AIR,
-  2,
-);
-/** 3. and 4. açıklama — ayahs 53 … 82, fifteen and fifteen, in one band. */
-const ACIK_34 = frame(
-  "/yasin-atlas/acik-34.svg",
-  union(DRAWN.s5368, DRAWN.s6982),
-  AIR,
-  2,
-);
+// Each frame owns one immutable anchor extent. In particular, BODY_EXTENT is
+// made from the sheets themselves—not from the three already-tuned borders—so
+// moving an inner border does not pull the outer border along with it.
+const ACIK_1_EXTENT = union(DRAWN.s1319, DRAWN.s2027, DRAWN.s2832);
+const ACIK_2_EXTENT = union(DRAWN.s3340, DRAWN.s4147, DRAWN.s4852);
+const ACIK_34_EXTENT = union(DRAWN.s5368, DRAWN.s6982);
+const BODY_EXTENT = union(ACIK_1_EXTENT, ACIK_2_EXTENT, ACIK_34_EXTENT);
 
-/** The extent a frame rectangle covers, so the body frame can wrap the three. */
-const extentOf = (d: PaperDecoration): Extent => ({
-  l: d.x,
-  r: d.x + d.w,
-  t: d.y,
-  b: d.y - d.h,
-});
+/** 1. açıklama — ayahs 13 … 32, on the right, where the reading starts. */
+const ACIK_1 = frame(ATLAS_FRAME_SETTINGS.acik1, ACIK_1_EXTENT);
+/** 2. açıklama — ayahs 33 … 52, the answering twenty, on the left. */
+const ACIK_2 = frame(ATLAS_FRAME_SETTINGS.acik2, ACIK_2_EXTENT);
+/** 3. and 4. açıklama — ayahs 53 … 82, fifteen and fifteen, in one band. */
+const ACIK_34 = frame(ATLAS_FRAME_SETTINGS.acik34, ACIK_34_EXTENT);
 
 const DECOS: PaperDecoration[] = [
-  // The body of the surah, painted first and under everything: the three
-  // frames inside it and every sheet's own art sit on top of it.
-  frame(
-    "/yasin-atlas/body.svg",
-    union(extentOf(ACIK_1), extentOf(ACIK_2), extentOf(ACIK_34)),
-    BODY_AIR,
-    1,
-    true,
-  ),
+  // The body is independently positioned and painted under everything.
+  frame(ATLAS_FRAME_SETTINGS.body, BODY_EXTENT),
   ACIK_1,
   ACIK_2,
   ACIK_34,

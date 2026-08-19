@@ -239,8 +239,8 @@ const SPEC: SheetSpec = {
       src: "/yasin3340/section.svg",
       pad: 0.045,
       w: 1.05,
-      h: 0.73,
-      offsetY: -0.255,
+      h: 0.67,
+      offsetY: -0.285,
     },
     // The sky — ayahs 37 … 40, in the same cream and the same frame file.
     {
@@ -250,8 +250,8 @@ const SPEC: SheetSpec = {
       src: "/yasin3340/section.svg",
       pad: 0.045,
       w: 1.05,
-      h: 0.73,
-      offsetY: -0.255,
+      h: 0.67,
+      offsetY: -0.285,
     },
   ],
 };

@@ -158,8 +158,9 @@ export function layOutGrid(spec: GridSpec): GridLayout {
       const [from, to] = spanOf(c.align);
       x = (from + to) / 2 - c.w / 2;
     } else {
-      x = paperWidth - margin - c.at[1] * colStep - c.w + (c.shiftX ?? 0);
+      x = paperWidth - margin - c.at[1] * colStep - c.w;
     }
+    x += c.shiftX ?? 0;
     return {
       key: c.key,
       sheet: c.sheet,
