@@ -310,7 +310,7 @@ const SPEC: SheetSpec = {
 
     // ── The fire: named, then entered, then sealed ────────────────────────
     {
-      gapAfter: 0.032,
+      gapAfter: 0.025,
       pair: [
         {
           ayah: 63,
@@ -335,12 +335,9 @@ const SPEC: SheetSpec = {
     },
     {
       ayah: 65,
-      // SHEET_COLORS.maroon — the same tone ayah 83 closes the surah in, on
-      // the sister sheet: cream ground, dark red ink. Asked for by eye, not
-      // by any pairing this sheet draws.
-      tone: "maroon",
-      heightLines: 1.5,
-      gapAfter: 0.032,
+      tone: "gold",
+      heightLines: 1.75,
+      gapAfter: 0.025,
       arScale: 0.84,
       latScale: 0.67,
       ar: "الْيَوْمَ نَخْتِمُ عَلَىٰ أَفْوَاهِهِمْ وَتُكَلِّمُنَا أَيْدِيهِمْ وَتَشْهَدُ أَرْجُلُهُم بِمَا كَانُوا يَكْسِبُونَ",
@@ -439,3 +436,66 @@ const SPEC: SheetSpec = {
 };
 
 export const SHEET = buildSheet(SPEC);
+
+// Match 82's gold capsule and red text in every language.
+const verse65Override = Object.values(SHEET.config.verseOverrides ?? {}).find(
+  (override) => override.displayNumber === 65,
+);
+if (!verse65Override) {
+  throw new Error("yasin5368: verse override for ayah 65 was not emitted");
+}
+verse65Override.textColor = "#A30000";
+
+// The same four short curved-arrow SVGs used around 49-52, repeated around
+// the 55-58 Garden frame. Only their offsets change to follow this frame's
+// centre (x 0.665) and its taller 1.28 x 0.74 rectangle.
+SHEET.config.svgOverlays?.push(
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 2,
+    anchorEdge: "top",
+    scaleX: 0.1,
+    scaleY: 0.1,
+    offsetX: 0.665,
+    offsetY: 0.03,
+    rotationZ: -Math.PI / 2.8,
+    renderOrder: 8,
+    customSectionId: "yasin5368_f2",
+  },
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 2,
+    anchorEdge: "top",
+    scaleX: 0.1,
+    scaleY: 0.1,
+    offsetX: 0.1,
+    offsetY: -0.31,
+    rotationZ: Math.PI * 0.1,
+    renderOrder: 8,
+    customSectionId: "yasin5368_f2",
+  },
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 2,
+    anchorEdge: "top",
+    scaleX: -0.1,
+    scaleY: 0.1,
+    offsetX: 1.23,
+    offsetY: -0.31,
+    rotationZ: -Math.PI * 0.1,
+    renderOrder: 8,
+    customSectionId: "yasin5368_f2",
+  },
+  {
+    src: "/ahzab/arrows.svg",
+    anchorGroupIndex: 2,
+    anchorEdge: "top",
+    scaleX: -0.1,
+    scaleY: 0.1,
+    offsetX: 0.665,
+    offsetY: -0.65,
+    rotationZ: -Math.PI / 1.5,
+    renderOrder: 8,
+    customSectionId: "yasin5368_f2",
+  },
+);
