@@ -141,6 +141,44 @@ export function detectGpuTier(): GpuTier {
 }
 
 /**
+ * The pixel ratio the canvas may render at.
+ *
+ * WHY A PHONE USED TO BE FLATTENED TO 1, AND WHY THAT COST MORE THAN IT LOOKED.
+ * The canvas asked for `isMobile ? 1 : 2`, off a user-agent test — so every
+ * phone ever made rendered at ONE CSS pixel, an iPhone's flagship GPU included,
+ * and a display with three physical pixels per CSS pixel was handed a third of
+ * the picture and asked to stretch it.
+ *
+ * That number is not just the framebuffer. It is multiplied into the whole page
+ * ladder: the zoom buffer is sized at `dpr` texels per CSS pixel
+ * (`detailTextureSize`), and a composed paper rasterises its script at a density
+ * derived from the same figure (`maxPageTexelsPerUnit` → `PageTextDensityContext`
+ * → `CanvasText`). One capped ratio therefore softened the page three times
+ * over — the framebuffer, the sheet the reader zoomed into, and the glyphs
+ * themselves — which is why the script on an atlas page looked worst at exactly
+ * the moment the reader leaned in to read it.
+ *
+ * So it is graded by GPU POWER here, like every other quality decision in this
+ * file. Strictly additive: a desktop keeps the 2 it always had, a phone whose
+ * chip is genuinely weak keeps the 1 it always had, and only a phone with the
+ * GPU to spend gets the resolution its own screen can show.
+ */
+export function maxDevicePixelRatio(isMobile: boolean): number {
+  if (!isMobile) return 2;
+
+  switch (detectGpuTier()) {
+    case "high":
+      return 2;
+    case "medium":
+      return 1.5;
+    default:
+      // A weak chip keeps exactly what it had. Its sharpness is bought back by
+      // the zoom ladder instead, which is sized per screen and not per tier.
+      return 1;
+  }
+}
+
+/**
  * Quick capability check: does this browser/device expose a WebGL context at
  * all? Distinct from `detectGpuTier`, which assumes WebGL exists and only
  * grades how powerful it is — this answers a prior yes/no question so

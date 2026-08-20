@@ -56,7 +56,7 @@ import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
-import { isWebGLSupported } from "@/app/utils/gpuTier";
+import { isWebGLSupported, maxDevicePixelRatio } from "@/app/utils/gpuTier";
 import { useAutoCollapsePanelsOnElevate } from "@/app/hooks/useAutoCollapsePanelsOnElevate";
 
 // @react-three/fiber's <Canvas> still creates a THREE.Clock internally to
@@ -221,9 +221,15 @@ export default function SurahViewer() {
   /**
    * Rebuilt whenever the ratio changes so the Canvas re-renders with it —
    * R3F compares the RESOLVED number, so an identical pair costs nothing.
+   *
+   * The ceiling is the GPU's to earn (`maxDevicePixelRatio`), not the user
+   * agent's to veto. `isMobile` decided this alone until now, which meant the
+   * softening described above was not limited to a mis-measured desktop: it was
+   * what EVERY phone got, permanently, whatever silicon it had. A tier is the
+   * one thing here that actually knows whether the pixels can be afforded.
    */
   const dpr: [number, number] = useMemo(
-    () => (isMobile ? [1, 1] : [1, 2]),
+    () => [1, maxDevicePixelRatio(isMobile)],
     // `dprEpoch` is deliberately a dep the body does not read: producing a new
     // array is the whole point, since that is what re-renders the Canvas and
     // makes R3F sample `devicePixelRatio` again.

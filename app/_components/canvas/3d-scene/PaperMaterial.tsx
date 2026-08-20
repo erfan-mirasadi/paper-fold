@@ -30,6 +30,7 @@ import {
 } from "three";
 import { PageLodSceneProbe, PageTextureLod } from "./PageTextureLod";
 import {
+  fitTextureSize,
   firstPassTextureSize,
   maxPageTexelsPerUnit,
   TEXT_DENSITY_HEADROOM,
@@ -60,6 +61,31 @@ const paperBaseColor = new Color(PAGE_BG_COLOR);
 
 const BASE_RENDER_TEX_WIDTH = 1200;
 const BASE_RENDER_TEX_HEIGHT = 1700;
+
+/**
+ * Ceiling on the single full-page capture, in texels. Half-float, so a texel is
+ * 8 bytes — this is 96 MB, and it is a guard rather than a target: the highest
+ * tier asks for 8.2 of these megatexels and never reaches it. It exists so that
+ * no tier, no future page size and no display can turn this one allocation back
+ * into the quarter-gigabyte it used to be.
+ */
+const FULL_PAGE_MAX_PIXELS = 12e6;
+
+/**
+ * What to hand `RenderTexture` so the buffer comes out at `texels` exactly.
+ *
+ * It multiplies the ask by the device pixel ratio, so the ask is that many
+ * texels DIVIDED by the ratio — and snapped to a multiple of four, because the
+ * ratio is not always a whole number. A 1.5 ratio (a medium-tier phone, a
+ * Windows display at 150%) turns an odd ask into half a texel, and a fractional
+ * size is not a size any driver can allocate: it is silently truncated, leaving
+ * the target's recorded height and its real one disagreeing by a texel. Four
+ * keeps the product whole at every ratio that actually occurs — 1, 1.25, 1.5, 2
+ * and 3 — and costs at most three texels of the ask.
+ */
+function askForTexels(texels: number, dpr: number): number {
+  return Math.max(64, Math.round(texels / dpr / 4) * 4);
+}
 
 const TEXTURE_SETTLE_DELAY_MS = 600;
 const TEXTURE_READY_DELAY_MS = 200;
@@ -182,18 +208,48 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
   const targetW = BASE_RENDER_TEX_WIDTH * targetMultiplier;
   const targetH = BASE_RENDER_TEX_HEIGHT * targetMultiplier;
 
-  const clampedScale = Math.min(
+  /**
+   * The full-page capture, for every surah that is a single sheet rather than a
+   * composed atlas — and THESE NUMBERS ARE THE BUFFER, exactly as they are on
+   * the ladder's first paint below.
+   *
+   * They were not, until now. `RenderTexture` multiplies whatever it is handed
+   * by the device pixel ratio, so a figure written here as a texel count was
+   * silently squared against the display: the 2400 x 3400 this tier asks for
+   * arrived as 4800 x 6800 on any retina screen — 32.6 megatexels of half-float,
+   * a quarter of a gigabyte for one page, before `colorSamples` multisampled it
+   * further. That is the allocation `PageTextureLod`'s own header calls "the
+   * thing weak GPUs quietly refuse", and it was never a decision; it was drei's
+   * arithmetic leaking into a constant that reads like a resolution.
+   *
+   * Dividing it back out makes the tier table mean what it says and makes the
+   * cost independent of the screen — which is the precondition for letting a
+   * capable phone raise its pixel ratio at all (`maxDevicePixelRatio`). Nothing
+   * is given up for it: 3400 texels down the page is already well over twice
+   * what any display resolves it at, and past a certain point oversampling
+   * makes text softer rather than sharper, not being read at mip zero — the
+   * reasoning `TEXT_DENSITY_HEADROOM` sets out in full.
+   *
+   * `fitTextureSize` applies the driver's own limit and a ceiling, so no tier
+   * and no future page can ask for a buffer the device will refuse.
+   */
+  const fullPage = fitTextureSize(
+    targetW,
+    targetH,
     1,
-    (maxTextureSize - 16) / Math.max(targetW, targetH),
+    maxTextureSize,
+    FULL_PAGE_MAX_PIXELS,
   );
-  const baseRenderTexWidth = Math.max(512, Math.floor(targetW * clampedScale));
-  const baseRenderTexHeight = Math.max(512, Math.floor(targetH * clampedScale));
+  const baseRenderTexWidth = askForTexels(fullPage.width, dpr);
+  const baseRenderTexHeight = askForTexels(fullPage.height, dpr);
 
   const colorSamples = tier === "low" ? 0 : tier === "medium" ? 2 : 4;
   const normalSamples = 0;
 
-  const normalTexW = Math.min(baseRenderTexWidth, 1024);
-  const normalTexHeight = Math.min(baseRenderTexHeight, 1024);
+  // Divided by the ratio for the same reason, so the crease/grain normal map is
+  // the 1024 it says it is rather than 1024 times the display's ratio.
+  const normalTexW = askForTexels(Math.min(fullPage.width, 1024), dpr);
+  const normalTexHeight = askForTexels(Math.min(fullPage.height, 1024), dpr);
 
   /**
    * A page of many sheets is drawn in stages instead of once — see
@@ -264,10 +320,10 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
     maxTextureSize,
   );
   const renderTexWidth = useLod
-    ? Math.max(64, Math.round(firstPass.width / dpr))
+    ? askForTexels(firstPass.width, dpr)
     : baseRenderTexWidth;
   const renderTexHeight = useLod
-    ? Math.max(64, Math.round(firstPass.height / dpr))
+    ? askForTexels(firstPass.height, dpr)
     : baseRenderTexHeight;
 
   // The scene (and this material) persist across paper switches — bumping
