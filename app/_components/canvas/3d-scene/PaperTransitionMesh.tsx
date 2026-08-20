@@ -86,6 +86,7 @@ import {
   PAGE_SEGMENTS,
 } from "./SinglePaper";
 import { PAPER_MATERIAL_CONFIG } from "./PaperMaterial";
+import { detectGpuTier } from "../../../utils/gpuTier";
 import { PAGE_BG_COLOR } from "../../../data/theme";
 import type { PaperTransitionCapture } from "./paperSnapshot";
 
@@ -158,11 +159,45 @@ const SHEET_RENDER_ORDER = 100000;
 /** Total time (seconds), grab → fully off-screen. */
 const FLIP_DURATION_S = 3.6;
 /** Grid resolution of the flip sheet — a plain (non-skinned) mesh whose
- *  vertices are re-positioned analytically on the CPU every frame (a few
- *  thousand vertices — trivial), so the curl silhouette is perfectly
- *  smooth. Raise for extra silkiness, lower for weak devices. */
+ *  vertices are re-positioned analytically on the CPU every frame, so the
+ *  curl silhouette is perfectly smooth. Raise for extra silkiness, lower for
+ *  weak devices — which is exactly what `flipSegments` does with it. */
 const FLIP_WIDTH_SEGMENTS = 96;
 const FLIP_HEIGHT_SEGMENTS = 48;
+
+/**
+ * The grid this device turns a page on, taking the note above at its word.
+ *
+ * "A few thousand vertices — trivial" is true of the arithmetic and not of the
+ * bill. The sheet is a box, so 96 x 48 is ~10,100 vertices and ~19,000
+ * triangles, and EVERY FRAME of the 3.6-second turn rewrites all of them from
+ * `basePositions` and then calls `computeVertexNormals`, which walks every
+ * triangle again to rebuild the normals. That is roughly 216 frames of it per
+ * page turn, on the main thread, during the single most-used interaction in the
+ * app — and it was the same grid on every device, alone among the quality
+ * decisions here in not asking what it was running on.
+ *
+ * Halving each axis quarters both passes. What it costs is silhouette
+ * smoothness on the curl's edge, which is the thing a weak device is least able
+ * to show and least likely to be looked at closely on; what it buys is the turn
+ * not stuttering. A strong GPU keeps all 96 x 48 exactly as before.
+ */
+function flipSegments(): { width: number; height: number } {
+  switch (detectGpuTier()) {
+    case "high":
+      return { width: FLIP_WIDTH_SEGMENTS, height: FLIP_HEIGHT_SEGMENTS };
+    case "medium":
+      return {
+        width: Math.round(FLIP_WIDTH_SEGMENTS * 0.75),
+        height: Math.round(FLIP_HEIGHT_SEGMENTS * 0.75),
+      };
+    default:
+      return {
+        width: FLIP_WIDTH_SEGMENTS / 2,
+        height: FLIP_HEIGHT_SEGMENTS / 2,
+      };
+  }
+}
 /** Radius of the roll the page bends around, as a fraction of page width.
  *  Bigger = looser, softer curl; smaller = tighter roll. Also caps how far
  *  the page ever reaches toward the camera (max = 2 × this × pageWidth). */
@@ -688,12 +723,13 @@ interface FlipRig {
 function buildFlipRig(capture: PaperTransitionCapture): FlipRig {
   const { pageWidth, pageHeight } = capture;
 
+  const segments = flipSegments();
   const geometry = new BoxGeometry(
     pageWidth,
     pageHeight,
     PAGE_DEPTH,
-    FLIP_WIDTH_SEGMENTS,
-    FLIP_HEIGHT_SEGMENTS,
+    segments.width,
+    segments.height,
   );
   const basePositions = Float32Array.from(
     geometry.attributes.position.array as Float32Array,

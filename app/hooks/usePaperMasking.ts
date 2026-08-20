@@ -288,6 +288,15 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       ...detailUniforms,
       uVerseVisibility: { value: new Float32Array(VERSE_ARR_SIZE).fill(1.0) },
       uSectionVisibility: { value: new Float32Array(TOTAL_SECTIONS).fill(1.0) },
+      /**
+       * Whether either mask has anything to say at all, and how far up the
+       * verse loop has to count — see `refreshMaskSummary`. Three numbers that
+       * let the fragment shader skip both loops outright, which is what it does
+       * for almost every frame this app ever draws.
+       */
+      uAnyVerseHidden: { value: 0 },
+      uMaxHiddenVerseId: { value: 0 },
+      uAnySectionHidden: { value: 0 },
       uVerseRects: { value: new Float32Array(VERSE_ARR_SIZE * 4) },
       uVerseRadii: { value: new Float32Array(VERSE_ARR_SIZE) },
       uSectionRects: { value: new Float32Array(TOTAL_SECTIONS * 4) },
@@ -328,6 +337,52 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
   useEffect(() => {
     const timeouts: Record<string, NodeJS.Timeout> = {};
 
+    /**
+     * Re-reads both visibility arrays and writes down what the shader actually
+     * needs to know: whether anything is hidden at all, and the last verse id
+     * that is.
+     *
+     * WHY THE SHADER CANNOT WORK THIS OUT FOR ITSELF, AND WHAT IT COST. The
+     * fragment shader's masks are two loops — ten sections and a hundred verses
+     * — and they ran over EVERY pixel of the page on EVERY frame, whether or
+     * not a single thing was hidden. A hundred iterations of "read
+     * uVerseVisibility[i], compare, continue" is not free anywhere, and on the
+     * weak mobile GPUs this app tries hardest to be kind to it is close to the
+     * worst thing a fragment shader can do: indexing a uniform array by a
+     * running variable is the case many GLSL ES drivers refuse to keep in
+     * registers, and several answer it by unrolling the whole loop — a shader
+     * a hundred times the size, slow to compile and slower to run.
+     *
+     * None of that work was ever needed. Nothing is hidden while the reader is
+     * simply looking at the page: a verse goes dark only for an open pop-up, an
+     * elevated verse in all-sections mode, or a middle fold, and a section only
+     * while it is elevated. That is a small minority of frames, and the rest
+     * were paying the full price of asking.
+     *
+     * So the question is answered once here, on the CPU, whenever the answer
+     * can actually change — a hundred and eleven array reads, at the moment a
+     * pop-up opens rather than at sixty frames a second times every pixel.
+     */
+    const refreshMaskSummary = () => {
+      const verses = uniforms.uVerseVisibility.value as Float32Array;
+      let maxHidden = 0;
+      for (let i = 1; i <= MAX_VERSE_ID; i++) {
+        if (verses[i] < 0.5) maxHidden = i;
+      }
+      uniforms.uMaxHiddenVerseId.value = maxHidden;
+      uniforms.uAnyVerseHidden.value = maxHidden > 0 ? 1 : 0;
+
+      const sections = uniforms.uSectionVisibility.value as Float32Array;
+      let anySection = 0;
+      for (let i = 0; i < TOTAL_SECTIONS; i++) {
+        if (sections[i] < 0.5) {
+          anySection = 1;
+          break;
+        }
+      }
+      uniforms.uAnySectionHidden.value = anySection;
+    };
+
     const updateVerse = (id: number, delay: number) => {
       const key = `v${id}`;
       if (timeouts[key]) clearTimeout(timeouts[key]);
@@ -349,6 +404,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           isMiddleHorizontalFoldedForVerse(s, id);
 
         uniforms.uVerseVisibility.value[id] = isHidden ? 0.0 : 1.0;
+        refreshMaskSummary();
         delete timeouts[key];
       }, delay);
     };
@@ -358,6 +414,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       if (timeouts[key]) clearTimeout(timeouts[key]);
       timeouts[key] = setTimeout(() => {
         uniforms.uSectionVisibility.value[idx] = visible ? 1.0 : 0.0;
+        refreshMaskSummary();
         delete timeouts[key];
       }, delay);
     };
@@ -398,6 +455,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
           ? 0.0
           : 1.0;
     });
+
+    // Both arrays have just been rebuilt from scratch above.
+    refreshMaskSummary();
 
     const unsubPopUp = usePopUpStore.subscribe((state, prevState) => {
       const idsToCheck = new Set<number>();
@@ -509,6 +569,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       shader.fragmentShader = `
       uniform float uVerseVisibility[${VERSE_ARR_SIZE}];
       uniform float uSectionVisibility[${TOTAL_SECTIONS}];
+      uniform float uAnyVerseHidden;
+      uniform float uMaxHiddenVerseId;
+      uniform float uAnySectionHidden;
       uniform vec4 uVerseRects[${VERSE_ARR_SIZE}];
       uniform float uVerseRadii[${VERSE_ARR_SIZE}];
       uniform float uVerseExpand;
@@ -546,22 +609,34 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       float ly = (vMapUv.y - 1.0) * uPageHeight;
 
       // 1. Check Full Section Masking
+      //
+      // Skipped whole when nothing is hidden, which is almost always — see
+      // refreshMaskSummary in usePaperMasking. One uniform comparison stands in
+      // for ten iterations of reading a uniform array by a running index, the
+      // thing weak GLSL ES drivers handle worst.
       bool sectionHidden = false;
-      for (int i = 0; i < ${TOTAL_SECTIONS}; i++) {
-        vec4 r = uSectionRects[i];
-        if (lx >= r.x && lx <= r.x + r.z && ly <= r.y && ly >= r.y - r.w) {
-          if (uSectionVisibility[i] < 0.5) {
-            sectionHidden = true;
-            break;
+      if (uAnySectionHidden > 0.5) {
+        for (int i = 0; i < ${TOTAL_SECTIONS}; i++) {
+          vec4 r = uSectionRects[i];
+          if (lx >= r.x && lx <= r.x + r.z && ly <= r.y && ly >= r.y - r.w) {
+            if (uSectionVisibility[i] < 0.5) {
+              sectionHidden = true;
+              break;
+            }
           }
         }
       }
 
       if (sectionHidden) {
         diffuseColor = texture2D(uBaseTexture, vMapUv);
-      } else {
+      } else if (uAnyVerseHidden > 0.5) {
         // 2. Check Individual Verse Masking with SDF (Rounded rectangles)
+        //
+        // The loop's bound has to be a constant, so it stays a hundred — but it
+        // stops at the last verse actually hidden, which is a low number on
+        // every page there is, and it is not entered at all unless something is.
         for (int i = 1; i <= ${MAX_VERSE_ID}; i++) {
+          if (float(i) > uMaxHiddenVerseId) break;
           if (uVerseVisibility[i] >= 0.5) continue; // Shader optimization
 
           vec4 r = uVerseRects[i];
