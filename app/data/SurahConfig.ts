@@ -13,7 +13,20 @@ import type {
   SvgOverlayItem,
 } from "./schema";
 import type { SurahLanguage } from "../hooks/useSurahLanguageStore";
-import { ALAK_LAYOUT_CONFIG, ALAK_TEXT_AR as SURAH_DATA } from "./configs/alak96Config";
+/**
+ * Only the LAYOUT is taken from Alak here, never its text.
+ *
+ * The verse text used to come along too (`ALAK_TEXT_AR as SURAH_DATA`), re-
+ * exported for a single string — the Basmala — which `BismillahText3D` now owns
+ * as the constant it always was. Dropping it takes Alak's Arabic, English and
+ * Turkish verse data out of the bundle that every surah page loads.
+ *
+ * The layout object below is a different matter: the module-level constants
+ * derived from it (`PAGE_HEIGHT`, `layoutMath`, the styling figures) are
+ * imported all over the canvas, so it stays eager for now. Untangling that is
+ * its own change — see the audit.
+ */
+import { ALAK_LAYOUT_CONFIG } from "./configs/alak96Layout";
 export { ALAK_LAYOUT_CONFIG };
 
 export interface Verse {
@@ -57,7 +70,6 @@ export interface SurahDataShape {
   section2: SectionTwoData;
 }
 
-export { SURAH_DATA };
 
 // ----------------------------------------------------------------------------
 // ALAK CONFIGURATION (Fully Config-Driven)
@@ -66,7 +78,6 @@ export { SURAH_DATA };
 // ----------------------------------------------------------------------------
 // SHARED CONSTANTS
 // ----------------------------------------------------------------------------
-export const ALAQ_LAYOUT_CONFIG = ALAK_LAYOUT_CONFIG;
 export const BASE_PAGE_WIDTH = ALAK_LAYOUT_CONFIG.dimensions.paperWidth;
 export const PAGE_HEIGHT = ALAK_LAYOUT_CONFIG.dimensions.paperHeight;
 export const SCENE_CENTER_Y_OFFSET =

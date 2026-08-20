@@ -57,6 +57,7 @@ import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
 import { useAudioUnlockStore } from "@/app/stores/useAudioUnlockStore";
 import { isWebGLSupported, maxDevicePixelRatio } from "@/app/utils/gpuTier";
+import { useAdaptiveFrameloop } from "@/app/hooks/useAdaptiveFrameloop";
 import { useAutoCollapsePanelsOnElevate } from "@/app/hooks/useAutoCollapsePanelsOnElevate";
 
 // @react-three/fiber's <Canvas> still creates a THREE.Clock internally to
@@ -361,6 +362,13 @@ function SurahViewerInner({
   handleSceneReady,
 }: InnerProps) {
   const lenis = useLenis();
+  /**
+   * "always" while anything is happening, "demand" once the page has been
+   * still for a while — see `useAdaptiveFrameloop` for why it is not simply
+   * "demand" everywhere. Re-renders only on the transition, twice per idle
+   * cycle, never per frame.
+   */
+  const frameloop = useAdaptiveFrameloop();
 
   // Whether this paper folds at all. A flat one (a composed atlas, or a sheet
   // whose creased step is commented out) gets no scroll length, no edge
@@ -541,7 +549,7 @@ function SurahViewerInner({
                   toneMapping: THREE.NoToneMapping,
                   outputColorSpace: THREE.SRGBColorSpace,
                 }}
-                frameloop="always"
+                frameloop={frameloop}
               >
                 <ScrollManager />
                 <PopUpHoverScrollController />

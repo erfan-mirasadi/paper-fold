@@ -2,11 +2,26 @@
 
 import { useMemo, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { PAGE_WIDTH, SURAH_DATA } from "../../../data/SurahConfig";
+import { PAGE_WIDTH } from "../../../data/SurahConfig";
 import { QURAN_FONT, TEXT_SIZES } from "../../../data/theme";
 import { useElevatedStore } from "../../../stores/useElevatedStore";
 import { CanvasText } from "../shared/CanvasText";
 import { detectGpuTier } from "../../../utils/gpuTier";
+
+/**
+ * The Basmala, which heads every page and belongs to no surah in particular.
+ *
+ * It used to be read as `SURAH_DATA.bismillah` — that is, out of Alak's Arabic
+ * text module, whose only other job was to be one surah among many loaded on
+ * demand. One fixed string, identical in all three language files, was enough
+ * to make that entire module a dependency of the shared bundle: this component
+ * mounts for every page, so every page carried Alak's verses to read a line
+ * that never varies.
+ *
+ * The elongated "س" is intentional — it is the display form the page is set in,
+ * not a typo, and it must be preserved exactly.
+ */
+const BISMILLAH_TEXT = "بِسْـــــــــــــــــمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
 
 const TOP_EDGE_OFFSET = -0.02;
 const MANUAL_DOWN_SHIFT = -0.0008;
@@ -158,7 +173,7 @@ export function BismillahText3D({
   }, []);
 
   const baseCanvasColor = "#FFFFFF";
-  const bismillahText = SURAH_DATA.bismillah;
+  const bismillahText = BISMILLAH_TEXT;
   const maxWidth = PAGE_WIDTH * 0.9;
   const bismillahHeight = 0.14;
 
