@@ -249,10 +249,9 @@ export const YASIN_13_19_CONFIG: SurahLayoutConfig = {
       curveColors: [
         {
           pair: [2, 5], // ayah 15 ▸ ayah 18
-          // Blue, matching the band frame (/yasin1319/band.svg, #CEE0E9) this
-          // curve is drawn over — the same "curve carries its section's own
-          // colour" choice made for the 53-65 shout-to-seal link.
-          color: SHEET_COLORS.blue.border,
+          // Match the dark edge of the gold gradient used around the section
+          // frames (#968428 → #CDC577 → #968428).
+          color: "#968428",
           fillColor: SHEET_COLORS.blue.bg,
           curveSide: "left",
           // Anchored on the capsules' left edge (0.360), with a shallow bow

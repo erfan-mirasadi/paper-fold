@@ -44,6 +44,37 @@ export interface SurahFeatures {
    * full quality and has nothing to gain from the machinery.
    */
   progressivePageTexture?: boolean;
+  /**
+   * Draw the paper as its own background COLOUR, with no photograph of paper
+   * on it and no surface relief at all — see `PAPER_TEXTURES`.
+   *
+   * WHY A PAGE WOULD WANT THIS. The paper photograph is 683 x 1024 and is
+   * stretched, once, across whatever the page turns out to be. On a single
+   * sheet (1.54 units) that is about 440 texels per world unit, and it looks
+   * like paper because it is being sampled at roughly the rate it was shot at.
+   * On a paper composed of many sheets it is stretched across seven units —
+   * about 98 — and then a section zoom magnifies ONE sheet of that until the
+   * screen is resolving fourteen times more detail than the photograph has.
+   * The grain stops being grain and becomes slow grey blotches, which is worse
+   * than no texture at all: a flat colour cannot be magnified past its own
+   * detail, because it has none.
+   *
+   * `PageTextureLod` cannot rescue it either. That ladder redraws the framed
+   * sheet at the screen's resolution and it genuinely works — on the script,
+   * which is rasterised on demand. Redrawing a 98-texel-per-unit photograph
+   * into a 1750-texel-per-unit buffer just reproduces the blur exactly.
+   *
+   * So such a page opts out of the photograph entirely. The grunge frame stays
+   * (it is page-scale artwork, not a surface), and what goes is the paper
+   * diffuse and the whole normal map — relief and fold creases both, which a
+   * composed paper never had a use for anyway: its fold story is flat by
+   * construction (`hasFoldMotion` is false for it), so the creases were
+   * drawing fold lines for a fold that never happens.
+   *
+   * It is also the cheapest this page has ever been: one texture fewer, and one
+   * entire offscreen RenderTexture (the normal map) never created or drawn.
+   */
+  flatPaperSurface?: boolean;
 }
 
 export interface LayoutDimensions {

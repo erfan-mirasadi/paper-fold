@@ -13,7 +13,12 @@ import { useSurahLayoutRuntime } from "./useSurahLayoutRuntime";
 import { VERSE_5_6_19_RADIUS } from "../data/SurahConfig";
 import { getActiveStoryConfig, useStoryStore } from "../stores/useStoryStore";
 import { SectionTransforms, ThemeColors } from "../data/schema";
-import { S1_INNER_BG, S1_INNER_BORDER } from "../data/theme";
+import {
+  FLAT_PAGE_BG_COLOR,
+  PAGE_BG_COLOR,
+  S1_INNER_BG,
+  S1_INNER_BORDER,
+} from "../data/theme";
 import { getSectionPriority } from "../utils/sectionResolver";
 
 export const MASK_CONFIG = {
@@ -305,6 +310,19 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uPageHeight: { value: 1.76 },
       uBaseTexture: { value: paperTextureDiffuse },
       uVerseExpand: { value: 0.005 },
+      /**
+       * Whether this paper HAS a photograph to reveal — see
+       * `SurahFeatures.flatPaperSurface`. Set per paper by the effect below,
+       * never a constant: the paper material survives a switch without
+       * recompiling, so this has to follow the page rather than the shader.
+       */
+      uFlatPaper: { value: 0 },
+      /**
+       * What bare paper looks like when there is no photograph of it — the
+       * colour the page is cleared to, so a lifted section reveals the same
+       * paper the rest of the page is made of. Set per paper below.
+       */
+      uBarePaper: { value: new Color(PAGE_BG_COLOR) },
     }),
     [paperTextureDiffuse, detailUniforms],
   );
@@ -316,6 +334,11 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     (uniforms.uVerseBgColors.value as Float32Array).set(verseBgColors);
     uniforms.uPageWidth.value = PAGE_WIDTH;
     uniforms.uPageHeight.value = PAGE_HEIGHT;
+    const flatPaper = activeConfig.features.flatPaperSurface === true;
+    uniforms.uFlatPaper.value = flatPaper ? 1 : 0;
+    (uniforms.uBarePaper.value as Color).set(
+      flatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR,
+    );
   }, [
     verseRects,
     verseRadii,
@@ -323,6 +346,7 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     verseBgColors,
     PAGE_WIDTH,
     PAGE_HEIGHT,
+    activeConfig,
     uniforms,
   ]);
 
@@ -580,6 +604,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform float uPageWidth;
       uniform float uPageHeight;
       uniform sampler2D uBaseTexture;
+      uniform float uFlatPaper;
+      uniform vec3 uBarePaper;
       uniform sampler2D uDetailMap[${DETAIL_SLOTS}];
       uniform vec4 uDetailRect[${DETAIL_SLOTS}];
       uniform float uDetailStrength[${DETAIL_SLOTS}];
@@ -628,7 +654,15 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       }
 
       if (sectionHidden) {
-        diffuseColor = texture2D(uBaseTexture, vMapUv);
+        // The bare paper under a lifted section. A page that carries no
+        // photograph of paper has its own colour revealed instead — see
+        // SurahFeatures.flatPaperSurface. Sampling the photograph here
+        // regardless would put the one stretched, blurry thing this page was
+        // built to avoid back on screen, in the very rectangle the reader is
+        // looking straight at.
+        diffuseColor = uFlatPaper > 0.5
+          ? vec4(uBarePaper, 1.0)
+          : texture2D(uBaseTexture, vMapUv);
       } else if (uAnyVerseHidden > 0.5) {
         // 2. Check Individual Verse Masking with SDF (Rounded rectangles)
         //

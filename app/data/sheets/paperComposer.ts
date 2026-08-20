@@ -787,6 +787,12 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       // and the only kind a single full-resolution capture cannot serve. See
       // `SurahFeatures.progressivePageTexture` / `PageTextureLod`.
       progressivePageTexture: true,
+      // ...and for the same reason it is the only kind the paper PHOTOGRAPH
+      // cannot serve either: stretched this wide it has no grain left to show,
+      // and a zoom magnifies the blur rather than the paper. Its own background
+      // colour is sharper at every distance than a photograph it has outgrown.
+      // See `SurahFeatures.flatPaperSurface`.
+      flatPaperSurface: true,
     },
 
     dimensions: {

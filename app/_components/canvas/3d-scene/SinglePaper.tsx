@@ -390,6 +390,20 @@ export const SinglePaper: FC<SinglePaperProps> = ({
   onReady,
 }) => {
   const runtime = useSurahLayoutRuntime();
+
+  /**
+   * A page that has outgrown the paper photograph draws neither it nor the
+   * normal map — see `SurahFeatures.flatPaperSurface`. Resolved HERE rather
+   * than at the call sites so no caller can pass a paper a surface it cannot
+   * show properly, and so the flag follows the active paper across a switch.
+   */
+  const effectiveToggles = useMemo<TextureToggles>(
+    () =>
+      runtime.config.features.flatPaperSurface
+        ? { diffuse: false, normal: false }
+        : toggles,
+    [runtime.config.features.flatPaperSurface, toggles],
+  );
   const foldSound = useRef<HTMLAudioElement | null>(null);
   const lastActiveStage = useRef<number>(0);
 
@@ -538,7 +552,7 @@ export const SinglePaper: FC<SinglePaperProps> = ({
           key={panel.id}
           panel={panel}
           isFolded={isFolded}
-          toggles={toggles}
+          toggles={effectiveToggles}
           globalFoldAngles={globalFoldAngles}
           onReady={idx === 0 ? onReady : undefined}
           isPrimary={idx === 0}

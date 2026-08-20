@@ -47,6 +47,7 @@ import { usePaperStore } from "../../../stores/usePaperStore";
 import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
+  FLAT_PAGE_BG_COLOR,
   FONT_FAMILY_NAMES,
   HANDWRITTEN_FONT,
   LATIN_VERSE_FONT,
@@ -260,6 +261,21 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
    */
   const useLod = runtime.config.features.progressivePageTexture === true;
   const virtualSceneRef = useRef<Scene | null>(null);
+
+  /**
+   * A page that carries no photograph of paper — see
+   * `SurahFeatures.flatPaperSurface`. It drops the grunge frame with it: the
+   * frame is 3440 x 2430 stretched over a seven-unit page, so a section zoom
+   * magnifies it well past its own detail exactly as it did the paper, and it
+   * is the last stretched raster left on this page.
+   *
+   * The page colour moves with it, and has to. `PAGE_BG_COLOR` is what the
+   * buffer is CLEARED to, and the photograph used to be painted over all of
+   * it — so leaving the clear colour showing does not just remove a texture,
+   * it lightens the page by 15% and tints it pink. See `FLAT_PAGE_BG_COLOR`.
+   */
+  const isFlatPaper = runtime.config.features.flatPaperSurface === true;
+  const pageBgColor = isFlatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR;
 
   /**
    * How finely the text on THIS page is worth drawing — see
@@ -505,7 +521,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
         frames={mapFrames}
         samples={colorSamples}
       >
-        <color attach="background" args={[PAGE_BG_COLOR]} />
+        <color attach="background" args={[pageBgColor]} />
 
         <OrthographicCamera
           makeDefault
@@ -567,16 +583,18 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
           )}
         </Suspense>
 
-        <mesh position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, 2]}>
-          <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />
-          <meshBasicMaterial
-            map={frameTexture}
-            transparent={true}
-            opacity={FRAME_OPACITY}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </mesh>
+        {!isFlatPaper && (
+          <mesh position={[runtime.PAGE_WIDTH / 2, -runtime.PAGE_HEIGHT / 2, 2]}>
+            <planeGeometry args={[runtime.PAGE_WIDTH, runtime.PAGE_HEIGHT]} />
+            <meshBasicMaterial
+              map={frameTexture}
+              transparent={true}
+              opacity={FRAME_OPACITY}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        )}
       </RenderTexture>
 
       {toggles.normal && (

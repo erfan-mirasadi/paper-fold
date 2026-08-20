@@ -8,6 +8,31 @@ export const TEXT_LABEL = "#4a423a";
 // ----------------------------------------------------------------------------
 export const INNER_CARD_BG = "#ffffff";
 export const PAGE_BG_COLOR = "#f4efec";
+/**
+ * The page colour for a paper that draws NO photograph of paper on itself —
+ * see `SurahFeatures.flatPaperSurface`.
+ *
+ * MEASURED, not chosen. `PAGE_BG_COLOR` was never what those pages looked
+ * like: it is the colour the render target is CLEARED to, and the paper
+ * photograph was then drawn opaquely over the whole of it, so what the reader
+ * actually saw was the photograph's own average. Dropping the photograph and
+ * leaving the clear colour showing therefore did not remove a texture — it
+ * also lightened the page from 212 to 244 and swapped a warm neutral grey for
+ * a pink cream. The page went pale and slightly rosy, which is exactly the
+ * complaint.
+ *
+ * This is that average, sampled off the real assets: the photograph means
+ * #d8d6d2, and the grunge frame (black at 0.115 average alpha, laid over it at
+ * FRAME_OPACITY) brought it to #d4d3ce. Since a flat paper drops the frame as
+ * well, this one number stands in for both and the page lands back where it
+ * was.
+ *
+ * The material's own `color` is deliberately NOT touched: the page reads as
+ * (material colour x page texture), so restoring the texture's background to
+ * what the photograph averaged reproduces the old result exactly, and every
+ * other surah keeps its own arithmetic untouched.
+ */
+export const FLAT_PAGE_BG_COLOR = "#d4d3ce";
 export const CIRCLE_BORDER = "#8e8e8e";
 
 // ----------------------------------------------------------------------------
