@@ -134,11 +134,11 @@ const { placements, paperWidth, paperHeight } = layOutGrid({
  * any of the authored sheets. The placements move with the new page centre,
  * so the extra paper is shared evenly by both sides.
  *
- * It went from 1.1 to 1.14 when the frames arrived, then to 1.18 to add a
- * little more side margin. The sheets and frames are only re-centred below;
+ * It went from 1.1 to 1.14 when the frames arrived, then to 1.24 to add more
+ * side margin. The sheets and frames are only re-centred below;
  * none of their authored geometry is scaled or stretched.
  */
-const PAPER_WIDTH_SCALE = 1.18;
+const PAPER_WIDTH_SCALE = 1.24;
 const widerPaperWidth = paperWidth * PAPER_WIDTH_SCALE;
 
 /**
