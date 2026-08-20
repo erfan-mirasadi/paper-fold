@@ -278,6 +278,8 @@ function GridBlock({
               translationTextHighlights={override?.translationTextHighlights}
               versePadding={override?.versePadding}
               translationPadding={override?.translationPadding}
+              lineHeight={override?.lineHeight}
+              translationLineHeight={override?.translationLineHeight}
               textAlignOverride={override?.translationTextAlign}
               domeDir={override?.verseShape === "dome-up" ? "up" : override?.verseShape === "dome-down" ? "down" : undefined}
               domeSideRatio={override?.domeSideRatio}
@@ -445,7 +447,9 @@ export function BlockRenderer({
           textScaleOverride={activeLanguage !== "ar" ? (introOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (introOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
           verseId={introVerseNum}
           versePadding={introOverride?.versePadding}
-          translationPadding={introOverride?.translationPadding} />
+          translationPadding={introOverride?.translationPadding}
+          lineHeight={introOverride?.lineHeight}
+          translationLineHeight={introOverride?.translationLineHeight} />
       )}
 
       {/* All verse groups — keyed by flat index for both engines */}
@@ -474,7 +478,9 @@ export function BlockRenderer({
           textScaleOverride={activeLanguage !== "ar" ? (outroOverride?.translationTextScaleOverride ?? config.globalSettings?.translationVerseTextScale ?? undefined) : (outroOverride?.textScaleOverride ?? config.globalSettings?.verseTextScale ?? undefined)}
           verseId={outroVerseNum}
           versePadding={outroOverride?.versePadding}
-          translationPadding={outroOverride?.translationPadding} />
+          translationPadding={outroOverride?.translationPadding}
+          lineHeight={outroOverride?.lineHeight}
+          translationLineHeight={outroOverride?.translationLineHeight} />
       )}
 
       {/* SideCurves — single instance spanning ALL groups */}

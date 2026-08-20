@@ -777,6 +777,40 @@ export interface VerseOverrideConfig {
   versePadding?: number;
   /** The EN/TR padding, replacing `versePadding` there — see `versePadding`. */
   translationPadding?: number;
+  /**
+   * LINE SPACING for this capsule's ARABIC text, as a multiple of its own font
+   * size. Defaults to 1.2 — the number every page has always drawn with, and
+   * the one the capsule-height arithmetic in the sheet headers assumes.
+   *
+   * Raise it when the lines of a capsule COLLIDE. The Qur'an font hangs its
+   * vowel marks well above the letters and its descenders well below them, so
+   * a capsule set large enough to fill its box can have the marks of the lower
+   * line reaching into the ink of the upper one. 1.2 is the gap between
+   * BASELINES; no amount of padding moves it, and neither does the capsule's
+   * height — only this does.
+   *
+   * IT SPENDS CAPSULE HEIGHT, which is fixed. CanvasText draws into a canvas
+   * the size of the capsule and CLIPS whatever runs past it, so the ink still
+   * has to fit:
+   *
+   *     fontSize × ((lines − 1) × lineHeight + 1.05) ≤ capsuleHeight − 0.012
+   *
+   * where fontSize is `0.071 × textScaleOverride` on a non-pill capsule. If a
+   * raise starts shaving the top line, that is the budget that ran out: take
+   * the scale down a little, or give the capsule more height.
+   *
+   * ARABIC ONLY, unlike `versePadding` — the translations keep their own 1.06,
+   * which is tuned for a script that hangs nothing above its letters and would
+   * only lose room it needs to wrap. `translationLineHeight` is where an EN/TR
+   * line is moved.
+   */
+  lineHeight?: number;
+  /**
+   * The EN/TR line spacing, as a multiple of the font size. Defaults to 1.06
+   * and is INDEPENDENT of `lineHeight` — see there for the height budget it
+   * spends.
+   */
+  translationLineHeight?: number;
   /** Direct hex color for the verse box background (also used by paper masking) */
   bg?: string;
   /** Direct hex color for the verse border / circle decorations */

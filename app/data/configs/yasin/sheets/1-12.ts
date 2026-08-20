@@ -77,7 +77,9 @@
  * Each one is the size at which that capsule's ink — vowel marks and descenders
  * included — just clears its own rule:
  *
- *     ink height ≈ 0.071 × override × ((lines − 1) × 1.2 + 1.05)
+ *     ink height ≈ 0.071 × override × ((lines − 1) × lineHeight + 1.05)
+ *
+ * where lineHeight is 1.2 unless the capsule sets its own (ayah 12 does)
  *                ≤ capsule height − 0.012   ← the Arabic block is drawn 0.006
  *                                             low, so the bottom edge binds
  *
@@ -358,6 +360,16 @@ export const YASIN_36_CONFIG: SurahLayoutConfig = {
       expandH: 0.01,
       frameScaleLTR: 1.1,
       circleTextCol: "#7C2C2A",
+      // THE PAGE'S ONLY TWO-LINE CAPSULE THAT STAYS TWO LINES, and at 0.87 it
+      // is also the largest Arabic on the sheet — big enough that at the
+      // renderer's default 1.2 baseline gap the fatha and sukun riding above
+      // "وَآثَارَهُمْ" ran into the descenders of "قَدَّمُوا" on the line over it.
+      // 1.5 opens the two lines apart; nothing else on the sheet moves.
+      //
+      // IT FITS: 0.071 × 0.87 × (1.5 + 1.05) = 0.137 against this capsule's
+      // 0.185 − 0.012 = 0.173. That is the budget in the header, and it is
+      // what caps this number — see `VerseOverrideConfig.lineHeight`.
+      lineHeight: 1.5,
       textScaleOverride: 0.87,
       translationTextScaleOverride: 0.57,
       showNumber: true,

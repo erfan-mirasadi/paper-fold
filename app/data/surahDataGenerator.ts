@@ -47,6 +47,10 @@ export interface VerseConfig {
   /** See `VerseOverrideConfig.versePadding`. */
   versePadding?: number;
   translationPadding?: number;
+  /** See `VerseOverrideConfig.lineHeight` — the Arabic line spacing. */
+  lineHeight?: number;
+  /** See `VerseOverrideConfig.translationLineHeight` — the EN/TR one. */
+  translationLineHeight?: number;
   isPill?: boolean;
   /** Half-oval/dome shape for the capsule — see `VerseOverrideConfig.verseShape`. */
   verseShape?: "capsule" | "dome-up" | "dome-down";
@@ -236,6 +240,8 @@ export function buildVerseConfigs(
           translationTextAlign,
           versePadding,
           translationPadding,
+          lineHeight: override?.lineHeight,
+          translationLineHeight: override?.translationLineHeight,
           isPill,
           isSectionIntroOutro: !isGridVerse,
           customFrameSvg: override?.customFrameSvg,
@@ -286,6 +292,8 @@ export function buildVerseConfigs(
           translationTextAlign: override?.translationTextAlign,
           versePadding: override?.versePadding,
           translationPadding: override?.translationPadding,
+          lineHeight: override?.lineHeight,
+          translationLineHeight: override?.translationLineHeight,
           isPill: override?.isPill ?? false,
           customFrameSvg: override?.customFrameSvg,
           frameScaleLTR: override?.frameScaleLTR,
@@ -402,6 +410,8 @@ export function buildVerseConfigs(
         translationTextAlign,
         versePadding,
         translationPadding,
+        lineHeight: override?.lineHeight,
+        translationLineHeight: override?.translationLineHeight,
         isPill: override?.isPill,
         forceShowNumber: override?.showNumber,
         showAyahNumber: override?.showAyahNumber,

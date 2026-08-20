@@ -144,15 +144,15 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
   useEffect(() => {
     const updateCursor = () => {
       const { phase, isAllSectionsMode } = useElevatedStore.getState();
-      const { currentOffset, isIntroActive } = useFoldStore.getState();
-      const isPaperFolded = currentOffset < 0.98;
+      const { isIntroActive } = useFoldStore.getState();
 
-      if (
-        isPaperFolded &&
-        phase === "elevated" &&
-        !isIntroActive &&
-        !isAllSectionsMode
-      ) {
+      // Framed a section → the entire window is a zoom-out target, whatever the
+      // scroll has done to the folds. This used to be gated on the paper still
+      // being folded, so a reader who had scrolled to the end — the usual place
+      // to read from — got a zoomed page with no cursor saying how to leave it.
+      // The background mesh already dismissed on a click from here; only the
+      // cursor was missing, and `VerseClickHitboxes` stands down to match.
+      if (phase === "elevated" && !isIntroActive && !isAllSectionsMode) {
         document.body.style.cursor = "zoom-out";
       } else {
         if (document.body.style.cursor === "zoom-out") {

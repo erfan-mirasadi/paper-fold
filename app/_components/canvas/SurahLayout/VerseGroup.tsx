@@ -305,6 +305,8 @@ export function VerseGroup({
                 translationTextHighlights={override?.translationTextHighlights}
                 versePadding={override?.versePadding}
                 translationPadding={override?.translationPadding}
+                lineHeight={override?.lineHeight}
+                translationLineHeight={override?.translationLineHeight}
               />
             ) : (
               <VerseBox
@@ -333,6 +335,8 @@ export function VerseGroup({
                 translationTextHighlights={override?.translationTextHighlights}
                 versePadding={override?.versePadding}
                 translationPadding={override?.translationPadding}
+                lineHeight={override?.lineHeight}
+                translationLineHeight={override?.translationLineHeight}
                 textAlignOverride={override?.translationTextAlign}
                 forceShowNumber={override?.showNumber}
                 showAyahNumber={override?.showAyahNumber}

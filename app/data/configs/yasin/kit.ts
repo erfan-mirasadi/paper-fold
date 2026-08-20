@@ -293,6 +293,25 @@ export interface CapsuleSpec {
   arPad?: number;
   /** The same, for the EN/TR text. See `arPad`. */
   latPad?: number;
+  /**
+   * THE GAP BETWEEN THIS CAPSULE'S ARABIC BASELINES, in multiples of its font
+   * size. Defaults to `LINE_EM` (1.2), which is what the renderer draws with
+   * everywhere it is not asked otherwise.
+   *
+   * Raise it on a two-line capsule whose lines TOUCH — the marks hanging above
+   * the lower line reaching into the descenders of the upper one. Padding
+   * cannot fix that; it is the baseline gap, and this is the only thing that
+   * moves it. See `VerseOverrideConfig.lineHeight` for the full story.
+   *
+   * The auto-fit reads it, so a capsule left without an `arScale` is fitted to
+   * the taller block this asks for rather than clipped by it. A capsule WITH a
+   * measured `arScale` is on its own: that number was read off the capsule at
+   * 1.2, and spreading the lines apart spends height it may not have — check
+   * the top line still clears the rule, or take the scale down a notch.
+   */
+  arLineHeight?: number;
+  /** The same, for the EN/TR text (default 1.06). See `arLineHeight`. */
+  latLineHeight?: number;
 }
 
 /**
@@ -533,29 +552,38 @@ const AR_SCALE_CAP = 1;
 const PAD_X = 0.016;
 const PAD_Y = 0.022;
 
-function fitArabicScale(text: string, w: number, h: number): number {
+function fitArabicScale(
+  text: string,
+  w: number,
+  h: number,
+  lineEm: number = LINE_EM,
+): number {
   const lines = text.split("\n");
   const widestWords = Math.max(
     ...lines.map((l) => l.trim().split(/\s+/).length),
   );
   const byWidth = (w - PAD_X) / (AR_EM * AR_WORD_EM * widestWords);
-  const byHeight = (h - PAD_Y) / (AR_EM * LINE_EM * lines.length);
+  const byHeight = (h - PAD_Y) / (AR_EM * lineEm * lines.length);
   return Math.min(byWidth, byHeight, AR_SCALE_CAP);
 }
 
 /** The same for a translation: Latin runs to the CHARACTER, not the word. */
 const LAT_EM = 0.071;
 const LAT_CHAR_EM = 0.36;
+const LAT_LINE_EM = 1.06;
 
-function fitLatinScale(text: string, w: number, h: number): number {
+function fitLatinScale(
+  text: string,
+  w: number,
+  h: number,
+  lineEm: number = LAT_LINE_EM,
+): number {
   const lines = text.split("\n");
   const widest = Math.max(...lines.map((l) => l.trim().length));
   const byWidth = (w - PAD_X) / (LAT_EM * LAT_CHAR_EM * widest);
-  const byHeight = (h - 0.012) / (LAT_EM * 1.06 * lines.length);
+  const byHeight = (h - 0.012) / (LAT_EM * lineEm * lines.length);
   return Math.min(byWidth, byHeight, 0.9);
 }
-
-const LAT_LINE_EM = 1.06;
 
 /**
  * How much of a domed capsule's width its text can actually reach. VerseBox
@@ -585,18 +613,24 @@ function domeWidthFactor(h: number, textH: number, sideRatio: number): number {
  * rectangle under it, which is exactly what a page of even capsules must not do.
  */
 function fitInDome(
-  fit: (text: string, w: number, h: number) => number,
+  fit: (text: string, w: number, h: number, lineEm?: number) => number,
   text: string,
   w: number,
   h: number,
   lineH: number,
+  lineEm?: number,
 ): number {
   const fitH = h - DOME_EXTRA_H;
   const lines = text.split("\n").length;
-  let scale = fit(text, w, fitH);
+  let scale = fit(text, w, fitH, lineEm);
   for (let i = 0; i < 2; i++) {
     const textH = lineH * lines * scale;
-    scale = fit(text, w * domeWidthFactor(h, textH, DOME_SIDE_RATIO), fitH);
+    scale = fit(
+      text,
+      w * domeWidthFactor(h, textH, DOME_SIDE_RATIO),
+      fitH,
+      lineEm,
+    );
   }
   return scale;
 }
@@ -875,15 +909,27 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
     // sized by it would wrap the moment its padding went up.
     const arW = capW - arPad * 2;
     const latW = capW - latPad * 2;
+    // The baseline gap this capsule sets on — see `CapsuleSpec.arLineHeight`.
+    // The fits below are given it too, so opening the lines up costs the text
+    // its own size rather than the bottom of the capsule.
+    const arLineEm = c.arLineHeight ?? LINE_EM;
+    const latLineEm = c.latLineHeight ?? LAT_LINE_EM;
     // A dome's text is bounded by the arch, not by the capsule's own width.
     const fitAr = (t: string) =>
       c.shape
-        ? fitInDome(fitArabicScale, t, arW, p.height, AR_EM * LINE_EM)
-        : fitArabicScale(t, arW, p.height);
+        ? fitInDome(fitArabicScale, t, arW, p.height, AR_EM * arLineEm, arLineEm)
+        : fitArabicScale(t, arW, p.height, arLineEm);
     const fitLat = (t: string) =>
       c.shape
-        ? fitInDome(fitLatinScale, t, latW, p.height, LAT_EM * LAT_LINE_EM)
-        : fitLatinScale(t, latW, p.height);
+        ? fitInDome(
+            fitLatinScale,
+            t,
+            latW,
+            p.height,
+            LAT_EM * latLineEm,
+            latLineEm,
+          )
+        : fitLatinScale(t, latW, p.height, latLineEm);
     verseOverrides[p.verseIds[ci]] = {
       bg: tone.bg,
       border: tone.border,
@@ -905,6 +951,8 @@ export function buildSheet(spec: SheetSpec): BuiltSheet {
       // effect but would put the number on every capsule of every sheet.
       ...(arPad ? { versePadding: arPad } : {}),
       ...(latPad ? { translationPadding: latPad } : {}),
+      ...(c.arLineHeight ? { lineHeight: c.arLineHeight } : {}),
+      ...(c.latLineHeight ? { translationLineHeight: c.latLineHeight } : {}),
       ...(c.shape
         ? { verseShape: c.shape, domeSideRatio: DOME_SIDE_RATIO }
         : {}),

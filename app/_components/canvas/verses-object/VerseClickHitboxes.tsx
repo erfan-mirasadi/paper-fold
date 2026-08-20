@@ -231,12 +231,19 @@ export function VerseClickHitboxes() {
    */
   const wouldElevate = (e: ThreeEvent<PointerEvent | MouseEvent>) => {
     const offset = useFoldStore.getState().currentOffset;
-    const phase = useElevatedStore.getState().phase;
-    const isPaperFolded = offset < 0.98;
+    const { phase, isAllSectionsMode } = useElevatedStore.getState();
 
-    // Already zoomed in on a folded paper: the background mesh owns the press,
-    // and the global cursor style owns the zoom-out it shows for it.
-    if (isPaperFolded && phase === "elevated") return false;
+    // ALREADY ZOOMED IN: every hitbox stands down. Once a section is framed the
+    // whole window is one big zoom-out target — the background mesh takes the
+    // press and dismisses, and `Experience` paints the page-wide `zoom-out`
+    // cursor that advertises it. A hitbox that kept answering here would break
+    // both halves of that at once: it stops propagation, so the press never
+    // reached the background and nothing happened, and it painted `zoom-in`
+    // over the top, promising a zoom that was not going to arrive.
+    //
+    // All-sections mode is its own thing and keeps its own rules (only the
+    // return button leaves it), so it is left alone.
+    if (phase === "elevated" && !isAllSectionsMode) return false;
 
     // When the paper is folded, hitboxes below the folded part remain active in
     // the empty space. Reject presses that land on these "invisible" hitboxes
@@ -305,9 +312,12 @@ export function VerseClickHitboxes() {
   };
 
   const handlePointerOut = () => {
-    // Only reset if we set it — avoid fighting with drag cursors
-    const cur = document.body.style.cursor;
-    if (cur === "zoom-in" || cur === "zoom-out") {
+    // Only clear the magnifier THIS component sets. `zoom-out` belongs to
+    // `Experience`, which paints it for the whole window while a section is
+    // framed and only re-asserts it when a store changes — clearing it here
+    // would blank the cursor the moment the pointer crossed a hitbox and leave
+    // it blank, since leaving a hitbox is not a store change.
+    if (document.body.style.cursor === "zoom-in") {
       document.body.style.cursor = "";
     }
   };

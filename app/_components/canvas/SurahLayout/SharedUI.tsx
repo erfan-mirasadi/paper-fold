@@ -772,6 +772,12 @@ interface VerseBoxProps {
   /** The EN/TR padding, replacing `versePadding` there — see
    * `VerseOverrideConfig.translationPadding`. */
   translationPadding?: number;
+  /** Arabic line spacing, in multiples of the font size (default 1.2) — see
+   * `VerseOverrideConfig.lineHeight`. */
+  lineHeight?: number;
+  /** EN/TR line spacing (default 1.06), independent of `lineHeight` — see
+   * `VerseOverrideConfig.translationLineHeight`. */
+  translationLineHeight?: number;
   /** Stacks the page's single ayah number under the chunk counter — see
    * `VerseOverrideConfig.showAyahNumber`. */
   showAyahNumber?: boolean;
@@ -824,6 +830,8 @@ export const VerseBox = ({
   forceShowNumber = false,
   versePadding,
   translationPadding,
+  lineHeight,
+  translationLineHeight,
   showAyahNumber = false,
   ayahBadgeBg,
   ayahBadgeBorderCol,
@@ -865,7 +873,13 @@ export const VerseBox = ({
   const showVerseNumber =
     forceShowNumber ||
     (!hideNumber && !(activeStoryConfig?.features?.hideVerseNumbers ?? false));
-  const textLineHeight = isArabic ? 1.2 : 1.06;
+  // THE GAP BETWEEN BASELINES, in multiples of the font size. The two
+  // defaults are what every page has always drawn with; a single capsule whose
+  // marks collide with the line under it opens its own up, and each language
+  // does so on its own — see `VerseOverrideConfig.lineHeight`.
+  const textLineHeight = isArabic
+    ? (lineHeight ?? 1.2)
+    : (translationLineHeight ?? 1.06);
   const nonArabicTextTighten = 1;
 
   const shrinkX = 0.001;
@@ -1148,6 +1162,10 @@ interface SplitVerseCapsulesProps {
   baseRenderOrder?: number;
   versePadding?: number;
   translationPadding?: number;
+  /** See `VerseOverrideConfig.lineHeight`. */
+  lineHeight?: number;
+  /** See `VerseOverrideConfig.translationLineHeight`. */
+  translationLineHeight?: number;
 }
 export const SplitVerseCapsules = ({
   x,
@@ -1173,6 +1191,8 @@ export const SplitVerseCapsules = ({
   baseRenderOrder,
   versePadding,
   translationPadding,
+  lineHeight,
+  translationLineHeight,
 }: SplitVerseCapsulesProps) => {
   const zOrder = baseRenderOrder !== undefined ? baseRenderOrder : 10;
 
@@ -1245,6 +1265,8 @@ export const SplitVerseCapsules = ({
         hideNumber
         versePadding={versePadding}
         translationPadding={translationPadding}
+        lineHeight={lineHeight}
+        translationLineHeight={translationLineHeight}
       />
       <VerseBox
         x={farX}
@@ -1268,6 +1290,8 @@ export const SplitVerseCapsules = ({
         hideNumber
         versePadding={versePadding}
         translationPadding={translationPadding}
+        lineHeight={lineHeight}
+        translationLineHeight={translationLineHeight}
       />
     </group>
   );

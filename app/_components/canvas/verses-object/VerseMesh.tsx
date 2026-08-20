@@ -72,6 +72,10 @@ export interface VerseMeshProps {
   /** See `VerseOverrideConfig.versePadding`. */
   versePadding?: number;
   translationPadding?: number;
+  /** See `VerseOverrideConfig.lineHeight`. */
+  lineHeight?: number;
+  /** See `VerseOverrideConfig.translationLineHeight`. */
+  translationLineHeight?: number;
   suppressShadow?: boolean;
   shadowRenderOrder?: number;
   customFrameSvg?: string;
@@ -185,6 +189,8 @@ export function VerseMesh({
   translationTextAlign,
   versePadding,
   translationPadding,
+  lineHeight,
+  translationLineHeight,
   suppressShadow = false,
   shadowRenderOrder,
   customFrameSvg,
@@ -447,6 +453,8 @@ export function VerseMesh({
                         textScaleOverride={textScaleOverride}
                         versePadding={versePadding}
                         translationPadding={translationPadding}
+                        lineHeight={lineHeight}
+                        translationLineHeight={translationLineHeight}
                         opacity={combinedOpacity}
                         baseRenderOrder={baseRenderOrder}
                       />
@@ -473,6 +481,8 @@ export function VerseMesh({
                         textAlignOverride={translationTextAlign}
                         versePadding={versePadding}
                         translationPadding={translationPadding}
+                        lineHeight={lineHeight}
+                        translationLineHeight={translationLineHeight}
                         isPill={isPill}
                         domeDir={domeDir}
                         domeSideRatio={domeSideRatio}
