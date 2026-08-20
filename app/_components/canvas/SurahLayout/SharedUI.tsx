@@ -106,6 +106,43 @@ interface RoundedShapeProps {
   /** Straight-wall fraction (0–1) before the arch begins. Defaults to 0.35. */
   domeSideRatio?: number;
 }
+/**
+ * Rounded-rect geometries, shared between every capsule that happens to be the
+ * same size.
+ *
+ * A page is built out of a few shapes repeated a great many times: a verse
+ * capsule, a label, a badge. Each one used to triangulate its own outline
+ * (`ShapeGeometry` runs earcut) and upload its own buffer — an atlas page came
+ * to hundreds of them, nearly all duplicates of a handful of distinct
+ * rectangles. The triangulation is paid at mount, which is exactly the moment
+ * a page is already slow: first load, and every paper switch.
+ *
+ * NOT AN LRU, deliberately. Evicting would mean disposing a geometry that
+ * meshes still on screen are drawing from, and the reward for getting that
+ * wrong is an invisible page. Instead the cache simply stops taking new entries
+ * once it is full, and callers past that point get their own geometry with the
+ * ordinary R3F lifetime. The set of distinct sizes a layout produces is small
+ * and does not grow with reading, so the cap is a guard rather than a limit.
+ */
+const MAX_CACHED_SHAPES = 256;
+const shapeGeometryCache = new Map<string, THREE.ShapeGeometry>();
+
+/** Rounded so that sizes differing below a texel share one geometry. */
+const q = (n: number) => Math.round(n * 10000) / 10000;
+
+function getCachedShapeGeometry(
+  key: string,
+  build: () => THREE.Shape,
+): THREE.ShapeGeometry | null {
+  const hit = shapeGeometryCache.get(key);
+  if (hit) return hit;
+  if (shapeGeometryCache.size >= MAX_CACHED_SHAPES) return null;
+
+  const geometry = new THREE.ShapeGeometry(build());
+  shapeGeometryCache.set(key, geometry);
+  return geometry;
+}
+
 export function RoundedShapeComponent({
   w,
   h,
@@ -116,7 +153,8 @@ export function RoundedShapeComponent({
   dome,
   domeSideRatio = 0.2,
 }: RoundedShapeProps) {
-  const shape = useMemo(() => {
+  const buildShape = useMemo(() => {
+    const make = () => {
     if (dome) {
       return buildDomeShape(w, h, dome, domeSideRatio);
     }
@@ -155,8 +193,24 @@ export function RoundedShapeComponent({
       s.quadraticCurveTo(0, 0, rx, 0);
     }
     return s;
+    };
+    return make;
   }, [w, h, radius, topOnly, bottomOnly, xMultiplier, dome, domeSideRatio]);
-  return <shapeGeometry args={[shape]} />;
+
+  const cacheKey = `${q(w)}|${q(h)}|${q(radius)}|${topOnly ? 1 : 0}|${
+    bottomOnly ? 1 : 0
+  }|${q(xMultiplier)}|${dome ?? "-"}|${q(domeSideRatio)}`;
+
+  const shared = useMemo(
+    () => getCachedShapeGeometry(cacheKey, buildShape),
+    [cacheKey, buildShape],
+  );
+
+  // Shared entry: handed over as a prop-style primitive, which R3F treats as
+  // externally owned and never disposes. Past the cap, fall back to the
+  // original per-instance geometry and its ordinary R3F lifetime.
+  if (shared) return <primitive object={shared} attach="geometry" />;
+  return <shapeGeometry args={[buildShape()]} />;
 }
 
 interface UiRectProps {

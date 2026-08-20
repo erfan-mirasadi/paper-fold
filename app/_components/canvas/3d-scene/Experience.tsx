@@ -1,6 +1,7 @@
 "use client";
 import { SpotLight } from "@react-three/drei";
 import { a } from "@react-spring/three";
+import dynamic from "next/dynamic";
 import {
   Suspense,
   useCallback,
@@ -32,6 +33,35 @@ import { ViewSpinGroup } from "../orchestrator/ViewSpinGroup";
 import { useStoryStore } from "../../../stores/useStoryStore";
 import { usePaperStore } from "../../../stores/usePaperStore";
 import { PageSpaceAnchor } from "./PageSpaceAnchor";
+
+/**
+ * The two development read-outs, behind `dynamic()` ON PURPOSE.
+ *
+ * A plain `import { Perf } from "r3f-perf"` at the top of this file puts the
+ * whole library — ~78 KB gzipped, and its own bundled copy of zustand — into the
+ * production chunk, because a `NODE_ENV` check at the JSX call site guards when
+ * the component RENDERS and not whether the module is SHIPPED. A dynamic import
+ * that only the development branch ever reaches leaves it out of the build
+ * entirely, which is the whole point of `Experience` being code-split to begin
+ * with.
+ *
+ * Keep both. Between them they answer "is this frame expensive" (Perf) and "is
+ * this device getting the quality it should, and is anything leaking"
+ * (DevStatsOverlay) — the two questions this project keeps having to ask.
+ */
+const Perf = dynamic(
+  () => import("r3f-perf").then((m) => ({ default: m.Perf })),
+  { ssr: false },
+);
+const DevStatsOverlay = dynamic(
+  () =>
+    import("../dev/DevStatsOverlay").then((m) => ({
+      default: m.DevStatsOverlay,
+    })),
+  { ssr: false },
+);
+
+const IS_DEV = process.env.NODE_ENV === "development";
 
 interface ExperienceProps {
   isFolded?: boolean;
@@ -168,7 +198,12 @@ export function Experience({ isFolded = false, onReady }: ExperienceProps) {
 
   return (
     <>
-      {/* {process.env.NODE_ENV === "development" && <Perf position="top-left" />} */}
+      {IS_DEV && (
+        <>
+          <Perf position="top-left" />
+          <DevStatsOverlay />
+        </>
+      )}
       {/*
        * The PerspectiveCamera + DynamicControls live in SurahViewer, OUTSIDE
        * this paper-keyed subtree, so the camera survives paper switches.

@@ -54,6 +54,13 @@ export const PageZoomDensityContext = createContext<
  */
 const DEFAULT_TEXELS_PER_UNIT = 3072;
 
+/**
+ * The single quad every piece of text on every page is drawn on, stretched to
+ * size by the mesh's own scale. Module scope, never disposed — see the mesh
+ * below for why it is handed over as a prop and not written as a child.
+ */
+const UNIT_PLANE = new THREE.PlaneGeometry(1, 1);
+
 interface CanvasTextSegment {
   /** This segment's text, concatenated directly after the previous segment (no auto-spacing). */
   text: string;
@@ -494,8 +501,31 @@ export function CanvasText({
   if (!texture) return null;
 
   return (
-    <mesh position={position} renderOrder={renderOrder}>
-      <planeGeometry args={[width, height]} />
+    /*
+     * ONE quad, scaled — not a new PlaneGeometry per piece of text.
+     *
+     * `<planeGeometry args={[width, height]} />` built and uploaded a separate
+     * two-triangle buffer for every label, badge, verse and note on the page.
+     * On a composed atlas that was over two hundred of them, each allocated,
+     * uploaded and tracked by three for the lifetime of the page, all describing
+     * the same rectangle at different sizes — something a scale already
+     * expresses exactly.
+     *
+     * Passed as a PROP rather than as a JSX child on purpose: a geometry written
+     * as a child belongs to R3F, which disposes it when the mesh unmounts, and
+     * disposing a shared singleton would take every other text on the page down
+     * with it. As a prop it stays ours, and it is a module constant that lives
+     * as long as the tab.
+     *
+     * Pixel-identical: the plane is flat and z is left at 1, so its normal is
+     * untouched and only the two in-plane axes are stretched.
+     */
+    <mesh
+      position={position}
+      renderOrder={renderOrder}
+      geometry={UNIT_PLANE}
+      scale={[width, height, 1]}
+    >
       {children ? (
         cloneElement(
           children as React.ReactElement<{ map: THREE.CanvasTexture }>,

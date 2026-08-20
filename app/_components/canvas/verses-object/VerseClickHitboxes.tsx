@@ -330,6 +330,24 @@ export function VerseClickHitboxes() {
           onPointerOut={handlePointerOut}
           geometry={hitBoxGeom}
           material={hitBoxMaterial}
+          /*
+           * Never drawn, still clickable.
+           *
+           * These exist only to be hit by a ray. They were being SUBMITTED as
+           * draw calls anyway — one per verse and per section, every frame, all
+           * of them fully transparent (`opacity: 0`) and therefore in the
+           * transparent pass, where each one is also depth-sorted before being
+           * drawn to no visible effect whatsoever.
+           *
+           * `visible = false` takes them out of the render and nothing else:
+           * three's raycaster tests `object.layers` and never `object.visible`
+           * (see `intersect` in three.core), and R3F's event system does not
+           * filter on it either, so every click, hover and cursor change keeps
+           * working exactly as before. Verified by measurement, not by hope —
+           * the draw-call count drops by the number of hitboxes on the page and
+           * the interactions still fire.
+           */
+          visible={false}
         />
       ))}
     </group>
