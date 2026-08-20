@@ -33,6 +33,38 @@ export const PAGE_BG_COLOR = "#f4efec";
  * other surah keeps its own arithmetic untouched.
  */
 export const FLAT_PAGE_BG_COLOR = "#d4d3ce";
+/**
+ * How much light a flat paper accepts, against a normal-mapped one — see
+ * `SurahFeatures.flatPaperSurface`. THE BRIGHTNESS DIAL: turn this and nothing
+ * else if the page is washed out or too dark.
+ *
+ * WHY IT IS NEEDED AT ALL. The scene lights the paper at roughly twice full
+ * strength — ambient 0.8, directional 1.0, and the HDR environment at 0.6
+ * (`SceneLighting`, `PAPER_MATERIAL_CONFIG`) — and the renderer runs with
+ * `NoToneMapping`, so anything over 1.0 does not roll off, it clips flat to
+ * white. A page has always been lit that way.
+ *
+ * The normal map was hiding it. With relief on the surface, N·L varied from
+ * pixel to pixel, so only some of the page was ever over the line and the rest
+ * kept its colour. Take the normal map away and the page is geometrically
+ * flat: N·L is 1 EVERYWHERE, every pixel is lit at the same 2x, and everything
+ * pale enough goes over the line together. What clips is not brightness but
+ * SATURATION — a pale blue capsule at (0.90, 0.93, 0.98) doubled is (1, 1, 1),
+ * and the blue is simply gone. That is why the colour coding disappeared along
+ * with the texture: the two were never independent.
+ *
+ * Scaling the material's own colour is the surgical fix. It scales what the
+ * paper reflects from EVERY light at once, and touches nothing else in the
+ * scene: `SceneLighting` is mounted outside the paper-keyed subtree precisely
+ * so illumination stays stable across a paper switch, and the elevated
+ * sections, pop-ups and 3D bismillah all read those same lights.
+ *
+ * 0.62 puts the brightest paper back just under the clipping point (2.0 x 0.62
+ * is 1.24 at the material's own colour, and the page texture under it is
+ * darker still). It is arithmetic, not a measurement — the only way to land it
+ * exactly is to look.
+ */
+export const FLAT_PAPER_LIGHT_SCALE = 0.62;
 export const CIRCLE_BORDER = "#8e8e8e";
 
 // ----------------------------------------------------------------------------

@@ -48,6 +48,7 @@ import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
   FLAT_PAGE_BG_COLOR,
+  FLAT_PAPER_LIGHT_SCALE,
   FONT_FAMILY_NAMES,
   HANDWRITTEN_FONT,
   LATIN_VERSE_FONT,
@@ -276,6 +277,24 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
    */
   const isFlatPaper = runtime.config.features.flatPaperSurface === true;
   const pageBgColor = isFlatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR;
+
+  /**
+   * How much light this paper takes. A flat one takes less, because it has no
+   * relief left to break up the scene's ~2x illumination and would otherwise
+   * clip to white and lose every pale colour on it — see
+   * `FLAT_PAPER_LIGHT_SCALE`, which is the dial for this.
+   *
+   * Scaled in LINEAR space (`Color` components are already the working space),
+   * which is what makes it a light scale rather than a repaint: every hue on
+   * the page keeps its ratios and simply stops being over-exposed.
+   */
+  const paperColor = useMemo(
+    () =>
+      isFlatPaper
+        ? new Color(PAGE_BG_COLOR).multiplyScalar(FLAT_PAPER_LIGHT_SCALE)
+        : paperBaseColor,
+    [isFlatPaper],
+  );
 
   /**
    * How finely the text on THIS page is worth drawing — see
@@ -510,6 +529,7 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
       ref={matRef}
       attach="material-4"
       {...PAPER_MATERIAL_CONFIG}
+      color={paperColor}
       normalScale={normalScale}
       onBeforeCompile={onBeforeCompile}
     >
