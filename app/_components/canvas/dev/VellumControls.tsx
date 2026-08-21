@@ -35,7 +35,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { invalidate } from "@react-three/fiber";
 import { Vector3 } from "three";
 
+import { getActiveStoryConfig } from "../../../stores/useStoryStore";
 import {
+  CAPSULE_SHADOW,
+  CAPSULE_SHADOW_DEFAULTS,
+  CONTENT_DIALS,
+  setContentDial,
+  type ContentDial,
   VELLUM_DIALS,
   VELLUM_MATERIAL_DEFAULTS,
   VELLUM_MATERIAL_DIALS,
@@ -130,6 +136,7 @@ function writeStored(): void {
     for (const prop of Object.keys(VELLUM_MATERIAL_DIALS))
       mat[prop] = readVellumMaterial(prop as VellumMaterialDial);
     out.__material = mat;
+    out.__shadow = { ...CAPSULE_SHADOW };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
   } catch {
     /* a full or disabled localStorage must never take the panel down */
@@ -144,7 +151,28 @@ export function VellumControls() {
 
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Whether the page on screen is the one the shadow dials can reach. Read at
+  // render time; the panel re-renders whenever it is opened, which is the only
+  // moment this matters.
+  const features = getActiveStoryConfig().features;
+  const isVellumPage = Boolean(
+    features.flatPaperSurface && features.vellumSurface,
+  );
   const readouts = useRef<Record<string, HTMLSpanElement | null>>({});
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * The list is long enough that a trackpad is not always enough to get down it
+   * — and on the deployed page the panel may be the only thing a client can
+   * reach. Two buttons that page it are the difference between a tool they can
+   * use and one they cannot.
+   */
+  const page = useCallback((dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ top: dir * (el.clientHeight * 0.8), behavior: "smooth" });
+  }, []);
 
   // Restore a previous session's dials before the first paint that uses them.
   useEffect(() => {
@@ -191,6 +219,21 @@ export function VellumControls() {
     invalidate();
   }, []);
 
+  // What the shadow sliders are showing but have not yet applied — see the note
+  // at the input.
+  const pendingShadow = useRef<Partial<Record<ContentDial, number>>>({});
+  const commitShadow = useCallback(
+    (dial: ContentDial) => {
+      const v = pendingShadow.current[dial];
+      if (v === undefined) return;
+      delete pendingShadow.current[dial];
+      setContentDial(dial, v);
+      writeStored();
+      invalidate();
+    },
+    [],
+  );
+
   const groups = Object.entries(VELLUM_DIALS).reduce<
     Record<string, [string, (typeof VELLUM_DIALS)[keyof typeof VELLUM_DIALS]][]>
   >((acc, [name, dial]) => {
@@ -235,6 +278,8 @@ export function VellumControls() {
               resetVellumUniforms();
               for (const [prop, v] of Object.entries(VELLUM_MATERIAL_DEFAULTS))
                 applyVellumMaterial(prop as VellumMaterialDial, v);
+              for (const [dial, v] of Object.entries(CAPSULE_SHADOW_DEFAULTS))
+                setContentDial(dial as ContentDial, v);
               localStorage.removeItem(STORAGE_KEY);
               for (const [name, el] of Object.entries(readouts.current)) {
                 const u = VELLUM_UNIFORMS[name]?.value;
@@ -259,7 +304,26 @@ export function VellumControls() {
         </div>
       </div>
 
-      <div style={styles.scroll}>
+      <div style={styles.pager}>
+        <button
+          type="button"
+          style={styles.pagerBtn}
+          onClick={() => page(-1)}
+          aria-label="Scroll up"
+        >
+          ↑
+        </button>
+        <button
+          type="button"
+          style={styles.pagerBtn}
+          onClick={() => page(1)}
+          aria-label="Scroll down"
+        >
+          ↓
+        </button>
+      </div>
+
+      <div style={styles.scroll} ref={scrollRef}>
         {Object.entries(groups).map(([group, dials]) => (
           <div key={group} style={styles.group}>
             <div style={styles.groupName}>{group}</div>
@@ -339,6 +403,63 @@ export function VellumControls() {
             })}
           </div>
         ))}
+
+        {/*
+         * The capsule shadow. Same panel again, third destination: this one is
+         * drawn INTO the page texture, so moving it reopens that capture for a
+         * moment — see `CAPSULE_SHADOW`. It is the only group here that is not
+         * free to drag.
+         */}
+        {/*
+         * Shown only on a vellum page. Everywhere else the capsules cast the
+         * shadow they always have (`CAPSULE_SHADOW_LEGACY`), so these sliders
+         * would move nothing — and a control that does nothing is exactly the
+         * confusion this panel keeps having to avoid.
+         */}
+        {isVellumPage && (
+        <div style={styles.group}>
+          <div style={styles.groupName}>Shadow</div>
+          {Object.entries(CONTENT_DIALS).map(([dial, cfg]) => (
+            <label key={dial} style={styles.row}>
+              <span style={styles.label}>{cfg.label}</span>
+              <input
+                type="range"
+                min={cfg.min}
+                max={cfg.max}
+                step={cfg.step}
+                defaultValue={CAPSULE_SHADOW[dial as ContentDial]}
+                style={styles.range}
+                /*
+                 * The number follows the thumb, but the PAGE is only rebuilt when
+                 * the thumb is let go. Every other dial on this panel is read by
+                 * the shader each frame and costs nothing to drag; this one
+                 * redraws the whole page texture and, on the composed atlas,
+                 * restarts the detail ladder with it. Doing that on every pointer
+                 * move would make the slider unusable — so the drag is free and
+                 * the commit happens once, on release.
+                 */
+                onChange={(e) => {
+                  const n = parseFloat(e.target.value);
+                  pendingShadow.current[dial as ContentDial] = n;
+                  const el = readouts.current["shadow-" + dial];
+                  if (el) el.textContent = fmt(n);
+                }}
+                onPointerUp={() => commitShadow(dial as ContentDial)}
+                onKeyUp={() => commitShadow(dial as ContentDial)}
+                onBlur={() => commitShadow(dial as ContentDial)}
+              />
+              <span
+                ref={(el) => {
+                  readouts.current["shadow-" + dial] = el;
+                }}
+                style={styles.value}
+              >
+                {fmt(CAPSULE_SHADOW[dial as ContentDial])}
+              </span>
+            </label>
+          ))}
+        </div>
+        )}
 
         {/*
          * The material's own dials. Same panel, different destination — these
@@ -448,6 +569,24 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#c9a227",
   },
   headActions: { display: "flex", gap: 5 },
+  pager: {
+    display: "flex",
+    gap: 5,
+    padding: "5px 10px",
+    borderBottom: "1px solid #2a251c",
+    flexShrink: 0,
+  },
+  pagerBtn: {
+    flex: 1,
+    font: `12px ${mono}`,
+    lineHeight: 1,
+    color: "#ece5d6",
+    background: "transparent",
+    border: "1px solid #3a3327",
+    borderRadius: 2,
+    padding: "3px 0",
+    cursor: "pointer",
+  },
   smallBtn: {
     font: `11px ${mono}`,
     color: "#ece5d6",

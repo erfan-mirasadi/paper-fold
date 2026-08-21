@@ -29,7 +29,12 @@ import {
   Vector2,
 } from "three";
 import { PageLodSceneProbe, PageTextureLod } from "./PageTextureLod";
-import { VELLUM_MATERIAL, VELLUM_MATERIAL_DEFAULTS } from "./vellumSurface";
+import {
+  CONTENT_REVISION,
+  onContentDialChange,
+  VELLUM_MATERIAL,
+  VELLUM_MATERIAL_DEFAULTS,
+} from "./vellumSurface";
 import {
   fitTextureSize,
   firstPassTextureSize,
@@ -465,9 +470,34 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 
   const settled = fontsReady && settledKey === renderTextureKey;
 
+  /**
+   * True for a moment after a CONTENT dial moves — the capsule shadow, which is
+   * drawn into this texture rather than by the paper's shader.
+   *
+   * The page is captured once and then left alone, which is the whole reason it
+   * is affordable; a dial that changes what is IN the capture therefore has to
+   * ask for another one. Rather than re-key the RenderTexture — which would
+   * remount every sheet on the page and take seconds on the composed atlas —
+   * the capture is simply reopened for a few hundred milliseconds and closes
+   * itself again once the dragging stops.
+   */
+  const [tuningContent, setTuningContent] = useState(false);
+  const [contentRevision, setContentRevision] = useState(0);
+  useEffect(() => {
+    let t = 0;
+    return onContentDialChange(() => {
+      setContentRevision(CONTENT_REVISION.value);
+      setTuningContent(true);
+      window.clearTimeout(t);
+      t = window.setTimeout(() => setTuningContent(false), 600);
+    });
+  }, []);
+
   // اگر در حال بیدار شدن باشیم، فریمها روی بینهایت میرن تا دوباره نقاشی بشن
   const mapFrames =
-    settled && !isWakingUp ? TEXTURE_CAPTURE_FRAMES : (Infinity as number);
+    settled && !isWakingUp && !tuningContent
+      ? TEXTURE_CAPTURE_FRAMES
+      : (Infinity as number);
 
   const matRef = useRef<MeshStandardMaterial>(null);
 
@@ -739,7 +769,13 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
        */}
       {useLod && (
         <PageTextureLod
-          key={`${renderTextureKey}-${isWakingUp ? "waking" : "awake"}`}
+          /*
+           * The content revision is part of the key, and has to be. This ladder
+           * holds the picture the reader is ACTUALLY looking at — redrawing the
+           * base capture underneath it changes nothing on screen. Restarting it
+           * is what makes a shadow dial visible on a composed paper.
+           */
+          key={`${renderTextureKey}-${isWakingUp ? "waking" : "awake"}-c${contentRevision}`}
           config={runtime.config}
           materialRef={matRef}
           sceneRef={virtualSceneRef}

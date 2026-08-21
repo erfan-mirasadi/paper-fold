@@ -4,6 +4,8 @@ import { a } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
 import { useContext, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { capsuleShadow } from "../3d-scene/vellumSurface";
+import { getActiveStoryConfig } from "../../../stores/useStoryStore";
 import {
   WHITE_BASE,
   SHADOW_BLACK,
@@ -333,10 +335,28 @@ export const UiRect = ({
   const isImage =
     typeof finalColor === "string" && /\.(jpe?g|png|webp)$/i.test(finalColor);
 
+  // Read rather than subscribed: the whole page content is remounted on a paper
+  // switch (`storyRevision` re-keys the RenderTexture), so there is no state
+  // here that could go stale, and a store subscription per capsule would be a
+  // few hundred of them for a value that cannot change under their feet.
+  const shadowStyle = capsuleShadow(getActiveStoryConfig().features);
+
   return (
     <group position={[x, y, z]}>
       {shadow && (
-        <mesh position={[0.008, -0.008, -0.001]} renderOrder={renderOrder}>
+        /*
+         * The fake shadow: the same shape again, nudged and darkened.
+         *
+         * On a VELLUM page its offset and strength are read live, so the panel
+         * can tune them; on every other surah it is the figure it has always
+         * been. See `capsuleShadow` — read globally, this changed the shadow on
+         * every page in the app. A per-capsule `opacity` still overrides the
+         * strength, as it always did.
+         */
+        <mesh
+          position={[shadowStyle.x, shadowStyle.y, -0.001]}
+          renderOrder={renderOrder}
+        >
           <RoundedShapeComponent
             w={w}
             h={h}
@@ -350,7 +370,7 @@ export const UiRect = ({
           <a.meshBasicMaterial
             color={SHADOW_BLACK}
             transparent
-            opacity={opacity !== undefined ? opacity : 0.32}
+            opacity={opacity !== undefined ? opacity : shadowStyle.opacity}
             depthTest={depthTest}
             depthWrite={false}
           />

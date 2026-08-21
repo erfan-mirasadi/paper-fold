@@ -522,6 +522,99 @@ const float VL_FIB_DENSITY    = ${glslFloat(VELLUM.fibreDensity)};
 `;
 
 /**
+ * THE FAKE SHADOW under every capsule — and the odd one out on this panel.
+ *
+ * It is not the paper's surface and not the paper's material: it is a second
+ * copy of each capsule's own shape, offset and darkened, drawn INSIDE the page
+ * content (see `SharedUI`). It is here because it is judged the same way the
+ * rest of this file is — by looking at the page — and one panel is better than
+ * two.
+ *
+ * IT COSTS MORE TO CHANGE THAN A UNIFORM DOES, and that is worth knowing before
+ * dragging it. Everything else on the panel is read by the paper's fragment
+ * shader every frame, so a slider reaches the screen instantly. This is drawn
+ * into the page's RenderTexture, which is captured ONCE after the page settles
+ * and then left alone — so moving it means redrawing that whole texture. The
+ * panel asks for exactly that, briefly, and only while the dial is moving; see
+ * `onContentDialChange`.
+ */
+export const CAPSULE_SHADOW = { x: 0.03, y: -0.028, opacity: 0.1 };
+
+/**
+ * What every OTHER surah's capsules have always cast, and must go on casting.
+ *
+ * The tunable shadow above is part of the vellum work, which is for one composed
+ * sheet. Read globally it reached every page in the app — the same mistake the
+ * material dials made — so the two are kept apart and `capsuleShadow` picks
+ * between them. These figures are the ones that were written into `SharedUI`
+ * before any of this, and nothing may move them.
+ */
+export const CAPSULE_SHADOW_LEGACY = Object.freeze({
+  x: 0.008,
+  y: -0.008,
+  opacity: 0.32,
+});
+
+/**
+ * The shadow a given paper casts. Only a VELLUM page gets the tunable one.
+ */
+export function capsuleShadow(features: {
+  flatPaperSurface?: boolean;
+  vellumSurface?: boolean;
+}): { x: number; y: number; opacity: number } {
+  return features.flatPaperSurface && features.vellumSurface
+    ? CAPSULE_SHADOW
+    : CAPSULE_SHADOW_LEGACY;
+}
+
+export const CONTENT_DIALS = {
+  x: { min: -0.05, max: 0.05, step: 0.0005, label: "Offset across", group: "Shadow" },
+  y: { min: -0.05, max: 0.05, step: 0.0005, label: "Offset down", group: "Shadow" },
+  opacity: { min: 0, max: 1, step: 0.01, label: "Strength", group: "Shadow" },
+} as const;
+
+export type ContentDial = keyof typeof CONTENT_DIALS;
+
+export const CAPSULE_SHADOW_DEFAULTS: Record<ContentDial, number> = {
+  x: 0.03,
+  y: -0.028,
+  opacity: 0.1,
+};
+
+/**
+ * How many times a content dial has changed.
+ *
+ * It has to be a REVISION rather than a bare notification, because on a paper
+ * with `progressivePageTexture` the base capture is not what the reader is
+ * looking at: `PageTextureLod` swaps the material's map for buffers of its own,
+ * so redrawing the base texture changes something no longer on screen — which
+ * is exactly why moving this dial appeared to do nothing at all. The ladder is
+ * keyed on this number, so a change restarts it and the page is rebuilt with
+ * the new shadow in it.
+ */
+export const CONTENT_REVISION = { value: 0 };
+
+const contentListeners = new Set<() => void>();
+
+/**
+ * Told whenever a content dial moves, so the page texture can be redrawn.
+ *
+ * A plain listener set rather than a store: there is exactly one subscriber
+ * (`PaperMaterial`), it only needs to know THAT something changed, and the
+ * value it would otherwise carry is already sitting in `CAPSULE_SHADOW`.
+ */
+export function onContentDialChange(fn: () => void): () => void {
+  contentListeners.add(fn);
+  return () => contentListeners.delete(fn);
+}
+
+export function setContentDial(dial: ContentDial, value: number): void {
+  CAPSULE_SHADOW[dial] = value;
+  CONTENT_REVISION.value += 1;
+  for (const fn of contentListeners) fn();
+}
+
+/**
  * The paper's MATERIAL — not part of the surface at all.
  *
  * These are `MeshStandardMaterial` properties, and they are on the panel
@@ -665,12 +758,20 @@ export function vellumUniformsAsSource(): string {
     (prop) => `  ${prop}: ${num(readVellumMaterial(prop as VellumMaterialDial))},`,
   );
 
+  // ...and the capsule shadow, which lands in a third object again.
+  const shadow = Object.keys(CONTENT_DIALS).map(
+    (dial) => `  ${dial}: ${num(CAPSULE_SHADOW[dial as ContentDial])},`,
+  );
+
   return [
     "// paste into VELLUM in vellumSurface.ts",
     ...dials,
     "",
     "// paste into VELLUM_MATERIAL_DEFAULTS in vellumSurface.ts",
     ...material,
+    "",
+    "// paste into CAPSULE_SHADOW_DEFAULTS in vellumSurface.ts",
+    ...shadow,
   ].join("\n");
 }
 
