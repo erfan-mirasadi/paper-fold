@@ -92,6 +92,15 @@ export interface GridLayout {
   placements: SheetPlacement[];
   paperWidth: number;
   paperHeight: number;
+  /**
+   * Where one row of sheets ends and the next begins, in page coordinates —
+   * the lines a folded sheet would crease along.
+   *
+   * Halfway across the gap rather than at either row's edge, because `gapY` is
+   * NEGATIVE here: the rows overlap slightly, so neither edge is a place with
+   * nothing on it. The midpoint is.
+   */
+  rowBoundaries: number[];
 }
 
 /**
@@ -123,10 +132,17 @@ export function layOutGrid(spec: GridSpec): GridLayout {
   // ── Rows: each is as tall as its tallest sheet, stacked downwards ───────
   const rowIndices = [...new Set(cells.map((c) => c.at[0]))].sort((a, b) => a - b);
   const rowTop = new Map<number, number>();
+  const rowBoundaries: number[] = [];
   let y = -margin;
   for (const r of rowIndices) {
     rowTop.set(r, y);
     const tallest = Math.max(...cells.filter((c) => c.at[0] === r).map((c) => c.h));
+    // The seam between this row and the next, before the next row's top is
+    // known — see `rowBoundaries`. Not recorded after the last row, which has
+    // no next one to be between.
+    if (r !== rowIndices[rowIndices.length - 1]) {
+      rowBoundaries.push(y - tallest - gapY / 2);
+    }
     y -= tallest + gapY;
   }
   const contentBottom = y + gapY; // the last row's bottom edge
@@ -171,7 +187,7 @@ export function layOutGrid(spec: GridSpec): GridLayout {
     };
   });
 
-  return { placements, paperWidth, paperHeight };
+  return { placements, paperWidth, paperHeight, rowBoundaries };
 }
 
 /**

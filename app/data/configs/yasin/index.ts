@@ -122,7 +122,7 @@ const CELLS: GridCell[] = [
  */
 const SCALE = 1.1;
 
-const { placements, paperWidth, paperHeight } = layOutGrid({
+const { placements, paperWidth, paperHeight, rowBoundaries } = layOutGrid({
   cells: CELLS,
   gapY: -0.08,
   margin: 0.02,
@@ -388,4 +388,11 @@ export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
 
     sheets: zoomedPlacements,
     decorations: DECOS,
+
+    /**
+     * A crease along every seam between two rows of sheets — where this atlas
+     * would be folded to be carried. `layOutGrid` puts them halfway across each
+     * gap; see `rowBoundaries`.
+     */
+    creaseLines: rowBoundaries,
   });

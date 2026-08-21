@@ -355,6 +355,15 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
        * which is what the ink is measured against. See `VELLUM_PAGE_COLOR`.
        */
       uVellumPage: { value: new Color(VELLUM_PAGE_COLOR) },
+      /**
+       * Where the sheet is creased, in UV down the page, and how many of those
+       * positions are real — see `SurahLayoutConfig.creaseLines`. Uploaded as a
+       * fixed-length array with a count rather than sized per paper, because the
+       * material survives a paper switch without recompiling and a shader whose
+       * array length changed would have to be rebuilt.
+       */
+      uCreaseY: { value: new Float32Array(8) },
+      uCreaseCount: { value: 0 },
     }),
     [paperTextureDiffuse, detailUniforms],
   );
@@ -376,6 +385,18 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       vellum ? VELLUM_PAGE_COLOR : flatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR,
     );
     (uniforms.uVellumAspect.value as Vector2).set(1, PAGE_HEIGHT / PAGE_WIDTH);
+
+    // Page space runs 0 to -PAGE_HEIGHT downwards; the shader wants UV, which
+    // runs 1 at the top to 0 at the bottom. Clamped to the array the shader was
+    // built with, so a paper with more creases than that loses the extras
+    // rather than writing past the end of a uniform.
+    const creases = (vellum ? (activeConfig.creaseLines ?? []) : []).slice(0, 8);
+    const creaseY = uniforms.uCreaseY.value as Float32Array;
+    creaseY.fill(0);
+    creases.forEach((y, i) => {
+      creaseY[i] = y / PAGE_HEIGHT + 1;
+    });
+    uniforms.uCreaseCount.value = creases.length;
   }, [
     verseRects,
     verseRadii,
@@ -646,6 +667,8 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform float uVellum;
       uniform vec2 uVellumAspect;
       uniform vec3 uVellumPage;
+      uniform float uCreaseY[8];
+      uniform float uCreaseCount;
       uniform sampler2D uDetailMap[${DETAIL_SLOTS}];
       uniform vec4 uDetailRect[${DETAIL_SLOTS}];
       uniform float uDetailStrength[${DETAIL_SLOTS}];

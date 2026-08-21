@@ -54,9 +54,9 @@ import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
 
 /**
- * The vellum's dials, live on screen. Development only, and dynamically
- * imported for the same reason `Perf` is in `Experience`: a static import would
- * put the panel in the production chunk however carefully the JSX is guarded.
+ * The vellum's dials, live on screen. Dynamically imported so it stays in its
+ * own chunk, and it decides for itself whether it may open — always in
+ * development, and in production only behind `?vellum`. See `panelAllowed`.
  *
  * Mounted HERE rather than inside the Canvas because it is DOM — see the note
  * in the component.
@@ -68,7 +68,6 @@ const VellumControls = dynamic(
     })),
   { ssr: false },
 );
-const IS_DEV = process.env.NODE_ENV === "development";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
@@ -684,13 +683,29 @@ function SurahViewerInner({
                   <PaperArrowsOverlay />
                   <SectionZoomArrowsOverlay />
                   <PaperPaginationOverlay />
-                  {IS_DEV && <VellumControls />}
                 </motion.div>
               )}
             </AnimatePresence>
           )}
         </motion.div>
       )}
+
+      {/*
+       * OUTSIDE EVERY motion wrapper, and that is the whole reason it is down
+       * here rather than up with the other overlays.
+       *
+       * The panel is `position: fixed`, and `will-change` — like `transform` —
+       * makes an element a containing block for its fixed descendants. Mounted
+       * inside the overlay group, whose `motion.div` carries
+       * `willChange: "opacity"`, its `top` and its `100vh` were being measured
+       * against THAT div instead of the viewport, so the panel ran off the
+       * bottom of the screen and the dials below the fold could not be reached.
+       * Nothing about the panel's own CSS could fix that.
+       *
+       * Out here it is also independent of the intro: the paper is worth tuning
+       * before `showPostIntroUI` ever becomes true.
+       */}
+      <VellumControls />
     </main>
   );
 }

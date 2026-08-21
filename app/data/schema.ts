@@ -1505,6 +1505,17 @@ export interface SurahLayoutConfig {
   styling: LayoutStyling;
   specialVerses: SpecialVerses;
   assets?: SurahAssets;
+  /**
+   * Y positions (page space, negative going down) where the sheet has been
+   * FOLDED and still shows it — drawn by the vellum surface as shallow ridges.
+   *
+   * Not `foldLines`, and the distinction is the point: those drive the fold
+   * STORY — the bend meshes, the animation, the crease normal-map band — and a
+   * flat composed atlas deliberately has none of it. These are only a mark on
+   * the paper, so a page can carry the memory of having been folded without
+   * acquiring the machinery for folding.
+   */
+  creaseLines?: number[];
   /** Script metadata for the ayah-list sidebar (title + sayfa/juz/hizb). */
   scriptInfo?: SurahScriptInfo;
 

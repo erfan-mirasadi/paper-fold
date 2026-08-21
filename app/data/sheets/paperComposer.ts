@@ -234,6 +234,18 @@ export interface PaperCompositionSpec {
    */
   foldLines?: number[];
 
+  /**
+   * Y positions (big-paper space, negative going down) of the paper's CREASES —
+   * where the sheet has been folded and still shows it.
+   *
+   * Separate from `foldLines`, and deliberately. Those drive the fold STORY,
+   * which this paper deliberately does not have: adding lines there would give
+   * a flat atlas a fold animation, bend meshes and a crease normal-map band it
+   * has no use for. These are only drawn, by the vellum surface, as the
+   * shallow ridges a sheet keeps after it has been folded and opened out.
+   */
+  creaseLines?: number[];
+
   sheets: SheetPlacement[];
 
   /**
@@ -799,6 +811,8 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       // is exactly what makes this sharper. See `SurahFeatures.vellumSurface`.
       vellumSurface: true,
     },
+
+    creaseLines: spec.creaseLines,
 
     dimensions: {
       paperWidth: spec.paperWidth,

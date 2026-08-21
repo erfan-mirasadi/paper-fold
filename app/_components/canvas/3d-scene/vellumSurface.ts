@@ -365,6 +365,42 @@ export const VELLUM = {
   fibres: 0.1,
   fibreCells: 130.0,
   fibreDensity: 0.16,
+
+  /**
+   * THE CREASES — see `vlCreases`. `crease` is how hard the fold is pressed and
+   * `creaseWidth` how broad the ridge is, in page units.
+   *
+   * There is no "wander" dial, and the measurement is why. A fold in paper is
+   * very nearly STRAIGHT — see `vlCreases` for the numbers — so the control was
+   * offering a fault rather than a property, and the only useful setting for it
+   * was zero. What the reference actually has instead is a finely jittered
+   * EDGE, which is not a taste and is now simply built in.
+   */
+  crease: 0.16,
+  creaseWidth: 0.0025,
+  /**
+   * THE DETAIL, every figure measured off the reference normal map.
+   *
+   *   creaseJitter   the rough edge, as a fraction of the ridge's half-width.
+   *                  Measured 1.07px of stray against 6.17px of half-width.
+   *   creaseJitterScale  how fine that roughness is, in cycles across the sheet.
+   *                  The reference's stray peaks at a two-pixel period.
+   *   creaseDrift    the one slow term the measurement supports — the residual
+   *                  below 256px, under half a pixel end to end.
+   *   creaseUneven   how far the fold weakens where it is weakest. The
+   *                  reference runs at 0.945 of peak and dips to 0.53.
+   *   creaseUnevenScale  how often it does. Measured: 46 separate weak
+   *                  stretches across 1024px, averaging 2.7px each — short
+   *                  flecks, not long soft sections, which is why this is high.
+   *   creaseBalance  the lit flank against the shaded one. A fold is not
+   *                  symmetric: measured 106.9 bright against 113.7 dark.
+   */
+  creaseJitter: 0.25,
+  creaseJitterScale: 340.0,
+  creaseDrift: 0.37,
+  creaseUneven: 0.0,
+  creaseUnevenScale: 400.0,
+  creaseBalance: 0.99,
 } as const;
 
 /**
@@ -433,6 +469,24 @@ export const VELLUM_DIALS: Record<string, VellumDial> = {
     label: "Texture in strokes", group: "Ink" },
   VL_INK_SEPIA: { of: "inkSepia", kind: "float", min: 0, max: 1, step: 0.01,
     label: "Warmth", group: "Ink" },
+
+  // ── the folds ─────────────────────────────────────────────────────────────
+  VL_CREASE: { of: "crease", kind: "float", min: 0, max: 0.4, step: 0.005,
+    label: "Depth", group: "Crease" },
+  VL_CREASE_WIDTH: { of: "creaseWidth", kind: "float", min: 0.0005, max: 0.06, step: 0.0005,
+    label: "Width", group: "Crease" },
+  VL_CREASE_BAL: { of: "creaseBalance", kind: "float", min: 0.4, max: 1.6, step: 0.01,
+    label: "Flank balance", group: "Crease" },
+  VL_CREASE_JIT: { of: "creaseJitter", kind: "float", min: 0, max: 1.2, step: 0.01,
+    label: "Edge roughness", group: "Crease" },
+  VL_CREASE_JIT_CYC: { of: "creaseJitterScale", kind: "float", min: 40, max: 2000, step: 10,
+    label: "Roughness scale", group: "Crease" },
+  VL_CREASE_DRIFT: { of: "creaseDrift", kind: "float", min: 0, max: 1.5, step: 0.01,
+    label: "Slow drift", group: "Crease" },
+  VL_CREASE_UNEVEN: { of: "creaseUneven", kind: "float", min: 0, max: 1, step: 0.01,
+    label: "Unevenness", group: "Crease" },
+  VL_CREASE_UNEVEN_CYC: { of: "creaseUnevenScale", kind: "float", min: 2, max: 400, step: 1,
+    label: "Unevenness scale", group: "Crease" },
 };
 
 const glslFloat = (n: number) => (Number.isInteger(n) ? n.toFixed(1) : String(n));
@@ -462,6 +516,9 @@ const float VL_INK_POOL_W     = ${glslFloat(VELLUM.inkPoolWidth)};
 const vec3  VL_SEPIA_TINT     = ${glslVec3(VELLUM.sepiaTint)};
 const float VL_FIB_CELLS      = ${glslFloat(VELLUM.fibreCells)};
 const float VL_FIB_DENSITY    = ${glslFloat(VELLUM.fibreDensity)};
+/** How many creases the shader is built to carry. */
+#define VL_CREASE_MAX 8
+
 `;
 
 /**
@@ -857,6 +914,81 @@ float vlFibres(vec2 p, float cells, float px, float density, float len) {
 }
 
 /**
+ * CREASES — where the sheet was folded, and still shows it.
+ *
+ * Modelled on public/paper-material/crease-normal-1.png, which is what the folding
+ * papers use: a strip that is flat blue almost everywhere with one wandering
+ * ridge through it, never straight for more than a centimetre and never the
+ * same strength twice along its length. Reproducing it as geometry rather than
+ * as that image is what lets it run at the atlas's size without stretching, and
+ * what lets it sit between EVERY row instead of only where a band mesh was
+ * placed.
+ *
+ * A RIDGE IS NOT A LINE, and drawing it as one is the whole difference between
+ * a fold and a rule ruled on paper. A fold catches the light on the flank
+ * turned towards it and shades the flank turned away, so what the eye is given
+ * is a bright edge immediately beside a dark one, with nothing at the crest
+ * itself. That is the derivative of a bell curve, which is used here directly:
+ * smooth everywhere, zero at the centre, equal and opposite either side, and —
+ * because it integrates to nothing — it changes the sheet's tone not at all.
+ *
+ * Three things stop it reading as drawn on:
+ *   · the centre WANDERS, on two scales, so it is never straight;
+ *   · the strength VARIES along the length, so parts of the fold have almost
+ *     opened out and parts have not;
+ *   · both wander and strength are functions of position on the page, so the
+ *     crease is in the same place at every zoom, like everything else here.
+ */
+float vlCreases(vec2 uv, vec2 aspect, float px) {
+  float acc = 0.0;
+  float w = max(VL_CREASE_WIDTH, px * 1.5);   // never thinner than a pixel
+
+  for (int i = 0; i < VL_CREASE_MAX; i++) {
+    if (float(i) >= uCreaseCount) break;
+
+    float seed = float(i) * 37.0;
+    float x = uv.x * aspect.x;
+
+    // THE EDGE, not a meander. Measured off the reference: the centre's
+    // deviation is 1.07px in a 33px strip and its energy is spread almost flat
+    // across every scale, with the MOST at the two-pixel end. So what is
+    // actually there is a straight line with a rough edge, and it is built from
+    // two fine octaves at a fraction of the ridge's own width.
+    float jitter = (vlValue(vec2(x * VL_CREASE_JIT_CYC + seed, seed))
+                  + vlValue(vec2(x * VL_CREASE_JIT_CYC * 2.3 + seed, seed + 9.0)) * 0.5)
+                 * w * VL_CREASE_JIT;
+
+    // ...and the one slow term the measurement does support: the residual below
+    // 256px, a drift of under half a pixel across the whole sheet.
+    float drift = vlValue(vec2(x * 0.8 + seed, seed + 4.0)) * w * VL_CREASE_DRIFT;
+
+    float d = (uv.y - uCreaseY[i]) * aspect.y + jitter + drift;
+
+    // Pressed nearly all the way along, with occasional weak spots — measured
+    // at mean 0.945 of peak, and dipping to 0.53 at its weakest. A cubed noise
+    // keeps it near full and lets it fall away rarely, which is that shape.
+    float weak = vlValue(vec2(x * VL_CREASE_UNEVEN_CYC + seed, seed + 21.0)) * 0.5 + 0.5;
+    float strength = 1.0 - VL_CREASE_UNEVEN * weak * weak * weak;
+
+    // The bell's derivative, normalised so its peak is 1.
+    float t = d / w;
+    float ridge = -2.332 * t * exp(-t * t);
+
+    // The two flanks are NOT equal — one faces the light and one turns away.
+    // Measured on the reference at 106.9 bright against 113.7 dark. Scaling one
+    // side keeps the profile continuous, since it passes through zero at the
+    // crest where the scaling would otherwise show.
+    ridge *= ridge > 0.0 ? VL_CREASE_BAL : 1.0;
+
+    acc += ridge * strength;
+  }
+
+  // Gone before the ridge is thinner than the screen can hold, and harmless
+  // when it goes: this term averages to zero, so losing it costs no tone.
+  return acc * vlBand(1.0 / max(w, 1e-5), px);
+}
+
+/**
  * The whole surface at one point: what to multiply the page colour by.
  *
  * @param uv     the page, 0..1
@@ -912,6 +1044,11 @@ vec3 vlSurface(vec2 uv, vec2 aspect, out float fine) {
   float d = mix(max(e.x, e.y), length(e), VL_VIG_SHAPE) + n * 0.08;
   float v = smoothstep(VL_VIG_SIZE, VL_VIG_SIZE + VL_VIG_SOFT, d) * VL_VIG_AMOUNT;
   surface *= mix(vec3(1.0), VL_VIG_TINT, v);
+
+  // The folds, last: they are relief on the finished sheet rather than
+  // something mixed into its colour, so they lighten and darken whatever the
+  // paper turned out to be.
+  surface *= 1.0 + vlCreases(uv, aspect, px) * VL_CREASE;
 
   return surface;
 }

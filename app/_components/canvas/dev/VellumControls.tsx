@@ -50,6 +50,28 @@ import {
 
 const STORAGE_KEY = "vellum-dials-v1";
 
+const IS_DEV = process.env.NODE_ENV === "development";
+
+/**
+ * Whether the panel may open at all.
+ *
+ * Always in development. In a PRODUCTION build only behind `?vellum`, following
+ * the same pattern `gpuTier` uses for `?gpu`: the paper is judged by looking at
+ * the real page, and sometimes the real page is the deployed one — a texture
+ * tuned only against a dev build is tuned against a different renderer state
+ * than anyone will ever see.
+ *
+ * TEMPORARY. It is here because it was asked for, and it costs a chunk in the
+ * production bundle that nothing else needs. To take it out again, delete this
+ * function and put `IS_DEV &&` back in front of `<VellumControls />` in
+ * SurahViewer; nothing else refers to it.
+ */
+function panelAllowed(): boolean {
+  if (IS_DEV) return true;
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("vellum");
+}
+
 /**
  * Colour dials are stored LINEAR, because that is the space the shader
  * multiplies them in — and edited in sRGB, because that is the space a colour
@@ -115,6 +137,11 @@ function writeStored(): void {
 }
 
 export function VellumControls() {
+  // Read once, lazily. Safe to touch `window` here because SurahViewer imports
+  // this with `ssr: false`, so it never renders on the server and there is no
+  // hydration pass to disagree with.
+  const [allowed] = useState(panelAllowed);
+
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const readouts = useRef<Record<string, HTMLSpanElement | null>>({});
@@ -170,6 +197,8 @@ export function VellumControls() {
     (acc[dial.group] ??= []).push([name, dial]);
     return acc;
   }, {});
+
+  if (!allowed) return null;
 
   if (!open) {
     return (
@@ -382,11 +411,17 @@ const styles: Record<string, React.CSSProperties> = {
   tabClosed: {},
   panel: {
     position: "fixed",
+    // ANCHORED AT BOTH ENDS, which is what actually stops it running off the
+    // screen. `maxHeight: calc(100vh - …)` only works if the panel's top is
+    // where you think it is, and it was not: `100vh` is always the viewport,
+    // but `top` is measured from the containing block. Pinning `bottom` as well
+    // leaves the panel no height of its own to get wrong — it is whatever fits
+    // between the two edges, and the dials scroll inside it.
     top: 132,
+    bottom: 8,
     right: 8,
     zIndex: 10000,
     width: 300,
-    maxHeight: "calc(100vh - 148px)",
     display: "flex",
     flexDirection: "column",
     background: "rgba(20,18,14,0.94)",
@@ -403,6 +438,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 8,
     padding: "8px 10px",
     borderBottom: "1px solid #3a3327",
+    // The header stays put while the dials scroll under it.
+    flexShrink: 0,
   },
   title: {
     font: `500 11px ${mono}`,
@@ -420,7 +457,20 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "2px 7px",
     cursor: "pointer",
   },
-  scroll: { overflowY: "auto", padding: "4px 10px 10px" },
+  /**
+   * THE SCROLLING HALF. `flex` and `minHeight` are belt and braces rather than
+   * the fix — an item with `overflow` other than `visible` already has an
+   * automatic minimum size of zero, so this scrolled on its own. What stopped
+   * it reaching the screen was the containing block; see the note at its mount
+   * site in SurahViewer.
+   */
+  scroll: {
+    flex: "1 1 auto",
+    minHeight: 0,
+    overflowY: "auto",
+    overscrollBehavior: "contain",
+    padding: "4px 10px 10px",
+  },
   group: { marginTop: 10 },
   groupName: {
     font: `500 10px ${mono}`,
