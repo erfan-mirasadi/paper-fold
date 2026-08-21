@@ -55,8 +55,9 @@ import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLU
 
 /**
  * The vellum's dials, live on screen. Dynamically imported so it stays in its
- * own chunk, and it decides for itself whether it may open — always in
- * development, and in production only behind `?vellum`. See `panelAllowed`.
+ * own chunk. Mounted in every build, production included, so the paper can be
+ * tuned on the deployed page rather than only against a dev renderer. See
+ * `panelAllowed` — that is the one place to gate it again.
  *
  * Mounted HERE rather than inside the Canvas because it is DOM — see the note
  * in the component.

@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * VellumControls — the paper's dials, on screen, live. Development only; never
- * mounted in a production build (see `Experience`).
+ * VellumControls — the paper's dials, on screen, live. Currently mounted in
+ * EVERY build, production included, so the paper can be tuned on the deployed
+ * page; see `panelAllowed` for how to take that back out.
  *
  * WHY THIS EXISTS. The vellum surface has two dozen numbers and not one of them
  * can be chosen by reasoning — they are judged by looking at the page. While
@@ -56,26 +57,21 @@ import {
 
 const STORAGE_KEY = "vellum-dials-v1";
 
-const IS_DEV = process.env.NODE_ENV === "development";
-
 /**
  * Whether the panel may open at all.
  *
- * Always in development. In a PRODUCTION build only behind `?vellum`, following
- * the same pattern `gpuTier` uses for `?gpu`: the paper is judged by looking at
- * the real page, and sometimes the real page is the deployed one — a texture
- * tuned only against a dev build is tuned against a different renderer state
- * than anyone will ever see.
+ * Right now: always, in every build. The paper is judged by looking at the real
+ * page, and the real page is the deployed one — a texture tuned only against a
+ * dev build is tuned against a different renderer state than anyone will ever
+ * see, and the person doing the tuning does not have a dev build.
  *
- * TEMPORARY. It is here because it was asked for, and it costs a chunk in the
- * production bundle that nothing else needs. To take it out again, delete this
- * function and put `IS_DEV &&` back in front of `<VellumControls />` in
- * SurahViewer; nothing else refers to it.
+ * TEMPORARY. It ships a chunk in the production bundle that nothing else needs.
+ * To take it out again, delete this function, drop the `allowed` check below,
+ * and put `IS_DEV &&` back in front of `<VellumControls />` in SurahViewer;
+ * nothing else refers to it.
  */
 function panelAllowed(): boolean {
-  if (IS_DEV) return true;
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).has("vellum");
+  return true;
 }
 
 /**
