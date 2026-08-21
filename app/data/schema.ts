@@ -75,6 +75,29 @@ export interface SurahFeatures {
    * entire offscreen RenderTexture (the normal map) never created or drawn.
    */
   flatPaperSurface?: boolean;
+  /**
+   * Give that flat page a real surface again — VELLUM, computed in the paper's
+   * own fragment shader instead of photographed. See `vellumSurface.ts`.
+   *
+   * It is the answer to the sentence above: "a flat colour cannot be magnified
+   * past its own detail, because it has none." Neither can a procedural one,
+   * for the opposite reason — it has no fixed detail to run out of. The surface
+   * is a function of the page coordinate evaluated once per SCREEN pixel, so a
+   * section zoom samples it more finely rather than magnifying it, and there is
+   * no resolution at which it goes soft.
+   *
+   * Requires `flatPaperSurface`: this REPLACES the photograph, it does not sit
+   * on top of one, and a page still carrying the paper diffuse would be wearing
+   * two surfaces at once. It also replaces the page's clear colour with
+   * `VELLUM_PAGE_COLOR` and neutralises the material's own tint — the paper's
+   * hue has to live in exactly one place for any of it to be tunable.
+   *
+   * What it costs is fragment work on the paper and nothing else: no texture,
+   * no download, no render target. The layers it can afford are chosen from the
+   * GPU tier (`vellumQualityForTier`), so a weak device draws fewer of them
+   * rather than drawing them slowly.
+   */
+  vellumSurface?: boolean;
 }
 
 export interface LayoutDimensions {

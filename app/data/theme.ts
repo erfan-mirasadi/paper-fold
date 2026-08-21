@@ -65,6 +65,106 @@ export const FLAT_PAGE_BG_COLOR = "#d4d3ce";
  * exactly is to look.
  */
 export const FLAT_PAPER_LIGHT_SCALE = 0.62;
+
+/**
+ * BARE SKIN — the colour a page of vellum is cleared to, before the procedural
+ * surface is laid over it. See `vellumSurface.ts`, which is what makes the
+ * difference between this and a coloured card.
+ *
+ * IT REPLACES `FLAT_PAGE_BG_COLOR` FOR ANY PAGE THAT HAS THE SURFACE, and the
+ * reason is the complaint that started this: those pages had gone pink and
+ * pale. `FLAT_PAGE_BG_COLOR` is a neutral grey and honest about it — it is the
+ * average of the photograph it stood in for — but the material's own colour was
+ * still `PAGE_BG_COLOR`, a pinkish off-white, and every pixel of the page was
+ * being multiplied by it. Grey paper x pink light is a pink page, and no amount
+ * of turning the grey could fix a tint that was not in the grey.
+ *
+ * So the vellum page splits the two apart. The material's colour goes NEUTRAL
+ * (`VELLUM_MATERIAL_COLOR`) and stops tinting anything, and the entire hue of
+ * the paper lives here and in the shader — one place, where it can be looked at
+ * against the reference sheet instead of derived through two multiplications.
+ *
+ * THE VALUE IS SOLVED BACKWARDS from what the page should LOOK like. The
+ * reference sheet's median is #faebcd; the page is lit at roughly twice full
+ * strength and reflects `VELLUM_LIGHT_SCALE` of it, so the colour the buffer
+ * is cleared to has to be that median divided by the 1.12 those two make
+ * together — which is this.
+ *
+ * IT MUST NOT BE BRIGHTER THAN THIS, and that is the whole reason it is written
+ * down rather than picked. At #f2dac3 — the value that "looks like vellum" if
+ * you choose one by eye — the red channel comes back out of the light ABOVE 255
+ * and clips, on the paper AND on every pale thing drawn on it. Red pinned at
+ * full while green and blue still move is not a warm cream; it is the peach the
+ * flat page was complained about for in the first place. The clipping is the
+ * bug; the hue was only ever the symptom.
+ *
+ * If the page ever looks wrong in the app, this is the number to turn — and the
+ * check is that nothing on bare paper reads 255 in any channel.
+ */
+export const VELLUM_PAGE_COLOR = "#e6d9bd";
+
+/**
+ * What a vellum page's material reflects — NEUTRAL, at the same brightness
+ * `FLAT_PAPER_LIGHT_SCALE` sets for every other flat page, so that dial still
+ * means what its own comment says it means.
+ *
+ * Neutral on purpose: see `VELLUM_PAGE_COLOR`. The paper's colour belongs to
+ * the paper, not to the light falling on it, and the moment the material stops
+ * carrying a hue every coloured capsule on the page goes back to being exactly
+ * the colour it was authored as.
+ */
+export const VELLUM_MATERIAL_COLOR = "#ffffff";
+
+/**
+ * How much light a VELLUM page accepts — the same dial as
+ * `FLAT_PAPER_LIGHT_SCALE`, re-solved because the colour it multiplies changed.
+ *
+ * 0.62 was not a brightness, it was a brightness TIMES A COLOUR: it scaled
+ * `PAGE_BG_COLOR`, whose largest channel is 0.905 in linear, so the brightest
+ * thing the page could reflect was 2.0 x 0.62 x 0.905 = 1.12 — just over the
+ * clipping point, which is where its own comment says it was aimed. Take the
+ * colour out and leave the 0.62 and that peak becomes a flat 1.24: every pale
+ * capsule on the page gains a tenth of a stop it has nowhere to put, and the
+ * colour coding the whole reading depends on washes out.
+ *
+ * 0.56 is 0.62 x 0.905. It is the same peak through a neutral colour, so the
+ * page is re-tinted without being re-exposed — which is the only way to change
+ * the paper's hue without changing every capsule drawn on it.
+ */
+export const VELLUM_LIGHT_SCALE = 0.56;
+
+/**
+ * BARE PAPER for a given surah — the one place that decides it, because there
+ * are TWO places that paint it and they were disagreeing.
+ *
+ * THE TRAP THIS CLOSES. `FLAT_PAGE_BG_COLOR`'s comment above says it is "the
+ * colour the render target is CLEARED to", which is true and was never the
+ * whole story: `SurahLayout` also draws a full-page plane at z = -0.05, half
+ * again the size of the page, over the entire buffer. The clear colour is
+ * therefore invisible on every surah — whatever that plane is painted with IS
+ * the paper, and it was hard-coded to `PAGE_BG_COLOR`.
+ *
+ * Nothing showed the disagreement while the paper was a photograph, because the
+ * photograph covered both. It showed up the moment the vellum needed to know
+ * what bare paper looks like: the shader compares each pixel against this
+ * colour to decide whether anything has been DRAWN there (see
+ * `VELLUM.coverGain`), the plane handed it a different colour from the clear,
+ * so every pixel of the sheet read as "drawn on" — and the surface was
+ * multiplied out across the whole page. The paper stayed pink and the texture
+ * never appeared, from one hard-coded constant two files away.
+ *
+ * Both callers now ask here. If a third ever needs it, it asks here too.
+ */
+export function pageBackgroundColor(features: {
+  flatPaperSurface?: boolean;
+  vellumSurface?: boolean;
+}): string {
+  if (features.flatPaperSurface && features.vellumSurface)
+    return VELLUM_PAGE_COLOR;
+  if (features.flatPaperSurface) return FLAT_PAGE_BG_COLOR;
+  return PAGE_BG_COLOR;
+}
+
 export const CIRCLE_BORDER = "#8e8e8e";
 
 // ----------------------------------------------------------------------------

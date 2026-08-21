@@ -793,6 +793,11 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
       // colour is sharper at every distance than a photograph it has outgrown.
       // See `SurahFeatures.flatPaperSurface`.
       flatPaperSurface: true,
+      // Which left the page a coloured card, and a pink one. It gets a real
+      // surface back the only way a page this size can have one — computed per
+      // screen pixel rather than stored, so the zoom that broke the photograph
+      // is exactly what makes this sharper. See `SurahFeatures.vellumSurface`.
+      vellumSurface: true,
     },
 
     dimensions: {

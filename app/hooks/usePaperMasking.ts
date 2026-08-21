@@ -1,9 +1,15 @@
 import { useMemo, useEffect, useCallback, useRef } from "react";
-import { Color, type Texture } from "three";
+import { Color, Vector2, type Texture } from "three";
 import {
   createPageDetailUniforms,
   DETAIL_SLOTS,
 } from "../_components/canvas/3d-scene/pageTextureLodMath";
+import {
+  vellumGlsl,
+  vellumOctavesForTier,
+  VELLUM_UNIFORMS,
+} from "../_components/canvas/3d-scene/vellumSurface";
+import { detectGpuTier } from "../utils/gpuTier";
 import { usePopUpStore } from "../stores/usePopUpStore";
 import { useElevatedStore } from "../stores/useElevatedStore";
 import { useFoldStore } from "../_components/canvas/orchestrator/ScrollManager";
@@ -18,6 +24,7 @@ import {
   PAGE_BG_COLOR,
   S1_INNER_BG,
   S1_INNER_BORDER,
+  VELLUM_PAGE_COLOR,
 } from "../data/theme";
 import { getSectionPriority } from "../utils/sectionResolver";
 
@@ -291,6 +298,13 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
   const uniforms = useMemo(
     () => ({
       ...detailUniforms,
+      /*
+       * The vellum's taste dials, as LIVE uniform objects shared with the dev
+       * panel — see `VELLUM_DIALS`. Spread by reference on purpose: three binds
+       * these exact objects, so writing `.value` from the panel reaches the GPU
+       * on the next frame with no recompile and no remount.
+       */
+      ...VELLUM_UNIFORMS,
       uVerseVisibility: { value: new Float32Array(VERSE_ARR_SIZE).fill(1.0) },
       uSectionVisibility: { value: new Float32Array(TOTAL_SECTIONS).fill(1.0) },
       /**
@@ -323,6 +337,24 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
        * paper the rest of the page is made of. Set per paper below.
        */
       uBarePaper: { value: new Color(PAGE_BG_COLOR) },
+      /**
+       * Whether this paper is VELLUM — see `SurahFeatures.vellumSurface`. A
+       * uniform rather than a compiled-in constant for the same reason
+       * `uFlatPaper` is one: the material outlives a paper switch, and the
+       * surface has to follow the page rather than the shader.
+       */
+      uVellum: { value: 0 },
+      /**
+       * (1, height / width). The surface's noise cells have to be square ON THE
+       * PAGE, and the page is not square — feeding it raw UVs stretches every
+       * follicle into an oval and the fibre grain along with it.
+       */
+      uVellumAspect: { value: new Vector2(1, 1) },
+      /**
+       * Bare skin, before the surface — what the render target was cleared to,
+       * which is what the ink is measured against. See `VELLUM_PAGE_COLOR`.
+       */
+      uVellumPage: { value: new Color(VELLUM_PAGE_COLOR) },
     }),
     [paperTextureDiffuse, detailUniforms],
   );
@@ -335,10 +367,15 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
     uniforms.uPageWidth.value = PAGE_WIDTH;
     uniforms.uPageHeight.value = PAGE_HEIGHT;
     const flatPaper = activeConfig.features.flatPaperSurface === true;
+    // Vellum REPLACES the flat colour rather than joining it, so it answers for
+    // bare paper too — see `SurahFeatures.vellumSurface`.
+    const vellum = flatPaper && activeConfig.features.vellumSurface === true;
     uniforms.uFlatPaper.value = flatPaper ? 1 : 0;
+    uniforms.uVellum.value = vellum ? 1 : 0;
     (uniforms.uBarePaper.value as Color).set(
-      flatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR,
+      vellum ? VELLUM_PAGE_COLOR : flatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR,
     );
+    (uniforms.uVellumAspect.value as Vector2).set(1, PAGE_HEIGHT / PAGE_WIDTH);
   }, [
     verseRects,
     verseRadii,
@@ -606,6 +643,9 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform sampler2D uBaseTexture;
       uniform float uFlatPaper;
       uniform vec3 uBarePaper;
+      uniform float uVellum;
+      uniform vec2 uVellumAspect;
+      uniform vec3 uVellumPage;
       uniform sampler2D uDetailMap[${DETAIL_SLOTS}];
       uniform vec4 uDetailRect[${DETAIL_SLOTS}];
       uniform float uDetailStrength[${DETAIL_SLOTS}];
@@ -613,7 +653,23 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       uniform vec2 uDetailTexel;
       uniform float uDetailSharpen;
       ${shader.fragmentShader}
-    `.replace(
+    `
+      /*
+       * The vellum, spliced in immediately above `main()` rather than at the top
+       * with the uniforms — `vlApply` reads three's own `map` sampler for the
+       * ink pooling, and that is not declared until `map_pars_fragment`, well
+       * below where this block would otherwise land.
+       *
+       * Compiled in for EVERY paper, gated at runtime by `uVellum`. The material
+       * survives a paper switch without recompiling, so a shader that only knew
+       * about vellum when it happened to be built for a vellum page would be the
+       * wrong shader the moment the reader turned to one.
+       */
+      .replace(
+        "void main() {",
+        `${vellumGlsl(vellumOctavesForTier(detectGpuTier()))}\nvoid main() {`,
+      )
+      .replace(
         "#include <map_fragment>",
         `
       #include <map_fragment>
@@ -630,6 +686,25 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
       // two zones of one sheet overlap they carry the same picture anyway, and
       // the later one winning costs nothing.
       ${detailSlotSource}
+
+      /*
+       * THE PAPER ITSELF — see vellumSurface.ts.
+       *
+       * Here and not in the page's own RenderTexture, and that is the whole
+       * point of it. The RenderTexture is a fixed buffer: anything drawn into it
+       * is a picture with a resolution, and a section zoom magnifies it exactly
+       * as it magnified the photograph this replaces. This runs in the PAPER'S
+       * fragment shader instead — once per screen pixel, on the surface the
+       * reader is actually looking at — so the grain is generated at whatever
+       * scale the page is being viewed at and there is no zoom that outruns it.
+       *
+       * After the detail patches on purpose: they carry the same page at more
+       * texels, and the skin is under all of it either way.
+       */
+      vec3 vlTone = vec3(1.0);
+      if (uVellum > 0.5) {
+        vlApply(diffuseColor, diffuse, vMapUv, uVellumAspect, uVellumPage, vlTone);
+      }
 
       float lx = vMapUv.x * uPageWidth;
       float ly = (vMapUv.y - 1.0) * uPageHeight;
@@ -660,9 +735,29 @@ export function usePaperMasking(paperTextureDiffuse: Texture) {
         // regardless would put the one stretched, blurry thing this page was
         // built to avoid back on screen, in the very rectangle the reader is
         // looking straight at.
-        diffuseColor = uFlatPaper > 0.5
-          ? vec4(uBarePaper, 1.0)
-          : texture2D(uBaseTexture, vMapUv);
+        //
+        // A VELLUM page keeps the SURFACE, not just the colour: it was already
+        // computed at this pixel above, so the rectangle a lifted section
+        // leaves behind carries the same mottle, the same marks and the same
+        // edge toning as the page around it. Revealing a flat swatch in the
+        // middle of a textured sheet is precisely as wrong as revealing a
+        // blurry one.
+        //
+        // ...and it is written as (material x page x surface), which is the
+        // same product map_fragment forms for every other pixel of the page.
+        // The two branches below are NOT — they hand back a bare colour with
+        // the material's own contribution left out, so the patch they reveal
+        // sits about eight tenths of a stop brighter than the paper around it.
+        // That is how those papers have always looked and it is not this
+        // change's business to alter them, but the vellum page is new and
+        // should be right.
+        if (uVellum > 0.5) {
+          diffuseColor = vec4(diffuse * uVellumPage * vlTone, 1.0);
+        } else if (uFlatPaper > 0.5) {
+          diffuseColor = vec4(uBarePaper, 1.0);
+        } else {
+          diffuseColor = texture2D(uBaseTexture, vMapUv);
+        }
       } else if (uAnyVerseHidden > 0.5) {
         // 2. Check Individual Verse Masking with SDF (Rounded rectangles)
         //

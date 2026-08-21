@@ -52,6 +52,23 @@ import { SurahScriptSidebar } from "@/app/_components/dom/ui-overlay/SurahScript
 import { SideInfoPanel } from "@/app/_components/dom/ui-overlay/SideInfoPanel";
 import { LenisProvider, useLenis } from "@/app/_components/dom/LenisProvider";
 import { WebGLUnsupportedOverlay } from "@/app/_components/dom/ui-overlay/WebGLUnsupportedOverlay";
+
+/**
+ * The vellum's dials, live on screen. Development only, and dynamically
+ * imported for the same reason `Perf` is in `Experience`: a static import would
+ * put the panel in the production chunk however carefully the JSX is guarded.
+ *
+ * Mounted HERE rather than inside the Canvas because it is DOM — see the note
+ * in the component.
+ */
+const VellumControls = dynamic(
+  () =>
+    import("@/app/_components/canvas/dev/VellumControls").then((m) => ({
+      default: m.VellumControls,
+    })),
+  { ssr: false },
+);
+const IS_DEV = process.env.NODE_ENV === "development";
 import { CAMERA_CONFIG } from "@/app/data/cameraConfig";
 import { useStoryStore } from "@/app/stores/useStoryStore";
 import { usePaperStore } from "@/app/stores/usePaperStore";
@@ -667,6 +684,7 @@ function SurahViewerInner({
                   <PaperArrowsOverlay />
                   <SectionZoomArrowsOverlay />
                   <PaperPaginationOverlay />
+                  {IS_DEV && <VellumControls />}
                 </motion.div>
               )}
             </AnimatePresence>

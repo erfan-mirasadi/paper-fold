@@ -9,7 +9,7 @@ import {
 import {
   // TEXT_DARK,
   // TEXT_SIZES,
-  PAGE_BG_COLOR,
+  pageBackgroundColor,
   // QURAN_FONT,
 } from "../../../data/theme";
 
@@ -50,9 +50,14 @@ function SurahLayout({ imageUrl, isFolded = false }: SurahLayoutProps) {
     );
   }
 
-  const activeBg = PAGE_BG_COLOR;
-
   const config = useStoryStore((state) => state.activeConfig);
+
+  /**
+   * THIS PLANE IS THE PAPER. It covers the render target's clear colour
+   * entirely, so it — not the clear — is what the reader sees and what the
+   * vellum shader measures every pixel against. See `pageBackgroundColor`.
+   */
+  const activeBg = pageBackgroundColor(config.features);
 
   return (
     <>

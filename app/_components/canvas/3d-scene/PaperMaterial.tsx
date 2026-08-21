@@ -29,6 +29,7 @@ import {
   Vector2,
 } from "three";
 import { PageLodSceneProbe, PageTextureLod } from "./PageTextureLod";
+import { VELLUM_MATERIAL, VELLUM_MATERIAL_DEFAULTS } from "./vellumSurface";
 import {
   fitTextureSize,
   firstPassTextureSize,
@@ -47,13 +48,14 @@ import { usePaperStore } from "../../../stores/usePaperStore";
 import { detectGpuTier } from "../../../utils/gpuTier";
 import { useSurahLanguageStore } from "../../../hooks/useSurahLanguageStore";
 import {
-  FLAT_PAGE_BG_COLOR,
   FLAT_PAPER_LIGHT_SCALE,
   FONT_FAMILY_NAMES,
   HANDWRITTEN_FONT,
   LATIN_VERSE_FONT,
   PAGE_BG_COLOR,
+  pageBackgroundColor,
   QURAN_FONT,
+  VELLUM_MATERIAL_COLOR,
 } from "../../../data/theme";
 
 const CREASE_BAND_HEIGHT = 0.03;
@@ -276,7 +278,23 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
    * it lightens the page by 15% and tints it pink. See `FLAT_PAGE_BG_COLOR`.
    */
   const isFlatPaper = runtime.config.features.flatPaperSurface === true;
-  const pageBgColor = isFlatPaper ? FLAT_PAGE_BG_COLOR : PAGE_BG_COLOR;
+
+  /**
+   * ...and a flat page that gets its surface back, computed instead of
+   * photographed — see `SurahFeatures.vellumSurface` and `vellumSurface.ts`.
+   *
+   * It is drawn in the PAPER's fragment shader (`usePaperMasking`), not in this
+   * RenderTexture, which is the only way it can outlast a zoom. What changes
+   * here is only what the shader is given to work on: the buffer is cleared to
+   * bare skin instead of to a neutral grey, and the material stops carrying a
+   * tint of its own.
+   */
+  const isVellum = isFlatPaper && runtime.config.features.vellumSurface === true;
+
+  // The buffer's clear colour. `SurahLayout` paints a full-page plane over all
+  // of it in the same colour, and THAT is what actually shows — see
+  // `pageBackgroundColor`, which both of them ask.
+  const pageBgColor = pageBackgroundColor(runtime.config.features);
 
   /**
    * How much light this paper takes. A flat one takes less, because it has no
@@ -287,13 +305,24 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
    * Scaled in LINEAR space (`Color` components are already the working space),
    * which is what makes it a light scale rather than a repaint: every hue on
    * the page keeps its ratios and simply stops being over-exposed.
+   *
+   * A VELLUM page takes the same PEAK through a NEUTRAL colour — see
+   * `VELLUM_LIGHT_SCALE`, which is 0.62 with that colour's own brightness
+   * divided back out of it. The pink every flat page had came from here:
+   * `PAGE_BG_COLOR` is a pinkish off-white and it was multiplying every pixel of
+   * the page, paper and capsules alike, so the paper could not be re-tinted
+   * without re-tinting the artwork with it.
    */
   const paperColor = useMemo(
     () =>
-      isFlatPaper
-        ? new Color(PAGE_BG_COLOR).multiplyScalar(FLAT_PAPER_LIGHT_SCALE)
-        : paperBaseColor,
-    [isFlatPaper],
+      isVellum
+        ? new Color(VELLUM_MATERIAL_COLOR).multiplyScalar(
+            VELLUM_MATERIAL_DEFAULTS.brightness,
+          )
+        : isFlatPaper
+          ? new Color(PAGE_BG_COLOR).multiplyScalar(FLAT_PAPER_LIGHT_SCALE)
+          : paperBaseColor,
+    [isFlatPaper, isVellum],
   );
 
   /**
@@ -442,6 +471,26 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
 
   const matRef = useRef<MeshStandardMaterial>(null);
 
+  /**
+   * Hand the live material to the dev panel's material dials — see
+   * `VELLUM_MATERIAL`. Cleared on unmount so a paper switch cannot leave the
+   * panel writing into a material that is no longer on screen.
+   *
+   * ONLY FOR A VELLUM PAGE, and that guard is not a nicety. Published
+   * unconditionally, this pointed at whatever paper happened to be on screen —
+   * so the panel's remembered roughness, reflection and brightness were applied
+   * to EVERY surah, and the vellum work, which was meant for one composed sheet,
+   * silently relit the whole app. The panel may only ever reach the page it was
+   * built for.
+   */
+  useEffect(() => {
+    if (!isVellum) return;
+    VELLUM_MATERIAL.current = matRef.current;
+    return () => {
+      VELLUM_MATERIAL.current = null;
+    };
+  });
+
   useImperativeHandle(
     ref,
     () => ({
@@ -529,6 +578,12 @@ const PaperMaterialComponentFn: React.ForwardRefRenderFunction<
       ref={matRef}
       attach="material-4"
       {...PAPER_MATERIAL_CONFIG}
+      {...(isVellum
+        ? {
+            roughness: VELLUM_MATERIAL_DEFAULTS.roughness,
+            envMapIntensity: VELLUM_MATERIAL_DEFAULTS.envMapIntensity,
+          }
+        : null)}
       color={paperColor}
       normalScale={normalScale}
       onBeforeCompile={onBeforeCompile}
