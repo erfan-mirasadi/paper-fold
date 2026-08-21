@@ -61,8 +61,8 @@
  *   · per-language block overrides (`languageOverrides`, `stackOrder`) — the
  *     geometry is baked from the Arabic pass, so a translation that moves its
  *     blocks would move them relative to a stack that is no longer there;
- *   · the folds — a sheet's fold story is about ITS page, and the big paper
- *     gets one flat story (see `foldLines`);
+ *   · a source sheet's folds — its fold story is about ITS page. A composed
+ *     paper may author its own page-wide story with `foldLines` + `foldSteps`;
  *   · `styling` — one config has one styling block, so the first sheet's wins.
  *     In practice this only picks border widths and theme fallbacks, since a
  *     capsule's colours all live in its own `verseOverrides` entry;
@@ -228,21 +228,26 @@ export interface PaperCompositionSpec {
 
   /**
    * Y positions (big-paper space, negative going down) of the paper's fold
-   * lines. The composed story never bends them — they exist so the fold
-   * machinery has a line to hold — so this is only about where a future fold
-   * WOULD run. Defaults to a single line through the paper's middle.
+   * lines. These are the hinges used by the bend mesh when `foldSteps` carries
+   * motion. Defaults to a single line through the paper's middle.
    */
   foldLines?: number[];
+
+  /**
+   * The composed paper's own fold story. Every step must contain exactly one
+   * fold state per `foldLines` entry. When omitted, the paper stays flat, which
+   * keeps ordinary atlas compositions free of fold UI and scroll length.
+   */
+  foldSteps?: readonly FoldStoryStep[];
 
   /**
    * Y positions (big-paper space, negative going down) of the paper's CREASES —
    * where the sheet has been folded and still shows it.
    *
-   * Separate from `foldLines`, and deliberately. Those drive the fold STORY,
-   * which this paper deliberately does not have: adding lines there would give
-   * a flat atlas a fold animation, bend meshes and a crease normal-map band it
-   * has no use for. These are only drawn, by the vellum surface, as the
-   * shallow ridges a sheet keeps after it has been folded and opened out.
+   * Separate from `foldLines`, and deliberately. Fold lines are animation
+   * hinges; crease lines are drawn by the vellum surface as the shallow ridges
+   * a sheet keeps after it has been folded and opened out. They often share
+   * the same positions, but neither one implicitly creates the other.
    */
   creaseLines?: number[];
 
@@ -761,16 +766,24 @@ export function composePaper(spec: PaperCompositionSpec): ComposedPaper {
   }
 
   // ── Fold story ──────────────────────────────────────────────────────────
-  // Flat: the big paper is a map to read, not a sheet to fold (yet). The lines
-  // still exist so every consumer of `FOLD_Y_POSITIONS` has one to hold.
+  // A composition does not inherit any source sheet's folds. It is flat by
+  // default, but may declare its own page-wide story against these lines.
   const foldLines = spec.foldLines ?? [-spec.paperHeight / 2];
   const flatFolds = foldLines.map(
     () => ({ direction: 1, angleFactor: 0 }) as const,
   );
-  const foldSteps: FoldStoryStep[] = [
+  const foldSteps: readonly FoldStoryStep[] = spec.foldSteps ?? [
     { id: "pre-start", folds: [...flatFolds] },
     { id: "end", folds: [...flatFolds] },
   ];
+
+  for (const step of foldSteps) {
+    if (step.folds.length !== foldLines.length) {
+      throw new Error(
+        `composePaper(${spec.id}): fold step "${step.id}" has ${step.folds.length} states for ${foldLines.length} fold lines`,
+      );
+    }
+  }
 
   const base = spec.sheets[0]?.sheet.config;
 

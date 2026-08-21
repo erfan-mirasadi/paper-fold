@@ -31,6 +31,7 @@ import type {
   ComposableSheet,
   PaperDecoration,
 } from "../../sheets/paperComposer";
+import type { FoldStoryStep } from "../../schema";
 import { layOutGrid, type GridCell } from "./grid";
 
 import { YASIN_36_CONFIG, YASIN_36_TEXT_DATA } from "./sheets/1-12";
@@ -128,6 +129,35 @@ const { placements, paperWidth, paperHeight, rowBoundaries } = layOutGrid({
   margin: 0.02,
   scale: SCALE,
 });
+
+/**
+ * The full atlas opens as one accordion, using the row seams already pressed
+ * into the paper. The two inner hinges close fully while the outer pair close
+ * part-way; their signed angles add to zero, so the bottom of the folded page
+ * finishes parallel to its top instead of leaving the whole sheet twisted.
+ * Scrolling opens all four hinges together, matching Ayat al-Kursi's two-step
+ * `pre-start` → `end` fold story.
+ */
+const ATLAS_FOLD_STEPS: readonly FoldStoryStep[] = [
+  {
+    id: "pre-start",
+    folds: [
+      { direction: 1, angleFactor: 0.4 },
+      { direction: -1, angleFactor: 1 },
+      { direction: 1, angleFactor: 1 },
+      { direction: -1, angleFactor: 0.4 },
+    ],
+  },
+  {
+    id: "end",
+    folds: [
+      { direction: 1, angleFactor: 0 },
+      { direction: -1, angleFactor: 0 },
+      { direction: 1, angleFactor: 0 },
+      { direction: -1, angleFactor: 0 },
+    ],
+  },
+];
 
 /**
  * Give the atlas a little more horizontal breathing room without stretching
@@ -394,5 +424,8 @@ export const { config: YASIN_PAPER_CONFIG, textData: YASIN_PAPER_TEXT_DATA } =
      * would be folded to be carried. `layOutGrid` puts them halfway across each
      * gap; see `rowBoundaries`.
      */
+    foldLines: rowBoundaries,
+    foldSteps: ATLAS_FOLD_STEPS,
     creaseLines: rowBoundaries,
+    scrollPages: 1.5,
   });
