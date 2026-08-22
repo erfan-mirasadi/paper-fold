@@ -1,0 +1,19 @@
+<svg width="780" height="1000" viewBox="0 0 780 1000" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+<!-- YÂSÎN 41-47 — page-wide outer frame.
+
+     Drawn at its displayed aspect:
+       world 1.1 x 1.41  ->  0.780
+       viewBox 780 x 1000 ->  0.780
+
+     This is deliberately a rim only. The former opaque #F0E4E5 pink panel
+     has been removed so the vellum remains visible inside the frame. -->
+<defs>
+<linearGradient id="yasin4147OuterGold" x1="0" y1="500" x2="780" y2="500" gradientUnits="userSpaceOnUse">
+<stop stop-color="#968428"/>
+<stop offset="0.503741" stop-color="#CDC577"/>
+<stop offset="1" stop-color="#968428"/>
+</linearGradient>
+</defs>
+<rect x="1.5" y="1.5" width="777" height="997" rx="27.5" ry="27.5"
+      fill="none" stroke="url(#yasin4147OuterGold)" stroke-width="3"/>
+</svg>

@@ -16,10 +16,17 @@
      one SVG unit = 2.488e-03 world units on both axes, so the 0.012
      rim and the 0.09 corner convert with the same factor either way.
 
+
+     NO GROUND. This border used to wash its interior with off-white #FBFAF4 at 0.35. That fill is
+     gone on purpose: the frame is a RIM ONLY, so the vellum surface underneath
+     runs through it unbroken and the sections are told apart by the colour of
+     their rim alone. Only the four large atlas borders lost their ground — the
+     sheet frames inside them (SHEET_FRAME_SVGS) keep theirs.
+
      Change the rectangle in app/data/configs/yasin/index.ts and this file has
      to be redrawn to match. -->
 <rect x="2.4" y="2.4" width="2367.2" height="995.2"
       rx="36.2" ry="36.2"
-      fill="#FBFAF4" fill-opacity="0.35"
+      fill="none"
       stroke="#6E9464" stroke-width="4.8"/>
 </svg>

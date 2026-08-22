@@ -203,14 +203,14 @@ export const VELLUM = {
    */
   markThreshold: 0.35,
   markPower: 1.6,
-  markAmp: 0.048,
+  markAmp: 0.04,
   /**
    * A mark is a brown, never a grey — and the ratio is measured, not chosen.
    * The reference's darkest twentieth against its lightest comes out
    * 0.936 / 0.868 / 0.754, so blue falls three times as fast as red. Taken
    * relative to red, that is this.
    */
-  markTint: [1, 0.927, 0.806] as const,
+  markTint: [0.947, 0.855, 0.68] as const,
   /**
    * How fast a mark reaches its full colour. Set so the deepest marks actually
    * arrive at `markTint` rather than asymptotically approaching it: measured
@@ -235,7 +235,7 @@ export const VELLUM = {
    * asked for. 2.2 is where it reads as a material at reading distance and
    * still does not read as a filter close up.
    */
-  intensity: 0.45,
+  intensity: 0.4,
 
   // ── the edge ──────────────────────────────────────────────────────────────
   /** The corner's measured ratio to the centre. */
@@ -266,7 +266,7 @@ export const VELLUM = {
    * the other direction: not paper laid over a stroke, but a stroke behaving
    * like a stroke.
    */
-  contentShowThrough: 0.76,
+  contentShowThrough: 0.66,
   /**
    * How "bare paper" is told from "something is drawn here", as linear colour
    * distance from the page colour: below `coverDead` the pixel is paper and
@@ -291,7 +291,7 @@ export const VELLUM = {
    * This is the ink effect worth having: it is a clean line, it follows the
    * letterform, and it is what separates a written stroke from a printed one.
    */
-  inkPool: 0.0,
+  inkPool: 1.5,
   /** The rim's width, in page widths. A physical width, so it grows with zoom. */
   inkPoolWidth: 0.0008,
   /**
@@ -300,7 +300,7 @@ export const VELLUM = {
    * driven from the finest octaves only, so it is a texture within the stroke
    * and never a mark on top of it.
    */
-  inkGrain: 0.01,
+  inkGrain: 1.0,
   /**
    * How far a thinly-laid stroke drifts towards its warm sepia. Iron gall is
    * brown-black, and where it is thin it is simply brown. Multiplying is what
@@ -310,7 +310,7 @@ export const VELLUM = {
    */
   inkSepia: 0.0,
   /** How much darker a solid stroke is made. The ink's contrast dial. */
-  inkDepth: 0.08,
+  inkDepth: 0.95,
   sepiaTint: [1.0, 0.88, 0.7] as const,
 
   // ── the four the panel adds, which have no counterpart in the measurement ──
@@ -329,14 +329,14 @@ export const VELLUM = {
    * a stop and clips the red. The panel's colour picker does the conversion in
    * both directions, so what you pick there is what you get.
    */
-  paper: [0.745, 0.701, 0.61] as const,
+  paper: [1, 1, 1] as const,
   /**
    * A multiplier on every frequency in the octave chain at once — bigger number,
    * finer grain. One dial instead of the four separate frequencies it scales,
    * because "make the texture smaller" is the only thing anyone actually wants
    * from them.
    */
-  grain: 12.0,
+  grain: 40.0,
   /**
    * THE VIGNETTE, which replaces the measured edge toning with something that
    * can be aimed. The reference's own corner-to-centre ratio is still the
@@ -347,11 +347,11 @@ export const VELLUM = {
    * box distance, which follows the sheet's own rectangle, and 1 is the radial
    * one, which is a circle from the centre.
    */
-  vignette: 0.46,
-  vignetteTint: [0, 0, 0] as const,
-  vignetteSize: 0.92,
-  vignetteSoftness: 0.6,
-  vignetteShape: 1.0,
+  vignette: 0.42,
+  vignetteTint: [0.565, 0.565, 0.279] as const,
+  vignetteSize: 0.44,
+  vignetteSoftness: 0.83,
+  vignetteShape: 0.0,
 
   /**
    * FIBRES — how heavily the threads read. See `vlFibres`.
@@ -362,7 +362,7 @@ export const VELLUM = {
    * "more fibres" and "darker fibres" are the same request and one slider
    * should answer it.
    */
-  fibres: 0.1,
+  fibres: 0.36,
   fibreCells: 130.0,
   fibreDensity: 0.16,
 
@@ -442,7 +442,7 @@ export const VELLUM_DIALS: Record<string, VellumDial> = {
   VL_MARK_AMP: { of: "markAmp", kind: "float", min: 0, max: 0.12, step: 0.002,
     label: "Blotches", group: "Paper" },
   VL_MARK_TINT: { of: "markTint", kind: "color", label: "Blotch colour", group: "Paper" },
-  VL_GRAIN: { of: "grain", kind: "float", min: 0.25, max: 40, step: 0.05,
+  VL_GRAIN: { of: "grain", kind: "float", min: 0.25, max: 120, step: 0.05,
     label: "Texture size", group: "Paper" },
   VL_FIBRES: { of: "fibres", kind: "float", min: 0, max: 1.5, step: 0.02,
     label: "Fibres", group: "Paper" },
@@ -471,9 +471,9 @@ export const VELLUM_DIALS: Record<string, VellumDial> = {
     label: "Warmth", group: "Ink" },
 
   // ── the folds ─────────────────────────────────────────────────────────────
-  VL_CREASE: { of: "crease", kind: "float", min: 0, max: 0.4, step: 0.005,
+  VL_CREASE: { of: "crease", kind: "float", min: 0, max: 1.2, step: 0.005,
     label: "Depth", group: "Crease" },
-  VL_CREASE_WIDTH: { of: "creaseWidth", kind: "float", min: 0.0005, max: 0.06, step: 0.0005,
+  VL_CREASE_WIDTH: { of: "creaseWidth", kind: "float", min: 0.0001, max: 0.06, step: 0.0001,
     label: "Width", group: "Crease" },
   VL_CREASE_BAL: { of: "creaseBalance", kind: "float", min: 0.4, max: 1.6, step: 0.01,
     label: "Flank balance", group: "Crease" },
@@ -538,7 +538,7 @@ const float VL_FIB_DENSITY    = ${glslFloat(VELLUM.fibreDensity)};
  * panel asks for exactly that, briefly, and only while the dial is moving; see
  * `onContentDialChange`.
  */
-export const CAPSULE_SHADOW = { x: 0.03, y: -0.028, opacity: 0.1 };
+export const CAPSULE_SHADOW = { x: -0.05, y: -0.05, opacity: 0 };
 
 /**
  * What every OTHER surah's capsules have always cast, and must go on casting.
@@ -576,9 +576,9 @@ export const CONTENT_DIALS = {
 export type ContentDial = keyof typeof CONTENT_DIALS;
 
 export const CAPSULE_SHADOW_DEFAULTS: Record<ContentDial, number> = {
-  x: 0.03,
-  y: -0.028,
-  opacity: 0.1,
+  x: -0.05,
+  y: -0.05,
+  opacity: 0,
 };
 
 /**
@@ -629,8 +629,8 @@ export function setContentDial(dial: ContentDial, value: number): void {
  * carry a property name instead of a shader name.
  */
 export const VELLUM_MATERIAL_DIALS = {
-  roughness: { min: 0.3, max: 1, step: 0.01, label: "Roughness", group: "Material" },
-  envMapIntensity: { min: 0, max: 2, step: 0.02, label: "Reflection", group: "Material" },
+  roughness: { min: 0.05, max: 1, step: 0.01, label: "Roughness", group: "Material" },
+  envMapIntensity: { min: 0, max: 5, step: 0.02, label: "Reflection", group: "Material" },
   brightness: { min: 0.2, max: 1, step: 0.01, label: "Brightness", group: "Material" },
 } as const;
 
@@ -638,8 +638,8 @@ export type VellumMaterialDial = keyof typeof VELLUM_MATERIAL_DIALS;
 
 export const VELLUM_MATERIAL_DEFAULTS: Record<VellumMaterialDial, number> = {
   roughness: 0.3,
-  envMapIntensity: 0.98,
-  brightness: 0.61,
+  envMapIntensity: 2.0,
+  brightness: 0.59,
 };
 
 /**
@@ -708,6 +708,146 @@ export function resetVellumUniforms(): void {
   }
 }
 
+// ---------------------------------------------------------------------------
+// PRESETS — two whole papers, one click apart
+// ---------------------------------------------------------------------------
+
+/**
+ * A COMPLETE paper: every dial, the material, and the capsule shadow.
+ *
+ * WHY THESE EXIST. The panel's twenty-odd sliders describe one paper at a time,
+ * and comparing two takes of the same sheet meant pasting a block of numbers
+ * back into this file and reloading — about two minutes to answer "was the old
+ * one better?", which is long enough that the question stops being asked. A
+ * preset is that comparison in one click, so the two takes can be flipped
+ * between while looking at the same page.
+ *
+ * A preset is a WHOLE paper, never a patch. Applying one writes all three
+ * groups, so no dial can be left behind from the take before it — a half-
+ * applied preset is a third paper nobody chose, and that is the failure mode
+ * this shape exists to rule out.
+ */
+export interface VellumPreset {
+  /** What the button says. */
+  label: string;
+  /** One line, shown on hover, on what this take is going for. */
+  note: string;
+  dials: Partial<Record<keyof typeof VELLUM, number | readonly number[]>>;
+  material: Record<VellumMaterialDial, number>;
+  shadow: Record<ContentDial, number>;
+}
+
+/**
+ * MODE 1 — the warm take. The paper carries its own colour (a warm buff), the
+ * ink sits light on it, and the vignette is a wide dark round.
+ *
+ * This is the paper as it stood before the second take, kept because it was
+ * tuned on the real page and is not reconstructible from the one that replaced
+ * it. It is written out in full rather than as a diff for the same reason a
+ * preset is a whole paper: a list of differences is only readable next to the
+ * thing it differs from, and that thing keeps changing.
+ *
+ * ITS CREASE VALUES ARE THE ONES BOTH MODES USE — see MODE 2.
+ */
+const MODE_1: VellumPreset = {
+  label: "Mode 1",
+  note: "Warm buff paper, light ink, wide round vignette",
+  dials: {
+    paper: [0.745, 0.701, 0.61] as const,
+    intensity: 0.45,
+    markAmp: 0.048,
+    markTint: [1, 0.927, 0.806] as const,
+    grain: 12.0,
+    fibres: 0.1,
+    contentShowThrough: 0.76,
+
+    vignette: 0.46,
+    vignetteTint: [0, 0, 0] as const,
+    vignetteSize: 0.92,
+    vignetteSoftness: 0.6,
+    vignetteShape: 1.0,
+
+    inkDepth: 0.08,
+    inkPool: 0.0,
+    inkGrain: 0.01,
+    inkSepia: 0.0,
+
+    crease: 0.16,
+    creaseWidth: 0.0025,
+    creaseBalance: 0.99,
+    creaseJitter: 0.25,
+    creaseJitterScale: 340.0,
+    creaseDrift: 0.37,
+    creaseUneven: 0.0,
+    creaseUnevenScale: 400.0,
+  },
+  material: { roughness: 0.3, envMapIntensity: 0.98, brightness: 0.61 },
+  shadow: { x: 0.03, y: -0.028, opacity: 0.1 },
+};
+
+/**
+ * MODE 2 — the current take, and THE DEFAULT. White paper doing none of the
+ * tinting itself (the warmth comes from the blotches and the vignette), very
+ * dark ink with pooled edges, a small warm vignette, and no capsule shadow.
+ *
+ * IT IS NOT WRITTEN OUT HERE. It reads `VELLUM`, `VELLUM_MATERIAL_DEFAULTS` and
+ * `CAPSULE_SHADOW_DEFAULTS` — the file's own defaults — so "Mode 2" and "what
+ * the page loads with" are the same values by construction and cannot drift
+ * apart. Editing a default edits this preset; that is the intent.
+ *
+ * THE CREASE GROUP IS SHARED WITH MODE 1 and belongs to neither: the folds are
+ * a property of the sheet's geometry rather than of a colour take, they were
+ * settled once against the real crease photograph, and flipping presets must
+ * not disturb them. They are in both tables because a preset is a whole paper —
+ * the values are simply the same on both sides.
+ */
+function currentAsPreset(): VellumPreset {
+  const dials: VellumPreset["dials"] = {};
+  for (const dial of Object.values(VELLUM_DIALS))
+    dials[dial.of] = VELLUM[dial.of] as number | readonly number[];
+  return {
+    label: "Mode 2",
+    note: "White paper, deep pooled ink, small warm vignette, no shadow",
+    dials,
+    material: { ...VELLUM_MATERIAL_DEFAULTS },
+    shadow: { ...CAPSULE_SHADOW_DEFAULTS },
+  };
+}
+
+/** The presets, in button order. Index 0 is Mode 1; the default is Mode 2. */
+export const VELLUM_PRESETS: readonly VellumPreset[] = [MODE_1, currentAsPreset()];
+
+/** Which preset the page loads with. */
+export const VELLUM_DEFAULT_PRESET = 1;
+
+/**
+ * Apply a whole preset: dials, material, shadow.
+ *
+ * The shadow goes through `setContentDial` rather than being written directly,
+ * because it is the one group the fragment shader does not read — it is baked
+ * into the page's RenderTexture, and only that call bumps the revision that
+ * makes the texture be drawn again. Writing `CAPSULE_SHADOW` by hand here would
+ * change the numbers and leave the screen alone.
+ */
+export function applyVellumPreset(index: number): void {
+  const preset = VELLUM_PRESETS[index];
+  if (!preset) return;
+
+  for (const [name, dial] of Object.entries(VELLUM_DIALS)) {
+    const v = preset.dials[dial.of];
+    if (v === undefined) continue;
+    const u = VELLUM_UNIFORMS[name];
+    if (typeof v === "number") u.value = v;
+    else (u.value as Vector3).set(v[0], v[1], v[2]);
+  }
+
+  for (const [prop, v] of Object.entries(preset.material))
+    applyVellumMaterial(prop as VellumMaterialDial, v);
+
+  for (const [dial, v] of Object.entries(preset.shadow))
+    setContentDial(dial as ContentDial, v);
+}
+
 /**
  * The current dial values, printed as the `VELLUM` block to paste back into
  * this file — so a session spent on the sliders ends as source, not as a
@@ -734,7 +874,11 @@ export function vellumDefaultsSignature(): string {
     const v = VELLUM[d.of] as number | readonly number[];
     return typeof v === "number" ? String(v) : v.join(",");
   });
-  return [...dials, ...Object.values(VELLUM_MATERIAL_DEFAULTS)].join("|");
+  return [
+    ...dials,
+    ...Object.values(VELLUM_MATERIAL_DEFAULTS),
+    ...Object.values(CAPSULE_SHADOW_DEFAULTS),
+  ].join("|");
 }
 
 export function vellumUniformsAsSource(): string {

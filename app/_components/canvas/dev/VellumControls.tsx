@@ -50,12 +50,24 @@ import {
   applyVellumMaterial,
   readVellumMaterial,
   resetVellumUniforms,
+  applyVellumPreset,
+  VELLUM_PRESETS,
+  VELLUM_DEFAULT_PRESET,
   vellumDefaultsSignature,
   vellumUniformsAsSource,
   type VellumMaterialDial,
 } from "../3d-scene/vellumSurface";
 
 const STORAGE_KEY = "vellum-dials-v1";
+
+/**
+ * Which preset is showing. Module-level, not React state, for the same reason
+ * the uniforms are: `writeStored` is a plain function called from three places
+ * that have no idea a mode exists, and threading it through all of them to
+ * record one integer is worse than one variable. The component mirrors it into
+ * state purely so the buttons can highlight.
+ */
+let activeMode: number = VELLUM_DEFAULT_PRESET;
 
 /**
  * Whether the panel may open at all.
@@ -133,10 +145,52 @@ function writeStored(): void {
       mat[prop] = readVellumMaterial(prop as VellumMaterialDial);
     out.__material = mat;
     out.__shadow = { ...CAPSULE_SHADOW };
+    out.__mode = activeMode;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
   } catch {
     /* a full or disabled localStorage must never take the panel down */
   }
+}
+
+/**
+ * Put a previous session's dials back, and report which mode it was in.
+ *
+ * RUNS AT MOST ONCE, during the first render rather than in an effect: it seeds
+ * the mode buttons, and state seeded from an effect is state that renders wrong
+ * first and corrects itself second. Reaching localStorage during render is safe
+ * only because SurahViewer imports this with `ssr: false` — there is no server
+ * pass to disagree with, the same reason `panelAllowed` may touch `window`.
+ *
+ * The material and the shadow are NOT restored here. They are not uniforms:
+ * they live on a material and inside the page's RenderTexture, neither of which
+ * exists yet at this point. They are re-applied when the panel opens.
+ */
+let restored = false;
+function restoreStoredSession(): number {
+  if (restored) return activeMode;
+  restored = true;
+
+  const stored = readStored();
+  if (!stored) return activeMode;
+
+  // A session saved against DIFFERENT source defaults is older than the file
+  // — see `vellumDefaultsSignature`. Drop it, so editing `VELLUM` is always
+  // what decides what the page shows.
+  if (stored.__sig !== vellumDefaultsSignature()) {
+    localStorage.removeItem(STORAGE_KEY);
+    return activeMode;
+  }
+
+  for (const [name, v] of Object.entries(stored)) {
+    const u = VELLUM_UNIFORMS[name];
+    if (!u) continue; // a dial that has since been renamed or removed
+    if (typeof v === "number" && typeof u.value === "number") u.value = v;
+    else if (Array.isArray(v) && u.value instanceof Vector3)
+      u.value.set(v[0], v[1], v[2]);
+  }
+
+  if (typeof stored.__mode === "number") activeMode = stored.__mode;
+  return activeMode;
 }
 
 export function VellumControls() {
@@ -147,6 +201,7 @@ export function VellumControls() {
 
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mode, setMode] = useState(restoreStoredSession);
 
   // Whether the page on screen is the one the shadow dials can reach. Read at
   // render time; the panel re-renders whenever it is opened, which is the only
@@ -170,24 +225,9 @@ export function VellumControls() {
     el.scrollBy({ top: dir * (el.clientHeight * 0.8), behavior: "smooth" });
   }, []);
 
-  // Restore a previous session's dials before the first paint that uses them.
+  // The stored session is restored on the way to the first paint — see
+  // `restoreStoredSession`, which also decides which mode button opens lit.
   useEffect(() => {
-    const stored = readStored();
-    if (!stored) return;
-    // A session saved against DIFFERENT source defaults is older than the file
-    // — see `vellumDefaultsSignature`. Drop it, so editing `VELLUM` is always
-    // what decides what the page shows.
-    if (stored.__sig !== vellumDefaultsSignature()) {
-      localStorage.removeItem(STORAGE_KEY);
-      return;
-    }
-    for (const [name, v] of Object.entries(stored)) {
-      const u = VELLUM_UNIFORMS[name];
-      if (!u) continue; // a dial that has since been renamed or removed
-      if (typeof v === "number" && typeof u.value === "number") u.value = v;
-      else if (Array.isArray(v) && u.value instanceof Vector3)
-        u.value.set(v[0], v[1], v[2]);
-    }
     invalidate();
   }, []);
 
@@ -201,12 +241,25 @@ export function VellumControls() {
    */
   useEffect(() => {
     if (!open) return;
-    const mat = readStored()?.__material as Record<string, number> | undefined;
-    if (!mat) return;
-    for (const prop of Object.keys(VELLUM_MATERIAL_DIALS)) {
-      const v = mat[prop];
-      if (typeof v === "number") applyVellumMaterial(prop as VellumMaterialDial, v);
-    }
+    const stored = readStored();
+    const mat = stored?.__material as Record<string, number> | undefined;
+    if (mat)
+      for (const prop of Object.keys(VELLUM_MATERIAL_DIALS)) {
+        const v = mat[prop];
+        if (typeof v === "number") applyVellumMaterial(prop as VellumMaterialDial, v);
+      }
+
+    // Only where it actually differs: `setContentDial` bumps the revision that
+    // makes the page's whole RenderTexture be captured again, and paying for
+    // that every time the panel is opened would be a visible stall for nothing.
+    const shadow = stored?.__shadow as Record<string, number> | undefined;
+    if (shadow)
+      for (const dial of Object.keys(CONTENT_DIALS) as ContentDial[]) {
+        const v = shadow[dial];
+        if (typeof v === "number" && v !== CAPSULE_SHADOW[dial])
+          setContentDial(dial, v);
+      }
+
     invalidate();
   }, [open]);
 
@@ -214,6 +267,37 @@ export function VellumControls() {
     writeStored();
     invalidate();
   }, []);
+
+  /**
+   * Make every input show the value it is now bound to.
+   *
+   * The inputs are UNCONTROLLED — a slider writes into the uniform and React is
+   * never told, which is the whole reason dragging one is free. The cost is
+   * that changing a uniform from anywhere else leaves the input showing the old
+   * number, so anything that rewrites the dials wholesale has to throw the
+   * inputs away and let them mount again against the new values. The numeric
+   * readouts are spans rather than inputs, so those are just written.
+   */
+  const remount = useCallback(() => {
+    for (const [name, el] of Object.entries(readouts.current)) {
+      const u = VELLUM_UNIFORMS[name]?.value;
+      if (el && typeof u === "number") el.textContent = fmt(u);
+    }
+    setOpen(false);
+    window.setTimeout(() => setOpen(true), 0);
+    invalidate();
+  }, []);
+
+  const chooseMode = useCallback(
+    (index: number) => {
+      applyVellumPreset(index);
+      activeMode = index;
+      setMode(index);
+      writeStored();
+      remount();
+    },
+    [remount],
+  );
 
   // What the shadow sliders are showing but have not yet applied — see the note
   // at the input.
@@ -277,15 +361,11 @@ export function VellumControls() {
               for (const [dial, v] of Object.entries(CAPSULE_SHADOW_DEFAULTS))
                 setContentDial(dial as ContentDial, v);
               localStorage.removeItem(STORAGE_KEY);
-              for (const [name, el] of Object.entries(readouts.current)) {
-                const u = VELLUM_UNIFORMS[name]?.value;
-                if (el && typeof u === "number") el.textContent = fmt(u);
-              }
-              // The inputs are uncontrolled, so remount them to pick up the
-              // restored values rather than tracking each one in state.
-              setOpen(false);
-              window.setTimeout(() => setOpen(true), 0);
-              invalidate();
+              // Reset writes exactly the file's own defaults, which IS Mode 2 —
+              // see `currentAsPreset`. Saying so keeps the buttons honest.
+              activeMode = VELLUM_DEFAULT_PRESET;
+              setMode(VELLUM_DEFAULT_PRESET);
+              remount();
             }}
           >
             reset
@@ -298,6 +378,28 @@ export function VellumControls() {
             ×
           </button>
         </div>
+      </div>
+
+      {/*
+        THE TWO PAPERS. A whole take per button — dials, material and shadow —
+        so the pair can be compared by clicking rather than by pasting numbers
+        into the source and reloading. Mode 2 is what the page loads with.
+      */}
+      <div style={styles.modes}>
+        {VELLUM_PRESETS.map((preset, i) => (
+          <button
+            key={preset.label}
+            type="button"
+            title={preset.note}
+            onClick={() => chooseMode(i)}
+            style={{
+              ...styles.modeBtn,
+              ...(i === mode ? styles.modeBtnOn : null),
+            }}
+          >
+            {preset.label}
+          </button>
+        ))}
       </div>
 
       <div style={styles.pager}>
@@ -565,6 +667,31 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#c9a227",
   },
   headActions: { display: "flex", gap: 5 },
+  modes: {
+    display: "flex",
+    gap: 5,
+    padding: "7px 10px",
+    borderBottom: "1px solid #2a251c",
+    flexShrink: 0,
+  },
+  modeBtn: {
+    flex: 1,
+    font: `500 11px ${mono}`,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#b8b0a0",
+    background: "transparent",
+    border: "1px solid #3a3327",
+    borderRadius: 2,
+    padding: "4px 0",
+    cursor: "pointer",
+  },
+  /** The chosen one, in the panel's own gold. */
+  modeBtnOn: {
+    color: "#141210",
+    background: "#c9a227",
+    borderColor: "#c9a227",
+  },
   pager: {
     display: "flex",
     gap: 5,

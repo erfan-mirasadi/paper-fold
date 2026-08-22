@@ -1,4 +1,4 @@
-import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
+import { buildSheet, type SheetSpec } from "../kit";
 
 // ---------------------------------------------------------------------------
 // 41-47 — the laden ship, copied off the handwritten sheet.
@@ -17,9 +17,8 @@ import { buildSheet, SHEET_FRAME_SVGS, type SheetSpec } from "../kit";
 //     │   ───── 47 ─────  "shall WE feed him?"   │
 //     ╰──────────────────────────────────────────╯
 //
-// Right reads first, as everywhere in this family. Both frames are the
-// project's own all-section art — gold rim, panel inside — the two outlines
-// inked around these bands on the sheet.
+// Right reads first, as everywhere in this family. Both frames keep their
+// gold outlines, without a page-wide pink panel behind the bands.
 //
 // NARROW ON PURPOSE. This sheet sits in the far-left corner of the atlas, and
 // its width is what sets the whole paper's width from that column — 1.7 puts
@@ -134,12 +133,13 @@ const SPEC: SheetSpec = {
   ],
 
   frames: [
-    // One outer frame around the complete 41-47 section.
+    // One transparent-background outer frame around the complete 41-47
+    // section. This sheet-local SVG keeps the change away from other sheets.
     {
       from: 0,
       to: 3,
       tone: "outer",
-      src: SHEET_FRAME_SVGS.overall,
+      src: "/yasin4147/all-section.svg",
       w: 1.1,
       h: 1.41,
     },
